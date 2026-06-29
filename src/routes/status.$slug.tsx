@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type HistoryPoint = { day: string; up_ratio: number | null };
@@ -171,7 +172,11 @@ function StatusDetailPage() {
             </CardContent>
           </Card>
 
+          <ServiceSubscribe slug={data.service.slug} name={data.service.name} />
+
           <ServiceEmbed slug={data.service.slug} />
+
+
 
 
           <Card>
@@ -293,6 +298,74 @@ function ServiceEmbed({ slug }: { slug: string }) {
             <a href={rssUrl} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded border hover:bg-muted">Abrir</a>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ServiceSubscribe({ slug, name }: { slug: string; name: string }) {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setState("sending");
+    setMessage(null);
+    try {
+      const r = await fetch("/api/public/status-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: `status_service:${slug}`, services: [slug] }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setState("error");
+        setMessage(j.error === "invalid_email" ? "Email inválido." : "Não foi possível inscrever agora.");
+        return;
+      }
+      setState("ok");
+      setMessage(j.message ?? "Verifique seu email para confirmar.");
+      setEmail("");
+    } catch {
+      setState("error");
+      setMessage("Falha de rede. Tente novamente.");
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Receber alertas deste serviço</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-3">
+          Notificamos por email apenas incidentes e manutenções que afetam{" "}
+          <span className="font-medium">{name}</span>. Você pode ajustar os filtros depois.
+        </p>
+        <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            className="flex-1 rounded border px-3 py-2 text-sm bg-background"
+          />
+          <button
+            type="submit"
+            disabled={state === "sending"}
+            className="rounded bg-primary text-primary-foreground px-4 py-2 text-sm font-medium disabled:opacity-60"
+          >
+            {state === "sending" ? "Enviando…" : "Inscrever-se"}
+          </button>
+        </form>
+        {message ? (
+          <p className={`mt-2 text-xs ${state === "error" ? "text-red-600" : "text-emerald-600"}`}>
+            {message}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );
