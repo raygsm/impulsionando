@@ -17146,6 +17146,7 @@ export type Database = {
           internal_notes: string | null
           is_active: boolean
           is_core: boolean
+          kind: string
           last_version_at: string
           limits: Json
           min_contract_days: number
@@ -17153,6 +17154,7 @@ export type Database = {
           monthly_price: number
           name: string
           owner: string | null
+          parent_module_id: string | null
           readiness_checklist: Json
           readiness_status: string
           segments: string[]
@@ -17193,6 +17195,7 @@ export type Database = {
           internal_notes?: string | null
           is_active?: boolean
           is_core?: boolean
+          kind?: string
           last_version_at?: string
           limits?: Json
           min_contract_days?: number
@@ -17200,6 +17203,7 @@ export type Database = {
           monthly_price?: number
           name: string
           owner?: string | null
+          parent_module_id?: string | null
           readiness_checklist?: Json
           readiness_status?: string
           segments?: string[]
@@ -17240,6 +17244,7 @@ export type Database = {
           internal_notes?: string | null
           is_active?: boolean
           is_core?: boolean
+          kind?: string
           last_version_at?: string
           limits?: Json
           min_contract_days?: number
@@ -17247,6 +17252,7 @@ export type Database = {
           monthly_price?: number
           name?: string
           owner?: string | null
+          parent_module_id?: string | null
           readiness_checklist?: Json
           readiness_status?: string
           segments?: string[]
@@ -17263,7 +17269,15 @@ export type Database = {
           status_tecnico?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "modules_parent_module_id_fkey"
+            columns: ["parent_module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mp_buyers: {
         Row: {

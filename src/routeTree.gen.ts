@@ -471,6 +471,7 @@ import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminN8nNichesRouteImport } from './routes/_authenticated/admin.n8n-niches'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMpagoEventosRouteImport } from './routes/_authenticated/admin.mpago-eventos'
+import { Route as AuthenticatedAdminModulosRecursosRouteImport } from './routes/_authenticated/admin.modulos-recursos'
 import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from './routes/_authenticated/admin.mercadopago-billing-health'
 import { Route as AuthenticatedAdminMenuManagerRouteImport } from './routes/_authenticated/admin.menu-manager'
 import { Route as AuthenticatedAdminMasterHubRouteImport } from './routes/_authenticated/admin.master-hub'
@@ -3241,6 +3242,12 @@ const AuthenticatedAdminMpagoEventosRoute =
     path: '/admin/mpago-eventos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminModulosRecursosRoute =
+  AuthenticatedAdminModulosRecursosRouteImport.update({
+    id: '/admin/modulos-recursos',
+    path: '/admin/modulos-recursos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMercadopagoBillingHealthRoute =
   AuthenticatedAdminMercadopagoBillingHealthRouteImport.update({
     id: '/admin/mercadopago-billing-health',
@@ -4858,6 +4865,7 @@ export interface FileRoutesByFullPath {
   '/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
   '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
+  '/admin/modulos-recursos': typeof AuthenticatedAdminModulosRecursosRoute
   '/admin/mpago-eventos': typeof AuthenticatedAdminMpagoEventosRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
@@ -5533,6 +5541,7 @@ export interface FileRoutesByTo {
   '/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
   '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
+  '/admin/modulos-recursos': typeof AuthenticatedAdminModulosRecursosRoute
   '/admin/mpago-eventos': typeof AuthenticatedAdminMpagoEventosRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
@@ -6221,6 +6230,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
   '/_authenticated/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/_authenticated/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
+  '/_authenticated/admin/modulos-recursos': typeof AuthenticatedAdminModulosRecursosRoute
   '/_authenticated/admin/mpago-eventos': typeof AuthenticatedAdminMpagoEventosRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
@@ -6910,6 +6920,7 @@ export interface FileRouteTypes {
     | '/admin/master-hub'
     | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
+    | '/admin/modulos-recursos'
     | '/admin/mpago-eventos'
     | '/admin/n8n-console'
     | '/admin/n8n-niches'
@@ -7585,6 +7596,7 @@ export interface FileRouteTypes {
     | '/admin/master-hub'
     | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
+    | '/admin/modulos-recursos'
     | '/admin/mpago-eventos'
     | '/admin/n8n-console'
     | '/admin/n8n-niches'
@@ -8272,6 +8284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/master-hub'
     | '/_authenticated/admin/menu-manager'
     | '/_authenticated/admin/mercadopago-billing-health'
+    | '/_authenticated/admin/modulos-recursos'
     | '/_authenticated/admin/mpago-eventos'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/n8n-niches'
@@ -12088,6 +12101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMpagoEventosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/modulos-recursos': {
+      id: '/_authenticated/admin/modulos-recursos'
+      path: '/admin/modulos-recursos'
+      fullPath: '/admin/modulos-recursos'
+      preLoaderRoute: typeof AuthenticatedAdminModulosRecursosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/mercadopago-billing-health': {
       id: '/_authenticated/admin/mercadopago-billing-health'
       path: '/admin/mercadopago-billing-health'
@@ -14600,6 +14620,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminMasterHubRoute: typeof AuthenticatedAdminMasterHubRoute
   AuthenticatedAdminMenuManagerRoute: typeof AuthenticatedAdminMenuManagerRoute
   AuthenticatedAdminMercadopagoBillingHealthRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRoute
+  AuthenticatedAdminModulosRecursosRoute: typeof AuthenticatedAdminModulosRecursosRoute
   AuthenticatedAdminMpagoEventosRoute: typeof AuthenticatedAdminMpagoEventosRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminN8nNichesRoute: typeof AuthenticatedAdminN8nNichesRoute
@@ -14909,6 +14930,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMenuManagerRoute: AuthenticatedAdminMenuManagerRoute,
   AuthenticatedAdminMercadopagoBillingHealthRoute:
     AuthenticatedAdminMercadopagoBillingHealthRoute,
+  AuthenticatedAdminModulosRecursosRoute:
+    AuthenticatedAdminModulosRecursosRoute,
   AuthenticatedAdminMpagoEventosRoute: AuthenticatedAdminMpagoEventosRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminN8nNichesRoute: AuthenticatedAdminN8nNichesRoute,
