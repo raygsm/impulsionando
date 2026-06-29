@@ -65,7 +65,7 @@ function Page() {
       <PageHeader
         title="Alertas de Confiabilidade"
         description="Disparados automaticamente quando o score de um tenant cai abaixo de 70. Resolvem quando volta a ≥ 80."
-        actions={
+        action={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
               <Link to="/admin/reliability">Abrir Scorecard</Link>

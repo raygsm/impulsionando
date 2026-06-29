@@ -113,7 +113,7 @@ async function getStaffRecipients(): Promise<{ user_id: string; email: string | 
   const { data } = await supabaseAdmin
     .from("user_roles")
     .select("user_id, profiles:user_id(email)")
-    .in("role", ["impulsionando_master", "impulsionando_staff"]);
+    .in("role", ["admin" as any, "impulsionando_master" as any, "impulsionando_staff" as any]);
   const list = (data ?? []) as any[];
   const seen = new Set<string>();
   const out: { user_id: string; email: string | null }[] = [];
