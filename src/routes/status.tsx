@@ -371,7 +371,7 @@ function SubscribeCard() {
 function EmbedCard() {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://impulsionando.com.br";
   const iframe = `<iframe src="${origin}/status/embed" title="Status Impulsionando" style="width:100%;max-width:480px;height:80px;border:0" loading="lazy"></iframe>`;
-  const badge = `[![Status](${origin}/api/public/status.rss)](${origin}/status)`;
+  
   const [copied, setCopied] = useState<string>("");
   async function copy(text: string, key: string) {
     try {
