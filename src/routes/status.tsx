@@ -207,11 +207,20 @@ function StatusPage() {
                     <li key={`${s.scope}-${s.url ?? s.name ?? i}`} className="py-3">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="font-medium truncate">{s.name ?? s.scope}</div>
+                          <div className="font-medium truncate">
+                            {s.slug ? (
+                              <a href={`/status/${s.slug}`} className="hover:underline">
+                                {s.name ?? s.scope}
+                              </a>
+                            ) : (
+                              s.name ?? s.scope
+                            )}
+                          </div>
                           {s.url ? (
                             <div className="text-xs text-muted-foreground truncate max-w-[420px]">{s.url}</div>
                           ) : null}
                         </div>
+
                         <span
                           className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
                             up ? "bg-emerald-500/15 text-emerald-700" : "bg-red-500/15 text-red-700"
