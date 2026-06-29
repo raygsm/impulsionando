@@ -48,14 +48,28 @@ type PostmortemRow = {
   postmortem_published_at: string | null;
 };
 
+type MaintenanceRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  scope: string;
+  url: string | null;
+  severity: "info" | "minor" | "major";
+  starts_at: string;
+  ends_at: string;
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
+};
+
 type StatusPayload = {
-  overall: "operational" | "degraded" | "outage" | "unknown";
+  overall: "operational" | "degraded" | "outage" | "maintenance" | "unknown";
   updated_at: string;
-  summary: { monitored: number; up: number; down: number; openIncidents: number; sev1Open: number };
+  summary: { monitored: number; up: number; down: number; openIncidents: number; sev1Open: number; maintenance?: number };
   services: ServiceRow[];
   incidents: IncidentRow[];
   postmortems: PostmortemRow[];
+  maintenance?: MaintenanceRow[];
 };
+
 
 async function fetchStatus(): Promise<StatusPayload> {
   const res = await fetch("/api/public/status", { headers: { accept: "application/json" } });
@@ -67,6 +81,7 @@ const OVERALL_LABEL: Record<StatusPayload["overall"], { text: string; cls: strin
   operational: { text: "Todos os sistemas operacionais", cls: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
   degraded: { text: "Operação parcialmente degradada", cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
   outage: { text: "Indisponibilidade ativa", cls: "bg-red-500/15 text-red-700 border-red-500/30" },
+  maintenance: { text: "Manutenção programada em curso", cls: "bg-sky-500/15 text-sky-700 border-sky-500/30" },
   unknown: { text: "Status indisponível", cls: "bg-muted text-muted-foreground border-border" },
 };
 
@@ -214,6 +229,43 @@ function StatusPage() {
             )}
           </CardContent>
         </Card>
+        {/* Scheduled maintenance */}
+        {data?.maintenance && data.maintenance.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Manutenções programadas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {data.maintenance.map((m) => {
+                  const live = m.status === "in_progress";
+                  return (
+                    <li key={m.id} className="rounded-md border p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="font-medium">{m.title}</div>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium uppercase ${
+                            live ? "bg-sky-500/15 text-sky-700" : "bg-slate-500/15 text-slate-700"
+                          }`}
+                        >
+                          {live ? "em curso" : "agendada"} · {m.severity}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {m.scope}
+                        {m.url ? ` · ${m.url}` : ""} · {fmtDate(m.starts_at)} → {fmtDate(m.ends_at)}
+                      </div>
+                      {m.description ? (
+                        <p className="mt-2 whitespace-pre-wrap text-sm">{m.description}</p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        ) : null}
+
 
         {/* Active / recent incidents */}
         <Card>
