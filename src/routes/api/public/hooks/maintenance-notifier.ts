@@ -72,6 +72,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
           .not('confirmed_at', 'is', null)
           .is('unsubscribed_at', null)
           .is('bounced_at', null)
+          .neq('notify_maintenance', false)
           .limit(10000)
         const subscribers = (subsRaw ?? []) as unknown as SubscriberRow[]
         if (subscribers.length === 0) {

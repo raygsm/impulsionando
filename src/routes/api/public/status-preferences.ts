@@ -44,7 +44,7 @@ export const Route = createFileRoute('/api/public/status-preferences')({
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { data: sub } = await supabaseAdmin
           .from('core_status_subscribers')
-          .select('id, email, unsubscribed_at')
+          .select('id, email, unsubscribed_at, notify_incidents, notify_maintenance')
           .eq('unsubscribe_token', token)
           .maybeSingle()
 
@@ -80,13 +80,22 @@ export const Route = createFileRoute('/api/public/status-preferences')({
           .join('')
 
         const banner = saved ? `<div class="ok">Preferências atualizadas com sucesso.</div>` : ''
+        const notifInc = (sub as any).notify_incidents !== false
+        const notifMan = (sub as any).notify_maintenance !== false
 
         const body = `
 ${banner}
 <h1>Preferências de notificação</h1>
-<p class="muted">Receber atualizações sobre <strong>${escapeHtml((sub as any).email)}</strong>. Marque os serviços desejados — sem nenhum marcado equivale a "todos".</p>
+<p class="muted">Receber atualizações sobre <strong>${escapeHtml((sub as any).email)}</strong>.</p>
 <form method="POST" action="/api/public/status-preferences">
   <input type="hidden" name="token" value="${escapeHtml(token)}"/>
+  <h2 style="font-size:15px;margin:18px 0 8px">Tipos de aviso</h2>
+  <div class="list" style="max-height:none">
+    <label><input type="checkbox" name="notify_incidents" value="1" ${notifInc ? 'checked' : ''}/> <span>Incidentes (abertura, atualizações, resolução, postmortem)</span></label>
+    <label><input type="checkbox" name="notify_maintenance" value="1" ${notifMan ? 'checked' : ''}/> <span>Manutenções programadas (lembrete, início, fim)</span></label>
+  </div>
+  <h2 style="font-size:15px;margin:18px 0 8px">Serviços</h2>
+  <p class="muted" style="margin:-4px 0 8px;font-size:12px">Marque os serviços desejados — nenhum marcado equivale a "todos".</p>
   <div class="list">${checkboxes || '<p class="muted" style="margin:0">Nenhum serviço público disponível.</p>'}</div>
   <div class="row">
     <button class="primary" type="submit">Salvar preferências</button>
@@ -114,6 +123,14 @@ ${banner}
         if ((sub as any).unsubscribed_at) {
           return page('Inscrição cancelada', `<h1>Inscrição cancelada</h1><p class="muted">Reative em <a href="/status">/status</a>.</p>`)
         }
+
+        const notify_incidents = form.get('notify_incidents') === '1'
+        const notify_maintenance = form.get('notify_maintenance') === '1'
+
+        await supabaseAdmin
+          .from('core_status_subscribers')
+          .update({ notify_incidents, notify_maintenance })
+          .eq('id', (sub as any).id)
 
         await supabaseAdmin
           .from('core_status_subscriber_services' as any)
