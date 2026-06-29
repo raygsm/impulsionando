@@ -38,6 +38,15 @@ type SubscriberRow = {
   unsubscribe_token: string
   confirmed_at: string | null
   categories: string[] | null
+  min_severity: string | null
+}
+
+const SEVERITY_RANK: Record<string, number> = { info: 0, minor: 1, major: 2, critical: 3 }
+function severityAllowed(sub: SubscriberRow, sev: string | null): boolean {
+  const threshold = SEVERITY_RANK[(sub.min_severity ?? 'info').toLowerCase()] ?? 0
+  if (threshold === 0) return true
+  const incRank = SEVERITY_RANK[(sev ?? 'info').toLowerCase()] ?? 0
+  return incRank >= threshold
 }
 
 const SITE = 'https://impulsionando.com.br'
