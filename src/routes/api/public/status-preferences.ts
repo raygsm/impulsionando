@@ -56,7 +56,7 @@ export const Route = createFileRoute('/api/public/status-preferences')({
 
         const { data: services } = await supabaseAdmin
           .from('uptime_state')
-          .select('public_slug, label, url, show_on_public')
+          .select('public_slug, label, url, show_on_public, category')
           .eq('show_on_public', true)
           .not('public_slug', 'is', null)
           .order('sort_order', { ascending: true })
