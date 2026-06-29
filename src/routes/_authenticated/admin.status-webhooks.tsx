@@ -390,7 +390,28 @@ function EditDialog({
               placeholder="vazio = todas (ex: API, Site, Pagamentos)"
             />
           </div>
+          <div>
+            <Label>Severidade mínima (incidentes)</Label>
+            <Select
+              value={v.min_severity ?? 'info'}
+              onValueChange={(s) => setForm({ ...form, min_severity: s })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="info">info — tudo</SelectItem>
+                <SelectItem value="minor">minor ou acima</SelectItem>
+                <SelectItem value="major">major ou acima</SelectItem>
+                <SelectItem value="critical">apenas critical</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Atualizações, manutenções e resoluções sempre são entregues.
+            </p>
+          </div>
         </div>
+
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
             Cancelar
