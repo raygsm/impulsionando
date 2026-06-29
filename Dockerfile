@@ -41,6 +41,8 @@ RUN bun run build
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
 
+ARG IMPULSIONANDO_IMAGE_VERSION=local
+
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
