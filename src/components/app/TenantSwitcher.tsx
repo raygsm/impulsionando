@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { listAdminHubTenants } from "@/lib/admin-menu.functions";
+import { logImpersonation } from "@/lib/impersonation-audit.functions";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+
 
 export function TenantSwitcher() {
   const { data: me } = useCurrentUser();
