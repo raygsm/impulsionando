@@ -20,6 +20,7 @@ export const Route = createFileRoute('/api/public/status/rss')({
       GET: async ({ request }) => {
         const url = new URL(request.url)
         const origin = `${url.protocol}//${url.host}`
+        const categoryFilter = (url.searchParams.get('category') ?? '').trim()
 
         const supabase = createClient(
           process.env.SUPABASE_URL!,
@@ -29,7 +30,7 @@ export const Route = createFileRoute('/api/public/status/rss')({
 
         const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
-        const [{ data: incidents }, { data: postmortems }] = await Promise.all([
+        const [{ data: incidents }, { data: postmortems }, { data: uptime }] = await Promise.all([
           supabase
             .from('core_incidents')
             .select('id,title,severity,status,started_at,resolved_at,summary,affected_service')
@@ -43,7 +44,22 @@ export const Route = createFileRoute('/api/public/status/rss')({
             .gte('postmortem_published_at', since)
             .order('postmortem_published_at', { ascending: false })
             .limit(50),
+          supabase
+            .from('uptime_state')
+            .select('url,scope,category'),
         ])
+
+        const categoryByKey = new Map<string, string>()
+        for (const u of uptime ?? []) {
+          const cat = (u as { category?: string | null }).category ?? 'Geral'
+          if ((u as { url?: string | null }).url) categoryByKey.set(String((u as { url?: string | null }).url), cat || 'Geral')
+          if ((u as { scope?: string | null }).scope) categoryByKey.set(String((u as { scope?: string | null }).scope), cat || 'Geral')
+        }
+        const resolveCategory = (svc: string | null | undefined) =>
+          (svc && categoryByKey.get(String(svc))) || 'Geral'
+        const matchesFilter = (svc: string | null | undefined) =>
+          !categoryFilter || resolveCategory(svc).toLowerCase() === categoryFilter.toLowerCase()
+
 
         type Item = {
           guid: string
