@@ -10910,6 +10910,101 @@ export type Database = {
         }
         Relationships: []
       }
+      core_status_webhook_dispatches: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_kind: string
+          id: string
+          ok: boolean
+          reference_key: string
+          status_code: number | null
+          webhook_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_kind: string
+          id?: string
+          ok?: boolean
+          reference_key: string
+          status_code?: number | null
+          webhook_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_kind?: string
+          id?: string
+          ok?: boolean
+          reference_key?: string
+          status_code?: number | null
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_status_webhook_dispatches_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "core_status_webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_status_webhooks: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          label: string
+          last_dispatch_at: string | null
+          last_error: string | null
+          last_status_code: number | null
+          notify_incidents: boolean
+          notify_maintenance: boolean
+          secret: string | null
+          services: Json
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          label: string
+          last_dispatch_at?: string | null
+          last_error?: string | null
+          last_status_code?: number | null
+          notify_incidents?: boolean
+          notify_maintenance?: boolean
+          secret?: string | null
+          services?: Json
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          last_dispatch_at?: string | null
+          last_error?: string | null
+          last_status_code?: number | null
+          notify_incidents?: boolean
+          notify_maintenance?: boolean
+          secret?: string | null
+          services?: Json
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       core_subnichos: {
         Row: {
           created_at: string
