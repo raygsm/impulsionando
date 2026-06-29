@@ -258,11 +258,14 @@ function StatusPage() {
                   arr.push(s);
                   groups.set(k, arr);
                 }
-                const ordered = Array.from(groups.entries()).sort(([a], [b]) => {
-                  if (a === "Geral") return 1;
-                  if (b === "Geral") return -1;
-                  return a.localeCompare(b);
-                });
+                const ordered = Array.from(groups.entries())
+                  .filter(([cat]) => activeCategory === "all" || cat === activeCategory)
+                  .sort(([a], [b]) => {
+                    if (a === "Geral") return 1;
+                    if (b === "Geral") return -1;
+                    return a.localeCompare(b);
+                  });
+
                 return (
                   <div className="space-y-6">
                     {ordered.map(([cat, rows]) => {
