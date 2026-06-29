@@ -293,6 +293,8 @@ function StatusPage() {
         </Card>
 
         <SubscribeCard />
+        <EmbedCard />
+
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Esta página é pública e atualizada automaticamente a cada minuto. Dados agregados — sem informações de clientes.
