@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { listAdminHubTenants } from "@/lib/admin-menu.functions";
+import { logImpersonation } from "@/lib/impersonation-audit.functions";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+
 
 export function TenantSwitcher() {
   const { data: me } = useCurrentUser();
@@ -21,6 +23,14 @@ export function TenantSwitcher() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const fn = useServerFn(listAdminHubTenants);
+  const logFn = useServerFn(logImpersonation);
+
+  async function safeLog(input: { targetCompanyId: string; targetCompanyName?: string | null; action: "start" | "stop"; reason?: string | null }) {
+    try {
+      await logFn({ data: { ...input, userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 400) : null } } as any);
+    } catch { /* non-blocking */ }
+  }
+
 
   const query = useQuery({
     queryKey: ["admin-hub-tenants"],
@@ -64,7 +74,17 @@ export function TenantSwitcher() {
           {isImpersonating && (
             <button
               type="button"
-              onClick={() => { stopImpersonation(); setOpen(false); }}
+              onClick={() => {
+                if (impersonatedCompanyId) {
+                  void safeLog({
+                    targetCompanyId: impersonatedCompanyId,
+                    targetCompanyName: impersonatedCompanyName,
+                    action: "stop",
+                  });
+                }
+                stopImpersonation();
+                setOpen(false);
+              }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-destructive"
             >
               <LogOut className="size-4" /> Sair da impersonação
@@ -83,7 +103,16 @@ export function TenantSwitcher() {
                 key={t.id}
                 type="button"
                 onClick={() => {
+                  const reason = typeof window !== "undefined"
+                    ? window.prompt(`Motivo para impersonar ${t.name}? (opcional)`) ?? null
+                    : null;
                   startImpersonation({ companyId: t.id, companyName: t.name });
+                  void safeLog({
+                    targetCompanyId: t.id,
+                    targetCompanyName: t.name,
+                    action: "start",
+                    reason,
+                  });
                   setOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
@@ -93,6 +122,7 @@ export function TenantSwitcher() {
                 {active && <Check className="size-4 text-primary" />}
               </button>
             );
+
           })}
         </div>
       </PopoverContent>
