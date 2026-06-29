@@ -163,7 +163,16 @@ function AdminUptimePage() {
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
                     Ordem #{s.sort_order ?? 100} · Desde {fmt(s.since)} · Última {fmt(s.last_check_at)}
+                    {s.public_slug ? (
+                      <>
+                        {' · '}
+                        <a href={`/status/${s.public_slug}`} target="_blank" rel="noreferrer" className="underline hover:text-foreground">
+                          /status/{s.public_slug}
+                        </a>
+                      </>
+                    ) : null}
                   </div>
+
                   {s.last_error && !s.is_up && !s.paused ? (
                     <div className="text-xs text-destructive mt-1">Erro: {s.last_error}</div>
                   ) : null}
