@@ -134,7 +134,9 @@ function AdminStatusWebhooksPage() {
                 notify_maintenance: true,
                 services: [],
                 categories: [],
+                min_severity: 'info',
                 active: true,
+
               })
             }
           >
