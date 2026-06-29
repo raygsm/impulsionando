@@ -22,6 +22,7 @@ on:
       - plugins/**
       - public/**
       - server/**
+      - scripts/start-hostinger.mjs
       - src/**
       - stores/**
       - utils/**
