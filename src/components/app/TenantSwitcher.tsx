@@ -23,6 +23,14 @@ export function TenantSwitcher() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const fn = useServerFn(listAdminHubTenants);
+  const logFn = useServerFn(logImpersonation);
+
+  async function safeLog(input: { targetCompanyId: string; targetCompanyName?: string | null; action: "start" | "stop"; reason?: string | null }) {
+    try {
+      await logFn({ data: { ...input, userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 400) : null } } as any);
+    } catch { /* non-blocking */ }
+  }
+
 
   const query = useQuery({
     queryKey: ["admin-hub-tenants"],
