@@ -18,6 +18,7 @@ type IncidentRow = {
   resolved_at: string | null
   description: string | null
   scope: string | null
+  url: string | null
   postmortem_published_at: string | null
   postmortem_summary: string | null
 }
