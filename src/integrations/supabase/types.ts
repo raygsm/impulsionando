@@ -10871,6 +10871,8 @@ export type Database = {
           email: string
           id: string
           last_notified_at: string | null
+          notify_incidents: boolean
+          notify_maintenance: boolean
           source: string | null
           unsubscribe_token: string
           unsubscribed_at: string | null
@@ -10884,6 +10886,8 @@ export type Database = {
           email: string
           id?: string
           last_notified_at?: string | null
+          notify_incidents?: boolean
+          notify_maintenance?: boolean
           source?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
@@ -10897,6 +10901,8 @@ export type Database = {
           email?: string
           id?: string
           last_notified_at?: string | null
+          notify_incidents?: boolean
+          notify_maintenance?: boolean
           source?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
