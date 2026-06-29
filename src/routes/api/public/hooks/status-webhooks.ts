@@ -343,6 +343,12 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
               const cat = categoryOf(ev.service_slug)
               if (!cat || !catFilter.includes(cat)) continue
             }
+            // Severity gate: only applies to incident_opened events (which carry severity).
+            // Maintenance/updates/resolved/postmortem always pass.
+            if (ev.event_kind === 'incident_opened' && h.min_severity) {
+              if (severityRank(ev.severity) < severityRank(h.min_severity)) continue
+            }
+
             const key = `${h.id}::${ev.reference_key}`
             if (seen.has(key)) continue
 
