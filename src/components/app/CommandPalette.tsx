@@ -14,7 +14,7 @@ type Entry = NavItem & { group: string };
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { favorites } = useFavorites();
+  const { favorites, isFavorite, toggle } = useFavorites();
   const recent = useRecentPages();
 
   useEffect(() => {
