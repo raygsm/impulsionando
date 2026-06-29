@@ -119,6 +119,7 @@ function AdminStatusWebhooksPage() {
                 notify_incidents: true,
                 notify_maintenance: true,
                 services: [],
+                categories: [],
                 active: true,
               })
             }
