@@ -96,14 +96,29 @@ export const Route = createFileRoute("/api/public/status")({
             const d = new Date(today.getTime() - i * 86400000);
             days.push(d.toISOString().slice(0, 10));
           }
-          const servicesWithHistory = status.map((s) => {
-            const map = (s.url && historyByUrl[s.url]) || null;
-            const history = days.map((day) => ({
-              day,
-              up_ratio: map ? (map.has(day) ? map.get(day)! : null) : null,
-            }));
-            return { ...s, history };
-          });
+          const servicesWithHistory = status
+            .filter((s) => {
+              if (!s.url) return true;
+              const v = visibility.get(s.url);
+              if (!v) return true; // unknown URL: keep visible
+              return v.show && !v.paused;
+            })
+            .map((s) => {
+              const v = s.url ? visibility.get(s.url) : null;
+              const map = (s.url && historyByUrl[s.url]) || null;
+              const history = days.map((day) => ({
+                day,
+                up_ratio: map ? (map.has(day) ? map.get(day)! : null) : null,
+              }));
+              return {
+                ...s,
+                name: v?.label || s.name || s.url,
+                sort_order: v?.sort ?? 100,
+                history,
+              };
+            })
+            .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
+
 
           // Fetch updates for open incidents (last 90d)
           const openIds = incidents.filter((i) => i.status !== "resolved").map((i) => i.id);
