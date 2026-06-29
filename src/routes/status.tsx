@@ -293,6 +293,8 @@ function StatusPage() {
         </Card>
 
         <SubscribeCard />
+        <EmbedCard />
+
 
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Esta página é pública e atualizada automaticamente a cada minuto. Dados agregados — sem informações de clientes.
@@ -365,6 +367,63 @@ function SubscribeCard() {
     </Card>
   );
 }
+
+function EmbedCard() {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://impulsionando.com.br";
+  const iframe = `<iframe src="${origin}/status/embed" title="Status Impulsionando" style="width:100%;max-width:480px;height:80px;border:0" loading="lazy"></iframe>`;
+  
+  const [copied, setCopied] = useState<string>("");
+  async function copy(text: string, key: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 1500);
+    } catch {
+      /* ignore */
+    }
+  }
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Incorporar no seu site</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Cole o snippet abaixo na sua landing page para exibir o status em tempo real.
+        </p>
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase text-muted-foreground">HTML / iframe</span>
+            <Button size="sm" variant="outline" onClick={() => copy(iframe, "iframe")}>
+              {copied === "iframe" ? "Copiado!" : "Copiar"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs"><code>{iframe}</code></pre>
+        </div>
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase text-muted-foreground">Feed RSS</span>
+            <Button size="sm" variant="outline" onClick={() => copy(`${origin}/api/public/status.rss`, "rss")}>
+              {copied === "rss" ? "Copiado!" : "Copiar"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs"><code>{origin}/api/public/status.rss</code></pre>
+        </div>
+        <div className="pt-2">
+          <a
+            href="/status/embed"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Pré-visualizar widget →
+          </a>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 export const Route = createFileRoute("/status")({
 
