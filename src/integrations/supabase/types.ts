@@ -8995,6 +8995,42 @@ export type Database = {
         }
         Relationships: []
       }
+      core_impersonation_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_user_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          target_company_id: string
+          target_company_name: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_user_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_company_id: string
+          target_company_name?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_user_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_company_id?: string
+          target_company_name?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       core_implantation_tasks: {
         Row: {
           auto_check: Json | null
