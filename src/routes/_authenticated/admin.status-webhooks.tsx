@@ -29,6 +29,7 @@ import {
   deleteStatusWebhook,
   listStatusWebhookDispatches,
   triggerStatusWebhooksTick,
+  testStatusWebhook,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
