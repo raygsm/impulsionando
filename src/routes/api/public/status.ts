@@ -70,6 +70,16 @@ export const Route = createFileRoute("/api/public/status")({
           const postmortems = (pmRes.data ?? []) as any[];
           const maintenance = (mwRes.data ?? []) as any[];
           const historyRows = (histRes.data ?? []) as any[];
+          const visRows = (visRes.data ?? []) as any[];
+          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean }>();
+          for (const v of visRows) {
+            visibility.set(v.url, {
+              label: v.label ?? null,
+              show: v.show_on_public !== false,
+              sort: typeof v.sort_order === "number" ? v.sort_order : 100,
+              paused: !!v.paused,
+            });
+          }
 
           // Build 90-day history per url, padding missing days with null
           const historyByUrl: Record<string, Map<string, number | null>> = {};
@@ -78,6 +88,7 @@ export const Route = createFileRoute("/api/public/status")({
             const day = String(h.day).slice(0, 10);
             (historyByUrl[url] ||= new Map()).set(day, h.up_ratio == null ? null : Number(h.up_ratio));
           }
+
           const today = new Date();
           today.setUTCHours(0, 0, 0, 0);
           const days: string[] = [];
