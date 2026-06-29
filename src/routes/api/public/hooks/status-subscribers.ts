@@ -38,6 +38,15 @@ type SubscriberRow = {
   unsubscribe_token: string
   confirmed_at: string | null
   categories: string[] | null
+  min_severity: string | null
+}
+
+const SEVERITY_RANK: Record<string, number> = { info: 0, minor: 1, major: 2, critical: 3 }
+function severityAllowed(sub: SubscriberRow, sev: string | null): boolean {
+  const threshold = SEVERITY_RANK[(sub.min_severity ?? 'info').toLowerCase()] ?? 0
+  if (threshold === 0) return true
+  const incRank = SEVERITY_RANK[(sev ?? 'info').toLowerCase()] ?? 0
+  return incRank >= threshold
 }
 
 const SITE = 'https://impulsionando.com.br'
@@ -58,7 +67,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         const [subsRes, incRes] = await Promise.all([
           supabaseAdmin
             .from('core_status_subscribers')
-            .select('id,email,confirm_token,unsubscribe_token,confirmed_at,notify_incidents,categories')
+            .select('id,email,confirm_token,unsubscribe_token,confirmed_at,notify_incidents,categories,min_severity')
             .is('unsubscribed_at', null)
             .is('bounced_at', null)
             .neq('notify_incidents', false)
@@ -190,7 +199,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
             if (!subscriberWantsCategory(s, cat)) continue
-            if (isOpened) {
+            if (isOpened && severityAllowed(s, i.severity)) {
               events.push({
                 subscriber: s,
                 incident_id: i.id,
@@ -202,7 +211,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                   unsubFooter(s.unsubscribe_token),
               })
             }
-            if (isResolved) {
+            if (isResolved && severityAllowed(s, i.severity)) {
               events.push({
                 subscriber: s,
                 incident_id: i.id,
@@ -240,6 +249,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
             if (!subscriberWantsCategory(s, cat)) continue
+            if (!severityAllowed(s, inc?.severity ?? null)) continue
             events.push({
               subscriber: s,
               incident_id: u.incident_id,
