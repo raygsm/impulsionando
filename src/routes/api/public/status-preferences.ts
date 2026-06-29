@@ -124,6 +124,14 @@ ${banner}
           return page('Inscrição cancelada', `<h1>Inscrição cancelada</h1><p class="muted">Reative em <a href="/status">/status</a>.</p>`)
         }
 
+        const notify_incidents = form.get('notify_incidents') === '1'
+        const notify_maintenance = form.get('notify_maintenance') === '1'
+
+        await supabaseAdmin
+          .from('core_status_subscribers')
+          .update({ notify_incidents, notify_maintenance })
+          .eq('id', (sub as any).id)
+
         await supabaseAdmin
           .from('core_status_subscriber_services' as any)
           .delete()
