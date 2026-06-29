@@ -106,6 +106,8 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
         const { data: targets, error: stateErr } = await supabaseAdmin
           .from('uptime_state')
           .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails, alert_whatsapps')
+          .eq('paused', false)
+
 
 
         if (stateErr || !targets) {
