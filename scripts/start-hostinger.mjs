@@ -17,8 +17,20 @@ let startedServerEntrypoint = false;
 
 for (const entrypoint of serverEntrypoints) {
   if (existsSync(entrypoint)) {
-    await import(resolve(entrypoint));
-    console.log(`Impulsionando Core server started from ${entrypoint}`);
+    const module = await import(resolve(entrypoint));
+    const handler = module.default ?? module;
+
+    if (typeof handler?.fetch === "function") {
+      Bun.serve({
+        hostname: host,
+        port,
+        fetch(request) {
+          return handler.fetch(request, process.env, {});
+        },
+      });
+    }
+
+    console.log(`Impulsionando Core server loaded from ${entrypoint} on ${host}:${port}`);
     startedServerEntrypoint = true;
     break;
   }

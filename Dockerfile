@@ -35,9 +35,6 @@ ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 
 COPY . .
 RUN bun run build
-RUN set -eux; \
-  find /app -maxdepth 8 \( -name index.html -o -name index.mjs -o -name index.js -o -name server.mjs -o -name nitro.mjs \) \
-    -print 2>/dev/null || true
 
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
