@@ -30499,6 +30499,7 @@ export type Database = {
           last_check_at: string
           last_error: string | null
           paused: boolean
+          public_slug: string | null
           show_on_public: boolean
           since: string
           sort_order: number
@@ -30516,6 +30517,7 @@ export type Database = {
           last_check_at?: string
           last_error?: string | null
           paused?: boolean
+          public_slug?: string | null
           show_on_public?: boolean
           since?: string
           sort_order?: number
@@ -30533,6 +30535,7 @@ export type Database = {
           last_check_at?: string
           last_error?: string | null
           paused?: boolean
+          public_slug?: string | null
           show_on_public?: boolean
           since?: string
           sort_order?: number
