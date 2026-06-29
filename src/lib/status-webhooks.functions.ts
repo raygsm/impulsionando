@@ -49,6 +49,7 @@ export const upsertStatusWebhook = createServerFn({ method: 'POST' })
       notify_incidents: data.notify_incidents,
       notify_maintenance: data.notify_maintenance,
       services: data.services,
+      categories: data.categories,
       active: data.active,
       updated_at: new Date().toISOString(),
     }
