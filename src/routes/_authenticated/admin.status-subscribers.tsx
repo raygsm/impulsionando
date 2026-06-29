@@ -257,7 +257,21 @@ function AdminStatusSubscribers() {
                           : ""}
                         {s.source ? ` • origem ${s.source}` : ""}
                       </div>
+                      {(s.services?.length ?? 0) > 0 ? (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {s.services.map((slug: string) => (
+                            <Badge key={slug} variant="outline" className="text-[10px]">
+                              {slug}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-muted-foreground mt-1">
+                          recebe todos os serviços
+                        </div>
+                      )}
                     </div>
+
                     <Badge variant={state.variant}>{state.label}</Badge>
                     <Button
                       size="sm"
