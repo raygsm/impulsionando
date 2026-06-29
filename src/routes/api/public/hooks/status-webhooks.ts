@@ -113,7 +113,7 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           supabaseAdmin
             .from('core_status_webhooks')
             .select(
-              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,active',
+              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,categories,active',
             )
             .eq('active', true)
             .limit(200),
