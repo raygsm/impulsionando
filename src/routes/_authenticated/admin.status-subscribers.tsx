@@ -57,7 +57,7 @@ function AdminStatusSubscribers() {
 
   const { data: breakdown } = useQuery({
     queryKey: ["admin-status-breakdown"],
-    queryFn: () => breakdownFn({ data: {} as any }),
+    queryFn: () => breakdownFn(),
   });
 
   const unsubMut = useMutation({
