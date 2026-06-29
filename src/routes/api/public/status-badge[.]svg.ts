@@ -39,7 +39,7 @@ function badge(label: string, message: string, color: string) {
 </svg>`
 }
 
-export const Route = createFileRoute('/api/public/status-badge[.]svg')({
+export const Route = createFileRoute('/api/public/status-badge.svg')({
   server: {
     handlers: {
       GET: async () => {
