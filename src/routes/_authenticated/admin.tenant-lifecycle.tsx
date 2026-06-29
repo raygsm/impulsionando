@@ -193,7 +193,7 @@ function Page() {
                   <tr><th className="py-2">Tenant</th><th>Steps</th><th>Status</th><th>Última atualização</th></tr>
                 </thead>
                 <tbody>
-                  {d.migrationsInProgress.map((m) => (
+                  {d.migrationsInProgress.map((m: any) => (
                     <tr key={m.companyId} className="border-b last:border-0">
                       <td className="py-2 truncate max-w-[200px]">{m.companyName}</td>
                       <td className="tabular-nums">{m.steps}</td>
