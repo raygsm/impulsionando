@@ -30,26 +30,30 @@ export const getNichosOverview = createServerFn({ method: "GET" })
     const [macros, subs, modulosRel, templatesRel, companies] = await Promise.all([
       supabase.from("core_macro_nichos").select("id,slug,nome,ordem").order("ordem"),
       supabase.from("core_subnichos").select("id,slug,nome,macro_id,ordem").order("ordem"),
-      supabase.from("core_niche_modules").select("niche_slug").throwOnError(),
-      supabase.from("core_templates").select("niche_slug").throwOnError(),
-      supabase.from("companies").select("niche_code").throwOnError(),
+      supabase.from("core_niche_modules").select("niche_id"),
+      supabase.from("core_templates").select("subnicho_id"),
+      supabase.from("companies").select("subnicho_slug"),
     ]);
 
     const macroById = new Map((macros.data ?? []).map((m) => [m.id, m]));
+    const subById = new Map((subs.data ?? []).map((s) => [s.id, s]));
+
     const tenantsByNiche = new Map<string, number>();
-    for (const c of (companies.data as Array<{ niche_code: string | null }>) ?? []) {
-      if (!c.niche_code) continue;
-      tenantsByNiche.set(c.niche_code, (tenantsByNiche.get(c.niche_code) ?? 0) + 1);
+    for (const c of (companies.data ?? []) as Array<{ subnicho_slug: string | null }>) {
+      if (!c.subnicho_slug) continue;
+      tenantsByNiche.set(c.subnicho_slug, (tenantsByNiche.get(c.subnicho_slug) ?? 0) + 1);
     }
     const modulosByNiche = new Map<string, number>();
-    for (const r of (modulosRel.data as Array<{ niche_slug: string | null }>) ?? []) {
-      if (!r.niche_slug) continue;
-      modulosByNiche.set(r.niche_slug, (modulosByNiche.get(r.niche_slug) ?? 0) + 1);
+    for (const r of (modulosRel.data ?? []) as Array<{ niche_id: string | null }>) {
+      const sub = r.niche_id ? subById.get(r.niche_id) : null;
+      if (!sub) continue;
+      modulosByNiche.set(sub.slug, (modulosByNiche.get(sub.slug) ?? 0) + 1);
     }
     const templatesByNiche = new Map<string, number>();
-    for (const r of (templatesRel.data as Array<{ niche_slug: string | null }>) ?? []) {
-      if (!r.niche_slug) continue;
-      templatesByNiche.set(r.niche_slug, (templatesByNiche.get(r.niche_slug) ?? 0) + 1);
+    for (const r of (templatesRel.data ?? []) as Array<{ subnicho_id: string | null }>) {
+      const sub = r.subnicho_id ? subById.get(r.subnicho_id) : null;
+      if (!sub) continue;
+      templatesByNiche.set(sub.slug, (templatesByNiche.get(sub.slug) ?? 0) + 1);
     }
 
     const subnichos: SubnichoRow[] = (subs.data ?? []).map((s) => {
@@ -64,6 +68,7 @@ export const getNichosOverview = createServerFn({ method: "GET" })
         templates: templatesByNiche.get(s.slug) ?? 0,
       };
     });
+
 
     const macrosAgg = (macros.data ?? []).map((m) => {
       const subsOfMacro = subnichos.filter((s) => s.macro_slug === m.slug);
