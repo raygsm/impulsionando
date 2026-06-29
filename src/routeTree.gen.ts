@@ -447,6 +447,7 @@ import { Route as AuthenticatedAdminRuntimeUptimeHealthRouteImport } from './rou
 import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminRestaurantHealthRouteImport } from './routes/_authenticated/admin.restaurant-health'
+import { Route as AuthenticatedAdminReliabilityAlertsRouteImport } from './routes/_authenticated/admin.reliability-alerts'
 import { Route as AuthenticatedAdminReliabilityRouteImport } from './routes/_authenticated/admin.reliability'
 import { Route as AuthenticatedAdminRealestateHealthRouteImport } from './routes/_authenticated/admin.realestate-health'
 import { Route as AuthenticatedAdminRealestateCockpitRouteImport } from './routes/_authenticated/admin.realestate-cockpit'
@@ -587,6 +588,7 @@ import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/a
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
+import { Route as ApiPublicHooksReliabilityAlertsRouteImport } from './routes/api/public/hooks/reliability-alerts'
 import { Route as ApiPublicHooksNotificationLogCleanupRouteImport } from './routes/api/public/hooks/notification-log-cleanup'
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
@@ -3105,6 +3107,12 @@ const AuthenticatedAdminRestaurantHealthRoute =
     path: '/admin/restaurant-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReliabilityAlertsRoute =
+  AuthenticatedAdminReliabilityAlertsRouteImport.update({
+    id: '/admin/reliability-alerts',
+    path: '/admin/reliability-alerts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminReliabilityRoute =
   AuthenticatedAdminReliabilityRouteImport.update({
     id: '/admin/reliability',
@@ -3931,6 +3939,12 @@ const ApiPublicHooksRetentionSweepRoute =
   ApiPublicHooksRetentionSweepRouteImport.update({
     id: '/api/public/hooks/retention-sweep',
     path: '/api/public/hooks/retention-sweep',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksReliabilityAlertsRoute =
+  ApiPublicHooksReliabilityAlertsRouteImport.update({
+    id: '/api/public/hooks/reliability-alerts',
+    path: '/api/public/hooks/reliability-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksNotificationLogCleanupRoute =
@@ -4937,6 +4951,7 @@ export interface FileRoutesByFullPath {
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/realestate-health': typeof AuthenticatedAdminRealestateHealthRoute
   '/admin/reliability': typeof AuthenticatedAdminReliabilityRoute
+  '/admin/reliability-alerts': typeof AuthenticatedAdminReliabilityAlertsRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -5233,6 +5248,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -5619,6 +5635,7 @@ export interface FileRoutesByTo {
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/realestate-health': typeof AuthenticatedAdminRealestateHealthRoute
   '/admin/reliability': typeof AuthenticatedAdminReliabilityRoute
+  '/admin/reliability-alerts': typeof AuthenticatedAdminReliabilityAlertsRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -5914,6 +5931,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -6314,6 +6332,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/_authenticated/admin/realestate-health': typeof AuthenticatedAdminRealestateHealthRoute
   '/_authenticated/admin/reliability': typeof AuthenticatedAdminReliabilityRoute
+  '/_authenticated/admin/reliability-alerts': typeof AuthenticatedAdminReliabilityAlertsRoute
   '/_authenticated/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -6610,6 +6629,7 @@ export interface FileRoutesById {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -7010,6 +7030,7 @@ export interface FileRouteTypes {
     | '/admin/realestate-cockpit'
     | '/admin/realestate-health'
     | '/admin/reliability'
+    | '/admin/reliability-alerts'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
@@ -7306,6 +7327,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -7692,6 +7714,7 @@ export interface FileRouteTypes {
     | '/admin/realestate-cockpit'
     | '/admin/realestate-health'
     | '/admin/reliability'
+    | '/admin/reliability-alerts'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
@@ -7987,6 +8010,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -8386,6 +8410,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/realestate-cockpit'
     | '/_authenticated/admin/realestate-health'
     | '/_authenticated/admin/reliability'
+    | '/_authenticated/admin/reliability-alerts'
     | '/_authenticated/admin/restaurant-health'
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/revenue-quality'
@@ -8682,6 +8707,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -8914,6 +8940,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksNotificationLogCleanupRoute: typeof ApiPublicHooksNotificationLogCleanupRoute
+  ApiPublicHooksReliabilityAlertsRoute: typeof ApiPublicHooksReliabilityAlertsRoute
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
@@ -12010,6 +12037,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRestaurantHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/reliability-alerts': {
+      id: '/_authenticated/admin/reliability-alerts'
+      path: '/admin/reliability-alerts'
+      fullPath: '/admin/reliability-alerts'
+      preLoaderRoute: typeof AuthenticatedAdminReliabilityAlertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/reliability': {
       id: '/_authenticated/admin/reliability'
       path: '/admin/reliability'
@@ -12988,6 +13022,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/retention-sweep'
       fullPath: '/api/public/hooks/retention-sweep'
       preLoaderRoute: typeof ApiPublicHooksRetentionSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/reliability-alerts': {
+      id: '/api/public/hooks/reliability-alerts'
+      path: '/api/public/hooks/reliability-alerts'
+      fullPath: '/api/public/hooks/reliability-alerts'
+      preLoaderRoute: typeof ApiPublicHooksReliabilityAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/notification-log-cleanup': {
@@ -14770,6 +14811,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRealestateCockpitRoute: typeof AuthenticatedAdminRealestateCockpitRoute
   AuthenticatedAdminRealestateHealthRoute: typeof AuthenticatedAdminRealestateHealthRoute
   AuthenticatedAdminReliabilityRoute: typeof AuthenticatedAdminReliabilityRoute
+  AuthenticatedAdminReliabilityAlertsRoute: typeof AuthenticatedAdminReliabilityAlertsRoute
   AuthenticatedAdminRestaurantHealthRoute: typeof AuthenticatedAdminRestaurantHealthRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
@@ -15101,6 +15143,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRealestateHealthRoute:
     AuthenticatedAdminRealestateHealthRoute,
   AuthenticatedAdminReliabilityRoute: AuthenticatedAdminReliabilityRoute,
+  AuthenticatedAdminReliabilityAlertsRoute:
+    AuthenticatedAdminReliabilityAlertsRoute,
   AuthenticatedAdminRestaurantHealthRoute:
     AuthenticatedAdminRestaurantHealthRoute,
   AuthenticatedAdminRevenueForecastRoute:
@@ -15650,6 +15694,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksN8nLogRoute: ApiPublicHooksN8nLogRoute,
   ApiPublicHooksNotificationLogCleanupRoute:
     ApiPublicHooksNotificationLogCleanupRoute,
+  ApiPublicHooksReliabilityAlertsRoute: ApiPublicHooksReliabilityAlertsRoute,
   ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,

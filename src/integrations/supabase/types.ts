@@ -10102,6 +10102,113 @@ export type Database = {
           },
         ]
       }
+      core_reliability_alerts: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          n8n_failed: number
+          open_incidents: number
+          outbox_email_id: string | null
+          outbox_in_app_id: string | null
+          payload: Json
+          resolved_at: string | null
+          resolved_grade: string | null
+          resolved_score: number | null
+          status: string
+          triggered_grade: string
+          triggered_score: number
+          updated_at: string
+          webhook_failed: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          n8n_failed?: number
+          open_incidents?: number
+          outbox_email_id?: string | null
+          outbox_in_app_id?: string | null
+          payload?: Json
+          resolved_at?: string | null
+          resolved_grade?: string | null
+          resolved_score?: number | null
+          status?: string
+          triggered_grade: string
+          triggered_score: number
+          updated_at?: string
+          webhook_failed?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          n8n_failed?: number
+          open_incidents?: number
+          outbox_email_id?: string | null
+          outbox_in_app_id?: string | null
+          payload?: Json
+          resolved_at?: string | null
+          resolved_grade?: string | null
+          resolved_score?: number | null
+          status?: string
+          triggered_grade?: string
+          triggered_score?: number
+          updated_at?: string
+          webhook_failed?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_reliability_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_outbox_email_id_fkey"
+            columns: ["outbox_email_id"]
+            isOneToOne: false
+            referencedRelation: "message_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_reliability_alerts_outbox_in_app_id_fkey"
+            columns: ["outbox_in_app_id"]
+            isOneToOne: false
+            referencedRelation: "message_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_reschedule_rules: {
         Row: {
           auto_reschedule: boolean
