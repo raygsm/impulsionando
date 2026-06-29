@@ -241,6 +241,9 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
+import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
+import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
+import { Route as ApiPublicStatusConfirmRouteImport } from './routes/api/public/status-confirm'
 import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
@@ -592,6 +595,7 @@ import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/publi
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
+import { Route as ApiPublicHooksStatusSubscribersRouteImport } from './routes/api/public/hooks/status-subscribers'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksReliabilityAlertsRouteImport } from './routes/api/public/hooks/reliability-alerts'
 import { Route as ApiPublicHooksPostmortemActionsRouteImport } from './routes/api/public/hooks/postmortem-actions'
@@ -1896,6 +1900,23 @@ const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
 const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   id: '/api/public/version',
   path: '/api/public/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicStatusUnsubscribeRoute =
+  ApiPublicStatusUnsubscribeRouteImport.update({
+    id: '/api/public/status-unsubscribe',
+    path: '/api/public/status-unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicStatusSubscribeRoute =
+  ApiPublicStatusSubscribeRouteImport.update({
+    id: '/api/public/status-subscribe',
+    path: '/api/public/status-subscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicStatusConfirmRoute = ApiPublicStatusConfirmRouteImport.update({
+  id: '/api/public/status-confirm',
+  path: '/api/public/status-confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicStatusRoute = ApiPublicStatusRouteImport.update({
@@ -3968,6 +3989,12 @@ const ApiPublicHooksTrialReguaRoute =
     path: '/api/public/hooks/trial-regua',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStatusSubscribersRoute =
+  ApiPublicHooksStatusSubscribersRouteImport.update({
+    id: '/api/public/hooks/status-subscribers',
+    path: '/api/public/hooks/status-subscribers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRetentionSweepRoute =
   ApiPublicHooksRetentionSweepRouteImport.update({
     id: '/api/public/hooks/retention-sweep',
@@ -5202,6 +5229,9 @@ export interface FileRoutesByFullPath {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
+  '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -5294,6 +5324,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -5892,6 +5923,9 @@ export interface FileRoutesByTo {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
+  '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -5983,6 +6017,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -6595,6 +6630,9 @@ export interface FileRoutesById {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
+  '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -6687,6 +6725,7 @@ export interface FileRoutesById {
   '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -7299,6 +7338,9 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-confirm'
+    | '/api/public/status-subscribe'
+    | '/api/public/status-unsubscribe'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -7391,6 +7433,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -7989,6 +8032,9 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-confirm'
+    | '/api/public/status-subscribe'
+    | '/api/public/status-unsubscribe'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -8080,6 +8126,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -8691,6 +8738,9 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-confirm'
+    | '/api/public/status-subscribe'
+    | '/api/public/status-unsubscribe'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -8783,6 +8833,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -8989,6 +9040,9 @@ export interface RootRouteChildren {
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicStatusRoute: typeof ApiPublicStatusRouteWithChildren
+  ApiPublicStatusConfirmRoute: typeof ApiPublicStatusConfirmRoute
+  ApiPublicStatusSubscribeRoute: typeof ApiPublicStatusSubscribeRoute
+  ApiPublicStatusUnsubscribeRoute: typeof ApiPublicStatusUnsubscribeRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -9020,6 +9074,7 @@ export interface RootRouteChildren {
   ApiPublicHooksPostmortemActionsRoute: typeof ApiPublicHooksPostmortemActionsRoute
   ApiPublicHooksReliabilityAlertsRoute: typeof ApiPublicHooksReliabilityAlertsRoute
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
+  ApiPublicHooksStatusSubscribersRoute: typeof ApiPublicHooksStatusSubscribersRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -10671,6 +10726,27 @@ declare module '@tanstack/react-router' {
       path: '/api/public/version'
       fullPath: '/api/public/version'
       preLoaderRoute: typeof ApiPublicVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status-unsubscribe': {
+      id: '/api/public/status-unsubscribe'
+      path: '/api/public/status-unsubscribe'
+      fullPath: '/api/public/status-unsubscribe'
+      preLoaderRoute: typeof ApiPublicStatusUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status-subscribe': {
+      id: '/api/public/status-subscribe'
+      path: '/api/public/status-subscribe'
+      fullPath: '/api/public/status-subscribe'
+      preLoaderRoute: typeof ApiPublicStatusSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status-confirm': {
+      id: '/api/public/status-confirm'
+      path: '/api/public/status-confirm'
+      fullPath: '/api/public/status-confirm'
+      preLoaderRoute: typeof ApiPublicStatusConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/status': {
@@ -13128,6 +13204,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/trial-regua'
       fullPath: '/api/public/hooks/trial-regua'
       preLoaderRoute: typeof ApiPublicHooksTrialReguaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/status-subscribers': {
+      id: '/api/public/hooks/status-subscribers'
+      path: '/api/public/hooks/status-subscribers'
+      fullPath: '/api/public/hooks/status-subscribers'
+      preLoaderRoute: typeof ApiPublicHooksStatusSubscribersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/retention-sweep': {
@@ -15800,6 +15883,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicStatusRoute: ApiPublicStatusRouteWithChildren,
+  ApiPublicStatusConfirmRoute: ApiPublicStatusConfirmRoute,
+  ApiPublicStatusSubscribeRoute: ApiPublicStatusSubscribeRoute,
+  ApiPublicStatusUnsubscribeRoute: ApiPublicStatusUnsubscribeRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
@@ -15835,6 +15921,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksPostmortemActionsRoute: ApiPublicHooksPostmortemActionsRoute,
   ApiPublicHooksReliabilityAlertsRoute: ApiPublicHooksReliabilityAlertsRoute,
   ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
+  ApiPublicHooksStatusSubscribersRoute: ApiPublicHooksStatusSubscribersRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,

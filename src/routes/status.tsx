@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,6 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 
 type ServiceRow = {
   scope: string;
@@ -288,15 +292,82 @@ function StatusPage() {
           </CardContent>
         </Card>
 
+        <SubscribeCard />
+
         <footer className="pt-4 text-center text-xs text-muted-foreground">
           Esta página é pública e atualizada automaticamente a cada minuto. Dados agregados — sem informações de clientes.
         </footer>
+
       </div>
     </main>
   );
 }
 
+function SubscribeCard() {
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [msg, setMsg] = useState<string>("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setState("loading");
+    setMsg("");
+    try {
+      const res = await fetch("/api/public/status-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "status_page" }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
+      if (res.ok && json.ok) {
+        setState("ok");
+        setMsg(json.message ?? "Verifique seu email para confirmar a inscrição.");
+        setEmail("");
+      } else {
+        setState("error");
+        setMsg(json.error === "invalid_email" ? "Email inválido." : "Não foi possível inscrever agora. Tente novamente.");
+      }
+    } catch {
+      setState("error");
+      setMsg("Falha de rede. Tente novamente.");
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Receber atualizações por email</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Inscreva-se para receber notificações de novos incidentes, resoluções e postmortems publicados. Enviamos um link
+          de confirmação por email.
+        </p>
+        <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="email"
+            required
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={state === "loading"}
+            className="sm:max-w-sm"
+          />
+          <Button type="submit" disabled={state === "loading" || !email}>
+            {state === "loading" ? "Enviando…" : "Inscrever"}
+          </Button>
+        </form>
+        {msg ? (
+          <p className={`mt-2 text-xs ${state === "error" ? "text-destructive" : "text-muted-foreground"}`}>{msg}</p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
 export const Route = createFileRoute("/status")({
+
   component: StatusPage,
   head: () => ({
     meta: [

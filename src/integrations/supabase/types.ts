@@ -10712,6 +10712,89 @@ export type Database = {
           },
         ]
       }
+      core_status_dispatch_log: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          event_kind: string
+          id: string
+          incident_id: string | null
+          reference_key: string
+          subscriber_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event_kind: string
+          id?: string
+          incident_id?: string | null
+          reference_key: string
+          subscriber_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          event_kind?: string
+          id?: string
+          incident_id?: string | null
+          reference_key?: string
+          subscriber_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_status_dispatch_log_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "core_status_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_status_subscribers: {
+        Row: {
+          bounced_at: string | null
+          confirm_token: string
+          confirmed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          last_notified_at: string | null
+          source: string | null
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          bounced_at?: string | null
+          confirm_token?: string
+          confirmed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          last_notified_at?: string | null
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bounced_at?: string | null
+          confirm_token?: string
+          confirmed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_notified_at?: string | null
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       core_subnichos: {
         Row: {
           created_at: string
