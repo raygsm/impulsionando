@@ -14,7 +14,7 @@ function rfc822(d: string | Date): string {
   return new Date(d).toUTCString()
 }
 
-export const Route = createFileRoute('/api/public/status.rss')({
+export const Route = createFileRoute('/api/public/status/rss')({
   server: {
     handlers: {
       GET: async ({ request }) => {
