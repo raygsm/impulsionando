@@ -9,6 +9,7 @@ import {
   forceUnsubscribeStatusSubscriber,
   resendStatusConfirmation,
   broadcastStatusAnnouncement,
+  setStatusSubscriberSeverity,
 } from "@/lib/status-subscribers.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ function AdminStatusSubscribers() {
   const unsubFn = useServerFn(forceUnsubscribeStatusSubscriber);
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
+  const severityFn = useServerFn(setStatusSubscriberSeverity);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
@@ -72,6 +74,16 @@ function AdminStatusSubscribers() {
   const resendMut = useMutation({
     mutationFn: (id: string) => resendFn({ data: { id } }),
     onSuccess: () => toast.success("Confirmação reenviada"),
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const severityMut = useMutation({
+    mutationFn: (vars: { id: string; min_severity: "info" | "minor" | "major" | "critical" }) =>
+      severityFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Severidade mínima atualizada");
+      refetch();
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -273,6 +285,22 @@ function AdminStatusSubscribers() {
                     </div>
 
                     <Badge variant={state.variant}>{state.label}</Badge>
+                    <Select
+                      value={(s.min_severity ?? "info") as string}
+                      onValueChange={(v) =>
+                        severityMut.mutate({ id: s.id, min_severity: v as any })
+                      }
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="info">Tudo (info)</SelectItem>
+                        <SelectItem value="minor">Minor+</SelectItem>
+                        <SelectItem value="major">Major+</SelectItem>
+                        <SelectItem value="critical">Crítico</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       size="sm"
                       variant="outline"

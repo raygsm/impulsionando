@@ -24,7 +24,7 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
     let q = context.supabase
       .from('core_status_subscribers')
       .select(
-        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at',
+        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at,min_severity',
       )
       .order('created_at', { ascending: false })
       .limit(data.limit)
@@ -159,6 +159,26 @@ export const forceUnsubscribeStatusSubscriber = createServerFn({ method: 'POST' 
     const { error } = await context.supabase
       .from('core_status_subscribers')
       .update({ unsubscribed_at: new Date().toISOString() })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
+
+export const setStatusSubscriberSeverity = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        min_severity: z.enum(['info', 'minor', 'major', 'critical']),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { error } = await context.supabase
+      .from('core_status_subscribers')
+      .update({ min_severity: data.min_severity })
       .eq('id', data.id)
     if (error) throw new Error(error.message)
     return { ok: true }
