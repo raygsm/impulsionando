@@ -1276,9 +1276,15 @@ function AutoDisableSettingsCard() {
   const getFn = useServerFn(getStatusWebhookAutoDisableSettings)
   const saveFn = useServerFn(updateStatusWebhookAutoDisableSettings)
   const runNowFn = useServerFn(runStatusWebhookAutoDisableNow)
+  const runsFn = useServerFn(listStatusWebhookAutoDisableRuns)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhooks', 'auto-disable-settings'],
     queryFn: () => getFn(),
+  })
+  const { data: recentRuns } = useQuery({
+    queryKey: ['status-webhooks', 'auto-disable-runs', 'freshness'],
+    queryFn: () => runsFn({ data: { limit: 10 } }),
+    refetchInterval: 60_000,
   })
   const [form, setForm] = useState<{ enabled: boolean; hours: number; min_total: number; threshold: number } | null>(null)
   const current = form ?? (data as any) ?? { enabled: true, hours: 24, min_total: 10, threshold: 50 }
@@ -1300,12 +1306,28 @@ function AutoDisableSettingsCard() {
         toast.success(`Avaliação concluída: ${res?.disabled ?? 0} desativado(s), ${res?.candidates?.length ?? 0} candidato(s).`)
       }
       qc.invalidateQueries({ queryKey: ['status-webhooks', 'auto-disable-runs'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'auto-disable-runs', 'freshness'] })
       qc.invalidateQueries({ queryKey: ['status-webhooks', 'inactive'] })
       qc.invalidateQueries({ queryKey: ['status-webhooks', 'health'] })
       qc.invalidateQueries({ queryKey: ['status-webhooks', 'list'] })
     },
     onError: (e: any) => toast.error(e?.message ?? 'Falha ao executar agora'),
   })
+
+  const lastCron = (recentRuns ?? []).find((r: any) => !r.manual) as any
+  const lastAny = (recentRuns ?? [])[0] as any
+  const minutesSinceCron = lastCron ? Math.floor((Date.now() - new Date(lastCron.created_at).getTime()) / 60000) : null
+  const cronStale = minutesSinceCron !== null && minutesSinceCron > 120 // cron é horário; >2h = atraso
+  const noCronEver = !lastCron
+
+  function fmtAgo(min: number) {
+    if (min < 1) return 'agora mesmo'
+    if (min < 60) return `${min} min atrás`
+    const h = Math.floor(min / 60)
+    if (h < 24) return `${h}h atrás`
+    return `${Math.floor(h / 24)}d atrás`
+  }
+
 
 
   return (
@@ -1361,6 +1383,38 @@ function AutoDisableSettingsCard() {
             </div>
           </div>
         )}
+        <div
+          className={`rounded border px-3 py-2 text-xs ${
+            noCronEver || cronStale
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100'
+              : 'bg-muted/40'
+          }`}
+        >
+          {lastAny ? (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>
+                <strong>Última execução:</strong>{' '}
+                {fmtAgo(Math.floor((Date.now() - new Date(lastAny.created_at).getTime()) / 60000))}{' '}
+                <Badge variant={lastAny.manual ? 'outline' : 'secondary'} className="ml-1">
+                  {lastAny.manual ? 'manual' : 'cron'}
+                </Badge>{' '}
+                · {lastAny.disabled ?? 0} desativado(s)
+              </span>
+              {noCronEver ? (
+                <span>⚠ Nenhuma execução do cron registrada — verifique o agendamento (pg_cron horário).</span>
+              ) : cronStale ? (
+                <span>
+                  ⚠ Último cron há {fmtAgo(minutesSinceCron!)} — esperado a cada 1h.
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Cron saudável (último há {fmtAgo(minutesSinceCron!)}).</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Nenhuma execução registrada ainda.</span>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
             variant="secondary"
@@ -1380,6 +1434,7 @@ function AutoDisableSettingsCard() {
             </Button>
           </div>
         </div>
+
 
         <AutoDisableRunsList />
       </CardContent>
