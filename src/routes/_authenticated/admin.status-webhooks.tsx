@@ -445,11 +445,23 @@ function EditDialog({
 }
 
 function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () => void }) {
+  const qc = useQueryClient()
   const list = useServerFn(listStatusWebhookDispatches)
+  const redispatch = useServerFn(redispatchStatusWebhookEvent)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-dispatches', webhook?.id],
     queryFn: () => list({ data: { webhook_id: webhook!.id, limit: 50 } }),
     enabled: !!webhook,
+  })
+  const replay = useMutation({
+    mutationFn: (dispatch_id: string) => redispatch({ data: { dispatch_id } }),
+    onSuccess: (r: any) => {
+      if (r?.ok) toast.success(`Reenvio OK (HTTP ${r.status})`)
+      else toast.error(`Reenvio falhou (HTTP ${r?.status ?? 'n/a'}) — ${r?.error ?? ''}`)
+      qc.invalidateQueries({ queryKey: ['status-webhook-dispatches', webhook?.id] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
+    onError: (e: any) => toast.error(e.message),
   })
   if (!webhook) return null
   const items = (data?.items ?? []) as Array<{
