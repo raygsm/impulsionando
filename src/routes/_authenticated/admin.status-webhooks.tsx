@@ -1391,7 +1391,7 @@ function AutoDisableRunsList() {
   const listFn = useServerFn(listStatusWebhookAutoDisableRuns)
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['status-webhooks', 'auto-disable-runs'],
-    queryFn: () => listFn({ data: { limit: 20 } }),
+    queryFn: () => listFn({ data: { limit: 50 } }),
     refetchInterval: 60_000,
   })
   const runs = (data ?? []) as Array<{
@@ -1404,26 +1404,94 @@ function AutoDisableRunsList() {
     min_total: number | null
     disabled: number
     candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }>
+    manual: boolean
+    by: string | null
+    skipped: string | null
   }>
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [originFilter, setOriginFilter] = useState<'all' | 'manual' | 'auto'>('all')
+
+  const filtered = runs.filter((r) =>
+    originFilter === 'all' ? true : originFilter === 'manual' ? r.manual : !r.manual,
+  )
+
+  function exportCsv() {
+    const header = [
+      'created_at',
+      'origin',
+      'status',
+      'hours',
+      'threshold_pct',
+      'min_total',
+      'candidates',
+      'disabled',
+      'skipped',
+      'error',
+    ]
+    const lines = [header.join(',')]
+    for (const r of filtered) {
+      const row = [
+        r.created_at,
+        r.manual ? 'manual' : 'auto',
+        r.status ?? '',
+        r.hours ?? '',
+        r.threshold ?? '',
+        r.min_total ?? '',
+        r.candidates.length,
+        r.disabled,
+        r.skipped ?? '',
+        (r.error ?? '').replace(/[\r\n,]+/g, ' '),
+      ]
+      lines.push(row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `status-webhooks-auto-disable-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="mt-2 space-y-2 border-t pt-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h4 className="text-sm font-medium">Execuções recentes do cron</h4>
-        <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? 'Atualizando…' : 'Atualizar'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            className="h-8 rounded border bg-background px-2 text-xs"
+            value={originFilter}
+            onChange={(e) => setOriginFilter(e.target.value as any)}
+            aria-label="Filtrar por origem"
+          >
+            <option value="all">Todas as origens</option>
+            <option value="auto">Apenas cron</option>
+            <option value="manual">Apenas manuais</option>
+          </select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            disabled={filtered.length === 0}
+          >
+            Exportar CSV
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? 'Atualizando…' : 'Atualizar'}
+          </Button>
+        </div>
       </div>
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
-      ) : runs.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma execução registrada ainda.</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma execução para os filtros atuais.</p>
       ) : (
         <div className="overflow-x-auto rounded border">
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr>
                 <th className="px-3 py-2 text-left">Quando</th>
+                <th className="px-3 py-2 text-left">Origem</th>
                 <th className="px-3 py-2 text-left">Janela</th>
                 <th className="px-3 py-2 text-left">Limiar</th>
                 <th className="px-3 py-2 text-left">Candidatos</th>
@@ -1432,34 +1500,77 @@ function AutoDisableRunsList() {
               </tr>
             </thead>
             <tbody>
-              {runs.map((r) => (
-                <tr key={r.id} className="border-t">
-                  <td className="px-3 py-2 whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString('pt-BR')}
-                  </td>
-                  <td className="px-3 py-2">{r.hours ?? '—'}h</td>
-                  <td className="px-3 py-2">
-                    {r.threshold ?? '—'}% (min {r.min_total ?? '—'})
-                  </td>
-                  <td className="px-3 py-2">{r.candidates.length}</td>
-                  <td className="px-3 py-2">
-                    {r.disabled > 0 ? (
-                      <Badge variant="destructive">{r.disabled}</Badge>
-                    ) : (
-                      <Badge variant="secondary">0</Badge>
+              {filtered.map((r) => {
+                const isOpen = expanded === r.id
+                const canExpand = r.candidates.length > 0
+                return (
+                  <Fragment key={r.id}>
+                    <tr
+                      className={`border-t ${canExpand ? 'cursor-pointer hover:bg-muted/30' : ''}`}
+                      onClick={() => canExpand && setExpanded(isOpen ? null : r.id)}
+                    >
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {new Date(r.created_at).toLocaleString('pt-BR')}
+                      </td>
+                      <td className="px-3 py-2">
+                        {r.manual ? (
+                          <Badge variant="outline">manual</Badge>
+                        ) : (
+                          <Badge variant="secondary">cron</Badge>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">{r.hours ?? '—'}h</td>
+                      <td className="px-3 py-2">
+                        {r.threshold ?? '—'}% (min {r.min_total ?? '—'})
+                      </td>
+                      <td className="px-3 py-2">{r.candidates.length}</td>
+                      <td className="px-3 py-2">
+                        {r.disabled > 0 ? (
+                          <Badge variant="destructive">{r.disabled}</Badge>
+                        ) : (
+                          <Badge variant="secondary">0</Badge>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {r.error ? (
+                          <span className="text-destructive" title={r.error}>
+                            erro
+                          </span>
+                        ) : r.skipped ? (
+                          <span className="text-muted-foreground">skipped: {r.skipped}</span>
+                        ) : (
+                          <span className="text-muted-foreground">{r.status ?? 'ok'}</span>
+                        )}
+                      </td>
+                    </tr>
+                    {isOpen && canExpand && (
+                      <tr className="bg-muted/20">
+                        <td colSpan={7} className="px-3 py-2">
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Webhooks candidatos ({r.candidates.length})
+                            </p>
+                            <ul className="grid grid-cols-1 gap-1 text-xs md:grid-cols-2">
+                              {r.candidates.map((c) => (
+                                <li
+                                  key={c.webhook_id}
+                                  className="flex items-center justify-between rounded border bg-background px-2 py-1"
+                                >
+                                  <code className="truncate">{c.webhook_id.slice(0, 8)}…</code>
+                                  <span>
+                                    {c.ok}/{c.total} ·{' '}
+                                    <strong>{c.success_rate}%</strong>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
                     )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {r.error ? (
-                      <span className="text-destructive" title={r.error}>
-                        erro
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">{r.status ?? 'ok'}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                  </Fragment>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -1467,5 +1578,6 @@ function AutoDisableRunsList() {
     </div>
   )
 }
+
 
 
