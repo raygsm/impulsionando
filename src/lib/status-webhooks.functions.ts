@@ -36,6 +36,7 @@ const upsertSchema = z.object({
   min_severity: z.enum(['info', 'minor', 'major', 'critical']).default('info'),
   max_retries: z.number().int().min(0).max(10).default(3),
   active: z.boolean().default(true),
+  auto_disable_protected: z.boolean().default(false),
 })
 
 
