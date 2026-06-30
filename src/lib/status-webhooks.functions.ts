@@ -870,4 +870,61 @@ export const bulkSetStatusWebhookProtection = createServerFn({ method: 'POST' })
   })
 
 
+// W101 — Histórico (auditoria) das mudanças de proteção contra auto-desativação.
+const protectionLogSchema = z.object({
+  limit: z.number().int().min(1).max(500).default(100),
+  scope: z.enum(['all', 'ids', 'active', 'inactive']).optional(),
+  protectedOnly: z.enum(['all', 'protected', 'unprotected']).default('all'),
+})
+
+export const listStatusWebhookProtectionLog = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => protectionLogSchema.parse(input ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { data: rows, error } = await context.supabase
+      .from('core_integration_logs')
+      .select('id,event_type,status,response,created_at')
+      .eq('integration_slug', 'status-webhooks')
+      .eq('event_type', 'bulk_protect')
+      .order('created_at', { ascending: false })
+      .limit(data.limit)
+    if (error) throw new Error(error.message)
+
+    const ids = Array.from(
+      new Set((rows ?? []).map((r: any) => r?.response?.by).filter(Boolean)),
+    ) as string[]
+    const emailMap = new Map<string, string>()
+    if (ids.length) {
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+      const settled = await Promise.all(
+        ids.map((id) =>
+          (supabaseAdmin as any).auth.admin.getUserById(id).catch(() => null),
+        ),
+      )
+      settled.forEach((r: any, i) => {
+        const email = r?.data?.user?.email
+        if (email) emailMap.set(ids[i], email)
+      })
+    }
+
+    const items = (rows ?? [])
+      .map((r: any) => ({
+        id: r.id,
+        created_at: r.created_at,
+        scope: r?.response?.scope ?? 'ids',
+        protected: !!r?.response?.protected,
+        affected: Number(r?.response?.affected ?? 0),
+        by: r?.response?.by ?? null,
+        by_email: r?.response?.by ? emailMap.get(r.response.by) ?? null : null,
+      }))
+      .filter((it: any) => {
+        if (data.scope && it.scope !== data.scope) return false
+        if (data.protectedOnly === 'protected' && !it.protected) return false
+        if (data.protectedOnly === 'unprotected' && it.protected) return false
+        return true
+      })
+
+    return { items }
+  })
 
