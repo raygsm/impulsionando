@@ -188,13 +188,55 @@ function AdminStatusWebhooksPage() {
         <CardHeader>
           <CardTitle>Webhooks cadastrados</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {allItems.length > 0 && (
+            <div className="flex items-center justify-between gap-3 flex-wrap rounded-md border bg-muted/40 p-3 text-sm">
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground">Proteção:</Label>
+                <Select value={protectionFilter} onValueChange={(v) => setProtectionFilter(v as any)}>
+                  <SelectTrigger className="h-8 w-44">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos ({allItems.length})</SelectItem>
+                    <SelectItem value="protected">🛡 Protegidos ({protectedCount})</SelectItem>
+                    <SelectItem value="unprotected">Desprotegidos ({allItems.length - protectedCount})</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={bulkProtectMut.isPending}
+                  onClick={() => {
+                    if (!confirm('Proteger TODOS os webhooks ativos contra auto-desativação?')) return
+                    bulkProtectMut.mutate({ scope: 'active', protected: true })
+                  }}
+                >
+                  🛡 Proteger ativos
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={bulkProtectMut.isPending}
+                  onClick={() => {
+                    if (!confirm('Remover proteção de TODOS os webhooks?')) return
+                    bulkProtectMut.mutate({ scope: 'all', protected: false })
+                  }}
+                >
+                  Remover proteção (todos)
+                </Button>
+              </div>
+            </div>
+          )}
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : items.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhum webhook cadastrado. Crie um para distribuir eventos do Status para Slack,
-              Discord ou seu sistema interno.
+              {allItems.length === 0
+                ? 'Nenhum webhook cadastrado. Crie um para distribuir eventos do Status para Slack, Discord ou seu sistema interno.'
+                : 'Nenhum webhook corresponde ao filtro de proteção selecionado.'}
             </p>
           ) : (
             <div className="overflow-x-auto">
