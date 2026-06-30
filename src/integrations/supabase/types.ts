@@ -10976,6 +10976,7 @@ export type Database = {
       core_status_webhooks: {
         Row: {
           active: boolean
+          auto_disable_protected: boolean
           categories: string[] | null
           created_at: string
           created_by: string | null
@@ -10996,6 +10997,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          auto_disable_protected?: boolean
           categories?: string[] | null
           created_at?: string
           created_by?: string | null
@@ -11016,6 +11018,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          auto_disable_protected?: boolean
           categories?: string[] | null
           created_at?: string
           created_by?: string | null

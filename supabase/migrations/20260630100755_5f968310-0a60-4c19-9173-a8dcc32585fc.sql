@@ -1,0 +1,2 @@
+ALTER TABLE public.core_status_webhooks ADD COLUMN IF NOT EXISTS auto_disable_protected boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_core_status_webhooks_protected ON public.core_status_webhooks (auto_disable_protected) WHERE auto_disable_protected = true;
