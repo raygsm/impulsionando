@@ -46,6 +46,7 @@ import {
   listStatusWebhookAutoDisableRuns,
   runStatusWebhookAutoDisableNow,
   bulkSetStatusWebhookProtection,
+  listStatusWebhookProtectionLog,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -361,6 +362,7 @@ function AdminStatusWebhooksPage() {
       <AutoDisableSettingsCard />
       <PendingRetriesCard />
       <InactiveHooksCard />
+      <ProtectionAuditCard />
 
 
       <EditDialog
@@ -1777,5 +1779,133 @@ function AutoDisableRunsList() {
   )
 }
 
+function ProtectionAuditCard() {
+  const list = useServerFn(listStatusWebhookProtectionLog)
+  const [scope, setScope] = useState<'all' | 'ids' | 'active' | 'inactive'>('all')
+  const [protectedOnly, setProtectedOnly] = useState<'all' | 'protected' | 'unprotected'>('all')
 
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['status-webhooks-protection-log', scope, protectedOnly],
+    queryFn: () =>
+      list({
+        data: {
+          limit: 200,
+          scope: scope === 'all' ? undefined : scope,
+          protectedOnly,
+        },
+      }),
+    refetchInterval: 60_000,
+  })
+  const items: any[] = (data as any)?.items ?? []
+
+  const exportCsv = () => {
+    const header = ['Quando', 'Escopo', 'Ação', 'Afetados', 'Por (email)', 'Por (id)']
+    const rows = items.map((it) => [
+      new Date(it.created_at).toISOString(),
+      it.scope,
+      it.protected ? 'protegido' : 'desprotegido',
+      String(it.affected),
+      it.by_email ?? '',
+      it.by ?? '',
+    ])
+    const csv =
+      [header, ...rows]
+        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `protection-audit-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>🛡 Auditoria de proteção</span>
+          <div className="flex items-center gap-2">
+            <Select value={scope} onValueChange={(v: any) => setScope(v)}>
+              <SelectTrigger className="h-8 w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os escopos</SelectItem>
+                <SelectItem value="ids">Individual</SelectItem>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="inactive">Inativos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={protectedOnly} onValueChange={(v: any) => setProtectedOnly(v)}>
+              <SelectTrigger className="h-8 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as ações</SelectItem>
+                <SelectItem value="protected">Só proteções</SelectItem>
+                <SelectItem value="unprotected">Só remoções</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              {isFetching ? '…' : 'Atualizar'}
+            </Button>
+            <Button size="sm" variant="outline" onClick={exportCsv} disabled={!items.length}>
+              Exportar CSV
+            </Button>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando histórico…</p>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhuma mudança de proteção registrada nos filtros atuais.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-muted-foreground border-b">
+                <tr>
+                  <th className="py-2 pr-3">Quando</th>
+                  <th className="py-2 pr-3">Escopo</th>
+                  <th className="py-2 pr-3">Ação</th>
+                  <th className="py-2 pr-3">Afetados</th>
+                  <th className="py-2 pr-3">Por</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it) => (
+                  <tr key={it.id} className="border-b last:border-0">
+                    <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      {new Date(it.created_at).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="py-2 pr-3">
+                      <Badge variant="outline" className="capitalize">
+                        {it.scope}
+                      </Badge>
+                    </td>
+                    <td className="py-2 pr-3">
+                      {it.protected ? (
+                        <Badge className="bg-emerald-600 hover:bg-emerald-600">🛡 protegido</Badge>
+                      ) : (
+                        <Badge variant="secondary">🛡 desprotegido</Badge>
+                      )}
+                    </td>
+                    <td className="py-2 pr-3 font-medium">{it.affected}</td>
+                    <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      {it.by_email ?? it.by ?? '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
