@@ -91,6 +91,21 @@ function AdminStatusSubscribers() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const categoriesMut = useMutation({
+    mutationFn: (vars: { id: string; categories: string[] }) =>
+      categoriesFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Categorias atualizadas");
+      refetch();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const { data: catsData } = useQuery({
+    queryKey: ["admin-status-cats"],
+    queryFn: () => listCatsFn(),
+  });
+
   const [bSubject, setBSubject] = useState("");
   const [bBody, setBBody] = useState("");
   const [bTag, setBTag] = useState("manual_broadcast");
