@@ -530,10 +530,9 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
           <DialogTitle>Logs — {webhook.label}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Label className="text-xs">Filtro:</Label>
+          <div className="flex items-center gap-2 flex-wrap">
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-              <SelectTrigger className="h-8 w-[160px]">
+              <SelectTrigger className="h-8 w-[150px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -542,23 +541,53 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
                 <SelectItem value="ok">OK ({allItems.length - failedCount})</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={kindFilter} onValueChange={setKindFilter}>
+              <SelectTrigger className="h-8 w-[170px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os eventos</SelectItem>
+                {kinds.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    {k}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar reference_key…"
+              className="h-8 w-[200px]"
+            />
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (failedCount === 0) return toast.info('Nenhuma falha para reenviar.')
-              if (confirm(`Reenviar últimas ${Math.min(failedCount, 20)} falhas?`)) bulk.mutate()
-            }}
-            disabled={bulk.isPending || failedCount === 0}
-          >
-            {bulk.isPending ? 'Reenviando…' : `Reenviar falhas (${Math.min(failedCount, 20)})`}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={exportCsv}
+              disabled={items.length === 0}
+            >
+              Exportar CSV
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                if (failedCount === 0) return toast.info('Nenhuma falha para reenviar.')
+                if (confirm(`Reenviar últimas ${Math.min(failedCount, 20)} falhas?`)) bulk.mutate()
+              }}
+              disabled={bulk.isPending || failedCount === 0}
+            >
+              {bulk.isPending ? 'Reenviando…' : `Reenviar falhas (${Math.min(failedCount, 20)})`}
+            </Button>
+          </div>
         </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum disparo no filtro atual.</p>
+
 
         ) : (
           <div className="max-h-[60vh] overflow-y-auto text-xs">
