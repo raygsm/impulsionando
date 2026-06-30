@@ -154,6 +154,7 @@ function AdminStatusWebhooksPage() {
                 min_severity: 'info',
                 max_retries: 3,
                 active: true,
+                auto_disable_protected: false,
 
               })
             }
