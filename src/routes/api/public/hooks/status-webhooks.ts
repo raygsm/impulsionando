@@ -371,6 +371,7 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
             } catch (e) {
               error = e instanceof Error ? e.message.slice(0, 500) : 'unknown error'
             }
+            const nextRetryAt = !ok ? new Date(Date.now() + 5 * 60_000).toISOString() : null
             await supabaseAdmin.from('core_status_webhook_dispatches').insert({
               webhook_id: h.id,
               reference_key: ev.reference_key,
@@ -378,6 +379,8 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
               status_code: status || null,
               ok,
               error,
+              retry_count: 0,
+              next_retry_at: nextRetryAt,
             })
             await supabaseAdmin
               .from('core_status_webhooks')

@@ -10922,8 +10922,11 @@ export type Database = {
           error: string | null
           event_kind: string
           id: string
+          next_retry_at: string | null
           ok: boolean
+          parent_dispatch_id: string | null
           reference_key: string
+          retry_count: number
           status_code: number | null
           webhook_id: string
         }
@@ -10932,8 +10935,11 @@ export type Database = {
           error?: string | null
           event_kind: string
           id?: string
+          next_retry_at?: string | null
           ok?: boolean
+          parent_dispatch_id?: string | null
           reference_key: string
+          retry_count?: number
           status_code?: number | null
           webhook_id: string
         }
@@ -10942,12 +10948,22 @@ export type Database = {
           error?: string | null
           event_kind?: string
           id?: string
+          next_retry_at?: string | null
           ok?: boolean
+          parent_dispatch_id?: string | null
           reference_key?: string
+          retry_count?: number
           status_code?: number | null
           webhook_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "core_status_webhook_dispatches_parent_dispatch_id_fkey"
+            columns: ["parent_dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "core_status_webhook_dispatches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "core_status_webhook_dispatches_webhook_id_fkey"
             columns: ["webhook_id"]
@@ -10969,6 +10985,7 @@ export type Database = {
           last_dispatch_at: string | null
           last_error: string | null
           last_status_code: number | null
+          max_retries: number
           min_severity: string
           notify_incidents: boolean
           notify_maintenance: boolean
@@ -10988,6 +11005,7 @@ export type Database = {
           last_dispatch_at?: string | null
           last_error?: string | null
           last_status_code?: number | null
+          max_retries?: number
           min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean
@@ -11007,6 +11025,7 @@ export type Database = {
           last_dispatch_at?: string | null
           last_error?: string | null
           last_status_code?: number | null
+          max_retries?: number
           min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean

@@ -49,6 +49,7 @@ type Hook = {
   services: string[] | null
   categories: string[] | null
   min_severity: 'info' | 'minor' | 'major' | 'critical' | null
+  max_retries: number | null
   active: boolean
 
   last_dispatch_at: string | null
@@ -137,6 +138,7 @@ function AdminStatusWebhooksPage() {
                 services: [],
                 categories: [],
                 min_severity: 'info',
+                max_retries: 3,
                 active: true,
 
               })
@@ -412,6 +414,24 @@ function EditDialog({
               Atualizações, manutenções e resoluções sempre são entregues.
             </p>
           </div>
+          <div>
+            <Label>Tentativas máximas (auto-retry)</Label>
+            <Input
+              type="number"
+              min={0}
+              max={10}
+              value={v.max_retries ?? 3}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  max_retries: Math.max(0, Math.min(10, Number(e.target.value) || 0)),
+                })
+              }
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Falhas são reagendadas automaticamente com backoff 5/15/45/120 min. 0 desativa retry.
+            </p>
+          </div>
         </div>
 
         <DialogFooter>
@@ -431,8 +451,8 @@ function EditDialog({
                 services: v.services ?? [],
                 categories: v.categories ?? [],
                 min_severity: v.min_severity ?? 'info',
+                max_retries: typeof v.max_retries === 'number' ? v.max_retries : 3,
                 active: v.active ?? true,
-
               })
             }
             disabled={saving || !v.label || !v.url}
