@@ -37,6 +37,9 @@ import {
   cancelAllStatusWebhookRetries,
   getStatusWebhooksHealth,
   autoDisableUnhealthyStatusWebhooks,
+  listInactiveStatusWebhooks,
+  reactivateStatusWebhook,
+  reactivateAllInactiveStatusWebhooks,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -267,6 +270,8 @@ function AdminStatusWebhooksPage() {
 
       <HealthCard items={items} />
       <PendingRetriesCard />
+      <InactiveHooksCard />
+
 
       <EditDialog
         open={!!editing}
@@ -999,3 +1004,127 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
     </Dialog>
   )
 }
+
+function InactiveHooksCard() {
+  const qc = useQueryClient()
+  const list = useServerFn(listInactiveStatusWebhooks)
+  const reactivate = useServerFn(reactivateStatusWebhook)
+  const reactivateAll = useServerFn(reactivateAllInactiveStatusWebhooks)
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['status-webhooks-inactive'],
+    queryFn: () => list(),
+    refetchInterval: 60_000,
+  })
+  const items = (data?.items ?? []) as Array<{
+    id: string
+    label: string
+    url: string
+    kind: string
+    last_error: string | null
+    last_dispatch_at: string | null
+    last_status_code: number | null
+    updated_at: string | null
+  }>
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['status-webhooks-inactive'] })
+    qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    qc.invalidateQueries({ queryKey: ['status-webhooks-health'] })
+  }
+
+  const oneMut = useMutation({
+    mutationFn: (id: string) => reactivate({ data: { id } }),
+    onSuccess: () => {
+      toast.success('Webhook reativado.')
+      invalidate()
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const allMut = useMutation({
+    mutationFn: () => reactivateAll(),
+    onSuccess: (r: { reactivated: number }) => {
+      toast.success(`${r.reactivated} webhook(s) reativado(s).`)
+      invalidate()
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between gap-2">
+        <CardTitle className="text-base">Webhooks inativos</CardTitle>
+        <div className="flex items-center gap-2">
+          <Badge variant={items.length > 0 ? 'destructive' : 'secondary'}>
+            {items.length} inativo(s)
+          </Badge>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={items.length === 0 || allMut.isPending}
+            loading={allMut.isPending}
+            onClick={() => {
+              if (confirm(`Reativar ${items.length} webhook(s)?`)) allMut.mutate()
+            }}
+          >
+            Reativar todos
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhum webhook inativo. Todos os hooks estão operacionais.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-xs uppercase text-muted-foreground">
+                  <th className="py-2">Webhook</th>
+                  <th>Tipo</th>
+                  <th>Último erro</th>
+                  <th>Desde</th>
+                  <th className="text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((h) => (
+                  <tr key={h.id} className="border-b align-top">
+                    <td className="py-2">
+                      <div className="font-medium">{h.label}</div>
+                      <div className="text-xs text-muted-foreground break-all">{h.url}</div>
+                    </td>
+                    <td className="capitalize">{h.kind}</td>
+                    <td className="max-w-md">
+                      <div className="text-xs text-destructive line-clamp-2">
+                        {h.last_error ?? '—'}
+                      </div>
+                    </td>
+                    <td className="text-xs text-muted-foreground whitespace-nowrap">
+                      {h.updated_at ? new Date(h.updated_at).toLocaleString() : '—'}
+                    </td>
+                    <td className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        loading={oneMut.isPending && oneMut.variables === h.id}
+                        onClick={() => oneMut.mutate(h.id)}
+                      >
+                        Reativar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
