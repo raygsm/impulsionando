@@ -456,6 +456,17 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
                     <td className="py-2 pr-3 text-xs text-muted-foreground">
                       {r.lastAt ? new Date(r.lastAt).toLocaleString('pt-BR') : '—'}
                     </td>
+                    <td className="py-2 pr-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setTrendHook({ id: r.webhook_id, label: labels[r.webhook_id] ?? r.webhook_id })
+                        }
+                      >
+                        Tendência
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
