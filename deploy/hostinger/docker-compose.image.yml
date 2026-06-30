@@ -22,19 +22,25 @@ services:
       - traefik.enable=true
       - traefik.docker.network=n8n-umlg_default
       - traefik.http.services.impulsionando-core.loadbalancer.server.port=3000
+      - traefik.http.services.impulsionando-core.loadbalancer.passhostheader=true
       - traefik.http.middlewares.impulsionando-core-https.redirectscheme.scheme=https
       - traefik.http.middlewares.impulsionando-core-https.redirectscheme.permanent=true
+      - traefik.http.middlewares.impulsionando-core-headers.headers.customresponseheaders.X-Impulsionando-Route=core
+      - traefik.http.middlewares.impulsionando-core-headers.headers.customresponseheaders.Cache-Control=no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0
+      - traefik.http.middlewares.impulsionando-core-headers.headers.customresponseheaders.Pragma=no-cache
+      - traefik.http.middlewares.impulsionando-core-headers.headers.customresponseheaders.Expires=0
       - traefik.http.routers.impulsionando-core-web.entrypoints=web
       - traefik.http.routers.impulsionando-core-web.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
       - traefik.http.routers.impulsionando-core-web.service=impulsionando-core
       - traefik.http.routers.impulsionando-core-web.middlewares=impulsionando-core-https
-      - traefik.http.routers.impulsionando-core-web.priority=5000
+      - traefik.http.routers.impulsionando-core-web.priority=1000000
       - traefik.http.routers.impulsionando-core-secure.entrypoints=websecure
       - traefik.http.routers.impulsionando-core-secure.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
       - traefik.http.routers.impulsionando-core-secure.service=impulsionando-core
+      - traefik.http.routers.impulsionando-core-secure.middlewares=impulsionando-core-headers
       - traefik.http.routers.impulsionando-core-secure.tls=true
       - traefik.http.routers.impulsionando-core-secure.tls.certresolver=letsencrypt
-      - traefik.http.routers.impulsionando-core-secure.priority=5000
+      - traefik.http.routers.impulsionando-core-secure.priority=1000000
     networks:
       - proxy
 

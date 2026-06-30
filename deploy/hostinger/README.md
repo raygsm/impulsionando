@@ -6,6 +6,8 @@ O objetivo deste deploy e simples: a Hostinger deve baixar a imagem pronta do Gi
 
 ## Regra principal
 
+Enquanto este deploy estiver sendo estabilizado, nao publique o Core pelo Lovable. O Lovable fica apenas como legado/backup visual. Publicar por la durante a migracao pode recolocar artefatos, rotas ou variaveis antigas e mascarar a validacao da Hostinger.
+
 Use sempre esta imagem no container:
 
 ```text
@@ -25,6 +27,8 @@ Nao use tag com SHA de commit e nao use a tag `security-autonomy-audit` para o d
 - `https://app.impulsionando.com.br`
 - `https://*.impulsionando.com.br`
 - `https://*.*.impulsionando.com.br`
+
+Todos os clientes atuais devem cair na mesma rota do Core. Exemplos: `marocas.impulsionando.com.br`, `riomed.impulsionando.com.br`, `dqa.impulsionando.com.br`, `chrismed.impulsionando.com.br` e demais subdominios.
 
 ## Como publicar pela tela da Hostinger
 
@@ -90,13 +94,17 @@ O resultado esperado contem:
 }
 ```
 
-Se `/health` responder `OK`, mas a pagina principal mostrar `Welcome to nginx`, o problema nao e DNS, Supabase, N8N ou Cloudflare. Isso significa que a Hostinger ainda esta entregando uma imagem antiga, um container antigo, ou uma rota antiga do Traefik.
+O sinal correto nao e apenas o status `Em execucao` na Hostinger. O sinal correto e o `/health` responder com `runtime=impulsionando-core-bun`.
+
+Se `/health` responder apenas `OK`, mas a pagina principal mostrar `Welcome to nginx`, o problema nao e DNS, Supabase, N8N ou Cloudflare. Isso significa que a Hostinger ainda esta entregando uma imagem antiga, um container antigo, ou uma rota antiga do Traefik.
 
 Nesse caso, nao altere Cloudflare, DNS, SSL/TLS, Supabase nem N8N. Volte ao projeto `impulsionando-core` na Hostinger e confirme que a imagem do container e exatamente:
 
 ```text
 ghcr.io/raygsm/impulsionando-core:hostinger-verified
 ```
+
+Se mesmo assim a pagina padrao do Nginx aparecer, recrie o projeto `impulsionando-core` usando o Compose oficial abaixo. Ele define prioridade alta no Traefik para impedir que uma rota antiga do Nginx ganhe dos dominios do Core.
 
 ## Arquivo Compose oficial
 
