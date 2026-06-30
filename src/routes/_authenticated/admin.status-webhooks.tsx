@@ -1383,6 +1383,38 @@ function AutoDisableSettingsCard() {
             </div>
           </div>
         )}
+        <div
+          className={`rounded border px-3 py-2 text-xs ${
+            noCronEver || cronStale
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100'
+              : 'bg-muted/40'
+          }`}
+        >
+          {lastAny ? (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>
+                <strong>Última execução:</strong>{' '}
+                {fmtAgo(Math.floor((Date.now() - new Date(lastAny.created_at).getTime()) / 60000))}{' '}
+                <Badge variant={lastAny.manual ? 'outline' : 'secondary'} className="ml-1">
+                  {lastAny.manual ? 'manual' : 'cron'}
+                </Badge>{' '}
+                · {lastAny.disabled ?? 0} desativado(s)
+              </span>
+              {noCronEver ? (
+                <span>⚠ Nenhuma execução do cron registrada — verifique o agendamento (pg_cron horário).</span>
+              ) : cronStale ? (
+                <span>
+                  ⚠ Último cron há {fmtAgo(minutesSinceCron!)} — esperado a cada 1h.
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Cron saudável (último há {fmtAgo(minutesSinceCron!)}).</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Nenhuma execução registrada ainda.</span>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
             variant="secondary"
@@ -1402,6 +1434,7 @@ function AutoDisableSettingsCard() {
             </Button>
           </div>
         </div>
+
 
         <AutoDisableRunsList />
       </CardContent>
