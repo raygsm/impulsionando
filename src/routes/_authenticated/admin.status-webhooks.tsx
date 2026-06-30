@@ -36,6 +36,7 @@ import {
   cancelStatusWebhookRetry,
   cancelAllStatusWebhookRetries,
   getStatusWebhooksHealth,
+  autoDisableUnhealthyStatusWebhooks,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
