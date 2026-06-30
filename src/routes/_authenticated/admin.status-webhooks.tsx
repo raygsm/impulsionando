@@ -262,6 +262,8 @@ function AdminStatusWebhooksPage() {
         </CardContent>
       </Card>
 
+      <PendingRetriesCard />
+
       <EditDialog
         open={!!editing}
         value={editing}
@@ -271,6 +273,103 @@ function AdminStatusWebhooksPage() {
       />
       <LogsDialog webhook={logsFor} onClose={() => setLogsFor(null)} />
     </div>
+  )
+}
+
+function PendingRetriesCard() {
+  const qc = useQueryClient()
+  const listPending = useServerFn(listPendingStatusWebhookRetries)
+  const cancelFn = useServerFn(cancelStatusWebhookRetry)
+  const { data, isLoading } = useQuery({
+    queryKey: ['status-webhook-pending-retries'],
+    queryFn: () => listPending({ data: { limit: 100 } }),
+    refetchInterval: 30_000,
+  })
+  const cancel = useMutation({
+    mutationFn: (dispatch_id: string) => cancelFn({ data: { dispatch_id } }),
+    onSuccess: () => {
+      toast.success('Retry cancelado')
+      qc.invalidateQueries({ queryKey: ['status-webhook-pending-retries'] })
+    },
+    onError: (e: any) => toast.error(e.message),
+  })
+  const items = (data?.items ?? []) as Array<{
+    id: string
+    webhook_id: string
+    webhook_label: string
+    reference_key: string
+    event_kind: string
+    retry_count: number | null
+    next_retry_at: string | null
+    status_code: number | null
+    error: string | null
+  }>
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Retries pendentes ({items.length})</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum retry agendado no momento.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-muted-foreground border-b">
+                <tr>
+                  <th className="py-2 pr-3">Próximo retry</th>
+                  <th className="py-2 pr-3">Webhook</th>
+                  <th className="py-2 pr-3">Evento</th>
+                  <th className="py-2 pr-3">Ref.</th>
+                  <th className="py-2 pr-3">Tentativa</th>
+                  <th className="py-2 pr-3">Último HTTP</th>
+                  <th className="py-2 pr-3">Erro</th>
+                  <th className="py-2 pr-3 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((r) => (
+                  <tr key={r.id} className="border-b last:border-0">
+                    <td className="py-2 pr-3 text-xs">
+                      {r.next_retry_at
+                        ? new Date(r.next_retry_at).toLocaleString('pt-BR')
+                        : '—'}
+                    </td>
+                    <td className="py-2 pr-3">{r.webhook_label}</td>
+                    <td className="py-2 pr-3 text-xs">{r.event_kind}</td>
+                    <td className="py-2 pr-3 text-xs truncate max-w-[220px]">
+                      {r.reference_key}
+                    </td>
+                    <td className="py-2 pr-3 text-xs">{(r.retry_count ?? 0) + 1}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {r.status_code ? `HTTP ${r.status_code}` : '—'}
+                    </td>
+                    <td className="py-2 pr-3 text-xs text-destructive truncate max-w-[260px]">
+                      {r.error ?? '—'}
+                    </td>
+                    <td className="py-2 pr-3 text-right">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (confirm('Cancelar este retry agendado?')) cancel.mutate(r.id)
+                        }}
+                        disabled={cancel.isPending}
+                      >
+                        Cancelar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
