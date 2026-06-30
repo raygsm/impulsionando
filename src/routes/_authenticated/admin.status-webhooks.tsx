@@ -1579,16 +1579,17 @@ function AutoDisableRunsList() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
         {[
           { label: 'Execuções', value: summary.runs },
           { label: 'Cron', value: summary.auto },
           { label: 'Manuais', value: summary.manual },
           { label: 'Candidatos', value: summary.candidates },
           { label: 'Desativados', value: summary.disabled, danger: summary.disabled > 0 },
+          { label: '🛡 Protegidos', value: summary.protected, hint: 'Pulos por proteção contra auto-desativação' },
           { label: 'Erros', value: summary.errors, danger: summary.errors > 0 },
-        ].map((k) => (
-          <div key={k.label} className="rounded border bg-background px-3 py-2">
+        ].map((k: any) => (
+          <div key={k.label} className="rounded border bg-background px-3 py-2" title={k.hint}>
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
               {k.label}
             </div>
