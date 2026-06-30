@@ -1783,20 +1783,51 @@ function ProtectionAuditCard() {
   const list = useServerFn(listStatusWebhookProtectionLog)
   const [scope, setScope] = useState<'all' | 'ids' | 'active' | 'inactive'>('all')
   const [protectedOnly, setProtectedOnly] = useState<'all' | 'protected' | 'unprotected'>('all')
+  const [window, setWindow] = useState<'24h' | '7d' | '30d' | 'all'>('7d')
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['status-webhooks-protection-log', scope, protectedOnly],
     queryFn: () =>
       list({
         data: {
-          limit: 200,
+          limit: 500,
           scope: scope === 'all' ? undefined : scope,
           protectedOnly,
         },
       }),
     refetchInterval: 60_000,
   })
-  const items: any[] = (data as any)?.items ?? []
+  const allItems: any[] = (data as any)?.items ?? []
+  const cutoff = (() => {
+    if (window === 'all') return 0
+    const ms = window === '24h' ? 86_400_000 : window === '7d' ? 7 * 86_400_000 : 30 * 86_400_000
+    return Date.now() - ms
+  })()
+  const items = allItems.filter((it) => !cutoff || new Date(it.created_at).getTime() >= cutoff)
+
+  const kpis = items.reduce(
+    (acc, it) => {
+      acc.total += 1
+      if (it.protected) {
+        acc.protectActions += 1
+        acc.protectAffected += it.affected
+      } else {
+        acc.unprotectActions += 1
+        acc.unprotectAffected += it.affected
+      }
+      if (it.by) acc.actors.add(it.by)
+      return acc
+    },
+    {
+      total: 0,
+      protectActions: 0,
+      unprotectActions: 0,
+      protectAffected: 0,
+      unprotectAffected: 0,
+      actors: new Set<string>(),
+    },
+  )
+
 
   const exportCsv = () => {
     const header = ['Quando', 'Escopo', 'Ação', 'Afetados', 'Por (email)', 'Por (id)']
@@ -1824,9 +1855,20 @@ function ProtectionAuditCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between flex-wrap gap-2">
           <span>🛡 Auditoria de proteção</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={window} onValueChange={(v: any) => setWindow(v)}>
+              <SelectTrigger className="h-8 w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="24h">24h</SelectItem>
+                <SelectItem value="7d">7d</SelectItem>
+                <SelectItem value="30d">30d</SelectItem>
+                <SelectItem value="all">Tudo</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={scope} onValueChange={(v: any) => setScope(v)}>
               <SelectTrigger className="h-8 w-[140px]">
                 <SelectValue />
@@ -1858,6 +1900,14 @@ function ProtectionAuditCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+          <KpiTile label="Eventos" value={kpis.total} />
+          <KpiTile label="Proteções" value={kpis.protectActions} sub={`${kpis.protectAffected} hooks`} tone="emerald" />
+          <KpiTile label="Remoções" value={kpis.unprotectActions} sub={`${kpis.unprotectAffected} hooks`} tone={kpis.unprotectActions ? 'amber' : undefined} />
+          <KpiTile label="Saldo" value={kpis.protectAffected - kpis.unprotectAffected} />
+          <KpiTile label="Autores" value={kpis.actors.size} />
+        </div>
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando histórico…</p>
         ) : items.length === 0 ? (
@@ -1909,3 +1959,31 @@ function ProtectionAuditCard() {
   )
 }
 
+
+function KpiTile({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string
+  value: number | string
+  sub?: string
+  tone?: 'emerald' | 'amber' | 'rose'
+}) {
+  const toneCls =
+    tone === 'emerald'
+      ? 'border-emerald-500/40 bg-emerald-500/5'
+      : tone === 'amber'
+        ? 'border-amber-500/40 bg-amber-500/5'
+        : tone === 'rose'
+          ? 'border-rose-500/40 bg-rose-500/5'
+          : 'border-border'
+  return (
+    <div className={`rounded-md border px-3 py-2 ${toneCls}`}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-lg font-semibold leading-tight">{value}</div>
+      {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
+    </div>
+  )
+}
