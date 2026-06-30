@@ -88,6 +88,17 @@ function AdminStatusWebhooksPage() {
 
   const [editing, setEditing] = useState<Partial<Hook> | null>(null)
   const [logsFor, setLogsFor] = useState<Hook | null>(null)
+  const [protectionFilter, setProtectionFilter] = useState<'all' | 'protected' | 'unprotected'>('all')
+  const bulkProtect = useServerFn(bulkSetStatusWebhookProtection)
+  const bulkProtectMut = useMutation({
+    mutationFn: (vars: { scope: 'active' | 'all'; protected: boolean }) =>
+      bulkProtect({ data: vars }),
+    onSuccess: (r: any) => {
+      toast.success(`${r.affected} webhook(s) ${r.protected ? 'protegidos' : 'desprotegidos'}.`)
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
+    onError: (e: any) => toast.error(e.message),
+  })
 
   const save = useMutation({
     mutationFn: (payload: any) => upsert({ data: payload }),
