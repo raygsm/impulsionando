@@ -47,12 +47,24 @@ function AdminStatusSubscribers() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [severityFilter, setSeverityFilter] = useState<
+    "any" | "info" | "minor" | "major" | "critical"
+  >("any");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin-status-subs", statusFilter, search],
+    queryKey: ["admin-status-subs", statusFilter, search, categoryFilter, severityFilter],
     queryFn: () =>
-      list({ data: { status: statusFilter, search, limit: 200 } }),
+      list({
+        data: {
+          status: statusFilter,
+          search,
+          category: categoryFilter,
+          min_severity: severityFilter,
+          limit: 200,
+        },
+      }),
   });
 
   const { data: logData, refetch: refetchLog } = useQuery({
