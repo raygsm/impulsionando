@@ -54,6 +54,7 @@ export const upsertStatusWebhook = createServerFn({ method: 'POST' })
       services: data.services,
       categories: data.categories,
       min_severity: data.min_severity,
+      max_retries: data.max_retries,
       active: data.active,
 
       updated_at: new Date().toISOString(),
