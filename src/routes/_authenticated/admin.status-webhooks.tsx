@@ -856,6 +856,13 @@ function EditDialog({
               />
               Ativo
             </label>
+            <label className="flex items-center gap-2 text-sm" title="Quando ligado, o cron de saúde nunca desativa este webhook automaticamente.">
+              <Switch
+                checked={v.auto_disable_protected ?? false}
+                onCheckedChange={(c) => setForm({ ...form, auto_disable_protected: c })}
+              />
+              🛡 Proteger de auto-desativação
+            </label>
           </div>
           <div>
             <Label>Filtro de serviços (slugs separados por vírgula)</Label>
