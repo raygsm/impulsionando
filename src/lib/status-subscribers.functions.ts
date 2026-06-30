@@ -184,6 +184,33 @@ export const setStatusSubscriberSeverity = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
+export const setStatusSubscriberCategories = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        categories: z.array(z.string().min(1).max(80)).max(50),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const cleaned = Array.from(
+      new Set(
+        data.categories
+          .map((c) => c.trim())
+          .filter((c) => /^[\w\s\-./&+]{1,80}$/.test(c)),
+      ),
+    )
+    const { error } = await context.supabase
+      .from('core_status_subscribers')
+      .update({ categories: cleaned.length > 0 ? cleaned : null })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true, categories: cleaned }
+  })
+
 export const resendStatusConfirmation = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
