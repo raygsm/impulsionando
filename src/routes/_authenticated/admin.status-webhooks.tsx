@@ -1410,10 +1410,23 @@ function AutoDisableRunsList() {
   }>
   const [expanded, setExpanded] = useState<string | null>(null)
   const [originFilter, setOriginFilter] = useState<'all' | 'manual' | 'auto'>('all')
+  const [windowDays, setWindowDays] = useState<1 | 7 | 30>(7)
 
-  const filtered = runs.filter((r) =>
+  const sinceMs = Date.now() - windowDays * 86_400_000
+  const inWindow = runs.filter((r) => new Date(r.created_at).getTime() >= sinceMs)
+  const filtered = inWindow.filter((r) =>
     originFilter === 'all' ? true : originFilter === 'manual' ? r.manual : !r.manual,
   )
+
+  const summary = {
+    runs: inWindow.length,
+    manual: inWindow.filter((r) => r.manual).length,
+    auto: inWindow.filter((r) => !r.manual).length,
+    disabled: inWindow.reduce((s, r) => s + (r.disabled || 0), 0),
+    candidates: inWindow.reduce((s, r) => s + r.candidates.length, 0),
+    errors: inWindow.filter((r) => r.error).length,
+  }
+
 
   function exportCsv() {
     const header = [
