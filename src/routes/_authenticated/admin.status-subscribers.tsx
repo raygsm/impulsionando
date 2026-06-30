@@ -42,6 +42,8 @@ function AdminStatusSubscribers() {
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
   const severityFn = useServerFn(setStatusSubscriberSeverity);
+  const categoriesFn = useServerFn(setStatusSubscriberCategories);
+  const listCatsFn = useServerFn(listStatusCategories);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
