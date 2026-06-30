@@ -604,6 +604,7 @@ import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/a
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
 import { Route as ApiPublicHooksStatusWebhooksRouteImport } from './routes/api/public/hooks/status-webhooks'
+import { Route as ApiPublicHooksStatusWebhookRetriesRouteImport } from './routes/api/public/hooks/status-webhook-retries'
 import { Route as ApiPublicHooksStatusSubscribersMaintenanceRouteImport } from './routes/api/public/hooks/status-subscribers-maintenance'
 import { Route as ApiPublicHooksStatusSubscribersRouteImport } from './routes/api/public/hooks/status-subscribers'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
@@ -4053,6 +4054,12 @@ const ApiPublicHooksStatusWebhooksRoute =
     path: '/api/public/hooks/status-webhooks',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStatusWebhookRetriesRoute =
+  ApiPublicHooksStatusWebhookRetriesRouteImport.update({
+    id: '/api/public/hooks/status-webhook-retries',
+    path: '/api/public/hooks/status-webhook-retries',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStatusSubscribersMaintenanceRoute =
   ApiPublicHooksStatusSubscribersMaintenanceRouteImport.update({
     id: '/api/public/hooks/status-subscribers-maintenance',
@@ -5421,6 +5428,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -6127,6 +6135,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -6848,6 +6857,7 @@ export interface FileRoutesById {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -7569,6 +7579,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -8275,6 +8286,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -8995,6 +9007,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
@@ -9244,6 +9257,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksStatusSubscribersRoute: typeof ApiPublicHooksStatusSubscribersRoute
   ApiPublicHooksStatusSubscribersMaintenanceRoute: typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  ApiPublicHooksStatusWebhookRetriesRoute: typeof ApiPublicHooksStatusWebhookRetriesRoute
   ApiPublicHooksStatusWebhooksRoute: typeof ApiPublicHooksStatusWebhooksRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
@@ -13439,6 +13453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksStatusWebhooksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/status-webhook-retries': {
+      id: '/api/public/hooks/status-webhook-retries'
+      path: '/api/public/hooks/status-webhook-retries'
+      fullPath: '/api/public/hooks/status-webhook-retries'
+      preLoaderRoute: typeof ApiPublicHooksStatusWebhookRetriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/status-subscribers-maintenance': {
       id: '/api/public/hooks/status-subscribers-maintenance'
       path: '/api/public/hooks/status-subscribers-maintenance'
@@ -16224,6 +16245,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksStatusSubscribersRoute: ApiPublicHooksStatusSubscribersRoute,
   ApiPublicHooksStatusSubscribersMaintenanceRoute:
     ApiPublicHooksStatusSubscribersMaintenanceRoute,
+  ApiPublicHooksStatusWebhookRetriesRoute:
+    ApiPublicHooksStatusWebhookRetriesRoute,
   ApiPublicHooksStatusWebhooksRoute: ApiPublicHooksStatusWebhooksRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
