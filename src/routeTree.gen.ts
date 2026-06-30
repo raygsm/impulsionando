@@ -605,6 +605,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
 import { Route as ApiPublicHooksStatusWebhooksRouteImport } from './routes/api/public/hooks/status-webhooks'
 import { Route as ApiPublicHooksStatusWebhookRetriesRouteImport } from './routes/api/public/hooks/status-webhook-retries'
+import { Route as ApiPublicHooksStatusWebhookAutoDisableRouteImport } from './routes/api/public/hooks/status-webhook-auto-disable'
 import { Route as ApiPublicHooksStatusSubscribersMaintenanceRouteImport } from './routes/api/public/hooks/status-subscribers-maintenance'
 import { Route as ApiPublicHooksStatusSubscribersRouteImport } from './routes/api/public/hooks/status-subscribers'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
@@ -4060,6 +4061,12 @@ const ApiPublicHooksStatusWebhookRetriesRoute =
     path: '/api/public/hooks/status-webhook-retries',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStatusWebhookAutoDisableRoute =
+  ApiPublicHooksStatusWebhookAutoDisableRouteImport.update({
+    id: '/api/public/hooks/status-webhook-auto-disable',
+    path: '/api/public/hooks/status-webhook-auto-disable',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStatusSubscribersMaintenanceRoute =
   ApiPublicHooksStatusSubscribersMaintenanceRouteImport.update({
     id: '/api/public/hooks/status-subscribers-maintenance',
@@ -5428,6 +5435,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-auto-disable': typeof ApiPublicHooksStatusWebhookAutoDisableRoute
   '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -6135,6 +6143,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-auto-disable': typeof ApiPublicHooksStatusWebhookAutoDisableRoute
   '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -6857,6 +6866,7 @@ export interface FileRoutesById {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhook-auto-disable': typeof ApiPublicHooksStatusWebhookAutoDisableRoute
   '/api/public/hooks/status-webhook-retries': typeof ApiPublicHooksStatusWebhookRetriesRoute
   '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -7579,6 +7589,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-auto-disable'
     | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
@@ -8286,6 +8297,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-auto-disable'
     | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
@@ -9007,6 +9019,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhook-auto-disable'
     | '/api/public/hooks/status-webhook-retries'
     | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
@@ -9257,6 +9270,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksStatusSubscribersRoute: typeof ApiPublicHooksStatusSubscribersRoute
   ApiPublicHooksStatusSubscribersMaintenanceRoute: typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  ApiPublicHooksStatusWebhookAutoDisableRoute: typeof ApiPublicHooksStatusWebhookAutoDisableRoute
   ApiPublicHooksStatusWebhookRetriesRoute: typeof ApiPublicHooksStatusWebhookRetriesRoute
   ApiPublicHooksStatusWebhooksRoute: typeof ApiPublicHooksStatusWebhooksRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
@@ -13460,6 +13474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksStatusWebhookRetriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/status-webhook-auto-disable': {
+      id: '/api/public/hooks/status-webhook-auto-disable'
+      path: '/api/public/hooks/status-webhook-auto-disable'
+      fullPath: '/api/public/hooks/status-webhook-auto-disable'
+      preLoaderRoute: typeof ApiPublicHooksStatusWebhookAutoDisableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/status-subscribers-maintenance': {
       id: '/api/public/hooks/status-subscribers-maintenance'
       path: '/api/public/hooks/status-subscribers-maintenance'
@@ -16245,6 +16266,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksStatusSubscribersRoute: ApiPublicHooksStatusSubscribersRoute,
   ApiPublicHooksStatusSubscribersMaintenanceRoute:
     ApiPublicHooksStatusSubscribersMaintenanceRoute,
+  ApiPublicHooksStatusWebhookAutoDisableRoute:
+    ApiPublicHooksStatusWebhookAutoDisableRoute,
   ApiPublicHooksStatusWebhookRetriesRoute:
     ApiPublicHooksStatusWebhookRetriesRoute,
   ApiPublicHooksStatusWebhooksRoute: ApiPublicHooksStatusWebhooksRoute,
@@ -16278,13 +16301,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

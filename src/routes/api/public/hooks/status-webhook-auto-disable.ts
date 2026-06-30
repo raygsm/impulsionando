@@ -95,10 +95,10 @@ export const Route = createFileRoute('/api/public/hooks/status-webhook-auto-disa
         }
 
         await supabaseAdmin.from('core_integration_logs').insert({
-          provider: 'status-webhooks',
-          event: 'auto_disable',
+          integration_slug: 'status-webhooks',
+          event_type: 'auto_disable',
           status: 'ok',
-          payload: {
+          response: {
             hours,
             min_total: minTotal,
             threshold,
