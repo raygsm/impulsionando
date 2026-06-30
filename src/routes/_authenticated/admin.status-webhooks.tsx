@@ -361,6 +361,43 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
             </SelectContent>
           </Select>
         </div>
+        <div className="mt-3 flex items-end gap-2 flex-wrap text-xs">
+          <div>
+            <Label className="text-xs">% mín. sucesso</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={threshold}
+              onChange={(e) => setThreshold(e.target.value)}
+              className="h-8 w-24"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Disparos mín.</Label>
+            <Input
+              type="number"
+              min={1}
+              value={minTotal}
+              onChange={(e) => setMinTotal(e.target.value)}
+              className="h-8 w-24"
+            />
+          </div>
+          <Button size="sm" variant="outline" onClick={() => runAutoDisable(true)}>
+            Simular
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => {
+              if (confirm(`Desativar webhooks abaixo de ${threshold}% (min ${minTotal} disparos, janela ${hours}h)?`)) {
+                runAutoDisable(false)
+              }
+            }}
+          >
+            Auto-desativar
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
