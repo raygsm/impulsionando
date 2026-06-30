@@ -820,3 +820,54 @@ export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
   })
 
 
+// W99 — bulk protect / unprotect status webhooks against auto-disable.
+const bulkProtectSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(500).optional(),
+  scope: z.enum(['ids', 'active', 'inactive', 'all']).default('ids'),
+  protected: z.boolean(),
+})
+
+export const bulkSetStatusWebhookProtection = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => bulkProtectSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    let q = (supabaseAdmin as any)
+      .from('core_status_webhooks')
+      .update({
+        auto_disable_protected: data.protected,
+        updated_at: new Date().toISOString(),
+      })
+    if (data.scope === 'ids') {
+      if (!data.ids || data.ids.length === 0) throw new Error('Informe ao menos um webhook.')
+      q = q.in('id', data.ids)
+    } else if (data.scope === 'active') {
+      q = q.eq('active', true)
+    } else if (data.scope === 'inactive') {
+      q = q.eq('active', false)
+    }
+    // 'all' — no extra filter
+
+    const { data: rows, error } = await q.select('id')
+    if (error) throw new Error(error.message)
+
+    await (supabaseAdmin as any).from('core_integration_logs').insert({
+      integration_slug: 'status-webhooks',
+      event_type: 'bulk_protect',
+      status: 'ok',
+      response: {
+        scope: data.scope,
+        protected: data.protected,
+        affected: (rows ?? []).length,
+        by: context.userId,
+        at: new Date().toISOString(),
+      },
+    })
+
+    return { ok: true, affected: (rows ?? []).length, protected: data.protected }
+  })
+
+
+
