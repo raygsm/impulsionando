@@ -312,6 +312,21 @@ function AdminStatusWebhooksPage() {
                         <Button
                           size="sm"
                           variant="ghost"
+                          title={h.auto_disable_protected ? 'Remover proteção contra auto-desativação' : 'Proteger contra auto-desativação'}
+                          onClick={() =>
+                            bulkProtectMut.mutate({
+                              scope: 'ids',
+                              ids: [h.id],
+                              protected: !h.auto_disable_protected,
+                            })
+                          }
+                          disabled={bulkProtectMut.isPending}
+                        >
+                          {h.auto_disable_protected ? '🛡 Desproteger' : '🛡 Proteger'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => test.mutate(h.id)}
                           disabled={test.isPending}
                         >
