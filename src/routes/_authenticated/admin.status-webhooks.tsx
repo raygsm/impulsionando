@@ -44,6 +44,7 @@ import {
   getStatusWebhookAutoDisableSettings,
   updateStatusWebhookAutoDisableSettings,
   listStatusWebhookAutoDisableRuns,
+  runStatusWebhookAutoDisableNow,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -1274,6 +1275,7 @@ function AutoDisableSettingsCard() {
   const qc = useQueryClient()
   const getFn = useServerFn(getStatusWebhookAutoDisableSettings)
   const saveFn = useServerFn(updateStatusWebhookAutoDisableSettings)
+  const runNowFn = useServerFn(runStatusWebhookAutoDisableNow)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhooks', 'auto-disable-settings'],
     queryFn: () => getFn(),
@@ -1289,6 +1291,22 @@ function AutoDisableSettingsCard() {
     },
     onError: (e: any) => toast.error(e?.message ?? 'Falha ao salvar'),
   })
+  const runNow = useMutation({
+    mutationFn: () => runNowFn(),
+    onSuccess: (res: any) => {
+      if (res?.skipped === 'disabled') {
+        toast.message('Cron desativado — nenhuma avaliação realizada.')
+      } else {
+        toast.success(`Avaliação concluída: ${res?.disabled ?? 0} desativado(s), ${res?.candidates?.length ?? 0} candidato(s).`)
+      }
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'auto-disable-runs'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'inactive'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'health'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'list'] })
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Falha ao executar agora'),
+  })
+
 
   return (
     <Card>
@@ -1343,14 +1361,26 @@ function AutoDisableSettingsCard() {
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" disabled={!form} onClick={() => setForm(null)}>
-            Descartar
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => runNow.mutate()}
+            disabled={runNow.isPending}
+            title="Executa a avaliação imediatamente, sem esperar o cron horário"
+          >
+            {runNow.isPending ? 'Executando…' : 'Executar agora'}
           </Button>
-          <Button disabled={!form || save.isPending} onClick={() => form && save.mutate(form)}>
-            {save.isPending ? 'Salvando…' : 'Salvar'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" disabled={!form} onClick={() => setForm(null)}>
+              Descartar
+            </Button>
+            <Button disabled={!form || save.isPending} onClick={() => form && save.mutate(form)}>
+              {save.isPending ? 'Salvando…' : 'Salvar'}
+            </Button>
+          </div>
         </div>
+
         <AutoDisableRunsList />
       </CardContent>
     </Card>

@@ -709,3 +709,102 @@ export const listStatusWebhookAutoDisableRuns = createServerFn({ method: 'POST' 
     }))
   })
 
+// W94 — manual trigger of the auto-disable evaluation (admin "Run now")
+export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const settingKeys = [
+      'status_webhook_auto_disable_enabled',
+      'status_webhook_auto_disable_hours',
+      'status_webhook_auto_disable_min_total',
+      'status_webhook_auto_disable_threshold',
+    ]
+    const { data: settingsRows } = await (supabaseAdmin as any)
+      .from('core_settings')
+      .select('key,value')
+      .in('key', settingKeys)
+    const s = new Map<string, any>((settingsRows ?? []).map((r: any) => [r.key, r.value]))
+    const enabled = s.get('status_webhook_auto_disable_enabled') !== false
+    const hours = Number(s.get('status_webhook_auto_disable_hours') ?? 24)
+    const minTotal = Number(s.get('status_webhook_auto_disable_min_total') ?? 10)
+    const threshold = Number(s.get('status_webhook_auto_disable_threshold') ?? 50)
+
+    if (!enabled) {
+      await (supabaseAdmin as any).from('core_integration_logs').insert({
+        integration_slug: 'status-webhooks',
+        event_type: 'auto_disable',
+        status: 'ok',
+        response: { skipped: 'disabled', manual: true, by: context.userId, at: new Date().toISOString() },
+      })
+      return { ok: true, skipped: 'disabled' as const, disabled: 0, candidates: [] }
+    }
+
+    const since = new Date(Date.now() - hours * 3600_000).toISOString()
+    const { data: rows, error } = await (supabaseAdmin as any)
+      .from('core_status_webhook_dispatches')
+      .select('webhook_id,ok')
+      .gte('created_at', since)
+      .limit(20000)
+    if (error) throw new Error(error.message)
+
+    const stats = new Map<string, { total: number; ok: number }>()
+    for (const r of (rows ?? []) as any[]) {
+      const cur = stats.get(r.webhook_id) ?? { total: 0, ok: 0 }
+      cur.total++
+      if (r.ok) cur.ok++
+      stats.set(r.webhook_id, cur)
+    }
+
+    const candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }> = []
+    for (const [webhook_id, st] of stats.entries()) {
+      if (st.total < minTotal) continue
+      const rate = (st.ok / st.total) * 100
+      if (rate < threshold) {
+        candidates.push({ webhook_id, total: st.total, ok: st.ok, success_rate: Math.round(rate * 10) / 10 })
+      }
+    }
+
+    let disabled = 0
+    if (candidates.length > 0) {
+      const ids = candidates.map((c) => c.webhook_id)
+      const { data: active } = await (supabaseAdmin as any)
+        .from('core_status_webhooks')
+        .select('id')
+        .in('id', ids)
+        .eq('active', true)
+      const activeIds = (active ?? []).map((h: any) => h.id)
+      if (activeIds.length > 0) {
+        await (supabaseAdmin as any)
+          .from('core_status_webhooks')
+          .update({
+            active: false,
+            last_error: `Auto-desativado (manual): <${threshold}% sucesso na janela ${hours}h`,
+            updated_at: new Date().toISOString(),
+          })
+          .in('id', activeIds)
+        disabled = activeIds.length
+      }
+    }
+
+    await (supabaseAdmin as any).from('core_integration_logs').insert({
+      integration_slug: 'status-webhooks',
+      event_type: 'auto_disable',
+      status: 'ok',
+      response: {
+        hours,
+        min_total: minTotal,
+        threshold,
+        candidates,
+        disabled,
+        manual: true,
+        by: context.userId,
+        at: new Date().toISOString(),
+      },
+    })
+
+    return { ok: true, hours, threshold, minTotal, disabled, candidates }
+  })
+
