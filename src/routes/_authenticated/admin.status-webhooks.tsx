@@ -1361,14 +1361,26 @@ function AutoDisableSettingsCard() {
             </div>
           </div>
         )}
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" disabled={!form} onClick={() => setForm(null)}>
-            Descartar
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => runNow.mutate()}
+            disabled={runNow.isPending}
+            title="Executa a avaliação imediatamente, sem esperar o cron horário"
+          >
+            {runNow.isPending ? 'Executando…' : 'Executar agora'}
           </Button>
-          <Button disabled={!form || save.isPending} onClick={() => form && save.mutate(form)}>
-            {save.isPending ? 'Salvando…' : 'Salvar'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" disabled={!form} onClick={() => setForm(null)}>
+              Descartar
+            </Button>
+            <Button disabled={!form || save.isPending} onClick={() => form && save.mutate(form)}>
+              {save.isPending ? 'Salvando…' : 'Salvar'}
+            </Button>
+          </div>
         </div>
+
         <AutoDisableRunsList />
       </CardContent>
     </Card>
