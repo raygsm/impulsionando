@@ -270,6 +270,8 @@ function AdminStatusWebhooksPage() {
 
       <HealthCard items={items} />
       <PendingRetriesCard />
+      <InactiveHooksCard />
+
 
       <EditDialog
         open={!!editing}
