@@ -13,6 +13,8 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 const listSchema = z.object({
   status: z.enum(['all', 'confirmed', 'pending', 'unsubscribed', 'bounced']).default('all'),
   search: z.string().max(200).optional().default(''),
+  category: z.string().max(80).optional().default(''),
+  min_severity: z.enum(['any', 'info', 'minor', 'major', 'critical']).default('any'),
   limit: z.number().int().min(1).max(500).default(100),
 })
 
