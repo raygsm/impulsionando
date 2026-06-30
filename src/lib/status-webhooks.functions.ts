@@ -707,6 +707,7 @@ export const listStatusWebhookAutoDisableRuns = createServerFn({ method: 'POST' 
       threshold: r.response?.threshold ?? null,
       min_total: r.response?.min_total ?? null,
       disabled: r.response?.disabled ?? 0,
+      protected_skipped: r.response?.protected_skipped ?? 0,
       candidates: Array.isArray(r.response?.candidates) ? r.response.candidates : [],
       manual: r.response?.manual === true,
       by: r.response?.by ?? null,
