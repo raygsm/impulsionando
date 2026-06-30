@@ -8,7 +8,11 @@ const imageVersion = process.env.IMPULSIONANDO_IMAGE_VERSION || "local";
 
 function coreHeaders(extra = {}) {
   return {
-    "cache-control": "no-store",
+    "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
+    pragma: "no-cache",
+    expires: "0",
+    "surrogate-control": "no-store",
+    "x-accel-expires": "0",
     "x-impulsionando-runtime": runtimeName,
     "x-impulsionando-image-version": imageVersion,
     ...extra,
