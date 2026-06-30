@@ -423,6 +423,7 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
                   <th className="py-2 pr-3">Pendentes</th>
                   <th className="py-2 pr-3">% sucesso</th>
                   <th className="py-2 pr-3">Último</th>
+                  <th className="py-2 pr-3"></th>
                 </tr>
               </thead>
               <tbody>
