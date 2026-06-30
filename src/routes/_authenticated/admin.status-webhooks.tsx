@@ -1510,6 +1510,7 @@ function AutoDisableRunsList() {
       'min_total',
       'candidates',
       'disabled',
+      'protected_skipped',
       'skipped',
       'error',
     ]
@@ -1524,6 +1525,7 @@ function AutoDisableRunsList() {
         r.min_total ?? '',
         r.candidates.length,
         r.disabled,
+        r.protected_skipped ?? 0,
         r.skipped ?? '',
         (r.error ?? '').replace(/[\r\n,]+/g, ' '),
       ]
