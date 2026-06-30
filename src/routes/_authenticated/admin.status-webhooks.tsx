@@ -49,6 +49,7 @@ type Hook = {
   services: string[] | null
   categories: string[] | null
   min_severity: 'info' | 'minor' | 'major' | 'critical' | null
+  max_retries: number | null
   active: boolean
 
   last_dispatch_at: string | null
