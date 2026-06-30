@@ -138,7 +138,15 @@ function AdminStatusWebhooksPage() {
     onError: (e: any) => toast.error(e.message),
   })
 
-  const items = (data?.items ?? []) as Hook[]
+  const allItems = (data?.items ?? []) as Hook[]
+  const items = allItems.filter((h) =>
+    protectionFilter === 'all'
+      ? true
+      : protectionFilter === 'protected'
+        ? !!h.auto_disable_protected
+        : !h.auto_disable_protected,
+  )
+  const protectedCount = allItems.filter((h) => !!h.auto_disable_protected).length
 
   return (
     <div className="container mx-auto py-8 space-y-6">
