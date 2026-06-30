@@ -621,3 +621,60 @@ export const getStatusWebhookHealthHistory = createServerFn({ method: 'POST' })
     }
     return { hours: data.hours, bucket_minutes: data.bucket_minutes, buckets }
   })
+
+// ---------------------------------------------------------------------------
+// W92 — Auto-disable cron settings (read/write `core_settings`)
+// ---------------------------------------------------------------------------
+
+const AUTO_DISABLE_KEYS = [
+  'status_webhook_auto_disable_enabled',
+  'status_webhook_auto_disable_hours',
+  'status_webhook_auto_disable_min_total',
+  'status_webhook_auto_disable_threshold',
+] as const
+
+export const getStatusWebhookAutoDisableSettings = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { data, error } = await context.supabase
+      .from('core_settings')
+      .select('key,value')
+      .in('key', AUTO_DISABLE_KEYS as unknown as string[])
+    if (error) throw new Error(error.message)
+    const s = new Map<string, any>((data ?? []).map((r: any) => [r.key, r.value]))
+    return {
+      enabled: s.get('status_webhook_auto_disable_enabled') !== false,
+      hours: Number(s.get('status_webhook_auto_disable_hours') ?? 24),
+      min_total: Number(s.get('status_webhook_auto_disable_min_total') ?? 10),
+      threshold: Number(s.get('status_webhook_auto_disable_threshold') ?? 50),
+    }
+  })
+
+export const updateStatusWebhookAutoDisableSettings = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        enabled: z.boolean(),
+        hours: z.number().int().min(1).max(168),
+        min_total: z.number().int().min(1).max(10000),
+        threshold: z.number().min(0).max(100),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const rows = [
+      { key: 'status_webhook_auto_disable_enabled', value: data.enabled, label: 'Auto-desativar webhooks degradados', category: 'status' },
+      { key: 'status_webhook_auto_disable_hours', value: data.hours, label: 'Janela (h) para avaliação de saúde', category: 'status' },
+      { key: 'status_webhook_auto_disable_min_total', value: data.min_total, label: 'Mín. de disparos para avaliar', category: 'status' },
+      { key: 'status_webhook_auto_disable_threshold', value: data.threshold, label: '% mínimo de sucesso', category: 'status' },
+    ].map((r) => ({ ...r, updated_by: context.userId, updated_at: new Date().toISOString() }))
+    const { error } = await (supabaseAdmin as any)
+      .from('core_settings')
+      .upsert(rows, { onConflict: 'key' })
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
