@@ -91,7 +91,7 @@ function AdminStatusWebhooksPage() {
   const [protectionFilter, setProtectionFilter] = useState<'all' | 'protected' | 'unprotected'>('all')
   const bulkProtect = useServerFn(bulkSetStatusWebhookProtection)
   const bulkProtectMut = useMutation({
-    mutationFn: (vars: { scope: 'active' | 'all'; protected: boolean }) =>
+    mutationFn: (vars: { scope: 'active' | 'all' | 'ids'; protected: boolean; ids?: string[] }) =>
       bulkProtect({ data: vars }),
     onSuccess: (r: any) => {
       toast.success(`${r.affected} webhook(s) ${r.protected ? 'protegidos' : 'desprotegidos'}.`)
@@ -309,6 +309,21 @@ function AdminStatusWebhooksPage() {
                           : '—'}
                       </td>
                       <td className="py-2 pr-3 text-right space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          title={h.auto_disable_protected ? 'Remover proteção contra auto-desativação' : 'Proteger contra auto-desativação'}
+                          onClick={() =>
+                            bulkProtectMut.mutate({
+                              scope: 'ids',
+                              ids: [h.id],
+                              protected: !h.auto_disable_protected,
+                            })
+                          }
+                          disabled={bulkProtectMut.isPending}
+                        >
+                          {h.auto_disable_protected ? '🛡 Desproteger' : '🛡 Proteger'}
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
