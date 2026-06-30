@@ -706,8 +706,12 @@ export const listStatusWebhookAutoDisableRuns = createServerFn({ method: 'POST' 
       min_total: r.response?.min_total ?? null,
       disabled: r.response?.disabled ?? 0,
       candidates: Array.isArray(r.response?.candidates) ? r.response.candidates : [],
+      manual: r.response?.manual === true,
+      by: r.response?.by ?? null,
+      skipped: r.response?.skipped ?? null,
     }))
   })
+
 
 // W94 — manual trigger of the auto-disable evaluation (admin "Run now")
 export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
