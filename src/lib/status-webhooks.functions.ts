@@ -471,3 +471,58 @@ export const getStatusWebhooksHealth = createServerFn({ method: 'POST' })
     }))
     return { hours: data.hours, items }
   })
+
+export const autoDisableUnhealthyStatusWebhooks = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        hours: z.number().int().min(1).max(168).default(24),
+        min_total: z.number().int().min(1).max(1000).default(5),
+        threshold: z.number().min(0).max(100).default(50),
+        dry_run: z.boolean().default(false),
+      })
+      .parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const since = new Date(Date.now() - data.hours * 3600_000).toISOString()
+    const { data: rows, error } = await context.supabase
+      .from('core_status_webhook_dispatches')
+      .select('webhook_id,ok,created_at')
+      .gte('created_at', since)
+      .limit(10000)
+    if (error) throw new Error(error.message)
+
+    const stats = new Map<string, { total: number; ok: number }>()
+    for (const r of (rows ?? []) as any[]) {
+      const cur = stats.get(r.webhook_id) ?? { total: 0, ok: 0 }
+      cur.total++
+      if (r.ok) cur.ok++
+      stats.set(r.webhook_id, cur)
+    }
+
+    const candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }> = []
+    for (const [webhook_id, s] of stats.entries()) {
+      if (s.total < data.min_total) continue
+      const rate = (s.ok / s.total) * 100
+      if (rate < data.threshold) candidates.push({ webhook_id, total: s.total, ok: s.ok, success_rate: Math.round(rate * 10) / 10 })
+    }
+
+    if (data.dry_run || candidates.length === 0) {
+      return { ok: true, dry_run: data.dry_run, disabled: 0, candidates }
+    }
+
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const ids = candidates.map((c) => c.webhook_id)
+    const { error: uErr } = await supabaseAdmin
+      .from('core_status_webhooks')
+      .update({
+        active: false,
+        last_error: `Auto-desativado: ${data.threshold}% mínimo, janela ${data.hours}h, usuário ${context.userId}`,
+        updated_at: new Date().toISOString(),
+      })
+      .in('id', ids)
+    if (uErr) throw new Error(uErr.message)
+    return { ok: true, dry_run: false, disabled: ids.length, candidates }
+  })
