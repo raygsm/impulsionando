@@ -43,6 +43,7 @@ import {
   getStatusWebhookHealthHistory,
   getStatusWebhookAutoDisableSettings,
   updateStatusWebhookAutoDisableSettings,
+  listStatusWebhookAutoDisableRuns,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -1350,8 +1351,90 @@ function AutoDisableSettingsCard() {
             {save.isPending ? 'Salvando…' : 'Salvar'}
           </Button>
         </div>
+        <AutoDisableRunsList />
       </CardContent>
     </Card>
+  )
+}
+
+function AutoDisableRunsList() {
+  const listFn = useServerFn(listStatusWebhookAutoDisableRuns)
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['status-webhooks', 'auto-disable-runs'],
+    queryFn: () => listFn({ data: { limit: 20 } }),
+    refetchInterval: 60_000,
+  })
+  const runs = (data ?? []) as Array<{
+    id: string
+    created_at: string
+    status: string
+    error: string | null
+    hours: number | null
+    threshold: number | null
+    min_total: number | null
+    disabled: number
+    candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }>
+  }>
+
+  return (
+    <div className="mt-2 space-y-2 border-t pt-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium">Execuções recentes do cron</h4>
+        <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? 'Atualizando…' : 'Atualizar'}
+        </Button>
+      </div>
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : runs.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma execução registrada ainda.</p>
+      ) : (
+        <div className="overflow-x-auto rounded border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40">
+              <tr>
+                <th className="px-3 py-2 text-left">Quando</th>
+                <th className="px-3 py-2 text-left">Janela</th>
+                <th className="px-3 py-2 text-left">Limiar</th>
+                <th className="px-3 py-2 text-left">Candidatos</th>
+                <th className="px-3 py-2 text-left">Desativados</th>
+                <th className="px-3 py-2 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {runs.map((r) => (
+                <tr key={r.id} className="border-t">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {new Date(r.created_at).toLocaleString('pt-BR')}
+                  </td>
+                  <td className="px-3 py-2">{r.hours ?? '—'}h</td>
+                  <td className="px-3 py-2">
+                    {r.threshold ?? '—'}% (min {r.min_total ?? '—'})
+                  </td>
+                  <td className="px-3 py-2">{r.candidates.length}</td>
+                  <td className="px-3 py-2">
+                    {r.disabled > 0 ? (
+                      <Badge variant="destructive">{r.disabled}</Badge>
+                    ) : (
+                      <Badge variant="secondary">0</Badge>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.error ? (
+                      <span className="text-destructive" title={r.error}>
+                        erro
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">{r.status ?? 'ok'}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   )
 }
 

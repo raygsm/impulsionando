@@ -678,3 +678,34 @@ export const updateStatusWebhookAutoDisableSettings = createServerFn({ method: '
     if (error) throw new Error(error.message)
     return { ok: true }
   })
+
+// W93 — recent auto-disable cron runs (from core_integration_logs)
+export const listStatusWebhookAutoDisableRuns = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(100).default(20) }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: rows, error } = await (supabaseAdmin as any)
+      .from('core_integration_logs')
+      .select('id,created_at,status,response,error')
+      .eq('integration_slug', 'status-webhooks')
+      .eq('event_type', 'auto_disable')
+      .order('created_at', { ascending: false })
+      .limit(data.limit)
+    if (error) throw new Error(error.message)
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      created_at: r.created_at,
+      status: r.status,
+      error: r.error,
+      hours: r.response?.hours ?? null,
+      threshold: r.response?.threshold ?? null,
+      min_total: r.response?.min_total ?? null,
+      disabled: r.response?.disabled ?? 0,
+      candidates: Array.isArray(r.response?.candidates) ? r.response.candidates : [],
+    }))
+  })
+
