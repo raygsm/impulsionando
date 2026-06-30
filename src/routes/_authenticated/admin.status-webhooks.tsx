@@ -492,6 +492,7 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
                   <th className="py-1 pr-2">Evento</th>
                   <th className="py-1 pr-2">HTTP</th>
                   <th className="py-1 pr-2">Erro</th>
+                  <th className="py-1 pr-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
