@@ -1410,10 +1410,23 @@ function AutoDisableRunsList() {
   }>
   const [expanded, setExpanded] = useState<string | null>(null)
   const [originFilter, setOriginFilter] = useState<'all' | 'manual' | 'auto'>('all')
+  const [windowDays, setWindowDays] = useState<1 | 7 | 30>(7)
 
-  const filtered = runs.filter((r) =>
+  const sinceMs = Date.now() - windowDays * 86_400_000
+  const inWindow = runs.filter((r) => new Date(r.created_at).getTime() >= sinceMs)
+  const filtered = inWindow.filter((r) =>
     originFilter === 'all' ? true : originFilter === 'manual' ? r.manual : !r.manual,
   )
+
+  const summary = {
+    runs: inWindow.length,
+    manual: inWindow.filter((r) => r.manual).length,
+    auto: inWindow.filter((r) => !r.manual).length,
+    disabled: inWindow.reduce((s, r) => s + (r.disabled || 0), 0),
+    candidates: inWindow.reduce((s, r) => s + r.candidates.length, 0),
+    errors: inWindow.filter((r) => r.error).length,
+  }
+
 
   function exportCsv() {
     const header = [
@@ -1457,7 +1470,17 @@ function AutoDisableRunsList() {
     <div className="mt-2 space-y-2 border-t pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h4 className="text-sm font-medium">Execuções recentes do cron</h4>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            className="h-8 rounded border bg-background px-2 text-xs"
+            value={windowDays}
+            onChange={(e) => setWindowDays(Number(e.target.value) as 1 | 7 | 30)}
+            aria-label="Janela de tempo"
+          >
+            <option value={1}>Últimas 24h</option>
+            <option value={7}>Últimos 7 dias</option>
+            <option value={30}>Últimos 30 dias</option>
+          </select>
           <select
             className="h-8 rounded border bg-background px-2 text-xs"
             value={originFilter}
@@ -1481,6 +1504,29 @@ function AutoDisableRunsList() {
           </Button>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {[
+          { label: 'Execuções', value: summary.runs },
+          { label: 'Cron', value: summary.auto },
+          { label: 'Manuais', value: summary.manual },
+          { label: 'Candidatos', value: summary.candidates },
+          { label: 'Desativados', value: summary.disabled, danger: summary.disabled > 0 },
+          { label: 'Erros', value: summary.errors, danger: summary.errors > 0 },
+        ].map((k) => (
+          <div key={k.label} className="rounded border bg-background px-3 py-2">
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              {k.label}
+            </div>
+            <div
+              className={`text-lg font-semibold ${k.danger ? 'text-destructive' : ''}`}
+            >
+              {k.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : filtered.length === 0 ? (
