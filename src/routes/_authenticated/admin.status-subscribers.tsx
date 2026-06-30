@@ -301,6 +301,31 @@ function AdminStatusSubscribers() {
                           recebe todos os serviços
                         </div>
                       )}
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-muted-foreground">Categorias:</span>
+                        <Input
+                          defaultValue={(s.categories ?? []).join(", ")}
+                          placeholder={
+                            (catsData?.categories ?? []).length > 0
+                              ? `vazio = todas • disponíveis: ${(catsData?.categories ?? []).join(", ")}`
+                              : "vazio = todas as categorias"
+                          }
+                          className="h-7 text-xs flex-1 min-w-48"
+                          onBlur={(e) => {
+                            const next = e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean);
+                            const prev = (s.categories ?? []) as string[];
+                            if (
+                              next.length === prev.length &&
+                              next.every((v, i) => v === prev[i])
+                            )
+                              return;
+                            categoriesMut.mutate({ id: s.id, categories: next });
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <Badge variant={state.variant}>{state.label}</Badge>
