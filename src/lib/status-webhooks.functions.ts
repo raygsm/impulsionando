@@ -526,3 +526,53 @@ export const autoDisableUnhealthyStatusWebhooks = createServerFn({ method: 'POST
     if (uErr) throw new Error(uErr.message)
     return { ok: true, dry_run: false, disabled: ids.length, candidates }
   })
+
+export const listInactiveStatusWebhooks = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { data, error } = await context.supabase
+      .from('core_status_webhooks')
+      .select('id,label,url,kind,last_error,last_dispatch_at,last_status_code,updated_at')
+      .eq('active', false)
+      .order('updated_at', { ascending: false })
+      .limit(200)
+    if (error) throw new Error(error.message)
+    return { items: data ?? [] }
+  })
+
+export const reactivateStatusWebhook = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { error } = await supabaseAdmin
+      .from('core_status_webhooks')
+      .update({
+        active: true,
+        last_error: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
+
+export const reactivateAllInactiveStatusWebhooks = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data, error } = await supabaseAdmin
+      .from('core_status_webhooks')
+      .update({
+        active: true,
+        last_error: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('active', false)
+      .select('id')
+    if (error) throw new Error(error.message)
+    return { ok: true, reactivated: (data ?? []).length }
+  })
