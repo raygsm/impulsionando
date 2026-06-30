@@ -281,13 +281,38 @@ function AdminStatusWebhooksPage() {
 }
 
 function HealthCard({ items: hooks }: { items: Hook[] }) {
+  const qc = useQueryClient()
   const fn = useServerFn(getStatusWebhooksHealth)
+  const autoDisableFn = useServerFn(autoDisableUnhealthyStatusWebhooks)
   const [hours, setHours] = useState<string>('24')
+  const [threshold, setThreshold] = useState<string>('50')
+  const [minTotal, setMinTotal] = useState<string>('5')
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-health', hours],
     queryFn: () => fn({ data: { hours: parseInt(hours, 10) } }),
     refetchInterval: 60_000,
   })
+  const runAutoDisable = async (dry: boolean) => {
+    try {
+      const res = await autoDisableFn({
+        data: {
+          hours: parseInt(hours, 10),
+          threshold: parseFloat(threshold),
+          min_total: parseInt(minTotal, 10),
+          dry_run: dry,
+        },
+      })
+      if (dry) {
+        toast.info(`${res.candidates.length} webhook(s) seriam desativados.`)
+      } else {
+        toast.success(`${res.disabled} webhook(s) desativados.`)
+        await qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+        await qc.invalidateQueries({ queryKey: ['status-webhook-health', hours] })
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Falha ao executar.')
+    }
+  }
   const labels = Object.fromEntries(hooks.map((h) => [h.id, h.label]))
   const rows = (data?.items ?? []) as Array<{
     webhook_id: string
