@@ -135,6 +135,24 @@ function AdminStatusSubscribers() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const [testTo, setTestTo] = useState("");
+  const [testKind, setTestKind] = useState<
+    "incident_opened" | "incident_resolved" | "maintenance_scheduled" | "broadcast"
+  >("incident_opened");
+  const [testSeverity, setTestSeverity] = useState<
+    "info" | "minor" | "major" | "critical"
+  >("minor");
+  const testEmailMut = useMutation({
+    mutationFn: () =>
+      testEmailFn({
+        data: { to: testTo, kind: testKind, severity: testSeverity },
+      }),
+    onSuccess: (r) => {
+      toast.success(`Email de teste enfileirado para ${r.to}`);
+      setTestTo("");
+    },
+    onError: (e: any) => toast.error(e.message),
+
   const counts = data?.counts;
 
   return (
