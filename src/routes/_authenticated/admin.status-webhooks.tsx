@@ -1473,6 +1473,7 @@ function AutoDisableRunsList() {
     threshold: number | null
     min_total: number | null
     disabled: number
+    protected_skipped: number
     candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }>
     manual: boolean
     by: string | null
