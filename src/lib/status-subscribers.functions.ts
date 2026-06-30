@@ -13,6 +13,8 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 const listSchema = z.object({
   status: z.enum(['all', 'confirmed', 'pending', 'unsubscribed', 'bounced']).default('all'),
   search: z.string().max(200).optional().default(''),
+  category: z.string().max(80).optional().default(''),
+  min_severity: z.enum(['any', 'info', 'minor', 'major', 'critical']).default('any'),
   limit: z.number().int().min(1).max(500).default(100),
 })
 
@@ -38,6 +40,14 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
 
     if (data.search && data.search.trim()) {
       q = q.ilike('email', `%${data.search.trim()}%`)
+    }
+
+    if (data.category && data.category.trim()) {
+      q = q.contains('categories', [data.category.trim()])
+    }
+
+    if (data.min_severity !== 'any') {
+      q = q.eq('min_severity', data.min_severity)
     }
 
     const { data: items, error } = await q

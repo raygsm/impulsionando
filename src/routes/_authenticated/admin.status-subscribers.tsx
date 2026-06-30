@@ -47,12 +47,24 @@ function AdminStatusSubscribers() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [severityFilter, setSeverityFilter] = useState<
+    "any" | "info" | "minor" | "major" | "critical"
+  >("any");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin-status-subs", statusFilter, search],
+    queryKey: ["admin-status-subs", statusFilter, search, categoryFilter, severityFilter],
     queryFn: () =>
-      list({ data: { status: statusFilter, search, limit: 200 } }),
+      list({
+        data: {
+          status: statusFilter,
+          search,
+          category: categoryFilter,
+          min_severity: severityFilter,
+          limit: 200,
+        },
+      }),
   });
 
   const { data: logData, refetch: refetchLog } = useQuery({
@@ -255,8 +267,106 @@ function AdminStatusSubscribers() {
                 placeholder="parte@email"
               />
             </div>
+            <div className="w-48">
+              <Label>Categoria</Label>
+              <Select
+                value={categoryFilter || "__all__"}
+                onValueChange={(v) => setCategoryFilter(v === "__all__" ? "" : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  {(catsData?.categories ?? []).map((c: string) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-40">
+              <Label>Severidade mín.</Label>
+              <Select
+                value={severityFilter}
+                onValueChange={(v) => setSeverityFilter(v as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Qualquer</SelectItem>
+                  <SelectItem value="info">Tudo (info)</SelectItem>
+                  <SelectItem value="minor">Minor+</SelectItem>
+                  <SelectItem value="major">Major+</SelectItem>
+                  <SelectItem value="critical">Crítico</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button variant="outline" onClick={() => refetch()}>
               Atualizar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const rows = (data?.items ?? []) as any[];
+                if (rows.length === 0) {
+                  toast.info("Nenhum inscrito para exportar");
+                  return;
+                }
+                const header = [
+                  "email",
+                  "status",
+                  "source",
+                  "min_severity",
+                  "categories",
+                  "services",
+                  "created_at",
+                  "confirmed_at",
+                  "last_notified_at",
+                ];
+                const esc = (v: unknown) => {
+                  const s = v == null ? "" : String(v);
+                  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+                };
+                const lines = [header.join(",")];
+                for (const r of rows) {
+                  const status = r.bounced_at
+                    ? "bounced"
+                    : r.unsubscribed_at
+                      ? "unsubscribed"
+                      : r.confirmed_at
+                        ? "confirmed"
+                        : "pending";
+                  lines.push(
+                    [
+                      r.email,
+                      status,
+                      r.source ?? "",
+                      r.min_severity ?? "info",
+                      (r.categories ?? []).join("|"),
+                      (r.services ?? []).join("|"),
+                      r.created_at ?? "",
+                      r.confirmed_at ?? "",
+                      r.last_notified_at ?? "",
+                    ]
+                      .map(esc)
+                      .join(","),
+                  );
+                }
+                const blob = new Blob([lines.join("\n")], {
+                  type: "text/csv;charset=utf-8;",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `status-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Exportar CSV
             </Button>
           </div>
 
