@@ -371,3 +371,48 @@ export const redispatchFailedStatusWebhookDispatches = createServerFn({ method: 
 
     return { ok: failCount === 0, total: (failed ?? []).length, okCount, failCount }
   })
+
+export const listPendingStatusWebhookRetries = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({ limit: z.number().int().min(1).max(200).default(100) })
+      .parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { data: items, error } = await context.supabase
+      .from('core_status_webhook_dispatches')
+      .select('id,webhook_id,reference_key,event_kind,retry_count,next_retry_at,status_code,error,created_at')
+      .not('next_retry_at', 'is', null)
+      .order('next_retry_at', { ascending: true })
+      .limit(data.limit)
+    if (error) throw new Error(error.message)
+
+    const ids = Array.from(new Set((items ?? []).map((r: any) => r.webhook_id)))
+    let labels: Record<string, string> = {}
+    if (ids.length) {
+      const { data: hooks } = await context.supabase
+        .from('core_status_webhooks')
+        .select('id,label')
+        .in('id', ids)
+      labels = Object.fromEntries((hooks ?? []).map((h: any) => [h.id, h.label]))
+    }
+    return {
+      items: (items ?? []).map((r: any) => ({ ...r, webhook_label: labels[r.webhook_id] ?? '—' })),
+    }
+  })
+
+export const cancelStatusWebhookRetry = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ dispatch_id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { error } = await supabaseAdmin
+      .from('core_status_webhook_dispatches')
+      .update({ next_retry_at: null })
+      .eq('id', data.dispatch_id)
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
