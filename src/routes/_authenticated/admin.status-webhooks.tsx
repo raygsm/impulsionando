@@ -1959,3 +1959,31 @@ function ProtectionAuditCard() {
   )
 }
 
+
+function KpiTile({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string
+  value: number | string
+  sub?: string
+  tone?: 'emerald' | 'amber' | 'rose'
+}) {
+  const toneCls =
+    tone === 'emerald'
+      ? 'border-emerald-500/40 bg-emerald-500/5'
+      : tone === 'amber'
+        ? 'border-amber-500/40 bg-amber-500/5'
+        : tone === 'rose'
+          ? 'border-rose-500/40 bg-rose-500/5'
+          : 'border-border'
+  return (
+    <div className={`rounded-md border px-3 py-2 ${toneCls}`}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-lg font-semibold leading-tight">{value}</div>
+      {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
+    </div>
+  )
+}
