@@ -132,6 +132,22 @@ export const listStatusServiceBreakdown = createServerFn({ method: 'POST' })
     return { breakdown, subsWithFilter, subsAllServices, activeSubscribers: activeIds.size }
   })
 
+export const listStatusCategories = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { data } = await context.supabase
+      .from('uptime_state')
+      .select('category')
+      .not('category', 'is', null)
+      .limit(2000)
+    const set = new Set<string>()
+    for (const r of ((data ?? []) as Array<{ category: string | null }>)) {
+      if (r.category) set.add(r.category)
+    }
+    return { categories: Array.from(set).sort() }
+  })
+
 
 export const listStatusDispatchLog = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
