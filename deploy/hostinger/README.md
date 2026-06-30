@@ -1,69 +1,98 @@
-# Deploy Hostinger + Traefik
+# Deploy Hostinger do Impulsionando Core
 
-Este pacote sobe o Impulsionando Core na VPS Hostinger, atras do Traefik existente, sem depender da hospedagem do Lovable.
+Este e o caminho oficial para publicar o Core na VPS Hostinger, atras do Traefik que ja roda junto do n8n.
 
-## Pre-requisitos
+O objetivo deste deploy e simples: a Hostinger deve baixar a imagem pronta do GitHub Container Registry e rodar o Core. A VPS nao deve compilar o projeto.
 
-- DNS do Cloudflare apontando para a VPS `187.77.232.52`.
-- Traefik rodando na VPS.
-- Docker e Docker Compose ativos.
-- Arquivo `.env.production` preenchido na VPS com os segredos reais.
+## Regra principal
 
-## Registros atendidos
+Use sempre esta imagem no container:
 
-- `impulsionando.com.br`
-- `www.impulsionando.com.br`
-- `app.impulsionando.com.br`
-- `*.impulsionando.com.br`
-- `*.*.impulsionando.com.br`
-
-## Como subir na VPS
-
-### Opcao recomendada: imagem pronta do GitHub
-
-Use `docker-compose.image.yml` no Gerenciador Docker da Hostinger. Esse modo nao compila o projeto no VPS; ele baixa a imagem oficial publicada pelo GitHub Actions.
-
-Antes de implantar:
-
-1. Execute o workflow `Build Core Docker Image` no GitHub.
-2. Confirme que a imagem `ghcr.io/raygsm/impulsionando-core:hostinger-stable` foi publicada.
-3. No Compose da Hostinger, substitua `COLE_AQUI_A_CHAVE_PUBLICAVEL_DO_SUPABASE` pela chave `Publishable key` do projeto Supabase oficial.
-
-### Opcao por terminal
-
-```bash
-cd /opt/impulsionando
-docker compose -f deploy/hostinger/docker-compose.yml up -d --build
+```text
+ghcr.io/raygsm/impulsionando-core:hostinger-stable
 ```
 
-Se o Traefik da Hostinger usar outro nome de rede ou outro resolver TLS, crie um arquivo `.env` em `/opt/impulsionando`:
+Nao use tag com SHA de commit e nao use a tag `security-autonomy-audit` para o deploy manual da Hostinger. A tag estavel e atualizada automaticamente pelo workflow `Build Core Docker Image`.
 
-```bash
-TRAEFIK_NETWORK=traefik
-TRAEFIK_HTTP_ENTRYPOINT=web
-TRAEFIK_HTTPS_ENTRYPOINT=websecure
-TRAEFIK_CERT_RESOLVER=letsencrypt
+## URLs atendidas
+
+- `https://impulsionando.com.br`
+- `https://www.impulsionando.com.br`
+- `https://app.impulsionando.com.br`
+- `https://*.impulsionando.com.br`
+- `https://*.*.impulsionando.com.br`
+
+## Como publicar pela tela da Hostinger
+
+1. Abra a Hostinger.
+2. Entre na VPS `srv1777313.hstgr.cloud`.
+3. Va em `Gerenciador Docker`.
+4. Clique em `Projetos`.
+5. Abra o projeto `impulsionando-core`.
+6. Clique em `Gerenciar`.
+7. Entre em `Editor visual`.
+8. No container `impulsionando-core`, clique no icone de lapis.
+9. No campo da imagem, coloque exatamente:
+
+```text
+ghcr.io/raygsm/impulsionando-core:hostinger-stable
 ```
 
-Depois rode novamente:
+10. Abra a area `Ambiente`.
+11. Confirme estas variaveis:
 
-```bash
-docker compose -f deploy/hostinger/docker-compose.yml up -d --build
+```text
+SUPABASE_URL=https://arygtqrdpcdkwnuwsgmm.supabase.co
+SUPABASE_PUBLISHABLE_KEY=COLE_A_CHAVE_PUBLICAVEL_DO_SUPABASE
+SUPABASE_ANON_KEY=COLE_A_MESMA_CHAVE_PUBLICAVEL_DO_SUPABASE
+VITE_SUPABASE_URL=https://arygtqrdpcdkwnuwsgmm.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=COLE_A_MESMA_CHAVE_PUBLICAVEL_DO_SUPABASE
 ```
 
-## Validacao
+12. Salve.
+13. Clique em `Implantar`.
+14. Aguarde o status ficar `Em execucao`.
 
-```bash
-docker ps
-docker logs impulsionando-core --tail=80
-curl -I https://app.impulsionando.com.br
-curl -I https://impulsionando.com.br
+## Como validar
+
+Depois de implantar, abra primeiro:
+
+```text
+https://app.impulsionando.com.br/health
 ```
 
-Resultado esperado:
+O resultado esperado contem:
 
-- O container `impulsionando-core` fica `Up`.
-- As URLs respondem por HTTPS.
-- Nao aparece erro de certificado.
-- O Core continua com `LOVABLE_LEGACY_ENABLED=false`.
-- O Traefik encaminha para a porta interna `3000` do Core.
+```text
+ok
+runtime=impulsionando-core-bun
+version=hostinger-stable
+```
+
+Depois abra:
+
+```text
+https://app.impulsionando.com.br/__impulsionando-runtime
+```
+
+O resultado esperado contem:
+
+```json
+{
+  "ok": true,
+  "runtime": "impulsionando-core-bun",
+  "version": "hostinger-stable"
+}
+```
+
+Se `/health` responder `OK`, mas a pagina principal mostrar `Welcome to nginx`, o problema nao e DNS, Supabase, N8N ou Cloudflare. Isso significa que a Hostinger ainda esta entregando uma imagem antiga, um container antigo, ou uma rota antiga do Traefik.
+
+Nesse caso, nao altere Cloudflare, DNS, SSL/TLS, Supabase nem N8N. Volte ao projeto `impulsionando-core` na Hostinger e confirme que a imagem do container e exatamente:
+
+```text
+ghcr.io/raygsm/impulsionando-core:hostinger-stable
+```
+
+## Arquivo Compose oficial
+
+O arquivo `docker-compose.image.yml` contem a configuracao completa para o modo por imagem pronta. Ele deve ser usado como referencia quando a Hostinger pedir um Compose manual.

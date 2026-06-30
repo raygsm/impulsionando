@@ -1,12 +1,13 @@
 services:
   impulsionando-core:
-    image: ghcr.io/raygsm/impulsionando-core:78c6443b0b85a79dcc02bc52fed6824ce16ebc68
+    image: ghcr.io/raygsm/impulsionando-core:hostinger-stable
     container_name: impulsionando-core
     restart: unless-stopped
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
+      IMPULSIONANDO_IMAGE_VERSION: hostinger-stable
       LOVABLE_LEGACY_ENABLED: "false"
       APP_BASE_URL: https://app.impulsionando.com.br
       PUBLIC_APP_URL: https://app.impulsionando.com.br
