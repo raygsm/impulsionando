@@ -1269,3 +1269,90 @@ function InactiveHooksCard() {
   )
 }
 
+function AutoDisableSettingsCard() {
+  const qc = useQueryClient()
+  const getFn = useServerFn(getStatusWebhookAutoDisableSettings)
+  const saveFn = useServerFn(updateStatusWebhookAutoDisableSettings)
+  const { data, isLoading } = useQuery({
+    queryKey: ['status-webhooks', 'auto-disable-settings'],
+    queryFn: () => getFn(),
+  })
+  const [form, setForm] = useState<{ enabled: boolean; hours: number; min_total: number; threshold: number } | null>(null)
+  const current = form ?? (data as any) ?? { enabled: true, hours: 24, min_total: 10, threshold: 50 }
+  const save = useMutation({
+    mutationFn: (v: typeof current) => saveFn({ data: v }),
+    onSuccess: () => {
+      toast.success('Configurações salvas')
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'auto-disable-settings'] })
+      setForm(null)
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Falha ao salvar'),
+  })
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Auto-desativação automática (cron)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Configura o cron que avalia a saúde dos webhooks e desativa os que ficarem abaixo do limiar.
+          Endpoint: <code>/api/public/hooks/status-webhook-auto-disable</code>.
+        </p>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="ad-enabled"
+                checked={current.enabled}
+                onCheckedChange={(v) => setForm({ ...current, enabled: v })}
+              />
+              <Label htmlFor="ad-enabled">Ativado</Label>
+            </div>
+            <div>
+              <Label>Janela (horas)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={168}
+                value={current.hours}
+                onChange={(e) => setForm({ ...current, hours: Math.max(1, Number(e.target.value) || 1) })}
+              />
+            </div>
+            <div>
+              <Label>Mín. disparos</Label>
+              <Input
+                type="number"
+                min={1}
+                value={current.min_total}
+                onChange={(e) => setForm({ ...current, min_total: Math.max(1, Number(e.target.value) || 1) })}
+              />
+            </div>
+            <div>
+              <Label>% mín. sucesso</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={current.threshold}
+                onChange={(e) => setForm({ ...current, threshold: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+              />
+            </div>
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" disabled={!form} onClick={() => setForm(null)}>
+            Descartar
+          </Button>
+          <Button disabled={!form || save.isPending} onClick={() => form && save.mutate(form)}>
+            {save.isPending ? 'Salvando…' : 'Salvar'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+
