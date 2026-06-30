@@ -30,6 +30,7 @@ import {
   listStatusWebhookDispatches,
   triggerStatusWebhooksTick,
   testStatusWebhook,
+  redispatchStatusWebhookEvent,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -444,11 +445,23 @@ function EditDialog({
 }
 
 function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () => void }) {
+  const qc = useQueryClient()
   const list = useServerFn(listStatusWebhookDispatches)
+  const redispatch = useServerFn(redispatchStatusWebhookEvent)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-dispatches', webhook?.id],
     queryFn: () => list({ data: { webhook_id: webhook!.id, limit: 50 } }),
     enabled: !!webhook,
+  })
+  const replay = useMutation({
+    mutationFn: (dispatch_id: string) => redispatch({ data: { dispatch_id } }),
+    onSuccess: (r: any) => {
+      if (r?.ok) toast.success(`Reenvio OK (HTTP ${r.status})`)
+      else toast.error(`Reenvio falhou (HTTP ${r?.status ?? 'n/a'}) — ${r?.error ?? ''}`)
+      qc.invalidateQueries({ queryKey: ['status-webhook-dispatches', webhook?.id] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
+    onError: (e: any) => toast.error(e.message),
   })
   if (!webhook) return null
   const items = (data?.items ?? []) as Array<{
@@ -479,6 +492,7 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
                   <th className="py-1 pr-2">Evento</th>
                   <th className="py-1 pr-2">HTTP</th>
                   <th className="py-1 pr-2">Erro</th>
+                  <th className="py-1 pr-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -498,6 +512,16 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
                     </td>
                     <td className="py-1 pr-2 text-destructive max-w-[280px] break-words">
                       {d.error ?? ''}
+                    </td>
+                    <td className="py-1 pr-2 text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => replay.mutate(d.id)}
+                        disabled={replay.isPending}
+                      >
+                        {replay.isPending ? '…' : 'Reenviar'}
+                      </Button>
                     </td>
                   </tr>
                 ))}
