@@ -330,3 +330,49 @@ export const broadcastStatusAnnouncement = createServerFn({ method: 'POST' })
 
     return { enqueued: toSend.length, skipped: list.length - toSend.length }
   })
+
+const testEmailSchema = z.object({
+  to: z.string().email().max(320),
+  kind: z.enum(['incident_opened', 'incident_resolved', 'maintenance_scheduled', 'broadcast']).default('incident_opened'),
+  severity: z.enum(['info', 'minor', 'major', 'critical']).default('minor'),
+})
+
+export const sendStatusTestEmail = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => testEmailSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const SITE = 'https://impulsionando.com.br'
+    const labels: Record<string, { subject: string; body: string }> = {
+      incident_opened: {
+        subject: `[TESTE • ${data.severity.toUpperCase()}] Novo incidente aberto`,
+        body: `Este é um email de TESTE enviado pelo painel administrativo.\n\nSimulação: incidente aberto com severidade "${data.severity}".\n\nNenhum inscrito real recebeu esta mensagem.`,
+      },
+      incident_resolved: {
+        subject: '[TESTE] Incidente resolvido',
+        body: 'Email de TESTE: simulação de incidente resolvido. Nenhum inscrito real recebeu esta mensagem.',
+      },
+      maintenance_scheduled: {
+        subject: '[TESTE] Manutenção programada',
+        body: 'Email de TESTE: simulação de manutenção programada. Nenhum inscrito real recebeu esta mensagem.',
+      },
+      broadcast: {
+        subject: '[TESTE] Broadcast manual',
+        body: 'Email de TESTE: pré-visualização de broadcast manual. Nenhum inscrito real recebeu esta mensagem.',
+      },
+    }
+    const tpl = labels[data.kind]
+
+    const { error } = await supabaseAdmin.from('message_outbox').insert({
+      channel: 'email',
+      status: 'queued',
+      to_address: data.to.trim().toLowerCase(),
+      subject: tpl.subject,
+      body: `${tpl.body}\n\n—\nStatus page: ${SITE}/status\nEnviado em: ${new Date().toISOString()}`,
+      tags: { topic: 'status_test_email', kind: data.kind, severity: data.severity, requested_by: context.userId },
+    } as any)
+    if (error) throw new Error(error.message)
+    return { ok: true, to: data.to.trim().toLowerCase(), kind: data.kind, severity: data.severity }
+  })

@@ -12,6 +12,7 @@ import {
   setStatusSubscriberSeverity,
   setStatusSubscriberCategories,
   listStatusCategories,
+  sendStatusTestEmail,
 } from "@/lib/status-subscribers.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ function AdminStatusSubscribers() {
   const severityFn = useServerFn(setStatusSubscriberSeverity);
   const categoriesFn = useServerFn(setStatusSubscriberCategories);
   const listCatsFn = useServerFn(listStatusCategories);
+  const testEmailFn = useServerFn(sendStatusTestEmail);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
@@ -132,6 +134,27 @@ function AdminStatusSubscribers() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  const [testTo, setTestTo] = useState("");
+  const [testKind, setTestKind] = useState<
+    "incident_opened" | "incident_resolved" | "maintenance_scheduled" | "broadcast"
+  >("incident_opened");
+  const [testSeverity, setTestSeverity] = useState<
+    "info" | "minor" | "major" | "critical"
+  >("minor");
+  const testEmailMut = useMutation({
+    mutationFn: () =>
+      testEmailFn({
+        data: { to: testTo, kind: testKind, severity: testSeverity },
+      }),
+    onSuccess: (r) => {
+      toast.success(`Email de teste enfileirado para ${r.to}`);
+      setTestTo("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
 
   const counts = data?.counts;
 
@@ -232,6 +255,66 @@ function AdminStatusSubscribers() {
             Dedupe por <code>tag + minuto</code>: reenviar o mesmo broadcast no
             mesmo minuto não duplica destinatários.
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Email de teste</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Envia um email simulado para um endereço específico sem afetar
+            inscritos reais. Útil para validar templates e roteamento.
+          </p>
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <Label>Destinatário</Label>
+              <Input
+                type="email"
+                value={testTo}
+                onChange={(e) => setTestTo(e.target.value)}
+                placeholder="voce@empresa.com"
+              />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select value={testKind} onValueChange={(v) => setTestKind(v as any)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="incident_opened">Incidente aberto</SelectItem>
+                  <SelectItem value="incident_resolved">Incidente resolvido</SelectItem>
+                  <SelectItem value="maintenance_scheduled">Manutenção programada</SelectItem>
+                  <SelectItem value="broadcast">Broadcast</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Severidade</Label>
+              <Select
+                value={testSeverity}
+                onValueChange={(v) => setTestSeverity(v as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="minor">Minor</SelectItem>
+                  <SelectItem value="major">Major</SelectItem>
+                  <SelectItem value="critical">Crítico</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button
+            onClick={() => testEmailMut.mutate()}
+            disabled={testEmailMut.isPending || !/^.+@.+\..+$/.test(testTo)}
+          >
+            {testEmailMut.isPending ? "Enviando..." : "Enviar email de teste"}
+          </Button>
         </CardContent>
       </Card>
 
