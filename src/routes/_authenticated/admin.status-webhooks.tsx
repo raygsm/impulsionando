@@ -451,8 +451,8 @@ function EditDialog({
                 services: v.services ?? [],
                 categories: v.categories ?? [],
                 min_severity: v.min_severity ?? 'info',
+                max_retries: typeof v.max_retries === 'number' ? v.max_retries : 3,
                 active: v.active ?? true,
-
               })
             }
             disabled={saving || !v.label || !v.url}
