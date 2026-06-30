@@ -138,6 +138,7 @@ function AdminStatusWebhooksPage() {
                 services: [],
                 categories: [],
                 min_severity: 'info',
+                max_retries: 3,
                 active: true,
 
               })
