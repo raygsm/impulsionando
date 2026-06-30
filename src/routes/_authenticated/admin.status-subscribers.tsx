@@ -260,6 +260,66 @@ function AdminStatusSubscribers() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Email de teste</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Envia um email simulado para um endereço específico sem afetar
+            inscritos reais. Útil para validar templates e roteamento.
+          </p>
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <Label>Destinatário</Label>
+              <Input
+                type="email"
+                value={testTo}
+                onChange={(e) => setTestTo(e.target.value)}
+                placeholder="voce@empresa.com"
+              />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select value={testKind} onValueChange={(v) => setTestKind(v as any)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="incident_opened">Incidente aberto</SelectItem>
+                  <SelectItem value="incident_resolved">Incidente resolvido</SelectItem>
+                  <SelectItem value="maintenance_scheduled">Manutenção programada</SelectItem>
+                  <SelectItem value="broadcast">Broadcast</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Severidade</Label>
+              <Select
+                value={testSeverity}
+                onValueChange={(v) => setTestSeverity(v as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="minor">Minor</SelectItem>
+                  <SelectItem value="major">Major</SelectItem>
+                  <SelectItem value="critical">Crítico</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button
+            onClick={() => testEmailMut.mutate()}
+            disabled={testEmailMut.isPending || !/^.+@.+\..+$/.test(testTo)}
+          >
+            {testEmailMut.isPending ? "Enviando..." : "Enviar email de teste"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Inscritos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
