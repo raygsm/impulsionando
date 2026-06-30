@@ -73,14 +73,17 @@ export const Route = createFileRoute('/api/public/hooks/status-webhook-auto-disa
         }
 
         let disabled = 0
+        let protectedSkipped = 0
         if (candidates.length > 0) {
           const ids = candidates.map((c) => c.webhook_id)
           const { data: active } = await supabaseAdmin
             .from('core_status_webhooks')
-            .select('id,label')
+            .select('id,label,auto_disable_protected')
             .in('id', ids)
             .eq('active', true)
-          const activeIds = (active ?? []).map((h: any) => h.id)
+          const protectedIds = (active ?? []).filter((h: any) => h.auto_disable_protected).map((h: any) => h.id)
+          const activeIds = (active ?? []).filter((h: any) => !h.auto_disable_protected).map((h: any) => h.id)
+          protectedSkipped = protectedIds.length
           if (activeIds.length > 0) {
             await supabaseAdmin
               .from('core_status_webhooks')
@@ -104,12 +107,13 @@ export const Route = createFileRoute('/api/public/hooks/status-webhook-auto-disa
             threshold,
             candidates,
             disabled,
+            protected_skipped: protectedSkipped,
             at: new Date().toISOString(),
           },
         })
 
         return new Response(
-          JSON.stringify({ ok: true, hours, threshold, minTotal, disabled, candidates }),
+          JSON.stringify({ ok: true, hours, threshold, minTotal, disabled, protectedSkipped, candidates }),
           { headers: { 'Content-Type': 'application/json' } },
         )
       },

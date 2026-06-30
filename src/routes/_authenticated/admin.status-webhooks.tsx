@@ -64,6 +64,7 @@ type Hook = {
   min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   max_retries: number | null
   active: boolean
+  auto_disable_protected: boolean | null
 
   last_dispatch_at: string | null
   last_status_code: number | null
@@ -153,6 +154,7 @@ function AdminStatusWebhooksPage() {
                 min_severity: 'info',
                 max_retries: 3,
                 active: true,
+                auto_disable_protected: false,
 
               })
             }
@@ -199,6 +201,11 @@ function AdminStatusWebhooksPage() {
                         {!h.active && (
                           <Badge variant="secondary" className="ml-2">
                             inativo
+                          </Badge>
+                        )}
+                        {h.auto_disable_protected && (
+                          <Badge variant="outline" className="ml-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-300" title="Protegido contra auto-desativação">
+                            🛡 protegido
                           </Badge>
                         )}
                       </td>
@@ -849,6 +856,13 @@ function EditDialog({
               />
               Ativo
             </label>
+            <label className="flex items-center gap-2 text-sm" title="Quando ligado, o cron de saúde nunca desativa este webhook automaticamente.">
+              <Switch
+                checked={v.auto_disable_protected ?? false}
+                onCheckedChange={(c) => setForm({ ...form, auto_disable_protected: c })}
+              />
+              🛡 Proteger de auto-desativação
+            </label>
           </div>
           <div>
             <Label>Filtro de serviços (slugs separados por vírgula)</Label>
@@ -941,6 +955,7 @@ function EditDialog({
                 min_severity: v.min_severity ?? 'info',
                 max_retries: typeof v.max_retries === 'number' ? v.max_retries : 3,
                 active: v.active ?? true,
+                auto_disable_protected: v.auto_disable_protected ?? false,
               })
             }
             disabled={saving || !v.label || !v.url}
@@ -1458,6 +1473,7 @@ function AutoDisableRunsList() {
     threshold: number | null
     min_total: number | null
     disabled: number
+    protected_skipped: number
     candidates: Array<{ webhook_id: string; total: number; ok: number; success_rate: number }>
     manual: boolean
     by: string | null
@@ -1478,6 +1494,7 @@ function AutoDisableRunsList() {
     manual: inWindow.filter((r) => r.manual).length,
     auto: inWindow.filter((r) => !r.manual).length,
     disabled: inWindow.reduce((s, r) => s + (r.disabled || 0), 0),
+    protected: inWindow.reduce((s, r) => s + (r.protected_skipped || 0), 0),
     candidates: inWindow.reduce((s, r) => s + r.candidates.length, 0),
     errors: inWindow.filter((r) => r.error).length,
   }
@@ -1493,6 +1510,7 @@ function AutoDisableRunsList() {
       'min_total',
       'candidates',
       'disabled',
+      'protected_skipped',
       'skipped',
       'error',
     ]
@@ -1507,6 +1525,7 @@ function AutoDisableRunsList() {
         r.min_total ?? '',
         r.candidates.length,
         r.disabled,
+        r.protected_skipped ?? 0,
         r.skipped ?? '',
         (r.error ?? '').replace(/[\r\n,]+/g, ' '),
       ]
@@ -1560,16 +1579,17 @@ function AutoDisableRunsList() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
         {[
           { label: 'Execuções', value: summary.runs },
           { label: 'Cron', value: summary.auto },
           { label: 'Manuais', value: summary.manual },
           { label: 'Candidatos', value: summary.candidates },
           { label: 'Desativados', value: summary.disabled, danger: summary.disabled > 0 },
+          { label: '🛡 Protegidos', value: summary.protected, hint: 'Pulos por proteção contra auto-desativação' },
           { label: 'Erros', value: summary.errors, danger: summary.errors > 0 },
-        ].map((k) => (
-          <div key={k.label} className="rounded border bg-background px-3 py-2">
+        ].map((k: any) => (
+          <div key={k.label} className="rounded border bg-background px-3 py-2" title={k.hint}>
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
               {k.label}
             </div>

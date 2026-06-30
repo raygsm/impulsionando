@@ -36,6 +36,7 @@ const upsertSchema = z.object({
   min_severity: z.enum(['info', 'minor', 'major', 'critical']).default('info'),
   max_retries: z.number().int().min(0).max(10).default(3),
   active: z.boolean().default(true),
+  auto_disable_protected: z.boolean().default(false),
 })
 
 
@@ -56,6 +57,7 @@ export const upsertStatusWebhook = createServerFn({ method: 'POST' })
       min_severity: data.min_severity,
       max_retries: data.max_retries,
       active: data.active,
+      auto_disable_protected: data.auto_disable_protected,
 
       updated_at: new Date().toISOString(),
     }
@@ -705,6 +707,7 @@ export const listStatusWebhookAutoDisableRuns = createServerFn({ method: 'POST' 
       threshold: r.response?.threshold ?? null,
       min_total: r.response?.min_total ?? null,
       disabled: r.response?.disabled ?? 0,
+      protected_skipped: r.response?.protected_skipped ?? 0,
       candidates: Array.isArray(r.response?.candidates) ? r.response.candidates : [],
       manual: r.response?.manual === true,
       by: r.response?.by ?? null,
@@ -772,14 +775,17 @@ export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
     }
 
     let disabled = 0
+    let protectedSkipped = 0
     if (candidates.length > 0) {
       const ids = candidates.map((c) => c.webhook_id)
       const { data: active } = await (supabaseAdmin as any)
         .from('core_status_webhooks')
-        .select('id')
+        .select('id,auto_disable_protected')
         .in('id', ids)
         .eq('active', true)
-      const activeIds = (active ?? []).map((h: any) => h.id)
+      const protectedIds = (active ?? []).filter((h: any) => h.auto_disable_protected).map((h: any) => h.id)
+      const activeIds = (active ?? []).filter((h: any) => !h.auto_disable_protected).map((h: any) => h.id)
+      protectedSkipped = protectedIds.length
       if (activeIds.length > 0) {
         await (supabaseAdmin as any)
           .from('core_status_webhooks')
@@ -803,12 +809,14 @@ export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
         threshold,
         candidates,
         disabled,
+        protected_skipped: protectedSkipped,
         manual: true,
         by: context.userId,
         at: new Date().toISOString(),
       },
     })
 
-    return { ok: true, hours, threshold, minTotal, disabled, candidates }
+    return { ok: true, hours, threshold, minTotal, disabled, protectedSkipped, candidates }
   })
+
 
