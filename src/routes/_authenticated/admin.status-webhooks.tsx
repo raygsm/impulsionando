@@ -264,6 +264,7 @@ function AdminStatusWebhooksPage() {
         </CardContent>
       </Card>
 
+      <HealthCard items={items} />
       <PendingRetriesCard />
 
       <EditDialog
