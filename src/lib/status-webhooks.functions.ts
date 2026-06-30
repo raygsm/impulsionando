@@ -774,14 +774,17 @@ export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
     }
 
     let disabled = 0
+    let protectedSkipped = 0
     if (candidates.length > 0) {
       const ids = candidates.map((c) => c.webhook_id)
       const { data: active } = await (supabaseAdmin as any)
         .from('core_status_webhooks')
-        .select('id')
+        .select('id,auto_disable_protected')
         .in('id', ids)
         .eq('active', true)
-      const activeIds = (active ?? []).map((h: any) => h.id)
+      const protectedIds = (active ?? []).filter((h: any) => h.auto_disable_protected).map((h: any) => h.id)
+      const activeIds = (active ?? []).filter((h: any) => !h.auto_disable_protected).map((h: any) => h.id)
+      protectedSkipped = protectedIds.length
       if (activeIds.length > 0) {
         await (supabaseAdmin as any)
           .from('core_status_webhooks')
