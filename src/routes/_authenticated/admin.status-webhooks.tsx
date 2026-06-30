@@ -361,6 +361,7 @@ function AdminStatusWebhooksPage() {
       <AutoDisableSettingsCard />
       <PendingRetriesCard />
       <InactiveHooksCard />
+      <ProtectionAuditCard />
 
 
       <EditDialog
