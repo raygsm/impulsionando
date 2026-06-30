@@ -1855,9 +1855,20 @@ function ProtectionAuditCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between flex-wrap gap-2">
           <span>🛡 Auditoria de proteção</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={window} onValueChange={(v: any) => setWindow(v)}>
+              <SelectTrigger className="h-8 w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="24h">24h</SelectItem>
+                <SelectItem value="7d">7d</SelectItem>
+                <SelectItem value="30d">30d</SelectItem>
+                <SelectItem value="all">Tudo</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={scope} onValueChange={(v: any) => setScope(v)}>
               <SelectTrigger className="h-8 w-[140px]">
                 <SelectValue />
@@ -1889,6 +1900,14 @@ function ProtectionAuditCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+          <KpiTile label="Eventos" value={kpis.total} />
+          <KpiTile label="Proteções" value={kpis.protectActions} sub={`${kpis.protectAffected} hooks`} tone="emerald" />
+          <KpiTile label="Remoções" value={kpis.unprotectActions} sub={`${kpis.unprotectAffected} hooks`} tone={kpis.unprotectActions ? 'amber' : undefined} />
+          <KpiTile label="Saldo" value={kpis.protectAffected - kpis.unprotectAffected} />
+          <KpiTile label="Autores" value={kpis.actors.size} />
+        </div>
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando histórico…</p>
         ) : items.length === 0 ? (
