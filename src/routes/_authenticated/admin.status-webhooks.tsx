@@ -203,6 +203,11 @@ function AdminStatusWebhooksPage() {
                             inativo
                           </Badge>
                         )}
+                        {h.auto_disable_protected && (
+                          <Badge variant="outline" className="ml-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-300" title="Protegido contra auto-desativação">
+                            🛡 protegido
+                          </Badge>
+                        )}
                       </td>
                       <td className="py-2 pr-3 capitalize">{h.kind}</td>
                       <td className="py-2 pr-3">
