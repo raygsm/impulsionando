@@ -808,12 +808,14 @@ export const runStatusWebhookAutoDisableNow = createServerFn({ method: 'POST' })
         threshold,
         candidates,
         disabled,
+        protected_skipped: protectedSkipped,
         manual: true,
         by: context.userId,
         at: new Date().toISOString(),
       },
     })
 
-    return { ok: true, hours, threshold, minTotal, disabled, candidates }
+    return { ok: true, hours, threshold, minTotal, disabled, protectedSkipped, candidates }
   })
+
 
