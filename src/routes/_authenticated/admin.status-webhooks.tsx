@@ -35,6 +35,7 @@ import {
   listPendingStatusWebhookRetries,
   cancelStatusWebhookRetry,
   cancelAllStatusWebhookRetries,
+  getStatusWebhooksHealth,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -263,6 +264,7 @@ function AdminStatusWebhooksPage() {
         </CardContent>
       </Card>
 
+      <HealthCard items={items} />
       <PendingRetriesCard />
 
       <EditDialog
@@ -274,6 +276,123 @@ function AdminStatusWebhooksPage() {
       />
       <LogsDialog webhook={logsFor} onClose={() => setLogsFor(null)} />
     </div>
+  )
+}
+
+function HealthCard({ items: hooks }: { items: Hook[] }) {
+  const fn = useServerFn(getStatusWebhooksHealth)
+  const [hours, setHours] = useState<string>('24')
+  const { data, isLoading } = useQuery({
+    queryKey: ['status-webhook-health', hours],
+    queryFn: () => fn({ data: { hours: parseInt(hours, 10) } }),
+    refetchInterval: 60_000,
+  })
+  const labels = Object.fromEntries(hooks.map((h) => [h.id, h.label]))
+  const rows = (data?.items ?? []) as Array<{
+    webhook_id: string
+    total: number
+    ok: number
+    fail: number
+    retries: number
+    pending: number
+    success_rate: number | null
+    lastAt: string | null
+  }>
+  const totals = rows.reduce(
+    (a, r) => ({
+      total: a.total + r.total,
+      ok: a.ok + r.ok,
+      fail: a.fail + r.fail,
+      retries: a.retries + r.retries,
+      pending: a.pending + r.pending,
+    }),
+    { total: 0, ok: 0, fail: 0, retries: 0, pending: 0 },
+  )
+  const overall = totals.total > 0 ? Math.round((totals.ok / totals.total) * 1000) / 10 : null
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle>
+            Saúde dos webhooks — últimas {hours}h
+            {overall !== null && (
+              <Badge variant={overall >= 95 ? 'default' : overall >= 80 ? 'secondary' : 'destructive'} className="ml-2">
+                {overall}% sucesso
+              </Badge>
+            )}
+          </CardTitle>
+          <Select value={hours} onValueChange={setHours}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1 hora</SelectItem>
+              <SelectItem value="6">6 horas</SelectItem>
+              <SelectItem value="24">24 horas</SelectItem>
+              <SelectItem value="72">3 dias</SelectItem>
+              <SelectItem value="168">7 dias</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sem disparos no período.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-muted-foreground border-b">
+                <tr>
+                  <th className="py-2 pr-3">Webhook</th>
+                  <th className="py-2 pr-3">Total</th>
+                  <th className="py-2 pr-3">OK</th>
+                  <th className="py-2 pr-3">Falhas</th>
+                  <th className="py-2 pr-3">Retries</th>
+                  <th className="py-2 pr-3">Pendentes</th>
+                  <th className="py-2 pr-3">% sucesso</th>
+                  <th className="py-2 pr-3">Último</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.webhook_id} className="border-b last:border-0">
+                    <td className="py-2 pr-3 font-medium">{labels[r.webhook_id] ?? r.webhook_id}</td>
+                    <td className="py-2 pr-3">{r.total}</td>
+                    <td className="py-2 pr-3 text-emerald-600">{r.ok}</td>
+                    <td className="py-2 pr-3 text-destructive">{r.fail}</td>
+                    <td className="py-2 pr-3">{r.retries}</td>
+                    <td className="py-2 pr-3">{r.pending}</td>
+                    <td className="py-2 pr-3">
+                      {r.success_rate === null ? (
+                        '—'
+                      ) : (
+                        <Badge
+                          variant={
+                            r.success_rate >= 95
+                              ? 'default'
+                              : r.success_rate >= 80
+                                ? 'secondary'
+                                : 'destructive'
+                          }
+                        >
+                          {r.success_rate}%
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="py-2 pr-3 text-xs text-muted-foreground">
+                      {r.lastAt ? new Date(r.lastAt).toLocaleString('pt-BR') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

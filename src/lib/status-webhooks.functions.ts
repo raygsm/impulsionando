@@ -434,3 +434,40 @@ export const cancelAllStatusWebhookRetries = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { ok: true, cancelled: count ?? 0 }
   })
+
+export const getStatusWebhooksHealth = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ hours: z.number().int().min(1).max(168).default(24) }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const since = new Date(Date.now() - data.hours * 3600_000).toISOString()
+    const { data: rows, error } = await context.supabase
+      .from('core_status_webhook_dispatches')
+      .select('webhook_id,ok,retry_count,next_retry_at,created_at')
+      .gte('created_at', since)
+      .limit(5000)
+    if (error) throw new Error(error.message)
+
+    const map = new Map<
+      string,
+      { total: number; ok: number; fail: number; retries: number; pending: number; lastAt: string | null }
+    >()
+    for (const r of (rows ?? []) as any[]) {
+      const cur = map.get(r.webhook_id) ?? { total: 0, ok: 0, fail: 0, retries: 0, pending: 0, lastAt: null }
+      cur.total++
+      if (r.ok) cur.ok++
+      else cur.fail++
+      if ((r.retry_count ?? 0) > 0) cur.retries++
+      if (r.next_retry_at) cur.pending++
+      if (!cur.lastAt || r.created_at > cur.lastAt) cur.lastAt = r.created_at
+      map.set(r.webhook_id, cur)
+    }
+    const items = Array.from(map.entries()).map(([webhook_id, s]) => ({
+      webhook_id,
+      ...s,
+      success_rate: s.total > 0 ? Math.round((s.ok / s.total) * 1000) / 10 : null,
+    }))
+    return { hours: data.hours, items }
+  })
