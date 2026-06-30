@@ -272,6 +272,7 @@ function AdminStatusWebhooksPage() {
       </Card>
 
       <HealthCard items={items} />
+      <AutoDisableSettingsCard />
       <PendingRetriesCard />
       <InactiveHooksCard />
 
