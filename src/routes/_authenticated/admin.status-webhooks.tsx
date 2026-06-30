@@ -293,6 +293,7 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
   const [hours, setHours] = useState<string>('24')
   const [threshold, setThreshold] = useState<string>('50')
   const [minTotal, setMinTotal] = useState<string>('5')
+  const [trendHook, setTrendHook] = useState<{ id: string; label: string } | null>(null)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-health', hours],
     queryFn: () => fn({ data: { hours: parseInt(hours, 10) } }),
