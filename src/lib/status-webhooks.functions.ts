@@ -268,3 +268,104 @@ export const redispatchStatusWebhookEvent = createServerFn({ method: 'POST' })
 
     return { ok, status, error: err }
   })
+
+export const redispatchFailedStatusWebhookDispatches = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        webhook_id: z.string().uuid(),
+        limit: z.number().int().min(1).max(100).default(20),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { createHmac } = await import('crypto')
+
+    const { data: hook, error: hErr } = await supabaseAdmin
+      .from('core_status_webhooks')
+      .select('id,label,url,kind,secret,active')
+      .eq('id', data.webhook_id)
+      .single()
+    if (hErr || !hook) throw new Error(hErr?.message ?? 'Webhook não encontrado')
+    if (!hook.active) throw new Error('Webhook está inativo.')
+
+    const { data: failed, error: fErr } = await supabaseAdmin
+      .from('core_status_webhook_dispatches')
+      .select('id,reference_key,event_kind')
+      .eq('webhook_id', data.webhook_id)
+      .eq('ok', false)
+      .order('created_at', { ascending: false })
+      .limit(data.limit)
+    if (fErr) throw new Error(fErr.message)
+
+    let okCount = 0
+    let failCount = 0
+    let lastStatus = 0
+    let lastError: string | null = null
+
+    for (const disp of failed ?? []) {
+      const nowIso = new Date().toISOString()
+      const ev = {
+        reference_key: disp.reference_key,
+        event_kind: disp.event_kind,
+        title: `[REENVIO EM LOTE] ${disp.event_kind} — ${hook.label}`,
+        text: `Reenvio em lote de ${disp.id} (referência ${disp.reference_key}) por ${context.userId} em ${nowIso}.`,
+        url: 'https://impulsionando.com.br/status',
+        replay: true as const,
+      }
+      let body: unknown
+      if (hook.kind === 'slack') body = { text: `*${ev.title}*\n${ev.text}\n${ev.url}` }
+      else if (hook.kind === 'discord') body = { content: `**${ev.title}**\n${ev.text}\n${ev.url}` }
+      else body = { ...ev, sent_at: nowIso }
+
+      const json = JSON.stringify(body)
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (hook.secret && hook.kind === 'generic') {
+        headers['X-Impulsionando-Signature'] = createHmac('sha256', hook.secret)
+          .update(json)
+          .digest('hex')
+        headers['X-Impulsionando-Replay'] = 'bulk'
+      }
+
+      let status = 0
+      let ok = false
+      let err: string | null = null
+      try {
+        const res = await fetch(hook.url, { method: 'POST', headers, body: json })
+        status = res.status
+        ok = res.ok
+        if (!ok) err = (await res.text()).slice(0, 500)
+      } catch (e) {
+        err = e instanceof Error ? e.message.slice(0, 500) : 'unknown error'
+      }
+      lastStatus = status
+      lastError = ok ? null : err
+      if (ok) okCount++
+      else failCount++
+
+      await supabaseAdmin.from('core_status_webhook_dispatches').insert({
+        webhook_id: hook.id,
+        reference_key: `${disp.reference_key}:replay-bulk:${Date.now()}`,
+        event_kind: disp.event_kind,
+        status_code: status || null,
+        ok,
+        error: err,
+      })
+    }
+
+    if ((failed ?? []).length > 0) {
+      await supabaseAdmin
+        .from('core_status_webhooks')
+        .update({
+          last_dispatch_at: new Date().toISOString(),
+          last_status_code: lastStatus || null,
+          last_error: lastError,
+        })
+        .eq('id', hook.id)
+    }
+
+    return { ok: failCount === 0, total: (failed ?? []).length, okCount, failCount }
+  })

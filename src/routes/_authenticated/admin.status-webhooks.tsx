@@ -31,6 +31,7 @@ import {
   triggerStatusWebhooksTick,
   testStatusWebhook,
   redispatchStatusWebhookEvent,
+  redispatchFailedStatusWebhookDispatches,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -448,9 +449,11 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
   const qc = useQueryClient()
   const list = useServerFn(listStatusWebhookDispatches)
   const redispatch = useServerFn(redispatchStatusWebhookEvent)
+  const bulkRedispatch = useServerFn(redispatchFailedStatusWebhookDispatches)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'failed' | 'ok'>('all')
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-dispatches', webhook?.id],
-    queryFn: () => list({ data: { webhook_id: webhook!.id, limit: 50 } }),
+    queryFn: () => list({ data: { webhook_id: webhook!.id, limit: 100 } }),
     enabled: !!webhook,
   })
   const replay = useMutation({
@@ -463,8 +466,19 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
     },
     onError: (e: any) => toast.error(e.message),
   })
+  const bulk = useMutation({
+    mutationFn: () => bulkRedispatch({ data: { webhook_id: webhook!.id, limit: 20 } }),
+    onSuccess: (r: any) => {
+      if (r?.total === 0) toast.info('Nenhuma falha para reenviar.')
+      else if (r?.ok) toast.success(`Reenvio em lote: ${r.okCount}/${r.total} OK`)
+      else toast.warning(`Reenvio parcial: ${r.okCount} OK, ${r.failCount} falhas`)
+      qc.invalidateQueries({ queryKey: ['status-webhook-dispatches', webhook?.id] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
+    onError: (e: any) => toast.error(e.message),
+  })
   if (!webhook) return null
-  const items = (data?.items ?? []) as Array<{
+  const allItems = (data?.items ?? []) as Array<{
     id: string
     reference_key: string
     event_kind: string
@@ -473,16 +487,50 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
     error: string | null
     created_at: string
   }>
+  const items =
+    statusFilter === 'all'
+      ? allItems
+      : statusFilter === 'failed'
+        ? allItems.filter((d) => !d.ok)
+        : allItems.filter((d) => d.ok)
+  const failedCount = allItems.filter((d) => !d.ok).length
   return (
     <Dialog open={!!webhook} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Logs — {webhook.label}</DialogTitle>
         </DialogHeader>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">Filtro:</Label>
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+              <SelectTrigger className="h-8 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos ({allItems.length})</SelectItem>
+                <SelectItem value="failed">Falhas ({failedCount})</SelectItem>
+                <SelectItem value="ok">OK ({allItems.length - failedCount})</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              if (failedCount === 0) return toast.info('Nenhuma falha para reenviar.')
+              if (confirm(`Reenviar últimas ${Math.min(failedCount, 20)} falhas?`)) bulk.mutate()
+            }}
+            disabled={bulk.isPending || failedCount === 0}
+          >
+            {bulk.isPending ? 'Reenviando…' : `Reenviar falhas (${Math.min(failedCount, 20)})`}
+          </Button>
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum disparo registrado ainda.</p>
+          <p className="text-sm text-muted-foreground">Nenhum disparo no filtro atual.</p>
+
         ) : (
           <div className="max-h-[60vh] overflow-y-auto text-xs">
             <table className="w-full">
