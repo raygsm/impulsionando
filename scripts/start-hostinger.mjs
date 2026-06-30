@@ -57,6 +57,10 @@ function isNginxPlaceholder(filePath) {
   return nginxPlaceholderPattern.test(readTextFile(filePath));
 }
 
+function isAssetRequest(pathname) {
+  return /\.[a-z0-9]{2,8}$/i.test(pathname);
+}
+
 function emergencyHtml(reason) {
   return `<!doctype html>
 <html lang="pt-BR">
@@ -90,6 +94,20 @@ function emergencyResponse(reason) {
   return new Response(emergencyHtml(reason), {
     headers: coreHeaders({ "content-type": "text/html; charset=utf-8" }),
   });
+}
+
+async function blockNginxPlaceholderResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.toLowerCase().includes("text/html")) {
+    return response;
+  }
+
+  const html = await response.clone().text();
+  if (nginxPlaceholderPattern.test(html)) {
+    return emergencyResponse("nginx-placeholder-blocked");
+  }
+
+  return response;
 }
 
 function attachCoreHeaders(response) {
@@ -136,7 +154,7 @@ for (const entrypoint of serverEntrypoints) {
             return runtimeResponse("server", entrypoint);
           }
 
-          const response = await handler.fetch(request, process.env, {});
+          const response = await blockNginxPlaceholderResponse(await handler.fetch(request, process.env, {}));
           return attachCoreHeaders(response);
         },
       });
@@ -213,6 +231,10 @@ if (!startedServerEntrypoint) {
         status: 404,
         headers: coreHeaders({ "content-type": "text/plain; charset=utf-8" }),
       });
+    }
+
+    if (artifactMode === "emergency" && !isAssetRequest(pathname)) {
+      return emergencyResponse("build-artifact-not-found");
     }
 
     const normalizedPath = normalize(decodeURIComponent(pathname)).replace(/^[/\\]+/, "");

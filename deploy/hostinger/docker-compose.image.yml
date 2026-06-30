@@ -33,14 +33,14 @@ services:
       - traefik.http.routers.impulsionando-core-web.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
       - traefik.http.routers.impulsionando-core-web.service=impulsionando-core
       - traefik.http.routers.impulsionando-core-web.middlewares=impulsionando-core-https
-      - traefik.http.routers.impulsionando-core-web.priority=1000000
+      - traefik.http.routers.impulsionando-core-web.priority=2147483000
       - traefik.http.routers.impulsionando-core-secure.entrypoints=websecure
       - traefik.http.routers.impulsionando-core-secure.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
       - traefik.http.routers.impulsionando-core-secure.service=impulsionando-core
       - traefik.http.routers.impulsionando-core-secure.middlewares=impulsionando-core-headers
       - traefik.http.routers.impulsionando-core-secure.tls=true
       - traefik.http.routers.impulsionando-core-secure.tls.certresolver=letsencrypt
-      - traefik.http.routers.impulsionando-core-secure.priority=1000000
+      - traefik.http.routers.impulsionando-core-secure.priority=2147483000
     networks:
       - proxy
 
