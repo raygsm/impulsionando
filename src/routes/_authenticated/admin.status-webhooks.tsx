@@ -34,6 +34,7 @@ import {
   redispatchFailedStatusWebhookDispatches,
   listPendingStatusWebhookRetries,
   cancelStatusWebhookRetry,
+  cancelAllStatusWebhookRetries,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -280,9 +281,17 @@ function PendingRetriesCard() {
   const qc = useQueryClient()
   const listPending = useServerFn(listPendingStatusWebhookRetries)
   const cancelFn = useServerFn(cancelStatusWebhookRetry)
+  const cancelAllFn = useServerFn(cancelAllStatusWebhookRetries)
+  const listHooks = useServerFn(listStatusWebhooks)
+  const [webhookFilter, setWebhookFilter] = useState<string>('all')
+
+  const { data: hooksData } = useQuery({
+    queryKey: ['status-webhooks-min'],
+    queryFn: () => listHooks(),
+  })
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-pending-retries'],
-    queryFn: () => listPending({ data: { limit: 100 } }),
+    queryFn: () => listPending({ data: { limit: 200 } }),
     refetchInterval: 30_000,
   })
   const cancel = useMutation({
@@ -293,7 +302,17 @@ function PendingRetriesCard() {
     },
     onError: (e: any) => toast.error(e.message),
   })
-  const items = (data?.items ?? []) as Array<{
+  const cancelAll = useMutation({
+    mutationFn: (webhook_id?: string) =>
+      cancelAllFn({ data: webhook_id ? { webhook_id } : {} }),
+    onSuccess: (r: any) => {
+      toast.success(`${r?.cancelled ?? 0} retries cancelados`)
+      qc.invalidateQueries({ queryKey: ['status-webhook-pending-retries'] })
+    },
+    onError: (e: any) => toast.error(e.message),
+  })
+
+  const allItems = (data?.items ?? []) as Array<{
     id: string
     webhook_id: string
     webhook_label: string
@@ -304,11 +323,49 @@ function PendingRetriesCard() {
     status_code: number | null
     error: string | null
   }>
+  const items =
+    webhookFilter === 'all' ? allItems : allItems.filter((r) => r.webhook_id === webhookFilter)
+  const hooks = (hooksData?.items ?? []) as Array<{ id: string; label: string }>
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Retries pendentes ({items.length})</CardTitle>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle>Retries pendentes ({items.length})</CardTitle>
+          <div className="flex items-center gap-2">
+            <Select value={webhookFilter} onValueChange={setWebhookFilter}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Filtrar por webhook" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os webhooks</SelectItem>
+                {hooks.map((h) => (
+                  <SelectItem key={h.id} value={h.id}>
+                    {h.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={cancelAll.isPending || items.length === 0}
+              onClick={() => {
+                const target = webhookFilter === 'all' ? undefined : webhookFilter
+                if (
+                  confirm(
+                    target
+                      ? 'Cancelar TODOS os retries deste webhook?'
+                      : 'Cancelar TODOS os retries pendentes?',
+                  )
+                )
+                  cancelAll.mutate(target)
+              }}
+            >
+              Cancelar todos
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
