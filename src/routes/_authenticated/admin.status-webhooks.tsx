@@ -64,6 +64,7 @@ type Hook = {
   min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   max_retries: number | null
   active: boolean
+  auto_disable_protected: boolean | null
 
   last_dispatch_at: string | null
   last_status_code: number | null
