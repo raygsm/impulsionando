@@ -416,3 +416,21 @@ export const cancelStatusWebhookRetry = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
+
+export const cancelAllStatusWebhookRetries = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ webhook_id: z.string().uuid().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    let q = supabaseAdmin
+      .from('core_status_webhook_dispatches')
+      .update({ next_retry_at: null })
+      .not('next_retry_at', 'is', null)
+    if (data.webhook_id) q = q.eq('webhook_id', data.webhook_id)
+    const { error, count } = await q.select('id', { count: 'exact', head: true })
+    if (error) throw new Error(error.message)
+    return { ok: true, cancelled: count ?? 0 }
+  })
