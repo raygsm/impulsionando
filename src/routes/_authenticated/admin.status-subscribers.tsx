@@ -45,6 +45,7 @@ function AdminStatusSubscribers() {
   const severityFn = useServerFn(setStatusSubscriberSeverity);
   const categoriesFn = useServerFn(setStatusSubscriberCategories);
   const listCatsFn = useServerFn(listStatusCategories);
+  const testEmailFn = useServerFn(sendStatusTestEmail);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
