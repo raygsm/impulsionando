@@ -513,6 +513,16 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
                     <td className="py-1 pr-2 text-destructive max-w-[280px] break-words">
                       {d.error ?? ''}
                     </td>
+                    <td className="py-1 pr-2 text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => replay.mutate(d.id)}
+                        disabled={replay.isPending}
+                      >
+                        {replay.isPending ? '…' : 'Reenviar'}
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
