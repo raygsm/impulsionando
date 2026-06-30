@@ -1494,6 +1494,7 @@ function AutoDisableRunsList() {
     manual: inWindow.filter((r) => r.manual).length,
     auto: inWindow.filter((r) => !r.manual).length,
     disabled: inWindow.reduce((s, r) => s + (r.disabled || 0), 0),
+    protected: inWindow.reduce((s, r) => s + (r.protected_skipped || 0), 0),
     candidates: inWindow.reduce((s, r) => s + r.candidates.length, 0),
     errors: inWindow.filter((r) => r.error).length,
   }
