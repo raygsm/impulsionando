@@ -1275,6 +1275,7 @@ function AutoDisableSettingsCard() {
   const qc = useQueryClient()
   const getFn = useServerFn(getStatusWebhookAutoDisableSettings)
   const saveFn = useServerFn(updateStatusWebhookAutoDisableSettings)
+  const runNowFn = useServerFn(runStatusWebhookAutoDisableNow)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhooks', 'auto-disable-settings'],
     queryFn: () => getFn(),
@@ -1290,6 +1291,22 @@ function AutoDisableSettingsCard() {
     },
     onError: (e: any) => toast.error(e?.message ?? 'Falha ao salvar'),
   })
+  const runNow = useMutation({
+    mutationFn: () => runNowFn(),
+    onSuccess: (res: any) => {
+      if (res?.skipped === 'disabled') {
+        toast.message('Cron desativado — nenhuma avaliação realizada.')
+      } else {
+        toast.success(`Avaliação concluída: ${res?.disabled ?? 0} desativado(s), ${res?.candidates?.length ?? 0} candidato(s).`)
+      }
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'auto-disable-runs'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'inactive'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'health'] })
+      qc.invalidateQueries({ queryKey: ['status-webhooks', 'list'] })
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Falha ao executar agora'),
+  })
+
 
   return (
     <Card>
