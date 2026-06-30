@@ -91,7 +91,7 @@ function AdminStatusWebhooksPage() {
   const [protectionFilter, setProtectionFilter] = useState<'all' | 'protected' | 'unprotected'>('all')
   const bulkProtect = useServerFn(bulkSetStatusWebhookProtection)
   const bulkProtectMut = useMutation({
-    mutationFn: (vars: { scope: 'active' | 'all'; protected: boolean }) =>
+    mutationFn: (vars: { scope: 'active' | 'all' | 'ids'; protected: boolean; ids?: string[] }) =>
       bulkProtect({ data: vars }),
     onSuccess: (r: any) => {
       toast.success(`${r.affected} webhook(s) ${r.protected ? 'protegidos' : 'desprotegidos'}.`)
