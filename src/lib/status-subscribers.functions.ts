@@ -24,7 +24,7 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
     let q = context.supabase
       .from('core_status_subscribers')
       .select(
-        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at,min_severity',
+        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at,min_severity,categories',
       )
       .order('created_at', { ascending: false })
       .limit(data.limit)
@@ -132,6 +132,22 @@ export const listStatusServiceBreakdown = createServerFn({ method: 'POST' })
     return { breakdown, subsWithFilter, subsAllServices, activeSubscribers: activeIds.size }
   })
 
+export const listStatusCategories = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { data } = await context.supabase
+      .from('uptime_state')
+      .select('category')
+      .not('category', 'is', null)
+      .limit(2000)
+    const set = new Set<string>()
+    for (const r of ((data ?? []) as Array<{ category: string | null }>)) {
+      if (r.category) set.add(r.category)
+    }
+    return { categories: Array.from(set).sort() }
+  })
+
 
 export const listStatusDispatchLog = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -182,6 +198,33 @@ export const setStatusSubscriberSeverity = createServerFn({ method: 'POST' })
       .eq('id', data.id)
     if (error) throw new Error(error.message)
     return { ok: true }
+  })
+
+export const setStatusSubscriberCategories = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        categories: z.array(z.string().min(1).max(80)).max(50),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const cleaned = Array.from(
+      new Set(
+        data.categories
+          .map((c) => c.trim())
+          .filter((c) => /^[\w\s\-./&+]{1,80}$/.test(c)),
+      ),
+    )
+    const { error } = await context.supabase
+      .from('core_status_subscribers')
+      .update({ categories: cleaned.length > 0 ? cleaned : null })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true, categories: cleaned }
   })
 
 export const resendStatusConfirmation = createServerFn({ method: 'POST' })

@@ -10,6 +10,8 @@ import {
   resendStatusConfirmation,
   broadcastStatusAnnouncement,
   setStatusSubscriberSeverity,
+  setStatusSubscriberCategories,
+  listStatusCategories,
 } from "@/lib/status-subscribers.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,8 @@ function AdminStatusSubscribers() {
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
   const severityFn = useServerFn(setStatusSubscriberSeverity);
+  const categoriesFn = useServerFn(setStatusSubscriberCategories);
+  const listCatsFn = useServerFn(listStatusCategories);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
@@ -85,6 +89,21 @@ function AdminStatusSubscribers() {
       refetch();
     },
     onError: (e: any) => toast.error(e.message),
+  });
+
+  const categoriesMut = useMutation({
+    mutationFn: (vars: { id: string; categories: string[] }) =>
+      categoriesFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Categorias atualizadas");
+      refetch();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const { data: catsData } = useQuery({
+    queryKey: ["admin-status-cats"],
+    queryFn: () => listCatsFn(),
   });
 
   const [bSubject, setBSubject] = useState("");
@@ -282,6 +301,31 @@ function AdminStatusSubscribers() {
                           recebe todos os serviços
                         </div>
                       )}
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] text-muted-foreground">Categorias:</span>
+                        <Input
+                          defaultValue={(s.categories ?? []).join(", ")}
+                          placeholder={
+                            (catsData?.categories ?? []).length > 0
+                              ? `vazio = todas • disponíveis: ${(catsData?.categories ?? []).join(", ")}`
+                              : "vazio = todas as categorias"
+                          }
+                          className="h-7 text-xs flex-1 min-w-48"
+                          onBlur={(e) => {
+                            const next = e.target.value
+                              .split(",")
+                              .map((v) => v.trim())
+                              .filter(Boolean);
+                            const prev = (s.categories ?? []) as string[];
+                            if (
+                              next.length === prev.length &&
+                              next.every((v, i) => v === prev[i])
+                            )
+                              return;
+                            categoriesMut.mutate({ id: s.id, categories: next });
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <Badge variant={state.variant}>{state.label}</Badge>
