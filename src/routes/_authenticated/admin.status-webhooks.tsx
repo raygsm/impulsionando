@@ -1783,20 +1783,51 @@ function ProtectionAuditCard() {
   const list = useServerFn(listStatusWebhookProtectionLog)
   const [scope, setScope] = useState<'all' | 'ids' | 'active' | 'inactive'>('all')
   const [protectedOnly, setProtectedOnly] = useState<'all' | 'protected' | 'unprotected'>('all')
+  const [window, setWindow] = useState<'24h' | '7d' | '30d' | 'all'>('7d')
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['status-webhooks-protection-log', scope, protectedOnly],
     queryFn: () =>
       list({
         data: {
-          limit: 200,
+          limit: 500,
           scope: scope === 'all' ? undefined : scope,
           protectedOnly,
         },
       }),
     refetchInterval: 60_000,
   })
-  const items: any[] = (data as any)?.items ?? []
+  const allItems: any[] = (data as any)?.items ?? []
+  const cutoff = (() => {
+    if (window === 'all') return 0
+    const ms = window === '24h' ? 86_400_000 : window === '7d' ? 7 * 86_400_000 : 30 * 86_400_000
+    return Date.now() - ms
+  })()
+  const items = allItems.filter((it) => !cutoff || new Date(it.created_at).getTime() >= cutoff)
+
+  const kpis = items.reduce(
+    (acc, it) => {
+      acc.total += 1
+      if (it.protected) {
+        acc.protectActions += 1
+        acc.protectAffected += it.affected
+      } else {
+        acc.unprotectActions += 1
+        acc.unprotectAffected += it.affected
+      }
+      if (it.by) acc.actors.add(it.by)
+      return acc
+    },
+    {
+      total: 0,
+      protectActions: 0,
+      unprotectActions: 0,
+      protectAffected: 0,
+      unprotectAffected: 0,
+      actors: new Set<string>(),
+    },
+  )
+
 
   const exportCsv = () => {
     const header = ['Quando', 'Escopo', 'Ação', 'Afetados', 'Por (email)', 'Por (id)']
