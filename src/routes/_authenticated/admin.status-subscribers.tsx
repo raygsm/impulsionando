@@ -12,6 +12,7 @@ import {
   setStatusSubscriberSeverity,
   setStatusSubscriberCategories,
   listStatusCategories,
+  sendStatusTestEmail,
 } from "@/lib/status-subscribers.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
