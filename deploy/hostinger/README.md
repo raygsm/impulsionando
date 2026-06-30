@@ -9,10 +9,14 @@ O objetivo deste deploy e simples: a Hostinger deve baixar a imagem pronta do Gi
 Use sempre esta imagem no container:
 
 ```text
-ghcr.io/raygsm/impulsionando-core:hostinger-stable
+ghcr.io/raygsm/impulsionando-core:hostinger-verified
 ```
 
-Nao use tag com SHA de commit e nao use a tag `security-autonomy-audit` para o deploy manual da Hostinger. A tag estavel e atualizada automaticamente pelo workflow `Build Core Docker Image`.
+Nao use tag com SHA de commit e nao use a tag `security-autonomy-audit` para o deploy manual da Hostinger. A tag `hostinger-verified` e atualizada automaticamente pelo workflow `Build Core Docker Image` somente depois que a imagem passa por estes testes:
+
+- `/health` contem `runtime=impulsionando-core-bun`;
+- `/__impulsionando-runtime` contem `"runtime": "impulsionando-core-bun"`;
+- `/` nao contem a pagina padrao do Nginx (`Welcome to nginx`).
 
 ## URLs atendidas
 
@@ -35,7 +39,7 @@ Nao use tag com SHA de commit e nao use a tag `security-autonomy-audit` para o d
 9. No campo da imagem, coloque exatamente:
 
 ```text
-ghcr.io/raygsm/impulsionando-core:hostinger-stable
+ghcr.io/raygsm/impulsionando-core:hostinger-verified
 ```
 
 10. Abra a area `Ambiente`.
@@ -66,7 +70,8 @@ O resultado esperado contem:
 ```text
 ok
 runtime=impulsionando-core-bun
-version=hostinger-stable
+mode=server|static|emergency
+version=<sha publicado pelo GitHub>
 ```
 
 Depois abra:
@@ -81,7 +86,7 @@ O resultado esperado contem:
 {
   "ok": true,
   "runtime": "impulsionando-core-bun",
-  "version": "hostinger-stable"
+  "version": "<sha publicado pelo GitHub>"
 }
 ```
 
@@ -90,7 +95,7 @@ Se `/health` responder `OK`, mas a pagina principal mostrar `Welcome to nginx`, 
 Nesse caso, nao altere Cloudflare, DNS, SSL/TLS, Supabase nem N8N. Volte ao projeto `impulsionando-core` na Hostinger e confirme que a imagem do container e exatamente:
 
 ```text
-ghcr.io/raygsm/impulsionando-core:hostinger-stable
+ghcr.io/raygsm/impulsionando-core:hostinger-verified
 ```
 
 ## Arquivo Compose oficial
