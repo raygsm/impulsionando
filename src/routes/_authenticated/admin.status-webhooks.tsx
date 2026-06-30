@@ -40,6 +40,7 @@ import {
   listInactiveStatusWebhooks,
   reactivateStatusWebhook,
   reactivateAllInactiveStatusWebhooks,
+  getStatusWebhookHealthHistory,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -292,6 +293,7 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
   const [hours, setHours] = useState<string>('24')
   const [threshold, setThreshold] = useState<string>('50')
   const [minTotal, setMinTotal] = useState<string>('5')
+  const [trendHook, setTrendHook] = useState<{ id: string; label: string } | null>(null)
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-health', hours],
     queryFn: () => fn({ data: { hours: parseInt(hours, 10) } }),
@@ -422,6 +424,7 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
                   <th className="py-2 pr-3">Pendentes</th>
                   <th className="py-2 pr-3">% sucesso</th>
                   <th className="py-2 pr-3">Último</th>
+                  <th className="py-2 pr-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -453,6 +456,17 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
                     <td className="py-2 pr-3 text-xs text-muted-foreground">
                       {r.lastAt ? new Date(r.lastAt).toLocaleString('pt-BR') : '—'}
                     </td>
+                    <td className="py-2 pr-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setTrendHook({ id: r.webhook_id, label: labels[r.webhook_id] ?? r.webhook_id })
+                        }
+                      >
+                        Tendência
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -460,7 +474,131 @@ function HealthCard({ items: hooks }: { items: Hook[] }) {
           </div>
         )}
       </CardContent>
+      <TrendDialog hook={trendHook} hours={parseInt(hours, 10)} onClose={() => setTrendHook(null)} />
     </Card>
+  )
+}
+
+function TrendDialog({
+  hook,
+  hours,
+  onClose,
+}: {
+  hook: { id: string; label: string } | null
+  hours: number
+  onClose: () => void
+}) {
+  const fn = useServerFn(getStatusWebhookHealthHistory)
+  const bucketMinutes = hours <= 6 ? 15 : hours <= 24 ? 60 : hours <= 72 ? 180 : 360
+  const { data, isLoading } = useQuery({
+    queryKey: ['status-webhook-history', hook?.id, hours, bucketMinutes],
+    queryFn: () => fn({ data: { webhook_id: hook!.id, hours, bucket_minutes: bucketMinutes } }),
+    enabled: !!hook,
+  })
+  const buckets = (data?.buckets ?? []) as Array<{ ts: string; total: number; ok: number; fail: number; success_rate: number | null }>
+  const w = 720
+  const h = 160
+  const pad = 24
+  const innerW = w - pad * 2
+  const innerH = h - pad * 2
+  const n = Math.max(buckets.length, 1)
+  const points = buckets
+    .map((b, i) => {
+      if (b.success_rate === null) return null
+      const x = pad + (i / Math.max(n - 1, 1)) * innerW
+      const y = pad + innerH - (b.success_rate / 100) * innerH
+      return `${x},${y}`
+    })
+    .filter(Boolean) as string[]
+  const maxTotal = buckets.reduce((m, b) => Math.max(m, b.total), 0)
+
+  return (
+    <Dialog open={!!hook} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Tendência — {hook?.label}</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : buckets.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sem dados.</p>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Janela {hours}h · bucket {bucketMinutes}min · {buckets.length} pontos
+            </p>
+            <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-40 border rounded bg-muted/20">
+              {[0, 50, 80, 95, 100].map((y) => {
+                const yy = pad + innerH - (y / 100) * innerH
+                return (
+                  <g key={y}>
+                    <line x1={pad} y1={yy} x2={w - pad} y2={yy} stroke="currentColor" strokeOpacity={0.1} />
+                    <text x={4} y={yy + 3} fontSize="9" fill="currentColor" fillOpacity={0.5}>
+                      {y}%
+                    </text>
+                  </g>
+                )
+              })}
+              {buckets.map((b, i) => {
+                if (b.total === 0) return null
+                const x = pad + (i / Math.max(n - 1, 1)) * innerW
+                const barH = maxTotal > 0 ? (b.total / maxTotal) * (innerH * 0.25) : 0
+                return (
+                  <rect
+                    key={i}
+                    x={x - 2}
+                    y={h - pad - barH}
+                    width={4}
+                    height={barH}
+                    fill="currentColor"
+                    fillOpacity={0.2}
+                  />
+                )
+              })}
+              {points.length > 1 && (
+                <polyline
+                  points={points.join(' ')}
+                  fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                />
+              )}
+              {buckets.map((b, i) => {
+                if (b.success_rate === null) return null
+                const x = pad + (i / Math.max(n - 1, 1)) * innerW
+                const y = pad + innerH - (b.success_rate / 100) * innerH
+                const color =
+                  b.success_rate >= 95 ? '#10b981' : b.success_rate >= 80 ? '#f59e0b' : '#ef4444'
+                return <circle key={`p${i}`} cx={x} cy={y} r={2.5} fill={color} />
+              })}
+            </svg>
+            <div className="grid grid-cols-4 gap-2 text-xs">
+              <div className="rounded border p-2">
+                <div className="text-muted-foreground">Total</div>
+                <div className="font-semibold">{buckets.reduce((a, b) => a + b.total, 0)}</div>
+              </div>
+              <div className="rounded border p-2">
+                <div className="text-muted-foreground">OK</div>
+                <div className="font-semibold text-emerald-600">{buckets.reduce((a, b) => a + b.ok, 0)}</div>
+              </div>
+              <div className="rounded border p-2">
+                <div className="text-muted-foreground">Falhas</div>
+                <div className="font-semibold text-destructive">{buckets.reduce((a, b) => a + b.fail, 0)}</div>
+              </div>
+              <div className="rounded border p-2">
+                <div className="text-muted-foreground">Buckets c/ dados</div>
+                <div className="font-semibold">{buckets.filter((b) => b.total > 0).length}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

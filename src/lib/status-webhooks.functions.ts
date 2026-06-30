@@ -576,3 +576,48 @@ export const reactivateAllInactiveStatusWebhooks = createServerFn({ method: 'POS
     if (error) throw new Error(error.message)
     return { ok: true, reactivated: (data ?? []).length }
   })
+
+export const getStatusWebhookHealthHistory = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        webhook_id: z.string().uuid(),
+        hours: z.number().int().min(1).max(168).default(24),
+        bucket_minutes: z.number().int().min(15).max(360).default(60),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const sinceMs = Date.now() - data.hours * 3600_000
+    const since = new Date(sinceMs).toISOString()
+    const { data: rows, error } = await context.supabase
+      .from('core_status_webhook_dispatches')
+      .select('ok,created_at')
+      .eq('webhook_id', data.webhook_id)
+      .gte('created_at', since)
+      .order('created_at', { ascending: true })
+      .limit(5000)
+    if (error) throw new Error(error.message)
+
+    const bucketMs = data.bucket_minutes * 60_000
+    const totalBuckets = Math.ceil((data.hours * 3600_000) / bucketMs)
+    const buckets: Array<{ ts: string; total: number; ok: number; fail: number; success_rate: number | null }> = []
+    for (let i = 0; i < totalBuckets; i++) {
+      const start = sinceMs + i * bucketMs
+      buckets.push({ ts: new Date(start).toISOString(), total: 0, ok: 0, fail: 0, success_rate: null })
+    }
+    for (const r of (rows ?? []) as any[]) {
+      const idx = Math.floor((new Date(r.created_at).getTime() - sinceMs) / bucketMs)
+      if (idx < 0 || idx >= buckets.length) continue
+      const b = buckets[idx]
+      b.total++
+      if (r.ok) b.ok++
+      else b.fail++
+    }
+    for (const b of buckets) {
+      b.success_rate = b.total > 0 ? Math.round((b.ok / b.total) * 1000) / 10 : null
+    }
+    return { hours: data.hours, bucket_minutes: data.bucket_minutes, buckets }
+  })
