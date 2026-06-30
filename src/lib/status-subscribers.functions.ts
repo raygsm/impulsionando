@@ -42,6 +42,14 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
       q = q.ilike('email', `%${data.search.trim()}%`)
     }
 
+    if (data.category && data.category.trim()) {
+      q = q.contains('categories', [data.category.trim()])
+    }
+
+    if (data.min_severity !== 'any') {
+      q = q.eq('min_severity', data.min_severity)
+    }
+
     const { data: items, error } = await q
     if (error) throw new Error(error.message)
 
