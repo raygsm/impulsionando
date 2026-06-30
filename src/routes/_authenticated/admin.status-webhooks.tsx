@@ -451,6 +451,8 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
   const redispatch = useServerFn(redispatchStatusWebhookEvent)
   const bulkRedispatch = useServerFn(redispatchFailedStatusWebhookDispatches)
   const [statusFilter, setStatusFilter] = useState<'all' | 'failed' | 'ok'>('all')
+  const [kindFilter, setKindFilter] = useState<string>('all')
+  const [search, setSearch] = useState('')
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhook-dispatches', webhook?.id],
     queryFn: () => list({ data: { webhook_id: webhook!.id, limit: 100 } }),
@@ -487,13 +489,40 @@ function LogsDialog({ webhook, onClose }: { webhook: Hook | null; onClose: () =>
     error: string | null
     created_at: string
   }>
-  const items =
-    statusFilter === 'all'
-      ? allItems
-      : statusFilter === 'failed'
-        ? allItems.filter((d) => !d.ok)
-        : allItems.filter((d) => d.ok)
+  const kinds = Array.from(new Set(allItems.map((d) => d.event_kind))).sort()
+  const q = search.trim().toLowerCase()
+  const items = allItems
+    .filter((d) =>
+      statusFilter === 'all' ? true : statusFilter === 'failed' ? !d.ok : d.ok,
+    )
+    .filter((d) => (kindFilter === 'all' ? true : d.event_kind === kindFilter))
+    .filter((d) =>
+      q ? d.reference_key.toLowerCase().includes(q) || d.event_kind.toLowerCase().includes(q) : true,
+    )
   const failedCount = allItems.filter((d) => !d.ok).length
+
+  const exportCsv = () => {
+    const header = ['quando', 'evento', 'reference_key', 'http', 'ok', 'erro']
+    const rows = items.map((d) => [
+      new Date(d.created_at).toISOString(),
+      d.event_kind,
+      d.reference_key,
+      String(d.status_code ?? ''),
+      d.ok ? '1' : '0',
+      (d.error ?? '').replace(/[\r\n]+/g, ' '),
+    ])
+    const csv = [header, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `status-webhook-${webhook.label.replace(/\W+/g, '_')}-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <Dialog open={!!webhook} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
