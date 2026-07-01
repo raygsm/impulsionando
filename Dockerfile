@@ -13,42 +13,19 @@ COPY . .
 
 RUN if [ -f pnpm-lock.yaml ]; then pnpm run build; else npm run build; fi
 
-FROM nginx:1.27-alpine
+FROM node:22-alpine AS runner
 
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-COPY --from=build /app/dist /usr/share/nginx/html
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
-RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
-server {
-  listen 80;
-  server_name _;
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/public ./public
 
-  root /usr/share/nginx/html;
-  index index.html;
+EXPOSE 3000
 
-  location ~* (^|/)\.env {
-    return 404;
-  }
-
-  location /health {
-    access_log off;
-    add_header Content-Type text/plain;
-    return 200 "ok\n";
-  }
-
-  location / {
-    try_files $uri $uri/ /index.html;
-  }
-
-  location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?)$ {
-    expires 30d;
-    add_header Cache-Control "public, immutable";
-    try_files $uri =404;
-  }
-}
-EOF
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "dist/server/server.js"]
