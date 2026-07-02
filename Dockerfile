@@ -27,4 +27,4 @@ COPY --from=build /app/public ./public
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "cd /app && node .output/server/index.mjs"]
+CMD ["npx", "nitro", "preview", "--host", "0.0.0.0", "--port", "3000"]
