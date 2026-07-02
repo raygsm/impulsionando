@@ -39,6 +39,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug build output
+        run: |
+          npm install
+          npm run build
+          echo "ROOT:"
+          ls -lah
+          echo "DIST:"
+          ls -lah dist || true
+          echo "DIST SERVER:"
+          ls -lah dist/server || true
+          echo "OUTPUT:"
+          ls -lah .output || true
+          echo "BUILD:"
+          ls -lah build || true
+          echo "TANSTACK:"
+          ls -lah .tanstack || true
+          echo "VINXI:"
+          ls -lah .vinxi || true
       - uses: docker/build-push-action@v6
         with:
           context: .
