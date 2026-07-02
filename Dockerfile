@@ -27,4 +27,4 @@ COPY --from=build /app/public ./public
 
 EXPOSE 3000
 
-CMD ["node", "/app/.output/server/index.mjs"]
+CMD ["sh", "-c", "cd /app && node .output/server/index.mjs"]
