@@ -1,0 +1,100 @@
+name: Deploy Core Frontend
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+      - bun.lock
+      - src/**
+      - public/**
+      - scripts/**
+      - vite.config.*
+      - tsconfig*.json
+      - Dockerfile
+      - deploy/**
+      - .github/workflows/deploy-core-frontend.yml
+
+concurrency:
+  group: deploy-core-frontend
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+  PUBLIC_SITE_URL: https://impulsionando.com.br
+
+jobs:
+  build:
+    name: Build TanStack Start app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_PUBLIC_SITE_URL: ${{ env.PUBLIC_SITE_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+      - name: Verify server output
+        run: |
+          test -f .output/server/index.mjs
+          test -d .output/public
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: impulsionando-core-output
+          path: |
+            .output
+            package.json
+            package-lock.json
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Publish to VPS/Hostinger
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: impulsionando-core-output
+          path: release
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload release
+        run: |
+          RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p '$RELEASE_DIR' /var/www/impulsionando-core/shared"
+          rsync -az --delete release/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:$RELEASE_DIR/"
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "cd '$RELEASE_DIR' && npm ci --omit=dev && ln -sfn '$RELEASE_DIR' /var/www/impulsionando-core/current && sudo systemctl restart impulsionando-core"
+
+      - name: Validate public URLs
+        run: |
+          curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/home.html
+          curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/planos >/tmp/planos.html
+          curl --fail --location --silent --show-error --max-time 30 https://www.impulsionando.com.br/ >/tmp/www.html
