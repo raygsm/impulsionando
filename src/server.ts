@@ -41,7 +41,7 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 }
 
 function hostOf(request: Request) {
-  return (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")
+  return (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? new URL(request.url).hostname)
     .toLowerCase()
     .split(":")[0];
 }
@@ -64,6 +64,10 @@ function normalizeDomainResponse(request: Request, response: Response): Response
     return response;
   }
 
+  return renderCoreHomeResponse();
+}
+
+function renderCoreHomeResponse(): Response {
   return new Response(
     "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Impulsionando Tecnologia</title><meta name=\"description\" content=\"Impulsionando Tecnologia — sistemas, automação e crescimento para empresas.\"/></head><body style=\"margin:0;font-family:Inter,Arial,sans-serif;background:#061a2f;color:#fff;display:grid;min-height:100vh;place-items:center\"><main style=\"max-width:720px;padding:32px;text-align:center\"><h1 style=\"font-size:42px;margin:0 0 16px\">Impulsionando Tecnologia</h1><p style=\"font-size:18px;line-height:1.6;color:#dbeafe\">Plataforma SaaS multiempresa para CRM, agenda, WhatsApp, pagamentos, BI e automação.</p><p><a href=\"/contato\" style=\"display:inline-block;margin-top:18px;padding:12px 18px;border-radius:10px;background:#f97316;color:#fff;text-decoration:none;font-weight:700\">Falar com a Impulsionando</a></p></main></body></html>",
     { status: 200, headers: { "content-type": "text/html; charset=utf-8" } },
@@ -73,6 +77,17 @@ function normalizeDomainResponse(request: Request, response: Response): Response
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const host = hostOf(request);
+      if (CORE_HOSTS.has(host) && rootPathOf(request)) {
+        return renderCoreHomeResponse();
+      }
+      if (CHRISMED_HOSTS.has(host) && rootPathOf(request)) {
+        const url = new URL(request.url);
+        url.pathname = "/chrismed";
+        url.search = "";
+        return Response.redirect(url, 302);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normalized = normalizeDomainResponse(request, response);
