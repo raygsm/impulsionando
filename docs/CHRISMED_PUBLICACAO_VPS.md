@@ -2,15 +2,16 @@
 
 Data: 2026-07-03
 
-Este checklist fecha a publicação do novo projeto cliente CHRISMED no domínio
-`https://agenda.chrismed.com.br/`, garantindo que o domínio deixe de apontar para
-o projeto antigo e passe a servir o Core Impulsionando publicado na VPS atual.
+Este checklist fecha a publicação do cliente CHRISMED no endereço correto do Core:
+`https://chrismed.impulsionando.com.br/`.
+
+> Observação operacional: o domínio antigo `https://agenda.chrismed.com.br/` pertence ao projeto anterior e não entra nesta publicação agora.
 
 ## 1. Domínio final
 
-- Domínio público oficial: `agenda.chrismed.com.br`
+- Domínio público oficial desta publicação: `chrismed.impulsionando.com.br`
 - Rota pública no Core: `/chrismed`
-- Home do domínio: ao acessar `/`, o Core redireciona para `/chrismed`
+- Home do subdomínio: ao acessar `/`, o Core redireciona para `/chrismed`
 - Fluxo de agendamento: `/chrismed/agendar`
 - WhatsApp único oficial: `+55 21 97253-7868` (`5521972537868` no formato `wa.me`)
 
@@ -39,16 +40,16 @@ docker rm impulsionando-core || true
 docker run -d --name impulsionando-core --restart unless-stopped -p 3000:3000 --env-file .env impulsionando-core:chrismed
 ```
 
-## 3. Proxy reverso do domínio
+## 3. Proxy reverso do subdomínio
 
-O virtual host de `agenda.chrismed.com.br` deve apontar para o serviço novo do
-Core na VPS, e não mais para o projeto antigo `chrismed.lovable.app`.
+O virtual host de `chrismed.impulsionando.com.br` deve apontar para o serviço novo
+do Core na VPS.
 
 Exemplo Nginx:
 
 ```nginx
 server {
-  server_name agenda.chrismed.com.br;
+  server_name chrismed.impulsionando.com.br;
 
   location / {
     proxy_pass http://127.0.0.1:3000;
@@ -68,7 +69,7 @@ Depois de alterar o proxy:
 ```bash
 nginx -t
 systemctl reload nginx
-certbot --nginx -d agenda.chrismed.com.br
+certbot --nginx -d chrismed.impulsionando.com.br
 ```
 
 ## 4. Validação pós-publicação
@@ -76,25 +77,16 @@ certbot --nginx -d agenda.chrismed.com.br
 Validar em produção:
 
 ```bash
-curl -I https://agenda.chrismed.com.br/
-curl -I https://agenda.chrismed.com.br/chrismed/agendar
-curl -s https://agenda.chrismed.com.br/ | head
+curl -I https://chrismed.impulsionando.com.br/
+curl -I https://chrismed.impulsionando.com.br/chrismed/agendar
+curl -s https://chrismed.impulsionando.com.br/ | head
 ```
 
 Checklist manual:
 
-- Abrir `https://agenda.chrismed.com.br/` e confirmar que cai na experiência CHRISMED nova.
-- Abrir `https://agenda.chrismed.com.br/chrismed/agendar`.
+- Abrir `https://chrismed.impulsionando.com.br/` e confirmar que cai na experiência CHRISMED nova.
+- Abrir `https://chrismed.impulsionando.com.br/chrismed/agendar`.
 - Clicar no botão flutuante “Falar com Oliver” e confirmar abertura do WhatsApp `21 97253-7868`.
 - Abrir `/chrismed/contato` e confirmar que o card “WhatsApp principal” usa o mesmo número.
 - Rodar o diagnóstico autenticado `/chrismed/setup` e corrigir qualquer erro antes de tráfego real.
 - Fazer um PIX de teste/sandbox, se disponível, e confirmar retorno do status de pagamento.
-
-## 5. Não desligar o projeto antigo imediatamente
-
-Manter `chrismed.lovable.app` como fallback até confirmar:
-
-1. `agenda.chrismed.com.br` servindo 100% pelo Core na VPS.
-2. Webhooks Mercado Pago/Z-API/N8N apontando para o Core.
-3. Sem escritas relevantes no projeto antigo.
-4. Sem usuários autenticando no projeto antigo durante a janela de observação.

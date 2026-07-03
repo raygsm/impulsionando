@@ -4,14 +4,12 @@ import { HomePage } from "@/components/marketing/HomePage";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 const SUBDOMAIN_LANDING: Record<string, string> = {
+  chrismed: "/chrismed",
   marocas: "/marocas",
 };
 
 // Domínios de clientes (white-label) → rota dedicada.
-const CUSTOM_HOST_LANDING: Record<string, string> = {
-  "agenda.chrismed.com.br": "/chrismed",
-  "www.agenda.chrismed.com.br": "/chrismed",
-};
+const CUSTOM_HOST_LANDING: Record<string, string> = {};
 
 function resolveSubdomainRedirect(host: string | null | undefined): string | null {
   if (!host) return null;

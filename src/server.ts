@@ -8,7 +8,7 @@ type ServerEntry = {
 };
 
 const CORE_HOSTS = new Set(["impulsionando.com.br", "www.impulsionando.com.br"]);
-const CHRISMED_HOSTS = new Set(["agenda.chrismed.com.br", "www.agenda.chrismed.com.br"]);
+const CHRISMED_HOSTS = new Set(["chrismed.impulsionando.com.br", "www.chrismed.impulsionando.com.br"]);
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
