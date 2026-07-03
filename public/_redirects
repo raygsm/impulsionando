@@ -1,5 +1,8 @@
 # Fallback para hospedagens estáticas: evita "404 page not found" em acesso
 # direto pelo navegador/celular a rotas do app quando a infra não aciona SSR.
 #
-# Rotas de API continuam preservadas pelas regras da plataforma/funções.
-/*    /index.html   200
+# Preserve APIs e assets antes do fallback de documentos.
+/api/*      /api/:splat      200
+/assets/*   /assets/:splat   200
+/__l5e/*    /__l5e/:splat    200
+/*          /index.html      200
