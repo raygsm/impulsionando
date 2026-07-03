@@ -1,0 +1,5 @@
+# Fallback para hospedagens estáticas: evita "404 page not found" em acesso
+# direto pelo navegador/celular a rotas do app quando a infra não aciona SSR.
+#
+# Rotas de API continuam preservadas pelas regras da plataforma/funções.
+/*    /index.html   200
