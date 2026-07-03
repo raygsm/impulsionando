@@ -22,7 +22,7 @@ export const Route = createFileRoute('/chrismed/contato')({
   component: ContatoPage,
 });
 
-const WHATSAPP = 'https://wa.me/5521000000000?text=Ol%C3%A1%20CrisMed';
+const WHATSAPP = 'https://wa.me/5521972537868?text=Ol%C3%A1%20CrisMed';
 const EMAIL = 'contato@crismed.com.br';
 
 function ContatoPage() {
