@@ -44,7 +44,7 @@ type NavItem = {
 const NAV_AFTER_NICHOS: NavItem[] = [
   { to: "/demo", label: "Demonstrações" },
   { to: "/vitrine", label: "Vitrine" },
-  { to: "/ecossistema", label: "Faça Parte do Ecossistema" },
+  { to: "/ecossistema", label: "Entre no Clube" },
   { to: "/suporte", label: "Suporte" },
 ];
 
