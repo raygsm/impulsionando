@@ -197,6 +197,17 @@ export function ImpulsionitoPanel() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const mergedSuggestions = useMemo(() => {
+    const route = suggestionsForRoute(pathname);
+    const seen = new Set<string>();
+    return [...route, ...QUICK_SUGGESTIONS].filter((s) => {
+      const k = s.trim().toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }, [pathname]);
+
   // Reseta saudação ao trocar de estado de demonstração.
   useEffect(() => {
     setMessages([
