@@ -518,6 +518,7 @@ function TypingBubble() {
   );
 }
 
+function StateExtras({
   demo,
   onQuick,
 }: {
