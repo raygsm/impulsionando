@@ -622,3 +622,259 @@ function SubdomainChecklist({
     </Card>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Painel: Sugestões automáticas de campos faltantes
+// ---------------------------------------------------------------------------
+function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
+  const qc = useQueryClient();
+  const doSuggest = useServerFn(suggestTenantDefaults);
+  const doApply = useServerFn(applyTenantDefaults);
+
+  const q = useQuery({
+    queryKey: ["admin", "tenants-editor", "suggestions", tenant.id],
+    queryFn: () => doSuggest({ data: { id: tenant.id } }),
+  });
+
+  const suggestions = q.data?.suggestions ?? [];
+  const autoApplyable = suggestions.filter((s) => s.autoApplyable);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // Marca todas as auto-applicáveis por padrão quando carrega
+  const suggestionKeys = autoApplyable.map((s) => String(s.field)).join(",");
+  useMemo(() => {
+    if (autoApplyable.length && selected.size === 0) {
+      setSelected(new Set(autoApplyable.map((s) => String(s.field))));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestionKeys]);
+
+  const apply = useMutation({
+    mutationFn: async () => doApply({ data: { id: tenant.id, fields: Array.from(selected) } }),
+    onSuccess: (res) => {
+      toast.success(`${res.applied} campo(s) preenchido(s) com valores padrão.`);
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "list"] });
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "suggestions", tenant.id] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao aplicar padrões"),
+  });
+
+  const toggle = (key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Sugestões automáticas</h3>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => q.refetch()}
+            disabled={q.isFetching}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${q.isFetching ? "animate-spin" : ""}`} />
+            Reavaliar
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => apply.mutate()}
+            disabled={apply.isPending || selected.size === 0}
+          >
+            {apply.isPending
+              ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+            Preencher {selected.size > 0 ? `(${selected.size})` : ""}
+          </Button>
+        </div>
+      </div>
+
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Analisando…</p>
+      ) : suggestions.length === 0 ? (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" /> Todos os campos essenciais já estão preenchidos.
+        </p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground mb-3">
+            Itens marcáveis são aplicados automaticamente. Campos como WhatsApp/logo/website exigem intervenção manual.
+            Após aplicar, revise e clique em <strong>Salvar</strong> no topo.
+          </p>
+          <ul className="space-y-2 text-sm">
+            {suggestions.map((s) => {
+              const key = String(s.field);
+              const checked = selected.has(key);
+              return (
+                <li key={key} className="flex items-start gap-2 rounded border p-2.5">
+                  {s.autoApplyable ? (
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(key)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{key}</code>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        {s.autoApplyable ? "auto" : "manual"}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{s.reason}</div>
+                    {s.autoApplyable && (
+                      <div className="text-xs mt-1">
+                        <span className="text-muted-foreground">Sugestão: </span>
+                        <code className="text-[11px]">
+                          {typeof s.suggestedValue === "boolean"
+                            ? String(s.suggestedValue)
+                            : (s.suggestedValue as string) || "(vazio)"}
+                        </code>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Painel: Histórico de sondagens
+// ---------------------------------------------------------------------------
+function ProbeHistoryPanel({ companyId }: { companyId: string }) {
+  const doList = useServerFn(listProbeHistory);
+  const q = useQuery({
+    queryKey: ["admin", "tenants-editor", "probe-history", companyId],
+    queryFn: () => doList({ data: { companyId, limit: 15 } }),
+  });
+
+  const history = q.data?.history ?? [];
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <History className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Histórico de sondagens do subdomínio</h3>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => q.refetch()} disabled={q.isFetching}>
+          <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${q.isFetching ? "animate-spin" : ""}`} />
+          Atualizar
+        </Button>
+      </div>
+
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : history.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Nenhum teste registrado. Use o botão <strong>Testar subdomínio</strong> acima.
+        </p>
+      ) : (
+        <ul className="space-y-2 text-xs">
+          {history.map((h) => (
+            <li key={h.id} className="rounded border p-2.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                {h.status != null ? (
+                  <Badge variant={h.ok ? "default" : "destructive"} className="text-[10px]">HTTP {h.status}</Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-[10px]">sem resposta</Badge>
+                )}
+                <Badge variant="outline" className="text-[10px]">
+                  {h.triggered_by === "auto-retry" ? `retry #${h.attempt}` : h.triggered_by}
+                </Badge>
+                <span className="text-muted-foreground">
+                  {new Date(h.created_at).toLocaleString("pt-BR")}
+                </span>
+                {h.elapsed_ms != null && (
+                  <span className="text-muted-foreground">· {h.elapsed_ms}ms</span>
+                )}
+              </div>
+              <div className="mt-1 text-muted-foreground truncate">
+                → <code className="text-[11px]">{h.final_url ?? h.url}</code>
+              </div>
+              {h.diagnosis && (
+                <div className="mt-1 text-foreground">{h.diagnosis}</div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Botão: Exportar diagnóstico (CSV + JSON) de todos os tenants não-arquivados
+// ---------------------------------------------------------------------------
+function ExportDiagnosticButton() {
+  const doExport = useServerFn(exportTenantsDiagnostic);
+  const [busy, setBusy] = useState(false);
+
+  const run = async (format: "csv" | "json") => {
+    setBusy(true);
+    try {
+      const res = await doExport({ data: undefined });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json;charset=utf-8" });
+        triggerDownload(`tenants-diagnostic-${stamp}.json`, blob);
+      } else {
+        const rows = res.rows ?? [];
+        const cols = rows.length
+          ? Object.keys(rows[0])
+          : ["id", "name", "public_slug", "domain", "card_ready", "required_missing", "recommended_missing", "last_probe_status", "last_probe_diagnosis"];
+        const esc = (v: unknown) => {
+          if (v == null) return "";
+          const s = Array.isArray(v) ? v.join("|") : String(v);
+          return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const csv = [
+          cols.join(";"),
+          ...rows.map((r) => cols.map((c) => esc((r as Record<string, unknown>)[c])).join(";")),
+        ].join("\n");
+        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+        triggerDownload(`tenants-diagnostic-${stamp}.csv`, blob);
+      }
+      toast.success(`Exportado ${format.toUpperCase()} (${res.rows?.length ?? 0} tenants).`);
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao exportar");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="inline-flex gap-1">
+      <Button size="sm" variant="outline" onClick={() => run("csv")} disabled={busy}>
+        {busy ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+        Exportar CSV
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => run("json")} disabled={busy} title="Exportar JSON">
+        JSON
+      </Button>
+    </div>
+  );
+}
+
+function triggerDownload(filename: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
