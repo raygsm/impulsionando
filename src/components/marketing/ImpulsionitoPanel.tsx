@@ -344,7 +344,12 @@ export function ImpulsionitoPanel() {
               )}
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  trackEvent("impulsionito_panel_close", {
+                    location: typeof window !== "undefined" ? window.location.pathname : "",
+                  });
+                }}
                 aria-label="Fechar"
                 className="p-1.5 rounded hover:bg-white/15"
               >
