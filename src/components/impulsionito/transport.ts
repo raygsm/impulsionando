@@ -192,7 +192,39 @@ export function useImpulsionitoTransport(): ImpulsionitoTransport {
 // Sugestões contextuais por rota.
 // ---------------------------------------------------------------------------
 
+const NICHO_SUGGESTIONS: Record<string, string[]> = {
+  clinicas: ["Como funciona a agenda de consultas?", "Como enviar lembretes por WhatsApp?", "Como emitir recibo/NFS-e?"],
+  saude: ["Como funciona a agenda de consultas?", "Como enviar lembretes por WhatsApp?", "Como emitir recibo/NFS-e?"],
+  "bares-restaurantes": ["Como funciona o cardápio digital?", "Como controlar comanda e mesa?", "Como fechar o caixa do dia?"],
+  bar: ["Como funciona o cardápio digital?", "Como controlar comanda e mesa?", "Como fechar o caixa do dia?"],
+  microcervejarias: ["Como controlar a produção?", "Como gerir vendas por canal?", "Como fidelizar cliente do clube?"],
+  imobiliaria: ["Como cadastrar um imóvel?", "Como qualificar leads no CRM?", "Como agendar uma visita?"],
+  eventos: ["Como montar um orçamento?", "Como gerir fornecedores?", "Como acompanhar o funil do evento?"],
+  juridico: ["Como controlar prazos e processos?", "Como cadastrar honorários?", "Como enviar contratos?"],
+  advocacia: ["Como controlar prazos e processos?", "Como cadastrar honorários?", "Como enviar contratos?"],
+  contabilidade: ["Como organizar documentos do cliente?", "Como enviar relatórios mensais?", "Como cobrar honorários?"],
+  psicologia: ["Como agendar sessão?", "Como controlar prontuário?", "Como cobrar via PIX/cartão?"],
+  fitness: ["Como controlar matrículas?", "Como agendar aula/personal?", "Como reter aluno em risco?"],
+  educacao: ["Como matricular aluno?", "Como emitir boletim?", "Como comunicar com responsáveis?"],
+  ecommerce: ["Como integrar minha loja?", "Como gerir estoque?", "Como acompanhar pedidos?"],
+  veiculos: ["Como cadastrar veículo?", "Como gerir test-drive?", "Como acompanhar propostas?"],
+  fornecedores: ["Como listar produtos?", "Como receber cotações?", "Como gerir pedidos B2B?"],
+  comercio: ["Como cadastrar produto?", "Como controlar estoque?", "Como fechar venda no PDV?"],
+  servicos: ["Como agendar prestação de serviço?", "Como orçar e cobrar?", "Como gerir equipe em campo?"],
+  comunidade: ["Como gerir associados?", "Como controlar mensalidade?", "Como enviar comunicados?"],
+  "white-label": ["Como replico a plataforma para meu cliente?", "Como aplico minha marca?", "Como cobro dos meus clientes?"],
+};
+
+function nichoSlugFromPath(pathname: string): string | null {
+  const m = pathname.match(/^\/(?:nichos|demo\/nicho)\/([^/?#]+)/);
+  return m?.[1] ?? null;
+}
+
 export function suggestionsForRoute(pathname: string): string[] {
+  const nichoSlug = nichoSlugFromPath(pathname);
+  if (nichoSlug && NICHO_SUGGESTIONS[nichoSlug]) return NICHO_SUGGESTIONS[nichoSlug];
+  if (pathname === "/nichos" || pathname.startsWith("/nichos/") || pathname.startsWith("/demo/nicho/"))
+    return ["Qual nicho combina com meu negócio?", "Ver uma demonstração agora", "Quanto custa cada plano?"];
   if (pathname.startsWith("/admin/billing"))
     return ["Resumo de inadimplência", "Clientes em atraso hoje", "Gerar relatório de cobrança"];
   if (pathname.startsWith("/admin"))
