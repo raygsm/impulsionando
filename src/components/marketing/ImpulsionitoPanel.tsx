@@ -455,6 +455,7 @@ function ChatTab({
         {messages.map((m) => (
           <MessageBubble key={m.id} msg={m} />
         ))}
+        {typing && <TypingBubble />}
 
         <StateExtras demo={demo} onQuick={onQuick} />
       </div>
