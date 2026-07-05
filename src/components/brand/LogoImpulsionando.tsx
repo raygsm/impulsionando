@@ -90,6 +90,11 @@ export function LogoImpulsionando({
     <img
       src={logoAsset.url}
       alt={alt}
+      width={640}
+      height={160}
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
       className={cn(SIZE[size], 'w-auto object-contain')}
       draggable={false}
     />

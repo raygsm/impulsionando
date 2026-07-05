@@ -131,9 +131,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Impulsionando Tecnologia — Plataforma SaaS Multiempresa" },
       { property: "og:description", content: "SaaS multiempresa modular: CRM, agenda, WhatsApp, pagamentos, emissão fiscal, estoque, BI e automação." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://impulsionando.com.br/" },
+      { property: "og:image", content: "https://impulsionando.com.br/__l5e/assets-v1/bfbd00d4-b55e-4e72-b25c-e93c63adf738/logo-impulsionando.png" },
+      { property: "og:image:alt", content: "Impulsionando Tecnologia" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Impulsionando Tecnologia — Plataforma SaaS Multiempresa" },
       { name: "twitter:description", content: "SaaS multiempresa modular para gestão, atendimento e automação." },
+      { name: "twitter:image", content: "https://impulsionando.com.br/__l5e/assets-v1/bfbd00d4-b55e-4e72-b25c-e93c63adf738/logo-impulsionando.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -150,7 +154,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "Impulsionando Tecnologia",
           url: "https://impulsionando.com.br",
-          logo: "https://impulsionando.com.br/favicon.ico",
+          logo: "https://impulsionando.com.br/__l5e/assets-v1/bfbd00d4-b55e-4e72-b25c-e93c63adf738/logo-impulsionando.png",
           description:
             "Plataforma SaaS multiempresa modular para gestão, atendimento e automação.",
           sameAs: ["https://impulsionandobrasil.com.br"],
