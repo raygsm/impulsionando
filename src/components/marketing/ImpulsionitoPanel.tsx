@@ -503,7 +503,21 @@ function MessageBubble({ msg }: { msg: ChatMsg }) {
   );
 }
 
-function StateExtras({
+function TypingBubble() {
+  return (
+    <div className="flex gap-2 justify-start" aria-live="polite" aria-label="Impulsionito está digitando">
+      <span className="w-7 h-7 rounded-full bg-gradient-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
+        <Bot className="w-3.5 h-3.5" />
+      </span>
+      <div className="rounded-2xl rounded-tl-sm border border-border bg-card px-3 py-2.5 shadow-sm inline-flex items-center gap-1">
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.3s]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.15s]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" />
+      </div>
+    </div>
+  );
+}
+
   demo,
   onQuick,
 }: {
