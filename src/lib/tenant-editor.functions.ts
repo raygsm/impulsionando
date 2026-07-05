@@ -9,6 +9,16 @@ import { requireAdminOrAudit } from "@/lib/security-audit.server";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+function slugify(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
 export type TenantRow = {
   id: string;
   name: string;
@@ -186,3 +196,296 @@ export const probeSubdomain = createServerFn({ method: "POST" })
       };
     }
   });
+
+// ---------------------------------------------------------------------------
+// Sugestões de defaults para preencher campos faltantes da vitrine.
+// ---------------------------------------------------------------------------
+
+export type TenantSuggestion = {
+  field: keyof TenantRow;
+  currentValue: string | boolean | null;
+  suggestedValue: string | boolean;
+  reason: string;
+  autoApplyable: boolean;
+};
+
+function buildSuggestions(t: TenantRow): TenantSuggestion[] {
+  const suggestions: TenantSuggestion[] = [];
+  const base = (t.trade_name || t.name || "").trim();
+  const slug = t.public_slug || (base ? slugify(base) : "");
+
+  if (!t.public_slug && slug) {
+    suggestions.push({
+      field: "public_slug",
+      currentValue: t.public_slug,
+      suggestedValue: slug,
+      reason: `Derivado de "${base}".`,
+      autoApplyable: true,
+    });
+  }
+  if (!t.trade_name && t.name) {
+    suggestions.push({
+      field: "trade_name",
+      currentValue: t.trade_name,
+      suggestedValue: t.name,
+      reason: "Usa o nome legal como nome fantasia.",
+      autoApplyable: true,
+    });
+  }
+  const targetDomain = slug ? `${slug}.impulsionando.com.br` : "";
+  if (!t.domain && targetDomain) {
+    suggestions.push({
+      field: "domain",
+      currentValue: t.domain,
+      suggestedValue: targetDomain,
+      reason: "Padrão do ecossistema Impulsionando.",
+      autoApplyable: true,
+    });
+  }
+  if (!t.tagline && base) {
+    suggestions.push({
+      field: "tagline",
+      currentValue: t.tagline,
+      suggestedValue: `${base} — parceiro do ecossistema Impulsionando.`,
+      reason: "Placeholder curto para o card da vitrine.",
+      autoApplyable: true,
+    });
+  }
+  if (!t.segment) {
+    suggestions.push({
+      field: "segment",
+      currentValue: t.segment,
+      suggestedValue: "geral",
+      reason: "Categoria genérica para não deixar o card sem rótulo.",
+      autoApplyable: true,
+    });
+  }
+  if (t.public_slug && !t.vitrine_enabled && t.status === "active") {
+    suggestions.push({
+      field: "vitrine_enabled",
+      currentValue: t.vitrine_enabled,
+      suggestedValue: true,
+      reason: "Slug OK e tenant ativo — pronto para publicar na vitrine.",
+      autoApplyable: false,
+    });
+  }
+  // Campos que exigem intervenção humana — apenas marcam o gap.
+  if (!t.whatsapp) suggestions.push({ field: "whatsapp", currentValue: null, suggestedValue: "", reason: "Obrigatório — precisa ser informado manualmente (DDI+DDD).", autoApplyable: false });
+  if (!t.logo_url) suggestions.push({ field: "logo_url", currentValue: null, suggestedValue: "", reason: "Recomendado — fornecer URL do logo (https://…).", autoApplyable: false });
+  if (!t.website) suggestions.push({ field: "website", currentValue: null, suggestedValue: "", reason: "Recomendado — informar site oficial.", autoApplyable: false });
+
+  return suggestions;
+}
+
+export const suggestTenantDefaults = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "companies", entityId: data.id, metadata: { source: "tenants-editor", op: "suggest" },
+    });
+    const { data: row, error } = await context.supabase
+      .from("companies")
+      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
+      .eq("id", data.id)
+      .single();
+    if (error) throw new Error(error.message);
+    return { suggestions: buildSuggestions(row as TenantRow) };
+  });
+
+export const applyTenantDefaults = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    id: z.string().uuid(),
+    fields: z.array(z.string()).min(1),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "companies", entityId: data.id, metadata: { source: "tenants-editor", op: "apply-defaults", fields: data.fields },
+    });
+    const { data: row, error: readErr } = await context.supabase
+      .from("companies")
+      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
+      .eq("id", data.id).single();
+    if (readErr) throw new Error(readErr.message);
+    const suggestions = buildSuggestions(row as TenantRow);
+    const allow = new Set(data.fields);
+    const patch: Record<string, string | boolean> = {};
+    for (const s of suggestions) {
+      if (!s.autoApplyable) continue;
+      if (!allow.has(String(s.field))) continue;
+      patch[s.field as string] = s.suggestedValue as string | boolean;
+    }
+    if (Object.keys(patch).length === 0) return { applied: 0, patch: {} as Record<string, string | boolean> };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (context.supabase.from("companies").update(patch as any).eq("id", data.id));
+    if (error) throw new Error(error.message);
+    return { applied: Object.keys(patch).length, patch };
+  });
+
+// ---------------------------------------------------------------------------
+// Histórico de sondagens de subdomínio (persistência).
+// ---------------------------------------------------------------------------
+
+const probeSaveSchema = z.object({
+  companyId: z.string().uuid(),
+  host: z.string(),
+  path: z.string().default("/"),
+  url: z.string(),
+  finalUrl: z.string().nullable(),
+  status: z.number().int().nullable(),
+  statusText: z.string().nullable(),
+  ok: z.boolean(),
+  elapsedMs: z.number().int().nullable(),
+  headers: z.record(z.string(), z.string()).default({}),
+  bodyPreview: z.string().nullable(),
+  diagnosis: z.string().nullable(),
+  attempt: z.number().int().min(1).max(20).default(1),
+  triggeredBy: z.enum(["manual", "auto-retry", "export"]).default("manual"),
+});
+
+export const saveProbeResult = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => probeSaveSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "tenant_subdomain_probes", entityId: data.companyId, metadata: { source: "tenants-editor", op: "save-probe" },
+    });
+    const { error } = await context.supabase.from("tenant_subdomain_probes").insert({
+      company_id: data.companyId,
+      host: data.host,
+      path: data.path,
+      url: data.url,
+      final_url: data.finalUrl,
+      status: data.status,
+      status_text: data.statusText,
+      ok: data.ok,
+      elapsed_ms: data.elapsedMs,
+      headers: data.headers,
+      body_preview: data.bodyPreview,
+      diagnosis: data.diagnosis,
+      attempt: data.attempt,
+      triggered_by: data.triggeredBy,
+      created_by: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listProbeHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    companyId: z.string().uuid(),
+    limit: z.number().int().min(1).max(50).default(15),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "tenant_subdomain_probes", entityId: data.companyId, metadata: { source: "tenants-editor", op: "list-probes" },
+    });
+    const { data: rows, error } = await context.supabase
+      .from("tenant_subdomain_probes")
+      .select("id,host,path,url,final_url,status,status_text,ok,elapsed_ms,diagnosis,attempt,triggered_by,created_at")
+      .eq("company_id", data.companyId)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { history: rows ?? [] };
+  });
+
+// ---------------------------------------------------------------------------
+// Exportação consolidada — validação + último diagnóstico por tenant.
+// ---------------------------------------------------------------------------
+
+export const exportTenantsDiagnostic = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "companies", metadata: { source: "tenants-editor", op: "export-diagnostic" },
+    });
+
+    const { data: tenants, error } = await context.supabase
+      .from("companies")
+      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
+      .neq("status", "archived")
+      .order("name");
+    if (error) throw new Error(error.message);
+
+    const ids = (tenants ?? []).map((t) => t.id);
+    const lastProbes: Record<string, {
+      status: number | null; ok: boolean; elapsed_ms: number | null;
+      diagnosis: string | null; final_url: string | null; created_at: string;
+    }> = {};
+
+    if (ids.length > 0) {
+      const { data: probes } = await context.supabase
+        .from("tenant_subdomain_probes")
+        .select("company_id,status,ok,elapsed_ms,diagnosis,final_url,created_at")
+        .in("company_id", ids)
+        .order("created_at", { ascending: false });
+      for (const p of probes ?? []) {
+        if (!lastProbes[p.company_id]) {
+          lastProbes[p.company_id] = {
+            status: p.status,
+            ok: p.ok,
+            elapsed_ms: p.elapsed_ms,
+            diagnosis: p.diagnosis,
+            final_url: p.final_url,
+            created_at: p.created_at,
+          };
+        }
+      }
+    }
+
+    const rows = (tenants ?? []).map((t) => {
+      const requiredMissing: string[] = [];
+      const recommendedMissing: string[] = [];
+      if (!t.public_slug) requiredMissing.push("public_slug");
+      if (!t.name) requiredMissing.push("name");
+      if (!t.whatsapp) requiredMissing.push("whatsapp");
+      if (!t.vitrine_enabled) requiredMissing.push("vitrine_enabled");
+      if (!t.trade_name) recommendedMissing.push("trade_name");
+      if (!t.segment) recommendedMissing.push("segment");
+      if (!t.address_city) recommendedMissing.push("address_city");
+      if (!t.address_state) recommendedMissing.push("address_state");
+      if (!t.logo_url) recommendedMissing.push("logo_url");
+      if (!t.website) recommendedMissing.push("website");
+      if (!t.tagline) recommendedMissing.push("tagline");
+
+      const expectedDomain = t.public_slug ? `${t.public_slug}.impulsionando.com.br` : "";
+      const domainMatches = !!expectedDomain && (t.domain ?? "").toLowerCase() === expectedDomain;
+      const probe = lastProbes[t.id] ?? null;
+
+      return {
+        id: t.id,
+        name: t.name,
+        trade_name: t.trade_name,
+        public_slug: t.public_slug,
+        domain: t.domain,
+        expected_domain: expectedDomain,
+        domain_matches_expected: domainMatches,
+        vitrine_enabled: t.vitrine_enabled,
+        status: t.status,
+        environment: t.environment,
+        segment: t.segment,
+        city: t.address_city,
+        state: t.address_state,
+        whatsapp: t.whatsapp,
+        email: t.email,
+        website: t.website,
+        logo_url: t.logo_url,
+        tagline: t.tagline,
+        card_ready: requiredMissing.length === 0,
+        required_missing: requiredMissing,
+        recommended_missing: recommendedMissing,
+        last_probe_status: probe?.status ?? null,
+        last_probe_ok: probe?.ok ?? null,
+        last_probe_elapsed_ms: probe?.elapsed_ms ?? null,
+        last_probe_diagnosis: probe?.diagnosis ?? null,
+        last_probe_final_url: probe?.final_url ?? null,
+        last_probe_at: probe?.created_at ?? null,
+      };
+    });
+
+    return { generatedAt: new Date().toISOString(), rows };
+  });
+

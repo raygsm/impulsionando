@@ -18,11 +18,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { listTenants, updateTenant, probeSubdomain, type TenantRow } from "@/lib/tenant-editor.functions";
+import {
+  listTenants, updateTenant, probeSubdomain, suggestTenantDefaults, applyTenantDefaults,
+  saveProbeResult, listProbeHistory, exportTenantsDiagnostic, type TenantRow,
+} from "@/lib/tenant-editor.functions";
 import { getTenantSubdomain } from "@/lib/subdomain";
 import {
   Search, Save, Loader2, ExternalLink, ShieldCheck, AlertTriangle, CheckCircle2, XCircle,
-  Building2, BookOpen, Info,
+  Building2, BookOpen, Info, Sparkles, History, Download, RefreshCw,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants-editor")({
@@ -69,6 +72,7 @@ function TenantsEditorPage() {
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/dns-guide"><BookOpen className="w-4 h-4 mr-1.5" />Guia DNS wildcard</Link>
           </Button>
+          <ExportDiagnosticButton />
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/vitrine">Vitrine (governança)</Link>
           </Button>
@@ -281,8 +285,10 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
       </div>
 
       <div className="mt-8 grid gap-6">
+        <SuggestionsPanel tenant={tenant} />
         <VitrineCardValidator form={form} />
         <SubdomainChecklist tenant={tenant} formDomain={form.domain} formSlug={form.public_slug} />
+        <ProbeHistoryPanel companyId={tenant.id} />
       </div>
     </Card>
   );
@@ -404,14 +410,80 @@ function SubdomainChecklist({
   const targetPath = formSlug ? `/vitrine/${formSlug}` : "/vitrine/<slug>";
 
   const doProbe = useServerFn(probeSubdomain);
+  const doSave = useServerFn(saveProbeResult);
+  const qc = useQueryClient();
+
+  const runProbe = async (opts: { attempt: number; triggeredBy: "manual" | "auto-retry" }) => {
+    if (!expected) throw new Error("Preencha o slug primeiro");
+    const res = await doProbe({ data: { host: expected, path: targetPath } });
+    try {
+      await doSave({
+        data: {
+          companyId: tenant.id,
+          host: expected,
+          path: targetPath,
+          url: res.url,
+          finalUrl: res.finalUrl,
+          status: res.status,
+          statusText: res.statusText,
+          ok: res.ok,
+          elapsedMs: res.elapsedMs,
+          headers: res.headers,
+          bodyPreview: res.bodyPreview,
+          diagnosis: res.diagnosis,
+          attempt: opts.attempt,
+          triggeredBy: opts.triggeredBy,
+        },
+      });
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "probe-history", tenant.id] });
+    } catch (e) {
+      console.error("[probe] falha ao salvar histórico", e);
+    }
+    return res;
+  };
+
   const probeM = useMutation({
-    mutationFn: async () => {
-      if (!expected) throw new Error("Preencha o slug primeiro");
-      return doProbe({ data: { host: expected, path: targetPath } });
-    },
+    mutationFn: () => runProbe({ attempt: 1, triggeredBy: "manual" }),
     onError: (e: Error) => toast.error(e.message),
   });
   const probe = probeM.data;
+
+  // Auto-retry com backoff exponencial (5s, 15s, 45s) — dispara quando o probe
+  // indica DNS/TLS ausente ou 404 persistente.
+  const [autoRetry, setAutoRetry] = useState<{ running: boolean; step: number; log: string[] }>(
+    { running: false, step: 0, log: [] },
+  );
+  const shouldOfferRetry = !!probe && !probe.ok && (
+    probe.status === 404 ||
+    probe.status === null ||
+    /TLS|certificado|DNS/i.test(probe.diagnosis ?? "")
+  );
+
+  const startAutoRetry = async () => {
+    if (!expected) return;
+    const delays = [5000, 15000, 45000];
+    setAutoRetry({ running: true, step: 0, log: [`Tentativas com backoff: ${delays.map((d) => d/1000+"s").join(" · ")}`] });
+    for (let i = 0; i < delays.length; i++) {
+      setAutoRetry((s) => ({ ...s, step: i + 1, log: [...s.log, `Aguardando ${delays[i]/1000}s antes da tentativa ${i + 2}…`] }));
+      await new Promise((r) => setTimeout(r, delays[i]));
+      try {
+        const res = await runProbe({ attempt: i + 2, triggeredBy: "auto-retry" });
+        setAutoRetry((s) => ({
+          ...s,
+          log: [...s.log, `Tentativa ${i + 2}: ${res.status != null ? `HTTP ${res.status}` : "sem resposta"} — ${res.diagnosis}`],
+        }));
+        if (res.ok) {
+          toast.success(`Subdomínio respondeu OK na tentativa ${i + 2}`);
+          setAutoRetry((s) => ({ ...s, running: false }));
+          return;
+        }
+      } catch (e) {
+        setAutoRetry((s) => ({ ...s, log: [...s.log, `Tentativa ${i + 2}: erro — ${(e as Error).message}`] }));
+      }
+    }
+    setAutoRetry((s) => ({ ...s, running: false, log: [...s.log, "Backoff concluído sem sucesso. Verifique DNS/TLS no provedor."] }));
+    toast.warning("Backoff concluído — subdomínio ainda não responde.");
+  };
 
   const items = [
     { ok: !!formSlug, label: "public_slug preenchido", hint: "Slug obrigatório para gerar URL e roteamento." },
@@ -499,6 +571,35 @@ function SubdomainChecklist({
             </div>
           </div>
         )}
+
+        {shouldOfferRetry && (
+          <div className="rounded border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+            <div className="text-xs font-medium text-foreground flex items-center gap-2">
+              <RefreshCw className="w-3.5 h-3.5 text-amber-500" />
+              Verificação extra sugerida
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {probe?.status === 404
+                ? "404 persistente costuma ser propagação do wildcard TLS/roteamento — pode levar alguns minutos após a configuração no painel."
+                : /TLS|certificado/i.test(probe?.diagnosis ?? "")
+                  ? "Certificado TLS ainda não emitido — o wildcard costuma ficar pronto em até ~30 min após adicionar no Custom Domain."
+                  : "DNS sem resposta — aguarde a propagação (TTL padrão 5–30 min) e tente novamente."}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={startAutoRetry} disabled={autoRetry.running}>
+                {autoRetry.running
+                  ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  : <RefreshCw className="w-3.5 h-3.5 mr-1.5" />}
+                {autoRetry.running ? `Retentando (${autoRetry.step}/3)…` : "Retentar com backoff (5s · 15s · 45s)"}
+              </Button>
+            </div>
+            {autoRetry.log.length > 0 && (
+              <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap">
+                {autoRetry.log.join("\n")}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
@@ -520,4 +621,260 @@ function SubdomainChecklist({
       </div>
     </Card>
   );
+}
+
+// ---------------------------------------------------------------------------
+// Painel: Sugestões automáticas de campos faltantes
+// ---------------------------------------------------------------------------
+function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
+  const qc = useQueryClient();
+  const doSuggest = useServerFn(suggestTenantDefaults);
+  const doApply = useServerFn(applyTenantDefaults);
+
+  const q = useQuery({
+    queryKey: ["admin", "tenants-editor", "suggestions", tenant.id],
+    queryFn: () => doSuggest({ data: { id: tenant.id } }),
+  });
+
+  const suggestions = q.data?.suggestions ?? [];
+  const autoApplyable = suggestions.filter((s) => s.autoApplyable);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // Marca todas as auto-applicáveis por padrão quando carrega
+  const suggestionKeys = autoApplyable.map((s) => String(s.field)).join(",");
+  useMemo(() => {
+    if (autoApplyable.length && selected.size === 0) {
+      setSelected(new Set(autoApplyable.map((s) => String(s.field))));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestionKeys]);
+
+  const apply = useMutation({
+    mutationFn: async () => doApply({ data: { id: tenant.id, fields: Array.from(selected) } }),
+    onSuccess: (res) => {
+      toast.success(`${res.applied} campo(s) preenchido(s) com valores padrão.`);
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "list"] });
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "suggestions", tenant.id] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao aplicar padrões"),
+  });
+
+  const toggle = (key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Sugestões automáticas</h3>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => q.refetch()}
+            disabled={q.isFetching}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${q.isFetching ? "animate-spin" : ""}`} />
+            Reavaliar
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => apply.mutate()}
+            disabled={apply.isPending || selected.size === 0}
+          >
+            {apply.isPending
+              ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+            Preencher {selected.size > 0 ? `(${selected.size})` : ""}
+          </Button>
+        </div>
+      </div>
+
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Analisando…</p>
+      ) : suggestions.length === 0 ? (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" /> Todos os campos essenciais já estão preenchidos.
+        </p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground mb-3">
+            Itens marcáveis são aplicados automaticamente. Campos como WhatsApp/logo/website exigem intervenção manual.
+            Após aplicar, revise e clique em <strong>Salvar</strong> no topo.
+          </p>
+          <ul className="space-y-2 text-sm">
+            {suggestions.map((s) => {
+              const key = String(s.field);
+              const checked = selected.has(key);
+              return (
+                <li key={key} className="flex items-start gap-2 rounded border p-2.5">
+                  {s.autoApplyable ? (
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(key)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{key}</code>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        {s.autoApplyable ? "auto" : "manual"}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{s.reason}</div>
+                    {s.autoApplyable && (
+                      <div className="text-xs mt-1">
+                        <span className="text-muted-foreground">Sugestão: </span>
+                        <code className="text-[11px]">
+                          {typeof s.suggestedValue === "boolean"
+                            ? String(s.suggestedValue)
+                            : (s.suggestedValue as string) || "(vazio)"}
+                        </code>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Painel: Histórico de sondagens
+// ---------------------------------------------------------------------------
+function ProbeHistoryPanel({ companyId }: { companyId: string }) {
+  const doList = useServerFn(listProbeHistory);
+  const q = useQuery({
+    queryKey: ["admin", "tenants-editor", "probe-history", companyId],
+    queryFn: () => doList({ data: { companyId, limit: 15 } }),
+  });
+
+  const history = q.data?.history ?? [];
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <History className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Histórico de sondagens do subdomínio</h3>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => q.refetch()} disabled={q.isFetching}>
+          <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${q.isFetching ? "animate-spin" : ""}`} />
+          Atualizar
+        </Button>
+      </div>
+
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : history.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Nenhum teste registrado. Use o botão <strong>Testar subdomínio</strong> acima.
+        </p>
+      ) : (
+        <ul className="space-y-2 text-xs">
+          {history.map((h) => (
+            <li key={h.id} className="rounded border p-2.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                {h.status != null ? (
+                  <Badge variant={h.ok ? "default" : "destructive"} className="text-[10px]">HTTP {h.status}</Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-[10px]">sem resposta</Badge>
+                )}
+                <Badge variant="outline" className="text-[10px]">
+                  {h.triggered_by === "auto-retry" ? `retry #${h.attempt}` : h.triggered_by}
+                </Badge>
+                <span className="text-muted-foreground">
+                  {new Date(h.created_at).toLocaleString("pt-BR")}
+                </span>
+                {h.elapsed_ms != null && (
+                  <span className="text-muted-foreground">· {h.elapsed_ms}ms</span>
+                )}
+              </div>
+              <div className="mt-1 text-muted-foreground truncate">
+                → <code className="text-[11px]">{h.final_url ?? h.url}</code>
+              </div>
+              {h.diagnosis && (
+                <div className="mt-1 text-foreground">{h.diagnosis}</div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Botão: Exportar diagnóstico (CSV + JSON) de todos os tenants não-arquivados
+// ---------------------------------------------------------------------------
+function ExportDiagnosticButton() {
+  const doExport = useServerFn(exportTenantsDiagnostic);
+  const [busy, setBusy] = useState(false);
+
+  const run = async (format: "csv" | "json") => {
+    setBusy(true);
+    try {
+      const res = await doExport({ data: undefined });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json;charset=utf-8" });
+        triggerDownload(`tenants-diagnostic-${stamp}.json`, blob);
+      } else {
+        const rows = res.rows ?? [];
+        const cols = rows.length
+          ? Object.keys(rows[0])
+          : ["id", "name", "public_slug", "domain", "card_ready", "required_missing", "recommended_missing", "last_probe_status", "last_probe_diagnosis"];
+        const esc = (v: unknown) => {
+          if (v == null) return "";
+          const s = Array.isArray(v) ? v.join("|") : String(v);
+          return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const csv = [
+          cols.join(";"),
+          ...rows.map((r) => cols.map((c) => esc((r as Record<string, unknown>)[c])).join(";")),
+        ].join("\n");
+        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+        triggerDownload(`tenants-diagnostic-${stamp}.csv`, blob);
+      }
+      toast.success(`Exportado ${format.toUpperCase()} (${res.rows?.length ?? 0} tenants).`);
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao exportar");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="inline-flex gap-1">
+      <Button size="sm" variant="outline" onClick={() => run("csv")} disabled={busy}>
+        {busy ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+        Exportar CSV
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => run("json")} disabled={busy} title="Exportar JSON">
+        JSON
+      </Button>
+    </div>
+  );
+}
+
+function triggerDownload(filename: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
