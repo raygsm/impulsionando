@@ -438,15 +438,17 @@ export function HomePage() {
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
           <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
-            <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-5">
-              <Sparkles className="w-3 h-3 mr-1" /> Tecnologia + Estratégia + Comunicação
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+            <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-6 px-3 py-1">
+              <Sparkles className="w-3 h-3 mr-1.5" /> Tecnologia + Estratégia + Comunicação
             </Badge>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight max-w-4xl mx-auto">
-              Tecnologia que conecta atendimento, vendas e operação em um só ecossistema.
+            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
+              Tecnologia que conecta{" "}
+              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atendimento, vendas e operação</span>{" "}
+              em um só ecossistema.
             </h1>
-            <p className="mt-5 text-base sm:text-xl text-white/85 leading-relaxed max-w-3xl mx-auto">
+            <p className="mt-6 text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl mx-auto">
               CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação —
               modular, por nicho, com White Label pronto para revender com a sua marca.
             </p>
