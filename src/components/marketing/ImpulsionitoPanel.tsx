@@ -132,7 +132,7 @@ const DEMO_STATE_LABEL: Record<DemoState, string> = {
 function greetingFor(state: DemoState): string {
   switch (state) {
     case "visitor":
-      return "Olá, eu sou o Impulsionito. Posso te ajudar a entender o ecossistema Impulsionando, encontrar soluções, explicar serviços e orientar seu próximo passo.";
+      return "Sou o Impulsionito — em qualquer página posso te apontar o próximo passo, módulo certo ou plano ideal. Tire todas as suas dúvidas por aqui mesmo, sem sair do portal: aqui é mais rápido, tenho seu contexto e histórico completos.";
     case "client_ok":
       return "Identifiquei seu acesso. Posso te ajudar com seus módulos, agenda, CRM, ERP, financeiro, pagamentos, guias, ferramentas e suporte.";
     case "client_overdue":
