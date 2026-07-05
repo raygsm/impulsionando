@@ -1,6 +1,7 @@
 # Project Memory
 
 ## Core
+FRONTEND-ONLY LOCK ATIVO: até ordem explícita, só editar camada visual/front-end. PROIBIDO tocar Supabase, banco, RLS, auth, GitHub, integrações, N8N, MPago, Z-API, Cloudflare, Hostinger, VPS, migrations, edge/server functions, `.env*`. Fora do escopo = apenas apontar, nunca executar.
 Impulsionando é o core/master. RioMed é tenant dentro do core — nunca projeto paralelo. Proibido deletar arquivos `riomed.*` em lote: antes verificar imports, rotas (`routeTree.gen.ts`), `<Link to="/riomed...">`, redirects e referências em docs/n8n/migrations. Remover item a item validando build.
 Todo projeto/cliente novo nasce acoplado ao core Impulsionando: auth (`_authenticated` gerido), RBAC (`user_roles`+`has_role`), multi-tenant (`companies`+RLS por `company_id`/`auth.uid()`), billing (`CheckoutShell`/`BillingGate`/`PlanGate`), branding (`TenantBrandingProvider`), server logic em `createServerFn`. Clientes são tenants, nunca sistemas isolados. Doc: `docs/CORE_IMPULSIONANDO_SCAFFOLDING.md`.
 Consumidor Final tem default-deny no menu: itens sem `audiences` declarado ficam ocultos. Pré-assinatura (sem `consumer_memberships` ativa) usa `CheckoutShell` em qualquer rota.
@@ -9,6 +10,7 @@ Todo módulo/N8N/agente IA opera pela ótica do funil Impulsionando (captar→co
 Contas master globais: `raygs@hotmail.com` = admin master (acesso total a todos os tenants, sem gates); `raygsmonnerat@gmail.com` = cliente-teste padrão (criada como `customers` em toda empresa real, auto-seed via trigger).
 
 ## Memories
+- [Frontend-only lock](mem://core/frontend-only-lock) — Trava permanente: só visual/front-end até ordem explícita; backend/infra congelados
 - [RioMed tenant policy](mem://core/riomed-tenant-policy) — RioMed é tenant; proibido deletar arquivos riomed em lote sem checar imports/rotas/links/redirects
 - [Audience visibility policy](mem://core/audience-policy) — Default-deny consumidor + CheckoutShell pré-assinatura
 - [Core Impulsionando scaffolding policy](mem://core/scaffolding-policy) — Todo projeto novo é tenant do core: checklist auth/RBAC/RLS/billing/branding
