@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/hooks/retention-sweep")({
         const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
 
         const [companies, contracts, overdue, msgs, modules] = await Promise.all([
-          supabaseAdmin.from("companies").select("id, name, contact_email, contact_phone").eq("is_active", true).limit(1000),
+          supabaseAdmin.from("companies").select("id, name, commercial_email, email, phone, whatsapp").eq("is_active", true).limit(1000),
           supabaseAdmin.from("billing_contracts").select("id, company_id, last_paid_at"),
           supabaseAdmin.from("billing_invoices").select("contract_id").in("status", ["overdue", "open"]),
           supabaseAdmin.from("message_outbox").select("company_id").eq("status", "sent").gte("created_at", since30).limit(20000),
