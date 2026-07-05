@@ -560,15 +560,11 @@ export function HomePage() {
             </div>
 
 
-
-
-
-
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <Button
                 asChild
                 size="sm"
-                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                className="bg-white text-primary hover:bg-white/90 gap-1.5 shadow-sm"
                 onClick={() => trackHeroCta("diagnostico_30s")}
               >
                 <a href="#diagnostico" data-analytics="hero-diagnostico-30s">
@@ -594,7 +590,8 @@ export function HomePage() {
               <Button
                 asChild
                 size="sm"
-                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                variant="outline"
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
                 onClick={() => trackHeroCta("ver_demonstracoes")}
               >
                 <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
@@ -602,6 +599,15 @@ export function HomePage() {
                 </Link>
               </Button>
             </div>
+
+            {/* Trust bar — reforço visual de segurança/leveza */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Sem cartão para testar</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Setup assistido</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> LGPD & dados no Brasil</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Modular por nicho</span>
+            </div>
+
 
 
 
