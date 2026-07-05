@@ -571,6 +571,35 @@ function SubdomainChecklist({
             </div>
           </div>
         )}
+
+        {shouldOfferRetry && (
+          <div className="rounded border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+            <div className="text-xs font-medium text-foreground flex items-center gap-2">
+              <RefreshCw className="w-3.5 h-3.5 text-amber-500" />
+              Verificação extra sugerida
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {probe?.status === 404
+                ? "404 persistente costuma ser propagação do wildcard TLS/roteamento — pode levar alguns minutos após a configuração no painel."
+                : /TLS|certificado/i.test(probe?.diagnosis ?? "")
+                  ? "Certificado TLS ainda não emitido — o wildcard costuma ficar pronto em até ~30 min após adicionar no Custom Domain."
+                  : "DNS sem resposta — aguarde a propagação (TTL padrão 5–30 min) e tente novamente."}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={startAutoRetry} disabled={autoRetry.running}>
+                {autoRetry.running
+                  ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  : <RefreshCw className="w-3.5 h-3.5 mr-1.5" />}
+                {autoRetry.running ? `Retentando (${autoRetry.step}/3)…` : "Retentar com backoff (5s · 15s · 45s)"}
+              </Button>
+            </div>
+            {autoRetry.log.length > 0 && (
+              <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap">
+                {autoRetry.log.join("\n")}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
