@@ -280,7 +280,8 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 grid gap-6">
+        <VitrineCardValidator form={form} />
         <SubdomainChecklist tenant={tenant} formDomain={form.domain} formSlug={form.public_slug} />
       </div>
     </Card>
