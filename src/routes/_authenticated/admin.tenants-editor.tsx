@@ -300,70 +300,139 @@ function Field({
   );
 }
 
+type CardForm = {
+  public_slug: string; name: string; trade_name: string; segment: string;
+  address_city: string; address_state: string; whatsapp: string; phone: string;
+  email: string; website: string; logo_url: string; tagline: string; domain: string;
+  vitrine_enabled: boolean;
+};
+
+/**
+ * Valida se o card da vitrine renderiza sem quebrar mesmo com campos vazios
+ * e mostra exatamente quais campos estão faltando/ideais.
+ */
+function VitrineCardValidator({ form }: { form: CardForm }) {
+  type Row = { key: string; label: string; ok: boolean; level: "required" | "recommended" | "optional"; fallback?: string };
+
+  const rows: Row[] = [
+    { key: "public_slug", label: "Slug público", ok: !!form.public_slug, level: "required",
+      fallback: "Sem slug o card não aparece na vitrine (obrigatório para roteamento)." },
+    { key: "name", label: "Nome legal", ok: !!form.name, level: "required",
+      fallback: "Sem nome o card ficaria em branco." },
+    { key: "trade_name", label: "Nome fantasia", ok: !!form.trade_name, level: "recommended",
+      fallback: `Usa "${form.name || "(nome legal)"}" como título.` },
+    { key: "segment", label: "Segmento", ok: !!form.segment, level: "recommended",
+      fallback: "Card exibe apenas categoria genérica." },
+    { key: "address_city", label: "Cidade", ok: !!form.address_city, level: "recommended",
+      fallback: "Localização não aparece no card." },
+    { key: "address_state", label: "UF", ok: !!form.address_state, level: "recommended",
+      fallback: "Localização não aparece no card." },
+    { key: "whatsapp", label: "WhatsApp", ok: !!form.whatsapp, level: "required",
+      fallback: "Sem WhatsApp o botão principal de contato do card fica oculto." },
+    { key: "email", label: "E-mail", ok: !!form.email, level: "optional" },
+    { key: "phone", label: "Telefone fixo", ok: !!form.phone, level: "optional" },
+    { key: "website", label: "Website", ok: !!form.website, level: "recommended",
+      fallback: "Card não expõe link externo do parceiro." },
+    { key: "logo_url", label: "Logo", ok: !!form.logo_url, level: "recommended",
+      fallback: `Card exibe inicial "${(form.trade_name || form.name || "?").charAt(0).toUpperCase()}" como placeholder.` },
+    { key: "tagline", label: "Tagline", ok: !!form.tagline, level: "recommended",
+      fallback: "Card fica sem a linha descritiva curta." },
+    { key: "vitrine_enabled", label: "Publicado na vitrine (toggle ligado)", ok: !!form.vitrine_enabled, level: "required",
+      fallback: "Enquanto desligado, o tenant não aparece em /vitrine." },
+  ];
+
+  const missingRequired = rows.filter((r) => !r.ok && r.level === "required");
+  const missingRecommended = rows.filter((r) => !r.ok && r.level === "recommended");
+  const canRender = missingRequired.length === 0;
+
+  const badge = canRender
+    ? { text: missingRecommended.length === 0 ? "Card completo — pronto" : `Renderiza com ${missingRecommended.length} placeholder(s)`, tone: "emerald" as const }
+    : { text: `Card não renderiza (${missingRequired.length} campo(s) obrigatório(s))`, tone: "red" as const };
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <Info className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Validação do card na vitrine</h3>
+        </div>
+        <Badge
+          variant="outline"
+          className={badge.tone === "emerald" ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400" : "border-red-500/40 text-red-600 dark:text-red-400"}
+        >
+          {badge.text}
+        </Badge>
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-4">
+        A vitrine sempre renderiza um placeholder seguro quando um campo opcional está vazio (inicial no lugar do logo,
+        localização oculta, etc.). Campos obrigatórios abaixo, se ausentes, impedem o card de aparecer.
+      </p>
+
+      <ul className="space-y-1.5 text-sm">
+        {rows.map((r) => (
+          <li key={r.key} className="flex items-start gap-2">
+            {r.ok
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              : r.level === "required"
+                ? <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                : <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className={r.ok ? "" : "font-medium"}>{r.label}</span>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  {r.level === "required" ? "obrigatório" : r.level === "recommended" ? "recomendado" : "opcional"}
+                </Badge>
+              </div>
+              {!r.ok && r.fallback && (
+                <div className="text-xs text-muted-foreground">{r.fallback}</div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 function SubdomainChecklist({
   tenant, formDomain, formSlug,
 }: { tenant: TenantRow; formDomain: string; formSlug: string }) {
   const expected = formSlug ? `${formSlug}.impulsionando.com.br` : null;
   const domainMatches = !!expected && formDomain.trim().toLowerCase() === expected;
-  const [probing, setProbing] = useState(false);
-  const [probeResult, setProbeResult] = useState<{ ok: boolean; status: number | null; note: string } | null>(null);
-
   const parsed = expected ? getTenantSubdomain(expected) : null;
+  const targetPath = formSlug ? `/vitrine/${formSlug}` : "/vitrine/<slug>";
 
-  async function probe() {
-    if (!expected) return;
-    setProbing(true);
-    setProbeResult(null);
-    try {
-      const res = await fetch(`https://${expected}/vitrine/${formSlug}`, { method: "HEAD", mode: "no-cors" });
-      // no-cors: type=opaque, status=0 → só sabemos se resolveu DNS+TLS
-      setProbeResult({
-        ok: true,
-        status: res.status || null,
-        note: "DNS resolvido e conexão TLS estabelecida. (Resposta opaca por CORS; use DevTools/Network para status real.)",
-      });
-    } catch (e) {
-      setProbeResult({
-        ok: false,
-        status: null,
-        note: `Falha: ${(e as Error).message}. Provável: DNS wildcard ausente, TLS não emitido ou host não conhecido pela plataforma.`,
-      });
-    } finally {
-      setProbing(false);
-    }
-  }
+  const doProbe = useServerFn(probeSubdomain);
+  const probeM = useMutation({
+    mutationFn: async () => {
+      if (!expected) throw new Error("Preencha o slug primeiro");
+      return doProbe({ data: { host: expected, path: targetPath } });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const probe = probeM.data;
 
   const items = [
-    {
-      ok: !!formSlug,
-      label: "public_slug preenchido",
-      hint: "Slug obrigatório para gerar URL e roteamento.",
-    },
-    {
-      ok: domainMatches,
-      label: `domain = ${expected ?? "<slug>.impulsionando.com.br"}`,
-      hint: domainMatches ? "OK" : "Ajuste o campo Domínio acima e salve.",
-    },
-    {
-      ok: !!tenant.vitrine_enabled,
-      label: "vitrine_enabled = true",
-      hint: "Deve estar ligado para aparecer publicamente.",
-    },
-    {
-      ok: !!parsed,
-      label: "Slug reconhecido pelo detector de subdomínio",
-      hint: parsed ? `Detectado: ${parsed.slug}` : "Slug caiu na lista de reservados (www, app, admin…).",
-    },
+    { ok: !!formSlug, label: "public_slug preenchido", hint: "Slug obrigatório para gerar URL e roteamento." },
+    { ok: domainMatches, label: `domain = ${expected ?? "<slug>.impulsionando.com.br"}`, hint: domainMatches ? "OK" : "Ajuste o campo Domínio acima e salve." },
+    { ok: !!tenant.vitrine_enabled, label: "vitrine_enabled = true", hint: "Deve estar ligado para aparecer publicamente." },
+    { ok: !!parsed, label: "Slug reconhecido pelo detector de subdomínio", hint: parsed ? `Detectado: ${parsed.slug}` : "Slug caiu na lista de reservados (www, app, admin…)." },
   ];
 
   return (
     <Card className="p-5 bg-muted/20">
-      <div className="flex items-center gap-2 mb-3">
-        <ShieldCheck className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold">Checklist de subdomínio</h3>
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold">Teste e checklist do subdomínio</h3>
+        </div>
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/admin/dns-guide"><BookOpen className="w-3.5 h-3.5 mr-1.5" />Guia DNS wildcard</Link>
+        </Button>
       </div>
 
-      <ul className="space-y-2 text-sm">
+      <ul className="space-y-2 text-sm mb-4">
         {items.map((i) => (
           <li key={i.label} className="flex items-start gap-2">
             {i.ok
@@ -377,39 +446,74 @@ function SubdomainChecklist({
         ))}
       </ul>
 
-      <div className="mt-4 pt-4 border-t space-y-3">
+      <div className="pt-4 border-t space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <Button size="sm" variant="outline" onClick={probe} disabled={!expected || probing}>
-            {probing ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5 mr-1.5" />}
+          <Button size="sm" onClick={() => probeM.mutate()} disabled={!expected || probeM.isPending}>
+            {probeM.isPending
+              ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              : <ExternalLink className="w-3.5 h-3.5 mr-1.5" />}
             Testar {expected ?? "subdomínio"}
           </Button>
           {expected && (
-            <a href={`https://${expected}`} target="_blank" rel="noopener" className="text-xs text-primary hover:underline">
-              abrir em nova aba →
+            <a href={`https://${expected}${targetPath}`} target="_blank" rel="noopener" className="text-xs text-primary hover:underline">
+              abrir {expected}{targetPath} →
+            </a>
+          )}
+          {expected && (
+            <a href={`https://dnschecker.org/#A/${expected}`} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:text-primary hover:underline">
+              verificar DNS externamente →
             </a>
           )}
         </div>
-        {probeResult && (
-          <div className={`text-xs p-2 rounded border ${probeResult.ok ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5"}`}>
-            {probeResult.note}
+
+        {probe && (
+          <div className={`text-xs rounded border p-3 space-y-2 ${probe.ok ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5"}`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              {probe.status != null ? (
+                <Badge variant={probe.ok ? "default" : "destructive"} className="text-[11px]">HTTP {probe.status}</Badge>
+              ) : (
+                <Badge variant="destructive" className="text-[11px]">sem resposta</Badge>
+              )}
+              <span className="text-muted-foreground">{probe.elapsedMs}ms</span>
+              <span className="text-muted-foreground">→</span>
+              <code className="text-[11px]">{probe.finalUrl ?? probe.url}</code>
+            </div>
+            <div className="font-medium text-foreground">{probe.diagnosis}</div>
+            {Object.keys(probe.headers).length > 0 && (
+              <details className="text-[11px] text-muted-foreground">
+                <summary className="cursor-pointer">Headers recebidos</summary>
+                <pre className="mt-1 whitespace-pre-wrap break-all">
+                  {Object.entries(probe.headers).map(([k, v]) => `${k}: ${v}`).join("\n")}
+                </pre>
+              </details>
+            )}
+            {probe.bodyPreview && (
+              <details className="text-[11px] text-muted-foreground">
+                <summary className="cursor-pointer">Prévia da resposta (400 bytes)</summary>
+                <pre className="mt-1 whitespace-pre-wrap break-all">{probe.bodyPreview}</pre>
+              </details>
+            )}
+            <div className="text-[11px] text-muted-foreground">
+              Destino esperado quando tudo estiver OK: <code>/vitrine/{formSlug || "<slug>"}</code>{" "}
+              (o redirect roda no <code>__root</code> assim que o host bater).
+            </div>
           </div>
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t text-xs text-muted-foreground space-y-1">
+      <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
           <div>
             <div className="font-medium text-foreground mb-1">Requisitos de infra (fora do app)</div>
             <ol className="list-decimal ml-4 space-y-0.5">
               <li>Registro <code>A</code> wildcard <code>*.impulsionando.com.br → 185.158.133.1</code> no DNS.</li>
-              <li>Domínio wildcard adicionado no Publish/Custom Domain da Lovable para este projeto.</li>
-              <li>Certificado TLS wildcard emitido (Lovable provisiona automaticamente após verificação).</li>
-              <li>Este tenant com <code>public_slug</code>, <code>domain</code> e <code>vitrine_enabled</code> corretos (checklist acima).</li>
+              <li>Domínio wildcard adicionado no Publish/Custom Domain da Lovable.</li>
+              <li>Certificado TLS wildcard emitido automaticamente pela Lovable.</li>
+              <li>Este tenant com os 4 itens do checklist acima verdes.</li>
             </ol>
             <p className="mt-2">
-              Com os 4 itens verdes, ao acessar <code>{expected ?? "<slug>.impulsionando.com.br"}</code> a app carrega e o
-              redirecionador (RootComponent) leva para <code>/vitrine/{formSlug || "<slug>"}</code>.
+              Passo-a-passo completo por provedor: <Link to="/admin/dns-guide" className="text-primary hover:underline">Guia DNS wildcard</Link>.
             </p>
           </div>
         </div>
