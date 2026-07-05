@@ -442,6 +442,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminTrialOnboardingHealthRouteImport } from './routes/_authenticated/admin.trial-onboarding-health'
 import { Route as AuthenticatedAdminTrialDemoHealthRouteImport } from './routes/_authenticated/admin.trial-demo-health'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
+import { Route as AuthenticatedAdminTenantsEditorRouteImport } from './routes/_authenticated/admin.tenants-editor'
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
 import { Route as AuthenticatedAdminTenantIdentityHealthRouteImport } from './routes/_authenticated/admin.tenant-identity-health'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
@@ -3097,6 +3098,12 @@ const AuthenticatedAdminTreasuryForecastRoute =
     path: '/admin/treasury-forecast',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTenantsEditorRoute =
+  AuthenticatedAdminTenantsEditorRouteImport.update({
+    id: '/admin/tenants-editor',
+    path: '/admin/tenants-editor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTenantLifecycleRoute =
   AuthenticatedAdminTenantLifecycleRouteImport.update({
     id: '/admin/tenant-lifecycle',
@@ -5148,6 +5155,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
@@ -5858,6 +5866,7 @@ export interface FileRoutesByTo {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
@@ -6581,6 +6590,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/_authenticated/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/_authenticated/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/_authenticated/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
@@ -7305,6 +7315,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
+    | '/admin/tenants-editor'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
     | '/admin/trial-onboarding-health'
@@ -8015,6 +8026,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
+    | '/admin/tenants-editor'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
     | '/admin/trial-onboarding-health'
@@ -8737,6 +8749,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/tenant-identity-health'
     | '/_authenticated/admin/tenant-lifecycle'
+    | '/_authenticated/admin/tenants-editor'
     | '/_authenticated/admin/treasury-forecast'
     | '/_authenticated/admin/trial-demo-health'
     | '/_authenticated/admin/trial-onboarding-health'
@@ -12346,6 +12359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTreasuryForecastRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/tenants-editor': {
+      id: '/_authenticated/admin/tenants-editor'
+      path: '/admin/tenants-editor'
+      fullPath: '/admin/tenants-editor'
+      preLoaderRoute: typeof AuthenticatedAdminTenantsEditorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tenant-lifecycle': {
       id: '/_authenticated/admin/tenant-lifecycle'
       path: '/admin/tenant-lifecycle'
@@ -15358,6 +15378,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTenantIdentityHealthRoute: typeof AuthenticatedAdminTenantIdentityHealthRoute
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
+  AuthenticatedAdminTenantsEditorRoute: typeof AuthenticatedAdminTenantsEditorRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
   AuthenticatedAdminTrialDemoHealthRoute: typeof AuthenticatedAdminTrialDemoHealthRoute
   AuthenticatedAdminTrialOnboardingHealthRoute: typeof AuthenticatedAdminTrialOnboardingHealthRoute
@@ -15706,6 +15727,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminTenantIdentityHealthRoute,
   AuthenticatedAdminTenantLifecycleRoute:
     AuthenticatedAdminTenantLifecycleRoute,
+  AuthenticatedAdminTenantsEditorRoute: AuthenticatedAdminTenantsEditorRoute,
   AuthenticatedAdminTreasuryForecastRoute:
     AuthenticatedAdminTreasuryForecastRoute,
   AuthenticatedAdminTrialDemoHealthRoute:

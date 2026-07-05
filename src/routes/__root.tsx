@@ -20,6 +20,23 @@ import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider"
 import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
+import { getTenantSubdomain, tenantSubdomainTarget } from "@/lib/subdomain";
+
+
+function TenantSubdomainRedirect() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const match = getTenantSubdomain(window.location.hostname);
+    if (!match) return;
+    const target = tenantSubdomainTarget(match.slug);
+    // Só redireciona se ainda não estamos na rota de destino ou em subrota do tenant.
+    const p = window.location.pathname;
+    if (p === "/" || p === "") {
+      window.location.replace(target + window.location.search + window.location.hash);
+    }
+  }, []);
+  return null;
+}
 
 
 function MaintenanceGate() {
@@ -198,6 +215,7 @@ function RootComponent() {
       <AuthSync />
       <AnalyticsTracker />
       <MaintenanceGate />
+      <TenantSubdomainRedirect />
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <Outlet />
