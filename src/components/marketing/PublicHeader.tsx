@@ -297,7 +297,7 @@ export function PublicHeader() {
 
                 <NavLink to="/demo" label="Demonstrações" onClick={() => setOpen(false)} />
                 <NavLink to="/vitrine" label="Vitrine" onClick={() => setOpen(false)} />
-                <NavLink to="/ecossistema" label="Faça Parte do Ecossistema" onClick={() => setOpen(false)} />
+                <NavLink to="/ecossistema" label="Entre no Clube" onClick={() => setOpen(false)} />
                 <NavLink to="/suporte" label="Suporte" onClick={() => setOpen(false)} />
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
