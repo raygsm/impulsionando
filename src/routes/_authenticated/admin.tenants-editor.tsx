@@ -18,11 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { listTenants, updateTenant, type TenantRow } from "@/lib/tenant-editor.functions";
+import { listTenants, updateTenant, probeSubdomain, type TenantRow } from "@/lib/tenant-editor.functions";
 import { getTenantSubdomain } from "@/lib/subdomain";
 import {
   Search, Save, Loader2, ExternalLink, ShieldCheck, AlertTriangle, CheckCircle2, XCircle,
-  Building2,
+  Building2, BookOpen, Info,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants-editor")({
