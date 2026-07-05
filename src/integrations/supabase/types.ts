@@ -30318,6 +30318,102 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_subdomain_probes: {
+        Row: {
+          attempt: number
+          body_preview: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          elapsed_ms: number | null
+          final_url: string | null
+          headers: Json
+          host: string
+          id: string
+          ok: boolean
+          path: string
+          status: number | null
+          status_text: string | null
+          triggered_by: string
+          url: string
+        }
+        Insert: {
+          attempt?: number
+          body_preview?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          elapsed_ms?: number | null
+          final_url?: string | null
+          headers?: Json
+          host: string
+          id?: string
+          ok?: boolean
+          path?: string
+          status?: number | null
+          status_text?: string | null
+          triggered_by?: string
+          url: string
+        }
+        Update: {
+          attempt?: number
+          body_preview?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          elapsed_ms?: number | null
+          final_url?: string | null
+          headers?: Json
+          host?: string
+          id?: string
+          ok?: boolean
+          path?: string
+          status?: number | null
+          status_text?: string | null
+          triggered_by?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subdomain_probes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subdomain_probes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subdomain_probes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "tenant_subdomain_probes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "tenant_subdomain_probes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       trial_abuse_index: {
         Row: {
           company_hash: string | null
