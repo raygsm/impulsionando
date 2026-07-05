@@ -481,11 +481,19 @@ function ChatTab({
       <div className="border-t border-border bg-background/95 px-2 py-2 overflow-x-auto">
         <div className="flex items-center gap-1.5 min-w-max">
           <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-          {chips.map((s) => (
+          {chips.map((s, i) => (
             <button
               key={s}
               type="button"
-              onClick={() => onQuick(s)}
+              onClick={() => {
+                trackEvent("impulsionito_suggestion_click", {
+                  suggestion: s,
+                  index: i,
+                  route_aware: suggestions.length > 0,
+                  location: typeof window !== "undefined" ? window.location.pathname : "",
+                });
+                onQuick(s);
+              }}
               className="shrink-0 text-[11px] rounded-full border border-border bg-card px-2.5 py-1 hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               {s}
