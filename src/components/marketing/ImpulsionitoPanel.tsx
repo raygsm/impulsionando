@@ -384,6 +384,7 @@ export function ImpulsionitoPanel() {
                 messages={messages}
                 scrollRef={scrollRef}
                 onQuick={pushUser}
+                typing={typing}
               />
             )}
             {tab === "hub" && <HubTab />}
