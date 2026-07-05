@@ -72,6 +72,7 @@ function TenantsEditorPage() {
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/dns-guide"><BookOpen className="w-4 h-4 mr-1.5" />Guia DNS wildcard</Link>
           </Button>
+          <ExportDiagnosticButton />
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/vitrine">Vitrine (governança)</Link>
           </Button>
