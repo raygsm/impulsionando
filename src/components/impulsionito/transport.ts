@@ -215,10 +215,16 @@ const NICHO_SUGGESTIONS: Record<string, string[]> = {
   "white-label": ["Como replico a plataforma para meu cliente?", "Como aplico minha marca?", "Como cobro dos meus clientes?"],
 };
 
-function nichoSlugFromPath(pathname: string): string | null {
+export function nichoSlugFromPath(pathname: string): string | null {
   const m = pathname.match(/^\/(?:nichos|demo\/nicho)\/([^/?#]+)/);
   return m?.[1] ?? null;
 }
+
+export function moduleSlugFromPath(pathname: string): string | null {
+  const m = pathname.match(/^\/(?:modulos|demo\/modulos|admin\/modules)\/([^/?#]+)/);
+  return m?.[1] ?? null;
+}
+
 
 export function suggestionsForRoute(pathname: string): string[] {
   const nichoSlug = nichoSlugFromPath(pathname);
