@@ -34,7 +34,7 @@ export const listTenants = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      target_kind: "companies",
+      entity: "companies",
       metadata: { source: "tenants-editor" },
     });
     const { data, error } = await context.supabase
@@ -71,8 +71,8 @@ export const updateTenant = createServerFn({ method: "POST" })
   .inputValidator((data) => updateSchema.parse(data))
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      target_kind: "companies",
-      target_id: data.id,
+      entity: "companies",
+      entityId: data.id,
       metadata: { source: "tenants-editor", op: "update" },
     });
 
@@ -84,12 +84,13 @@ export const updateTenant = createServerFn({ method: "POST" })
       patch[k] = v === "" ? null : v;
     }
 
-    const { data: updated, error } = await context.supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: updated, error } = await (context.supabase
       .from("companies")
-      .update(patch)
+      .update(patch as any)
       .eq("id", id)
       .select("id,public_slug,domain,vitrine_enabled,logo_url,whatsapp,email,website")
-      .single();
+      .single());
     if (error) throw new Error(error.message);
     return { tenant: updated };
   });
