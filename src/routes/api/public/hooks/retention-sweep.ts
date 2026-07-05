@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/hooks/retention-sweep")({
         const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
 
         const [companies, contracts, overdue, msgs, modules] = await Promise.all([
-          supabaseAdmin.from("companies").select("id, name, contact_email, contact_phone").eq("is_active", true).limit(1000),
+          supabaseAdmin.from("companies").select("id, name, commercial_email, email, phone, whatsapp").eq("is_active", true).limit(1000),
           supabaseAdmin.from("billing_contracts").select("id, company_id, last_paid_at"),
           supabaseAdmin.from("billing_invoices").select("contract_id").in("status", ["overdue", "open"]),
           supabaseAdmin.from("message_outbox").select("company_id").eq("status", "sent").gte("created_at", since30).limit(20000),
@@ -69,20 +69,22 @@ export const Route = createFileRoute("/api/public/hooks/retention-sweep")({
           const subject = "Estamos aqui para ajudar — vamos destravar resultados?";
           const message = `Olá ${co.name}, percebemos sinais de que podemos melhorar sua experiência (${reasons.join(", ")}). Um especialista Impulsionando entrará em contato em 24h. Se preferir, responda essa mensagem.`;
 
-          if (co.contact_email) {
+          const email = co.commercial_email || co.email;
+          const phone = co.whatsapp || co.phone;
+          if (email) {
             rows.push({
               company_id: co.id, channel: "email",
-              recipient_email: co.contact_email,
+              recipient_email: email,
               event_code: "retention.outreach",
               payload: { subject, message, reasons, company_name: co.name },
               status: "pending", scheduled_at: new Date().toISOString(),
               reference_type: "retention_sweep", reference_id: ref,
             });
           }
-          if (co.contact_phone) {
+          if (phone) {
             rows.push({
               company_id: co.id, channel: "whatsapp",
-              recipient_phone: co.contact_phone,
+              recipient_phone: phone,
               event_code: "retention.outreach",
               payload: { subject, message, reasons, company_name: co.name },
               status: "pending", scheduled_at: new Date().toISOString(),
