@@ -130,19 +130,21 @@ const DEMO_STATE_LABEL: Record<DemoState, string> = {
 };
 
 function greetingFor(state: DemoState): string {
+  const stay = " Pode tirar todas as dúvidas por aqui mesmo — sem sair do portal, sem WhatsApp.";
   switch (state) {
     case "visitor":
-      return "Sou o Impulsionito — em qualquer página posso te apontar o próximo passo, módulo certo ou plano ideal. Tire todas as suas dúvidas por aqui mesmo, sem sair do portal: aqui é mais rápido, tenho seu contexto e histórico completos.";
+      return "Sou o Impulsionito — em qualquer página posso te apontar o próximo passo, módulo certo ou plano ideal." + stay;
     case "client_ok":
-      return "Identifiquei seu acesso. Posso te ajudar com seus módulos, agenda, CRM, ERP, financeiro, pagamentos, guias, ferramentas e suporte.";
+      return "Identifiquei seu acesso. Posso te ajudar com módulos, agenda, CRM, ERP, financeiro, pagamentos, guias e suporte." + stay;
     case "client_overdue":
-      return "Identificamos uma pendência financeira vinculada à sua conta. Enquanto ela permanecer, alguns recursos exclusivos ficam temporariamente indisponíveis. Regularize seu acesso para voltar a utilizar tudo normalmente.";
+      return "Identificamos uma pendência financeira vinculada à sua conta. Enquanto ela permanecer, alguns recursos ficam temporariamente indisponíveis — posso te ajudar a regularizar agora." + stay;
     case "wants_whatsapp":
-      return "Podemos continuar pelo WhatsApp também. Mas por aqui, dentro do portal, o atendimento é mais rápido, seguro e completo. Aqui consigo acessar seu contexto, módulos, histórico, pagamentos, agenda e permissões. Além disso, você pode exportar suas conversas quando quiser.";
+      return "Posso continuar por aqui mesmo com muito mais contexto: acesso ao seu histórico, módulos, pagamentos, agenda e permissões — e você exporta a conversa quando quiser." + stay;
     case "no_solution":
-      return "Ainda não temos exatamente essa solução pronta, mas posso registrar sua demanda para análise da equipe Impulsionando.";
+      return "Ainda não temos exatamente essa solução pronta, mas registro sua demanda agora mesmo para a equipe Impulsionando." + stay;
   }
 }
+
 
 const MOCK_HUB = [
   {
