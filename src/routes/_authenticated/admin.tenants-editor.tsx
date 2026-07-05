@@ -410,14 +410,80 @@ function SubdomainChecklist({
   const targetPath = formSlug ? `/vitrine/${formSlug}` : "/vitrine/<slug>";
 
   const doProbe = useServerFn(probeSubdomain);
+  const doSave = useServerFn(saveProbeResult);
+  const qc = useQueryClient();
+
+  const runProbe = async (opts: { attempt: number; triggeredBy: "manual" | "auto-retry" }) => {
+    if (!expected) throw new Error("Preencha o slug primeiro");
+    const res = await doProbe({ data: { host: expected, path: targetPath } });
+    try {
+      await doSave({
+        data: {
+          companyId: tenant.id,
+          host: expected,
+          path: targetPath,
+          url: res.url,
+          finalUrl: res.finalUrl,
+          status: res.status,
+          statusText: res.statusText,
+          ok: res.ok,
+          elapsedMs: res.elapsedMs,
+          headers: res.headers,
+          bodyPreview: res.bodyPreview,
+          diagnosis: res.diagnosis,
+          attempt: opts.attempt,
+          triggeredBy: opts.triggeredBy,
+        },
+      });
+      qc.invalidateQueries({ queryKey: ["admin", "tenants-editor", "probe-history", tenant.id] });
+    } catch (e) {
+      console.error("[probe] falha ao salvar histórico", e);
+    }
+    return res;
+  };
+
   const probeM = useMutation({
-    mutationFn: async () => {
-      if (!expected) throw new Error("Preencha o slug primeiro");
-      return doProbe({ data: { host: expected, path: targetPath } });
-    },
+    mutationFn: () => runProbe({ attempt: 1, triggeredBy: "manual" }),
     onError: (e: Error) => toast.error(e.message),
   });
   const probe = probeM.data;
+
+  // Auto-retry com backoff exponencial (5s, 15s, 45s) — dispara quando o probe
+  // indica DNS/TLS ausente ou 404 persistente.
+  const [autoRetry, setAutoRetry] = useState<{ running: boolean; step: number; log: string[] }>(
+    { running: false, step: 0, log: [] },
+  );
+  const shouldOfferRetry = !!probe && !probe.ok && (
+    probe.status === 404 ||
+    probe.status === null ||
+    /TLS|certificado|DNS/i.test(probe.diagnosis ?? "")
+  );
+
+  const startAutoRetry = async () => {
+    if (!expected) return;
+    const delays = [5000, 15000, 45000];
+    setAutoRetry({ running: true, step: 0, log: [`Tentativas com backoff: ${delays.map((d) => d/1000+"s").join(" · ")}`] });
+    for (let i = 0; i < delays.length; i++) {
+      setAutoRetry((s) => ({ ...s, step: i + 1, log: [...s.log, `Aguardando ${delays[i]/1000}s antes da tentativa ${i + 2}…`] }));
+      await new Promise((r) => setTimeout(r, delays[i]));
+      try {
+        const res = await runProbe({ attempt: i + 2, triggeredBy: "auto-retry" });
+        setAutoRetry((s) => ({
+          ...s,
+          log: [...s.log, `Tentativa ${i + 2}: ${res.status != null ? `HTTP ${res.status}` : "sem resposta"} — ${res.diagnosis}`],
+        }));
+        if (res.ok) {
+          toast.success(`Subdomínio respondeu OK na tentativa ${i + 2}`);
+          setAutoRetry((s) => ({ ...s, running: false }));
+          return;
+        }
+      } catch (e) {
+        setAutoRetry((s) => ({ ...s, log: [...s.log, `Tentativa ${i + 2}: erro — ${(e as Error).message}`] }));
+      }
+    }
+    setAutoRetry((s) => ({ ...s, running: false, log: [...s.log, "Backoff concluído sem sucesso. Verifique DNS/TLS no provedor."] }));
+    toast.warning("Backoff concluído — subdomínio ainda não responde.");
+  };
 
   const items = [
     { ok: !!formSlug, label: "public_slug preenchido", hint: "Slug obrigatório para gerar URL e roteamento." },
