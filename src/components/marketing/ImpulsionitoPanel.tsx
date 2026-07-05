@@ -57,6 +57,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { suggestionsForRoute } from "@/components/impulsionito/transport";
 
 type PanelSize = "compact" | "expanded" | "fullscreen";
 type DemoState =
@@ -195,6 +196,17 @@ export function ImpulsionitoPanel() {
   ]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const mergedSuggestions = useMemo(() => {
+    const route = suggestionsForRoute(pathname);
+    const seen = new Set<string>();
+    return [...route, ...QUICK_SUGGESTIONS].filter((s) => {
+      const k = s.trim().toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }, [pathname]);
 
   // Reseta saudação ao trocar de estado de demonstração.
   useEffect(() => {
@@ -385,6 +397,7 @@ export function ImpulsionitoPanel() {
                 scrollRef={scrollRef}
                 onQuick={pushUser}
                 typing={typing}
+                suggestions={mergedSuggestions}
               />
             )}
             {tab === "hub" && <HubTab />}
@@ -439,13 +452,16 @@ function ChatTab({
   scrollRef,
   onQuick,
   typing,
+  suggestions,
 }: {
   demo: DemoState;
   messages: ChatMsg[];
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   onQuick: (t: string) => void;
   typing: boolean;
+  suggestions: string[];
 }) {
+  const chips = suggestions.length > 0 ? suggestions : QUICK_SUGGESTIONS;
   return (
     <>
       <div
@@ -464,7 +480,7 @@ function ChatTab({
       <div className="border-t border-border bg-background/95 px-2 py-2 overflow-x-auto">
         <div className="flex items-center gap-1.5 min-w-max">
           <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-          {QUICK_SUGGESTIONS.map((s) => (
+          {chips.map((s) => (
             <button
               key={s}
               type="button"
@@ -479,6 +495,7 @@ function ChatTab({
     </>
   );
 }
+
 
 function MessageBubble({ msg }: { msg: ChatMsg }) {
   const isBot = msg.role === "bot";
