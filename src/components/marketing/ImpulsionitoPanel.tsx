@@ -132,7 +132,7 @@ const DEMO_STATE_LABEL: Record<DemoState, string> = {
 function greetingFor(state: DemoState): string {
   switch (state) {
     case "visitor":
-      return "Olá, eu sou o Impulsionito. Posso te ajudar a entender o ecossistema Impulsionando, encontrar soluções, explicar serviços e orientar seu próximo passo.";
+      return "Sou o Impulsionito — em qualquer página posso te apontar o próximo passo, módulo certo ou plano ideal. Tire todas as suas dúvidas por aqui mesmo, sem sair do portal: aqui é mais rápido, tenho seu contexto e histórico completos.";
     case "client_ok":
       return "Identifiquei seu acesso. Posso te ajudar com seus módulos, agenda, CRM, ERP, financeiro, pagamentos, guias, ferramentas e suporte.";
     case "client_overdue":
@@ -486,6 +486,28 @@ function ChatTab({
 
         <StateExtras demo={demo} onQuick={onQuick} />
       </div>
+
+      {/* WhatsApp fallback — Impulsionito atende aqui mesmo, mas oferece o canal externo */}
+      <div className="border-t border-border bg-background/95 px-3 py-2 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-muted-foreground min-w-0 truncate">
+          Prefiro tirar suas dúvidas por aqui mesmo — mais rápido e com seu contexto.
+        </span>
+        <a
+          href="https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20um%20especialista%20Impulsionando."
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            trackEvent("impulsionito_whatsapp_fallback_click", {
+              location: typeof window !== "undefined" ? window.location.pathname : "",
+            })
+          }
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-medium px-3 py-1.5 transition-colors"
+        >
+          <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
+          Se preferir WhatsApp, clique aqui
+        </a>
+      </div>
+
 
       {/* Quick suggestions bar */}
       <div className="border-t border-border bg-background/95 px-2 py-2 overflow-x-auto">
