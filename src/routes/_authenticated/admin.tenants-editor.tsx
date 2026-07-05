@@ -285,8 +285,10 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
       </div>
 
       <div className="mt-8 grid gap-6">
+        <SuggestionsPanel tenant={tenant} />
         <VitrineCardValidator form={form} />
         <SubdomainChecklist tenant={tenant} formDomain={form.domain} formSlug={form.public_slug} />
+        <ProbeHistoryPanel companyId={tenant.id} />
       </div>
     </Card>
   );
