@@ -92,7 +92,7 @@ export function PublicFooter() {
                 <Mail className="w-3.5 h-3.5" /> {EMAIL}
               </a>
               <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
-                <ExternalLink className="w-3.5 h-3.5" /> Impulsionando Brasil
+                <ExternalLink className="w-3.5 h-3.5" /> Impulsionando Tecnologia
               </a>
             </div>
           </div>
