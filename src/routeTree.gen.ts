@@ -251,6 +251,7 @@ import { Route as ApiPublicStatusBadgeDotsvgRouteImport } from './routes/api/pub
 import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
+import { Route as ApiImpulsionitoChatRouteImport } from './routes/api/impulsionito/chat'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedWhiteLabelCapacidadeRouteImport } from './routes/_authenticated/white-label.capacidade'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
@@ -1969,6 +1970,11 @@ const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
 const ApiMercadopagoWebhookRoute = ApiMercadopagoWebhookRouteImport.update({
   id: '/api/mercadopago/webhook',
   path: '/api/mercadopago/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiImpulsionitoChatRoute = ApiImpulsionitoChatRouteImport.update({
+  id: '/api/impulsionito/chat',
+  path: '/api/impulsionito/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWhiteLabelCockpitRoute =
@@ -5332,6 +5338,7 @@ export interface FileRoutesByFullPath {
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
@@ -6041,6 +6048,7 @@ export interface FileRoutesByTo {
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
@@ -6763,6 +6771,7 @@ export interface FileRoutesById {
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
@@ -7486,6 +7495,7 @@ export interface FileRouteTypes {
     | '/users/corporate'
     | '/white-label/capacidade'
     | '/white-label/cockpit'
+    | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
@@ -8195,6 +8205,7 @@ export interface FileRouteTypes {
     | '/users/corporate'
     | '/white-label/capacidade'
     | '/white-label/cockpit'
+    | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
@@ -8916,6 +8927,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/capacidade'
     | '/_authenticated/white-label/cockpit'
+    | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
@@ -9228,6 +9240,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  ApiImpulsionitoChatRoute: typeof ApiImpulsionitoChatRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicStatusRoute: typeof ApiPublicStatusRouteWithChildren
@@ -10994,6 +11007,13 @@ declare module '@tanstack/react-router' {
       path: '/api/mercadopago/webhook'
       fullPath: '/api/mercadopago/webhook'
       preLoaderRoute: typeof ApiMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/impulsionito/chat': {
+      id: '/api/impulsionito/chat'
+      path: '/api/impulsionito/chat'
+      fullPath: '/api/impulsionito/chat'
+      preLoaderRoute: typeof ApiImpulsionitoChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/white-label/cockpit': {
@@ -16218,6 +16238,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  ApiImpulsionitoChatRoute: ApiImpulsionitoChatRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicStatusRoute: ApiPublicStatusRouteWithChildren,

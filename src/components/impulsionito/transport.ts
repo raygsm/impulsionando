@@ -1,21 +1,15 @@
 /**
- * Impulsionito — Transport (mock, sem backend).
+ * Impulsionito — Transport HTTP/SSE-like.
  *
- * Ponto único de integração para o Codex ligar depois no backend real
- * (ex.: /api/impulsionito/chat + OpenAI Responses API / Lovable AI Gateway).
+ * Faz POST para /api/impulsionito/chat e lê a resposta em streaming
+ * (text/plain chunks). Fallback automático para modo mock quando:
+ *  - `VITE_IMPULSIONITO_MODE=mock` (dev/demo forçado)
+ *  - o endpoint retorna erro / falha de rede (modo degradado)
+ *  - `navigator.onLine === false`
  *
- * Regras da trava atual (frontend-only-lock):
- * - Nenhuma requisição de rede real.
- * - Nenhum secret, nenhum Supabase, nenhum server function.
- * - Toda resposta é simulada localmente com atraso e streaming fake.
+ * Contrato mantido — a UI não precisou mudar:
  *
- * Contrato público (NÃO mudar sem alinhar com o roadmap
- * docs/IMPULSIONITO_BACKEND_ROADMAP_W110.md):
- *
- *   sendMessage({ text, context }) -> AsyncIterable<TokenChunk>
- *
- * Quando o backend estiver pronto, basta trocar a implementação de
- * `useImpulsionitoTransport` sem tocar em UI.
+ *   sendMessage({ text, context, history?, signal? }) -> AsyncIterable<TokenChunk>
  */
 
 export type ImpulsionitoRole = "user" | "assistant" | "system";
@@ -29,19 +23,17 @@ export interface ImpulsionitoMessage {
 }
 
 export interface ImpulsionitoContext {
-  /** Rota atual do usuário no Core. */
   pathname: string;
-  /** Título curto da tela (breadcrumb / doc.title). */
   screen?: string;
-  /** Tenant/empresa ativa, se conhecida. */
   companyId?: string | null;
-  /** Audiência do usuário (b2b, consumidor, whitelabel, admin). */
   audience?: string | null;
 }
 
 export interface SendMessageInput {
   text: string;
   context: ImpulsionitoContext;
+  /** Histórico já persistido (sem a mensagem nova). */
+  history?: ImpulsionitoMessage[];
   signal?: AbortSignal;
 }
 
@@ -52,58 +44,140 @@ export interface TokenChunk {
 
 export interface ImpulsionitoTransport {
   sendMessage: (input: SendMessageInput) => AsyncIterable<TokenChunk>;
-  /** Indicador visual — enquanto backend não existe, sempre `mock`. */
   mode: "mock" | "live";
 }
 
+const ENDPOINT = "/api/impulsionito/chat";
+
 // ---------------------------------------------------------------------------
-// Mock — respostas curtas e contextuais por rota. Sem chamadas de rede.
+// Mock (fallback local — permanece para dev e degradação graciosa).
 // ---------------------------------------------------------------------------
 
-function pickReply(input: SendMessageInput): string {
+function pickMockReply(input: SendMessageInput): string {
   const t = input.text.toLowerCase().trim();
   const path = input.context.pathname;
-
   if (!t) return "Diga o que você precisa que eu já te ajudo aqui no Core.";
-
-  if (t.includes("ola") || t.includes("olá") || t === "oi") {
-    return "Olá! Eu sou o Impulsionito. Estou em modo visual de demonstração — o backend real será plugado em seguida. Como posso te orientar nesta tela?";
-  }
-
-  if (t.includes("agenda")) {
-    return "Você pode abrir a Agenda pelo menu lateral. Nesta versão visual, ainda não executo ações — só te oriento no fluxo.";
-  }
-
-  if (t.includes("financeiro") || t.includes("pagamento") || t.includes("boleto") || t.includes("pix")) {
-    return "Para pagamentos e faturas, vá em Financeiro → Minha Assinatura. Quando meu backend estiver ativo, eu mesmo gero o link de pagamento aqui.";
-  }
-
-  if (t.includes("whatsapp")) {
-    return "O canal WhatsApp está no roadmap (Z-API na fase 1 → Meta Cloud API na fase 2). Por enquanto, converse comigo por aqui mesmo.";
-  }
-
-  if (path.startsWith("/admin")) {
-    return "Estou vendo que você está na área administrativa. Quando o backend estiver ativo, respondo com métricas reais desta tela e sugiro próximas ações.";
-  }
-
-  if (path.startsWith("/crm")) {
-    return "No CRM eu consigo te ajudar a triagem de leads, próximos follow-ups e roteiros de contato. Agora é só demo visual.";
-  }
-
-  return `Entendi. Nesta versão visual eu não executo ações, mas registrei sua mensagem "${input.text.slice(0, 80)}". O backend real será ligado em seguida.`;
+  if (t.includes("ola") || t.includes("olá") || t === "oi")
+    return "Olá! Sou o Impulsionito. Como posso te ajudar nesta tela?";
+  if (t.includes("agenda"))
+    return "Você pode abrir a Agenda pelo menu lateral. Quer que eu detalhe algum recurso específico?";
+  if (t.includes("financeiro") || t.includes("pagamento") || t.includes("pix"))
+    return "Para pagamentos e faturas, vá em Financeiro → Minha Assinatura.";
+  if (t.includes("whatsapp"))
+    return "O canal WhatsApp está no roadmap (Z-API na fase 1). Por enquanto, converse comigo por aqui mesmo.";
+  if (path.startsWith("/admin"))
+    return "Você está na área administrativa. Posso te orientar sobre métricas, ajustes ou próximas ações.";
+  return `Entendi. Registrei "${input.text.slice(0, 80)}". Como posso avançar?`;
 }
 
 async function* streamMock(input: SendMessageInput): AsyncIterable<TokenChunk> {
-  const full = pickReply(input);
-  // divide em tokens curtos para simular streaming
+  const full = pickMockReply(input);
   const parts = full.match(/\S+\s*/g) ?? [full];
   for (const p of parts) {
     if (input.signal?.aborted) return;
-    await new Promise((r) => setTimeout(r, 25 + Math.random() * 45));
+    await new Promise((r) => setTimeout(r, 25 + Math.random() * 40));
     yield { delta: p };
   }
   yield { delta: "", done: true };
 }
+
+// ---------------------------------------------------------------------------
+// Live — HTTP streaming contra /api/impulsionito/chat.
+// ---------------------------------------------------------------------------
+
+async function* streamLive(input: SendMessageInput): AsyncIterable<TokenChunk> {
+  const history = (input.history ?? [])
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .slice(-20)
+    .map((m) => ({ role: m.role, text: m.text }));
+
+  const payload = {
+    messages: [...history, { role: "user" as const, text: input.text }],
+    context: {
+      pathname: input.context.pathname,
+      screen: input.context.screen,
+      audience: input.context.audience,
+    },
+  };
+
+  const res = await fetch(ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "text/plain" },
+    body: JSON.stringify(payload),
+    signal: input.signal,
+  });
+
+  if (!res.ok || !res.body) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const j = (await res.json()) as { error?: string };
+      if (j?.error) detail = j.error;
+    } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  try {
+    while (true) {
+      if (input.signal?.aborted) {
+        try { await reader.cancel(); } catch { /* ignore */ }
+        return;
+      }
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) yield { delta: value };
+    }
+    yield { delta: "", done: true };
+  } finally {
+    try { reader.releaseLock(); } catch { /* ignore */ }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Seleção de modo.
+// ---------------------------------------------------------------------------
+
+function forcedMockMode(): boolean {
+  try {
+    const m = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_IMPULSIONITO_MODE;
+    if (m === "mock") return true;
+  } catch { /* ignore */ }
+  return false;
+}
+
+const liveTransport: ImpulsionitoTransport = {
+  mode: "live",
+  sendMessage: (input) => {
+    // Wrapper que faz fallback gracioso: se streamLive falhar antes do
+    // primeiro chunk (rede, 502), cai para mock automaticamente.
+    return {
+      [Symbol.asyncIterator]: async function* () {
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          yield* streamMock(input);
+          return;
+        }
+        try {
+          const it = streamLive(input)[Symbol.asyncIterator]();
+          const first = await it.next();
+          if (first.done) return;
+          yield first.value;
+          while (true) {
+            const n = await it.next();
+            if (n.done) return;
+            yield n.value;
+          }
+        } catch (err) {
+          if (input.signal?.aborted) return;
+          console.warn("[impulsionito] live falhou, usando mock:", err);
+          yield {
+            delta: "",
+          };
+          yield* streamMock(input);
+        }
+      },
+    };
+  },
+};
 
 const mockTransport: ImpulsionitoTransport = {
   mode: "mock",
@@ -111,12 +185,11 @@ const mockTransport: ImpulsionitoTransport = {
 };
 
 export function useImpulsionitoTransport(): ImpulsionitoTransport {
-  // Quando houver backend, retornar aqui o transport HTTP/SSE real.
-  return mockTransport;
+  return forcedMockMode() ? mockTransport : liveTransport;
 }
 
 // ---------------------------------------------------------------------------
-// Sugestões contextuais por rota — visuais, sem lógica de negócio.
+// Sugestões contextuais por rota.
 // ---------------------------------------------------------------------------
 
 export function suggestionsForRoute(pathname: string): string[] {
@@ -135,4 +208,44 @@ export function suggestionsForRoute(pathname: string): string[] {
   if (pathname.startsWith("/clube") || pathname.startsWith("/area-clube"))
     return ["Meus benefícios", "Como usar o clube", "Falar com suporte"];
   return ["O que posso fazer aqui?", "Me mostre um resumo do meu negócio", "Como você funciona?"];
+}
+
+// ---------------------------------------------------------------------------
+// Exportação de conversa (utilizado pelo dock).
+// ---------------------------------------------------------------------------
+
+export function exportConversation(
+  messages: ImpulsionitoMessage[],
+  format: "json" | "txt",
+): { filename: string; mime: string; content: string } {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  if (format === "json") {
+    return {
+      filename: `impulsionito-${stamp}.json`,
+      mime: "application/json",
+      content: JSON.stringify(
+        {
+          exportedAt: new Date().toISOString(),
+          messages: messages.map((m) => ({
+            role: m.role,
+            text: m.text,
+            ts: m.ts,
+            iso: new Date(m.ts).toISOString(),
+          })),
+        },
+        null,
+        2,
+      ),
+    };
+  }
+  const lines = messages.map((m) => {
+    const who = m.role === "user" ? "Você" : m.role === "assistant" ? "Impulsionito" : "Sistema";
+    const time = new Date(m.ts).toLocaleString("pt-BR");
+    return `[${time}] ${who}:\n${m.text}\n`;
+  });
+  return {
+    filename: `impulsionito-${stamp}.txt`,
+    mime: "text/plain;charset=utf-8",
+    content: `Conversa com Impulsionito — exportada em ${new Date().toLocaleString("pt-BR")}\n\n${lines.join("\n")}`,
+  };
 }
