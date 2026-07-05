@@ -438,11 +438,13 @@ function ChatTab({
   messages,
   scrollRef,
   onQuick,
+  typing,
 }: {
   demo: DemoState;
   messages: ChatMsg[];
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   onQuick: (t: string) => void;
+  typing: boolean;
 }) {
   return (
     <>
