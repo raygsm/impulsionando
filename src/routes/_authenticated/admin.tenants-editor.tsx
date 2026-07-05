@@ -65,9 +65,14 @@ function TenantsEditorPage() {
             roteamento por subdomínio <code className="text-xs">&lt;slug&gt;.impulsionando.com.br</code>.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/admin/vitrine">Vitrine (governança)</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/dns-guide"><BookOpen className="w-4 h-4 mr-1.5" />Guia DNS wildcard</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/vitrine">Vitrine (governança)</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
