@@ -184,6 +184,7 @@ export function ImpulsionitoPanel() {
   const [tab, setTab] = useState<Tab>("chat");
   const [demo, setDemo] = useState<DemoState>("visitor");
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>(() => [
     {
       id: "greet",
@@ -193,6 +194,7 @@ export function ImpulsionitoPanel() {
     },
   ]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reseta saudação ao trocar de estado de demonstração.
   useEffect(() => {
@@ -204,7 +206,11 @@ export function ImpulsionitoPanel() {
   useEffect(() => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, open, size, tab]);
+  }, [messages, open, size, tab, typing]);
+
+  useEffect(() => () => {
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+  }, []);
 
   const hidden = useMemo(
     () => HIDDEN_PREFIXES.some((p) => pathname.startsWith(p)),
@@ -218,13 +224,21 @@ export function ImpulsionitoPanel() {
     setMessages((m) => [
       ...m,
       { id: `u-${now}`, role: "user", text, ts: now },
-      {
-        id: `b-${now + 1}`,
-        role: "bot",
-        text: "Entendi. (Resposta simulada — a integração real será conectada em seguida.)",
-        ts: now + 1,
-      },
     ]);
+    setTyping(true);
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => {
+      setMessages((m) => [
+        ...m,
+        {
+          id: `b-${Date.now()}`,
+          role: "bot",
+          text: "Entendi. (Resposta simulada — a integração real será conectada em seguida.)",
+          ts: Date.now(),
+        },
+      ]);
+      setTyping(false);
+    }, 900);
   }
 
   function onSend() {
@@ -370,6 +384,7 @@ export function ImpulsionitoPanel() {
                 messages={messages}
                 scrollRef={scrollRef}
                 onQuick={pushUser}
+                typing={typing}
               />
             )}
             {tab === "hub" && <HubTab />}
@@ -423,11 +438,13 @@ function ChatTab({
   messages,
   scrollRef,
   onQuick,
+  typing,
 }: {
   demo: DemoState;
   messages: ChatMsg[];
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   onQuick: (t: string) => void;
+  typing: boolean;
 }) {
   return (
     <>
@@ -438,6 +455,7 @@ function ChatTab({
         {messages.map((m) => (
           <MessageBubble key={m.id} msg={m} />
         ))}
+        {typing && <TypingBubble />}
 
         <StateExtras demo={demo} onQuick={onQuick} />
       </div>
@@ -480,6 +498,21 @@ function MessageBubble({ msg }: { msg: ChatMsg }) {
         )}
       >
         {msg.text}
+      </div>
+    </div>
+  );
+}
+
+function TypingBubble() {
+  return (
+    <div className="flex gap-2 justify-start" aria-live="polite" aria-label="Impulsionito está digitando">
+      <span className="w-7 h-7 rounded-full bg-gradient-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
+        <Bot className="w-3.5 h-3.5" />
+      </span>
+      <div className="rounded-2xl rounded-tl-sm border border-border bg-card px-3 py-2.5 shadow-sm inline-flex items-center gap-1">
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.3s]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.15s]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" />
       </div>
     </div>
   );

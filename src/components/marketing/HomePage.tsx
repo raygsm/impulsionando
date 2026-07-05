@@ -438,15 +438,17 @@ export function HomePage() {
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
           <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
-            <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-5">
-              <Sparkles className="w-3 h-3 mr-1" /> Tecnologia + Estratégia + Comunicação
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+            <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-6 px-3 py-1">
+              <Sparkles className="w-3 h-3 mr-1.5" /> Tecnologia + Estratégia + Comunicação
             </Badge>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight max-w-4xl mx-auto">
-              Tecnologia que conecta atendimento, vendas e operação em um só ecossistema.
+            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
+              Tecnologia que conecta{" "}
+              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atendimento, vendas e operação</span>{" "}
+              em um só ecossistema.
             </h1>
-            <p className="mt-5 text-base sm:text-xl text-white/85 leading-relaxed max-w-3xl mx-auto">
+            <p className="mt-6 text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl mx-auto">
               CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação —
               modular, por nicho, com White Label pronto para revender com a sua marca.
             </p>
@@ -558,15 +560,11 @@ export function HomePage() {
             </div>
 
 
-
-
-
-
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <Button
                 asChild
                 size="sm"
-                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                className="bg-white text-primary hover:bg-white/90 gap-1.5 shadow-sm"
                 onClick={() => trackHeroCta("diagnostico_30s")}
               >
                 <a href="#diagnostico" data-analytics="hero-diagnostico-30s">
@@ -592,7 +590,8 @@ export function HomePage() {
               <Button
                 asChild
                 size="sm"
-                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                variant="outline"
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
                 onClick={() => trackHeroCta("ver_demonstracoes")}
               >
                 <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
@@ -600,6 +599,15 @@ export function HomePage() {
                 </Link>
               </Button>
             </div>
+
+            {/* Trust bar — reforço visual de segurança/leveza */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Sem cartão para testar</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Setup assistido</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> LGPD & dados no Brasil</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Modular por nicho</span>
+            </div>
+
 
 
 
