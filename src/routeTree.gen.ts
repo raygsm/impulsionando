@@ -535,6 +535,7 @@ import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminEcosystemMarketplaceHealthRouteImport } from './routes/_authenticated/admin.ecosystem-marketplace-health'
 import { Route as AuthenticatedAdminDominiosRouteImport } from './routes/_authenticated/admin.dominios'
 import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
+import { Route as AuthenticatedAdminDnsGuideRouteImport } from './routes/_authenticated/admin.dns-guide'
 import { Route as AuthenticatedAdminDeployStatusRouteImport } from './routes/_authenticated/admin.deploy-status'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
@@ -3654,6 +3655,12 @@ const AuthenticatedAdminDocumentsFilesHealthRoute =
     path: '/admin/documents-files-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDnsGuideRoute =
+  AuthenticatedAdminDnsGuideRouteImport.update({
+    id: '/admin/dns-guide',
+    path: '/admin/dns-guide',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDeployStatusRoute =
   AuthenticatedAdminDeployStatusRouteImport.update({
     id: '/admin/deploy-status',
@@ -5063,6 +5070,7 @@ export interface FileRoutesByFullPath {
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
+  '/admin/dns-guide': typeof AuthenticatedAdminDnsGuideRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
@@ -5774,6 +5782,7 @@ export interface FileRoutesByTo {
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
+  '/admin/dns-guide': typeof AuthenticatedAdminDnsGuideRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
@@ -6498,6 +6507,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
+  '/_authenticated/admin/dns-guide': typeof AuthenticatedAdminDnsGuideRoute
   '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/_authenticated/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/_authenticated/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
@@ -7223,6 +7233,7 @@ export interface FileRouteTypes {
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/deploy-status'
+    | '/admin/dns-guide'
     | '/admin/documents-files-health'
     | '/admin/dominios'
     | '/admin/ecosystem-marketplace-health'
@@ -7934,6 +7945,7 @@ export interface FileRouteTypes {
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/deploy-status'
+    | '/admin/dns-guide'
     | '/admin/documents-files-health'
     | '/admin/dominios'
     | '/admin/ecosystem-marketplace-health'
@@ -8657,6 +8669,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/deploy-status'
+    | '/_authenticated/admin/dns-guide'
     | '/_authenticated/admin/documents-files-health'
     | '/_authenticated/admin/dominios'
     | '/_authenticated/admin/ecosystem-marketplace-health'
@@ -13010,6 +13023,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsFilesHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/dns-guide': {
+      id: '/_authenticated/admin/dns-guide'
+      path: '/admin/dns-guide'
+      fullPath: '/admin/dns-guide'
+      preLoaderRoute: typeof AuthenticatedAdminDnsGuideRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/deploy-status': {
       id: '/_authenticated/admin/deploy-status'
       path: '/admin/deploy-status'
@@ -15286,6 +15306,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminDeployStatusRoute: typeof AuthenticatedAdminDeployStatusRoute
+  AuthenticatedAdminDnsGuideRoute: typeof AuthenticatedAdminDnsGuideRoute
   AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
   AuthenticatedAdminDominiosRoute: typeof AuthenticatedAdminDominiosRoute
   AuthenticatedAdminEcosystemMarketplaceHealthRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
@@ -15590,6 +15611,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
   AuthenticatedAdminDeployStatusRoute: AuthenticatedAdminDeployStatusRoute,
+  AuthenticatedAdminDnsGuideRoute: AuthenticatedAdminDnsGuideRoute,
   AuthenticatedAdminDocumentsFilesHealthRoute:
     AuthenticatedAdminDocumentsFilesHealthRoute,
   AuthenticatedAdminDominiosRoute: AuthenticatedAdminDominiosRoute,
