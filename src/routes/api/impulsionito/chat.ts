@@ -42,15 +42,15 @@ function systemPrompt(ctx: IncomingContext | undefined): string {
 }
 
 function toModelMessages(msgs: IncomingMessage[]): ModelMessage[] {
-  return msgs
-    .map((m) => {
-      const content = (m.text ?? m.content ?? "").toString().trim();
-      if (!content) return null;
-      if (m.role === "system") return { role: "system" as const, content };
-      if (m.role === "assistant") return { role: "assistant" as const, content };
-      return { role: "user" as const, content };
-    })
-    .filter((m): m is ModelMessage => m !== null);
+  const out: ModelMessage[] = [];
+  for (const m of msgs) {
+    const content = (m.text ?? m.content ?? "").toString().trim();
+    if (!content) continue;
+    if (m.role === "system") out.push({ role: "system", content });
+    else if (m.role === "assistant") out.push({ role: "assistant", content });
+    else out.push({ role: "user", content });
+  }
+  return out;
 }
 
 export const Route = createFileRoute("/api/impulsionito/chat")({
