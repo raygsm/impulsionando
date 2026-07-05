@@ -274,7 +274,12 @@ export function ImpulsionitoPanel() {
       {!open && (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            trackEvent("impulsionito_panel_open", {
+              location: typeof window !== "undefined" ? window.location.pathname : "",
+            });
+          }}
           aria-label="Abrir Impulsionito"
           className="fixed bottom-4 left-4 z-[60] inline-flex items-center gap-2 rounded-full bg-gradient-primary text-primary-foreground px-4 py-3 shadow-elegant hover:brightness-110 transition-all font-medium text-sm print:hidden"
         >
