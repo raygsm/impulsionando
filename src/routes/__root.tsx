@@ -17,7 +17,7 @@ import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
-import { ImpulsionitoFab } from "@/components/marketing/ImpulsionitoFab";
+import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 
@@ -199,8 +199,8 @@ function RootComponent() {
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
-      {/* W16: FAB único — apenas Impulsionito (WhatsApp/Brasil/Download FABs removidos). */}
-      <ImpulsionitoFab />
+      {/* Painel visual do agente Impulsionito (somente UI — integração posterior). */}
+      <ImpulsionitoPanel />
       <DemoAccessGate />
     </QueryClientProvider>
   );
