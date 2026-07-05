@@ -58,6 +58,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { suggestionsForRoute } from "@/components/impulsionito/transport";
+import { trackEvent } from "@/lib/analytics";
 
 type PanelSize = "compact" | "expanded" | "fullscreen";
 type DemoState =
@@ -273,7 +274,12 @@ export function ImpulsionitoPanel() {
       {!open && (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            trackEvent("impulsionito_panel_open", {
+              location: typeof window !== "undefined" ? window.location.pathname : "",
+            });
+          }}
           aria-label="Abrir Impulsionito"
           className="fixed bottom-4 left-4 z-[60] inline-flex items-center gap-2 rounded-full bg-gradient-primary text-primary-foreground px-4 py-3 shadow-elegant hover:brightness-110 transition-all font-medium text-sm print:hidden"
         >
@@ -338,7 +344,12 @@ export function ImpulsionitoPanel() {
               )}
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  trackEvent("impulsionito_panel_close", {
+                    location: typeof window !== "undefined" ? window.location.pathname : "",
+                  });
+                }}
                 aria-label="Fechar"
                 className="p-1.5 rounded hover:bg-white/15"
               >
@@ -480,11 +491,19 @@ function ChatTab({
       <div className="border-t border-border bg-background/95 px-2 py-2 overflow-x-auto">
         <div className="flex items-center gap-1.5 min-w-max">
           <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-          {chips.map((s) => (
+          {chips.map((s, i) => (
             <button
               key={s}
               type="button"
-              onClick={() => onQuick(s)}
+              onClick={() => {
+                trackEvent("impulsionito_suggestion_click", {
+                  suggestion: s,
+                  index: i,
+                  route_aware: suggestions.length > 0,
+                  location: typeof window !== "undefined" ? window.location.pathname : "",
+                });
+                onQuick(s);
+              }}
               className="shrink-0 text-[11px] rounded-full border border-border bg-card px-2.5 py-1 hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               {s}
