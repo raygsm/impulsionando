@@ -94,3 +94,95 @@ export const updateTenant = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { tenant: updated };
   });
+
+/**
+ * Faz uma sondagem HTTP real (server-side, sem CORS) contra o host informado
+ * para diagnosticar se o subdomínio responde e para onde. Retorna status,
+ * headers relevantes, tempo de resposta e URL final após redirects.
+ */
+export const probeSubdomain = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({
+      host: z.string().trim().min(3).max(253),
+      path: z.string().trim().max(400).optional(),
+    }).parse(data),
+  )
+  .handler(async ({ context, data }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "companies",
+      metadata: { source: "tenants-editor", op: "probe-subdomain", host: data.host },
+    });
+
+    const path = data.path?.startsWith("/") ? data.path : `/${data.path ?? ""}`;
+    const url = `https://${data.host}${path}`;
+    const started = Date.now();
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(url, {
+        method: "GET",
+        redirect: "follow",
+        signal: controller.signal,
+        headers: { "User-Agent": "Impulsionando-SubdomainProbe/1.0" },
+      });
+      clearTimeout(timeout);
+      const elapsed = Date.now() - started;
+
+      const headers: Record<string, string> = {};
+      for (const key of ["content-type", "server", "x-powered-by", "cf-ray", "location"]) {
+        const v = res.headers.get(key);
+        if (v) headers[key] = v;
+      }
+
+      let bodyPreview: string | null = null;
+      try {
+        const text = await res.text();
+        bodyPreview = text.slice(0, 400);
+      } catch { /* ignore */ }
+
+      const diagnosis =
+        res.status >= 200 && res.status < 400
+          ? "OK — host responde. Verifique se o conteúdo carregado é a app Impulsionando."
+          : res.status === 404
+            ? "404 — o host resolveu, mas a app não conhece esta rota/host. Falta adicionar o wildcard no Publish/Custom Domain."
+            : res.status === 502 || res.status === 503
+              ? "Erro de gateway — DNS OK, mas o backend está indisponível."
+              : `HTTP ${res.status} — resposta inesperada.`;
+
+      return {
+        ok: res.ok,
+        url,
+        finalUrl: res.url,
+        status: res.status,
+        statusText: res.statusText,
+        elapsedMs: elapsed,
+        headers,
+        bodyPreview,
+        diagnosis,
+      };
+    } catch (e) {
+      const msg = (e as Error).message;
+      const isDns = /getaddrinfo|ENOTFOUND|ENOENT|EAI_AGAIN/i.test(msg);
+      const isCert = /certificate|SSL|TLS/i.test(msg);
+      const isTimeout = /abort|timeout/i.test(msg);
+      return {
+        ok: false,
+        url,
+        finalUrl: null,
+        status: null,
+        statusText: null,
+        elapsedMs: Date.now() - started,
+        headers: {} as Record<string, string>,
+        bodyPreview: null,
+        diagnosis: isDns
+          ? "DNS não resolveu — falta o registro A wildcard *.impulsionando.com.br → 185.158.133.1."
+          : isCert
+            ? "TLS/certificado inválido — o wildcard ainda não foi provisionado (aguarde ou reconecte o domínio)."
+            : isTimeout
+              ? "Timeout — DNS pode ter resolvido mas o servidor não respondeu em 8s."
+              : `Falha de rede: ${msg}`,
+      };
+    }
+  });
