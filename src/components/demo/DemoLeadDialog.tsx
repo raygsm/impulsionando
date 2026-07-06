@@ -20,6 +20,14 @@ interface Props {
   className?: string;
   /** Label do botão padrão. */
   label?: string;
+  /** Contexto adicional enviado para o time comercial. */
+  notes?: string;
+  /** Título customizado para fluxos de agendamento/diagnóstico. */
+  title?: string;
+  /** Descrição customizada do formulário. */
+  description?: string;
+  /** Texto do botão de envio. */
+  submitLabel?: string;
 }
 
 const phoneOk = (v: string) => v.replace(/\D/g, "").length >= 10;
@@ -32,11 +40,17 @@ export function DemoLeadDialog({
   trigger,
   className,
   label = "Receber esta demo no WhatsApp",
+  notes,
+  title,
+  description,
+  submitLabel = "Liberar demo",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -53,7 +67,15 @@ export function DemoLeadDialog({
       const r = await fetch("/api/public/demo/feira-lead", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, email, phone, niche, origin }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          company,
+          niche,
+          origin,
+          notes: [notes, preferredTime ? `Melhor horário informado: ${preferredTime}` : ""].filter(Boolean).join("\n\n"),
+        }),
       });
       const j = await r.json();
       if (!r.ok || !j?.ok) throw new Error(j?.error ?? "Falha ao registrar.");
@@ -78,12 +100,12 @@ export function DemoLeadDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {done ? "Acesso liberado" : `Demo ${nicheLabel ?? niche} — receber acesso`}
+            {done ? "Acesso liberado" : title ?? `Demo ${nicheLabel ?? niche} — receber acesso`}
           </DialogTitle>
           <DialogDescription>
             {done
               ? "Em instantes você recebe um e-mail com a demo e um contato no WhatsApp."
-              : "Preencha 3 dados e libere a demo completa do nicho, sem cadastro."}
+              : description ?? "Preencha 3 dados e libere a demo completa do nicho, sem cadastro."}
           </DialogDescription>
         </DialogHeader>
 
@@ -109,13 +131,21 @@ export function DemoLeadDialog({
               <Label htmlFor="ld-phone">WhatsApp</Label>
               <Input id="ld-phone" inputMode="tel" placeholder="(11) 99999-9999" value={phone} onChange={(e) => setPhone(e.target.value)} required />
             </div>
+            <div>
+              <Label htmlFor="ld-company">Empresa</Label>
+              <Input id="ld-company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Nome da empresa" maxLength={160} />
+            </div>
+            <div>
+              <Label htmlFor="ld-time">Melhor horário para demonstração</Label>
+              <Input id="ld-time" value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)} placeholder="Ex.: amanhã às 15h" maxLength={120} />
+            </div>
             <label className="flex items-start gap-2 text-xs text-muted-foreground">
               <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
               <span>Autorizo a Impulsionando a entrar em contato sobre esta demonstração.</span>
             </label>
             <Button type="submit" disabled={submitting} className="w-full bg-gradient-primary gap-2">
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Liberar demo
+              {submitLabel}
             </Button>
           </form>
         )}
