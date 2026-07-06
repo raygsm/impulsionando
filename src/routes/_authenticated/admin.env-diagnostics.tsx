@@ -1,13 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from "lucide-react";
-import { getSupabaseEnvDiagnostics } from "@/lib/env-diagnostics.functions";
+import { getSupabaseEnvDiagnostics, triggerEnvAlert } from "@/lib/env-diagnostics.functions";
+import { checkDiagnosticAccess } from "@/lib/diagnostic-access.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/env-diagnostics")({
+  beforeLoad: async () => {
+    const res = await checkDiagnosticAccess();
+    if (!res.allowed) {
+      throw redirect({ to: "/core" as never });
+    }
+    return { diagLevel: res.level };
+  },
   head: () => ({
     meta: [
       { title: "Diagnóstico de Ambiente — Impulsionando" },
@@ -21,11 +30,14 @@ type ServerCheck = { name: string; present: boolean; length: number; preview: st
 
 function EnvDiagnosticsPage() {
   const serverFn = useServerFn(getSupabaseEnvDiagnostics);
+  const alertFn = useServerFn(triggerEnvAlert);
   const { data, isLoading, refetch, isFetching, error } = useQuery({
     queryKey: ["env-diagnostics"],
     queryFn: () => serverFn(),
     staleTime: 5_000,
   });
+  const alertSentRef = useRef(false);
+  const [alertStatus, setAlertStatus] = useState<null | { ok: boolean; msg: string }>(null);
 
   const clientChecks: ServerCheck[] = [
     {
@@ -60,6 +72,26 @@ function EnvDiagnosticsPage() {
     (c) => ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"].includes(c.name) && !c.present,
   );
   const hasCriticalMissing = missingServer.length > 0 || missingClient.length > 0;
+
+  // Dispara alerta (webhook + e-mail) automaticamente na primeira detecção.
+  useEffect(() => {
+    if (!hasCriticalMissing || alertSentRef.current || isLoading) return;
+    alertSentRef.current = true;
+    const missing = [
+      ...missingServer.map((c) => c.name),
+      ...missingClient.map((c) => c.name),
+    ];
+    alertFn({ data: { missing, host: data?.host ?? (typeof window !== "undefined" ? window.location.host : null) } })
+      .then((r) => {
+        setAlertStatus({
+          ok: !!r.sent,
+          msg: r.sent
+            ? `Alerta enviado (webhook: ${r.webhook ?? "—"}, e-mail: ${r.email ?? "—"}).`
+            : `Alerta não enviado: ${r.reason ?? "desconhecido"}.`,
+        });
+      })
+      .catch((err) => setAlertStatus({ ok: false, msg: `Falha ao alertar: ${(err as Error).message}` }));
+  }, [hasCriticalMissing, isLoading, missingServer, missingClient, data?.host, alertFn]);
 
   return (
     <div className="space-y-4 max-w-4xl">
@@ -111,6 +143,11 @@ function EnvDiagnosticsPage() {
                   <code>impulsionando.lovable.app</code>, que sempre recebe as env vars.
                 </li>
               </ol>
+              {alertStatus && (
+                <div className={`mt-2 text-xs ${alertStatus.ok ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  {alertStatus.msg}
+                </div>
+              )}
             </div>
           </div>
         </Card>

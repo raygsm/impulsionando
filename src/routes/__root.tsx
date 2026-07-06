@@ -21,6 +21,7 @@ import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import { getTenantSubdomain, tenantSubdomainTarget } from "@/lib/subdomain";
+import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 
 
 function TenantSubdomainRedirect() {
@@ -141,6 +142,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Impulsionando" },
       { name: "mobile-web-app-capable", content: "yes" },
+      // Cache-busting: garante que a navegação/menu novo apareça imediatamente após publicar.
+      { httpEquiv: "Cache-Control", content: "no-cache, no-store, must-revalidate" },
+      { httpEquiv: "Pragma", content: "no-cache" },
+      { httpEquiv: "Expires", content: "0" },
       { title: "Impulsionando Tecnologia — Plataforma SaaS Multiempresa" },
       { name: "description", content: "Plataforma SaaS multiempresa modular: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque, BI e automação para empresas que precisam crescer com controle." },
       { name: "author", content: "Impulsionando Tecnologia" },
@@ -218,6 +223,7 @@ function RootComponent() {
       <TenantSubdomainRedirect />
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
+      <EnvHealthBanner />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
