@@ -143,6 +143,11 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
 
   const toggleActive = useMutation({
     mutationFn: async (tpl: Template) => {
+      // Guard: nunca ativar template sem conteúdo — evita envio vazio ao cliente.
+      const willActivate = !tpl.is_active;
+      if (willActivate && !(tpl.body ?? "").trim()) {
+        throw new Error("Configure o conteúdo antes de ativar este modelo.");
+      }
       if (tpl.company_id === companyId) {
         const { error } = await supabase
           .from("message_templates")
