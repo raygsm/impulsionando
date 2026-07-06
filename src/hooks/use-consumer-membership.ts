@@ -3,34 +3,54 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "./use-current-user";
 
 /**
- * Indica se o Consumidor Final possui uma assinatura ativa do Clube.
+ * Estado de assinatura do Clube (Consumidor Final).
  *
- * Usado para decidir qual shell renderizar:
- *  - sem assinatura ativa → CheckoutShell (jornada de contratação, menu enxuto)
- *  - com assinatura ativa → AppShell padrão (Início, Clube, Vitrine etc.)
+ * Retorna `isActive` para gates simples e `tier` (derivado de `plan`) para
+ * gates finos entre `essencial` / `full` no painel do consumidor.
  */
-export function useConsumerHasActiveMembership() {
+export type ConsumerMembership = {
+  isActive: boolean;
+  tier: string | null;
+  status: string | null;
+  plan: string | null;
+};
+
+export function useConsumerMembership() {
   const { data: user } = useCurrentUser();
   const userId = user?.user?.id;
 
-  return useQuery({
-    queryKey: ["consumer-membership-active", userId],
+  return useQuery<ConsumerMembership>({
+    queryKey: ["consumer-membership", userId],
     enabled: !!userId,
     staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("consumer_memberships")
-        .select("id,status,created_at")
+        .select("id,status,plan,created_at")
         .eq("user_id", userId!)
         .in("status", ["active", "trialing"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (error) {
-        console.warn("[useConsumerHasActiveMembership]", error.message);
-        return false;
+        console.warn("[useConsumerMembership]", error.message);
+        return { isActive: false, tier: null, status: null, plan: null };
       }
-      return !!data;
+      const plan = (data?.plan ?? null) as string | null;
+      return {
+        isActive: !!data,
+        tier: plan,
+        status: (data?.status ?? null) as string | null,
+        plan,
+      };
     },
   });
+}
+
+/**
+ * Compat: mantém o shape booleano usado pelo AppShell/CheckoutShell.
+ */
+export function useConsumerHasActiveMembership() {
+  const q = useConsumerMembership();
+  return { ...q, data: q.data?.isActive ?? false };
 }

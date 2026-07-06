@@ -38,7 +38,7 @@ export const Route = createFileRoute('/contratar')({
   validateSearch: (search: Record<string, unknown>) => {
     const raw = typeof search.plano === 'string' ? (search.plano as string) : undefined
     const plano = raw && (VALID_PLANS as readonly string[]).includes(raw) ? (raw as PlanoParam) : undefined
-    return { plano }
+    return { plano } as { plano?: PlanoParam }
   },
   head: () => ({
     meta: [

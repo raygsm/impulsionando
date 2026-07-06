@@ -14,7 +14,9 @@ export const Route = createFileRoute("/riomed/cotizar")({
       { property: "og:description", content: "Cotización en línea de equipamiento médico-hospitalario." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({ producto: typeof s.producto === "string" ? s.producto : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    producto: typeof s.producto === "string" ? s.producto : undefined,
+  } as { producto?: string }),
   component: CotizarPage,
 });
 

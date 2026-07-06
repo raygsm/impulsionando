@@ -513,6 +513,7 @@ import { Route as AuthenticatedAdminIntegrationsAutomationHealthRouteImport } fr
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_authenticated/admin.inbox-eventos'
+import { Route as AuthenticatedAdminImpersonationLogRouteImport } from './routes/_authenticated/admin.impersonation-log'
 import { Route as AuthenticatedAdminImpersonationAuditRouteImport } from './routes/_authenticated/admin.impersonation-audit'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthScoreRouteImport } from './routes/_authenticated/admin.health-score'
@@ -3543,6 +3544,12 @@ const AuthenticatedAdminInboxEventosRoute =
     path: '/admin/inbox-eventos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminImpersonationLogRoute =
+  AuthenticatedAdminImpersonationLogRouteImport.update({
+    id: '/admin/impersonation-log',
+    path: '/admin/impersonation-log',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminImpersonationAuditRoute =
   AuthenticatedAdminImpersonationAuditRouteImport.update({
     id: '/admin/impersonation-audit',
@@ -5249,6 +5256,7 @@ export interface FileRoutesByFullPath {
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/impersonation-audit': typeof AuthenticatedAdminImpersonationAuditRoute
+  '/admin/impersonation-log': typeof AuthenticatedAdminImpersonationLogRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -5982,6 +5990,7 @@ export interface FileRoutesByTo {
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/impersonation-audit': typeof AuthenticatedAdminImpersonationAuditRoute
+  '/admin/impersonation-log': typeof AuthenticatedAdminImpersonationLogRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -6728,6 +6737,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/impersonation-audit': typeof AuthenticatedAdminImpersonationAuditRoute
+  '/_authenticated/admin/impersonation-log': typeof AuthenticatedAdminImpersonationLogRoute
   '/_authenticated/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -7475,6 +7485,7 @@ export interface FileRouteTypes {
     | '/admin/health-score'
     | '/admin/imobiliaria'
     | '/admin/impersonation-audit'
+    | '/admin/impersonation-log'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
     | '/admin/incidents'
@@ -8208,6 +8219,7 @@ export interface FileRouteTypes {
     | '/admin/health-score'
     | '/admin/imobiliaria'
     | '/admin/impersonation-audit'
+    | '/admin/impersonation-log'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
     | '/admin/incidents'
@@ -8953,6 +8965,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/health-score'
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/impersonation-audit'
+    | '/_authenticated/admin/impersonation-log'
     | '/_authenticated/admin/inbox-eventos'
     | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/incidents'
@@ -13147,6 +13160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInboxEventosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/impersonation-log': {
+      id: '/_authenticated/admin/impersonation-log'
+      path: '/admin/impersonation-log'
+      fullPath: '/admin/impersonation-log'
+      preLoaderRoute: typeof AuthenticatedAdminImpersonationLogRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/impersonation-audit': {
       id: '/_authenticated/admin/impersonation-audit'
       path: '/admin/impersonation-audit'
@@ -15791,6 +15811,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminHealthScoreRoute: typeof AuthenticatedAdminHealthScoreRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminImpersonationAuditRoute: typeof AuthenticatedAdminImpersonationAuditRoute
+  AuthenticatedAdminImpersonationLogRoute: typeof AuthenticatedAdminImpersonationLogRoute
   AuthenticatedAdminInboxEventosRoute: typeof AuthenticatedAdminInboxEventosRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
@@ -16112,6 +16133,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminImpersonationAuditRoute:
     AuthenticatedAdminImpersonationAuditRoute,
+  AuthenticatedAdminImpersonationLogRoute:
+    AuthenticatedAdminImpersonationLogRoute,
   AuthenticatedAdminInboxEventosRoute: AuthenticatedAdminInboxEventosRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
   AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
