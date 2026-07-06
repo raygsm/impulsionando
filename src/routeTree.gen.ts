@@ -635,6 +635,7 @@ import { Route as ApiPublicHooksMaintenanceNotifierRouteImport } from './routes/
 import { Route as ApiPublicHooksImpulsionitoTrainRouteImport } from './routes/api/public/hooks/impulsionito-train'
 import { Route as ApiPublicHooksFocusNfeRouteImport } from './routes/api/public/hooks/focus-nfe'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
+import { Route as ApiPublicHooksExpirePremiumTrialsRouteImport } from './routes/api/public/hooks/expire-premium-trials'
 import { Route as ApiPublicHooksDispatchFiscalRouteImport } from './routes/api/public/hooks/dispatch-fiscal'
 import { Route as ApiPublicHooksCorePullChrismedRouteImport } from './routes/api/public/hooks/core-pull-chrismed'
 import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
@@ -4256,6 +4257,12 @@ const ApiPublicHooksFiscalMonthlyEmailRoute =
     path: '/api/public/hooks/fiscal-monthly-email',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksExpirePremiumTrialsRoute =
+  ApiPublicHooksExpirePremiumTrialsRouteImport.update({
+    id: '/api/public/hooks/expire-premium-trials',
+    path: '/api/public/hooks/expire-premium-trials',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDispatchFiscalRoute =
   ApiPublicHooksDispatchFiscalRouteImport.update({
     id: '/api/public/hooks/dispatch-fiscal',
@@ -5566,6 +5573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -6293,6 +6301,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -7035,6 +7044,7 @@ export interface FileRoutesById {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -7777,6 +7787,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -8504,6 +8515,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -9245,6 +9257,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -9506,6 +9519,7 @@ export interface RootRouteChildren {
   ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
   ApiPublicHooksCorePullChrismedRoute: typeof ApiPublicHooksCorePullChrismedRoute
   ApiPublicHooksDispatchFiscalRoute: typeof ApiPublicHooksDispatchFiscalRoute
+  ApiPublicHooksExpirePremiumTrialsRoute: typeof ApiPublicHooksExpirePremiumTrialsRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
   ApiPublicHooksFocusNfeRoute: typeof ApiPublicHooksFocusNfeRoute
   ApiPublicHooksImpulsionitoTrainRoute: typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -13934,6 +13948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFiscalMonthlyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/expire-premium-trials': {
+      id: '/api/public/hooks/expire-premium-trials'
+      path: '/api/public/hooks/expire-premium-trials'
+      fullPath: '/api/public/hooks/expire-premium-trials'
+      preLoaderRoute: typeof ApiPublicHooksExpirePremiumTrialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/dispatch-fiscal': {
       id: '/api/public/hooks/dispatch-fiscal'
       path: '/api/public/hooks/dispatch-fiscal'
@@ -16683,6 +16704,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksCoreNotificationEventRoute,
   ApiPublicHooksCorePullChrismedRoute: ApiPublicHooksCorePullChrismedRoute,
   ApiPublicHooksDispatchFiscalRoute: ApiPublicHooksDispatchFiscalRoute,
+  ApiPublicHooksExpirePremiumTrialsRoute:
+    ApiPublicHooksExpirePremiumTrialsRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
   ApiPublicHooksFocusNfeRoute: ApiPublicHooksFocusNfeRoute,
   ApiPublicHooksImpulsionitoTrainRoute: ApiPublicHooksImpulsionitoTrainRoute,
@@ -16736,13 +16759,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

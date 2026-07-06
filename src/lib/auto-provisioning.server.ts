@@ -13,6 +13,12 @@
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+/** SKU do Teste Premium 30 dias — mapeia para plano Full + Vitrine. */
+export const PREMIUM_TRIAL_SKU = "teste-premium-30d";
+const PREMIUM_TRIAL_DAYS = 30;
+const PREMIUM_TRIAL_PLAN_CODE = "full";
+const PREMIUM_TRIAL_MODULE_SLUGS = ["imobiliaria_vitrine"];
+
 type Payment = {
   mp_payment_id: string;
   status: string;
@@ -22,12 +28,30 @@ type Payment = {
   payer_email: string | null;
   customer_phone: string | null;
   modulo_id: string | null;
+  plano_id: string | null;
   module_slugs: string[] | null;
   amount_cents: number;
   paid_at: string | null;
   approved_at: string | null;
   provisioning_status: string;
+  metadata: Record<string, unknown> | null;
+  external_reference: string | null;
 };
+
+function isPremiumTrial(p: Payment): boolean {
+  const meta = (p.metadata ?? {}) as Record<string, unknown>;
+  const candidates = [
+    p.modulo_id,
+    p.plano_id,
+    p.external_reference,
+    (meta.sku as string | undefined) ?? null,
+    (meta.plan_slug as string | undefined) ?? null,
+    ...(Array.isArray(p.module_slugs) ? p.module_slugs : []),
+  ]
+    .filter(Boolean)
+    .map((s) => String(s).toLowerCase());
+  return candidates.some((c) => c === PREMIUM_TRIAL_SKU || c.includes(PREMIUM_TRIAL_SKU));
+}
 
 function slugify(s: string): string {
   return (s || "empresa")
@@ -68,7 +92,7 @@ export async function autoProvisionFromPayment(mpPaymentId: string): Promise<{
   const { data: row, error } = await (supabaseAdmin as any)
     .from("mpago_payments")
     .select(
-      "mp_payment_id, status, user_id, empresa_id, payer_name, payer_email, customer_phone, modulo_id, module_slugs, amount_cents, paid_at, approved_at, provisioning_status",
+      "mp_payment_id, status, user_id, empresa_id, payer_name, payer_email, customer_phone, modulo_id, plano_id, module_slugs, amount_cents, paid_at, approved_at, provisioning_status, metadata, external_reference",
     )
     .eq("mp_payment_id", mpPaymentId)
     .maybeSingle();
@@ -158,43 +182,77 @@ export async function autoProvisionFromPayment(mpPaymentId: string): Promise<{
     }
   }
 
-  // 4. Contrato recorrente (plano padrão)
+  // 4. Contrato recorrente (plano padrão OU Full quando Teste Premium)
+  const isTrial = isPremiumTrial(p);
+  const trialEndsAt = isTrial
+    ? new Date(new Date(paidAt ?? new Date().toISOString()).getTime() + PREMIUM_TRIAL_DAYS * 86400_000).toISOString()
+    : null;
+  const trialStartAt = isTrial ? (paidAt ?? new Date().toISOString()) : null;
+  const trialSource = isTrial ? `mercadopago:${mpPaymentId}` : null;
+
   if (companyId) {
+    // Resolve plano alvo
+    const { data: fullPlan } = isTrial
+      ? await supabaseAdmin.from("billing_plans").select("id, recurring_amount, setup_fee, due_day").eq("code", PREMIUM_TRIAL_PLAN_CODE).maybeSingle()
+      : { data: null as any };
+    const { data: defaultPlan } = await supabaseAdmin
+      .from("billing_plans")
+      .select("id, recurring_amount, setup_fee, due_day")
+      .eq("is_default", true)
+      .maybeSingle();
+    const targetPlan = (isTrial && fullPlan) ? fullPlan : defaultPlan;
+
     const { data: existingContract } = await supabaseAdmin
       .from("billing_contracts")
-      .select("id")
+      .select("id, plan_id")
       .eq("company_id", companyId)
       .maybeSingle();
-    if (!existingContract) {
-      const { data: plan } = await supabaseAdmin
-        .from("billing_plans")
-        .select("id, recurring_amount, setup_fee, due_day")
-        .eq("is_default", true)
-        .maybeSingle();
-      if (plan) {
-        const today = new Date();
-        const due = new Date(today.getFullYear(), today.getMonth() + 1, plan.due_day);
-        await supabaseAdmin.from("billing_contracts").insert({
-          company_id: companyId,
-          plan_id: plan.id,
-          start_date: today.toISOString().slice(0, 10),
-          due_day: plan.due_day,
-          next_due_date: due.toISOString().slice(0, 10),
-          recurring_amount: plan.recurring_amount,
-          setup_amount: plan.setup_fee,
-          setup_paid_at: paidAt,
-          status: "active",
-        });
-        await appendLog(mpPaymentId, { step: "contract", plan_id: plan.id });
-      }
+
+    if (!existingContract && targetPlan) {
+      const today = new Date();
+      const due = new Date(today.getFullYear(), today.getMonth() + 1, targetPlan.due_day);
+      await supabaseAdmin.from("billing_contracts").insert({
+        company_id: companyId,
+        plan_id: targetPlan.id,
+        start_date: today.toISOString().slice(0, 10),
+        due_day: targetPlan.due_day,
+        next_due_date: due.toISOString().slice(0, 10),
+        recurring_amount: targetPlan.recurring_amount,
+        setup_amount: targetPlan.setup_fee,
+        setup_paid_at: paidAt,
+        status: "active",
+        trial_started_at: trialStartAt,
+        trial_ends_at: trialEndsAt,
+        trial_sku: isTrial ? PREMIUM_TRIAL_SKU : null,
+        trial_source: trialSource,
+      } as never);
+      await appendLog(mpPaymentId, { step: "contract", plan_id: targetPlan.id, trial: isTrial });
+    } else if (existingContract && isTrial && fullPlan) {
+      // Já existia contrato: promove ao Full durante o teste, preserva anterior
+      await supabaseAdmin.from("billing_contracts").update({
+        previous_plan_id: existingContract.plan_id,
+        plan_id: fullPlan.id,
+        trial_started_at: trialStartAt,
+        trial_ends_at: trialEndsAt,
+        trial_sku: PREMIUM_TRIAL_SKU,
+        trial_source: trialSource,
+      } as never).eq("id", existingContract.id);
+      await appendLog(mpPaymentId, { step: "contract", promoted_to: "full", trial: true });
     }
   }
 
-  // 5. Módulos contratados
+  // 5. Módulos contratados (+ Vitrine se Teste Premium)
   const slugs = new Set<string>();
   (p.module_slugs ?? []).forEach((s) => s && slugs.add(s));
   if (p.modulo_id) slugs.add(p.modulo_id);
   ["dashboard", "configuracoes", "usuarios"].forEach((s) => slugs.add(s));
+  if (isTrial) {
+    PREMIUM_TRIAL_MODULE_SLUGS.forEach((s) => slugs.add(s));
+    if (companyId) {
+      await supabaseAdmin.from("companies").update({ vitrine_enabled: true } as never).eq("id", companyId);
+      await appendLog(mpPaymentId, { step: "vitrine", enabled: true });
+    }
+  }
 
   const installed: string[] = [];
   if (companyId && slugs.size > 0) {
