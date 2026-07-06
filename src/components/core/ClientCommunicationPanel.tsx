@@ -318,8 +318,22 @@ function EditForm({
         <Switch checked={isActive} onCheckedChange={setIsActive} />
         <Label className="text-sm">Ativo</Label>
       </div>
+      {isActive && !body.trim() && (
+        <p className="text-[11px] text-destructive">
+          Preencha o conteúdo antes de ativar — modelos vazios não são enviados.
+        </p>
+      )}
       <DialogFooter>
-        <Button onClick={() => onSave({ subject, body, is_active: isActive })} disabled={saving}>
+        <Button
+          onClick={() =>
+            onSave({
+              subject: initial.channel === "email" ? subject : "",
+              body,
+              is_active: isActive && !!body.trim(),
+            })
+          }
+          disabled={saving || (isActive && !body.trim())}
+        >
           {saving ? "Salvando…" : "Salvar"}
         </Button>
       </DialogFooter>
