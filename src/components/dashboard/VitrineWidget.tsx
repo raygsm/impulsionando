@@ -63,20 +63,32 @@ export function VitrineWidget({ companyId }: { companyId: string }) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-md bg-muted/50 p-2.5">
-            <div className="text-2xl font-bold tabular-nums">{total}</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Listagens</div>
+        <>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-md bg-muted/50 p-2.5">
+              <div className="text-2xl font-bold tabular-nums">{total}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Listagens</div>
+            </div>
+            <div className="rounded-md bg-emerald-500/10 p-2.5">
+              <div className="text-2xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{approved}</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Aprovadas</div>
+            </div>
+            <div className="rounded-md bg-primary/10 p-2.5">
+              <div className="text-2xl font-bold tabular-nums text-primary">{avgDiscount}%</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Desc. médio</div>
+            </div>
           </div>
-          <div className="rounded-md bg-emerald-500/10 p-2.5">
-            <div className="text-2xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{approved}</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Aprovadas</div>
-          </div>
-          <div className="rounded-md bg-primary/10 p-2.5">
-            <div className="text-2xl font-bold tabular-nums text-primary">{avgDiscount}%</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Desc. médio</div>
-          </div>
-        </div>
+          {approved < total && (
+            <p className="mt-3 text-[11px] text-amber-700 dark:text-amber-300">
+              {total - approved} listagem(ns) aguardando aprovação da curadoria.
+            </p>
+          )}
+          <Button asChild size="sm" variant="outline" className="w-full mt-3 gap-2">
+            <Link to="/core/marketplace/compradores">
+              Gerenciar vitrine <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </>
       )}
     </Card>
   );
