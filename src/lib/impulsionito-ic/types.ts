@@ -38,7 +38,8 @@ export type ICSectionKey =
   | "historico"
   | "versoes-prompt"
   | "regras-agente"
-  | "fontes-conhecimento";
+  | "fontes-conhecimento"
+  | "configuracoes-llm";
 
 export type LearningKind =
   | "duvida_recorrente"

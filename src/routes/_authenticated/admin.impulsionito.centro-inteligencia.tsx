@@ -8,6 +8,7 @@ import { PromptMasterEditor } from "@/components/impulsionito-ic/PromptMasterEdi
 import { LearningsReview } from "@/components/impulsionito-ic/LearningsReview";
 import { MetricsDashboard } from "@/components/impulsionito-ic/MetricsDashboard";
 import { HistoryPanel, PromptVersionsPanel } from "@/components/impulsionito-ic/ReadonlyPanels";
+import { LlmConfigPanel } from "@/components/impulsionito-ic/LlmConfigPanel";
 
 const sectionSchema = z.enum([
   "metricas",
@@ -26,6 +27,7 @@ const sectionSchema = z.enum([
   "versoes-prompt",
   "regras-agente",
   "fontes-conhecimento",
+  "configuracoes-llm",
 ]);
 type Section = z.infer<typeof sectionSchema>;
 
@@ -46,6 +48,7 @@ const NAV: { section: Section; label: string; group: string }[] = [
   { section: "aprendizados", label: "Aprendizados Automáticos", group: "Operação" },
   { section: "historico", label: "Histórico", group: "Operação" },
   { section: "versoes-prompt", label: "Versões do Prompt", group: "Operação" },
+  { section: "configuracoes-llm", label: "Motor LLM", group: "Configurações" },
 ];
 
 export const Route = createFileRoute("/_authenticated/admin/impulsionito/centro-inteligencia")({
@@ -184,6 +187,8 @@ function SectionRouter({ section }: { section: Section }) {
       return <GenericSectionCrud section={section} title="Regras do Agente" bodyLabel="Regra" />;
     case "fontes-conhecimento":
       return <GenericSectionCrud section={section} title="Fontes de Conhecimento" bodyLabel="Descrição / URL" />;
+    case "configuracoes-llm":
+      return <LlmConfigPanel />;
     default:
       return (
         <Card>
