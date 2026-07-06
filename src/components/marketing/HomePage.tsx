@@ -521,7 +521,13 @@ function Diagnostico() {
                 </div>
                 <div className="mt-4 flex justify-between items-center">
                   <span className="text-xs text-muted-foreground" data-testid="dores-count">{dores.length} selecionada(s)</span>
-                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0} data-testid="btn-continuar">
+                  <Button
+                    size="sm"
+                    onClick={() => setStep(2)}
+                    onPointerUp={() => dores.length > 0 && setStep(2)}
+                    disabled={dores.length === 0}
+                    data-testid="btn-continuar"
+                  >
                     Continuar <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
