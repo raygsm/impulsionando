@@ -115,6 +115,46 @@ function ContratarPage() {
           </p>
         </header>
 
+        {selectedInfo && (
+          <section
+            aria-labelledby="contratar-selected-heading"
+            className="mb-10 max-w-3xl mx-auto"
+            data-testid="contratar-selected-plan"
+            data-plan-code={selectedInfo.code}
+          >
+            <Card className="border-primary shadow-lg">
+              <CardHeader className="text-center">
+                {selectedInfo.highlight && (
+                  <Badge className="mx-auto mb-2" data-testid="contratar-selected-badge">
+                    Recomendado
+                  </Badge>
+                )}
+                <CardTitle
+                  id="contratar-selected-heading"
+                  className="text-2xl"
+                  data-testid="contratar-selected-name"
+                >
+                  Plano {selectedInfo.displayName} selecionado
+                </CardTitle>
+                <CardDescription className="flex items-center justify-center gap-1 text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                  Preço vigente — {selectedInfo.factorLabel} (SM {formatBRL(wage)})
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center space-y-1">
+                <div
+                  className="text-4xl font-bold"
+                  data-testid="contratar-selected-price"
+                  data-price-cents={Math.round(wage * selectedInfo.factor * 100)}
+                >
+                  {formatBRL(wage * selectedInfo.factor)}
+                </div>
+                <div className="text-sm text-muted-foreground">/mês</div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">Carregando planos…</div>
         ) : (
