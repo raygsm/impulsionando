@@ -203,11 +203,11 @@ function Diagnostico() {
         </div>
 
         {/* GRID PRINCIPAL */}
-        <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]">
+        <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]" data-testid="diagnostico-root">
           {/* ---------------- ESQUERDA: PERGUNTAS ---------------- */}
-          <div className="space-y-5">
+          <div className="space-y-5 lg:min-h-0" data-testid="diagnostico-perguntas">
             {/* stepper */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-testid="diagnostico-stepper" role="tablist" aria-label="Etapas do diagnóstico">
               {STEP_LABELS.map((label, i) => {
                 const active = step === i;
                 const done = step > i;
@@ -215,15 +215,20 @@ function Diagnostico() {
                   <button
                     key={label}
                     type="button"
+                    role="tab"
+                    aria-selected={active}
+                    aria-current={active ? "step" : undefined}
+                    data-testid={`step-tab-${i}`}
+                    data-state={active ? "active" : done ? "done" : "idle"}
                     onClick={() => (i === 0 || nicho) && (i === 1 ? nicho : true) && setStep(i)}
-                    className={`group flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all
+                    className={`group flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none
                       ${active ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25 scale-[1.02]"
-                        : done ? "bg-primary/10 text-primary border-primary/30"
-                        : "bg-card/60 text-muted-foreground border-border/60"}`}
+                        : done ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                        : "bg-card/60 text-muted-foreground border-border/60 hover:border-primary/40"}`}
                   >
-                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs font-bold
+                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs font-bold transition-colors duration-300
                       ${active ? "bg-primary-foreground/20" : done ? "bg-primary/20" : "bg-muted"}`}>
-                      {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      {done ? <CheckCircle2 className="w-4 h-4 animate-in zoom-in-50 duration-300" /> : i + 1}
                     </span>
                     <span className="text-xs sm:text-sm font-medium truncate">{label}</span>
                   </button>
@@ -233,7 +238,12 @@ function Diagnostico() {
 
             {/* STEP 1: Segmento */}
             {step === 0 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-0"
+                data-testid="step-panel-0"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4">
                   <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 1 · Sobre você</div>
                   <h3 className="text-xl font-bold mt-1">Qual é o seu segmento?</h3>
@@ -247,10 +257,12 @@ function Diagnostico() {
                       <button
                         key={n.slug}
                         type="button"
+                        data-testid={`nicho-${n.slug}`}
+                        aria-pressed={on}
                         onClick={() => selectNicho(n.slug)}
-                        className={`group relative text-left rounded-xl p-3 border transition-all duration-200
+                        className={`group relative text-left rounded-xl p-3 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-md"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
                         <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2 transition-colors
                           ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
@@ -263,18 +275,24 @@ function Diagnostico() {
                   })}
                 </div>
               </Card>
+              </div>
             )}
 
             {/* STEP 2: Dores */}
             {step === 1 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-1"
+                data-testid="step-panel-1"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 2 · Diagnóstico</div>
                     <h3 className="text-xl font-bold mt-1">Qual é seu maior desafio hoje?</h3>
                     <p className="text-xs text-muted-foreground">Pode escolher quantos precisar — quanto mais, melhor o match.</p>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setStep(0)} className="shrink-0 text-xs">Voltar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(0)} className="shrink-0 text-xs" data-testid="btn-voltar-1">Voltar</Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {DORES.map((d) => {
@@ -284,40 +302,48 @@ function Diagnostico() {
                       <button
                         key={d}
                         type="button"
+                        data-testid={`dor-${d}`}
+                        aria-pressed={on}
                         onClick={() => toggleDor(d)}
-                        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 border text-left transition-all
+                        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
-                        <span className={`w-8 h-8 rounded-lg grid place-items-center shrink-0
+                        <span className={`w-8 h-8 rounded-lg grid place-items-center shrink-0 transition-colors duration-300
                           ${on ? "bg-primary-foreground/20" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
                           <Icon className="w-4 h-4" />
                         </span>
                         <span className="text-sm font-medium">{d}</span>
-                        {on && <CheckCircle2 className="w-4 h-4 ml-auto" />}
+                        {on && <CheckCircle2 className="w-4 h-4 ml-auto animate-in zoom-in-50 duration-300" />}
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">{dores.length} selecionada(s)</span>
-                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0}>
+                  <span className="text-xs text-muted-foreground" data-testid="dores-count">{dores.length} selecionada(s)</span>
+                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0} data-testid="btn-continuar">
                     Continuar <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               </Card>
+              </div>
             )}
 
             {/* STEP 3: Foco */}
             {step === 2 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-2"
+                data-testid="step-panel-2"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 3 · Prioridade</div>
                     <h3 className="text-xl font-bold mt-1">O que deseja resolver primeiro?</h3>
                     <p className="text-xs text-muted-foreground">Isso define por onde o Impulsionito começa a construir sua solução.</p>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="shrink-0 text-xs">Voltar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="shrink-0 text-xs" data-testid="btn-voltar-2">Voltar</Button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {FOCOS.map((f) => {
@@ -327,12 +353,14 @@ function Diagnostico() {
                       <button
                         key={f}
                         type="button"
+                        data-testid={`foco-${f}`}
+                        aria-pressed={on}
                         onClick={() => selectFoco(f)}
-                        className={`group rounded-xl p-3 border text-left transition-all
+                        className={`group rounded-xl p-3 border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
-                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2
+                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2 transition-colors duration-300
                           ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
                           <Icon className="w-5 h-5" />
                         </div>
@@ -342,57 +370,91 @@ function Diagnostico() {
                   })}
                 </div>
               </Card>
+              </div>
             )}
           </div>
 
+
           {/* ---------------- DIREITA: PAINEL IA ---------------- */}
-          <div className="lg:sticky lg:top-6 self-start space-y-4">
-            <Card className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25">
-              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="lg:sticky lg:top-6 self-start space-y-4" data-testid="impulsionito-panel" aria-live="polite">
+            <Card
+              data-testid="impulsionito-card"
+              data-stream-state={showResult ? "complete" : nicho ? "streaming" : "idle"}
+              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500"
+            >
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl motion-safe:animate-pulse" />
+              {/* barra de scanning durante streaming */}
+              {!showResult && nicho && (
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-white/80 to-transparent motion-safe:animate-pulse" />
+              )}
               <div className="relative">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25">
-                    <Brain className={`w-6 h-6 ${!showResult ? "animate-pulse" : ""}`} />
+                  <div className={`w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25 transition-all duration-500 ${!showResult && nicho ? "ring-white/50 shadow-lg shadow-white/10" : ""}`}>
+                    <Brain className={`w-6 h-6 transition-transform duration-500 ${!showResult ? "motion-safe:animate-pulse" : "scale-110"}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-xs uppercase tracking-wider opacity-80">Impulsionito</div>
-                    <div className="text-sm font-semibold">
-                      {!nicho ? "Aguardando segmento…"
-                        : !showResult ? "Analisando seu perfil…"
-                        : "Diagnóstico concluído"}
+                    <div className="text-sm font-semibold flex items-center gap-1.5" data-testid="impulsionito-status">
+                      <span className="truncate">
+                        {!nicho ? "Aguardando segmento…"
+                          : !showResult ? "Analisando seu perfil"
+                          : "Diagnóstico concluído"}
+                      </span>
+                      {!showResult && nicho && (
+                        <span className="inline-flex gap-0.5" aria-hidden="true">
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_0ms]" />
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_150ms]" />
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_300ms]" />
+                        </span>
+                      )}
+                      {showResult && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-300 animate-in zoom-in-50 duration-500" aria-hidden="true" />
+                      )}
                     </div>
                   </div>
-                  <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" /> ao vivo
+                  <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1 shrink-0">
+                    <span className={`w-1.5 h-1.5 rounded-full ${showResult ? "bg-emerald-300" : "bg-white/90"} motion-safe:animate-pulse`} /> ao vivo
                   </Badge>
                 </div>
 
                 {/* progresso */}
-                <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} data-testid="progress-bar">
                   <div
-                    className="h-full bg-gradient-to-r from-white to-white/70 transition-all duration-700 ease-out"
+                    className="h-full bg-gradient-to-r from-white via-white to-white/70 transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
                     style={{ width: `${progress}%` }}
+                    data-testid="progress-fill"
                   />
                 </div>
                 <div className="mt-1.5 text-[11px] opacity-80 flex justify-between">
-                  <span>Compatibilidade em cálculo</span>
-                  <span className="font-mono">{progress}%</span>
+                  <span>{showResult ? "Compatibilidade calculada" : nicho ? "Compatibilidade em cálculo" : "Aguardando dados"}</span>
+                  <span className="font-mono tabular-nums" data-testid="progress-value">{progress}%</span>
                 </div>
 
-                {/* estado inicial / streaming */}
+                {/* estado inicial / streaming — mensagens parciais aparecem progressivamente */}
                 {!showResult && (
-                  <ul className="mt-5 space-y-2 text-sm">
-                    <SignalRow ok={!!nicho} text="Segmento identificado" />
-                    <SignalRow ok={dores.length > 0} text={`Dores mapeadas${dores.length ? ` (${dores.length})` : ""}`} />
-                    <SignalRow ok={!!foco} text="Prioridade definida" />
-                    <SignalRow ok={false} text="Módulos compatíveis" pending />
-                    <SignalRow ok={false} text="Plano ideal" pending />
-                  </ul>
+                  <>
+                    {nicho && (
+                      <div className="mt-4 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-500" data-testid="stream-message">
+                        <span className="opacity-80">Detectei que você atua em </span>
+                        <strong className="font-semibold">{nicho}</strong>
+                        <span className="opacity-80">. Mapeando módulos compatíveis</span>
+                        <span className="inline-block motion-safe:animate-pulse">…</span>
+                      </div>
+                    )}
+                    <ul className="mt-4 space-y-2 text-sm" data-testid="stream-signals">
+                      <SignalRow ok={!!nicho} text="Segmento identificado" />
+                      <SignalRow ok={dores.length > 0} text={`Dores mapeadas${dores.length ? ` (${dores.length})` : ""}`} />
+                      <SignalRow ok={!!foco} text="Prioridade definida" />
+                      <SignalRow ok={false} text="Módulos compatíveis" pending />
+                      <SignalRow ok={false} text="Plano ideal" pending />
+                    </ul>
+                  </>
+
                 )}
 
                 {/* estado final */}
                 {showResult && result && (
-                  <div className="mt-5 space-y-4 animate-fade-in">
+                  <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" data-testid="diagnostico-resultado">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
                         <div className="text-[11px] uppercase tracking-wider opacity-80">Economia estimada</div>
