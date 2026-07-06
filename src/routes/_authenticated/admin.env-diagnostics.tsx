@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,11 +30,14 @@ type ServerCheck = { name: string; present: boolean; length: number; preview: st
 
 function EnvDiagnosticsPage() {
   const serverFn = useServerFn(getSupabaseEnvDiagnostics);
+  const alertFn = useServerFn(triggerEnvAlert);
   const { data, isLoading, refetch, isFetching, error } = useQuery({
     queryKey: ["env-diagnostics"],
     queryFn: () => serverFn(),
     staleTime: 5_000,
   });
+  const alertSentRef = useRef(false);
+  const [alertStatus, setAlertStatus] = useState<null | { ok: boolean; msg: string }>(null);
 
   const clientChecks: ServerCheck[] = [
     {
