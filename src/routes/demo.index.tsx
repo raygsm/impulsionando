@@ -183,7 +183,20 @@ function DemoLanding() {
                       {(() => {
                         const link = getDemoNichoLink(n.slug);
                         return (
-                          <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>
+                          <Link
+                            to={link.to}
+                            params={link.params}
+                            data-nicho={n.slug}
+                            data-resolved={link.slug}
+                            onClick={() => trackFunnelCta({
+                              cta: "hub-demo-abrir-nicho",
+                              origem: "hub-demo",
+                              nicho_pedido: n.slug,
+                              alias_resolvido: link.slug,
+                              isFallback: link.isFallback,
+                              rotaDestino: `/demo/nicho/${link.slug}`,
+                            })}
+                          >
                             <PlayCircle className="w-3.5 h-3.5" /> Abrir demo do nicho
                           </Link>
                         );
