@@ -215,15 +215,20 @@ function Diagnostico() {
                   <button
                     key={label}
                     type="button"
+                    role="tab"
+                    aria-selected={active}
+                    aria-current={active ? "step" : undefined}
+                    data-testid={`step-tab-${i}`}
+                    data-state={active ? "active" : done ? "done" : "idle"}
                     onClick={() => (i === 0 || nicho) && (i === 1 ? nicho : true) && setStep(i)}
-                    className={`group flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all
+                    className={`group flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none
                       ${active ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25 scale-[1.02]"
-                        : done ? "bg-primary/10 text-primary border-primary/30"
-                        : "bg-card/60 text-muted-foreground border-border/60"}`}
+                        : done ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                        : "bg-card/60 text-muted-foreground border-border/60 hover:border-primary/40"}`}
                   >
-                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs font-bold
+                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs font-bold transition-colors duration-300
                       ${active ? "bg-primary-foreground/20" : done ? "bg-primary/20" : "bg-muted"}`}>
-                      {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      {done ? <CheckCircle2 className="w-4 h-4 animate-in zoom-in-50 duration-300" /> : i + 1}
                     </span>
                     <span className="text-xs sm:text-sm font-medium truncate">{label}</span>
                   </button>
