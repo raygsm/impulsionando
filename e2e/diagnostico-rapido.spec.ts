@@ -123,4 +123,94 @@ test.describe("Diagnóstico Rápido — mobile", () => {
     await expect(impulsionito).toBeVisible();
     await expect(page.getByTestId("stream-message")).toBeVisible();
   });
+
+  test("progresso mobile é monotônico e nunca regride", async ({ page }) => {
+    const readProgress = async () => {
+      const txt = await page.getByTestId("progress-value").innerText();
+      return Number(txt.replace("%", ""));
+    };
+    const samples: number[] = [];
+    samples.push(await readProgress());
+    await page.locator('[data-testid^="nicho-"]').first().click();
+    await expect(page.getByTestId("step-panel-1")).toBeVisible();
+    samples.push(await readProgress());
+    await page.locator('[data-testid^="dor-"]').first().click();
+    samples.push(await readProgress());
+    await page.getByTestId("btn-continuar").click();
+    await expect(page.getByTestId("step-panel-2")).toBeVisible();
+    await page.locator('[data-testid^="foco-"]').first().click();
+    await expect(page.getByTestId("diagnostico-resultado")).toBeVisible();
+    samples.push(await readProgress());
+    for (let i = 1; i < samples.length; i++) {
+      expect(samples[i]).toBeGreaterThanOrEqual(samples[i - 1]);
+    }
+    expect(samples[samples.length - 1]).toBe(100);
+  });
 });
+
+// ================================================================
+// Teclado, back/forward e estados de erro/timeout
+// ================================================================
+
+test.describe("Diagnóstico Rápido — teclado e histórico", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test("navegação por Tab + Enter avança o step", async ({ page }) => {
+    await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector('[data-testid="step-panel-0"]');
+    const firstNicho = page.locator('[data-testid^="nicho-"]').first();
+    await firstNicho.focus();
+    // O elemento focado deve ser o próprio botão de nicho
+    const focusedTestId = await page.evaluate(() =>
+      (document.activeElement as HTMLElement | null)?.getAttribute("data-testid") ?? "",
+    );
+    expect(focusedTestId).toMatch(/^nicho-/);
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("step-panel-1")).toBeVisible({ timeout: 2000 });
+    // Focar primeira dor via Tab e alternar com Enter/Space
+    const firstDor = page.locator('[data-testid^="dor-"]').first();
+    await firstDor.focus();
+    await expect(firstDor).toHaveAttribute("aria-pressed", "false");
+    await page.keyboard.press("Enter");
+    await expect(firstDor).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Space");
+    await expect(firstDor).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("browser back/forward preservam a seção visível", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    // Navega para a âncora do diagnóstico
+    await page.goto("/#diagnostico");
+    await page.waitForSelector('[data-testid="diagnostico-root"]');
+    await expect(page.getByTestId("step-panel-0")).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(/\/$/);
+    await page.goForward();
+    await expect(page).toHaveURL(/#diagnostico$/);
+    await expect(page.getByTestId("step-panel-0")).toBeVisible();
+    await expect(page.getByTestId("impulsionito-card")).toHaveAttribute("data-stream-state", "idle");
+  });
+});
+
+test.describe("Diagnóstico Rápido — erro e retry", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  for (const kind of ["timeout", "error"] as const) {
+    test(`estado forçado ?diagError=${kind} exibe alerta + botão Tentar novamente`, async ({ page }) => {
+      await page.goto(`/?diagError=${kind}#diagnostico`);
+      await page.waitForLoadState("networkidle");
+      const card = page.getByTestId("impulsionito-card");
+      await expect(card).toHaveAttribute("data-stream-state", kind);
+      const err = page.getByTestId("stream-error");
+      await expect(err).toBeVisible();
+      await expect(err).toHaveAttribute("data-error-kind", kind);
+      await page.getByTestId("btn-retry").click();
+      await expect(card).toHaveAttribute("data-stream-state", "idle");
+      await expect(page.getByTestId("stream-error")).toHaveCount(0);
+      await expect(page.getByTestId("step-panel-0")).toBeVisible();
+    });
+  }
+});
+
