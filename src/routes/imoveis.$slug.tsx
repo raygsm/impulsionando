@@ -28,13 +28,13 @@ const SearchSchema = z.object({
   operation: z.enum(['venda', 'locacao', 'venda_ou_locacao']).optional(),
   city: z.string().optional(),
   q: z.string().optional(),
-  page: z.number().int().min(1).default(1),
-  pageSize: z.number().int().min(6).max(48).default(12),
-  sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
+  page: z.number().int().min(1).optional(),
+  pageSize: z.number().int().min(6).max(48).optional(),
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).optional(),
 })
 
 export const Route = createFileRoute('/imoveis/$slug')({
-  validateSearch: (s) => SearchSchema.parse(s),
+  validateSearch: (s) => SearchSchema.parse(s) as z.infer<typeof SearchSchema>,
   head: ({ params }) => ({
     meta: [
       { title: `Imóveis disponíveis — ${params.slug}` },
