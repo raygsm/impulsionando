@@ -17,6 +17,7 @@ import { QuickActionsButton } from "./QuickActions";
 import { AudienceBadge } from "./AudienceBadge";
 import { TenantSwitcher } from "./TenantSwitcher";
 import { globalEntitySearch, type GlobalEntityHit } from "@/lib/core-consumidores.functions";
+import { signOutSafely } from "@/lib/sign-out";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
 
