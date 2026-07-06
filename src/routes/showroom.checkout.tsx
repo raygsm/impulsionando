@@ -548,7 +548,7 @@ function ShowroomCheckout() {
               <Link to="/showroom/financeiro">Ver financeiro</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/showroom/">Voltar ao hub</Link>
+              <Link to="/showroom">Voltar ao hub</Link>
             </Button>
           </div>
         </div>

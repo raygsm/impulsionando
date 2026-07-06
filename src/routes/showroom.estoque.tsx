@@ -383,7 +383,7 @@ function ShowroomEstoque() {
               <Link to="/showroom/pdv">Ver PDV</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/showroom/">Voltar ao hub</Link>
+              <Link to="/showroom">Voltar ao hub</Link>
             </Button>
           </div>
         </div>
