@@ -247,11 +247,14 @@ function ShowroomHub() {
                       <Link to={liveHref! as never}>
                         Abrir showroom <ArrowRight className="ml-1 h-4 w-4" />
                       </Link>
-                    ) : (
-                      <Link to="/demo/nicho/$slug" params={{ slug: n.slug }}>
-                        Abrir demo <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
-                    )}
+                    ) : (() => {
+                      const link = getDemoNichoLink(n.slug);
+                      return (
+                        <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>
+                          Abrir demo <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      );
+                    })()}
                   </Button>
                 </div>
               </Card>
