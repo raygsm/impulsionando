@@ -11,11 +11,35 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { CheckCircle2, Sparkles } from 'lucide-react'
+import { CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react'
 import { OfficialChannelNotice } from '@/components/marketing/OfficialChannelNotice'
+import { useMinimumWage } from '@/hooks/useCoreSetting'
+
+type PlanoParam = 'essencial' | 'integrado' | 'avancado'
+const VALID_PLANS: readonly PlanoParam[] = ['essencial', 'integrado', 'avancado'] as const
+
+interface CheckoutPlanInfo {
+  code: PlanoParam
+  name: string
+  displayName: string
+  factor: number
+  factorLabel: string
+  highlight: boolean
+}
+
+const CHECKOUT_PLANS: readonly CheckoutPlanInfo[] = [
+  { code: 'essencial', name: 'Essencial',  displayName: 'Essencial', factor: 0.5, factorLabel: '½ salário mínimo', highlight: false },
+  { code: 'integrado', name: 'Integrado',  displayName: 'Ideal',     factor: 1,   factorLabel: '1 salário mínimo', highlight: true  },
+  { code: 'avancado',  name: 'Avançado',   displayName: 'Full',      factor: 2,   factorLabel: '2 salários mínimos', highlight: false },
+]
 
 export const Route = createFileRoute('/contratar')({
   component: ContratarPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = typeof search.plano === 'string' ? (search.plano as string) : undefined
+    const plano = raw && (VALID_PLANS as readonly string[]).includes(raw) ? (raw as PlanoParam) : undefined
+    return { plano }
+  },
   head: () => ({
     meta: [
       { title: 'Contratar — Impulsionando Tecnologia' },
@@ -37,6 +61,9 @@ function ContratarPage() {
   const fetchPlans = useServerFn(listPublicPlans)
   const submitTrial = useServerFn(startTrial)
   const { data: plans, isLoading } = useQuery({ queryKey: ['public-plans'], queryFn: () => fetchPlans() })
+  const { plano } = Route.useSearch()
+  const wage = useMinimumWage()
+  const selectedInfo = plano ? CHECKOUT_PLANS.find((p) => p.code === plano) : undefined
 
   const [open, setOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
@@ -87,6 +114,46 @@ function ContratarPage() {
             Comece com trial de 3 dias. Sem cartão. Setup + 1ª mensalidade só ao ativar.
           </p>
         </header>
+
+        {selectedInfo && (
+          <section
+            aria-labelledby="contratar-selected-heading"
+            className="mb-10 max-w-3xl mx-auto"
+            data-testid="contratar-selected-plan"
+            data-plan-code={selectedInfo.code}
+          >
+            <Card className="border-primary shadow-lg">
+              <CardHeader className="text-center">
+                {selectedInfo.highlight && (
+                  <Badge className="mx-auto mb-2" data-testid="contratar-selected-badge">
+                    Recomendado
+                  </Badge>
+                )}
+                <CardTitle
+                  id="contratar-selected-heading"
+                  className="text-2xl"
+                  data-testid="contratar-selected-name"
+                >
+                  Plano {selectedInfo.displayName} selecionado
+                </CardTitle>
+                <CardDescription className="flex items-center justify-center gap-1 text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                  Preço vigente — {selectedInfo.factorLabel} (SM {formatBRL(wage)})
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center space-y-1">
+                <div
+                  className="text-4xl font-bold"
+                  data-testid="contratar-selected-price"
+                  data-price-cents={Math.round(wage * selectedInfo.factor * 100)}
+                >
+                  {formatBRL(wage * selectedInfo.factor)}
+                </div>
+                <div className="text-sm text-muted-foreground">/mês</div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">Carregando planos…</div>
