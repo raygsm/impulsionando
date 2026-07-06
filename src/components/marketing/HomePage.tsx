@@ -16,13 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
+import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
 // ============== DIAGNÓSTICO ==============
 const NICHOS = [
   { slug: "saude", label: "Clínica/consultório", icon: Stethoscope, desc: "Agenda, prontuário, cobrança" },
-  { slug: "bares", label: "Bar/restaurante", icon: Beer, desc: "Comandas, PDV, cozinha" },
+  { slug: "bares-restaurantes", label: "Bar/restaurante", icon: Beer, desc: "Comandas, PDV, cozinha" },
+  { slug: "microcervejarias", label: "Microcervejaria", icon: Beer, desc: "PDV, B2B, eventos" },
   { slug: "imobiliaria", label: "Imobiliária", icon: HomeIcon, desc: "CRM de imóveis, corretores" },
   { slug: "contabilidade", label: "Contabilidade", icon: Scale, desc: "Portal do cliente, obrigações" },
   { slug: "comercio", label: "Loja física", icon: Store, desc: "PDV, estoque, financeiro" },
@@ -66,46 +68,69 @@ const FOCO_ICONS: Record<string, any> = {
 
 const FOCOS = ["Captação", "Atendimento", "Vendas", "Agenda", "Pagamentos", "Gestão", "Comunicação", "Fidelização", "Tudo junto"];
 
-const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; plano: string; demo: string; horas: number; compat: number }> = {
+type RecomendacaoBase = {
+  modulos: string[];
+  correlatos: string[];
+  plano: string;
+  demo: string;
+  horas: number;
+  compat: number;
+};
+
+type DiagnosticoCalculado = RecomendacaoBase & {
+  economiaValor: number;
+  racional: string;
+  prioridade: string;
+  nichoLabel: string;
+};
+
+const QUIZ_STORAGE_KEY = "impulsionando:diagnostico-home:v2";
+
+const RECOMENDACOES: Record<string, RecomendacaoBase> = {
   imobiliaria: {
     modulos: ["CRM de imóveis", "Automação & Comunicação", "BI & Dashboards", "Área do Cliente", "Documentos & Propostas", "Gestão de Corretores"],
     correlatos: ["WhatsApp para corretores", "Portal do proprietário", "Funil comercial", "Relatórios por gerente"],
-    plano: "Integrado", demo: "/nichos/imobiliaria", horas: 42, compat: 96,
+    plano: "Integrado", demo: "/demo/nicho/imobiliaria", horas: 42, compat: 96,
   },
   saude: {
     modulos: ["Agenda online", "Prontuário eletrônico", "Cobrança recorrente", "Área do paciente", "WhatsApp confirmação"],
     correlatos: ["Lista de espera", "Telemedicina", "Faturamento TISS", "BI clínico"],
-    plano: "Integrado", demo: "/nichos/saude", horas: 38, compat: 98,
+    plano: "Integrado", demo: "/demo/nicho/saude", horas: 38, compat: 98,
   },
   contabilidade: {
     modulos: ["Portal do cliente contábil", "Calendário fiscal", "Documentos", "IRPF jornada", "BI gerencial"],
     correlatos: ["WhatsApp por departamento", "Contratos e onboarding", "Tarefas e obrigações"],
-    plano: "Avançado", demo: "/contabilidade/cockpit", horas: 51, compat: 94,
+    plano: "Avançado", demo: "/demo/nicho/contabilidade", horas: 51, compat: 94,
   },
-  bares: {
+  "bares-restaurantes": {
     modulos: ["PDV", "Mesas e comandas", "QR Code menu", "Estoque", "Cozinha integrada"],
     correlatos: ["Delivery", "Fidelidade", "Pagamento na mesa", "Ficha técnica"],
-    plano: "Integrado", demo: "/demo/beer-house", horas: 35, compat: 97,
+    plano: "Integrado", demo: "/demo/nicho/bares-restaurantes", horas: 35, compat: 97,
+  },
+  microcervejarias: {
+    modulos: ["PDV cervejeiro", "Catálogo B2B", "Pedidos de bares", "Eventos e degustações", "Estoque por lote"],
+    correlatos: ["CRM de PDVs", "Sell-out", "WhatsApp para revendas", "BI por canal"],
+    plano: "Integrado", demo: "/demo/nicho/microcervejarias", horas: 39, compat: 96,
   },
   eventos: {
     modulos: ["Ingressos", "Check-in QR", "CRM público", "BI evento"],
     correlatos: ["Transferência de ingresso", "Pesquisa pós-evento", "Pagamento parcelado"],
-    plano: "Essencial", demo: "/demo/eventos", horas: 28, compat: 92,
+    plano: "Essencial", demo: "/demo/nicho/eventos", horas: 28, compat: 92,
   },
   ecommerce: {
     modulos: ["Catálogo", "Pedidos", "Pagamentos", "Estoque", "Área do consumidor"],
     correlatos: ["WhatsApp de carrinho", "Fidelidade", "Fulfillment", "BI vendas"],
-    plano: "Integrado", demo: "/demo", horas: 40, compat: 95,
+    plano: "Integrado", demo: "/demo/nicho/ecommerce", horas: 40, compat: 95,
   },
   comercio: {
     modulos: ["PDV", "Estoque", "Vendas", "Financeiro", "Clientes"],
     correlatos: ["Cashback", "WhatsApp pós-venda", "Cupons"],
-    plano: "Essencial", demo: "/demo", horas: 32, compat: 93,
+    plano: "Essencial", demo: "/demo/nicho/comercio", horas: 32, compat: 93,
   },
   servicos: {
     modulos: ["CRM", "Propostas", "Contratos", "Cobrança", "Agenda"],
     correlatos: ["Assinaturas", "WhatsApp", "BI comercial"],
-    plano: "Integrado", demo: "/demo", horas: 36, compat: 95,
+    plano: "Integrado", demo: "/demo/nicho/servicos", horas: 36, compat: 95,
   },
   fitness: {
     modulos: ["Agenda de aulas", "Mensalidade recorrente", "App aluno", "Avaliações físicas"],
@@ -115,19 +140,90 @@ const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; p
   educacao: {
     modulos: ["Matrículas", "Pagamento recorrente", "Portal do aluno", "Comunicados"],
     correlatos: ["WhatsApp turma", "BI evasão", "Boletos"],
-    plano: "Integrado", demo: "/demo", horas: 34, compat: 94,
+    plano: "Integrado", demo: "/demo/nicho/educacao", horas: 34, compat: 94,
   },
   "white-label": {
     modulos: ["Plataforma multiempresa", "Marca própria", "BI agregado", "Faturamento por cliente"],
     correlatos: ["Setup assistido", "Treinamento", "Suporte dedicado"],
-    plano: "Sob Medida", demo: "/demo/white-label", horas: 60, compat: 99,
+    plano: "Sob Medida", demo: "/demo/nicho/white-label", horas: 60, compat: 99,
   },
   outro: {
     modulos: ["CRM", "Comunicação", "Pagamentos", "Dashboard"],
     correlatos: ["Atendimento consultivo", "Customização"],
-    plano: "Sob Medida", demo: "/demo", horas: 30, compat: 90,
+    plano: "Sob Medida", demo: "/demo/nicho/servicos", horas: 30, compat: 90,
   },
 };
+
+const LEGACY_NICHO_ALIASES: Record<string, string> = {
+  bares: "bares-restaurantes",
+};
+
+const DOR_MODULES: Record<string, string[]> = {
+  "Perco leads": ["CRM", "Captação inteligente"],
+  "Demoro para responder": ["WhatsApp automático", "Atendimento IA"],
+  "Não tenho CRM": ["CRM & Funil"],
+  "Atendimento perdido no WhatsApp": ["Central WhatsApp", "Histórico unificado"],
+  "Equipe esquece follow-up": ["Réguas automáticas", "Tarefas"],
+  "Agenda confusa": ["Agenda online", "Lembretes"],
+  "Pagamentos manuais": ["Pix e cartão", "Cobrança recorrente"],
+  "Falta dashboard": ["BI & Dashboards"],
+  "Falta área do cliente": ["Portal do cliente"],
+  "Quero automatizar comunicação": ["E-mail transacional", "WhatsApp"],
+  "Quero vender mais": ["Campanhas", "Upsell"],
+  "Quero organizar operação": ["Processos", "Permissões"],
+};
+
+const FOCO_MODULES: Record<string, string[]> = {
+  Captação: ["Landing pages", "CRM"],
+  Atendimento: ["Central de atendimento", "SLA"],
+  Vendas: ["Funil comercial", "Checkout"],
+  Agenda: ["Agenda online", "Confirmação automática"],
+  Pagamentos: ["Pix", "Cartão", "Cobrança"],
+  Gestão: ["BI executivo", "Auditoria"],
+  Comunicação: ["WhatsApp", "E-mail", "N8N"],
+  Fidelização: ["Clube", "Cashback", "Winback"],
+  "Tudo junto": ["Core completo", "Automações", "BI", "Governança"],
+};
+
+function normalizeNichoSlug(slug: string): string {
+  return LEGACY_NICHO_ALIASES[slug] ?? slug;
+}
+
+function uniq<T>(items: T[]): T[] {
+  return Array.from(new Set(items));
+}
+
+function calculateDiagnostico(nicho: string, dores: string[], foco: string): DiagnosticoCalculado | null {
+  const normalized = normalizeNichoSlug(nicho);
+  const base = RECOMENDACOES[normalized] ?? RECOMENDACOES.outro;
+  if (!base) return null;
+
+  const selectedLabel = NICHOS.find((n) => n.slug === normalized)?.label ?? "operação";
+  const doresModules = dores.flatMap((dor) => DOR_MODULES[dor] ?? []);
+  const focoModules = FOCO_MODULES[foco] ?? [];
+  const modulos = uniq([...base.modulos, ...doresModules, ...focoModules]).slice(0, 9);
+  const correlatos = uniq([...base.correlatos, ...focoModules]).slice(0, 6);
+
+  const wantsFull = dores.length >= 6 || foco === "Tudo junto" || normalized === "white-label";
+  const canStartSimple = dores.length <= 2 && ["Agenda", "Pagamentos", "Captação"].includes(foco) && base.plano !== "Sob Medida";
+  const plano = base.plano === "Sob Medida" ? "Sob Medida" : wantsFull ? "Avançado" : canStartSimple ? "Essencial" : base.plano;
+  const horas = Math.min(86, base.horas + dores.length * 3 + (foco === "Tudo junto" ? 12 : foco === "Gestão" ? 7 : foco === "Comunicação" ? 5 : 0));
+  const compat = Math.min(99, base.compat + Math.min(4, dores.length));
+  const economiaValor = Math.round(horas * 95);
+  const racional = plano === "Avançado"
+    ? `Indiquei o Avançado porque você marcou ${dores.length} desafios e precisa integrar ${foco.toLowerCase()} com operação, dados e automações sem criar novos silos.`
+    : plano === "Essencial"
+      ? `Indiquei o Essencial porque sua prioridade imediata é ${foco.toLowerCase()} e o volume de desafios permite começar enxuto, com evolução modular.`
+      : plano === "Sob Medida"
+        ? `Indiquei Sob Medida porque este cenário pede marca, regras comerciais e implantação ajustadas ao modelo do seu negócio.`
+        : `Indiquei o Integrado porque seu diagnóstico combina ${selectedLabel.toLowerCase()}, ${dores.length} desafios e foco em ${foco.toLowerCase()}, exigindo módulos conectados de ponta a ponta.`;
+
+  return { ...base, modulos, correlatos, plano, horas, compat, economiaValor, racional, prioridade: foco, nichoLabel: selectedLabel };
+}
+
+function formatBRL(v: number): string {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+}
 
 // Contador animado (números crescendo)
 function useCountUp(target: number, run: boolean, ms = 900): number {
