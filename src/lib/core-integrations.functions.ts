@@ -109,8 +109,9 @@ export const testIntegration = createServerFn({ method: "POST" })
         response = { status: r.status, ok: r.ok, body: await r.text().then((t) => t.slice(0, 2000)) };
         if (!r.ok) { status = "error"; errorMsg = `HTTP ${r.status}`; }
       } else if (data.slug === "mercadopago") {
-        const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
-        if (!token) throw new Error("MERCADOPAGO_ACCESS_TOKEN não configurado nas secrets");
+        const { getMpAccessToken } = await import("@/lib/mercadopago-env.server");
+        const token = getMpAccessToken();
+        if (!token) throw new Error("Access Token do Mercado Pago não configurado nas secrets (MPAGO_CORE_SANDBOX_ACCESS_TOKEN).");
         const r = await fetch("https://api.mercadopago.com/users/me", {
           headers: { authorization: `Bearer ${token}` },
         });
