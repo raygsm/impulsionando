@@ -956,7 +956,13 @@ function SimuladorPerda() {
               <Link to="/orcamento">Quero parar de perder dinheiro <ArrowRight className="w-4 h-4 ml-1" /></Link>
             </Button>
             <Button asChild variant="outline" className="flex-1">
-              <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+              {demoLink ? (
+                <Link to={demoLink.to} params={demoLink.params} data-nicho={savedNicho} data-resolved={demoLink.slug}>
+                  <PlayCircle className="w-4 h-4 mr-1" /> Ver demo do meu nicho
+                </Link>
+              ) : (
+                <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+              )}
             </Button>
           </div>
         </Card>
