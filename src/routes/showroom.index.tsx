@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { getDemoNichoLink } from "@/lib/demoResolver";
+import { trackFunnelCta } from "@/lib/funnelTracking";
 import { ArrowRight, Sparkles, PlayCircle } from "lucide-react";
 
 export const Route = createFileRoute("/showroom/")({
