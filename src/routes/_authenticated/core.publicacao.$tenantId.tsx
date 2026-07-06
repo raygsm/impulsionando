@@ -104,7 +104,7 @@ function PublicacaoDetail() {
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <Link
-        to="/_authenticated/core/publicacao" as any
+        to={"/core/publicacao" as any}
         className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" /> Voltar

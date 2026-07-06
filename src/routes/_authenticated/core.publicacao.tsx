@@ -52,7 +52,7 @@ function PublicacaoIndex() {
             return (
               <Link
                 key={row.company.id}
-                to="/_authenticated/core/publicacao/$tenantId" as any
+                to={"/core/publicacao/$tenantId" as any}
                 params={{ tenantId: row.company.id }}
                 className="block"
               >
