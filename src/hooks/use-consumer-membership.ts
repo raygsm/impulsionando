@@ -20,9 +20,10 @@ export function useConsumerHasActiveMembership() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("consumer_memberships")
-        .select("id,status")
+        .select("id,status,created_at")
         .eq("user_id", userId!)
         .in("status", ["active", "trialing"])
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (error) {
