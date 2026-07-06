@@ -255,7 +255,7 @@ function DemoSimulador() {
       nicho: niche,
     });
     toast.success(`Setup do simulador (${planName} · ${niche}) movido para o checkout.`);
-    await navigate({ to: "/checkout/$plano", params: { plano: planCode } });
+    await navigate({ to: "/assinatura/checkout/$plano", params: { plano: planCode } } as any);
   }
 
   return (
