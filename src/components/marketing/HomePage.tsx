@@ -810,7 +810,14 @@ function Diagnostico() {
             {showResult && result && (
               <div className="grid gap-2 sm:grid-cols-3 animate-fade-in">
                 <Button asChild size="lg" className="justify-center">
-                  <Link to={result.demo as any}><PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração</Link>
+                  {(() => {
+                    const link = getDemoNichoLink(nicho);
+                    return (
+                      <Link to={link.to} params={link.params} data-analytics="diag-ver-demo" data-nicho={nicho} data-resolved={link.slug}>
+                        <PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração do meu nicho
+                      </Link>
+                    );
+                  })()}
                 </Button>
                 <Button asChild size="lg" variant="outline" className="justify-center">
                   <a href="#impulsionito"><Bot className="w-4 h-4 mr-1.5" /> Falar com Impulsionito</a>
