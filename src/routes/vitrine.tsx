@@ -120,7 +120,7 @@ function VitrinePage() {
     setQ(""); setSegment(""); setCity(""); setStateUf(""); setMinRating(0); setSort("rating");
   };
 
-  const activeFilters = [segment, city, state, deferredQ, minRating > 0 ? `${minRating}+` : ""].filter(Boolean).length;
+  const activeFilters = [segment, deferredCity, state, deferredQ, minRating > 0 ? `${minRating}+` : ""].filter(Boolean).length;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
