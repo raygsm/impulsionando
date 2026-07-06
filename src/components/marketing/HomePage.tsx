@@ -435,59 +435,127 @@ function Diagnostico() {
           <div className="lg:sticky lg:top-6 self-start space-y-4" data-testid="impulsionito-panel" aria-live="polite">
             <Card
               data-testid="impulsionito-card"
-              data-stream-state={showResult ? "complete" : nicho ? "streaming" : "idle"}
-              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500"
+              data-stream-state={streamState}
+              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500 min-h-[440px] flex flex-col contain-[layout_paint]"
             >
               <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl motion-safe:animate-pulse" />
               {/* barra de scanning durante streaming */}
-              {!showResult && nicho && (
+              {streamState === "streaming" && (
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-white/80 to-transparent motion-safe:animate-pulse" />
               )}
-              <div className="relative">
+              <div className="relative flex-1 flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25 transition-all duration-500 ${!showResult && nicho ? "ring-white/50 shadow-lg shadow-white/10" : ""}`}>
-                    <Brain className={`w-6 h-6 transition-transform duration-500 ${!showResult ? "motion-safe:animate-pulse" : "scale-110"}`} />
+                  <div className={`w-11 h-11 rounded-xl backdrop-blur grid place-items-center ring-1 transition-[background-color,box-shadow,border-color] duration-500 will-change-[background-color]
+                    ${streamState === "streaming" ? "bg-white/15 ring-white/50 shadow-lg shadow-white/10"
+                      : streamState === "timeout" || streamState === "error" ? "bg-amber-500/20 ring-amber-200/40"
+                      : "bg-white/15 ring-white/25"}`}>
+                    {streamState === "timeout" ? (
+                      <TimerReset className="w-6 h-6" />
+                    ) : streamState === "error" ? (
+                      <WifiOff className="w-6 h-6" />
+                    ) : (
+                      <Brain className={`w-6 h-6 transition-transform duration-500 ${streamState === "streaming" ? "motion-safe:animate-pulse" : streamState === "complete" ? "scale-110" : ""}`} />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs uppercase tracking-wider opacity-80">Impulsionito</div>
                     <div className="text-sm font-semibold flex items-center gap-1.5" data-testid="impulsionito-status">
                       <span className="truncate">
-                        {!nicho ? "Aguardando segmento…"
-                          : !showResult ? "Analisando seu perfil"
+                        {streamState === "timeout" ? "Análise expirou"
+                          : streamState === "error" ? "Falha temporária"
+                          : streamState === "idle" ? "Aguardando segmento…"
+                          : streamState === "streaming" ? "Analisando seu perfil"
                           : "Diagnóstico concluído"}
                       </span>
-                      {!showResult && nicho && (
+                      {streamState === "streaming" && (
                         <span className="inline-flex gap-0.5" aria-hidden="true">
                           <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_0ms]" />
                           <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_150ms]" />
                           <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_300ms]" />
                         </span>
                       )}
-                      {showResult && (
+                      {streamState === "complete" && (
                         <CheckCircle2 className="w-4 h-4 text-emerald-300 animate-in zoom-in-50 duration-500" aria-hidden="true" />
                       )}
                     </div>
                   </div>
                   <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1 shrink-0">
-                    <span className={`w-1.5 h-1.5 rounded-full ${showResult ? "bg-emerald-300" : "bg-white/90"} motion-safe:animate-pulse`} /> ao vivo
+                    <span className={`w-1.5 h-1.5 rounded-full motion-safe:animate-pulse
+                      ${streamState === "complete" ? "bg-emerald-300"
+                        : streamState === "timeout" || streamState === "error" ? "bg-amber-300"
+                        : "bg-white/90"}`} /> ao vivo
                   </Badge>
                 </div>
 
                 {/* progresso */}
                 <div className="h-1.5 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} data-testid="progress-bar">
                   <div
-                    className="h-full bg-gradient-to-r from-white via-white to-white/70 transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                    className={`h-full transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none will-change-[width]
+                      ${streamState === "timeout" || streamState === "error"
+                        ? "bg-gradient-to-r from-amber-200 to-amber-400"
+                        : "bg-gradient-to-r from-white via-white to-white/70"}`}
                     style={{ width: `${progress}%` }}
                     data-testid="progress-fill"
                   />
                 </div>
                 <div className="mt-1.5 text-[11px] opacity-80 flex justify-between">
-                  <span>{showResult ? "Compatibilidade calculada" : nicho ? "Compatibilidade em cálculo" : "Aguardando dados"}</span>
+                  <span>
+                    {streamState === "timeout" ? "Análise pausada"
+                      : streamState === "error" ? "Conexão instável"
+                      : streamState === "complete" ? "Compatibilidade calculada"
+                      : streamState === "streaming" ? "Compatibilidade em cálculo"
+                      : "Aguardando dados"}
+                  </span>
                   <span className="font-mono tabular-nums" data-testid="progress-value">{progress}%</span>
                 </div>
 
+                {/* estado de erro / timeout com CTA de retry */}
+                {(streamState === "timeout" || streamState === "error") && (
+                  <div
+                    role="alert"
+                    data-testid="stream-error"
+                    data-error-kind={streamState}
+                    className="mt-4 rounded-xl bg-amber-500/15 ring-1 ring-amber-200/40 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-1 duration-500"
+                  >
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-200" aria-hidden="true" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold">
+                          {streamState === "timeout"
+                            ? "Sua análise ficou parada por um tempo"
+                            : "Não consegui completar a análise agora"}
+                        </div>
+                        <p className="opacity-90 text-xs mt-0.5">
+                          {streamState === "timeout"
+                            ? "Podemos recomeçar em segundos — nada foi enviado ao servidor."
+                            : "Verifique sua conexão e tente novamente. Se persistir, fale com o time."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={retry}
+                        data-testid="btn-retry"
+                        className="gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Tentar novamente
+                      </Button>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary-foreground/90 hover:text-primary-foreground hover:bg-white/10"
+                      >
+                        <a href="#impulsionito"><MessageCircle className="w-3.5 h-3.5 mr-1" /> Falar com o time</a>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* estado inicial / streaming — mensagens parciais aparecem progressivamente */}
-                {!showResult && (
+                {(streamState === "idle" || streamState === "streaming") && (
                   <>
                     {nicho && (
                       <div className="mt-4 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-500" data-testid="stream-message">
@@ -505,8 +573,8 @@ function Diagnostico() {
                       <SignalRow ok={false} text="Plano ideal" pending />
                     </ul>
                   </>
-
                 )}
+
 
                 {/* estado final */}
                 {showResult && result && (
