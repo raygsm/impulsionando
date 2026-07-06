@@ -12,6 +12,8 @@
  *   sendMessage({ text, context, history?, signal? }) -> AsyncIterable<TokenChunk>
  */
 
+import type { BrainSnapshot, LlmConfig } from "@/lib/impulsionito/types";
+
 export type ImpulsionitoRole = "user" | "assistant" | "system";
 
 export interface ImpulsionitoMessage {
@@ -27,6 +29,9 @@ export interface ImpulsionitoContext {
   screen?: string;
   companyId?: string | null;
   audience?: string | null;
+  channel?: string;
+  tenant?: string;
+  userProfile?: string;
 }
 
 export interface SendMessageInput {
@@ -34,6 +39,10 @@ export interface SendMessageInput {
   context: ImpulsionitoContext;
   /** Histórico já persistido (sem a mensagem nova). */
   history?: ImpulsionitoMessage[];
+  /** Snapshot do Centro de Inteligência coletado pelo cliente. */
+  brain?: BrainSnapshot;
+  /** Config do Motor LLM (provedor, modelo, temperatura, fallback). */
+  llm?: Partial<LlmConfig>;
   signal?: AbortSignal;
 }
 
@@ -97,7 +106,12 @@ async function* streamLive(input: SendMessageInput): AsyncIterable<TokenChunk> {
       pathname: input.context.pathname,
       screen: input.context.screen,
       audience: input.context.audience,
+      channel: input.context.channel ?? "web",
+      tenant: input.context.tenant,
+      userProfile: input.context.userProfile,
     },
+    brain: input.brain,
+    llm: input.llm,
   };
 
   const res = await fetch(ENDPOINT, {
