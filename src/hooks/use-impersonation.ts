@@ -33,8 +33,10 @@ export function useImpersonation() {
 
   const startImpersonation = useCallback((s: ImpersonationState) => {
     localStorage.setItem(KEY, JSON.stringify(s));
-    // ensure other hooks reading active-company localStorage update too
-    localStorage.setItem("imp.activeCompanyId", s.companyId);
+    // NÃO sobrescrever `imp.activeCompanyId` — useActiveCompany já lê o
+    // impersonatedCompanyId via useImpersonation e força o escopo. Se
+    // gravarmos aqui, ao encerrar a impersonação o master fica ancorado
+    // na empresa impersonada no próximo carregamento.
     setState(s);
     window.dispatchEvent(new StorageEvent("storage", { key: KEY }));
   }, []);
