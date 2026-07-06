@@ -14,11 +14,11 @@ export function MobileBottomNav() {
   const tabs = [
     { to: "/dashboard", label: "Início", icon: LayoutDashboard },
     audience === "consumidor"
-      ? { to: "/consumidor/beneficios", label: "Benefícios", icon: Store }
+      ? { to: "/area-clube", label: "Benefícios", icon: Store }
       : { to: "/marketplace-eco", label: "Marketplace", icon: Store },
-    { to: "/buscar", label: "Buscar", icon: Search },
+    { to: "/busca", label: "Buscar", icon: Search },
     { to: "/notifications", label: "Avisos", icon: Bell },
-    { to: "/ajuda", label: "Menu", icon: Menu },
+    { to: "/central-de-ajuda", label: "Menu", icon: Menu },
   ] as const;
 
   return (
