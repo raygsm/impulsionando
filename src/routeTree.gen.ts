@@ -342,6 +342,7 @@ import { Route as AuthenticatedCoreSuporteRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
 import { Route as AuthenticatedCoreRepassesRouteImport } from './routes/_authenticated/core.repasses'
 import { Route as AuthenticatedCoreReleasesRouteImport } from './routes/_authenticated/core.releases'
+import { Route as AuthenticatedCorePublicacaoRouteImport } from './routes/_authenticated/core.publicacao'
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
 import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
@@ -663,6 +664,7 @@ import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './ro
 import { Route as AuthenticatedCrmLeadsIdRouteImport } from './routes/_authenticated/crm.leads.$id'
 import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreTenantsDominiosRouteImport } from './routes/_authenticated/core.tenants.dominios'
+import { Route as AuthenticatedCorePublicacaoTenantIdRouteImport } from './routes/_authenticated/core.publicacao.$tenantId'
 import { Route as AuthenticatedCoreModulosAgendaRouteImport } from './routes/_authenticated/core.modulos.agenda'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
@@ -2516,6 +2518,12 @@ const AuthenticatedCoreReleasesRoute =
   AuthenticatedCoreReleasesRouteImport.update({
     id: '/releases',
     path: '/releases',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCorePublicacaoRoute =
+  AuthenticatedCorePublicacaoRouteImport.update({
+    id: '/publicacao',
+    path: '/publicacao',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCorePromptsRoute =
@@ -4414,6 +4422,12 @@ const AuthenticatedCoreTenantsDominiosRoute =
     path: '/tenants/dominios',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCorePublicacaoTenantIdRoute =
+  AuthenticatedCorePublicacaoTenantIdRouteImport.update({
+    id: '/$tenantId',
+    path: '/$tenantId',
+    getParentRoute: () => AuthenticatedCorePublicacaoRoute,
+  } as any)
 const AuthenticatedCoreModulosAgendaRoute =
   AuthenticatedCoreModulosAgendaRouteImport.update({
     id: '/agenda',
@@ -5348,6 +5362,7 @@ export interface FileRoutesByFullPath {
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
+  '/core/publicacao': typeof AuthenticatedCorePublicacaoRouteWithChildren
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
@@ -5496,6 +5511,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
@@ -6071,6 +6087,7 @@ export interface FileRoutesByTo {
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
+  '/core/publicacao': typeof AuthenticatedCorePublicacaoRouteWithChildren
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
@@ -6218,6 +6235,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
@@ -6807,6 +6825,7 @@ export interface FileRoutesById {
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
+  '/_authenticated/core/publicacao': typeof AuthenticatedCorePublicacaoRouteWithChildren
   '/_authenticated/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/_authenticated/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
@@ -6955,6 +6974,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/_authenticated/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/_authenticated/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/_authenticated/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
@@ -7544,6 +7564,7 @@ export interface FileRouteTypes {
     | '/core/parametros'
     | '/core/planos'
     | '/core/prompts'
+    | '/core/publicacao'
     | '/core/releases'
     | '/core/repasses'
     | '/core/saude'
@@ -7692,6 +7713,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/core/modulos/agenda'
+    | '/core/publicacao/$tenantId'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/crm/leads/$id'
@@ -8267,6 +8289,7 @@ export interface FileRouteTypes {
     | '/core/parametros'
     | '/core/planos'
     | '/core/prompts'
+    | '/core/publicacao'
     | '/core/releases'
     | '/core/repasses'
     | '/core/saude'
@@ -8414,6 +8437,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/core/modulos/agenda'
+    | '/core/publicacao/$tenantId'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/crm/leads/$id'
@@ -9002,6 +9026,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/parametros'
     | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
+    | '/_authenticated/core/publicacao'
     | '/_authenticated/core/releases'
     | '/_authenticated/core/repasses'
     | '/_authenticated/core/saude'
@@ -9150,6 +9175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/core/modulos/agenda'
+    | '/_authenticated/core/publicacao/$tenantId'
     | '/_authenticated/core/tenants/dominios'
     | '/_authenticated/core/tenants/novo'
     | '/_authenticated/crm/leads/$id'
@@ -11818,6 +11844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreReleasesRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/publicacao': {
+      id: '/_authenticated/core/publicacao'
+      path: '/publicacao'
+      fullPath: '/core/publicacao'
+      preLoaderRoute: typeof AuthenticatedCorePublicacaoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/prompts': {
       id: '/_authenticated/core/prompts'
       path: '/prompts'
@@ -14065,6 +14098,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreTenantsDominiosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/publicacao/$tenantId': {
+      id: '/_authenticated/core/publicacao/$tenantId'
+      path: '/$tenantId'
+      fullPath: '/core/publicacao/$tenantId'
+      preLoaderRoute: typeof AuthenticatedCorePublicacaoTenantIdRouteImport
+      parentRoute: typeof AuthenticatedCorePublicacaoRoute
+    }
     '/_authenticated/core/modulos/agenda': {
       id: '/_authenticated/core/modulos/agenda'
       path: '/agenda'
@@ -14832,6 +14872,21 @@ const AuthenticatedCoreModulosRouteWithChildren =
     AuthenticatedCoreModulosRouteChildren,
   )
 
+interface AuthenticatedCorePublicacaoRouteChildren {
+  AuthenticatedCorePublicacaoTenantIdRoute: typeof AuthenticatedCorePublicacaoTenantIdRoute
+}
+
+const AuthenticatedCorePublicacaoRouteChildren: AuthenticatedCorePublicacaoRouteChildren =
+  {
+    AuthenticatedCorePublicacaoTenantIdRoute:
+      AuthenticatedCorePublicacaoTenantIdRoute,
+  }
+
+const AuthenticatedCorePublicacaoRouteWithChildren =
+  AuthenticatedCorePublicacaoRoute._addFileChildren(
+    AuthenticatedCorePublicacaoRouteChildren,
+  )
+
 interface AuthenticatedCoreClienteIdPaginasRouteChildren {
   AuthenticatedCoreClienteIdPaginasPageIdRoute: typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
 }
@@ -14902,6 +14957,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
   AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
+  AuthenticatedCorePublicacaoRoute: typeof AuthenticatedCorePublicacaoRouteWithChildren
   AuthenticatedCoreReleasesRoute: typeof AuthenticatedCoreReleasesRoute
   AuthenticatedCoreRepassesRoute: typeof AuthenticatedCoreRepassesRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
@@ -14966,6 +15022,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
   AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
+  AuthenticatedCorePublicacaoRoute:
+    AuthenticatedCorePublicacaoRouteWithChildren,
   AuthenticatedCoreReleasesRoute: AuthenticatedCoreReleasesRoute,
   AuthenticatedCoreRepassesRoute: AuthenticatedCoreRepassesRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
