@@ -459,6 +459,7 @@ function Diagnostico() {
                         data-testid={`nicho-${n.slug}`}
                         aria-pressed={on}
                         onClick={() => selectNicho(n.slug)}
+                        onPointerUp={() => selectNicho(n.slug)}
                         className={`group relative text-left rounded-xl p-3 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
                             : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
