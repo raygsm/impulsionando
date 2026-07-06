@@ -20,6 +20,7 @@ export const Route = createFileRoute("/paciente")({
 
 function PatientLayout() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,8 +28,7 @@ function PatientLayout() {
   }, []);
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    await signOutSafely({ queryClient, navigate });
   }
 
   return (
