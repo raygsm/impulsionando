@@ -8,6 +8,7 @@ import { WhatsAppBlock } from "@/components/marketing/WhatsAppBlock";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
 import { getDemoNichoLink } from "@/lib/demoResolver";
+import { trackFunnelCta } from "@/lib/funnelTracking";
 
 const WA_HOME =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20escolher%20o%20meu%20nicho%20e%20conhecer%20a%20Impulsionando.";
@@ -92,7 +93,20 @@ function NichosIndex() {
                           const link = getDemoNichoLink(n.slug);
                           return (
                             <Button asChild size="sm" variant="outline">
-                              <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>Demo</Link>
+                              <Link
+                                to={link.to}
+                                params={link.params}
+                                data-nicho={n.slug}
+                                data-resolved={link.slug}
+                                onClick={() => trackFunnelCta({
+                                  cta: "nichos-abrir-demo",
+                                  origem: "nichos-hub",
+                                  nicho_pedido: n.slug,
+                                  alias_resolvido: link.slug,
+                                  isFallback: link.isFallback,
+                                  rotaDestino: `/demo/nicho/${link.slug}`,
+                                })}
+                              >Demo</Link>
                             </Button>
                           );
                         })()}

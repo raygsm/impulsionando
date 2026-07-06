@@ -40,25 +40,46 @@ export const Route = createFileRoute("/demo/nicho/$slug")({
   },
 });
 
-function NichoNotFound() {
+function DemoFallbackLanding({
+  requestedSlug,
+  resolvedSlug,
+}: {
+  requestedSlug: string;
+  resolvedSlug: string;
+}) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <main className="flex-1 mx-auto max-w-3xl px-4 py-20 text-center">
-        <Badge variant="outline" className="mb-3">Demo ativa</Badge>
-        <h1 className="text-3xl font-bold tracking-tight">Demonstração geral do ecossistema</h1>
+      <main className="flex-1 mx-auto max-w-3xl px-4 py-16 text-center">
+        <Badge variant="outline" className="mb-3 border-amber-400 text-amber-700 bg-amber-50">
+          Alias desconhecido
+        </Badge>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Não encontramos uma demo para <span className="font-mono">"{requestedSlug}"</span>
+        </h1>
         <p className="mt-3 text-muted-foreground">
-          Quando um segmento ainda não tem vitrine dedicada, abrimos uma operação equivalente com CRM, agenda, pagamentos, comunicação e BI.
+          Redirecionamos para a demonstração geral (<strong>{resolvedSlug}</strong>) enquanto
+          você escolhe o nicho certo. Você pode continuar navegando ou selecionar um segmento
+          específico abaixo.
         </p>
         <div className="mt-6 flex justify-center gap-3 flex-wrap">
           <Button asChild className="bg-gradient-primary">
-            <Link to="/demo/nicho/$slug" params={{ slug: "eventos" }}>
-              Abrir demo Eventos / WMP <ArrowRight className="w-4 h-4 ml-2" />
+            <Link to="/demo/escolher-nicho">
+              Escolher meu nicho <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/demo/modulos">Ver todos os módulos</Link>
+            <Link to="/showroom">Ver showroom</Link>
           </Button>
+          <Button asChild variant="ghost">
+            <Link to="/demo">Todas as demonstrações</Link>
+          </Button>
+        </div>
+        <div className="mt-10 text-xs text-muted-foreground">
+          Continuar com a demo geral (<strong>{resolvedSlug}</strong>) →{" "}
+          <Link to="/demo/nicho/$slug" params={{ slug: resolvedSlug }} className="underline underline-offset-2 hover:no-underline">
+            abrir agora
+          </Link>
         </div>
       </main>
       <PublicFooter />
@@ -66,13 +87,36 @@ function NichoNotFound() {
   );
 }
 
+function NichoNotFound() {
+  return (
+    <DemoFallbackLanding requestedSlug="?" resolvedSlug="servicos" />
+  );
+}
+
 function DemoNichoPage() {
-  const data = Route.useLoaderData();
+  const data = Route.useLoaderData() as
+    | { slug: string; requestedSlug: string; isFallback: boolean; isAlias: boolean }
+    | undefined;
   const slug = data?.slug ?? "servicos";
+  const requestedSlug = data?.requestedSlug ?? slug;
+  const isFallback = Boolean(data?.isFallback);
+  const isAlias = Boolean(data?.isAlias);
+
+  // Alias completamente desconhecido → landing dedicada, não a demo genérica.
+  // (isFallback === true significa que resolveDemoNicho caiu em "servicos".)
+  if (isFallback && requestedSlug && requestedSlug !== slug) {
+    return <DemoFallbackLanding requestedSlug={requestedSlug} resolvedSlug={slug} />;
+  }
+
   if (slug === "eventos") return <DemoEventosNicho />;
   const cfg = getRichNiche(slug as RichNiche);
-  if (!cfg) return <NichoNotFound />;
-  return <NichoDemoRich config={cfg} />;
+  if (!cfg) return <DemoFallbackLanding requestedSlug={requestedSlug} resolvedSlug="servicos" />;
+  return (
+    <NichoDemoRich
+      config={cfg}
+      resolvedInfo={{ requestedSlug, slug, isAlias, isFallback }}
+    />
+  );
 }
 
 

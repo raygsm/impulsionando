@@ -12,7 +12,13 @@ import { useDemoTracker } from "@/hooks/useDemoTracker";
 import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
 import type { RichNicheConfig, RichTab } from "@/lib/demoNichoExtras";
 
-export function NichoDemoRich({ config }: { config: RichNicheConfig }) {
+export function NichoDemoRich({
+  config,
+  resolvedInfo,
+}: {
+  config: RichNicheConfig;
+  resolvedInfo?: { requestedSlug: string; slug: string; isAlias: boolean; isFallback: boolean };
+}) {
   const { track } = useDemoTracker(config.niche);
 
   return (
@@ -20,10 +26,31 @@ export function NichoDemoRich({ config }: { config: RichNicheConfig }) {
       <PublicHeader />
       <DemoModeBanner />
 
+      {resolvedInfo && (resolvedInfo.isAlias || resolvedInfo.isFallback) && (
+        <div className={`border-b ${resolvedInfo.isFallback ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-primary/5 border-primary/20 text-foreground"}`}>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center gap-2 text-xs">
+            <Badge variant={resolvedInfo.isFallback ? "outline" : "secondary"} className="uppercase tracking-wide">
+              {resolvedInfo.isFallback ? "Fallback" : "Alias"}
+            </Badge>
+            <span>
+              Você pediu <strong className="font-mono">{resolvedInfo.requestedSlug}</strong>{" · "}
+              exibindo demo de <strong>{config.heroEyebrow}</strong> ({resolvedInfo.slug}).
+            </span>
+            {resolvedInfo.isFallback && (
+              <Link to="/demo/escolher-nicho" className="underline underline-offset-2 ml-auto hover:no-underline">
+                Escolher outro nicho →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <Badge className="bg-gradient-primary mb-3">{config.heroEyebrow}</Badge>
+            <Badge className="bg-gradient-primary mb-3">
+              Nicho: {config.heroEyebrow}
+            </Badge>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{config.heroTitle}</h1>
             <p className="mt-3 text-muted-foreground max-w-3xl">{config.heroSubtitle}</p>
           </div>

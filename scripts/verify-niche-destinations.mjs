@@ -91,15 +91,25 @@ try {
   const escolherSrc = read("src/routes/escolher-nicho.tsx");
   const recoSrc = read("src/routes/recomendacao.$nicho.tsx");
   const demoNichoSrc = read("src/routes/demo.nicho.$slug.tsx");
+  const demoResolverSrc = read("src/lib/demoResolver.ts");
 
   const macros = extractMacroNichos(macrosSrc);
   const cardKeys = new Set(extractRecordKeys(escolherSrc, "NICHO_CARDS"));
   const recoKeys = new Set(extractRecordKeys(recoSrc, "RECOMENDACOES"));
-  const demoAliasKeys = new Set(extractRecordKeys(demoNichoSrc, "NICHO_ALIASES"));
-  const supportedMatch = demoNichoSrc.match(/const\s+SUPORTADOS[^=]*=\s*\[([^\]]*)\]/);
+  const demoAliasKeys = new Set(extractRecordKeys(demoResolverSrc, "NICHO_ALIASES"));
+  const supportedMatch =
+    demoResolverSrc.match(/const\s+SUPPORTED_DEMOS[^=]*=\s*\[([^\]]*)\]/) ||
+    demoNichoSrc.match(/const\s+SUPORTADOS[^=]*=\s*\[([^\]]*)\]/);
   const directDemoKeys = new Set(
     supportedMatch ? [...supportedMatch[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]) : [],
   );
+  // SUPPORTED_DEMOS inclui `...RICH_NICHES` via spread; adiciona os slugs ricos.
+  const richMatch = read("src/lib/demoNichoExtras.ts").match(
+    /export\s+const\s+RICH_NICHES[^=]*=\s*\[([^\]]*)\]/,
+  );
+  if (richMatch) {
+    for (const m of richMatch[1].matchAll(/"([^"]+)"/g)) directDemoKeys.add(m[1]);
+  }
 
   for (const { macro, subs } of macros) {
     if (!subs.length) {
@@ -122,7 +132,7 @@ try {
       if (!demoAliasKeys.has(slug) && !directDemoKeys.has(slug)) {
         errors.push(
           `Macro "${macro}" → subnicho "${slug}" não tem demo em /demo/nicho/$slug ` +
-          `(falta em NICHO_ALIASES ou SUPORTADOS de src/routes/demo.nicho.$slug.tsx).`,
+          `(falta em NICHO_ALIASES de src/lib/demoResolver.ts ou em SUPPORTED_DEMOS/RICH_NICHES).`,
         );
       }
     }
