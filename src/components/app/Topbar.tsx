@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search, LogOut, ArrowRight, User, Building2, UserPlus, Handshake } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
