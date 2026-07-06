@@ -10,9 +10,10 @@ import {
   Home, Search as SearchIcon, Zap, Bot, MessageSquare, QrCode,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
-  Beer, Store, Send, Ticket, Utensils,
+  Beer, Store, Send, Ticket, Utensils, Coffee, Wine, Pizza,
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
   Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
+  HeartPulse, Scale, ShoppingBag, Factory,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
@@ -56,6 +57,9 @@ export const TOP_ITEMS: NavItem[] = [
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
+  // ============================================================
+  // CONSUMIDOR
+  // ============================================================
   {
     label: "Minha Área",
     audiences: ["consumidor"],
@@ -83,42 +87,159 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck, audiences: ["consumidor"] },
     ],
   },
-  {
-    label: "Microcervejaria",
-    audiences: ["core", "white-label", "empresa"],
-    defaultOpen: true,
-    items: [
-      { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
-      { to: "/cervejaria/pdvs", label: "PDVs Parceiros", icon: Store },
-      { to: "/cervejaria/catalogo", label: "Catálogo & Campanhas", icon: Megaphone },
-      { to: "/cervejaria/relacionamento", label: "Relacionamento", icon: Users },
-      { to: "/cervejaria/retorno", label: "Retorno por PDV/Cupom", icon: BarChart3 },
-    ],
-  },
 
-  {
-    label: "Marketplace B2B",
-    audiences: ["core", "white-label", "empresa"],
-    items: [
-      { to: "/core/marketplace", label: "Visão geral", icon: TrendingUp, superOnly: true },
-      { to: "/core/marketplace/fornecedores", label: "Fornecedores", icon: Store, superOnly: true },
-      { to: "/core/marketplace/compradores", label: "Compradores", icon: Users2, superOnly: true },
-      { to: "/core/marketplace/pedidos", label: "Pedidos", icon: Receipt, superOnly: true },
-      { to: "/core/marketplace/financeiro", label: "Financeiro B2B", icon: Banknote, superOnly: true },
-      { to: "/cervejaria/marketplace", label: "Meu Marketplace (Cervejaria)", icon: Beer },
-      { to: "/bar/marketplace", label: "Comprar do Marketplace (Bar)", icon: ShoppingCart },
-    ],
-  },
-
+  // ============================================================
+  // ECOSSISTEMA — clientes, planos, vitrine, white-label, clube
+  // (substitui os antigos grupos "Ecossistema" + "Marketplace B2B")
+  // ============================================================
   {
     label: "Ecossistema",
-    audiences: ["core"],
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/core/ecossistema", label: "Painel do Ecossistema", icon: Sparkles, superOnly: true },
       { to: "/ecossistema", label: "Vitrine pública", icon: Store },
+      { to: "/vitrine", label: "Vitrine — parceiros", icon: SearchIcon },
+      {
+        label: "Marketplace B2B",
+        icon: Handshake,
+        children: [
+          { to: "/core/marketplace", label: "Visão geral", icon: TrendingUp, superOnly: true },
+          { to: "/core/marketplace/fornecedores", label: "Fornecedores", icon: Store, superOnly: true },
+          { to: "/core/marketplace/compradores", label: "Compradores", icon: Users2, superOnly: true },
+          { to: "/core/marketplace/pedidos", label: "Pedidos", icon: Receipt, superOnly: true },
+          { to: "/core/marketplace/financeiro", label: "Financeiro B2B", icon: Banknote, superOnly: true },
+          { to: "/cervejaria/marketplace", label: "Meu Marketplace (Cervejaria)", icon: Beer },
+          { to: "/bar/marketplace", label: "Comprar do Marketplace (Bar)", icon: ShoppingCart },
+        ],
+      },
+      { to: "/admin/clube", label: "Clube — Cockpit", icon: Crown, superOnly: true },
+      { to: "/core/consumidor-premium", label: "Consumidor Premium", icon: UserRound, superOnly: true },
     ],
   },
 
+  // ============================================================
+  // NICHOS — macroáreas de mercado. Microcervejaria é subnicho.
+  // ============================================================
+  {
+    label: "Nichos",
+    audiences: ["core", "white-label", "empresa"],
+    items: [
+      {
+        label: "Saúde",
+        icon: HeartPulse,
+        children: [
+          { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
+          { to: "/chrismed/admin", label: "ChrisMed — Admin", icon: Stethoscope, superOnly: true },
+          { to: "/chrismed/setup", label: "ChrisMed — Setup", icon: SettingsIcon, superOnly: true },
+          { to: "/chrismed/alertas", label: "ChrisMed — Alertas", icon: Inbox, superOnly: true },
+          { to: "/admin/ehr-compliance", label: "EHR & Clinical Compliance", icon: Stethoscope, superOnly: true },
+          { to: "/admin/ehr-clinical-health", label: "EHR & Clinical", icon: Stethoscope, superOnly: true },
+        ],
+      },
+      {
+        label: "Alimentação & Bebidas",
+        icon: Utensils,
+        children: [
+          { to: "/showroom/restaurante", label: "Showroom Bar/Restaurante", icon: QrCode, superOnly: true },
+          { to: "/admin/restaurant-health", label: "Restaurant & POS Health", icon: Utensils, superOnly: true },
+          {
+            label: "Microcervejarias",
+            icon: Beer,
+            children: [
+              { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
+              { to: "/cervejaria/pdvs", label: "PDVs Parceiros", icon: Store },
+              { to: "/cervejaria/catalogo", label: "Catálogo & Campanhas", icon: Megaphone },
+              { to: "/cervejaria/relacionamento", label: "Relacionamento", icon: Users },
+              { to: "/cervejaria/retorno", label: "Retorno por PDV/Cupom", icon: BarChart3 },
+              { to: "/cervejaria/marketplace", label: "Marketplace (venda B2B)", icon: Handshake },
+              { to: "/admin/brewery-clube-health", label: "Brewery & Clube Health", icon: Beer, superOnly: true },
+            ],
+          },
+          { to: "/bar/marketplace", label: "Bar — Compras B2B", icon: Wine },
+          { to: "/admin/marocas-health", label: "Marocas Hospitality", icon: Coffee, superOnly: true },
+          { to: "/admin/marocas-ops-health", label: "Marocas — Temporada", icon: Coffee, superOnly: true },
+        ],
+      },
+      {
+        label: "Comércio & Varejo",
+        icon: ShoppingBag,
+        children: [
+          { to: "/sales", label: "Vendas — visão geral", icon: ShoppingCart, perm: "sales.order.read" },
+          { to: "/inventory", label: "Estoque — visão geral", icon: Package, perm: "inventory.product.read" },
+          { to: "/admin/sales-pos-health", label: "Sales & POS Health", icon: ShoppingCart, superOnly: true },
+          { to: "/admin/inventory-health", label: "Inventory & Stock Health", icon: Package, superOnly: true },
+        ],
+      },
+      {
+        label: "Serviços",
+        icon: Wrench,
+        children: [
+          { to: "/agenda/services", label: "Catálogo de serviços", icon: Wrench, perm: "agenda.service.read" },
+          { to: "/admin/agenda-ops-health", label: "Agenda Ops Health", icon: CalendarClock, superOnly: true },
+        ],
+      },
+      {
+        label: "Imobiliário",
+        icon: Home,
+        children: [
+          { to: "/imobiliaria/vitrine", label: "Vitrine", icon: Home },
+          { to: "/realestate/cockpit", label: "Cockpit", icon: Home },
+          { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
+          { to: "/imobiliaria/interessados", label: "Interessados", icon: Users2, perm: "realestate.interest.read" },
+          { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
+          { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
+          { to: "/imobiliaria/campanhas", label: "Campanhas & Disparo", icon: Send, perm: "realestate.property.write" },
+          { to: "/imobiliaria/mensagens", label: "Mensagens", icon: MessageSquare, perm: "realestate.message.read" },
+          { to: "/imobiliaria/parceiros", label: "Corretores parceiros", icon: Handshake, perm: "realestate.property.write" },
+          { to: "/imobiliaria/modulos", label: "Módulos do nicho", icon: Boxes },
+          { to: "/admin/imobiliaria", label: "Imobiliária — Admin", icon: Home, superOnly: true },
+          { to: "/admin/realestate-cockpit", label: "Imob. — Cockpit", icon: Home, superOnly: true },
+          { to: "/admin/realestate-health", label: "Imob. & Temporada Health", icon: Home, superOnly: true },
+          { to: "/admin/real-estate-ops-health", label: "Real Estate Ops & Brokerage", icon: Home, superOnly: true },
+        ],
+      },
+      {
+        label: "Eventos",
+        icon: Ticket,
+        children: [
+          { to: "/admin/events-health", label: "Eventos & Ticketing Health", icon: Ticket, superOnly: true },
+          { to: "/admin/events-ticketing-health", label: "Eventos & Ticketing (v2)", icon: Ticket, superOnly: true },
+        ],
+      },
+      {
+        label: "Educação",
+        icon: GraduationCap,
+        children: [
+          { to: "/talents", label: "Banco de Talentos", icon: GraduationCap, superOnly: true },
+          { to: "/admin/educ-talentos", label: "Educacional & Talentos", icon: GraduationCap, superOnly: true },
+          { to: "/admin/education-polos-health", label: "Educação & Polos", icon: GraduationCap, superOnly: true },
+          { to: "/admin/talentos-cockpit-health", label: "Talentos — Cockpit", icon: Users, superOnly: true },
+        ],
+      },
+      {
+        label: "Fornecedores",
+        icon: Factory,
+        children: [
+          { to: "/core/marketplace/fornecedores", label: "Diretório de fornecedores", icon: Store, superOnly: true },
+          { to: "/inventory/suppliers", label: "Fornecedores (compras)", icon: Truck, perm: "inventory.supplier.read" },
+        ],
+      },
+      {
+        label: "Jurídico & Contábil",
+        icon: Scale,
+        children: [
+          { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
+          { to: "/admin/contab-health", label: "Contábil & Office", icon: Calculator, superOnly: true },
+          { to: "/admin/contab-cockpit-health", label: "Contabilidade — Cockpit", icon: Calculator, superOnly: true },
+        ],
+      },
+    ],
+  },
+
+  // ============================================================
+  // MÓDULOS TRANSVERSAIS — funções que servem a vários nichos
+  // (verbos-pilares preservados: Captar/Relacionar/Operar/Cobrar/Comunicar)
+  // ============================================================
   {
     label: "Captar",
     audiences: ["core", "white-label", "empresa"],
@@ -130,7 +251,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/crm/activities", label: "Atividades", icon: CalendarClock, perm: "crm.activity.read" },
       { to: "/marketing/leads", label: "Leads do site", icon: Inbox, superOnly: true },
       { to: "/marketing/cockpit", label: "Cockpit de Marketing", icon: Megaphone, superOnly: true },
-      { to: "/talents", label: "Banco de Talentos", icon: GraduationCap, superOnly: true },
     ],
   },
   {
@@ -153,8 +273,6 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/agenda/cliente", label: "Meus agendamentos", icon: Calendar },
         ],
       },
-      { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
-      { to: "/imobiliaria/interessados", label: "Interessados (Imob.)", icon: Users2, perm: "realestate.interest.read" },
       { to: "/area-clube", label: "Minha área Clube", icon: Sparkles },
       { to: "/consumer/unified", label: "Clube — Membros", icon: UserRound, perm: "users.read" },
     ],
@@ -185,20 +303,6 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp, perm: "inventory.movement.read" },
           { to: "/inventory/categories", label: "Categorias", icon: FolderTree, perm: "inventory.category.read" },
           { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck, perm: "inventory.supplier.read" },
-        ],
-      },
-      {
-        label: "Imobiliária",
-        icon: Home,
-        children: [
-          { to: "/imobiliaria/vitrine", label: "Vitrine", icon: Home },
-          { to: "/realestate/cockpit", label: "Cockpit", icon: Home },
-          { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
-          { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
-          { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
-          { to: "/imobiliaria/campanhas", label: "Campanhas & Disparo", icon: Send, perm: "realestate.property.write" },
-          { to: "/imobiliaria/parceiros", label: "Corretores parceiros", icon: Handshake, perm: "realestate.property.write" },
-          { to: "/imobiliaria/modulos", label: "Módulos do nicho", icon: Boxes },
         ],
       },
     ],
@@ -251,7 +355,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/ops/mensageria", label: "Mensageria (WhatsApp/E-mail)", icon: MessageSquare },
       { to: "/ops/voz-cliente", label: "Voz do Cliente", icon: Megaphone },
-      { to: "/imobiliaria/mensagens", label: "Mensagens (Imob.)", icon: MessageSquare, perm: "realestate.message.read" },
       { to: "/notifications", label: "Notificações", icon: Inbox },
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck },
     ],
@@ -316,8 +419,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 
   // ============================================================
-  // ADMINISTRAÇÃO — reorganizada com submenus por domínio.
-  // Lógica: 1 grupo, 10 submenus coesos, hierarquia previsível.
+  // ADMINISTRAÇÃO — mantida intacta (10 submenus coesos).
   // ============================================================
   {
     label: "Administração",
@@ -482,23 +584,13 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/tenant-lifecycle", label: "Tenant Lifecycle", icon: CalendarClock, superOnly: true },
           { to: "/admin/marketplace-ops", label: "Marketplace Ops", icon: Store, superOnly: true },
           { to: "/admin/agenda-health", label: "Agenda & Booking Health", icon: Calendar, superOnly: true },
-          { to: "/admin/ehr-compliance", label: "EHR & Clinical Compliance", icon: Stethoscope, superOnly: true },
           { to: "/admin/fiscal-health", label: "Fiscal & NF-e Health", icon: Receipt, superOnly: true },
           { to: "/admin/comms-health", label: "Comunicação Omnichannel", icon: Send, superOnly: true },
           { to: "/admin/compliance-health", label: "LGPD & Compliance", icon: ShieldCheck, superOnly: true },
           { to: "/admin/trial-onboarding-health", label: "Trial & Onboarding", icon: Rocket, superOnly: true },
           { to: "/admin/marketplace-health", label: "Marketplace & Afiliados", icon: Store, superOnly: true },
-          { to: "/admin/realestate-health", label: "Imobiliário & Temporada", icon: Home, superOnly: true },
-          { to: "/admin/cofre-credenciais", label: "Cofre de Credenciais", icon: KeyRound, superOnly: true },
           { to: "/admin/affiliates-health", label: "Affiliates & Co-producer", icon: Handshake, superOnly: true },
           { to: "/admin/real-estate-health", label: "Real Estate Cockpit", icon: Home, superOnly: true },
-          { to: "/admin/educ-talentos", label: "Educacional & Talentos", icon: GraduationCap, superOnly: true },
-          { to: "/admin/contab-health", label: "Contábil & Office", icon: Calculator, superOnly: true },
-          { to: "/admin/events-health", label: "Eventos & Ticketing", icon: Ticket, superOnly: true },
-          { to: "/admin/brewery-clube-health", label: "Brewery & Clube", icon: Beer, superOnly: true },
-          { to: "/admin/restaurant-health", label: "Restaurant & POS", icon: Utensils, superOnly: true },
-          { to: "/admin/inventory-health", label: "Inventory & Stock", icon: Package, superOnly: true },
-          { to: "/admin/finance-health", label: "Finance & Cashflow", icon: Wallet, superOnly: true },
           { to: "/erp-financeiro", label: "ERP Financeiro", icon: Wallet, perm: "financeiro.read" },
           { to: "/admin/crm-health", label: "CRM & Pipeline", icon: KanbanSquare, superOnly: true },
           { to: "/admin/marketing-health", label: "Marketing & Outbox", icon: Megaphone, superOnly: true },
@@ -509,16 +601,10 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/white-label-tenants", label: "White-Label · Tenants", icon: Globe, superOnly: true },
           { to: "/admin/notifications-cockpit", label: "Notifications Cockpit", icon: Inbox, superOnly: true },
           { to: "/admin/mercadopago-billing-health", label: "MercadoPago & Billing", icon: CreditCard, superOnly: true },
-          { to: "/admin/marocas-health", label: "Marocas Hospitality", icon: Building2, superOnly: true },
           { to: "/admin/governance-lgpd-health", label: "Governance & LGPD", icon: ShieldCheck, superOnly: true },
           { to: "/admin/support-ticketing-health", label: "Support & Ticketing", icon: Headphones, superOnly: true },
-          { to: "/admin/events-ticketing-health", label: "Eventos & Ticketing", icon: Ticket, superOnly: true },
-          { to: "/admin/realestate-cockpit", label: "Imobiliária — Cockpit", icon: Home, superOnly: true },
           { to: "/admin/documents-files-health", label: "Documents & Files", icon: FileCode, superOnly: true },
-          { to: "/admin/sales-pos-health", label: "Sales & POS", icon: ShoppingCart, superOnly: true },
-          { to: "/admin/ehr-clinical-health", label: "EHR & Clinical", icon: Stethoscope, superOnly: true },
           { to: "/admin/community-health", label: "Community", icon: Users, superOnly: true },
-          { to: "/admin/agenda-ops-health", label: "Agenda Operations", icon: CalendarClock, superOnly: true },
           { to: "/admin/ai-projects-health", label: "AI Projects & Pages", icon: Sparkles, superOnly: true },
           { to: "/admin/loyalty-clube-health", label: "Loyalty & Clube", icon: Crown, superOnly: true },
           { to: "/admin/onboarding-provisioning-health", label: "Onboarding & Provisioning", icon: Rocket, superOnly: true },
@@ -533,12 +619,6 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/jobs-queues-reliability-health", label: "Jobs, Queues & Reliability", icon: Workflow, superOnly: true },
           { to: "/admin/vitrine-legal-health", label: "Vitrine, Site Builder & Legal", icon: Globe, superOnly: true },
           { to: "/admin/notification-deliverability-health", label: "Notification & Deliverability", icon: Inbox, superOnly: true },
-          { to: "/admin/real-estate-ops-health", label: "Real Estate Ops & Brokerage", icon: Home, superOnly: true },
-          { to: "/admin/education-polos-health", label: "Educação & Polos", icon: GraduationCap, superOnly: true },
-          { to: "/admin/affiliates-cockpit-health", label: "Afiliados & Comissões", icon: BadgeDollarSign, superOnly: true },
-          { to: "/admin/contab-cockpit-health", label: "Contabilidade", icon: Calculator, superOnly: true },
-          { to: "/admin/marocas-ops-health", label: "Marocas — Temporada", icon: Building2, superOnly: true },
-          { to: "/admin/talentos-cockpit-health", label: "Talentos", icon: Users, superOnly: true },
           { to: "/admin/agenda-resources-health", label: "Agenda — Recursos", icon: Calendar, superOnly: true },
           { to: "/admin/agenda-operations-health", label: "Agenda — Operações", icon: CalendarClock, superOnly: true },
           { to: "/admin/crm-funnel-health", label: "CRM & Funil", icon: KanbanSquare, superOnly: true },
