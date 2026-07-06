@@ -348,7 +348,7 @@ function Diagnostico() {
   const selectNicho = useCallback((slug: string) => {
     setStreamError(null);
     setNicho(normalizeNichoSlug(slug));
-    setTimeout(() => setStep(1), 250);
+    setStep(1);
   }, []);
   const toggleDor = useCallback((d: string) => {
     setStreamError(null);
@@ -357,7 +357,7 @@ function Diagnostico() {
   const selectFoco = useCallback((f: string) => {
     setStreamError(null);
     setFoco(f);
-    setTimeout(() => setStep(2), 200);
+    setStep(2);
   }, []);
   const retry = useCallback(() => {
     setStreamError(null);
