@@ -6,6 +6,7 @@
  * `src/components/marketing/nichoMacros.ts` não tiver destino válido em:
  *  - `/escolher-nicho`         → `NICHO_CARDS` em src/routes/escolher-nicho.tsx
  *  - `/recomendacao/$nicho`    → `RECOMENDACOES` em src/routes/recomendacao.$nicho.tsx
+ *  - `/demo/nicho/$slug`       → `NICHO_ALIASES` ou demo rica/suportada
  *
  * Roda no `prebuild` para garantir invariante antes de qualquer deploy.
  * Não depende de TypeScript: extrai chaves dos objetos literais por regex
@@ -89,10 +90,16 @@ try {
   const macrosSrc = read("src/components/marketing/nichoMacros.ts");
   const escolherSrc = read("src/routes/escolher-nicho.tsx");
   const recoSrc = read("src/routes/recomendacao.$nicho.tsx");
+  const demoNichoSrc = read("src/routes/demo.nicho.$slug.tsx");
 
   const macros = extractMacroNichos(macrosSrc);
   const cardKeys = new Set(extractRecordKeys(escolherSrc, "NICHO_CARDS"));
   const recoKeys = new Set(extractRecordKeys(recoSrc, "RECOMENDACOES"));
+  const demoAliasKeys = new Set(extractRecordKeys(demoNichoSrc, "NICHO_ALIASES"));
+  const supportedMatch = demoNichoSrc.match(/const\s+SUPORTADOS[^=]*=\s*\[([^\]]*)\]/);
+  const directDemoKeys = new Set(
+    supportedMatch ? [...supportedMatch[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]) : [],
+  );
 
   for (const { macro, subs } of macros) {
     if (!subs.length) {
@@ -112,6 +119,12 @@ try {
           `(falta em RECOMENDACOES de src/routes/recomendacao.$nicho.tsx).`,
         );
       }
+      if (!demoAliasKeys.has(slug) && !directDemoKeys.has(slug)) {
+        errors.push(
+          `Macro "${macro}" → subnicho "${slug}" não tem demo em /demo/nicho/$slug ` +
+          `(falta em NICHO_ALIASES ou SUPORTADOS de src/routes/demo.nicho.$slug.tsx).`,
+        );
+      }
     }
   }
 } catch (err) {
@@ -122,7 +135,7 @@ if (errors.length) {
   console.error("\n✖ Inconsistência no catálogo de nichos:\n");
   for (const e of errors) console.error("  - " + e);
   console.error(
-    "\nCorrija adicionando a entrada faltante (NICHO_CARDS ou RECOMENDACOES) " +
+    "\nCorrija adicionando a entrada faltante (NICHO_CARDS, RECOMENDACOES ou NICHO_ALIASES) " +
     "ou remova o slug de MACRO_NICHOS.\n",
   );
   process.exit(1);
