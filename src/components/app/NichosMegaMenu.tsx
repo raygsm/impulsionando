@@ -41,7 +41,7 @@ export function NichosMegaMenu({ onNavigate }: { onNavigate?: () => void }) {
           type="button"
           className={cn(
             "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-colors shadow-sm",
-            "bg-indigo-600 text-white hover:bg-indigo-500 border-indigo-700",
+            "bg-primary text-primary-foreground hover:bg-primary/90 border-primary/60",
           )}
         >
           <span className="flex items-center gap-2">

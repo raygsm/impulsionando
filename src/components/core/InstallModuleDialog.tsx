@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,15 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
   const [selectedCompany, setSelectedCompany] = useState<string | undefined>(companyId);
   const [segment, setSegment] = useState<SegmentKey>("default");
   const [installDeps, setInstallDeps] = useState(true);
+
+  // Ao fechar, restaura os defaults para não vazar seleção entre aberturas.
+  useEffect(() => {
+    if (!open) {
+      setSegment("default");
+      setInstallDeps(true);
+      if (!companyId) setSelectedCompany(undefined);
+    }
+  }, [open, companyId]);
 
   const { data: companies } = useQuery({
     queryKey: ["companies-for-install"],
@@ -94,11 +103,17 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
                   <SelectValue placeholder="Selecione a empresa…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(companies ?? []).map((c: { id: string; name: string }) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
+                  {(companies ?? []).length === 0 ? (
+                    <div className="px-2 py-3 text-xs text-muted-foreground">
+                      Nenhum cliente ativo disponível.
+                    </div>
+                  ) : (
+                    (companies ?? []).map((c: { id: string; name: string }) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
