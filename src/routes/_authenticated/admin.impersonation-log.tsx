@@ -132,6 +132,9 @@ function ImpersonationLogPage() {
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`size-4 mr-1 ${isFetching ? "animate-spin" : ""}`} /> Atualizar
         </Button>
+        <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
+          <Download className="size-4 mr-1" /> CSV
+        </Button>
         <div className="text-xs text-muted-foreground ml-auto">
           {filtered.length} eventos · {totalStart} start · {totalStop} stop
         </div>
