@@ -814,7 +814,23 @@ function Diagnostico() {
                   {(() => {
                     const link = getDemoNichoLink(nicho);
                     return (
-                      <Link to={link.to} params={link.params} data-analytics="diag-ver-demo" data-nicho={nicho} data-resolved={link.slug}>
+                      <Link
+                        to={link.to}
+                        params={link.params}
+                        data-analytics="diag-ver-demo"
+                        data-nicho={nicho}
+                        data-resolved={link.slug}
+                        data-trace-id={getFunnelTraceId()}
+                        onClick={() => trackFunnelCta({
+                          cta: "diag-ver-demo",
+                          origem: "home-diagnostico",
+                          nicho_pedido: nicho,
+                          alias_resolvido: link.slug,
+                          isFallback: link.isFallback,
+                          rotaDestino: `/demo/nicho/${link.slug}`,
+                          extra: { plano: result.plano, dores: dores.length, foco },
+                        })}
+                      >
                         <PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração do meu nicho
                       </Link>
                     );
