@@ -225,6 +225,7 @@ function RootComponent() {
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <EnvHealthBanner />
+      <ScrollGuidance />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
