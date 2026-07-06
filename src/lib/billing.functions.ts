@@ -50,10 +50,16 @@ export const getMyBillingStatus = createServerFn({ method: "GET" })
   .inputValidator((data: { companyId: string }) => data)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    // [Etapa 4] .order().limit(1).maybeSingle() — se a empresa tiver mais de
+    // um contrato histórico, .maybeSingle() sozinho quebra ("more than one
+    // row"), derrubando o BillingGate para o usuário legítimo. Ordenamos
+    // pelo mais recente e pegamos apenas 1.
     const { data: rows, error } = await supabase
       .from("billing_contracts")
-      .select("id, status, next_due_date, recurring_amount, pix_key, pix_copy_paste")
+      .select("id, status, next_due_date, recurring_amount, pix_key, pix_copy_paste, created_at")
       .eq("company_id", data.companyId)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!rows) return { hasContract: false as const };
