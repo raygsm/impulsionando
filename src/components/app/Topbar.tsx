@@ -80,6 +80,7 @@ function normalize(s: string) {
 
 export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { companyId } = useActiveCompany();
   // Identidade do usuário logado (auth.user), nunca a empresa
   const metaName =
