@@ -251,7 +251,20 @@ function ShowroomHub() {
                     ) : (() => {
                       const link = getDemoNichoLink(n.slug);
                       return (
-                        <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>
+                        <Link
+                          to={link.to}
+                          params={link.params}
+                          data-nicho={n.slug}
+                          data-resolved={link.slug}
+                          onClick={() => trackFunnelCta({
+                            cta: "showroom-abrir-demo",
+                            origem: "showroom-hub",
+                            nicho_pedido: n.slug,
+                            alias_resolvido: link.slug,
+                            isFallback: link.isFallback,
+                            rotaDestino: `/demo/nicho/${link.slug}`,
+                          })}
+                        >
                           Abrir demo <ArrowRight className="ml-1 h-4 w-4" />
                         </Link>
                       );
