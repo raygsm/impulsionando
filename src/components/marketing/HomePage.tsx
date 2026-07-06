@@ -257,10 +257,12 @@ function Diagnostico() {
                       <button
                         key={n.slug}
                         type="button"
+                        data-testid={`nicho-${n.slug}`}
+                        aria-pressed={on}
                         onClick={() => selectNicho(n.slug)}
-                        className={`group relative text-left rounded-xl p-3 border transition-all duration-200
+                        className={`group relative text-left rounded-xl p-3 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-md"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
                         <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2 transition-colors
                           ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
