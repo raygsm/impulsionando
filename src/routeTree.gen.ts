@@ -681,6 +681,7 @@ import { Route as AuthenticatedAdminOndaYFretesRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminOndaYCrmReguasRouteImport } from './routes/_authenticated/admin.onda-y.crm-reguas'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
+import { Route as AuthenticatedAdminImpulsionitoCentroInteligenciaRouteImport } from './routes/_authenticated/admin.impulsionito.centro-inteligencia'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
 import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
@@ -4521,6 +4522,12 @@ const AuthenticatedAdminIntegracoesMercadoPagoRoute =
     path: '/admin/integracoes/mercado-pago',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminImpulsionitoCentroInteligenciaRoute =
+  AuthenticatedAdminImpulsionitoCentroInteligenciaRouteImport.update({
+    id: '/admin/impulsionito/centro-inteligencia',
+    path: '/admin/impulsionito/centro-inteligencia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedRoute =
   AuthenticatedAdminClientesRiomedRouteImport.update({
     id: '/admin/clientes/riomed',
@@ -5470,6 +5477,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
+  '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
@@ -6191,6 +6199,7 @@ export interface FileRoutesByTo {
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
+  '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
@@ -6927,6 +6936,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
+  '/_authenticated/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
@@ -7663,6 +7673,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
+    | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/admin/onda-y/crm-reguas'
@@ -8384,6 +8395,7 @@ export interface FileRouteTypes {
     | '/saiba-mais'
     | '/sales'
     | '/admin/clientes/riomed'
+    | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/admin/onda-y/crm-reguas'
@@ -9119,6 +9131,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
+    | '/_authenticated/admin/impulsionito/centro-inteligencia'
     | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/admin/onda-y/crm-reguas'
@@ -14178,6 +14191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/impulsionito/centro-inteligencia': {
+      id: '/_authenticated/admin/impulsionito/centro-inteligencia'
+      path: '/admin/impulsionito/centro-inteligencia'
+      fullPath: '/admin/impulsionito/centro-inteligencia'
+      preLoaderRoute: typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/clientes/riomed': {
       id: '/_authenticated/admin/clientes/riomed'
       path: '/admin/clientes/riomed'
@@ -15712,6 +15732,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
   AuthenticatedAdminClientesSlugRoute: typeof AuthenticatedAdminClientesSlugRouteWithChildren
   AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
+  AuthenticatedAdminImpulsionitoCentroInteligenciaRoute: typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
@@ -16104,6 +16125,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminClientesSlugRouteWithChildren,
   AuthenticatedAdminClientesRiomedRoute:
     AuthenticatedAdminClientesRiomedRouteWithChildren,
+  AuthenticatedAdminImpulsionitoCentroInteligenciaRoute:
+    AuthenticatedAdminImpulsionitoCentroInteligenciaRoute,
   AuthenticatedAdminIntegracoesMercadoPagoRoute:
     AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
