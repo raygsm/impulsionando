@@ -53,7 +53,7 @@ function PublicacaoIndex() {
               <Link
                 key={row.company.id}
                 to={"/core/publicacao/$tenantId" as any}
-                params={{ tenantId: row.company.id }}
+                params={{ tenantId: row.company.id } as any}
                 className="block"
               >
                 <Card className="p-4 hover:border-primary/50 transition-colors">
