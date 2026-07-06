@@ -385,7 +385,7 @@ function Diagnostico() {
               <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl motion-safe:animate-pulse" />
               {/* barra de scanning durante streaming */}
               {!showResult && nicho && (
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent motion-safe:animate-[shimmer_2.2s_linear_infinite]" style={{ backgroundSize: "200% 100%" }} />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-white/80 to-transparent motion-safe:animate-pulse" />
               )}
               <div className="relative">
                 <div className="flex items-center gap-3 mb-4">
