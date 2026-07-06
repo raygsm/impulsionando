@@ -974,11 +974,35 @@ function SimuladorPerda() {
             </Button>
             <Button asChild variant="outline" className="flex-1">
               {demoLink ? (
-                <Link to={demoLink.to} params={demoLink.params} data-nicho={savedNicho} data-resolved={demoLink.slug}>
+                <Link
+                  to={demoLink.to}
+                  params={demoLink.params}
+                  data-nicho={savedNicho}
+                  data-resolved={demoLink.slug}
+                  onClick={() => trackFunnelCta({
+                    cta: "simulador-ver-demo",
+                    origem: "home-simulador",
+                    nicho_pedido: savedNicho,
+                    alias_resolvido: demoLink.slug,
+                    isFallback: demoLink.isFallback,
+                    rotaDestino: `/demo/nicho/${demoLink.slug}`,
+                  })}
+                >
                   <PlayCircle className="w-4 h-4 mr-1" /> Ver demo do meu nicho
                 </Link>
               ) : (
-                <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+                <Link
+                  to="/demo/escolher-nicho"
+                  onClick={() => trackFunnelCta({
+                    cta: "simulador-escolher-nicho",
+                    origem: "home-simulador",
+                    alias_resolvido: "",
+                    isFallback: false,
+                    rotaDestino: "/demo/escolher-nicho",
+                  })}
+                >
+                  <PlayCircle className="w-4 h-4 mr-1" /> Ver demo
+                </Link>
               )}
             </Button>
           </div>
