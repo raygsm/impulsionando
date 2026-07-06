@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
+import { getDemoNichoLink } from "@/lib/demoResolver";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
