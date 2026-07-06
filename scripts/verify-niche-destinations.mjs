@@ -132,7 +132,7 @@ try {
       if (!demoAliasKeys.has(slug) && !directDemoKeys.has(slug)) {
         errors.push(
           `Macro "${macro}" → subnicho "${slug}" não tem demo em /demo/nicho/$slug ` +
-          `(falta em NICHO_ALIASES ou SUPORTADOS de src/routes/demo.nicho.$slug.tsx).`,
+          `(falta em NICHO_ALIASES de src/lib/demoResolver.ts ou em SUPPORTED_DEMOS/RICH_NICHES).`,
         );
       }
     }
