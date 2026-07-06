@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
  */
 export function CheckoutShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
