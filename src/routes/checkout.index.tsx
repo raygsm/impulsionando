@@ -56,7 +56,7 @@ function buildPlans(wage: number): CheckoutPlan[] {
         "7 dias de Trial com tudo liberado, sem cartão",
       ],
       cta: "Contratar Essencial",
-      ctaHref: "/contratar?plano=essencial",
+      ctaHref: "/checkout/essencial",
     },
     {
       code: "integrado",
@@ -76,7 +76,7 @@ function buildPlans(wage: number): CheckoutPlan[] {
       ],
       highlight: true,
       cta: "Contratar Ideal",
-      ctaHref: "/contratar?plano=integrado",
+      ctaHref: "/checkout/integrado",
     },
     {
       code: "avancado",
@@ -95,7 +95,7 @@ function buildPlans(wage: number): CheckoutPlan[] {
         "Governança LGPD, exportações e logs expandidos",
       ],
       cta: "Contratar Full",
-      ctaHref: "/contratar?plano=avancado",
+      ctaHref: "/checkout/avancado",
     },
   ];
 }
