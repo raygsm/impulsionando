@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Sparkles, HelpCircle, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { signOutSafely } from "@/lib/sign-out";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
  */
 export function CheckoutShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
@@ -57,10 +60,7 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
           <Button
             size="sm"
             variant="ghost"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={() => signOutSafely({ queryClient, navigate })}
           >
             <LogOut className="w-4 h-4 mr-1" /> Sair
           </Button>

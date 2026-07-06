@@ -30,7 +30,8 @@ export function BillingGate() {
     if (!enabled || !data) return;
     if (!("hasContract" in data) || !data.hasContract) return;
     if (data.contract.status === "suspended" && pathname !== "/conta-suspensa") {
-      navigate({ to: "/conta-suspensa" });
+      // replace: true — evita voltar para a rota protegida via Back
+      navigate({ to: "/conta-suspensa", replace: true });
     }
   }, [data, enabled, navigate, pathname]);
 
