@@ -73,6 +73,7 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
       if (error) throw error;
       return data ?? [];
     },
+    refetchInterval: 20000,
   });
 
   // Merge catalog × existing templates: every event×channel always selectable.
@@ -142,6 +143,11 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
 
   const toggleActive = useMutation({
     mutationFn: async (tpl: Template) => {
+      // Guard: nunca ativar template sem conteúdo — evita envio vazio ao cliente.
+      const willActivate = !tpl.is_active;
+      if (willActivate && !(tpl.body ?? "").trim()) {
+        throw new Error("Configure o conteúdo antes de ativar este modelo.");
+      }
       if (tpl.company_id === companyId) {
         const { error } = await supabase
           .from("message_templates")
@@ -312,8 +318,22 @@ function EditForm({
         <Switch checked={isActive} onCheckedChange={setIsActive} />
         <Label className="text-sm">Ativo</Label>
       </div>
+      {isActive && !body.trim() && (
+        <p className="text-[11px] text-destructive">
+          Preencha o conteúdo antes de ativar — modelos vazios não são enviados.
+        </p>
+      )}
       <DialogFooter>
-        <Button onClick={() => onSave({ subject, body, is_active: isActive })} disabled={saving}>
+        <Button
+          onClick={() =>
+            onSave({
+              subject: initial.channel === "email" ? subject : "",
+              body,
+              is_active: isActive && !!body.trim(),
+            })
+          }
+          disabled={saving || (isActive && !body.trim())}
+        >
           {saving ? "Salvando…" : "Salvar"}
         </Button>
       </DialogFooter>

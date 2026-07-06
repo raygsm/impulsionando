@@ -79,15 +79,27 @@ function ComunicacaoPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
-        {['queued', 'sending', 'sent', 'failed', 'skipped', 'cancelled'].map((s) => (
-          <Card key={s} className="cursor-pointer hover:bg-accent" onClick={() => setStatus(s)}>
-            <CardContent className="p-3">
-              <div className="text-xs text-muted-foreground uppercase">{s}</div>
-              <div className="text-2xl font-bold">{counts[s] ?? 0}</div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">
+          Contadores refletem os filtros ativos abaixo. Clique novamente no card selecionado para voltar a "todos".
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+          {['queued', 'sending', 'sent', 'failed', 'skipped', 'cancelled'].map((s) => {
+            const active = status === s;
+            return (
+              <Card
+                key={s}
+                className={`cursor-pointer transition-colors ${active ? 'ring-2 ring-primary' : 'hover:bg-accent'}`}
+                onClick={() => setStatus(active ? 'all' : s)}
+              >
+                <CardContent className="p-3">
+                  <div className="text-xs text-muted-foreground uppercase">{s}</div>
+                  <div className="text-2xl font-bold">{counts[s] ?? 0}</div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       <Card>
@@ -150,7 +162,9 @@ function ComunicacaoPage() {
                         {r.last_error && <div className="text-xs text-destructive mt-1 truncate max-w-[200px]" title={r.last_error}>{r.last_error}</div>}
                       </td>
                       <td className="py-2 pr-3 text-xs">{r.attempts}/{r.max_attempts}</td>
-                      <td className="py-2 pr-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
+                      <td className="py-2 pr-3 text-xs text-muted-foreground" title={r.sent_at ? `Enviado em ${new Date(r.sent_at).toLocaleString('pt-BR')}` : undefined}>
+                        {new Date(r.sent_at ?? r.created_at).toLocaleString('pt-BR')}
+                      </td>
                       <td className="py-2 pr-3">
                         <div className="flex gap-1">
                           {(r.status === 'failed' || r.status === 'cancelled' || r.status === 'skipped') && (
