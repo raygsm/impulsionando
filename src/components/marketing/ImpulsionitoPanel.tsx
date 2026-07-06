@@ -207,7 +207,9 @@ export function ImpulsionitoPanel() {
     },
   ]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const [conn, setConn] = useState<ConnState>("idle");
+  const transport = useImpulsionitoTransport();
 
   const mergedSuggestions = useMemo(() => {
     const route = suggestionsForRoute(pathname);
@@ -233,7 +235,7 @@ export function ImpulsionitoPanel() {
   }, [messages, open, size, tab, typing]);
 
   useEffect(() => () => {
-    if (typingTimer.current) clearTimeout(typingTimer.current);
+    abortRef.current?.abort();
   }, []);
 
   const hidden = useMemo(
@@ -242,33 +244,101 @@ export function ImpulsionitoPanel() {
   );
   if (hidden) return null;
 
-  function pushUser(text: string) {
-    if (!text.trim()) return;
+  async function pushUser(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
     const now = Date.now();
+    const userMsg: ChatMsg = { id: `u-${now}`, role: "user", text: trimmed, ts: now };
+    const botId = `b-${now}`;
+    const priorMessages = messages;
     setMessages((m) => [
       ...m,
-      { id: `u-${now}`, role: "user", text, ts: now },
+      userMsg,
+      { id: botId, role: "bot", text: "", ts: now + 1, status: "streaming" },
     ]);
     setTyping(true);
-    if (typingTimer.current) clearTimeout(typingTimer.current);
-    typingTimer.current = setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: `b-${Date.now()}`,
-          role: "bot",
-          text: "Entendi. (Resposta simulada — a integração real será conectada em seguida.)",
-          ts: Date.now(),
+    setConn("sending");
+
+    // Aborta stream anterior, se houver.
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setConn("offline");
+    }
+
+    const history: ImpulsionitoMessage[] = [
+      ...priorMessages
+        .filter((m) => m.text.trim().length > 0)
+        .map<ImpulsionitoMessage>((m) => ({
+          id: m.id,
+          role: m.role === "user" ? "user" : "assistant",
+          text: m.text,
+          ts: m.ts,
+        })),
+    ];
+
+    let acc = "";
+    let gotAny = false;
+    let errored = false;
+    try {
+      const it = transport.sendMessage({
+        text: trimmed,
+        context: {
+          pathname,
+          audience: DEMO_STATE_LABEL[demo],
+          screen: typeof document !== "undefined" ? document.title : undefined,
         },
-      ]);
+        history,
+        signal: ctrl.signal,
+      });
+      for await (const chunk of it) {
+        if (ctrl.signal.aborted) return;
+        if (chunk.delta) {
+          gotAny = true;
+          acc += chunk.delta;
+          setConn("streaming");
+          setMessages((m) =>
+            m.map((mm) => (mm.id === botId ? { ...mm, text: acc, status: "streaming" } : mm)),
+          );
+        }
+        if (chunk.done) break;
+      }
+    } catch (err) {
+      errored = true;
+      console.error("[impulsionito] send failed", err);
+    } finally {
       setTyping(false);
-    }, 900);
+      if (ctrl.signal.aborted) return;
+      if (errored || (!gotAny && acc.length === 0)) {
+        setConn("error");
+        setMessages((m) =>
+          m.map((mm) =>
+            mm.id === botId
+              ? {
+                  ...mm,
+                  text:
+                    "Não consegui conectar ao agente agora. Tente novamente em instantes ou fale pelo WhatsApp.",
+                  status: "error",
+                }
+              : mm,
+          ),
+        );
+      } else {
+        setConn("idle");
+        setMessages((m) =>
+          m.map((mm) => (mm.id === botId ? { ...mm, status: "done" } : mm)),
+        );
+      }
+    }
   }
 
   function onSend() {
-    pushUser(input);
+    void pushUser(input);
     setInput("");
   }
+
 
   const containerClass = cn(
     "fixed z-[60] bg-card text-card-foreground border border-border shadow-elegant flex flex-col overflow-hidden print:hidden",
