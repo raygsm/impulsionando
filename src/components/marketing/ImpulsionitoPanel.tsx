@@ -80,7 +80,10 @@ interface ChatMsg {
   role: "bot" | "user";
   text: string;
   ts: number;
+  status?: "streaming" | "done" | "error";
 }
+
+type ConnState = "idle" | "sending" | "streaming" | "error" | "offline";
 
 const HIDDEN_PREFIXES = [
   "/auth",
