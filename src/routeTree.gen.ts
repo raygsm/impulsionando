@@ -399,7 +399,6 @@ import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_au
 import { Route as AuthenticatedChrismedSetupRouteImport } from './routes/_authenticated/chrismed.setup'
 import { Route as AuthenticatedChrismedAlertasRouteImport } from './routes/_authenticated/chrismed.alertas'
 import { Route as AuthenticatedChrismedAdminRouteImport } from './routes/_authenticated/chrismed.admin'
-import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
 import { Route as AuthenticatedCervejariaRetornoRouteImport } from './routes/_authenticated/cervejaria.retorno'
 import { Route as AuthenticatedCervejariaRelacionamentoRouteImport } from './routes/_authenticated/cervejaria.relacionamento'
 import { Route as AuthenticatedCervejariaPdvsRouteImport } from './routes/_authenticated/cervejaria.pdvs'
@@ -685,6 +684,7 @@ import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './r
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
+import { Route as AuthenticatedAssinaturaCheckoutPlanoRouteImport } from './routes/_authenticated/assinatura.checkout.$plano'
 import { Route as AuthenticatedAdminTenantIdRouteImport } from './routes/_authenticated/admin.tenant.$id'
 import { Route as AuthenticatedAdminOndaYSetoresRouteImport } from './routes/_authenticated/admin.onda-y.setores'
 import { Route as AuthenticatedAdminOndaYProrataRouteImport } from './routes/_authenticated/admin.onda-y.prorata'
@@ -2865,12 +2865,6 @@ const AuthenticatedChrismedAdminRoute =
     path: '/chrismed/admin',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCheckoutPlanoRoute =
-  AuthenticatedCheckoutPlanoRouteImport.update({
-    id: '/checkout/$plano',
-    path: '/checkout/$plano',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedCervejariaRetornoRoute =
   AuthenticatedCervejariaRetornoRouteImport.update({
     id: '/retorno',
@@ -4556,6 +4550,12 @@ const AuthenticatedBarMarketplaceNovoPedidoRoute =
     path: '/novo-pedido',
     getParentRoute: () => AuthenticatedBarMarketplaceRoute,
   } as any)
+const AuthenticatedAssinaturaCheckoutPlanoRoute =
+  AuthenticatedAssinaturaCheckoutPlanoRouteImport.update({
+    id: '/assinatura/checkout/$plano',
+    path: '/assinatura/checkout/$plano',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTenantIdRoute =
   AuthenticatedAdminTenantIdRouteImport.update({
     id: '/admin/tenant/$id',
@@ -5370,7 +5370,6 @@ export interface FileRoutesByFullPath {
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
-  '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
@@ -5565,6 +5564,7 @@ export interface FileRoutesByFullPath {
   '/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
   '/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
+  '/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -6104,7 +6104,6 @@ export interface FileRoutesByTo {
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
-  '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
@@ -6298,6 +6297,7 @@ export interface FileRoutesByTo {
   '/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
   '/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
+  '/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -6851,7 +6851,6 @@ export interface FileRoutesById {
   '/_authenticated/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/_authenticated/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/_authenticated/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
-  '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/_authenticated/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/_authenticated/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/_authenticated/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
@@ -7046,6 +7045,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
   '/_authenticated/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
+  '/_authenticated/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -7599,7 +7599,6 @@ export interface FileRouteTypes {
     | '/cervejaria/pdvs'
     | '/cervejaria/relacionamento'
     | '/cervejaria/retorno'
-    | '/checkout/$plano'
     | '/chrismed/admin'
     | '/chrismed/alertas'
     | '/chrismed/setup'
@@ -7794,6 +7793,7 @@ export interface FileRouteTypes {
     | '/admin/onda-y/prorata'
     | '/admin/onda-y/setores'
     | '/admin/tenant/$id'
+    | '/assinatura/checkout/$plano'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
@@ -8333,7 +8333,6 @@ export interface FileRouteTypes {
     | '/cervejaria/pdvs'
     | '/cervejaria/relacionamento'
     | '/cervejaria/retorno'
-    | '/checkout/$plano'
     | '/chrismed/admin'
     | '/chrismed/alertas'
     | '/chrismed/setup'
@@ -8527,6 +8526,7 @@ export interface FileRouteTypes {
     | '/admin/onda-y/prorata'
     | '/admin/onda-y/setores'
     | '/admin/tenant/$id'
+    | '/assinatura/checkout/$plano'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
@@ -9079,7 +9079,6 @@ export interface FileRouteTypes {
     | '/_authenticated/cervejaria/pdvs'
     | '/_authenticated/cervejaria/relacionamento'
     | '/_authenticated/cervejaria/retorno'
-    | '/_authenticated/checkout/$plano'
     | '/_authenticated/chrismed/admin'
     | '/_authenticated/chrismed/alertas'
     | '/_authenticated/chrismed/setup'
@@ -9274,6 +9273,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/onda-y/prorata'
     | '/_authenticated/admin/onda-y/setores'
     | '/_authenticated/admin/tenant/$id'
+    | '/_authenticated/assinatura/checkout/$plano'
     | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
     | '/_authenticated/core/integracoes/diagnostico'
@@ -12362,13 +12362,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChrismedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/checkout/$plano': {
-      id: '/_authenticated/checkout/$plano'
-      path: '/checkout/$plano'
-      fullPath: '/checkout/$plano'
-      preLoaderRoute: typeof AuthenticatedCheckoutPlanoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/cervejaria/retorno': {
       id: '/_authenticated/cervejaria/retorno'
       path: '/retorno'
@@ -14364,6 +14357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBarMarketplaceNovoPedidoRouteImport
       parentRoute: typeof AuthenticatedBarMarketplaceRoute
     }
+    '/_authenticated/assinatura/checkout/$plano': {
+      id: '/_authenticated/assinatura/checkout/$plano'
+      path: '/assinatura/checkout/$plano'
+      fullPath: '/assinatura/checkout/$plano'
+      preLoaderRoute: typeof AuthenticatedAssinaturaCheckoutPlanoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tenant/$id': {
       id: '/_authenticated/admin/tenant/$id'
       path: '/admin/tenant/$id'
@@ -15891,7 +15891,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminWhiteLabelTenantsRoute: typeof AuthenticatedAdminWhiteLabelTenantsRoute
   AuthenticatedAdminWhitelabelHealthRoute: typeof AuthenticatedAdminWhitelabelHealthRoute
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
-  AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedChrismedAdminRoute: typeof AuthenticatedChrismedAdminRoute
   AuthenticatedChrismedAlertasRoute: typeof AuthenticatedChrismedAlertasRoute
   AuthenticatedChrismedSetupRoute: typeof AuthenticatedChrismedSetupRoute
@@ -15979,6 +15978,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
+  AuthenticatedAssinaturaCheckoutPlanoRoute: typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   AuthenticatedTenantsSlugHomologacaoRoute: typeof AuthenticatedTenantsSlugHomologacaoRoute
 }
 
@@ -16257,7 +16257,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminWhitelabelHealthRoute,
   AuthenticatedBarMarketplaceRoute:
     AuthenticatedBarMarketplaceRouteWithChildren,
-  AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedChrismedAdminRoute: AuthenticatedChrismedAdminRoute,
   AuthenticatedChrismedAlertasRoute: AuthenticatedChrismedAlertasRoute,
   AuthenticatedChrismedSetupRoute: AuthenticatedChrismedSetupRoute,
@@ -16380,6 +16379,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
   AuthenticatedAdminTenantIdRoute: AuthenticatedAdminTenantIdRoute,
+  AuthenticatedAssinaturaCheckoutPlanoRoute:
+    AuthenticatedAssinaturaCheckoutPlanoRoute,
   AuthenticatedTenantsSlugHomologacaoRoute:
     AuthenticatedTenantsSlugHomologacaoRoute,
 }

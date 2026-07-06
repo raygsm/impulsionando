@@ -22,7 +22,7 @@ import {
   type CheckoutCart,
 } from '@/hooks/useCheckoutCart'
 
-export const Route = createFileRoute('/_authenticated/checkout/$plano')({
+export const Route = createFileRoute('/_authenticated/assinatura/checkout/$plano')({
   component: CheckoutPage,
   head: () => ({
     meta: [
@@ -41,7 +41,7 @@ function formatBRLCents(c: number) {
 }
 
 function CheckoutPage() {
-  const { plano } = useParams({ from: '/_authenticated/checkout/$plano' })
+  const { plano } = useParams({ from: '/_authenticated/assinatura/checkout/$plano' })
   const fetchPlans = useServerFn(listPublicPlans)
   const { data: plans, isLoading } = useQuery({
     queryKey: ['public-plans'],
