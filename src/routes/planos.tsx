@@ -823,7 +823,7 @@ function PlanosPage() {
       </section>
 
       {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-20">
+      <section id="faq" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-20 scroll-mt-24">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
             <HelpCircle className="w-3.5 h-3.5" /> Dúvidas frequentes
