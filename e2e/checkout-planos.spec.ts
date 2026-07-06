@@ -20,31 +20,17 @@ const PLANS = [
   { code: "avancado", factor: 2, label: /Full/i },
 ];
 
-// Stubs GA4 antes de qualquer script rodar — capturamos os eventos no dataLayer.
+// Stub simples do dataLayer — trackEvent sempre espelha nele.
 async function stubAnalytics(page: import("@playwright/test").Page) {
   await page.addInitScript(() => {
-    // Concede consentimento de analytics via cookie/localStorage esperado pelo módulo consent.
-    try {
-      const consent = { analytics: true, marketing: false, functional: true, ts: Date.now() };
-      window.localStorage.setItem("impulsionando.consent.v1", JSON.stringify(consent));
-    } catch {
-      /* ignore */
-    }
-    (window as any).__gaCalls = [];
     (window as any).dataLayer = [];
-    (window as any).gtag = (...args: unknown[]) => {
-      (window as any).__gaCalls.push(args);
-      (window as any).dataLayer.push(args);
-    };
   });
 }
 
-async function getGaEvents(page: import("@playwright/test").Page, name: string) {
+async function getDlEvents(page: import("@playwright/test").Page, name: string) {
   return page.evaluate((evt) => {
-    const calls: unknown[][] = (window as any).__gaCalls ?? [];
-    return calls
-      .filter((c) => c[0] === "event" && c[1] === evt)
-      .map((c) => c[2]);
+    const dl: any[] = (window as any).dataLayer ?? [];
+    return dl.filter((e) => e && typeof e === "object" && e.event === evt);
   }, name);
 }
 
