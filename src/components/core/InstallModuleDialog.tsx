@@ -103,11 +103,17 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
                   <SelectValue placeholder="Selecione a empresa…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(companies ?? []).map((c: { id: string; name: string }) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
+                  {(companies ?? []).length === 0 ? (
+                    <div className="px-2 py-3 text-xs text-muted-foreground">
+                      Nenhum cliente ativo disponível.
+                    </div>
+                  ) : (
+                    (companies ?? []).map((c: { id: string; name: string }) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
