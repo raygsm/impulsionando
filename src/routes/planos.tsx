@@ -421,8 +421,9 @@ function PlanosPage() {
 
       {audience === "empresas" && (
         <>
+      <PlanosSectionsNav onExpandDetails={() => setShowComparison(true)} />
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
+      <section id="visao-geral" className="relative overflow-hidden bg-gradient-hero text-primary-foreground scroll-mt-24">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
         <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-24 text-center">
@@ -462,10 +463,16 @@ function PlanosPage() {
             </button>
           </div>
         </div>
+        {/* Fade de continuidade — sugere que há mais conteúdo abaixo. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background/90"
+        />
       </section>
 
+
       {/* PLAN CARDS */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
+      <section id="planos" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 scroll-mt-24">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {PLANS.map((plan) => {
             const monthlyEffective = plan.monthly !== null
@@ -665,7 +672,7 @@ function PlanosPage() {
       )}
 
       {/* Botão de expandir lista longa — escondida por padrão para não poluir antes da escolha */}
-      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center">
+      <section id="comparacao" className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center scroll-mt-24">
         <Button
           variant="outline"
           size="sm"
@@ -684,7 +691,7 @@ function PlanosPage() {
 
       <div id="planos-detalhes" hidden={!showComparison}>
       {/* MÓDULOS POR PLANO + SINERGIAS */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+      <section id="recursos" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
         <div className="max-w-3xl mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">O que compõe cada plano</h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">
@@ -816,7 +823,7 @@ function PlanosPage() {
       </section>
 
       {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-20">
+      <section id="faq" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-20 scroll-mt-24">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
             <HelpCircle className="w-3.5 h-3.5" /> Dúvidas frequentes
@@ -834,7 +841,7 @@ function PlanosPage() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+      <section id="contratacao" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20 scroll-mt-24">
         <Card className="p-10 lg:p-14 bg-gradient-primary text-primary-foreground border-0 shadow-elegant overflow-hidden relative">
           <div className="pointer-events-none absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-accent/20 blur-3xl" />
           <div className="relative max-w-3xl space-y-5">
@@ -1095,3 +1102,99 @@ function ConsumidorPlansPanel() {
     </>
   );
 }
+
+/**
+ * Sub-nav sticky com scroll-spy para a página /planos.
+ * Aparece após rolar além da 1ª dobra e destaca a seção ativa.
+ * Clicar em "Comparação" ou "Recursos" expande o bloco detalhado
+ * (que fica oculto por padrão) antes de rolar até ele.
+ */
+function PlanosSectionsNav({ onExpandDetails }: { onExpandDetails: () => void }) {
+  const SECTIONS = [
+    { id: "visao-geral", label: "Visão geral" },
+    { id: "planos", label: "Planos" },
+    { id: "comparacao", label: "Comparação", expand: true },
+    { id: "recursos", label: "Recursos", expand: true },
+    { id: "faq", label: "FAQ" },
+    { id: "contratacao", label: "Contratação" },
+  ] as const;
+
+  const [active, setActive] = useState<string>("visao-geral");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => setVisible(window.scrollY > 240);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const els = SECTIONS
+      .map((s) => document.getElementById(s.id))
+      .filter((e): e is HTMLElement => !!e);
+    if (!els.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActive((visible[0].target as HTMLElement).id);
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function scrollTo(id: string, expand?: boolean) {
+    if (expand) onExpandDetails();
+    // Espera o próximo frame para garantir que o bloco expandido esteja no DOM.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  return (
+    <div
+      className={cn(
+        "sticky top-[64px] z-30 border-b border-border bg-background/90 backdrop-blur transition-all duration-300",
+        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none",
+      )}
+    >
+      <nav
+        aria-label="Seções da página de planos"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex gap-1 overflow-x-auto"
+      >
+        {SECTIONS.map((s) => {
+          const isActive = active === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => scrollTo(s.id, "expand" in s ? s.expand : false)}
+              aria-current={isActive ? "true" : undefined}
+              className={cn(
+                "relative px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {s.label}
+              <span
+                className={cn(
+                  "absolute left-3 right-3 bottom-0 h-[2px] rounded-t-full transition-all",
+                  isActive ? "bg-primary opacity-100" : "bg-transparent opacity-0",
+                )}
+              />
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
