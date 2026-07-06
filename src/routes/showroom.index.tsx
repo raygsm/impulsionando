@@ -242,13 +242,15 @@ function ShowroomHub() {
 
                 <div className="mt-5 flex items-center gap-2">
                   <Button asChild size="sm" className="flex-1">
-                    <Link
-                      to={available ? liveHref! : "/demo/nicho/$slug"}
-                      params={available ? undefined : { slug: n.slug }}
-                    >
-                      {available ? "Abrir showroom" : "Abrir demo"}
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
+                    {available ? (
+                      <Link to={liveHref! as never}>
+                        Abrir showroom <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    ) : (
+                      <Link to="/demo/nicho/$slug" params={{ slug: n.slug }}>
+                        Abrir demo <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    )}
                   </Button>
                 </div>
               </Card>
