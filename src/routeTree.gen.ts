@@ -587,6 +587,11 @@ import { Route as AuthenticatedAdminAcoesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
+import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_authenticated/core.tenants.index'
+import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
+import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './routes/_authenticated/core.estudio-visual.index'
+import { Route as AuthenticatedCoreComercialIndexRouteImport } from './routes/_authenticated/core.comercial.index'
+import { Route as AuthenticatedCoreAdministracaoIndexRouteImport } from './routes/_authenticated/core.administracao.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -3964,6 +3969,36 @@ const AuthenticatedAccessProfilesMatrixRoute =
     path: '/matrix',
     getParentRoute: () => AuthenticatedAccessProfilesRoute,
   } as any)
+const AuthenticatedCoreTenantsIndexRoute =
+  AuthenticatedCoreTenantsIndexRouteImport.update({
+    id: '/tenants/',
+    path: '/tenants/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreNichosIndexRoute =
+  AuthenticatedCoreNichosIndexRouteImport.update({
+    id: '/nichos/',
+    path: '/nichos/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreEstudioVisualIndexRoute =
+  AuthenticatedCoreEstudioVisualIndexRouteImport.update({
+    id: '/estudio-visual/',
+    path: '/estudio-visual/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreComercialIndexRoute =
+  AuthenticatedCoreComercialIndexRouteImport.update({
+    id: '/comercial/',
+    path: '/comercial/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreAdministracaoIndexRoute =
+  AuthenticatedCoreAdministracaoIndexRouteImport.update({
+    id: '/administracao/',
+    path: '/administracao/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -5489,6 +5524,11 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
+  '/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
+  '/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
@@ -6201,6 +6241,11 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/core/administracao': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/core/comercial': typeof AuthenticatedCoreComercialIndexRoute
+  '/core/estudio-visual': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
+  '/core/tenants': typeof AuthenticatedCoreTenantsIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
@@ -6928,6 +6973,11 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/_authenticated/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
+  '/_authenticated/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
+  '/_authenticated/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/_authenticated/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/_authenticated/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/_authenticated/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
@@ -7655,6 +7705,11 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/core/administracao/'
+    | '/core/comercial/'
+    | '/core/estudio-visual/'
+    | '/core/nichos/'
+    | '/core/tenants/'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/configuracoes'
     | '/admin/clientes/$slug/crm'
@@ -8367,6 +8422,11 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/core/administracao'
+    | '/core/comercial'
+    | '/core/estudio-visual'
+    | '/core/nichos'
+    | '/core/tenants'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/configuracoes'
     | '/admin/clientes/$slug/crm'
@@ -9093,6 +9153,11 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/core/administracao/'
+    | '/_authenticated/core/comercial/'
+    | '/_authenticated/core/estudio-visual/'
+    | '/_authenticated/core/nichos/'
+    | '/_authenticated/core/tenants/'
     | '/_authenticated/admin/clientes/$slug/automacoes'
     | '/_authenticated/admin/clientes/$slug/configuracoes'
     | '/_authenticated/admin/clientes/$slug/crm'
@@ -13400,6 +13465,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccessProfilesMatrixRouteImport
       parentRoute: typeof AuthenticatedAccessProfilesRoute
     }
+    '/_authenticated/core/tenants/': {
+      id: '/_authenticated/core/tenants/'
+      path: '/tenants'
+      fullPath: '/core/tenants/'
+      preLoaderRoute: typeof AuthenticatedCoreTenantsIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/nichos/': {
+      id: '/_authenticated/core/nichos/'
+      path: '/nichos'
+      fullPath: '/core/nichos/'
+      preLoaderRoute: typeof AuthenticatedCoreNichosIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/estudio-visual/': {
+      id: '/_authenticated/core/estudio-visual/'
+      path: '/estudio-visual'
+      fullPath: '/core/estudio-visual/'
+      preLoaderRoute: typeof AuthenticatedCoreEstudioVisualIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/comercial/': {
+      id: '/_authenticated/core/comercial/'
+      path: '/comercial'
+      fullPath: '/core/comercial/'
+      preLoaderRoute: typeof AuthenticatedCoreComercialIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/administracao/': {
+      id: '/_authenticated/core/administracao/'
+      path: '/administracao'
+      fullPath: '/core/administracao/'
+      preLoaderRoute: typeof AuthenticatedCoreAdministracaoIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -14712,6 +14812,11 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
   AuthenticatedCoreTenantsDominiosRoute: typeof AuthenticatedCoreTenantsDominiosRoute
   AuthenticatedCoreTenantsNovoRoute: typeof AuthenticatedCoreTenantsNovoRoute
+  AuthenticatedCoreAdministracaoIndexRoute: typeof AuthenticatedCoreAdministracaoIndexRoute
+  AuthenticatedCoreComercialIndexRoute: typeof AuthenticatedCoreComercialIndexRoute
+  AuthenticatedCoreEstudioVisualIndexRoute: typeof AuthenticatedCoreEstudioVisualIndexRoute
+  AuthenticatedCoreNichosIndexRoute: typeof AuthenticatedCoreNichosIndexRoute
+  AuthenticatedCoreTenantsIndexRoute: typeof AuthenticatedCoreTenantsIndexRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
@@ -14773,6 +14878,13 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,
   AuthenticatedCoreTenantsDominiosRoute: AuthenticatedCoreTenantsDominiosRoute,
   AuthenticatedCoreTenantsNovoRoute: AuthenticatedCoreTenantsNovoRoute,
+  AuthenticatedCoreAdministracaoIndexRoute:
+    AuthenticatedCoreAdministracaoIndexRoute,
+  AuthenticatedCoreComercialIndexRoute: AuthenticatedCoreComercialIndexRoute,
+  AuthenticatedCoreEstudioVisualIndexRoute:
+    AuthenticatedCoreEstudioVisualIndexRoute,
+  AuthenticatedCoreNichosIndexRoute: AuthenticatedCoreNichosIndexRoute,
+  AuthenticatedCoreTenantsIndexRoute: AuthenticatedCoreTenantsIndexRoute,
 }
 
 const AuthenticatedCoreRouteWithChildren =

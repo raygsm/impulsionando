@@ -14,6 +14,7 @@ import {
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
   Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
   HeartPulse, Scale, ShoppingBag, Factory,
+  Palette, Cpu, Palmtree, Compass,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
@@ -57,6 +58,29 @@ export const TOP_ITEMS: NavItem[] = [
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
+  // ============================================================
+  // CORE IMPULSIONANDO — espinha oficial de navegação (Fase 1).
+  // Os 10 macros do spec, todos com hub próprio. Legado permanece
+  // logo abaixo para não quebrar fluxos existentes.
+  // ============================================================
+  {
+    label: "Core Impulsionando",
+    audiences: ["core"],
+    defaultOpen: true,
+    items: [
+      { to: "/core", label: "Visão Geral", icon: Compass, superOnly: true },
+      { to: "/core/tenants", label: "Tenants", icon: Building2, superOnly: true },
+      { to: "/core/estudio-visual", label: "Estúdio Visual", icon: Palette, superOnly: true },
+      { to: "/core/nichos", label: "Nichos", icon: Layers, superOnly: true },
+      { to: "/core/modulos", label: "Módulos", icon: Boxes, superOnly: true },
+      { to: "/core/comercial", label: "Comercial", icon: TrendingUp, superOnly: true },
+      { to: "/core/financeiro-consolidado", label: "Financeiro", icon: Banknote, superOnly: true },
+      { to: "/core/dominios", label: "Domínios & Infra", icon: Globe, superOnly: true },
+      { to: "/core/integracoes/diagnostico", label: "Integrações", icon: Workflow, superOnly: true },
+      { to: "/core/administracao", label: "Administração", icon: ShieldCheck, superOnly: true },
+    ],
+  },
+
   // ============================================================
   // CONSUMIDOR
   // ============================================================
