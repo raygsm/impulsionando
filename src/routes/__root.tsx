@@ -73,7 +73,7 @@ function MaintenanceGate() {
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <div className="mb-8 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>
 
@@ -166,7 +166,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   )}`;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-lg">
         <div className="mb-6 flex justify-center">
           <LogoImpulsionando variant="light" size="lg" />
