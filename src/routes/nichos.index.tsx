@@ -88,11 +88,14 @@ function NichosIndex() {
                             Ver nicho <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
                         </Button>
-                        {n.demoRoute && (
-                          <Button asChild size="sm" variant="outline">
-                            <Link to={n.demoRoute}>Demo</Link>
-                          </Button>
-                        )}
+                        {n.demoRoute && (() => {
+                          const link = getDemoNichoLink(n.slug);
+                          return (
+                            <Button asChild size="sm" variant="outline">
+                              <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>Demo</Link>
+                            </Button>
+                          );
+                        })()}
                       </div>
                     </Card>
                   );
