@@ -44,6 +44,7 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               to="/contratar"
+              search={{ plano: undefined }}
               className="px-3 py-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground"
             >
               Checkout
