@@ -111,10 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Sua sessão pode ter expirado. Faça login novamente para continuar.
           </p>
           <Button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={() => signOutSafely({ queryClient, navigate })}
           >
             Voltar para o login
           </Button>
