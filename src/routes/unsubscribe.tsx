@@ -119,5 +119,13 @@ function UnsubscribePage() {
 }
 
 export const Route = createFileRoute('/unsubscribe')({
+  head: () => ({
+    meta: [
+      { title: 'Cancelar inscrição — Impulsionando' },
+      { name: 'robots', content: 'noindex, nofollow' },
+      { name: 'description', content: 'Cancele sua inscrição em e-mails da Impulsionando.' },
+    ],
+  }),
   component: UnsubscribePage,
 });
+
