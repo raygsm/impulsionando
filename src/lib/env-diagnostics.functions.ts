@@ -111,8 +111,8 @@ export const triggerEnvAlert = createServerFn({ method: "POST" })
     // Best-effort e-mail via fila do app se domínio de e-mail estiver configurado.
     try {
       const { data: enq } = await context.supabase.rpc("enqueue_email", {
-        p_queue: "transactional_emails",
-        p_payload: {
+        queue_name: "transactional_emails",
+        payload: {
           template: "env-alert",
           to: process.env.ENV_ALERT_EMAIL ?? "raygs@hotmail.com",
           subject: `[Impulsionando] Env vars ausentes em ${host}`,
