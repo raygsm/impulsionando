@@ -139,7 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-dvh flex bg-background">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:shadow-lg"
@@ -153,7 +153,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <TrialBanner />
         <PastDueBanner />
         <Breadcrumbs />
-        <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden pb-20 lg:pb-8">
+        <main id="main-content" className="flex-1 p-4 sm:p-6 md:p-6 lg:p-8 overflow-x-hidden pb-20 lg:pb-8">
           {children}
         </main>
       </div>

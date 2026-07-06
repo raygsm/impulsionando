@@ -27,8 +27,17 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/riomed")({
+  head: () => ({
+    meta: [
+      { title: "Riomed — Equipamentos e Serviços Hospitalares" },
+      { name: "description", content: "Riomed: catálogo, locação e serviço técnico de equipamentos hospitalares. Cliente do ecossistema Impulsionando." },
+      { property: "og:title", content: "Riomed — Equipamentos e Serviços Hospitalares" },
+      { property: "og:description", content: "Catálogo, locação e serviço técnico de equipamentos hospitalares." },
+    ],
+  }),
   component: RiomedLayout,
 });
+
 
 type NavItem = { to: string; label: string; mega?: "catalog" | "rental" | "services" };
 const MAIN_NAV: NavItem[] = [

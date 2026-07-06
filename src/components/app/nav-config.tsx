@@ -291,7 +291,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/agenda/cliente", label: "Meus agendamentos", icon: Calendar },
         ],
       },
-      { to: "/area-clube", label: "Minha área Clube", icon: Sparkles },
+      { to: "/area-clube", label: "Minha área Clube", icon: Sparkles, audiences: ["consumidor"] },
       { to: "/consumer/unified", label: "Clube — Membros", icon: UserRound, perm: "users.read" },
     ],
   },

@@ -3,8 +3,17 @@ import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, Shi
 import { WmpShell } from "@/components/wmp/WmpShell";
 
 export const Route = createFileRoute("/wmp/")({
+  head: () => ({
+    meta: [
+      { title: "WMP — Som, luz e palco para eventos premium" },
+      { name: "description", content: "WMP: produção completa de som, luz, telão e palco com pré-diagnóstico acústico inteligente. Parceira do ecossistema Impulsionando." },
+      { property: "og:title", content: "WMP — Som, luz e palco para eventos premium" },
+      { property: "og:description", content: "Som que preenche. Luz que emociona. Produção de eventos com diagnóstico acústico." },
+    ],
+  }),
   component: WmpHome,
 });
+
 
 function WmpHome() {
   return (
