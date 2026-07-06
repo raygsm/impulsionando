@@ -20,6 +20,7 @@ test.describe("Diagnóstico Rápido — desktop", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
     await page.waitForSelector('[data-testid="diagnostico-root"]');
   });
 
