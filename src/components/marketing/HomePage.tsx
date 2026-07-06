@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
+import { getDemoNichoLink } from "@/lib/demoResolver";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
@@ -809,7 +810,14 @@ function Diagnostico() {
             {showResult && result && (
               <div className="grid gap-2 sm:grid-cols-3 animate-fade-in">
                 <Button asChild size="lg" className="justify-center">
-                  <Link to={result.demo as any}><PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração</Link>
+                  {(() => {
+                    const link = getDemoNichoLink(nicho);
+                    return (
+                      <Link to={link.to} params={link.params} data-analytics="diag-ver-demo" data-nicho={nicho} data-resolved={link.slug}>
+                        <PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração do meu nicho
+                      </Link>
+                    );
+                  })()}
                 </Button>
                 <Button asChild size="lg" variant="outline" className="justify-center">
                   <a href="#impulsionito"><Bot className="w-4 h-4 mr-1.5" /> Falar com Impulsionito</a>
@@ -884,6 +892,19 @@ function SimuladorPerda() {
   const perdaMes = useMemo(() => (leads * (perda / 100) * ticket), [leads, perda, ticket]);
   const perdaAno = perdaMes * 12;
 
+  // Lê o nicho salvo pelo Diagnóstico da Home para contextualizar o CTA "Ver demo".
+  const [savedNicho, setSavedNicho] = useState<string>("");
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(QUIZ_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.nicho) setSavedNicho(String(parsed.nicho));
+      }
+    } catch { /* ignore */ }
+  }, []);
+  const demoLink = savedNicho ? getDemoNichoLink(savedNicho) : null;
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
       <div className="text-center max-w-2xl mx-auto mb-8">
@@ -935,7 +956,13 @@ function SimuladorPerda() {
               <Link to="/orcamento">Quero parar de perder dinheiro <ArrowRight className="w-4 h-4 ml-1" /></Link>
             </Button>
             <Button asChild variant="outline" className="flex-1">
-              <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+              {demoLink ? (
+                <Link to={demoLink.to} params={demoLink.params} data-nicho={savedNicho} data-resolved={demoLink.slug}>
+                  <PlayCircle className="w-4 h-4 mr-1" /> Ver demo do meu nicho
+                </Link>
+              ) : (
+                <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+              )}
             </Button>
           </div>
         </Card>

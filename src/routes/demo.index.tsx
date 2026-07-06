@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
+import { getDemoNichoLink } from "@/lib/demoResolver";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20solicitar%20uma%20demonstra%C3%A7%C3%A3o%20da%20Impulsionando.";
 
@@ -178,9 +179,14 @@ function DemoLanding() {
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1">{n.cardDesc}</p>
                   <div className="mt-4 flex flex-col gap-2">
                     <Button asChild size="sm" className="bg-gradient-primary gap-1.5 w-full">
-                      <Link to="/demo/nicho/$slug" params={{ slug: n.slug }}>
-                        <PlayCircle className="w-3.5 h-3.5" /> Abrir demo do nicho
-                      </Link>
+                      {(() => {
+                        const link = getDemoNichoLink(n.slug);
+                        return (
+                          <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>
+                            <PlayCircle className="w-3.5 h-3.5" /> Abrir demo do nicho
+                          </Link>
+                        );
+                      })()}
                     </Button>
                     <Button asChild size="sm" variant="outline" className="gap-1.5 w-full">
                       <Link to="/nichos/$slug" params={{ slug: n.slug }}>
