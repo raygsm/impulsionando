@@ -643,6 +643,7 @@ import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
+import { Route as ApiPublicHealthMercadopagoRouteImport } from './routes/api/public/health/mercadopago'
 import { Route as ApiPublicEmailSendRouteImport } from './routes/api/public/email/send'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
@@ -4303,6 +4304,12 @@ const ApiPublicHealthMonetizationRoute =
     path: '/monetization',
     getParentRoute: () => ApiPublicHealthRoute,
   } as any)
+const ApiPublicHealthMercadopagoRoute =
+  ApiPublicHealthMercadopagoRouteImport.update({
+    id: '/mercadopago',
+    path: '/mercadopago',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
 const ApiPublicEmailSendRoute = ApiPublicEmailSendRouteImport.update({
   id: '/api/public/email/send',
   path: '/api/public/email/send',
@@ -5550,6 +5557,7 @@ export interface FileRoutesByFullPath {
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
+  '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -6276,6 +6284,7 @@ export interface FileRoutesByTo {
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
+  '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -7017,6 +7026,7 @@ export interface FileRoutesById {
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
+  '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -7758,6 +7768,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
+    | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -8484,6 +8495,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
+    | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -9224,6 +9236,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
+    | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -13977,6 +13990,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHealthMonetizationRouteImport
       parentRoute: typeof ApiPublicHealthRoute
     }
+    '/api/public/health/mercadopago': {
+      id: '/api/public/health/mercadopago'
+      path: '/mercadopago'
+      fullPath: '/api/public/health/mercadopago'
+      preLoaderRoute: typeof ApiPublicHealthMercadopagoRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
     '/api/public/email/send': {
       id: '/api/public/email/send'
       path: '/api/public/email/send'
@@ -16462,10 +16482,12 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
 )
 
 interface ApiPublicHealthRouteChildren {
+  ApiPublicHealthMercadopagoRoute: typeof ApiPublicHealthMercadopagoRoute
   ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
 }
 
 const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
+  ApiPublicHealthMercadopagoRoute: ApiPublicHealthMercadopagoRoute,
   ApiPublicHealthMonetizationRoute: ApiPublicHealthMonetizationRoute,
 }
 
