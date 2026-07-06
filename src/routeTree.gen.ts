@@ -215,6 +215,7 @@ import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/ad
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSaibaMaisIndexRouteImport } from './routes/_authenticated/saiba-mais.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
@@ -651,6 +652,7 @@ import { Route as ApiPublicCronFunnelDispatchRouteImport } from './routes/api/pu
 import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/public/cron/crm-touch-dispatch'
 import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
+import { Route as AuthenticatedTenantsSlugHomologacaoRouteImport } from './routes/_authenticated/tenants.$slug.homologacao'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
@@ -1790,6 +1792,12 @@ const Char91DotmcpChar93ListToolsRoute =
     id: '/.mcp/list-tools',
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedTenantsIndexRoute =
+  AuthenticatedTenantsIndexRouteImport.update({
+    id: '/tenants/',
+    path: '/tenants/',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/',
@@ -4345,6 +4353,12 @@ const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
     path: '/auditoria',
     getParentRoute: () => AuthenticatedTorreRestaurantesDemoRoute,
   } as any)
+const AuthenticatedTenantsSlugHomologacaoRoute =
+  AuthenticatedTenantsSlugHomologacaoRouteImport.update({
+    id: '/tenants/$slug/homologacao',
+    path: '/tenants/$slug/homologacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesCashIdRoute =
   AuthenticatedSalesCashIdRouteImport.update({
     id: '/$id',
@@ -5490,6 +5504,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/tenants/': typeof AuthenticatedTenantsIndexRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -5525,6 +5540,7 @@ export interface FileRoutesByFullPath {
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
@@ -6215,6 +6231,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/tenants': typeof AuthenticatedTenantsIndexRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
@@ -6249,6 +6266,7 @@ export interface FileRoutesByTo {
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
@@ -6953,6 +6971,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -6988,6 +7007,7 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/_authenticated/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
@@ -7692,6 +7712,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/saiba-mais/'
     | '/sales/'
+    | '/tenants/'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
@@ -7727,6 +7748,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
+    | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
@@ -8417,6 +8439,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/saiba-mais'
     | '/sales'
+    | '/tenants'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
@@ -8451,6 +8474,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
+    | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
@@ -9154,6 +9178,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
+    | '/_authenticated/tenants/'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/impulsionito/centro-inteligencia'
@@ -9189,6 +9214,7 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
+    | '/_authenticated/tenants/$slug/homologacao'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
@@ -10954,6 +10980,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.mcp/list-tools'
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/tenants/': {
+      id: '/_authenticated/tenants/'
+      path: '/tenants'
+      fullPath: '/tenants/'
+      preLoaderRoute: typeof AuthenticatedTenantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
@@ -14007,6 +14040,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport
       parentRoute: typeof AuthenticatedTorreRestaurantesDemoRoute
     }
+    '/_authenticated/tenants/$slug/homologacao': {
+      id: '/_authenticated/tenants/$slug/homologacao'
+      path: '/tenants/$slug/homologacao'
+      fullPath: '/tenants/$slug/homologacao'
+      preLoaderRoute: typeof AuthenticatedTenantsSlugHomologacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/cash/$id': {
       id: '/_authenticated/sales/cash/$id'
       path: '/$id'
@@ -15788,12 +15828,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
+  AuthenticatedTenantsIndexRoute: typeof AuthenticatedTenantsIndexRoute
   AuthenticatedAdminClientesSlugRoute: typeof AuthenticatedAdminClientesSlugRouteWithChildren
   AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   AuthenticatedAdminImpulsionitoCentroInteligenciaRoute: typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
+  AuthenticatedTenantsSlugHomologacaoRoute: typeof AuthenticatedTenantsSlugHomologacaoRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -16179,6 +16221,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
+  AuthenticatedTenantsIndexRoute: AuthenticatedTenantsIndexRoute,
   AuthenticatedAdminClientesSlugRoute:
     AuthenticatedAdminClientesSlugRouteWithChildren,
   AuthenticatedAdminClientesRiomedRoute:
@@ -16190,6 +16233,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
   AuthenticatedAdminTenantIdRoute: AuthenticatedAdminTenantIdRoute,
+  AuthenticatedTenantsSlugHomologacaoRoute:
+    AuthenticatedTenantsSlugHomologacaoRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
