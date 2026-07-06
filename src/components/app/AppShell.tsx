@@ -27,6 +27,7 @@ import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const { data, isLoading, error } = useCurrentUser();
   const { isSuspended: trialSuspended } = useMyTrial();
