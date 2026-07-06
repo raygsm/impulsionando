@@ -376,48 +376,80 @@ function Diagnostico() {
 
 
           {/* ---------------- DIREITA: PAINEL IA ---------------- */}
-          <div className="lg:sticky lg:top-6 self-start space-y-4">
-            <Card className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25">
-              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="lg:sticky lg:top-6 self-start space-y-4" data-testid="impulsionito-panel" aria-live="polite">
+            <Card
+              data-testid="impulsionito-card"
+              data-stream-state={showResult ? "complete" : nicho ? "streaming" : "idle"}
+              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500"
+            >
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl motion-safe:animate-pulse" />
+              {/* barra de scanning durante streaming */}
+              {!showResult && nicho && (
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent motion-safe:animate-[shimmer_2.2s_linear_infinite]" style={{ backgroundSize: "200% 100%" }} />
+              )}
               <div className="relative">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25">
-                    <Brain className={`w-6 h-6 ${!showResult ? "animate-pulse" : ""}`} />
+                  <div className={`w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25 transition-all duration-500 ${!showResult && nicho ? "ring-white/50 shadow-lg shadow-white/10" : ""}`}>
+                    <Brain className={`w-6 h-6 transition-transform duration-500 ${!showResult ? "motion-safe:animate-pulse" : "scale-110"}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-xs uppercase tracking-wider opacity-80">Impulsionito</div>
-                    <div className="text-sm font-semibold">
-                      {!nicho ? "Aguardando segmento…"
-                        : !showResult ? "Analisando seu perfil…"
-                        : "Diagnóstico concluído"}
+                    <div className="text-sm font-semibold flex items-center gap-1.5" data-testid="impulsionito-status">
+                      <span className="truncate">
+                        {!nicho ? "Aguardando segmento…"
+                          : !showResult ? "Analisando seu perfil"
+                          : "Diagnóstico concluído"}
+                      </span>
+                      {!showResult && nicho && (
+                        <span className="inline-flex gap-0.5" aria-hidden="true">
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_0ms]" />
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_150ms]" />
+                          <span className="w-1 h-1 rounded-full bg-white/90 motion-safe:animate-[bounce_1s_infinite_300ms]" />
+                        </span>
+                      )}
+                      {showResult && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-300 animate-in zoom-in-50 duration-500" aria-hidden="true" />
+                      )}
                     </div>
                   </div>
-                  <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" /> ao vivo
+                  <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1 shrink-0">
+                    <span className={`w-1.5 h-1.5 rounded-full ${showResult ? "bg-emerald-300" : "bg-white/90"} motion-safe:animate-pulse`} /> ao vivo
                   </Badge>
                 </div>
 
                 {/* progresso */}
-                <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-white/15 overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} data-testid="progress-bar">
                   <div
-                    className="h-full bg-gradient-to-r from-white to-white/70 transition-all duration-700 ease-out"
+                    className="h-full bg-gradient-to-r from-white via-white to-white/70 transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
                     style={{ width: `${progress}%` }}
+                    data-testid="progress-fill"
                   />
                 </div>
                 <div className="mt-1.5 text-[11px] opacity-80 flex justify-between">
-                  <span>Compatibilidade em cálculo</span>
-                  <span className="font-mono">{progress}%</span>
+                  <span>{showResult ? "Compatibilidade calculada" : nicho ? "Compatibilidade em cálculo" : "Aguardando dados"}</span>
+                  <span className="font-mono tabular-nums" data-testid="progress-value">{progress}%</span>
                 </div>
 
-                {/* estado inicial / streaming */}
+                {/* estado inicial / streaming — mensagens parciais aparecem progressivamente */}
                 {!showResult && (
-                  <ul className="mt-5 space-y-2 text-sm">
-                    <SignalRow ok={!!nicho} text="Segmento identificado" />
-                    <SignalRow ok={dores.length > 0} text={`Dores mapeadas${dores.length ? ` (${dores.length})` : ""}`} />
-                    <SignalRow ok={!!foco} text="Prioridade definida" />
-                    <SignalRow ok={false} text="Módulos compatíveis" pending />
-                    <SignalRow ok={false} text="Plano ideal" pending />
-                  </ul>
+                  <>
+                    {nicho && (
+                      <div className="mt-4 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-500" data-testid="stream-message">
+                        <span className="opacity-80">Detectei que você atua em </span>
+                        <strong className="font-semibold">{nicho}</strong>
+                        <span className="opacity-80">. Mapeando módulos compatíveis</span>
+                        <span className="inline-block motion-safe:animate-pulse">…</span>
+                      </div>
+                    )}
+                    <ul className="mt-4 space-y-2 text-sm" data-testid="stream-signals">
+                      <SignalRow ok={!!nicho} text="Segmento identificado" />
+                      <SignalRow ok={dores.length > 0} text={`Dores mapeadas${dores.length ? ` (${dores.length})` : ""}`} />
+                      <SignalRow ok={!!foco} text="Prioridade definida" />
+                      <SignalRow ok={false} text="Módulos compatíveis" pending />
+                      <SignalRow ok={false} text="Plano ideal" pending />
+                    </ul>
+                  </>
+
                 )}
 
                 {/* estado final */}
