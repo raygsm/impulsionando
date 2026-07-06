@@ -841,7 +841,7 @@ function PlanosPage() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
+      <section id="contratacao" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20 scroll-mt-24">
         <Card className="p-10 lg:p-14 bg-gradient-primary text-primary-foreground border-0 shadow-elegant overflow-hidden relative">
           <div className="pointer-events-none absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-accent/20 blur-3xl" />
           <div className="relative max-w-3xl space-y-5">
