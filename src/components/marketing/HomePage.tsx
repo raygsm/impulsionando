@@ -273,18 +273,24 @@ function Diagnostico() {
                   })}
                 </div>
               </Card>
+              </div>
             )}
 
             {/* STEP 2: Dores */}
             {step === 1 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-1"
+                data-testid="step-panel-1"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 2 · Diagnóstico</div>
                     <h3 className="text-xl font-bold mt-1">Qual é seu maior desafio hoje?</h3>
                     <p className="text-xs text-muted-foreground">Pode escolher quantos precisar — quanto mais, melhor o match.</p>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setStep(0)} className="shrink-0 text-xs">Voltar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(0)} className="shrink-0 text-xs" data-testid="btn-voltar-1">Voltar</Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {DORES.map((d) => {
@@ -294,40 +300,48 @@ function Diagnostico() {
                       <button
                         key={d}
                         type="button"
+                        data-testid={`dor-${d}`}
+                        aria-pressed={on}
                         onClick={() => toggleDor(d)}
-                        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 border text-left transition-all
+                        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
-                        <span className={`w-8 h-8 rounded-lg grid place-items-center shrink-0
+                        <span className={`w-8 h-8 rounded-lg grid place-items-center shrink-0 transition-colors duration-300
                           ${on ? "bg-primary-foreground/20" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
                           <Icon className="w-4 h-4" />
                         </span>
                         <span className="text-sm font-medium">{d}</span>
-                        {on && <CheckCircle2 className="w-4 h-4 ml-auto" />}
+                        {on && <CheckCircle2 className="w-4 h-4 ml-auto animate-in zoom-in-50 duration-300" />}
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">{dores.length} selecionada(s)</span>
-                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0}>
+                  <span className="text-xs text-muted-foreground" data-testid="dores-count">{dores.length} selecionada(s)</span>
+                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0} data-testid="btn-continuar">
                     Continuar <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               </Card>
+              </div>
             )}
 
             {/* STEP 3: Foco */}
             {step === 2 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-2"
+                data-testid="step-panel-2"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 3 · Prioridade</div>
                     <h3 className="text-xl font-bold mt-1">O que deseja resolver primeiro?</h3>
                     <p className="text-xs text-muted-foreground">Isso define por onde o Impulsionito começa a construir sua solução.</p>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="shrink-0 text-xs">Voltar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="shrink-0 text-xs" data-testid="btn-voltar-2">Voltar</Button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {FOCOS.map((f) => {
@@ -337,12 +351,14 @@ function Diagnostico() {
                       <button
                         key={f}
                         type="button"
+                        data-testid={`foco-${f}`}
+                        aria-pressed={on}
                         onClick={() => selectFoco(f)}
-                        className={`group rounded-xl p-3 border text-left transition-all
+                        className={`group rounded-xl p-3 border text-left transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
-                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
                       >
-                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2
+                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2 transition-colors duration-300
                           ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
                           <Icon className="w-5 h-5" />
                         </div>
@@ -352,8 +368,10 @@ function Diagnostico() {
                   })}
                 </div>
               </Card>
+              </div>
             )}
           </div>
+
 
           {/* ---------------- DIREITA: PAINEL IA ---------------- */}
           <div className="lg:sticky lg:top-6 self-start space-y-4">
