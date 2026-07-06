@@ -86,7 +86,7 @@ function REOpsCockpit() {
               <Sparkles className="h-4 w-4 text-violet-600" /> Interesses recentes
             </h2>
             <Button asChild size="sm" variant="outline">
-              <Link to="/realestate">Imobiliária <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              <Link to={"/realestate" as any}>Imobiliária <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </div>
           {isLoading ? <Skeleton className="h-40 w-full" /> : data?.recentInterests.length === 0 ? (
