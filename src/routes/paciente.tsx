@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { signOutSafely } from "@/lib/sign-out";
 import { Button } from "@/components/ui/button";
 import { LogOut, Stethoscope } from "lucide-react";
 
