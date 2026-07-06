@@ -116,7 +116,7 @@ function ClientMonetizacaoPage() {
               </option>
             ))}
           </select>
-          <Link to="/_authenticated/core/monetizacao" className="text-sm text-primary hover:underline">
+          <Link to="/core/monetizacao" className="text-sm text-primary hover:underline">
             visão CORE →
           </Link>
         </div>
