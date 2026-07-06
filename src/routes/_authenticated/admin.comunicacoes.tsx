@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/comunicacoes")({
 const CHANNELS = ["whatsapp","email","impulsionito","notification","push","n8n"] as const;
 type Channel = typeof CHANNELS[number];
 
-const channelIcon: Record<Channel, JSX.Element> = {
+const channelIcon: Record<Channel, React.ReactNode> = {
   whatsapp: <MessageSquare className="h-4 w-4" />,
   email: <Mail className="h-4 w-4" />,
   impulsionito: <Sparkles className="h-4 w-4" />,
