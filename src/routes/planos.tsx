@@ -1102,3 +1102,99 @@ function ConsumidorPlansPanel() {
     </>
   );
 }
+
+/**
+ * Sub-nav sticky com scroll-spy para a página /planos.
+ * Aparece após rolar além da 1ª dobra e destaca a seção ativa.
+ * Clicar em "Comparação" ou "Recursos" expande o bloco detalhado
+ * (que fica oculto por padrão) antes de rolar até ele.
+ */
+function PlanosSectionsNav({ onExpandDetails }: { onExpandDetails: () => void }) {
+  const SECTIONS = [
+    { id: "visao-geral", label: "Visão geral" },
+    { id: "planos", label: "Planos" },
+    { id: "comparacao", label: "Comparação", expand: true },
+    { id: "recursos", label: "Recursos", expand: true },
+    { id: "faq", label: "FAQ" },
+    { id: "contratacao", label: "Contratação" },
+  ] as const;
+
+  const [active, setActive] = useState<string>("visao-geral");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => setVisible(window.scrollY > 240);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const els = SECTIONS
+      .map((s) => document.getElementById(s.id))
+      .filter((e): e is HTMLElement => !!e);
+    if (!els.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActive((visible[0].target as HTMLElement).id);
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function scrollTo(id: string, expand?: boolean) {
+    if (expand) onExpandDetails();
+    // Espera o próximo frame para garantir que o bloco expandido esteja no DOM.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  return (
+    <div
+      className={cn(
+        "sticky top-[64px] z-30 border-b border-border bg-background/90 backdrop-blur transition-all duration-300",
+        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none",
+      )}
+    >
+      <nav
+        aria-label="Seções da página de planos"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex gap-1 overflow-x-auto"
+      >
+        {SECTIONS.map((s) => {
+          const isActive = active === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => scrollTo(s.id, "expand" in s ? s.expand : false)}
+              aria-current={isActive ? "true" : undefined}
+              className={cn(
+                "relative px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {s.label}
+              <span
+                className={cn(
+                  "absolute left-3 right-3 bottom-0 h-[2px] rounded-t-full transition-all",
+                  isActive ? "bg-primary opacity-100" : "bg-transparent opacity-0",
+                )}
+              />
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
