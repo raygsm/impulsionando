@@ -437,7 +437,7 @@ const PLAN_META = {
 } as const;
 
 function RecomendacaoPage() {
-  const { nicho } = Route.useLoaderData();
+  const { nicho } = Route.useParams();
   const r = RECOMENDACOES[nicho]!;
   const pricing = usePlanPricing();
   const PRICE_BY_LEVEL: Record<RecPlan["level"], number | null> = {
