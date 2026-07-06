@@ -672,7 +672,7 @@ function PlanosPage() {
       )}
 
       {/* Botão de expandir lista longa — escondida por padrão para não poluir antes da escolha */}
-      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center">
+      <section id="comparacao" className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center scroll-mt-24">
         <Button
           variant="outline"
           size="sm"
