@@ -81,20 +81,25 @@ function VitrinePage() {
   const [minRating, setMinRating] = useState<number>(0);
 
   const deferredQ = useDeferredValue(q);
+  const deferredCity = useDeferredValue(city);
 
   const query = useQuery({
-    queryKey: ["public-vitrine", segment, city, state, deferredQ, sort],
+    queryKey: ["public-vitrine", segment, deferredCity, state, deferredQ, sort],
     queryFn: () =>
       fetchFn({
         data: {
           segment: segment || undefined,
-          city: city || undefined,
+          city: deferredCity || undefined,
           state: state || undefined,
           q: deferredQ || undefined,
           sort,
           limit: 120,
         },
       }),
+    // Filtros mudam com frequência — mantém dados anteriores enquanto refetch
+    // acontece e evita flicker/perda de scroll na grid.
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
   });
 
   const companies = useMemo<VitrineCompany[]>(() => {
