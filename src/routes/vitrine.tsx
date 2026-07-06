@@ -3,7 +3,7 @@
  * Filtros: busca livre, segmento, cidade, UF, nota mínima e ordenação.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useDeferredValue, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
