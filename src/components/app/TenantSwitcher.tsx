@@ -84,7 +84,7 @@ export function TenantSwitcher() {
           {isImpersonating && (
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (impersonatedCompanyId) {
                   void safeLog({
                     targetCompanyId: impersonatedCompanyId,
@@ -92,6 +92,7 @@ export function TenantSwitcher() {
                     action: "stop",
                   });
                 }
+                await resetTenantScopedCache();
                 stopImpersonation();
                 setOpen(false);
               }}
@@ -112,10 +113,11 @@ export function TenantSwitcher() {
               <button
                 key={t.id}
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   const reason = typeof window !== "undefined"
                     ? window.prompt(`Motivo para impersonar ${t.name}? (opcional)`) ?? null
                     : null;
+                  await resetTenantScopedCache();
                   startImpersonation({ companyId: t.id, companyName: t.name });
                   void safeLog({
                     targetCompanyId: t.id,
@@ -132,8 +134,12 @@ export function TenantSwitcher() {
                 {active && <Check className="size-4 text-primary" />}
               </button>
             );
-
           })}
+          {truncated && (
+            <div className="px-3 py-2 text-[11px] text-muted-foreground border-t">
+              Exibindo {tenants.length} de {filtered.length}. Refine a busca para ver mais.
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
