@@ -304,7 +304,7 @@ function UpgradeBanner({ isPending }: { isPending: boolean }) {
         </div>
         {!isPending && (
           <Button asChild className="bg-white text-primary hover:bg-white/90">
-            <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>Assinar Premium</Link>
+            <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}>Assinar Premium</Link>
           </Button>
         )}
       </div>
@@ -661,7 +661,7 @@ function PlanTab({ membership, invoices, isPremium, onCancel }: { membership: an
           <div className="text-xs text-muted-foreground">Próxima ação</div>
           {!isPremium ? (
             <Button asChild size="sm" className="bg-gradient-primary mt-2 w-full">
-              <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>Upgrade para Premium</Link>
+              <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}>Upgrade para Premium</Link>
             </Button>
           ) : membership?.cancel_at_period_end ? (
             <p className="text-xs text-amber-700 mt-2">Renovação cancelada. Acesso até {periodEnd?.toLocaleDateString("pt-BR")}.</p>
@@ -777,7 +777,7 @@ function HistoryTab({ isPremium, items, onAdd }: {
         <h2 className="font-semibold mb-1">Histórico é exclusivo do Premium</h2>
         <p className="text-sm text-muted-foreground mb-4">Assine o Clube Premium (R$ 9,99/mês) e tenha onde, quando, o que e quanto você consumiu — com biblioteca pessoal, alertas e cashback ampliado.</p>
         <Button asChild className="bg-gradient-primary">
-          <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}><Crown className="w-4 h-4 mr-1" /> Assinar Premium</Link>
+          <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}><Crown className="w-4 h-4 mr-1" /> Assinar Premium</Link>
         </Button>
       </Card>
     );

@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         path.startsWith("/auth") ||
         path === "/";
       if (!allowedConsumer) {
-        navigate({ to: "/checkout/$plano", params: { plano: "clube_premium" } });
+        navigate({ to: "/checkout/$slug", params: { slug: "clube_premium" } });
       }
       return;
     }
