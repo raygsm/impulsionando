@@ -174,7 +174,7 @@ function OpsCockpit() {
             <ChefHat className="h-4 w-4 text-amber-600" /> Pedidos em andamento (KDS)
           </h2>
           <Button asChild size="sm" variant="outline">
-            <Link to="/orders">Todos os pedidos <ArrowRight className="h-3 w-3 ml-1" /></Link>
+            <Link to="/sales/orders">Todos os pedidos <ArrowRight className="h-3 w-3 ml-1" /></Link>
           </Button>
         </div>
         {isLoading ? <Skeleton className="h-32 w-full" /> : data?.orders.length === 0 ? (
