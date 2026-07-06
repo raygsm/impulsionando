@@ -80,7 +80,7 @@ function MonetizacaoPage() {
           </p>
         </div>
         <Link
-          to="/_authenticated/core/clientes"
+          to="/core/clientes"
           className="text-sm text-primary hover:underline"
         >
           ← voltar para clientes

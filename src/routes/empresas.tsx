@@ -189,7 +189,7 @@ function EmpresasPage() {
               </p>
               <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
                 <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
-                  <Link to="/planos" search={{ audience: "empresas" }}>
+                  <Link to="/planos" search={{ audience: "empresas" } as any}>
                     Quero automatizar minha empresa <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>

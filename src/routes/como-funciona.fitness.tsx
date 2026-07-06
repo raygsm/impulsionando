@@ -101,7 +101,7 @@ function ComoFuncionaFitness() {
               <Link to="/showroom/fitness">Explorar a demo</Link>
             </Button>
             <Button asChild variant="ghost">
-              <Link to="/trabalhe-conosco/fitness">Trabalhe conosco no Fitness</Link>
+              <Link to="/trabalhe-conosco/$nicho" params={{ nicho: "fitness" }}>Trabalhe conosco no Fitness</Link>
             </Button>
           </div>
         </Card>

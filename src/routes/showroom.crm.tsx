@@ -432,7 +432,7 @@ function ShowroomCRM() {
               <Link to="/contato">Falar com especialista</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/showroom/">Voltar ao hub</Link>
+              <Link to="/showroom">Voltar ao hub</Link>
             </Button>
           </div>
         </div>

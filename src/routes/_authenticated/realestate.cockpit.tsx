@@ -86,7 +86,7 @@ function REOpsCockpit() {
               <Sparkles className="h-4 w-4 text-violet-600" /> Interesses recentes
             </h2>
             <Button asChild size="sm" variant="outline">
-              <Link to="/realestate">Imobiliária <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              <Link to={"/realestate" as any}>Imobiliária <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
           </div>
           {isLoading ? <Skeleton className="h-40 w-full" /> : data?.recentInterests.length === 0 ? (
@@ -147,11 +147,12 @@ function REOpsCockpit() {
       <Card className="p-5 bg-muted/30">
         <h3 className="font-semibold mb-2 flex items-center gap-2"><Home className="h-4 w-4" /> Atalhos</h3>
         <div className="grid sm:grid-cols-3 gap-2 text-sm">
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/realestate/properties">Imóveis</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/realestate/intents">Buscas / Intenções</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/realestate/interests">Interesses</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/realestate/messages">Mensagens internas</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/realestate/matches">Matches</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to={"/realestate/properties" as any}>Imóveis</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to={"/realestate/intents" as any}>Buscas / Intenções</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to={"/realestate/interests" as any}>Interesses</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to={"/realestate/messages" as any}>Mensagens internas</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to={"/realestate/matches" as any}>Matches</Link></Button>
+
         </div>
       </Card>
     </div>

@@ -453,7 +453,7 @@ function ShowroomFinanceiro() {
               <Link to="/showroom/integracoes">Ver integrações</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/showroom/">Voltar ao hub</Link>
+              <Link to="/showroom">Voltar ao hub</Link>
             </Button>
           </div>
         </div>

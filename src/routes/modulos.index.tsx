@@ -383,7 +383,7 @@ function ModulosPage() {
 
           <div className="text-center">
             <Button asChild size="lg" variant="outline">
-              <Link to="/modulos/fidelizacao">Ver módulo completo de Fidelização & Afiliados</Link>
+              <Link to="/modulos/$slug" params={{ slug: "fidelizacao" }}>Ver módulo completo de Fidelização & Afiliados</Link>
             </Button>
           </div>
         </div>

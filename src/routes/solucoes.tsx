@@ -226,7 +226,7 @@ function SolucoesPage() {
                   <Button asChild size="sm" variant="outline" className="mt-2 w-full gap-2">
                     <Link
                       to="/orcamento"
-                      search={{ segmento, dores: dores.join(","), origem: "solucoes" }}
+                      search={{ segmento, dores: dores.join(","), origem: "solucoes" } as any}
                     >
                       Quero esta solução <ArrowRight className="w-3.5 h-3.5" />
                     </Link>

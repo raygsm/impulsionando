@@ -76,9 +76,10 @@ function ConsumerUnified() {
         </p>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2 text-sm">
           <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/customers">Clientes</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/orders">Pedidos</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/sales/orders">Pedidos</Link></Button>
           <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/agenda">Agendas</Link></Button>
-          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/events">Eventos</Link></Button>
+          <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/eventos">Eventos</Link></Button>
+
           <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/demo/cliente-final">Demo consumidor</Link></Button>
           <Button asChild size="sm" variant="outline" className="justify-start"><Link to="/privacy">Privacidade & LGPD</Link></Button>
         </div>

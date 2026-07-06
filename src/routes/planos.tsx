@@ -616,7 +616,7 @@ function PlanosPage() {
                     className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                     variant={plan.highlight ? "default" : "outline"}
                   >
-                    <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
+                    <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" } as any}>{plan.cta}</Link>
                   </Button>
                 )}
               </Card>
@@ -644,7 +644,7 @@ function PlanosPage() {
             </p>
           </div>
           <Button asChild variant="outline">
-            <Link to="/orcamento" search={{ plano: "Sob Medida", origem: "planos" }}>
+            <Link to="/orcamento" search={{ plano: "Sob Medida", origem: "planos" } as any}>
               Falar com consultor
             </Link>
           </Button>

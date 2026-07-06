@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, RefreshCw, LogIn, LogOut } from "lucide-react";
+import { Loader2, RefreshCw, LogIn, LogOut, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { listImpersonationAudit } from "@/lib/impersonation-audit.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/impersonation-log")({
@@ -40,6 +40,8 @@ function ImpersonationLogPage() {
   const [tenantFilter, setTenantFilter] = useState("");
   const [range, setRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [actionFilter, setActionFilter] = useState<"all" | "start" | "stop">("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 25;
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["impersonation-audit"],
@@ -70,6 +72,22 @@ function ImpersonationLogPage() {
 
   const totalStart = filtered.filter((r) => r.action === "start").length;
   const totalStop = filtered.filter((r) => r.action === "stop").length;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const exportCsv = () => {
+    const header = ["created_at", "action", "target_company_name", "target_company_id", "actor_email", "actor_user_id", "reason"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [header.join(",")].concat(
+      filtered.map((r) => [r.created_at, r.action, r.target_company_name, r.target_company_id, r.actor_email, r.actor_user_id, r.reason].map(esc).join(",")),
+    );
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `impersonation-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -114,6 +132,9 @@ function ImpersonationLogPage() {
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`size-4 mr-1 ${isFetching ? "animate-spin" : ""}`} /> Atualizar
         </Button>
+        <Button variant="outline" size="sm" onClick={exportCsv} disabled={filtered.length === 0}>
+          <Download className="size-4 mr-1" /> CSV
+        </Button>
         <div className="text-xs text-muted-foreground ml-auto">
           {filtered.length} eventos · {totalStart} start · {totalStop} stop
         </div>
@@ -139,7 +160,7 @@ function ImpersonationLogPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {paged.map((r) => (
                   <tr key={r.id} className="border-t align-top">
                     <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(r.created_at).toLocaleString("pt-BR")}
@@ -166,6 +187,17 @@ function ImpersonationLogPage() {
           </div>
         )}
       </Card>
+      {filtered.length > pageSize && (
+        <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
+          <span>Página {currentPage} de {totalPages}</span>
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage <= 1}>
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

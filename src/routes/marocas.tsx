@@ -55,7 +55,7 @@ function MarocasLanding() {
             <Link
               key={q.topico}
               to="/marocas/assistente"
-              search={{ topico: q.topico }}
+              search={{ topico: q.topico } as any}
               className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/10 hover:bg-white/20 px-3 py-1 transition"
             >
               {q.i} {q.t}

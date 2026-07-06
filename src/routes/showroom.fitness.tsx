@@ -107,7 +107,7 @@ function ShowroomFitness() {
               <Link to="/como-funciona/fitness"><PlayCircle className="w-4 h-4" /> Ver mapa visual da operação</Link>
             </Button>
             <Button asChild size="lg" variant="ghost" className="gap-2">
-              <Link to="/trabalhe-conosco/fitness"><GraduationCap className="w-4 h-4" /> Trabalhe conosco (CREF, Coach, Personal)</Link>
+              <Link to="/trabalhe-conosco/$nicho" params={{ nicho: "fitness" }}><GraduationCap className="w-4 h-4" /> Trabalhe conosco (CREF, Coach, Personal)</Link>
             </Button>
           </div>
         </div>
