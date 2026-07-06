@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
-import { ArrowRight, Sparkles, PlayCircle, Clock } from "lucide-react";
+import { ArrowRight, Sparkles, PlayCircle } from "lucide-react";
 
 export const Route = createFileRoute("/showroom/")({
   head: () => ({
@@ -214,7 +214,6 @@ function ShowroomHub() {
           {niches.map((n) => {
             const Icon = n.icon;
             const liveHref = PREMIUM_AVAILABLE[n.slug];
-            const fallback = `/demo/nicho/${n.slug}`;
             const available = Boolean(liveHref);
             return (
               <Card
@@ -230,8 +229,8 @@ function ShowroomHub() {
                       <Sparkles className="h-3 w-3" /> Premium
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="gap-1 text-muted-foreground">
-                      <Clock className="h-3 w-3" /> Em breve
+                    <Badge variant="outline" className="gap-1 border-emerald-500/40 text-emerald-700 dark:text-emerald-300">
+                      <PlayCircle className="h-3 w-3" /> Demo ativa
                     </Badge>
                   )}
                 </div>
@@ -243,10 +242,15 @@ function ShowroomHub() {
 
                 <div className="mt-5 flex items-center gap-2">
                   <Button asChild size="sm" className="flex-1">
-                    <Link to={available ? liveHref! : fallback}>
-                      {available ? "Abrir showroom" : "Ver prévia"}
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
+                    {available ? (
+                      <Link to={liveHref! as never}>
+                        Abrir showroom <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    ) : (
+                      <Link to="/demo/nicho/$slug" params={{ slug: n.slug }}>
+                        Abrir demo <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    )}
                   </Button>
                 </div>
               </Card>

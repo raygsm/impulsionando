@@ -26,6 +26,16 @@ export const NICHE_MODULE_SLUGS: Record<string, Record<RecLevel, string[]>> = {
     ideal:     ["agenda", "saude", "area_cliente", "commerce", "automacao"],
     full:      ["agenda", "saude", "bi", "parceiros", "area_cliente"],
   },
+  "saude": {
+    essencial: ["agenda", "saude", "automacao"],
+    ideal:     ["agenda", "saude", "area_cliente", "commerce", "automacao", "bi"],
+    full:      ["agenda", "saude", "area_cliente", "bi", "automacao", "commerce", "parceiros"],
+  },
+  "fitness": {
+    essencial: ["commerce", "area_cliente", "automacao"],
+    ideal:     ["commerce", "area_cliente", "agenda", "automacao", "bi"],
+    full:      ["commerce", "area_cliente", "agenda", "bi", "automacao", "parceiros"],
+  },
   "imobiliaria": {
     essencial: ["crm", "area_cliente", "agenda"],
     ideal:     ["crm", "area_cliente", "agenda", "automacao", "bi"],
@@ -46,6 +56,11 @@ export const NICHE_MODULE_SLUGS: Record<string, Record<RecLevel, string[]>> = {
     ideal:     ["commerce", "pdv", "crm", "automacao"],
     full:      ["eventos", "bi", "erp", "automacao", "commerce", "pdv"],
   },
+  "fornecedores": {
+    essencial: ["commerce", "crm"],
+    ideal:     ["commerce", "crm", "automacao", "parceiros"],
+    full:      ["commerce", "crm", "automacao", "parceiros", "bi", "erp"],
+  },
   "eventos": {
     essencial: ["eventos", "area_cliente"],
     ideal:     ["eventos", "area_cliente", "crm", "automacao", "bi"],
@@ -65,6 +80,11 @@ export const NICHE_MODULE_SLUGS: Record<string, Record<RecLevel, string[]>> = {
     essencial: ["commerce", "estoque"],
     ideal:     ["commerce", "estoque", "crm", "automacao"],
     full:      ["commerce", "estoque", "bi", "automacao", "parceiros"],
+  },
+  "educacao": {
+    essencial: ["crm", "commerce", "area_cliente"],
+    ideal:     ["crm", "commerce", "area_cliente", "automacao", "bi"],
+    full:      ["crm", "commerce", "area_cliente", "bi", "automacao", "white_label"],
   },
   "white-label": {
     essencial: ["white_label"],
