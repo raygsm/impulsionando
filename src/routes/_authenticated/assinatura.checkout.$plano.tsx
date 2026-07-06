@@ -22,7 +22,7 @@ import {
   type CheckoutCart,
 } from '@/hooks/useCheckoutCart'
 
-export const Route = createFileRoute('/_authenticated/checkout/$plano')({
+export const Route = createFileRoute('/_authenticated/assinatura/checkout/$plano')({
   component: CheckoutPage,
   head: () => ({
     meta: [
