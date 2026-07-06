@@ -282,6 +282,21 @@ function Diagnostico() {
     : showResult ? "complete"
     : nicho ? "streaming"
     : "idle";
+  const nichoLabel = useMemo(() => NICHOS.find((n) => n.slug === nicho)?.label ?? nicho, [nicho]);
+  const leadNotes = useMemo(() => {
+    if (!result) return "";
+    return [
+      "Diagnóstico da Home — Impulsionando",
+      `Segmento: ${result.nichoLabel} (${nicho})`,
+      `Desafios: ${dores.join(", ") || "não informado"}`,
+      `Prioridade: ${foco || "não informado"}`,
+      `Plano indicado: ${result.plano}`,
+      `Economia estimada: ${result.horas}h/mês (${formatBRL(result.economiaValor)}/mês operacional estimado)`,
+      `Compatibilidade: ${result.compat}%`,
+      `Módulos: ${result.modulos.join(", ")}`,
+      `Racional: ${result.racional}`,
+    ].join("\n");
+  }, [dores, foco, nicho, result]);
 
   // Lê ?diagError=... uma vez na montagem (SSR-safe).
   useEffect(() => {
@@ -688,7 +703,7 @@ function Diagnostico() {
                     {nicho && (
                       <div className="mt-4 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-500" data-testid="stream-message">
                         <span className="opacity-80">Detectei que você atua em </span>
-                        <strong className="font-semibold">{nicho}</strong>
+                        <strong className="font-semibold">{nichoLabel}</strong>
                         <span className="opacity-80">. Mapeando módulos compatíveis</span>
                         <span className="inline-block motion-safe:animate-pulse">…</span>
                       </div>
@@ -714,6 +729,7 @@ function Diagnostico() {
                           {horas}
                           <span className="text-sm font-medium opacity-80 ml-1">h/mês</span>
                         </div>
+                        <div className="mt-1 text-xs opacity-80">≈ {formatBRL(result.economiaValor)}/mês em tempo operacional</div>
                       </div>
                       <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
                         <div className="text-[11px] uppercase tracking-wider opacity-80">Compatibilidade</div>
@@ -744,10 +760,42 @@ function Diagnostico() {
                       </div>
                       <Rocket className="w-8 h-8 opacity-70" />
                     </div>
+
+                    <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
+                      <div className="text-[11px] uppercase tracking-wider opacity-80">Por que esse plano</div>
+                      <p className="mt-1 text-sm leading-relaxed text-white/90">{result.racional}</p>
+                    </div>
                   </div>
                 )}
               </div>
             </Card>
+
+            {showResult && result && (
+              <Card className="p-5 border-primary/20 bg-card/95 shadow-xl shadow-primary/5 animate-in fade-in slide-in-from-bottom-2 duration-700" data-testid="diagnostico-resumo">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <Badge variant="outline" className="mb-2 border-primary/30 text-primary">Resumo do diagnóstico</Badge>
+                    <h3 className="text-lg font-bold tracking-tight">{result.nichoLabel}: {result.plano}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{result.racional}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-xs text-muted-foreground">economia estimada</div>
+                    <div className="text-xl font-black text-primary">{formatBRL(result.economiaValor)}/mês</div>
+                    <div className="text-xs text-muted-foreground">{result.horas}h operacionais</div>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Respostas salvas neste navegador</div>
+                    <p className="mt-1 text-sm">{result.nichoLabel} · {dores.length} desafio(s) · foco em {foco}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Próximo passo</div>
+                    <p className="mt-1 text-sm">Agendar uma demonstração personalizada com esse diagnóstico já preenchido.</p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* CTAs */}
             {showResult && result && (
@@ -758,9 +806,21 @@ function Diagnostico() {
                 <Button asChild size="lg" variant="outline" className="justify-center">
                   <a href="#impulsionito"><Bot className="w-4 h-4 mr-1.5" /> Falar com Impulsionito</a>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="justify-center">
-                  <Link to="/orcamento"><Calculator className="w-4 h-4 mr-1.5" /> Solicitar apresentação</Link>
-                </Button>
+                <DemoLeadDialog
+                  niche={nicho}
+                  nicheLabel={result.nichoLabel}
+                  origin="diagnostico-home"
+                  notes={leadNotes}
+                  title="Agendar demonstração personalizada"
+                  description="Seu diagnóstico será enviado junto para o time preparar uma demonstração com módulos, economia estimada e plano indicado."
+                  submitLabel="Agendar demonstração"
+                  label="Agendar demo"
+                  trigger={(
+                    <Button size="lg" variant="outline" className="justify-center">
+                      <Calculator className="w-4 h-4 mr-1.5" /> Agendar demo
+                    </Button>
+                  )}
+                />
               </div>
             )}
 
