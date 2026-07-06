@@ -6,7 +6,7 @@
  * documentado do Impulsionando para jobs internos).
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { runCommTick } from "@/lib/comm.functions";
+import { runCommTick } from "@/lib/comm/tick.server";
 
 export const Route = createFileRoute("/api/public/comm/tick")({
   server: {
