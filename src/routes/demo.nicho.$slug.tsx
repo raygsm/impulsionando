@@ -12,66 +12,10 @@ import {
   AlertTriangle, ShieldCheck, BadgeDollarSign, Sparkles,
 } from "lucide-react";
 import { getDemoEventos, formatBRL, NICHO_LABELS, type Nicho } from "@/lib/demoNicho";
-import { getRichNiche, RICH_NICHES, type RichNiche } from "@/lib/demoNichoExtras";
+import { getRichNiche, type RichNiche } from "@/lib/demoNichoExtras";
 import { NichoDemoRich } from "@/components/demo/NichoDemoRich";
 import { useDemoTracker } from "@/hooks/useDemoTracker";
-
-const SUPORTADOS: string[] = ["eventos", ...RICH_NICHES];
-
-/**
- * Aliases: cada slug de NICHO_DETAILS (hub /demo) resolve para uma demo real.
- * Mantém o hub 100% navegável sem 404, mesmo enquanto demos dedicadas não existem.
- */
-const NICHO_ALIASES: Record<string, string> = {
-  "clinicas-medicas": "saude",
-  saude: "saude",
-  clinica: "saude",
-  "clinica-medica": "saude",
-  clinicas: "saude",
-  consultorio: "saude",
-  consultorios: "saude",
-  restaurantes: "bar",
-  restaurante: "bar",
-  bares: "bar",
-  bar: "bar",
-  "bares-restaurantes": "bar",
-  cervejaria: "microcervejarias",
-  cervejarias: "microcervejarias",
-  microcervejarias: "microcervejarias",
-  fornecedores: "comercio",
-  ecommerce: "comercio",
-  ecomerce: "comercio",
-  "loja-virtual": "comercio",
-  veiculos: "comercio",
-  auto: "comercio",
-  automotivo: "comercio",
-  imobiliaria: "imobiliaria",
-  imoveis: "imobiliaria",
-  imobiliarias: "imobiliaria",
-  fitness: "saude",
-  academia: "saude",
-  academias: "saude",
-  psicologia: "saude",
-  psicologos: "saude",
-  psicologo: "saude",
-  juridico: "servicos",
-  advocacia: "servicos",
-  "escritorio-advocacia": "servicos",
-  contabilidade: "servicos",
-  servicos: "servicos",
-  contador: "servicos",
-  contadores: "servicos",
-  "white-label": "servicos",
-  escola: "comunidade",
-  escolas: "comunidade",
-  educacao: "comunidade",
-};
-
-function resolveSlug(slug: string): string {
-  if (SUPORTADOS.includes(slug)) return slug;
-  const aliased = NICHO_ALIASES[slug];
-  return aliased && SUPORTADOS.includes(aliased) ? aliased : "servicos";
-}
+import { resolveDemoNicho } from "@/lib/demoResolver";
 
 export const Route = createFileRoute("/demo/nicho/$slug")({
   head: ({ params }) => ({
@@ -90,8 +34,9 @@ export const Route = createFileRoute("/demo/nicho/$slug")({
     </div>
   ),
   loader: ({ params }) => {
-    const resolved = resolveSlug(params.slug);
-    return { slug: resolved, requestedSlug: params.slug };
+    // resolveDemoNicho já emite console.warn "[demo-fallback]" quando aplicável.
+    const r = resolveDemoNicho(params.slug);
+    return { slug: r.slug, requestedSlug: params.slug, isFallback: r.isFallback, isAlias: r.isAlias };
   },
 });
 
