@@ -94,7 +94,9 @@ function NichoNotFound() {
 }
 
 function DemoNichoPage() {
-  const data = Route.useLoaderData();
+  const data = Route.useLoaderData() as
+    | { slug: string; requestedSlug: string; isFallback: boolean; isAlias: boolean }
+    | undefined;
   const slug = data?.slug ?? "servicos";
   const requestedSlug = data?.requestedSlug ?? slug;
   const isFallback = Boolean(data?.isFallback);
