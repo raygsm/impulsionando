@@ -13,7 +13,8 @@ import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCompanyModules, requiredModuleFor } from "@/hooks/useCompanyModules";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { signOutSafely } from "@/lib/sign-out";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { pushRecent } from "@/hooks/use-recent-pages";
 import { useAppearance } from "@/hooks/use-appearance";
@@ -26,6 +27,7 @@ import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const { data, isLoading, error } = useCurrentUser();
   const { isSuspended: trialSuspended } = useMyTrial();
@@ -109,10 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Sua sessão pode ter expirado. Faça login novamente para continuar.
           </p>
           <Button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={() => signOutSafely({ queryClient, navigate })}
           >
             Voltar para o login
           </Button>

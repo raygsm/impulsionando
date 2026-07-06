@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { signOutSafely } from "@/lib/sign-out";
 import { Button } from "@/components/ui/button";
 import { LogOut, Stethoscope } from "lucide-react";
 
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/paciente")({
 
 function PatientLayout() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,8 +28,7 @@ function PatientLayout() {
   }, []);
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    await signOutSafely({ queryClient, navigate });
   }
 
   return (

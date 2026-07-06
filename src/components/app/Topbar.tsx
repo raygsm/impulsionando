@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search, LogOut, ArrowRight, User, Building2, UserPlus, Handshake } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { QuickActionsButton } from "./QuickActions";
 import { AudienceBadge } from "./AudienceBadge";
 import { TenantSwitcher } from "./TenantSwitcher";
 import { globalEntitySearch, type GlobalEntityHit } from "@/lib/core-consumidores.functions";
+import { signOutSafely } from "@/lib/sign-out";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
 
@@ -79,6 +80,7 @@ function normalize(s: string) {
 
 export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { companyId } = useActiveCompany();
   // Identidade do usuário logado (auth.user), nunca a empresa
   const metaName =
@@ -149,8 +151,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    await signOutSafely({ queryClient, navigate });
   }
 
   const ENTITY_ICON: Record<GlobalEntityHit["type"], typeof User> = {

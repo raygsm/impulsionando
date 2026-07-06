@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 export interface AccessProfile {
   id: string;
@@ -28,24 +27,12 @@ export interface CurrentUser {
   isImpulsionandoStaff: boolean;
 }
 
-export function useAuthSession() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+// [Etapa 3] useAuthSession removido — nunca era importado e criava um
+// segundo listener onAuthStateChange além do AuthSync em __root.tsx.
+// Para observar sessão em componentes, use useCurrentUser (react-query)
+// que é invalidado pelo AuthSync.
 
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setLoading(false);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
 
-  return { session, loading };
-}
 
 export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   const { data: userData } = await supabase.auth.getUser();
