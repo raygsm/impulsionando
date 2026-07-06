@@ -55,11 +55,18 @@ export function ClientDashboardHero({
             <Badge className="bg-gradient-primary text-primary-foreground border-0 shadow-elegant">
               {planLabel}
             </Badge>
-            {generatedAt && (
-              <span className="text-xs text-muted-foreground">
-                Atualizado {new Date(generatedAt).toLocaleTimeString("pt-BR")}
-              </span>
-            )}
+            {generatedAt && (() => {
+              const d = new Date(generatedAt);
+              const isToday = new Date().toDateString() === d.toDateString();
+              const label = isToday
+                ? `Atualizado ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+                : `Atualizado ${d.toLocaleDateString("pt-BR")} ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+              return (
+                <span className="text-xs text-muted-foreground" title={d.toLocaleString("pt-BR")}>
+                  {label}
+                </span>
+              );
+            })()}
             {rightSlot}
           </div>
         </div>

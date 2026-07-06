@@ -43,6 +43,15 @@ export function ClientFeatureMenu({ groups, enabledModules, hideLocked = false }
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
+        {visibleGroups.length === 0 && (
+          <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+            Nenhum recurso disponível no seu plano atual.{" "}
+            <Link to="/planos" className="text-primary underline underline-offset-2">
+              Ver planos
+            </Link>{" "}
+            para liberar novas ferramentas.
+          </div>
+        )}
         {visibleGroups.map((group) => (
           <section key={group.category}>
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
@@ -91,7 +100,12 @@ export function ClientFeatureMenu({ groups, enabledModules, hideLocked = false }
                 );
                 if (locked) {
                   return (
-                    <Link key={it.to} to="/planos" title="Faça upgrade para liberar este recurso">
+                    <Link
+                      key={it.to}
+                      to="/planos"
+                      title="Faça upgrade para liberar este recurso"
+                      aria-label={`${it.label} — upgrade necessário, abrir planos`}
+                    >
                       {inner}
                     </Link>
                   );
