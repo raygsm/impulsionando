@@ -72,6 +72,22 @@ function ImpersonationLogPage() {
 
   const totalStart = filtered.filter((r) => r.action === "start").length;
   const totalStop = filtered.filter((r) => r.action === "stop").length;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const exportCsv = () => {
+    const header = ["created_at", "action", "target_company_name", "target_company_id", "actor_email", "actor_user_id", "reason"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const lines = [header.join(",")].concat(
+      filtered.map((r) => [r.created_at, r.action, r.target_company_name, r.target_company_id, r.actor_email, r.actor_user_id, r.reason].map(esc).join(",")),
+    );
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `impersonation-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
