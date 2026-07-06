@@ -148,7 +148,7 @@ function AuthPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(traduzirErroAuth(error.message));
     // Funil Impulsionando: registra lead self-signup (best-effort)
     try {
       const { captureSelfSignupLead } = await import("@/lib/self-signup-lead.functions");
