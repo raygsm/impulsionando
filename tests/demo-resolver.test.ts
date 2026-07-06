@@ -126,24 +126,26 @@ describe("demoResolver — fallback + telemetria", () => {
 });
 
 describe("demoResolver — integração com verify-niche-destinations", () => {
-  it("todos slugs presentes em MACRO_NICHOS resolvem sem fallback", async () => {
-    // Extrai slugs sem depender do TS: reproduz o regex do script mjs.
+  it("todos subnichos declarados em MACRO_NICHOS resolvem sem fallback", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
     const src = fs.readFileSync(
       path.resolve(__dirname, "../src/components/marketing/nichoMacros.ts"),
       "utf8",
     );
-    const slugRe = /slug:\s*"([^"]+)"/g;
-    const slugs = new Set<string>();
+    // Mesma extração do scripts/verify-niche-destinations.mjs: só o array `slugs`.
+    const macroRe = /\{\s*[\s\S]*?slug:\s*"([^"]+)"[\s\S]*?slugs:\s*\[([^\]]*)\]/g;
+    const subs = new Set<string>();
     let m: RegExpExecArray | null;
-    while ((m = slugRe.exec(src)) !== null) slugs.add(m[1]);
-    expect(slugs.size).toBeGreaterThan(0);
-    for (const slug of slugs) {
+    while ((m = macroRe.exec(src)) !== null) {
+      for (const s of m[2].matchAll(/"([^"]+)"/g)) subs.add(s[1]);
+    }
+    expect(subs.size).toBeGreaterThan(0);
+    for (const slug of subs) {
       const r = resolveDemoNicho(slug);
       expect(
         r.isFallback,
-        `slug "${slug}" caiu em fallback — falta alias em demoResolver`,
+        `subnicho "${slug}" caiu em fallback — falta alias em demoResolver`,
       ).toBe(false);
     }
   });
