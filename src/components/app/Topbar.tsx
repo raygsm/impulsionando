@@ -151,8 +151,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    await signOutSafely({ queryClient, navigate });
   }
 
   const ENTITY_ICON: Record<GlobalEntityHit["type"], typeof User> = {
