@@ -107,9 +107,10 @@ async function probeSupabase(supabaseAdmin: any): Promise<ProbeResult> {
 }
 
 async function probeMercadoPago(): Promise<ProbeResult> {
-  const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  const { getMpAccessToken } = await import("@/lib/mercadopago-env.server");
+  const token = getMpAccessToken();
   if (!token) {
-    return { slug: "mercadopago", name: "Mercado Pago", ok: false, configured: false, missing: ["MERCADOPAGO_ACCESS_TOKEN"], duration_ms: 0, checked_at: new Date().toISOString(), error: "Token ausente" };
+    return { slug: "mercadopago", name: "Mercado Pago", ok: false, configured: false, missing: ["MPAGO_CORE_SANDBOX_ACCESS_TOKEN|MPAGO_CORE_ACCESS_TOKEN"], duration_ms: 0, checked_at: new Date().toISOString(), error: "Token ausente" };
   }
   const r = await timed(async () => {
     const res = await fetch("https://api.mercadopago.com/users/me", { headers: { Authorization: `Bearer ${token}` } });
