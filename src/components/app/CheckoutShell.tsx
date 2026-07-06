@@ -60,10 +60,7 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
           <Button
             size="sm"
             variant="ghost"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
+            onClick={() => signOutSafely({ queryClient, navigate })}
           >
             <LogOut className="w-4 h-4 mr-1" /> Sair
           </Button>
