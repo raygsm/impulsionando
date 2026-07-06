@@ -86,7 +86,7 @@ test.describe("/checkout — planos", () => {
     await page.goto("/checkout");
     await expect(page.getByTestId("checkout-page")).toBeVisible();
 
-    const viewList = await getGaEvents(page, "view_item_list");
+    const viewList = await getDlEvents(page, "view_item_list");
     expect(viewList.length).toBeGreaterThanOrEqual(1);
     const items = (viewList[0] as any)?.items ?? [];
     expect(items.map((i: any) => i.item_id).sort()).toEqual(
@@ -101,8 +101,8 @@ test.describe("/checkout — planos", () => {
       });
     }
 
-    const selects = await getGaEvents(page, "select_item");
-    const begins = await getGaEvents(page, "begin_checkout");
+    const selects = await getDlEvents(page, "select_item");
+    const begins = await getDlEvents(page, "begin_checkout");
     const codesSelected = selects
       .map((e: any) => e?.items?.[0]?.item_id)
       .filter(Boolean);
