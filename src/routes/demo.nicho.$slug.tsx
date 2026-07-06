@@ -24,6 +24,7 @@ const SUPORTADOS: string[] = ["eventos", ...RICH_NICHES];
  */
 const NICHO_ALIASES: Record<string, string> = {
   "clinicas-medicas": "saude",
+  saude: "saude",
   clinica: "saude",
   "clinica-medica": "saude",
   clinicas: "saude",
@@ -44,6 +45,7 @@ const NICHO_ALIASES: Record<string, string> = {
   veiculos: "comercio",
   auto: "comercio",
   automotivo: "comercio",
+  imobiliaria: "imobiliaria",
   imoveis: "imobiliaria",
   imobiliarias: "imobiliaria",
   fitness: "saude",
@@ -56,6 +58,7 @@ const NICHO_ALIASES: Record<string, string> = {
   advocacia: "servicos",
   "escritorio-advocacia": "servicos",
   contabilidade: "servicos",
+  servicos: "servicos",
   contador: "servicos",
   contadores: "servicos",
   "white-label": "servicos",
