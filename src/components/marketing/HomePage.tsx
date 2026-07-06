@@ -6,7 +6,7 @@ import {
   Building2, Gift, Bot, Zap, Clock, TrendingUp, ShieldCheck, Brain,
   Stethoscope, Beer, Home as HomeIcon, Scale, ShoppingBag, Ticket, Sparkle, Utensils,
   Dumbbell, GraduationCap, Layers, Store, Target, Users, Wallet,
-  MessageCircleWarning, CalendarClock, BarChart3, Cog,
+  MessageCircleWarning, CalendarClock, BarChart3, Cog, RefreshCw, WifiOff, TimerReset,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
