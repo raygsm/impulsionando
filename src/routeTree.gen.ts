@@ -31,6 +31,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as OnboardingGuiadoRouteImport } from './routes/onboarding-guiado'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
@@ -212,6 +213,8 @@ import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
 import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/adm'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSaibaMaisIndexRouteImport } from './routes/_authenticated/saiba-mais.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
@@ -587,6 +590,7 @@ import { Route as AuthenticatedAdminAcoesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_authenticated/core.tenants.index'
 import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
 import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './routes/_authenticated/core.estudio-visual.index'
@@ -847,6 +851,11 @@ const OnboardingGuiadoRoute = OnboardingGuiadoRouteImport.update({
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarocasRoute = MarocasRouteImport.update({
@@ -1766,6 +1775,18 @@ const AuthenticatedAccessProfilesRoute =
     id: '/access-profiles',
     path: '/access-profiles',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/',
@@ -3969,6 +3990,12 @@ const AuthenticatedAccessProfilesMatrixRoute =
     path: '/matrix',
     getParentRoute: () => AuthenticatedAccessProfilesRoute,
   } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedCoreTenantsIndexRoute =
   AuthenticatedCoreTenantsIndexRouteImport.update({
     id: '/tenants/',
@@ -4881,6 +4908,7 @@ export interface FileRoutesByFullPath {
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
+  '/mcp': typeof McpRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
@@ -4903,6 +4931,8 @@ export interface FileRoutesByFullPath {
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
   '/wmp': typeof WmpRouteWithChildren
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -5062,6 +5092,7 @@ export interface FileRoutesByFullPath {
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -5611,6 +5642,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
+  '/mcp': typeof McpRoute
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
@@ -5630,6 +5662,8 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/ajuda': typeof AuthenticatedAjudaRoute
@@ -5780,6 +5814,7 @@ export interface FileRoutesByTo {
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/wmp': typeof WmpIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -6330,6 +6365,7 @@ export interface FileRoutesById {
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
+  '/mcp': typeof McpRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
@@ -6352,6 +6388,8 @@ export interface FileRoutesById {
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
   '/wmp': typeof WmpRouteWithChildren
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -6511,6 +6549,7 @@ export interface FileRoutesById {
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -7062,6 +7101,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/marketing'
     | '/marocas'
+    | '/mcp'
     | '/modulos'
     | '/onboarding-guiado'
     | '/orcamento'
@@ -7084,6 +7124,8 @@ export interface FileRouteTypes {
     | '/vitrine'
     | '/white-label'
     | '/wmp'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/access-profiles'
     | '/adm'
     | '/affiliates'
@@ -7243,6 +7285,7 @@ export interface FileRouteTypes {
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
+    | '/.mcp/invoke-tool/$tool'
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
@@ -7792,6 +7835,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/marketing'
     | '/marocas'
+    | '/mcp'
     | '/onboarding-guiado'
     | '/orcamento'
     | '/pesquisa'
@@ -7811,6 +7855,8 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vitrine'
     | '/white-label'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/access-profiles'
     | '/adm'
     | '/ajuda'
@@ -7961,6 +8007,7 @@ export interface FileRouteTypes {
     | '/showroom'
     | '/trabalhe-conosco'
     | '/wmp'
+    | '/.mcp/invoke-tool/$tool'
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
@@ -8510,6 +8557,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/marketing'
     | '/marocas'
+    | '/mcp'
     | '/modulos'
     | '/onboarding-guiado'
     | '/orcamento'
@@ -8532,6 +8580,8 @@ export interface FileRouteTypes {
     | '/vitrine'
     | '/white-label'
     | '/wmp'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/access-profiles'
     | '/_authenticated/adm'
     | '/_authenticated/affiliates'
@@ -8691,6 +8741,7 @@ export interface FileRouteTypes {
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/adm/master'
@@ -9242,6 +9293,7 @@ export interface RootRouteChildren {
   ManutencaoRoute: typeof ManutencaoRoute
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRouteWithChildren
+  McpRoute: typeof McpRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OnboardingGuiadoRoute: typeof OnboardingGuiadoRoute
   OrcamentoRoute: typeof OrcamentoRoute
@@ -9264,6 +9316,8 @@ export interface RootRouteChildren {
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
   WmpRoute: typeof WmpRouteWithChildren
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminManutencaoRoute: typeof AdminManutencaoRoute
   CheckoutSlugRoute: typeof CheckoutSlugRoute
@@ -9344,6 +9398,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiImpulsionitoChatRoute: typeof ApiImpulsionitoChatRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
@@ -9571,6 +9626,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marocas': {
@@ -10839,6 +10901,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/access-profiles'
       preLoaderRoute: typeof AuthenticatedAccessProfilesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
@@ -13464,6 +13540,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/access-profiles/matrix'
       preLoaderRoute: typeof AuthenticatedAccessProfilesMatrixRouteImport
       parentRoute: typeof AuthenticatedAccessProfilesRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/core/tenants/': {
       id: '/_authenticated/core/tenants/'
@@ -16314,6 +16397,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManutencaoRoute: ManutencaoRoute,
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRouteWithChildren,
+  McpRoute: McpRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OnboardingGuiadoRoute: OnboardingGuiadoRoute,
   OrcamentoRoute: OrcamentoRoute,
@@ -16336,6 +16420,9 @@ const rootRouteChildren: RootRouteChildren = {
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
   WmpRoute: WmpRouteWithChildren,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminManutencaoRoute: AdminManutencaoRoute,
   CheckoutSlugRoute: CheckoutSlugRoute,
@@ -16416,6 +16503,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiImpulsionitoChatRoute: ApiImpulsionitoChatRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
