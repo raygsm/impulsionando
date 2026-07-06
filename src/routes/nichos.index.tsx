@@ -7,6 +7,7 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { WhatsAppBlock } from "@/components/marketing/WhatsAppBlock";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
+import { getDemoNichoLink } from "@/lib/demoResolver";
 
 const WA_HOME =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20escolher%20o%20meu%20nicho%20e%20conhecer%20a%20Impulsionando.";
