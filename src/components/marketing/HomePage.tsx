@@ -16,13 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
+import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
 // ============== DIAGNÓSTICO ==============
 const NICHOS = [
   { slug: "saude", label: "Clínica/consultório", icon: Stethoscope, desc: "Agenda, prontuário, cobrança" },
-  { slug: "bares", label: "Bar/restaurante", icon: Beer, desc: "Comandas, PDV, cozinha" },
+  { slug: "bares-restaurantes", label: "Bar/restaurante", icon: Beer, desc: "Comandas, PDV, cozinha" },
+  { slug: "microcervejarias", label: "Microcervejaria", icon: Beer, desc: "PDV, B2B, eventos" },
   { slug: "imobiliaria", label: "Imobiliária", icon: HomeIcon, desc: "CRM de imóveis, corretores" },
   { slug: "contabilidade", label: "Contabilidade", icon: Scale, desc: "Portal do cliente, obrigações" },
   { slug: "comercio", label: "Loja física", icon: Store, desc: "PDV, estoque, financeiro" },
@@ -66,46 +68,69 @@ const FOCO_ICONS: Record<string, any> = {
 
 const FOCOS = ["Captação", "Atendimento", "Vendas", "Agenda", "Pagamentos", "Gestão", "Comunicação", "Fidelização", "Tudo junto"];
 
-const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; plano: string; demo: string; horas: number; compat: number }> = {
+type RecomendacaoBase = {
+  modulos: string[];
+  correlatos: string[];
+  plano: string;
+  demo: string;
+  horas: number;
+  compat: number;
+};
+
+type DiagnosticoCalculado = RecomendacaoBase & {
+  economiaValor: number;
+  racional: string;
+  prioridade: string;
+  nichoLabel: string;
+};
+
+const QUIZ_STORAGE_KEY = "impulsionando:diagnostico-home:v2";
+
+const RECOMENDACOES: Record<string, RecomendacaoBase> = {
   imobiliaria: {
     modulos: ["CRM de imóveis", "Automação & Comunicação", "BI & Dashboards", "Área do Cliente", "Documentos & Propostas", "Gestão de Corretores"],
     correlatos: ["WhatsApp para corretores", "Portal do proprietário", "Funil comercial", "Relatórios por gerente"],
-    plano: "Integrado", demo: "/nichos/imobiliaria", horas: 42, compat: 96,
+    plano: "Integrado", demo: "/demo/nicho/imobiliaria", horas: 42, compat: 96,
   },
   saude: {
     modulos: ["Agenda online", "Prontuário eletrônico", "Cobrança recorrente", "Área do paciente", "WhatsApp confirmação"],
     correlatos: ["Lista de espera", "Telemedicina", "Faturamento TISS", "BI clínico"],
-    plano: "Integrado", demo: "/nichos/saude", horas: 38, compat: 98,
+    plano: "Integrado", demo: "/demo/nicho/saude", horas: 38, compat: 98,
   },
   contabilidade: {
     modulos: ["Portal do cliente contábil", "Calendário fiscal", "Documentos", "IRPF jornada", "BI gerencial"],
     correlatos: ["WhatsApp por departamento", "Contratos e onboarding", "Tarefas e obrigações"],
-    plano: "Avançado", demo: "/contabilidade/cockpit", horas: 51, compat: 94,
+    plano: "Avançado", demo: "/demo/nicho/contabilidade", horas: 51, compat: 94,
   },
-  bares: {
+  "bares-restaurantes": {
     modulos: ["PDV", "Mesas e comandas", "QR Code menu", "Estoque", "Cozinha integrada"],
     correlatos: ["Delivery", "Fidelidade", "Pagamento na mesa", "Ficha técnica"],
-    plano: "Integrado", demo: "/demo/beer-house", horas: 35, compat: 97,
+    plano: "Integrado", demo: "/demo/nicho/bares-restaurantes", horas: 35, compat: 97,
+  },
+  microcervejarias: {
+    modulos: ["PDV cervejeiro", "Catálogo B2B", "Pedidos de bares", "Eventos e degustações", "Estoque por lote"],
+    correlatos: ["CRM de PDVs", "Sell-out", "WhatsApp para revendas", "BI por canal"],
+    plano: "Integrado", demo: "/demo/nicho/microcervejarias", horas: 39, compat: 96,
   },
   eventos: {
     modulos: ["Ingressos", "Check-in QR", "CRM público", "BI evento"],
     correlatos: ["Transferência de ingresso", "Pesquisa pós-evento", "Pagamento parcelado"],
-    plano: "Essencial", demo: "/demo/eventos", horas: 28, compat: 92,
+    plano: "Essencial", demo: "/demo/nicho/eventos", horas: 28, compat: 92,
   },
   ecommerce: {
     modulos: ["Catálogo", "Pedidos", "Pagamentos", "Estoque", "Área do consumidor"],
     correlatos: ["WhatsApp de carrinho", "Fidelidade", "Fulfillment", "BI vendas"],
-    plano: "Integrado", demo: "/demo", horas: 40, compat: 95,
+    plano: "Integrado", demo: "/demo/nicho/ecommerce", horas: 40, compat: 95,
   },
   comercio: {
     modulos: ["PDV", "Estoque", "Vendas", "Financeiro", "Clientes"],
     correlatos: ["Cashback", "WhatsApp pós-venda", "Cupons"],
-    plano: "Essencial", demo: "/demo", horas: 32, compat: 93,
+    plano: "Essencial", demo: "/demo/nicho/comercio", horas: 32, compat: 93,
   },
   servicos: {
     modulos: ["CRM", "Propostas", "Contratos", "Cobrança", "Agenda"],
     correlatos: ["Assinaturas", "WhatsApp", "BI comercial"],
-    plano: "Integrado", demo: "/demo", horas: 36, compat: 95,
+    plano: "Integrado", demo: "/demo/nicho/servicos", horas: 36, compat: 95,
   },
   fitness: {
     modulos: ["Agenda de aulas", "Mensalidade recorrente", "App aluno", "Avaliações físicas"],
@@ -115,19 +140,90 @@ const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; p
   educacao: {
     modulos: ["Matrículas", "Pagamento recorrente", "Portal do aluno", "Comunicados"],
     correlatos: ["WhatsApp turma", "BI evasão", "Boletos"],
-    plano: "Integrado", demo: "/demo", horas: 34, compat: 94,
+    plano: "Integrado", demo: "/demo/nicho/educacao", horas: 34, compat: 94,
   },
   "white-label": {
     modulos: ["Plataforma multiempresa", "Marca própria", "BI agregado", "Faturamento por cliente"],
     correlatos: ["Setup assistido", "Treinamento", "Suporte dedicado"],
-    plano: "Sob Medida", demo: "/demo/white-label", horas: 60, compat: 99,
+    plano: "Sob Medida", demo: "/demo/nicho/white-label", horas: 60, compat: 99,
   },
   outro: {
     modulos: ["CRM", "Comunicação", "Pagamentos", "Dashboard"],
     correlatos: ["Atendimento consultivo", "Customização"],
-    plano: "Sob Medida", demo: "/demo", horas: 30, compat: 90,
+    plano: "Sob Medida", demo: "/demo/nicho/servicos", horas: 30, compat: 90,
   },
 };
+
+const LEGACY_NICHO_ALIASES: Record<string, string> = {
+  bares: "bares-restaurantes",
+};
+
+const DOR_MODULES: Record<string, string[]> = {
+  "Perco leads": ["CRM", "Captação inteligente"],
+  "Demoro para responder": ["WhatsApp automático", "Atendimento IA"],
+  "Não tenho CRM": ["CRM & Funil"],
+  "Atendimento perdido no WhatsApp": ["Central WhatsApp", "Histórico unificado"],
+  "Equipe esquece follow-up": ["Réguas automáticas", "Tarefas"],
+  "Agenda confusa": ["Agenda online", "Lembretes"],
+  "Pagamentos manuais": ["Pix e cartão", "Cobrança recorrente"],
+  "Falta dashboard": ["BI & Dashboards"],
+  "Falta área do cliente": ["Portal do cliente"],
+  "Quero automatizar comunicação": ["E-mail transacional", "WhatsApp"],
+  "Quero vender mais": ["Campanhas", "Upsell"],
+  "Quero organizar operação": ["Processos", "Permissões"],
+};
+
+const FOCO_MODULES: Record<string, string[]> = {
+  Captação: ["Landing pages", "CRM"],
+  Atendimento: ["Central de atendimento", "SLA"],
+  Vendas: ["Funil comercial", "Checkout"],
+  Agenda: ["Agenda online", "Confirmação automática"],
+  Pagamentos: ["Pix", "Cartão", "Cobrança"],
+  Gestão: ["BI executivo", "Auditoria"],
+  Comunicação: ["WhatsApp", "E-mail", "N8N"],
+  Fidelização: ["Clube", "Cashback", "Winback"],
+  "Tudo junto": ["Core completo", "Automações", "BI", "Governança"],
+};
+
+function normalizeNichoSlug(slug: string): string {
+  return LEGACY_NICHO_ALIASES[slug] ?? slug;
+}
+
+function uniq<T>(items: T[]): T[] {
+  return Array.from(new Set(items));
+}
+
+function calculateDiagnostico(nicho: string, dores: string[], foco: string): DiagnosticoCalculado | null {
+  const normalized = normalizeNichoSlug(nicho);
+  const base = RECOMENDACOES[normalized] ?? RECOMENDACOES.outro;
+  if (!base) return null;
+
+  const selectedLabel = NICHOS.find((n) => n.slug === normalized)?.label ?? "operação";
+  const doresModules = dores.flatMap((dor) => DOR_MODULES[dor] ?? []);
+  const focoModules = FOCO_MODULES[foco] ?? [];
+  const modulos = uniq([...base.modulos, ...doresModules, ...focoModules]).slice(0, 9);
+  const correlatos = uniq([...base.correlatos, ...focoModules]).slice(0, 6);
+
+  const wantsFull = dores.length >= 6 || foco === "Tudo junto" || normalized === "white-label";
+  const canStartSimple = dores.length <= 2 && ["Agenda", "Pagamentos", "Captação"].includes(foco) && base.plano !== "Sob Medida";
+  const plano = base.plano === "Sob Medida" ? "Sob Medida" : wantsFull ? "Avançado" : canStartSimple ? "Essencial" : base.plano;
+  const horas = Math.min(86, base.horas + dores.length * 3 + (foco === "Tudo junto" ? 12 : foco === "Gestão" ? 7 : foco === "Comunicação" ? 5 : 0));
+  const compat = Math.min(99, base.compat + Math.min(4, dores.length));
+  const economiaValor = Math.round(horas * 95);
+  const racional = plano === "Avançado"
+    ? `Indiquei o Avançado porque você marcou ${dores.length} desafios e precisa integrar ${foco.toLowerCase()} com operação, dados e automações sem criar novos silos.`
+    : plano === "Essencial"
+      ? `Indiquei o Essencial porque sua prioridade imediata é ${foco.toLowerCase()} e o volume de desafios permite começar enxuto, com evolução modular.`
+      : plano === "Sob Medida"
+        ? `Indiquei Sob Medida porque este cenário pede marca, regras comerciais e implantação ajustadas ao modelo do seu negócio.`
+        : `Indiquei o Integrado porque seu diagnóstico combina ${selectedLabel.toLowerCase()}, ${dores.length} desafios e foco em ${foco.toLowerCase()}, exigindo módulos conectados de ponta a ponta.`;
+
+  return { ...base, modulos, correlatos, plano, horas, compat, economiaValor, racional, prioridade: foco, nichoLabel: selectedLabel };
+}
+
+function formatBRL(v: number): string {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+}
 
 // Contador animado (números crescendo)
 function useCountUp(target: number, run: boolean, ms = 900): number {
@@ -168,9 +264,10 @@ function Diagnostico() {
   const [dores, setDores] = useState<string[]>([]);
   const [foco, setFoco] = useState<string>("");
   const [streamError, setStreamError] = useState<StreamError>(null);
+  const [restored, setRestored] = useState(false);
 
-  const result = useMemo(() => nicho ? RECOMENDACOES[nicho] : null, [nicho]);
-  const showResult = !!(nicho && foco && dores.length > 0);
+  const result = useMemo(() => nicho ? calculateDiagnostico(nicho, dores, foco) : null, [nicho, dores, foco]);
+  const showResult = !!(nicho && foco && dores.length > 0 && result);
 
   const progress = showResult ? 100 : Math.min(95, ((nicho ? 33 : 0) + (dores.length ? 33 : 0) + (foco ? 29 : 0)));
 
@@ -185,12 +282,56 @@ function Diagnostico() {
     : showResult ? "complete"
     : nicho ? "streaming"
     : "idle";
+  const nichoLabel = useMemo(() => NICHOS.find((n) => n.slug === nicho)?.label ?? nicho, [nicho]);
+  const leadNotes = useMemo(() => {
+    if (!result) return "";
+    return [
+      "Diagnóstico da Home — Impulsionando",
+      `Segmento: ${result.nichoLabel} (${nicho})`,
+      `Desafios: ${dores.join(", ") || "não informado"}`,
+      `Prioridade: ${foco || "não informado"}`,
+      `Plano indicado: ${result.plano}`,
+      `Economia estimada: ${result.horas}h/mês (${formatBRL(result.economiaValor)}/mês operacional estimado)`,
+      `Compatibilidade: ${result.compat}%`,
+      `Módulos: ${result.modulos.join(", ")}`,
+      `Racional: ${result.racional}`,
+    ].join("\n");
+  }, [dores, foco, nicho, result]);
 
   // Lê ?diagError=... uma vez na montagem (SSR-safe).
   useEffect(() => {
     const forced = readForcedError();
     if (forced) setStreamError(forced);
   }, []);
+
+  // Restaura o diagnóstico localmente para o visitante continuar depois.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(QUIZ_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { step?: number; nicho?: string; dores?: string[]; foco?: string };
+        const savedNicho = normalizeNichoSlug(String(saved.nicho ?? ""));
+        const safeDores = Array.isArray(saved.dores) ? saved.dores.filter((d) => DORES.includes(d)).slice(0, DORES.length) : [];
+        const safeFoco = FOCOS.includes(String(saved.foco ?? "")) ? String(saved.foco) : "";
+        if (savedNicho && RECOMENDACOES[savedNicho]) setNicho(savedNicho);
+        if (safeDores.length) setDores(safeDores);
+        if (safeFoco) setFoco(safeFoco);
+        const nextStep = Number.isInteger(saved.step) ? Math.min(2, Math.max(0, Number(saved.step))) : savedNicho ? safeDores.length ? 2 : 1 : 0;
+        setStep(nextStep);
+      }
+    } catch {
+      window.localStorage.removeItem(QUIZ_STORAGE_KEY);
+    } finally {
+      setRestored(true);
+    }
+  }, []);
+
+  // Persiste apenas no navegador do visitante. Nada é enviado antes do contato.
+  useEffect(() => {
+    if (!restored || typeof window === "undefined") return;
+    window.localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify({ step, nicho, dores, foco, updatedAt: new Date().toISOString() }));
+  }, [step, nicho, dores, foco, restored]);
 
   // Watchdog: expira o streaming após STREAM_TIMEOUT_MS parado (sem completar).
   const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -206,8 +347,8 @@ function Diagnostico() {
 
   const selectNicho = useCallback((slug: string) => {
     setStreamError(null);
-    setNicho(slug);
-    setTimeout(() => setStep(1), 250);
+    setNicho(normalizeNichoSlug(slug));
+    setStep(1);
   }, []);
   const toggleDor = useCallback((d: string) => {
     setStreamError(null);
@@ -216,7 +357,7 @@ function Diagnostico() {
   const selectFoco = useCallback((f: string) => {
     setStreamError(null);
     setFoco(f);
-    setTimeout(() => setStep(2), 200);
+    setStep(2);
   }, []);
   const retry = useCallback(() => {
     setStreamError(null);
@@ -225,6 +366,7 @@ function Diagnostico() {
     setFoco("");
     setStep(0);
     if (typeof window !== "undefined") {
+      window.localStorage.removeItem(QUIZ_STORAGE_KEY);
       const url = new URL(window.location.href);
       if (url.searchParams.has("diagError")) {
         url.searchParams.delete("diagError");
@@ -317,6 +459,7 @@ function Diagnostico() {
                         data-testid={`nicho-${n.slug}`}
                         aria-pressed={on}
                         onClick={() => selectNicho(n.slug)}
+                        onPointerUp={() => selectNicho(n.slug)}
                         className={`group relative text-left rounded-xl p-3 border transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] motion-reduce:transition-none
                           ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
                             : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"}`}
@@ -378,9 +521,16 @@ function Diagnostico() {
                 </div>
                 <div className="mt-4 flex justify-between items-center">
                   <span className="text-xs text-muted-foreground" data-testid="dores-count">{dores.length} selecionada(s)</span>
-                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0} data-testid="btn-continuar">
+                  <button
+                    type="button"
+                    onClick={() => dores.length > 0 && setStep(2)}
+                    onPointerUp={() => dores.length > 0 && setStep(2)}
+                    disabled={dores.length === 0}
+                    data-testid="btn-continuar"
+                    className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+                  >
                     Continuar <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  </button>
                 </div>
               </Card>
               </div>
@@ -561,7 +711,7 @@ function Diagnostico() {
                     {nicho && (
                       <div className="mt-4 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-xs animate-in fade-in slide-in-from-bottom-1 duration-500" data-testid="stream-message">
                         <span className="opacity-80">Detectei que você atua em </span>
-                        <strong className="font-semibold">{nicho}</strong>
+                        <strong className="font-semibold">{nichoLabel}</strong>
                         <span className="opacity-80">. Mapeando módulos compatíveis</span>
                         <span className="inline-block motion-safe:animate-pulse">…</span>
                       </div>
@@ -587,6 +737,7 @@ function Diagnostico() {
                           {horas}
                           <span className="text-sm font-medium opacity-80 ml-1">h/mês</span>
                         </div>
+                        <div className="mt-1 text-xs opacity-80">≈ {formatBRL(result.economiaValor)}/mês em tempo operacional</div>
                       </div>
                       <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
                         <div className="text-[11px] uppercase tracking-wider opacity-80">Compatibilidade</div>
@@ -617,10 +768,42 @@ function Diagnostico() {
                       </div>
                       <Rocket className="w-8 h-8 opacity-70" />
                     </div>
+
+                    <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
+                      <div className="text-[11px] uppercase tracking-wider opacity-80">Por que esse plano</div>
+                      <p className="mt-1 text-sm leading-relaxed text-white/90">{result.racional}</p>
+                    </div>
                   </div>
                 )}
               </div>
             </Card>
+
+            {showResult && result && (
+              <Card className="p-5 border-primary/20 bg-card/95 shadow-xl shadow-primary/5 animate-in fade-in slide-in-from-bottom-2 duration-700" data-testid="diagnostico-resumo">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <Badge variant="outline" className="mb-2 border-primary/30 text-primary">Resumo do diagnóstico</Badge>
+                    <h3 className="text-lg font-bold tracking-tight">{result.nichoLabel}: {result.plano}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{result.racional}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-xs text-muted-foreground">economia estimada</div>
+                    <div className="text-xl font-black text-primary">{formatBRL(result.economiaValor)}/mês</div>
+                    <div className="text-xs text-muted-foreground">{result.horas}h operacionais</div>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Respostas salvas neste navegador</div>
+                    <p className="mt-1 text-sm">{result.nichoLabel} · {dores.length} desafio(s) · foco em {foco}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Próximo passo</div>
+                    <p className="mt-1 text-sm">Agendar uma demonstração personalizada com esse diagnóstico já preenchido.</p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* CTAs */}
             {showResult && result && (
@@ -631,9 +814,21 @@ function Diagnostico() {
                 <Button asChild size="lg" variant="outline" className="justify-center">
                   <a href="#impulsionito"><Bot className="w-4 h-4 mr-1.5" /> Falar com Impulsionito</a>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="justify-center">
-                  <Link to="/orcamento"><Calculator className="w-4 h-4 mr-1.5" /> Solicitar apresentação</Link>
-                </Button>
+                <DemoLeadDialog
+                  niche={nicho}
+                  nicheLabel={result.nichoLabel}
+                  origin="diagnostico-home"
+                  notes={leadNotes}
+                  title="Agendar demonstração personalizada"
+                  description="Seu diagnóstico será enviado junto para o time preparar uma demonstração com módulos, economia estimada e plano indicado."
+                  submitLabel="Agendar demonstração"
+                  label="Agendar demo"
+                  trigger={(
+                    <Button size="lg" variant="outline" className="justify-center">
+                      <Calculator className="w-4 h-4 mr-1.5" /> Agendar demo
+                    </Button>
+                  )}
+                />
               </div>
             )}
 

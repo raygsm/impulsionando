@@ -1,11 +1,11 @@
 /**
- * Datasets compactos para as demos ricas dos nichos saúde, bar, imobiliária,
- * comércio, serviços e comunidade. Renderizados por NichoDemoRich.
+ * Datasets compactos para as demos ricas dos nichos saúde, bar, microcervejarias,
+ * imobiliária, comércio, serviços e comunidade. Renderizados por NichoDemoRich.
  */
 export type RichNiche =
-  | "saude" | "bar" | "imobiliaria" | "comercio" | "servicos" | "comunidade";
+  | "saude" | "bar" | "microcervejarias" | "imobiliaria" | "comercio" | "servicos" | "comunidade";
 
-export const RICH_NICHES: RichNiche[] = ["saude", "bar", "imobiliaria", "comercio", "servicos", "comunidade"];
+export const RICH_NICHES: RichNiche[] = ["saude", "bar", "microcervejarias", "imobiliaria", "comercio", "servicos", "comunidade"];
 
 export interface RichKpi { label: string; value: string; sub?: string }
 export interface RichTab {
@@ -183,6 +183,79 @@ const bar: RichNicheConfig = {
   ],
   ctaPrimary: { label: "Quero levar isto para meu bar", to: "/orcamento" },
   ctaSecondary: { label: "Ver demo de delivery", to: "/demo/checkout" },
+};
+
+// ============================================================
+// MICROCERVEJARIAS — fábrica, taproom e venda B2B
+// ============================================================
+const microcervejarias: RichNicheConfig = {
+  niche: "microcervejarias",
+  heroEyebrow: "Demo — Microcervejarias",
+  heroTitle: "Produção, taproom, pedidos B2B e ativações de marca no mesmo painel",
+  heroSubtitle:
+    "Controle de lotes, barris, validade, sell-out em bares parceiros, pedidos recorrentes, degustações, clube de consumidores e BI por estilo de cerveja.",
+  kpis: [
+    { label: "Barris em campo", value: "148", sub: "37 retornam esta semana" },
+    { label: "Pedidos B2B/mês", value: "312" },
+    { label: "Receita taproom", value: fmtBRL(64_800) },
+    { label: "Sell-out parceiro", value: "+22%", sub: "após régua de degustação" },
+  ],
+  tabs: [
+    {
+      id: "producao",
+      label: "Produção",
+      headline: "Lotes, barris, validade e margem por receita",
+      description: "Do brassagem ao envase: cada lote conversa com estoque, pedidos B2B, taproom e fiscal.",
+      kind: "table",
+      columns: ["Lote", "Estilo", "Volume", "Validade", "Status"],
+      rows: [
+        ["IPA-2606", "West Coast IPA", "1.200 L", "18/09/2026", "Envase hoje"],
+        ["PIL-2605", "Pilsen", "2.400 L", "04/10/2026", "Pronta para expedição"],
+        ["SOU-2604", "Sour Frutas", "620 L", "21/08/2026", "Taproom + clube"],
+        ["APA-2603", "American Pale Ale", "980 L", "30/07/2026", "Reposição B2B"],
+      ],
+    },
+    {
+      id: "b2b",
+      label: "B2B & PDVs",
+      headline: "Bares parceiros compram pelo catálogo e recebem régua de sell-out",
+      description: "Tabela por cliente, prazo, recorrência, comissão de representante e incentivo de recompra.",
+      kind: "cards",
+      cards: [
+        { title: "Bar Lúpulo 42", meta: "Pedido recorrente quinzenal", body: "4 barris Pilsen + 2 IPA. Sistema sugeriu reposição antes do fim de semana e liberou material de divulgação.", tag: "Recorrente" },
+        { title: "Empório Malte", meta: "Baixo giro em Sour", body: "Sell-out abaixo da meta. Régua dispara degustação guiada + cupom para consumidor final no sábado.", tag: "Ação" },
+        { title: "Restaurante Brasa", meta: "Representante: Camila", body: "Pedido aprovado, comissão calculada e rota de entrega agrupada com mais 3 PDVs da região.", tag: "Expedição" },
+      ],
+    },
+    {
+      id: "ativacao",
+      label: "Ativações",
+      headline: "Degustação, clube e recompra conectados",
+      description: "Cada evento vira base de consumidores, ranking de estilos e oportunidade para o PDV parceiro.",
+      kind: "timeline",
+      steps: [
+        { title: "Degustação cadastrada", body: "A cervejaria escolhe PDV, estilos, equipe, meta de leads e verba de ativação.", meta: "D-7" },
+        { title: "Convite multicanal", body: "Consumidores próximos recebem e-mail/WhatsApp; o bar parceiro ganha lista e QR de check-in.", meta: "D-3" },
+        { title: "Check-in e prova", body: "Lead escolhe estilo favorito; preferência alimenta CRM, clube e campanhas futuras.", meta: "Evento" },
+        { title: "Reposição sugerida", body: "Se o sell-out bate meta, sistema gera pedido sugerido para o PDV e campanha de recompra no clube.", meta: "D+2" },
+      ],
+    },
+    {
+      id: "resultado",
+      label: "Resultado",
+      headline: "BI por estilo, lote, PDV e canal",
+      description: "Margem, giro, recompra B2B, retorno de evento e clube de consumidores em visão única.",
+      kind: "metrics",
+      metrics: [
+        { label: "Estilo mais rentável", value: "IPA — 42%", sub: "margem bruta média" },
+        { label: "Giro B2B", value: "18 dias", sub: "−6 dias vs. trimestre anterior" },
+        { label: "Recompra PDV", value: "64%", sub: "+11pp após alerta de sell-out" },
+        { label: "Leads de ativações", value: "1.940", sub: "38% entraram no clube" },
+      ],
+    },
+  ],
+  ctaPrimary: { label: "Quero operar minha cervejaria assim", to: "/orcamento" },
+  ctaSecondary: { label: "Ver checkout e pedidos", to: "/demo/checkout" },
 };
 
 // ============================================================
@@ -478,7 +551,7 @@ const comunidade: RichNicheConfig = {
 };
 
 export const RICH_NICHE_CONFIGS: Record<RichNiche, RichNicheConfig> = {
-  saude, bar, imobiliaria, comercio, servicos, comunidade,
+  saude, bar, microcervejarias, imobiliaria, comercio, servicos, comunidade,
 };
 
 export function getRichNiche(slug: string): RichNicheConfig | null {
