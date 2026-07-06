@@ -12,6 +12,25 @@ import { toast } from "sonner";
 import { ShieldCheck, Layers, Zap } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
+/** Traduz mensagens comuns do Supabase Auth para PT-BR. */
+function traduzirErroAuth(msg: string | undefined | null): string {
+  const m = (msg ?? "").toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid credentials"))
+    return "E-mail ou senha incorretos.";
+  if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (m.includes("user already registered") || m.includes("already registered"))
+    return "Já existe uma conta com este e-mail.";
+  if (m.includes("password should be at least")) return "A senha precisa ter pelo menos 6 caracteres.";
+  if (m.includes("rate limit") || m.includes("too many")) return "Muitas tentativas. Aguarde alguns minutos e tente de novo.";
+  if (m.includes("unable to validate email") || m.includes("invalid email")) return "E-mail inválido.";
+  if (m.includes("network") || m.includes("failed to fetch")) return "Sem conexão. Verifique sua internet e tente novamente.";
+  if (m.includes("user not found")) return "Usuário não encontrado.";
+  if (m.includes("token has expired") || m.includes("jwt expired")) return "Sua sessão expirou. Faça login novamente.";
+  if (m.includes("unsupported provider")) return "Provedor de login não configurado. Fale com o suporte.";
+  return msg || "Não foi possível concluir. Tente novamente.";
+}
+
+
 type AuthPersona = "core" | "empresa" | "white-label" | "admin" | "clube";
 type AuthMode = "signin" | "signup";
 
