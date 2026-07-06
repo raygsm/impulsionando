@@ -3,7 +3,7 @@
  * Filtros: busca livre, segmento, cidade, UF, nota mínima e ordenação.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useDeferredValue, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -81,20 +81,25 @@ function VitrinePage() {
   const [minRating, setMinRating] = useState<number>(0);
 
   const deferredQ = useDeferredValue(q);
+  const deferredCity = useDeferredValue(city);
 
   const query = useQuery({
-    queryKey: ["public-vitrine", segment, city, state, deferredQ, sort],
+    queryKey: ["public-vitrine", segment, deferredCity, state, deferredQ, sort],
     queryFn: () =>
       fetchFn({
         data: {
           segment: segment || undefined,
-          city: city || undefined,
+          city: deferredCity || undefined,
           state: state || undefined,
           q: deferredQ || undefined,
           sort,
           limit: 120,
         },
       }),
+    // Filtros mudam com frequência — mantém dados anteriores enquanto refetch
+    // acontece e evita flicker/perda de scroll na grid.
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
   });
 
   const companies = useMemo<VitrineCompany[]>(() => {
@@ -115,7 +120,7 @@ function VitrinePage() {
     setQ(""); setSegment(""); setCity(""); setStateUf(""); setMinRating(0); setSort("rating");
   };
 
-  const activeFilters = [segment, city, state, deferredQ, minRating > 0 ? `${minRating}+` : ""].filter(Boolean).length;
+  const activeFilters = [segment, deferredCity, state, deferredQ, minRating > 0 ? `${minRating}+` : ""].filter(Boolean).length;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
