@@ -149,11 +149,25 @@ function useCountUp(target: number, run: boolean, ms = 900): number {
 
 const STEP_LABELS = ["Segmento", "Desafios", "Prioridade"] as const;
 
+// Watchdog do painel Impulsionito: se o usuário selecionou nicho mas não
+// concluiu em `STREAM_TIMEOUT_MS`, exibimos um estado de timeout com CTA
+// de "Tentar novamente". Também aceitamos ?diagError=timeout|error na URL
+// para permitir screenshots/testes determinísticos sem alterar o backend.
+const STREAM_TIMEOUT_MS = 60_000;
+type StreamError = null | "timeout" | "error";
+
+function readForcedError(): StreamError {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("diagError");
+  return v === "timeout" || v === "error" ? v : null;
+}
+
 function Diagnostico() {
   const [step, setStep] = useState(0); // 0..2
   const [nicho, setNicho] = useState<string>("");
   const [dores, setDores] = useState<string[]>([]);
   const [foco, setFoco] = useState<string>("");
+  const [streamError, setStreamError] = useState<StreamError>(null);
 
   const result = useMemo(() => nicho ? RECOMENDACOES[nicho] : null, [nicho]);
   const showResult = !!(nicho && foco && dores.length > 0);
@@ -166,17 +180,59 @@ function Diagnostico() {
   const similares = useCountUp(nicho ? 180 : 0, !!nicho, 900);
   const automacoes = useCountUp(320, true, 1500);
 
-  function selectNicho(slug: string) {
+  const streamState: "idle" | "streaming" | "complete" | "timeout" | "error" =
+    streamError ? streamError
+    : showResult ? "complete"
+    : nicho ? "streaming"
+    : "idle";
+
+  // Lê ?diagError=... uma vez na montagem (SSR-safe).
+  useEffect(() => {
+    const forced = readForcedError();
+    if (forced) setStreamError(forced);
+  }, []);
+
+  // Watchdog: expira o streaming após STREAM_TIMEOUT_MS parado (sem completar).
+  const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (watchdogRef.current) clearTimeout(watchdogRef.current);
+    if (nicho && !showResult && !streamError) {
+      watchdogRef.current = setTimeout(() => setStreamError("timeout"), STREAM_TIMEOUT_MS);
+    }
+    return () => {
+      if (watchdogRef.current) clearTimeout(watchdogRef.current);
+    };
+  }, [nicho, dores.length, foco, showResult, streamError]);
+
+  const selectNicho = useCallback((slug: string) => {
+    setStreamError(null);
     setNicho(slug);
     setTimeout(() => setStep(1), 250);
-  }
-  function toggleDor(d: string) {
+  }, []);
+  const toggleDor = useCallback((d: string) => {
+    setStreamError(null);
     setDores((prev) => prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]);
-  }
-  function selectFoco(f: string) {
+  }, []);
+  const selectFoco = useCallback((f: string) => {
+    setStreamError(null);
     setFoco(f);
     setTimeout(() => setStep(2), 200);
-  }
+  }, []);
+  const retry = useCallback(() => {
+    setStreamError(null);
+    setNicho("");
+    setDores([]);
+    setFoco("");
+    setStep(0);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("diagError")) {
+        url.searchParams.delete("diagError");
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+  }, []);
+
 
   return (
     <section id="diagnostico-wrap" className="relative overflow-hidden border-y border-primary/10 bg-[radial-gradient(ellipse_at_top,theme(colors.primary/10),transparent_60%),linear-gradient(180deg,theme(colors.slate.950/2),theme(colors.slate.950/8))]">
