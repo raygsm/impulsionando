@@ -187,6 +187,17 @@ function ImpersonationLogPage() {
           </div>
         )}
       </Card>
+      {filtered.length > pageSize && (
+        <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
+          <span>Página {currentPage} de {totalPages}</span>
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage <= 1}>
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
