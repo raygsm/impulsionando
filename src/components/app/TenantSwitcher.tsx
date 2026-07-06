@@ -24,11 +24,19 @@ export function TenantSwitcher() {
   const [q, setQ] = useState("");
   const fn = useServerFn(listAdminHubTenants);
   const logFn = useServerFn(logImpersonation);
+  const queryClient = useQueryClient();
 
   async function safeLog(input: { targetCompanyId: string; targetCompanyName?: string | null; action: "start" | "stop"; reason?: string | null }) {
     try {
       await logFn({ data: { ...input, userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 400) : null } } as any);
     } catch { /* non-blocking */ }
+  }
+
+  // Ao trocar de tenant (start/stop) precisamos descartar caches escoped por
+  // company_id — evita que dados do tenant A apareçam no dashboard do B.
+  async function resetTenantScopedCache() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
   }
 
 
@@ -39,14 +47,16 @@ export function TenantSwitcher() {
     staleTime: 60_000,
   });
 
-  const tenants = useMemo(() => {
-    const list = (query.data?.tenants ?? []) as any[];
-    if (!q.trim()) return list.slice(0, 50);
+  const allTenants = (query.data?.tenants ?? []) as any[];
+  const filtered = useMemo(() => {
+    if (!q.trim()) return allTenants;
     const needle = q.toLowerCase();
-    return list.filter((t) =>
+    return allTenants.filter((t) =>
       `${t.name} ${t.slug ?? ""}`.toLowerCase().includes(needle),
-    ).slice(0, 50);
-  }, [query.data, q]);
+    );
+  }, [allTenants, q]);
+  const tenants = filtered.slice(0, 50);
+  const truncated = filtered.length > tenants.length;
 
   if (!isStaff) return null;
 
