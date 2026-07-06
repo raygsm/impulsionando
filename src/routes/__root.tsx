@@ -94,39 +94,178 @@ function NotFoundComponent() {
   );
 }
 
+type ErrorKind = "chunk_stale" | "offline" | "server" | "not_found" | "unknown";
+
+function classifyError(error: Error): { kind: ErrorKind; title: string; guidance: string } {
+  const msg = `${error?.name ?? ""} ${error?.message ?? ""}`.toLowerCase();
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return {
+      kind: "offline",
+      title: "Você está sem conexão",
+      guidance:
+        "Verifique sua internet (Wi-Fi ou dados). Assim que a conexão voltar, clique em Tentar novamente.",
+    };
+  }
+  if (/chunkloaderror|loading chunk|failed to fetch dynamically imported module|importing a module script failed/.test(msg)) {
+    return {
+      kind: "chunk_stale",
+      title: "Nova versão publicada",
+      guidance:
+        "Foi publicada uma versão mais recente do portal enquanto você navegava. Recarregue a página para aplicar a atualização.",
+    };
+  }
+  if (/(^|\W)(5\d\d|internal server|service unavailable|bad gateway|gateway timeout)(\W|$)/.test(msg)) {
+    return {
+      kind: "server",
+      title: "Instabilidade momentânea do servidor",
+      guidance:
+        "Nosso backend respondeu com erro. Costuma resolver em poucos minutos. Você pode tentar de novo ou falar com o suporte.",
+    };
+  }
+  if (/404|not.?found|no matching route/.test(msg)) {
+    return {
+      kind: "not_found",
+      title: "Recurso não encontrado",
+      guidance: "O endereço acessado não existe mais ou foi movido. Volte para o início.",
+    };
+  }
+  return {
+    kind: "unknown",
+    title: "Esta página não carregou",
+    guidance:
+      "Algo saiu do esperado durante o build ou o carregamento. Tente novamente, recarregue ou avise o suporte com o código abaixo.",
+  };
+}
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const { kind, title, guidance } = classifyError(error);
+  const errorId = `ERR-${Date.now().toString(36).toUpperCase()}`;
+  const errorDetail = `${errorId}\n${error?.name ?? "Error"}: ${error?.message ?? ""}${error?.stack ? `\n${error.stack.split("\n").slice(0, 4).join("\n")}` : ""}`;
+
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+    reportLovableError(error, {
+      boundary: "tanstack_root_error_component",
+      kind,
+      errorId,
+    });
+  }, [error, kind, errorId]);
+
+  async function copyDetail() {
+    try {
+      await navigator.clipboard.writeText(errorDetail);
+    } catch {
+      /* noop */
+    }
+  }
+
+  const whatsappHelp = `https://wa.me/5521993075000?text=${encodeURIComponent(
+    `Olá, preciso de suporte no portal Impulsionando.\nCódigo do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`,
+  )}`;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <div className="mb-8 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Esta página não carregou
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Não foi possível concluir o carregamento agora. Tente novamente ou volte para o início.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Tentar novamente
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Ir para o início
-          </a>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="w-full max-w-lg">
+        <div className="mb-6 flex justify-center">
+          <LogoImpulsionando variant="light" size="lg" />
+        </div>
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div
+              aria-hidden="true"
+              className={
+                "mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full " +
+                (kind === "offline"
+                  ? "bg-amber-500"
+                  : kind === "chunk_stale"
+                    ? "bg-sky-500"
+                    : kind === "server"
+                      ? "bg-red-500"
+                      : "bg-muted-foreground")
+              }
+            />
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{guidance}</p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {kind === "chunk_stale" ? (
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") window.location.reload();
+                }}
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Recarregar página
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  router.invalidate();
+                  reset();
+                }}
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Tentar novamente
+              </button>
+            )}
+            <a
+              href="/"
+              className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Ir para o início
+            </a>
+            <a
+              href="/api/public/health"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Ver status do sistema
+            </a>
+            <a
+              href={whatsappHelp}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Falar com suporte
+            </a>
+          </div>
+
+          <div className="mt-5 rounded-md border border-dashed border-border bg-muted/40 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Código do erro
+                </div>
+                <div className="mt-0.5 font-mono text-xs text-foreground truncate">{errorId}</div>
+              </div>
+              <button
+                type="button"
+                onClick={copyDetail}
+                className="shrink-0 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent"
+              >
+                Copiar detalhes
+              </button>
+            </div>
+            <details className="mt-3">
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                Ver detalhes técnicos
+              </summary>
+              <pre className="mt-2 max-h-40 overflow-auto rounded bg-background p-2 text-[11px] leading-relaxed text-muted-foreground">
+                {errorDetail}
+              </pre>
+            </details>
+          </div>
+
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Informe o código <span className="font-mono">{errorId}</span> ao suporte para acelerar
+            a resposta. Registramos o erro automaticamente para o time técnico.
+          </p>
         </div>
       </div>
     </div>
