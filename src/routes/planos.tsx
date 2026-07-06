@@ -421,8 +421,9 @@ function PlanosPage() {
 
       {audience === "empresas" && (
         <>
+      <PlanosSectionsNav onExpandDetails={() => setShowComparison(true)} />
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
+      <section id="visao-geral" className="relative overflow-hidden bg-gradient-hero text-primary-foreground scroll-mt-24">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
         <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-24 text-center">
@@ -462,7 +463,13 @@ function PlanosPage() {
             </button>
           </div>
         </div>
+        {/* Fade de continuidade — sugere que há mais conteúdo abaixo. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background/90"
+        />
       </section>
+
 
       {/* PLAN CARDS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
