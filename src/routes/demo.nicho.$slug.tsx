@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -23,24 +23,51 @@ const SUPORTADOS: string[] = ["eventos", ...RICH_NICHES];
  * Mantém o hub 100% navegável sem 404, mesmo enquanto demos dedicadas não existem.
  */
 const NICHO_ALIASES: Record<string, string> = {
+  "clinicas-medicas": "saude",
+  clinica: "saude",
+  "clinica-medica": "saude",
   clinicas: "saude",
+  consultorio: "saude",
+  consultorios: "saude",
+  restaurantes: "bar",
+  restaurante: "bar",
+  bares: "bar",
+  bar: "bar",
   "bares-restaurantes": "bar",
+  cervejaria: "bar",
+  cervejarias: "bar",
   microcervejarias: "bar",
   fornecedores: "comercio",
   ecommerce: "comercio",
+  ecomerce: "comercio",
+  "loja-virtual": "comercio",
   veiculos: "comercio",
+  auto: "comercio",
+  automotivo: "comercio",
+  imoveis: "imobiliaria",
+  imobiliarias: "imobiliaria",
   fitness: "saude",
+  academia: "saude",
+  academias: "saude",
   psicologia: "saude",
+  psicologos: "saude",
+  psicologo: "saude",
   juridico: "servicos",
+  advocacia: "servicos",
+  "escritorio-advocacia": "servicos",
   contabilidade: "servicos",
+  contador: "servicos",
+  contadores: "servicos",
   "white-label": "servicos",
+  escola: "comunidade",
+  escolas: "comunidade",
   educacao: "comunidade",
 };
 
-function resolveSlug(slug: string): string | null {
+function resolveSlug(slug: string): string {
   if (SUPORTADOS.includes(slug)) return slug;
   const aliased = NICHO_ALIASES[slug];
-  return aliased && SUPORTADOS.includes(aliased) ? aliased : null;
+  return aliased && SUPORTADOS.includes(aliased) ? aliased : "servicos";
 }
 
 export const Route = createFileRoute("/demo/nicho/$slug")({
@@ -61,7 +88,6 @@ export const Route = createFileRoute("/demo/nicho/$slug")({
   ),
   loader: ({ params }) => {
     const resolved = resolveSlug(params.slug);
-    if (!resolved) throw notFound();
     return { slug: resolved, requestedSlug: params.slug };
   },
 });
@@ -71,10 +97,10 @@ function NichoNotFound() {
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-20 text-center">
-        <Badge variant="outline" className="mb-3">Em breve</Badge>
-        <h1 className="text-3xl font-bold tracking-tight">Demo deste nicho ainda não está pronta</h1>
+        <Badge variant="outline" className="mb-3">Demo ativa</Badge>
+        <h1 className="text-3xl font-bold tracking-tight">Demonstração geral do ecossistema</h1>
         <p className="mt-3 text-muted-foreground">
-          Demos disponíveis: Eventos / WMP, Saúde, Bares, Imobiliária, Comércio, Serviços e Comunidade.
+          Quando um segmento ainda não tem vitrine dedicada, abrimos uma operação equivalente com CRM, agenda, pagamentos, comunicação e BI.
         </p>
         <div className="mt-6 flex justify-center gap-3 flex-wrap">
           <Button asChild className="bg-gradient-primary">
@@ -93,7 +119,7 @@ function NichoNotFound() {
 }
 
 function DemoNichoPage() {
-  const { slug } = Route.useParams();
+  const { slug } = Route.useLoaderData();
   if (slug === "eventos") return <DemoEventosNicho />;
   const cfg = getRichNiche(slug as RichNiche);
   if (!cfg) return <NichoNotFound />;
