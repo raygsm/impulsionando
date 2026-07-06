@@ -691,7 +691,7 @@ function PlanosPage() {
 
       <div id="planos-detalhes" hidden={!showComparison}>
       {/* MÓDULOS POR PLANO + SINERGIAS */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+      <section id="recursos" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
         <div className="max-w-3xl mb-8">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">O que compõe cada plano</h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">
