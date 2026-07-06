@@ -89,10 +89,11 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(traduzirErroAuth(error.message));
     toast.success("Bem-vindo!");
     navigate({ to: "/dashboard" });
   }
+
 
   async function handleGoogleSignIn() {
     setLoading(true);
