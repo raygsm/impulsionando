@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, RefreshCw, LogIn, LogOut } from "lucide-react";
+import { Loader2, RefreshCw, LogIn, LogOut, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { listImpersonationAudit } from "@/lib/impersonation-audit.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/impersonation-log")({
