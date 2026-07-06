@@ -9,23 +9,23 @@
  * NUNCA expõe o token/segredo — apenas booleans, contagem e prefixo do public key.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  getMpAccessToken,
+  getMpPublicKey,
+  getMpWebhookSecret,
+  getMpEnvironment,
+} from "@/lib/mercadopago-env.server";
 
 export const Route = createFileRoute("/api/public/health/mercadopago")({
   server: {
     handlers: {
       GET: async () => {
         const t0 = Date.now();
-        const token = process.env.MERCADOPAGO_ACCESS_TOKEN ?? "";
-        const pub = process.env.MERCADOPAGO_PUBLIC_KEY ?? "";
-        const wh = process.env.MERCADOPAGO_WEBHOOK_SECRET ?? "";
+        const token = getMpAccessToken() ?? "";
+        const pub = getMpPublicKey() ?? "";
+        const wh = getMpWebhookSecret() ?? "";
 
-        const environment = token.startsWith("APP_USR-")
-          ? "production"
-          : token.startsWith("TEST-")
-            ? "sandbox"
-            : token
-              ? "unknown"
-              : "missing";
+        const environment = getMpEnvironment();
 
         let apiOk = false;
         let apiStatus: number | null = null;
