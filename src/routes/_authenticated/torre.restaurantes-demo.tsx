@@ -361,7 +361,7 @@ function TorreRestaurantesDemoPage() {
             <Printer className="w-3.5 h-3.5 mr-1" /> PDF
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link to="/torre/restaurantes-demo/auditoria" search={{ scenarioSlug, sinceHours: windowHours }}>
+            <Link to="/torre/restaurantes-demo/auditoria" search={{ scenarioSlug, sinceHours: windowHours, actionKey: "", sessionId: "", leadName: "" }}>
               <FileSearch className="w-3.5 h-3.5 mr-1" /> Auditoria
             </Link>
           </Button>
