@@ -554,6 +554,7 @@ import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
 import { Route as AuthenticatedAdminConsumerJourneyHealthRouteImport } from './routes/_authenticated/admin.consumer-journey-health'
 import { Route as AuthenticatedAdminConfigCatalogHealthRouteImport } from './routes/_authenticated/admin.config-catalog-health'
+import { Route as AuthenticatedAdminComunicacoesRouteImport } from './routes/_authenticated/admin.comunicacoes'
 import { Route as AuthenticatedAdminComunicacaoRouteImport } from './routes/_authenticated/admin.comunicacao'
 import { Route as AuthenticatedAdminComplianceHealthRouteImport } from './routes/_authenticated/admin.compliance-health'
 import { Route as AuthenticatedAdminCommunityHealthRouteImport } from './routes/_authenticated/admin.community-health'
@@ -654,6 +655,8 @@ import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/ap
 import { Route as ApiPublicCronFunnelDispatchRouteImport } from './routes/api/public/cron/funnel-dispatch'
 import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/public/cron/crm-touch-dispatch'
 import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
+import { Route as ApiPublicCommTickRouteImport } from './routes/api/public/comm/tick'
+import { Route as ApiPublicCommN8nCallbackRouteImport } from './routes/api/public/comm/n8n-callback'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedTenantsSlugHomologacaoRouteImport } from './routes/_authenticated/tenants.$slug.homologacao'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -3786,6 +3789,12 @@ const AuthenticatedAdminConfigCatalogHealthRoute =
     path: '/admin/config-catalog-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminComunicacoesRoute =
+  AuthenticatedAdminComunicacoesRouteImport.update({
+    id: '/admin/comunicacoes',
+    path: '/admin/comunicacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminComunicacaoRoute =
   AuthenticatedAdminComunicacaoRouteImport.update({
     id: '/admin/comunicacao',
@@ -4368,6 +4377,17 @@ const ApiPublicCronAgendaTickRoute = ApiPublicCronAgendaTickRouteImport.update({
   path: '/api/public/cron/agenda-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCommTickRoute = ApiPublicCommTickRouteImport.update({
+  id: '/api/public/comm/tick',
+  path: '/api/public/comm/tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicCommN8nCallbackRoute =
+  ApiPublicCommN8nCallbackRouteImport.update({
+    id: '/api/public/comm/n8n-callback',
+    path: '/api/public/comm/n8n-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
   AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -5187,6 +5207,7 @@ export interface FileRoutesByFullPath {
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
+  '/admin/comunicacoes': typeof AuthenticatedAdminComunicacoesRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -5563,6 +5584,8 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
+  '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
@@ -5917,6 +5940,7 @@ export interface FileRoutesByTo {
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
+  '/admin/comunicacoes': typeof AuthenticatedAdminComunicacoesRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -6292,6 +6316,8 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
+  '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
@@ -6660,6 +6686,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/_authenticated/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/_authenticated/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
+  '/_authenticated/admin/comunicacoes': typeof AuthenticatedAdminComunicacoesRoute
   '/_authenticated/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/_authenticated/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -7036,6 +7063,8 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
+  '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
@@ -7404,6 +7433,7 @@ export interface FileRouteTypes {
     | '/admin/community-health'
     | '/admin/compliance-health'
     | '/admin/comunicacao'
+    | '/admin/comunicacoes'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -7780,6 +7810,8 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/comm/n8n-callback'
+    | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
@@ -8134,6 +8166,7 @@ export interface FileRouteTypes {
     | '/admin/community-health'
     | '/admin/compliance-health'
     | '/admin/comunicacao'
+    | '/admin/comunicacoes'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -8509,6 +8542,8 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/comm/n8n-callback'
+    | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
@@ -8876,6 +8911,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/community-health'
     | '/_authenticated/admin/compliance-health'
     | '/_authenticated/admin/comunicacao'
+    | '/_authenticated/admin/comunicacoes'
     | '/_authenticated/admin/config-catalog-health'
     | '/_authenticated/admin/consumer-journey-health'
     | '/_authenticated/admin/contab-cockpit-health'
@@ -9252,6 +9288,8 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/tenants/$slug/homologacao'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
+    | '/api/public/comm/n8n-callback'
+    | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
@@ -9517,6 +9555,8 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  ApiPublicCommN8nCallbackRoute: typeof ApiPublicCommN8nCallbackRoute
+  ApiPublicCommTickRoute: typeof ApiPublicCommTickRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
   ApiPublicCronCrmTouchDispatchRoute: typeof ApiPublicCronCrmTouchDispatchRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
@@ -13394,6 +13434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfigCatalogHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/comunicacoes': {
+      id: '/_authenticated/admin/comunicacoes'
+      path: '/admin/comunicacoes'
+      fullPath: '/admin/comunicacoes'
+      preLoaderRoute: typeof AuthenticatedAdminComunicacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/comunicacao': {
       id: '/_authenticated/admin/comunicacao'
       path: '/admin/comunicacao'
@@ -14092,6 +14139,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/cron/agenda-tick'
       fullPath: '/api/public/cron/agenda-tick'
       preLoaderRoute: typeof ApiPublicCronAgendaTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/comm/tick': {
+      id: '/api/public/comm/tick'
+      path: '/api/public/comm/tick'
+      fullPath: '/api/public/comm/tick'
+      preLoaderRoute: typeof ApiPublicCommTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/comm/n8n-callback': {
+      id: '/api/public/comm/n8n-callback'
+      path: '/api/public/comm/n8n-callback'
+      fullPath: '/api/public/comm/n8n-callback'
+      preLoaderRoute: typeof ApiPublicCommN8nCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/torre/restaurantes-demo/auditoria': {
@@ -15688,6 +15749,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommunityHealthRoute: typeof AuthenticatedAdminCommunityHealthRoute
   AuthenticatedAdminComplianceHealthRoute: typeof AuthenticatedAdminComplianceHealthRoute
   AuthenticatedAdminComunicacaoRoute: typeof AuthenticatedAdminComunicacaoRoute
+  AuthenticatedAdminComunicacoesRoute: typeof AuthenticatedAdminComunicacoesRoute
   AuthenticatedAdminConfigCatalogHealthRoute: typeof AuthenticatedAdminConfigCatalogHealthRoute
   AuthenticatedAdminConsumerJourneyHealthRoute: typeof AuthenticatedAdminConsumerJourneyHealthRoute
   AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -15990,6 +16052,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminComplianceHealthRoute:
     AuthenticatedAdminComplianceHealthRoute,
   AuthenticatedAdminComunicacaoRoute: AuthenticatedAdminComunicacaoRoute,
+  AuthenticatedAdminComunicacoesRoute: AuthenticatedAdminComunicacoesRoute,
   AuthenticatedAdminConfigCatalogHealthRoute:
     AuthenticatedAdminConfigCatalogHealthRoute,
   AuthenticatedAdminConsumerJourneyHealthRoute:
@@ -16709,6 +16772,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  ApiPublicCommN8nCallbackRoute: ApiPublicCommN8nCallbackRoute,
+  ApiPublicCommTickRoute: ApiPublicCommTickRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
   ApiPublicCronCrmTouchDispatchRoute: ApiPublicCronCrmTouchDispatchRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,

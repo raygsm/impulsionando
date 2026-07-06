@@ -7881,6 +7881,398 @@ export type Database = {
         }
         Relationships: []
       }
+      core_comm_channel_config: {
+        Row: {
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id: string
+          created_at: string
+          enabled: boolean
+          fallback_channel: Database["public"]["Enums"]["comm_channel"] | null
+          id: string
+          n8n_secret_ref: string | null
+          n8n_webhook_url: string | null
+          provider: string | null
+          provider_config: Json
+          rate_limit_per_min: number
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id: string
+          created_at?: string
+          enabled?: boolean
+          fallback_channel?: Database["public"]["Enums"]["comm_channel"] | null
+          id?: string
+          n8n_secret_ref?: string | null
+          n8n_webhook_url?: string | null
+          provider?: string | null
+          provider_config?: Json
+          rate_limit_per_min?: number
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          company_id?: string
+          created_at?: string
+          enabled?: boolean
+          fallback_channel?: Database["public"]["Enums"]["comm_channel"] | null
+          id?: string
+          n8n_secret_ref?: string | null
+          n8n_webhook_url?: string | null
+          provider?: string | null
+          provider_config?: Json
+          rate_limit_per_min?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_comm_channel_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_channel_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_channel_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_channel_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_channel_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_comm_delivery_events: {
+        Row: {
+          actor_user_id: string | null
+          channel: Database["public"]["Enums"]["comm_channel"] | null
+          created_at: string
+          dispatch_id: string
+          error: string | null
+          event_type: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          actor_user_id?: string | null
+          channel?: Database["public"]["Enums"]["comm_channel"] | null
+          created_at?: string
+          dispatch_id: string
+          error?: string | null
+          event_type: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          actor_user_id?: string | null
+          channel?: Database["public"]["Enums"]["comm_channel"] | null
+          created_at?: string
+          dispatch_id?: string
+          error?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_comm_delivery_events_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "core_comm_dispatches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_comm_dispatches: {
+        Row: {
+          attempts: number
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id: string | null
+          created_at: string
+          destination: string | null
+          event_code: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          max_attempts: number
+          n8n_execution_id: string | null
+          next_retry_at: string | null
+          origin: string
+          origin_ref: string | null
+          payload: Json
+          priority: Database["public"]["Enums"]["comm_priority"]
+          provider_message_id: string | null
+          resolved_template_id: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["comm_dispatch_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id?: string | null
+          created_at?: string
+          destination?: string | null
+          event_code: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          n8n_execution_id?: string | null
+          next_retry_at?: string | null
+          origin?: string
+          origin_ref?: string | null
+          payload?: Json
+          priority?: Database["public"]["Enums"]["comm_priority"]
+          provider_message_id?: string | null
+          resolved_template_id?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["comm_dispatch_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          company_id?: string | null
+          created_at?: string
+          destination?: string | null
+          event_code?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          n8n_execution_id?: string | null
+          next_retry_at?: string | null
+          origin?: string
+          origin_ref?: string | null
+          payload?: Json
+          priority?: Database["public"]["Enums"]["comm_priority"]
+          provider_message_id?: string | null
+          resolved_template_id?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["comm_dispatch_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_comm_dispatches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_event_code_fkey"
+            columns: ["event_code"]
+            isOneToOne: false
+            referencedRelation: "core_comm_events"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "core_comm_dispatches_resolved_template_id_fkey"
+            columns: ["resolved_template_id"]
+            isOneToOne: false
+            referencedRelation: "core_comm_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_comm_events: {
+        Row: {
+          active: boolean
+          category: string
+          code: string
+          created_at: string
+          default_channels: Database["public"]["Enums"]["comm_channel"][]
+          default_priority: Database["public"]["Enums"]["comm_priority"]
+          description: string | null
+          id: string
+          impulsionito_hint: string | null
+          label_pt: string
+          payload_schema: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          code: string
+          created_at?: string
+          default_channels?: Database["public"]["Enums"]["comm_channel"][]
+          default_priority?: Database["public"]["Enums"]["comm_priority"]
+          description?: string | null
+          id?: string
+          impulsionito_hint?: string | null
+          label_pt: string
+          payload_schema?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          code?: string
+          created_at?: string
+          default_channels?: Database["public"]["Enums"]["comm_channel"][]
+          default_priority?: Database["public"]["Enums"]["comm_priority"]
+          description?: string | null
+          id?: string
+          impulsionito_hint?: string | null
+          label_pt?: string
+          payload_schema?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      core_comm_templates: {
+        Row: {
+          active: boolean
+          body_html: string | null
+          body_md: string | null
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id: string | null
+          created_at: string
+          event_code: string
+          id: string
+          locale: string
+          niche_code: string | null
+          scope: Database["public"]["Enums"]["comm_template_scope"]
+          subject: string | null
+          updated_at: string
+          updated_by: string | null
+          variables: Json
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          body_html?: string | null
+          body_md?: string | null
+          channel: Database["public"]["Enums"]["comm_channel"]
+          company_id?: string | null
+          created_at?: string
+          event_code: string
+          id?: string
+          locale?: string
+          niche_code?: string | null
+          scope?: Database["public"]["Enums"]["comm_template_scope"]
+          subject?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          variables?: Json
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          body_html?: string | null
+          body_md?: string | null
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          company_id?: string | null
+          created_at?: string
+          event_code?: string
+          id?: string
+          locale?: string
+          niche_code?: string | null
+          scope?: Database["public"]["Enums"]["comm_template_scope"]
+          subject?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          variables?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_comm_templates_event_code_fkey"
+            columns: ["event_code"]
+            isOneToOne: false
+            referencedRelation: "core_comm_events"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       core_company_feature_values: {
         Row: {
           company_id: string
@@ -33287,6 +33679,24 @@ export type Database = {
         | "operador"
         | "profissional"
         | "consumidor"
+      comm_channel:
+        | "whatsapp"
+        | "email"
+        | "impulsionito"
+        | "notification"
+        | "push"
+        | "n8n"
+      comm_dispatch_status:
+        | "queued"
+        | "processing"
+        | "sent"
+        | "delivered"
+        | "failed"
+        | "dead_letter"
+        | "skipped"
+        | "cancelled"
+      comm_priority: "low" | "normal" | "high" | "critical"
+      comm_template_scope: "global" | "niche" | "tenant"
       company_environment: "demo" | "teste" | "real"
       core_funnel_stage: "capture" | "convert" | "relate" | "retain" | "expand"
       core_incident_severity: "sev1" | "sev2" | "sev3" | "sev4"
@@ -33629,6 +34039,26 @@ export const Constants = {
         "profissional",
         "consumidor",
       ],
+      comm_channel: [
+        "whatsapp",
+        "email",
+        "impulsionito",
+        "notification",
+        "push",
+        "n8n",
+      ],
+      comm_dispatch_status: [
+        "queued",
+        "processing",
+        "sent",
+        "delivered",
+        "failed",
+        "dead_letter",
+        "skipped",
+        "cancelled",
+      ],
+      comm_priority: ["low", "normal", "high", "critical"],
+      comm_template_scope: ["global", "niche", "tenant"],
       company_environment: ["demo", "teste", "real"],
       core_funnel_stage: ["capture", "convert", "relate", "retain", "expand"],
       core_incident_severity: ["sev1", "sev2", "sev3", "sev4"],

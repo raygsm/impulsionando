@@ -199,6 +199,41 @@ Deno.serve(async (req) => {
                 reference_id: updatedRows.id,
               });
             }
+
+            // ==== Centro de Comunicação — Impulsionando =====================
+            // Enfileira dispatches nos canais default do evento payment_approved.
+            try {
+              const { data: evt } = await supabase
+                .from('core_comm_events')
+                .select('default_channels, default_priority')
+                .eq('code', 'payment_approved').maybeSingle();
+              const channels: string[] = (evt?.default_channels as string[] | null) ?? ['email','notification','impulsionito'];
+              const idem = `mp:${updatedRows.id}:payment_approved`;
+              const commPayload = {
+                first_name: (updatedRows.payer_name ?? '').split(' ')[0] || 'cliente',
+                amount_brl: (updatedRows.amount_cents / 100).toFixed(2).replace('.', ','),
+                service_name: updatedRows.description ?? 'assinatura',
+                payment_id: updatedRows.id,
+              };
+              for (const channel of channels) {
+                await supabase.from('core_comm_dispatches').insert({
+                  event_code: 'payment_approved',
+                  company_id: companyId,
+                  channel,
+                  status: 'queued',
+                  priority: evt?.default_priority ?? 'high',
+                  payload: commPayload,
+                  origin: 'mpago_webhook',
+                  origin_ref: String(resourceId),
+                  destination: channel === 'email' ? updatedRows.payer_email
+                              : channel === 'whatsapp' ? (updatedRows as { payer_phone?: string }).payer_phone ?? null
+                              : null,
+                  idempotency_key: `${idem}:${channel}`,
+                });
+              }
+            } catch (commErr) {
+              console.warn('[comm-center] enqueue failed:', commErr);
+            }
           }
         }
       }
