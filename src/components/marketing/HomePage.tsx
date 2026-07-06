@@ -203,11 +203,11 @@ function Diagnostico() {
         </div>
 
         {/* GRID PRINCIPAL */}
-        <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]">
+        <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]" data-testid="diagnostico-root">
           {/* ---------------- ESQUERDA: PERGUNTAS ---------------- */}
-          <div className="space-y-5">
+          <div className="space-y-5 lg:min-h-0" data-testid="diagnostico-perguntas">
             {/* stepper */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-testid="diagnostico-stepper" role="tablist" aria-label="Etapas do diagnóstico">
               {STEP_LABELS.map((label, i) => {
                 const active = step === i;
                 const done = step > i;
