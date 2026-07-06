@@ -305,17 +305,23 @@ export function SidebarNav({
           />
         ))}
       </div>
-      {visibleGroups.map((g, i) => (
-        <Group
-          key={g.label}
-          group={g}
-          index={i}
-          pathname={location.pathname}
-          filterItem={filterItem}
-          onNavigate={onNavigate}
-          pendingPix={pendingPix}
-        />
-      ))}
+      {visibleGroups.map((g, i) =>
+        g.label === "Nichos" ? (
+          <div key={g.label} className="mt-3">
+            <NichosMegaMenu onNavigate={onNavigate} />
+          </div>
+        ) : (
+          <Group
+            key={g.label}
+            group={g}
+            index={i}
+            pathname={location.pathname}
+            filterItem={filterItem}
+            onNavigate={onNavigate}
+            pendingPix={pendingPix}
+          />
+        )
+      )}
 
     </nav>
   );
