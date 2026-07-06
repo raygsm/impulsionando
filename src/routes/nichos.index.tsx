@@ -93,7 +93,20 @@ function NichosIndex() {
                           const link = getDemoNichoLink(n.slug);
                           return (
                             <Button asChild size="sm" variant="outline">
-                              <Link to={link.to} params={link.params} data-nicho={n.slug} data-resolved={link.slug}>Demo</Link>
+                              <Link
+                                to={link.to}
+                                params={link.params}
+                                data-nicho={n.slug}
+                                data-resolved={link.slug}
+                                onClick={() => trackFunnelCta({
+                                  cta: "nichos-abrir-demo",
+                                  origem: "nichos-hub",
+                                  nicho_pedido: n.slug,
+                                  alias_resolvido: link.slug,
+                                  isFallback: link.isFallback,
+                                  rotaDestino: `/demo/nicho/${link.slug}`,
+                                })}
+                              >Demo</Link>
                             </Button>
                           );
                         })()}
