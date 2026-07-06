@@ -73,6 +73,7 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
       if (error) throw error;
       return data ?? [];
     },
+    refetchInterval: 20000,
   });
 
   // Merge catalog × existing templates: every event×channel always selectable.
