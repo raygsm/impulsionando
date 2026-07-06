@@ -12,6 +12,7 @@ import {
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { getDemoNichoLink } from "@/lib/demoResolver";
+import { trackFunnelCta } from "@/lib/funnelTracking";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20solicitar%20uma%20demonstra%C3%A7%C3%A3o%20da%20Impulsionando.";
 
