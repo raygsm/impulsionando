@@ -160,7 +160,7 @@ function ImpersonationLogPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {paged.map((r) => (
                   <tr key={r.id} className="border-t align-top">
                     <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(r.created_at).toLocaleString("pt-BR")}
