@@ -1,13 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from "lucide-react";
-import { getSupabaseEnvDiagnostics } from "@/lib/env-diagnostics.functions";
+import { getSupabaseEnvDiagnostics, triggerEnvAlert } from "@/lib/env-diagnostics.functions";
+import { checkDiagnosticAccess } from "@/lib/diagnostic-access.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/env-diagnostics")({
+  beforeLoad: async () => {
+    const res = await checkDiagnosticAccess();
+    if (!res.allowed) {
+      throw redirect({ to: "/core" as never });
+    }
+    return { diagLevel: res.level };
+  },
   head: () => ({
     meta: [
       { title: "Diagnóstico de Ambiente — Impulsionando" },
