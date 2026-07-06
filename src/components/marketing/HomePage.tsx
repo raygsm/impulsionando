@@ -521,15 +521,16 @@ function Diagnostico() {
                 </div>
                 <div className="mt-4 flex justify-between items-center">
                   <span className="text-xs text-muted-foreground" data-testid="dores-count">{dores.length} selecionada(s)</span>
-                  <Button
-                    size="sm"
-                    onClick={() => setStep(2)}
+                  <button
+                    type="button"
+                    onClick={() => dores.length > 0 && setStep(2)}
                     onPointerUp={() => dores.length > 0 && setStep(2)}
                     disabled={dores.length === 0}
                     data-testid="btn-continuar"
+                    className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
                   >
                     Continuar <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  </button>
                 </div>
               </Card>
               </div>
