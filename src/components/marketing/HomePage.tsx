@@ -264,9 +264,10 @@ function Diagnostico() {
   const [dores, setDores] = useState<string[]>([]);
   const [foco, setFoco] = useState<string>("");
   const [streamError, setStreamError] = useState<StreamError>(null);
+  const [restored, setRestored] = useState(false);
 
-  const result = useMemo(() => nicho ? RECOMENDACOES[nicho] : null, [nicho]);
-  const showResult = !!(nicho && foco && dores.length > 0);
+  const result = useMemo(() => nicho ? calculateDiagnostico(nicho, dores, foco) : null, [nicho, dores, foco]);
+  const showResult = !!(nicho && foco && dores.length > 0 && result);
 
   const progress = showResult ? 100 : Math.min(95, ((nicho ? 33 : 0) + (dores.length ? 33 : 0) + (foco ? 29 : 0)));
 
@@ -288,6 +289,35 @@ function Diagnostico() {
     if (forced) setStreamError(forced);
   }, []);
 
+  // Restaura o diagnóstico localmente para o visitante continuar depois.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(QUIZ_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { step?: number; nicho?: string; dores?: string[]; foco?: string };
+        const savedNicho = normalizeNichoSlug(String(saved.nicho ?? ""));
+        const safeDores = Array.isArray(saved.dores) ? saved.dores.filter((d) => DORES.includes(d)).slice(0, DORES.length) : [];
+        const safeFoco = FOCOS.includes(String(saved.foco ?? "")) ? String(saved.foco) : "";
+        if (savedNicho && RECOMENDACOES[savedNicho]) setNicho(savedNicho);
+        if (safeDores.length) setDores(safeDores);
+        if (safeFoco) setFoco(safeFoco);
+        const nextStep = Number.isInteger(saved.step) ? Math.min(2, Math.max(0, Number(saved.step))) : savedNicho ? safeDores.length ? 2 : 1 : 0;
+        setStep(nextStep);
+      }
+    } catch {
+      window.localStorage.removeItem(QUIZ_STORAGE_KEY);
+    } finally {
+      setRestored(true);
+    }
+  }, []);
+
+  // Persiste apenas no navegador do visitante. Nada é enviado antes do contato.
+  useEffect(() => {
+    if (!restored || typeof window === "undefined") return;
+    window.localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify({ step, nicho, dores, foco, updatedAt: new Date().toISOString() }));
+  }, [step, nicho, dores, foco, restored]);
+
   // Watchdog: expira o streaming após STREAM_TIMEOUT_MS parado (sem completar).
   const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -302,7 +332,7 @@ function Diagnostico() {
 
   const selectNicho = useCallback((slug: string) => {
     setStreamError(null);
-    setNicho(slug);
+    setNicho(normalizeNichoSlug(slug));
     setTimeout(() => setStep(1), 250);
   }, []);
   const toggleDor = useCallback((d: string) => {
@@ -321,6 +351,7 @@ function Diagnostico() {
     setFoco("");
     setStep(0);
     if (typeof window !== "undefined") {
+      window.localStorage.removeItem(QUIZ_STORAGE_KEY);
       const url = new URL(window.location.href);
       if (url.searchParams.has("diagError")) {
         url.searchParams.delete("diagError");
