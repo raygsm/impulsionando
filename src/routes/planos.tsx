@@ -472,7 +472,7 @@ function PlanosPage() {
 
 
       {/* PLAN CARDS */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
+      <section id="planos" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 scroll-mt-24">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {PLANS.map((plan) => {
             const monthlyEffective = plan.monthly !== null
