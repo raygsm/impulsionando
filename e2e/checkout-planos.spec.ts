@@ -85,6 +85,12 @@ test.describe("/checkout — planos", () => {
   test("dispara analytics: view_item_list no load e select_item + begin_checkout no clique", async ({ page }) => {
     await page.goto("/checkout");
     await expect(page.getByTestId("checkout-page")).toBeVisible();
+    // Aguarda a hidratação disparar o view_item_list (useEffect após mount).
+    await page.waitForFunction(
+      () => ((window as any).dataLayer ?? []).some((e: any) => e?.event === "view_item_list"),
+      undefined,
+      { timeout: 15_000 },
+    );
 
     const viewList = await getDlEvents(page, "view_item_list");
     expect(viewList.length).toBeGreaterThanOrEqual(1);
@@ -92,6 +98,7 @@ test.describe("/checkout — planos", () => {
     expect(items.map((i: any) => i.item_id).sort()).toEqual(
       ["avancado", "essencial", "integrado"],
     );
+
 
     // Clica em cada plano e valida os eventos — usa Ctrl+Click para não navegar
     // (Playwright abre em nova aba invisível; o handler onClick roda igual).
