@@ -235,28 +235,29 @@ function Diagnostico() {
 
 
   return (
-    <section id="diagnostico-wrap" className="relative overflow-hidden border-y border-primary/10 bg-[radial-gradient(ellipse_at_top,theme(colors.primary/10),transparent_60%),linear-gradient(180deg,theme(colors.slate.950/2),theme(colors.slate.950/8))]">
-      <div className="absolute inset-0 pointer-events-none opacity-40 [background-image:radial-gradient(circle_at_20%_10%,theme(colors.primary/15),transparent_40%),radial-gradient(circle_at_80%_80%,theme(colors.primary/12),transparent_40%)]" />
+    <section id="diagnostico-wrap" className="relative overflow-hidden border-y border-primary/20 bg-slate-950 text-slate-100">
+      <div className="absolute inset-0 pointer-events-none opacity-60 [background-image:radial-gradient(ellipse_at_top,theme(colors.primary/25),transparent_60%),radial-gradient(circle_at_20%_10%,theme(colors.primary/15),transparent_40%),radial-gradient(circle_at_80%_80%,theme(colors.primary/12),transparent_40%)]" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         {/* HEADER */}
         <div className="text-center max-w-3xl mx-auto mb-10 animate-fade-in">
-          <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 gap-1.5 px-3 py-1">
+          <Badge className="bg-primary/25 text-white border-primary/40 mb-4 gap-1.5 px-3 py-1 hover:bg-primary/25">
             <Bot className="w-3.5 h-3.5" /> Impulsionito · Consultor de IA
           </Badge>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
             Descubra em menos de 30 segundos como automatizar seu negócio
           </h2>
-          <p className="text-muted-foreground mt-3 text-sm sm:text-base">
+          <p className="text-slate-300 mt-3 text-sm sm:text-base">
             Responda poucas perguntas e veja imediatamente:
           </p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 text-sm">
             {["módulos recomendados", "economia estimada", "plano indicado", "demonstração personalizada"].map((x) => (
-              <span key={x} className="inline-flex items-center gap-1.5 text-foreground/80">
+              <span key={x} className="inline-flex items-center gap-1.5 text-slate-200">
                 <CheckCircle2 className="w-4 h-4 text-primary" /> {x}
               </span>
             ))}
           </div>
         </div>
+
 
         {/* GRID PRINCIPAL */}
         <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]" data-testid="diagnostico-root">
