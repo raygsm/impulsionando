@@ -643,6 +643,7 @@ import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
+import { Route as ApiPublicHealthMpWebhookRouteImport } from './routes/api/public/health/mp-webhook'
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
 import { Route as ApiPublicHealthMercadopagoRouteImport } from './routes/api/public/health/mercadopago'
 import { Route as ApiPublicEmailSendRouteImport } from './routes/api/public/email/send'
@@ -4305,6 +4306,12 @@ const ApiPublicHooksAffAdvanceCommissionsRoute =
     path: '/api/public/hooks/aff-advance-commissions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHealthMpWebhookRoute =
+  ApiPublicHealthMpWebhookRouteImport.update({
+    id: '/mp-webhook',
+    path: '/mp-webhook',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
 const ApiPublicHealthMonetizationRoute =
   ApiPublicHealthMonetizationRouteImport.update({
     id: '/monetization',
@@ -5566,6 +5573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -6294,6 +6302,7 @@ export interface FileRoutesByTo {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -7037,6 +7046,7 @@ export interface FileRoutesById {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -7780,6 +7790,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -8508,6 +8519,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -9250,6 +9262,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -14004,6 +14017,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAffAdvanceCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health/mp-webhook': {
+      id: '/api/public/health/mp-webhook'
+      path: '/mp-webhook'
+      fullPath: '/api/public/health/mp-webhook'
+      preLoaderRoute: typeof ApiPublicHealthMpWebhookRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
     '/api/public/health/monetization': {
       id: '/api/public/health/monetization'
       path: '/monetization'
@@ -16505,11 +16525,13 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
 interface ApiPublicHealthRouteChildren {
   ApiPublicHealthMercadopagoRoute: typeof ApiPublicHealthMercadopagoRoute
   ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
+  ApiPublicHealthMpWebhookRoute: typeof ApiPublicHealthMpWebhookRoute
 }
 
 const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
   ApiPublicHealthMercadopagoRoute: ApiPublicHealthMercadopagoRoute,
   ApiPublicHealthMonetizationRoute: ApiPublicHealthMonetizationRoute,
+  ApiPublicHealthMpWebhookRoute: ApiPublicHealthMpWebhookRoute,
 }
 
 const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
@@ -16759,3 +16781,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
