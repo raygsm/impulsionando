@@ -162,7 +162,9 @@ function ComunicacaoPage() {
                         {r.last_error && <div className="text-xs text-destructive mt-1 truncate max-w-[200px]" title={r.last_error}>{r.last_error}</div>}
                       </td>
                       <td className="py-2 pr-3 text-xs">{r.attempts}/{r.max_attempts}</td>
-                      <td className="py-2 pr-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
+                      <td className="py-2 pr-3 text-xs text-muted-foreground" title={r.sent_at ? `Enviado em ${new Date(r.sent_at).toLocaleString('pt-BR')}` : undefined}>
+                        {new Date(r.sent_at ?? r.created_at).toLocaleString('pt-BR')}
+                      </td>
                       <td className="py-2 pr-3">
                         <div className="flex gap-1">
                           {(r.status === 'failed' || r.status === 'cancelled' || r.status === 'skipped') && (
