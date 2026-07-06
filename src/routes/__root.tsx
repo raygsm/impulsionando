@@ -22,6 +22,7 @@ import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import { getTenantSubdomain, tenantSubdomainTarget } from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
+import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 
 
 function TenantSubdomainRedirect() {
@@ -224,6 +225,7 @@ function RootComponent() {
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <EnvHealthBanner />
+      <ScrollGuidance />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
