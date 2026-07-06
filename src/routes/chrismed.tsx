@@ -1,10 +1,17 @@
 /**
  * /chrismed — Home institucional CrisMed.
- * Redireciona para a página da Dra. Cristiane Alencar (autoridade médica).
- * O fluxo de agendamento mora em /chrismed/agendar.
+ * Redireciona /chrismed exato para a Dra. Cristiane Alencar (autoridade médica).
+ * Como este arquivo é o layout de /chrismed/*, precisamos redirecionar SOMENTE
+ * quando o pathname bater exatamente em /chrismed — caso contrário o beforeLoad
+ * dispara também nas rotas filhas e causa loop de redirecionamento (ERR_TOO_MANY_REDIRECTS).
  */
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/chrismed')({
-  beforeLoad: () => { throw redirect({ to: '/chrismed/dra-cristiane' }); },
+  beforeLoad: ({ location }) => {
+    if (location.pathname === '/chrismed' || location.pathname === '/chrismed/') {
+      throw redirect({ to: '/chrismed/dra-cristiane' });
+    }
+  },
+  component: () => <Outlet />,
 });
