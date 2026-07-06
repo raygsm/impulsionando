@@ -5,11 +5,12 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
+import { getMpAccessToken, getMpWebhookSecret } from "@/lib/mercadopago-env.server";
 
 const MP_API = "https://api.mercadopago.com";
 
 function verifySignature(request: Request, body: string): boolean {
-  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  const secret = getMpWebhookSecret();
   if (!secret) return true; // dev sem secret configurado
   const sig = request.headers.get("x-signature") ?? "";
   const reqId = request.headers.get("x-request-id") ?? "";
@@ -83,7 +84,7 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
           .single();
 
         try {
-          const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+          const token = getMpAccessToken();
           const topic = payload?.type ?? payload?.topic;
           const resourceId = payload?.data?.id;
 

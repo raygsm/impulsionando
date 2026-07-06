@@ -8,12 +8,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import {
+  getMpAccessToken,
+  getMpPublicKey,
+  getMpWebhookSecret,
+  getMpEnvironment,
+} from "@/lib/mercadopago-env.server";
 
 const MP_API = "https://api.mercadopago.com";
 
 function mpHeaders() {
-  const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
-  if (!token) throw new Error("MERCADOPAGO_ACCESS_TOKEN não configurado.");
+  const token = getMpAccessToken();
+  if (!token) throw new Error("Access Token do Mercado Pago não configurado nas secrets.");
   return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
@@ -21,7 +27,7 @@ function mpHeaders() {
 }
 
 function isProductionToken() {
-  return (process.env.MERCADOPAGO_ACCESS_TOKEN ?? "").startsWith("APP_USR-");
+  return getMpEnvironment() === "production";
 }
 
 // ============================================================================
@@ -68,10 +74,11 @@ export const getPlanBySlug = createServerFn({ method: "POST" })
 // ============================================================================
 
 export const getMercadoPagoConfig = createServerFn({ method: "GET" }).handler(async () => {
+  const publicKey = getMpPublicKey() ?? null;
+  const accessToken = getMpAccessToken();
   return {
-    public_key: process.env.MERCADOPAGO_PUBLIC_KEY ?? null,
-    configured:
-      !!process.env.MERCADOPAGO_PUBLIC_KEY && !!process.env.MERCADOPAGO_ACCESS_TOKEN,
+    public_key: publicKey,
+    configured: !!publicKey && !!accessToken,
     environment: isProductionToken() ? "production" : "sandbox",
   };
 });
@@ -89,8 +96,8 @@ export const getMpIntegrationStatus = createServerFn({ method: "GET" })
     });
     if (!isAdmin) throw new Error("Acesso restrito a administradores.");
 
-    const publicKey = process.env.MERCADOPAGO_PUBLIC_KEY ?? "";
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN ?? "";
+    const publicKey = getMpPublicKey() ?? "";
+    const accessToken = getMpAccessToken() ?? "";
 
     return {
       public_key_configured: !!publicKey,
@@ -98,9 +105,10 @@ export const getMpIntegrationStatus = createServerFn({ method: "GET" })
       access_token_configured: !!accessToken,
       environment: isProductionToken() ? "production" : "sandbox",
       webhook_url: "https://sistema.impulsionando.com.br/api/mercadopago/webhook",
-      webhook_secret_configured: !!process.env.MERCADOPAGO_WEBHOOK_SECRET,
+      webhook_secret_configured: !!getMpWebhookSecret(),
     };
   });
+
 
 export const testMpIntegration = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
