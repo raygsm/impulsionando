@@ -238,7 +238,12 @@ function Diagnostico() {
 
             {/* STEP 1: Segmento */}
             {step === 0 && (
-              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+              <div
+                key="step-0"
+                data-testid="step-panel-0"
+                className="min-h-[calc(100svh-16rem)] lg:min-h-0 flex animate-in fade-in slide-in-from-right-2 duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
+              >
+              <Card className="flex-1 p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70">
                 <div className="mb-4">
                   <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 1 · Sobre você</div>
                   <h3 className="text-xl font-bold mt-1">Qual é o seu segmento?</h3>
