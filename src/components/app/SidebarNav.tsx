@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
 import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup, type NavAudience } from "./nav-config";
+import { NichosMegaMenu } from "./NichosMegaMenu";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
