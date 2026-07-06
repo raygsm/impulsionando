@@ -11315,6 +11315,99 @@ export type Database = {
           },
         ]
       }
+      core_tenant_publication_state: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          dns_ok: boolean
+          domain_ok: boolean
+          env_ok: boolean
+          github_ok: boolean
+          notes: string | null
+          previous_snapshot_id: string | null
+          snapshot_id: string | null
+          ssl_ok: boolean
+          supabase_ok: boolean
+          updated_at: string
+          validated_at: string | null
+          validation_detail: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          dns_ok?: boolean
+          domain_ok?: boolean
+          env_ok?: boolean
+          github_ok?: boolean
+          notes?: string | null
+          previous_snapshot_id?: string | null
+          snapshot_id?: string | null
+          ssl_ok?: boolean
+          supabase_ok?: boolean
+          updated_at?: string
+          validated_at?: string | null
+          validation_detail?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          dns_ok?: boolean
+          domain_ok?: boolean
+          env_ok?: boolean
+          github_ok?: boolean
+          notes?: string | null
+          previous_snapshot_id?: string | null
+          snapshot_id?: string | null
+          ssl_ok?: boolean
+          supabase_ok?: boolean
+          updated_at?: string
+          validated_at?: string | null
+          validation_detail?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_tenant_publication_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_tenant_publication_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_tenant_publication_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_tenant_publication_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_tenant_publication_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_whatsapp_credentials: {
         Row: {
           access_token_encrypted: string | null
