@@ -892,6 +892,19 @@ function SimuladorPerda() {
   const perdaMes = useMemo(() => (leads * (perda / 100) * ticket), [leads, perda, ticket]);
   const perdaAno = perdaMes * 12;
 
+  // Lê o nicho salvo pelo Diagnóstico da Home para contextualizar o CTA "Ver demo".
+  const [savedNicho, setSavedNicho] = useState<string>("");
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(QUIZ_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.nicho) setSavedNicho(String(parsed.nicho));
+      }
+    } catch { /* ignore */ }
+  }, []);
+  const demoLink = savedNicho ? getDemoNichoLink(savedNicho) : null;
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
       <div className="text-center max-w-2xl mx-auto mb-8">
