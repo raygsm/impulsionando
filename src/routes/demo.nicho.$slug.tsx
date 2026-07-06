@@ -67,7 +67,8 @@ function NichoNotFound() {
 }
 
 function DemoNichoPage() {
-  const { slug } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  const slug = data?.slug ?? "servicos";
   if (slug === "eventos") return <DemoEventosNicho />;
   const cfg = getRichNiche(slug as RichNiche);
   if (!cfg) return <NichoNotFound />;
