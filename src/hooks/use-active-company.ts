@@ -9,10 +9,14 @@ const KEY = "imp.activeCompanyId";
 export function useActiveCompany() {
   const { data: me } = useCurrentUser();
   const { isImpersonating, impersonatedCompanyId, impersonatedCompanyName } = useImpersonation();
-  const [companyId, setCompanyId] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem(KEY) ?? "";
-  });
+  // Inicia vazio para evitar mismatch de hidratação; carrega do localStorage
+  // no primeiro efeito client-side (Etapa 2 — Multi-tenant).
+  const [companyId, setCompanyId] = useState<string>("");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem(KEY);
+    if (stored) setCompanyId(stored);
+  }, []);
 
   const { data: allCompanies } = useQuery({
     queryKey: ["companies-all-active"],

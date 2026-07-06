@@ -3,11 +3,19 @@ import { useTenant } from "@/hooks/use-tenant";
 
 /**
  * Aplica branding do tenant detectado pelo hostname:
- *   - --primary / --secondary em CSS vars
- *   - <title> com o nome do tenant
+ *   - --brand-primary / --brand-secondary em CSS vars (tokens do core lêem esses)
  *   - favicon do logo do tenant (quando definido)
+ *   - sufixo de título com o nome do tenant, sem sobrescrever o title da rota
  *
  * No CORE (impulsionando.com.br, localhost, preview) é no-op.
+ *
+ * Etapa 2 — Multi-tenant:
+ *   - cleanup agora restaura as mesmas chaves que foram escritas
+ *     (bug anterior escrevia --brand-primary e restaurava --primary,
+ *      vazando branding do tenant anterior ao trocar de host em SPA).
+ *   - título passa a ser sufixo ("Rota — Tenant") preservando o head()
+ *     definido pela rota TanStack; se a rota ainda não escreveu título,
+ *     usa apenas o nome do tenant.
  */
 export function TenantBrandingProvider() {
   const { tenant, isCore } = useTenant();
@@ -17,14 +25,21 @@ export function TenantBrandingProvider() {
     if (typeof document === "undefined") return;
 
     const root = document.documentElement;
-    const prevPrimary = root.style.getPropertyValue("--primary");
-    const prevSecondary = root.style.getPropertyValue("--secondary");
-    const prevTitle = document.title;
+    const prevBrandPrimary = root.style.getPropertyValue("--brand-primary");
+    const prevBrandSecondary = root.style.getPropertyValue("--brand-secondary");
 
     if (tenant.primary_color) root.style.setProperty("--brand-primary", tenant.primary_color);
     if (tenant.secondary_color) root.style.setProperty("--brand-secondary", tenant.secondary_color);
 
-    document.title = tenant.name;
+    // Título: preserva o que a rota escreveu via head(), apenas anexa
+    // o nome do tenant como sufixo — só ajusta uma vez por mudança de tenant.
+    const prevTitle = document.title;
+    const suffix = ` — ${tenant.name}`;
+    if (!prevTitle) {
+      document.title = tenant.name;
+    } else if (!prevTitle.endsWith(suffix)) {
+      document.title = `${prevTitle}${suffix}`;
+    }
 
     let prevHref: string | null = null;
     let linkEl: HTMLLinkElement | null = null;
@@ -37,8 +52,11 @@ export function TenantBrandingProvider() {
     }
 
     return () => {
-      if (prevPrimary) root.style.setProperty("--primary", prevPrimary);
-      if (prevSecondary) root.style.setProperty("--secondary", prevSecondary);
+      // Restaura EXATAMENTE as mesmas chaves que escrevemos.
+      if (prevBrandPrimary) root.style.setProperty("--brand-primary", prevBrandPrimary);
+      else root.style.removeProperty("--brand-primary");
+      if (prevBrandSecondary) root.style.setProperty("--brand-secondary", prevBrandSecondary);
+      else root.style.removeProperty("--brand-secondary");
       document.title = prevTitle;
       if (linkEl && prevHref) linkEl.href = prevHref;
     };
