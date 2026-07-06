@@ -73,6 +73,26 @@ function EnvDiagnosticsPage() {
   );
   const hasCriticalMissing = missingServer.length > 0 || missingClient.length > 0;
 
+  // Dispara alerta (webhook + e-mail) automaticamente na primeira detecção.
+  useEffect(() => {
+    if (!hasCriticalMissing || alertSentRef.current || isLoading) return;
+    alertSentRef.current = true;
+    const missing = [
+      ...missingServer.map((c) => c.name),
+      ...missingClient.map((c) => c.name),
+    ];
+    alertFn({ data: { missing, host: data?.host ?? (typeof window !== "undefined" ? window.location.host : null) } })
+      .then((r) => {
+        setAlertStatus({
+          ok: !!r.sent,
+          msg: r.sent
+            ? `Alerta enviado (webhook: ${r.webhook ?? "—"}, e-mail: ${r.email ?? "—"}).`
+            : `Alerta não enviado: ${r.reason ?? "desconhecido"}.`,
+        });
+      })
+      .catch((err) => setAlertStatus({ ok: false, msg: `Falha ao alertar: ${(err as Error).message}` }));
+  }, [hasCriticalMissing, isLoading, missingServer, missingClient, data?.host, alertFn]);
+
   return (
     <div className="space-y-4 max-w-4xl">
       <div className="flex items-center justify-between gap-4">
@@ -123,6 +143,11 @@ function EnvDiagnosticsPage() {
                   <code>impulsionando.lovable.app</code>, que sempre recebe as env vars.
                 </li>
               </ol>
+              {alertStatus && (
+                <div className={`mt-2 text-xs ${alertStatus.ok ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  {alertStatus.msg}
+                </div>
+              )}
             </div>
           </div>
         </Card>
