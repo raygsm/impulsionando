@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   MessageCircle, ArrowRight, Sparkles, PlayCircle, Calculator, Search,
   Settings, Eye, CheckCircle2, Rocket, AlertTriangle, TrendingDown, Mail, MessageSquare, Phone,
