@@ -38,7 +38,7 @@ const PRICE_ID: Record<string, { monthly: string; annual: string }> = {
   avancado_plan: { monthly: "avancado_monthly", annual: "avancado_annual" },
 };
 
-/** Map subscription product to the billing_plans.code used by /checkout/$plano. */
+/** Map subscription product to the billing_plans.code used by /checkout/$slug. */
 const PRODUCT_TO_PLAN_CODE: Record<string, string> = {
   essencial_plan: "essencial-mensal",
   integrado_plan: "completo-mensal",
@@ -193,8 +193,8 @@ function MinhaAssinaturaPage() {
             {PRODUCT_TO_PLAN_CODE[subscription.product_id] && (
               <Button asChild variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 <Link
-                  to="/checkout/$plano"
-                  params={{ plano: PRODUCT_TO_PLAN_CODE[subscription.product_id] }}
+                  to="/checkout/$slug"
+                  params={{ slug: PRODUCT_TO_PLAN_CODE[subscription.product_id] }}
                 >
                   <QrCode className="w-4 h-4 mr-2" /> Pagar agora via Pix
                 </Link>

@@ -6,7 +6,6 @@
  * documentado do Impulsionando para jobs internos).
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { runCommTick } from "@/lib/comm/tick.server";
 
 export const Route = createFileRoute("/api/public/comm/tick")({
   server: {
@@ -18,6 +17,7 @@ export const Route = createFileRoute("/api/public/comm/tick")({
           return new Response("unauthorized", { status: 401 });
         }
         try {
+          const { runCommTick } = await import("@/lib/comm/tick.server");
           const result = await runCommTick(50);
           return Response.json({ ok: true, ...result });
         } catch (err) {

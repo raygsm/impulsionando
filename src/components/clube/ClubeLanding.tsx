@@ -77,12 +77,12 @@ export function ClubeLanding() {
                 </Link>
               </Button>
               <Button asChild size="lg" className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant hover:brightness-110 w-full sm:w-auto">
-                <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>
+                <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}>
                   <Crown className="w-4 h-4" /> Assinar Premium · R$ 9,99/mês
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
-                <Link to="/checkout/$plano" params={{ plano: "clube_premium_anual" }}>
+                <Link to="/checkout/$slug" params={{ slug: "clube_premium_anual" }}>
                   Assinar Plano Anual · 17% off
                 </Link>
               </Button>
@@ -154,7 +154,7 @@ export function ClubeLanding() {
             <div className="px-4 sm:px-6 py-5 border-t bg-muted/20 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
               <p className="text-sm text-muted-foreground">Premium por <strong className="text-foreground">R$ 9,99/mês</strong>. Cancele quando quiser.</p>
               <Button asChild size="sm" className="bg-gradient-primary">
-                <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>Assinar Premium</Link>
+                <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}>Assinar Premium</Link>
               </Button>
             </div>
           </Card>
@@ -193,7 +193,7 @@ export function ClubeLanding() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-              <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>
+              <Link to="/checkout/$slug" params={{ slug: "clube_premium" }}>
                 <Crown className="w-4 h-4" /> Assinar Premium
               </Link>
             </Button>
