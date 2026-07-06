@@ -61,6 +61,9 @@ function ContratarPage() {
   const fetchPlans = useServerFn(listPublicPlans)
   const submitTrial = useServerFn(startTrial)
   const { data: plans, isLoading } = useQuery({ queryKey: ['public-plans'], queryFn: () => fetchPlans() })
+  const { plano } = Route.useSearch()
+  const wage = useMinimumWage()
+  const selectedInfo = plano ? CHECKOUT_PLANS.find((p) => p.code === plano) : undefined
 
   const [open, setOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
