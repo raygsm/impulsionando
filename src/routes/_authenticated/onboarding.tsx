@@ -266,7 +266,7 @@ function OnboardingWizard() {
             <Link to="/suporte">Falar com suporte</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
-            <Link to="/demonstracoes">Ver demonstrações</Link>
+            <Link to="/core/demos">Ver demonstrações</Link>
           </Button>
         </CardContent>
       </Card>
