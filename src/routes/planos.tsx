@@ -362,11 +362,12 @@ function PlanosPage() {
     });
 
     toast.success(
-      `Plano ${plan.displayName ?? plan.name} no carrinho. Finalize o pagamento via Pix, cartão ou boleto.`,
+      `Plano ${plan.displayName ?? plan.name} selecionado. Escolha Pix, cartão ou boleto.`,
     );
+    // Checkout Transparente Mercado Pago (público, sem redirecionamento externo).
     await navigate({
-      to: "/checkout/$plano",
-      params: { plano: planCode },
+      to: "/checkout/$slug",
+      params: { slug: planCode },
     });
   }
 
