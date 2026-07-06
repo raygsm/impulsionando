@@ -454,7 +454,7 @@ function Diagnostico() {
 
                 {/* estado final */}
                 {showResult && result && (
-                  <div className="mt-5 space-y-4 animate-fade-in">
+                  <div className="mt-5 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" data-testid="diagnostico-resultado">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
                         <div className="text-[11px] uppercase tracking-wider opacity-80">Economia estimada</div>
