@@ -51,20 +51,32 @@ async function checkDomain(domain: string | null): Promise<CheckResult> {
 async function checkDns(domain: string | null): Promise<CheckResult> {
   const at = new Date().toISOString();
   if (!domain) return { ok: false, detail: "Domínio não configurado", checked_at: at };
-  const [a, c, txt] = await Promise.all([
+  const [a, c, txt, caa] = await Promise.all([
     resolveDns(domain, "A"),
     resolveDns(domain, "CNAME"),
     resolveDns(`_lovable.${domain}`, "TXT"),
+    resolveDns(domain, "CAA" as any),
   ]);
   const pointsA = a.includes(LOVABLE_IP);
   const pointsCname = c.some((v) => v === LOVABLE_HOST);
   const hasTxt = txt.some((v) => v.startsWith("lovable_verify="));
+  // CAA é opcional. Se existir, precisa autorizar letsencrypt.org (SSL Lovable).
+  const caaBlocksLE =
+    caa.length > 0 &&
+    !caa.some((v) => /issue\s+"?letsencrypt\.org"?/i.test(v) || /issuewild\s+"?letsencrypt\.org"?/i.test(v));
   if (!pointsA && !pointsCname) {
     const seen = [...a, ...c].join(", ") || "nenhum registro";
     return { ok: false, detail: `A/CNAME não apontam para Lovable (visto: ${seen})`, checked_at: at };
   }
   if (!hasTxt) return { ok: false, detail: "TXT _lovable ausente ou não propagado", checked_at: at };
-  return { ok: true, detail: pointsA ? "A → Lovable + TXT ok" : "CNAME (proxy) + TXT ok", checked_at: at };
+  if (caaBlocksLE)
+    return { ok: false, detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)", checked_at: at };
+  const caaNote = caa.length > 0 ? " + CAA→LE" : "";
+  return {
+    ok: true,
+    detail: (pointsA ? "A → Lovable" : "CNAME (proxy)") + " + TXT ok" + caaNote,
+    checked_at: at,
+  };
 }
 
 async function checkSsl(domain: string | null): Promise<CheckResult> {

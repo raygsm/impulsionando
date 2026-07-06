@@ -17,6 +17,7 @@ import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
+import { TenantHostFallback } from "@/components/app/TenantHostFallback";
 import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
@@ -362,6 +363,7 @@ function RootComponent() {
       <MaintenanceGate />
       <TenantSubdomainRedirect />
       <TenantBrandingProvider />
+      <TenantHostFallback />
       <Toaster richColors position="top-right" />
       <EnvHealthBanner />
       <ScrollGuidance />
