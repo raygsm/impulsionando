@@ -50,6 +50,7 @@ export const NICHO_ALIASES: Record<string, string> = {
   comercio: "comercio",
   fornecedores: "comercio",
   ecommerce: "comercio",
+  "e-commerce": "comercio",
   ecomerce: "comercio",
   "loja-virtual": "comercio",
   veiculos: "comercio",
