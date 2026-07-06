@@ -529,4 +529,18 @@ html[data-density="compact"] table td {
 .wmp-brand a { color: var(--wmp-gold); }
 .wmp-brand a:hover { color: var(--wmp-violet-glow); }
 
+/* Oculta o badge "Edit with Lovable" em qualquer variação injetada */
+a[href*="lovable.dev"],
+iframe[src*="lovable.dev"],
+div[style*="Edit with Lovable"],
+.lovable-badge {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
+
+
 
