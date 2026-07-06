@@ -30,6 +30,15 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
   const [segment, setSegment] = useState<SegmentKey>("default");
   const [installDeps, setInstallDeps] = useState(true);
 
+  // Ao fechar, restaura os defaults para não vazar seleção entre aberturas.
+  useEffect(() => {
+    if (!open) {
+      setSegment("default");
+      setInstallDeps(true);
+      if (!companyId) setSelectedCompany(undefined);
+    }
+  }, [open, companyId]);
+
   const { data: companies } = useQuery({
     queryKey: ["companies-for-install"],
     enabled: open && !companyId,
