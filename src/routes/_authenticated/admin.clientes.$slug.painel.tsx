@@ -16,8 +16,8 @@ import {
   Megaphone, Workflow, ShoppingCart, FileText, ArrowRight, TrendingUp,
   AlertTriangle, Activity, ChevronRight,
 } from "lucide-react";
-import { ClientDashboardHero } from "@/components/admin/ClientDashboardHero";
-import { ClientFeatureMenu } from "@/components/admin/ClientFeatureMenu";
+import { ClientDashboardHero } from "@/components/client/ClientDashboardHero";
+import { ClientFeatureMenu } from "@/components/client/ClientFeatureMenu";
 import { getTenantFeatures } from "@/lib/tenant-features";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug/painel")({
