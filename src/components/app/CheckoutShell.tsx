@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Sparkles, HelpCircle, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { signOutSafely } from "@/lib/sign-out";
 import { Button } from "@/components/ui/button";
 
 /**
