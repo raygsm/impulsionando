@@ -15,7 +15,7 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-30">
         <div className="container mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
           <a
