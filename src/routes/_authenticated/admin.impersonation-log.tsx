@@ -40,6 +40,8 @@ function ImpersonationLogPage() {
   const [tenantFilter, setTenantFilter] = useState("");
   const [range, setRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [actionFilter, setActionFilter] = useState<"all" | "start" | "stop">("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 25;
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["impersonation-audit"],
