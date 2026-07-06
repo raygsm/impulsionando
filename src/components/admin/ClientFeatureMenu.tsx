@@ -100,7 +100,12 @@ export function ClientFeatureMenu({ groups, enabledModules, hideLocked = false }
                 );
                 if (locked) {
                   return (
-                    <Link key={it.to} to="/planos" title="Faça upgrade para liberar este recurso">
+                    <Link
+                      key={it.to}
+                      to="/planos"
+                      title="Faça upgrade para liberar este recurso"
+                      aria-label={`${it.label} — upgrade necessário, abrir planos`}
+                    >
                       {inner}
                     </Link>
                   );
