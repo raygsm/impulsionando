@@ -528,6 +528,7 @@ import { Route as AuthenticatedAdminExecutivoRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
 import { Route as AuthenticatedAdminEventsTicketingHealthRouteImport } from './routes/_authenticated/admin.events-ticketing-health'
 import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_authenticated/admin.events-health'
+import { Route as AuthenticatedAdminEnvDiagnosticsRouteImport } from './routes/_authenticated/admin.env-diagnostics'
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
 import { Route as AuthenticatedAdminEhrClinicalHealthRouteImport } from './routes/_authenticated/admin.ehr-clinical-health'
 import { Route as AuthenticatedAdminEducationPolosHealthRouteImport } from './routes/_authenticated/admin.education-polos-health'
@@ -3613,6 +3614,12 @@ const AuthenticatedAdminEventsHealthRoute =
     path: '/admin/events-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEnvDiagnosticsRoute =
+  AuthenticatedAdminEnvDiagnosticsRouteImport.update({
+    id: '/admin/env-diagnostics',
+    path: '/admin/env-diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEhrComplianceRoute =
   AuthenticatedAdminEhrComplianceRouteImport.update({
     id: '/admin/ehr-compliance',
@@ -5078,6 +5085,7 @@ export interface FileRoutesByFullPath {
   '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
+  '/admin/env-diagnostics': typeof AuthenticatedAdminEnvDiagnosticsRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
@@ -5790,6 +5798,7 @@ export interface FileRoutesByTo {
   '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
+  '/admin/env-diagnostics': typeof AuthenticatedAdminEnvDiagnosticsRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
@@ -6515,6 +6524,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/_authenticated/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
+  '/_authenticated/admin/env-diagnostics': typeof AuthenticatedAdminEnvDiagnosticsRoute
   '/_authenticated/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/_authenticated/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
@@ -7241,6 +7251,7 @@ export interface FileRouteTypes {
     | '/admin/education-polos-health'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
+    | '/admin/env-diagnostics'
     | '/admin/events-health'
     | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
@@ -7953,6 +7964,7 @@ export interface FileRouteTypes {
     | '/admin/education-polos-health'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
+    | '/admin/env-diagnostics'
     | '/admin/events-health'
     | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
@@ -8677,6 +8689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/education-polos-health'
     | '/_authenticated/admin/ehr-clinical-health'
     | '/_authenticated/admin/ehr-compliance'
+    | '/_authenticated/admin/env-diagnostics'
     | '/_authenticated/admin/events-health'
     | '/_authenticated/admin/events-ticketing-health'
     | '/_authenticated/admin/executive-briefing'
@@ -12974,6 +12987,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEventsHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/env-diagnostics': {
+      id: '/_authenticated/admin/env-diagnostics'
+      path: '/admin/env-diagnostics'
+      fullPath: '/admin/env-diagnostics'
+      preLoaderRoute: typeof AuthenticatedAdminEnvDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/ehr-compliance': {
       id: '/_authenticated/admin/ehr-compliance'
       path: '/admin/ehr-compliance'
@@ -15314,6 +15334,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminEducationPolosHealthRoute: typeof AuthenticatedAdminEducationPolosHealthRoute
   AuthenticatedAdminEhrClinicalHealthRoute: typeof AuthenticatedAdminEhrClinicalHealthRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
+  AuthenticatedAdminEnvDiagnosticsRoute: typeof AuthenticatedAdminEnvDiagnosticsRoute
   AuthenticatedAdminEventsHealthRoute: typeof AuthenticatedAdminEventsHealthRoute
   AuthenticatedAdminEventsTicketingHealthRoute: typeof AuthenticatedAdminEventsTicketingHealthRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
@@ -15623,6 +15644,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminEhrClinicalHealthRoute:
     AuthenticatedAdminEhrClinicalHealthRoute,
   AuthenticatedAdminEhrComplianceRoute: AuthenticatedAdminEhrComplianceRoute,
+  AuthenticatedAdminEnvDiagnosticsRoute: AuthenticatedAdminEnvDiagnosticsRoute,
   AuthenticatedAdminEventsHealthRoute: AuthenticatedAdminEventsHealthRoute,
   AuthenticatedAdminEventsTicketingHealthRoute:
     AuthenticatedAdminEventsTicketingHealthRoute,
@@ -16366,13 +16388,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
