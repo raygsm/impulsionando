@@ -96,7 +96,14 @@ export function trackPageView(path: string, title?: string) {
 }
 
 export function trackEvent(name: string, params: Record<string, unknown> = {}) {
-  if (!GA_ID || typeof window === "undefined") return;
+  if (typeof window === "undefined") return;
+  // Sempre espelha no dataLayer — permite que GTM/Segment/tests capturem o evento
+  // mesmo antes do consentimento GA4 ser aceito (o hit para o GA4 continua gated).
+  try {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: name, ...params });
+  } catch { /* ignore */ }
+  if (!GA_ID) return;
   const c = readConsent();
   if (!c?.analytics) return;
   window.gtag?.("event", name, params);
