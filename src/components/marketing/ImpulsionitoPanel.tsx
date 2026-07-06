@@ -57,7 +57,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { suggestionsForRoute, nichoSlugFromPath, moduleSlugFromPath } from "@/components/impulsionito/transport";
+import {
+  suggestionsForRoute,
+  nichoSlugFromPath,
+  moduleSlugFromPath,
+  useImpulsionitoTransport,
+  type ImpulsionitoMessage,
+} from "@/components/impulsionito/transport";
 import { trackEvent } from "@/lib/analytics";
 
 type PanelSize = "compact" | "expanded" | "fullscreen";
