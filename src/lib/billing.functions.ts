@@ -36,7 +36,7 @@ export const listBillingContracts = createServerFn({ method: "GET" })
         recurring_amount, setup_amount, setup_paid_at, nfe_issued_at, last_paid_at,
         pix_key, pix_copy_paste,
         companies:company_id ( name, is_active ),
-        billing_plans:plan_id ( name, code, cycle ),
+        billing_plans!plan_id ( name, code, cycle ),
         billing_invoices ( id, due_date, amount, status, paid_at )
       `)
       .order("created_at", { ascending: false });

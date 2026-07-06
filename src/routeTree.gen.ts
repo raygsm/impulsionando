@@ -635,6 +635,7 @@ import { Route as ApiPublicHooksMaintenanceNotifierRouteImport } from './routes/
 import { Route as ApiPublicHooksImpulsionitoTrainRouteImport } from './routes/api/public/hooks/impulsionito-train'
 import { Route as ApiPublicHooksFocusNfeRouteImport } from './routes/api/public/hooks/focus-nfe'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
+import { Route as ApiPublicHooksExpirePremiumTrialsRouteImport } from './routes/api/public/hooks/expire-premium-trials'
 import { Route as ApiPublicHooksDispatchFiscalRouteImport } from './routes/api/public/hooks/dispatch-fiscal'
 import { Route as ApiPublicHooksCorePullChrismedRouteImport } from './routes/api/public/hooks/core-pull-chrismed'
 import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
@@ -642,6 +643,7 @@ import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
+import { Route as ApiPublicHealthMpWebhookRouteImport } from './routes/api/public/health/mp-webhook'
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
 import { Route as ApiPublicHealthMercadopagoRouteImport } from './routes/api/public/health/mercadopago'
 import { Route as ApiPublicEmailSendRouteImport } from './routes/api/public/email/send'
@@ -4256,6 +4258,12 @@ const ApiPublicHooksFiscalMonthlyEmailRoute =
     path: '/api/public/hooks/fiscal-monthly-email',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksExpirePremiumTrialsRoute =
+  ApiPublicHooksExpirePremiumTrialsRouteImport.update({
+    id: '/api/public/hooks/expire-premium-trials',
+    path: '/api/public/hooks/expire-premium-trials',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDispatchFiscalRoute =
   ApiPublicHooksDispatchFiscalRouteImport.update({
     id: '/api/public/hooks/dispatch-fiscal',
@@ -4297,6 +4305,12 @@ const ApiPublicHooksAffAdvanceCommissionsRoute =
     id: '/api/public/hooks/aff-advance-commissions',
     path: '/api/public/hooks/aff-advance-commissions',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHealthMpWebhookRoute =
+  ApiPublicHealthMpWebhookRouteImport.update({
+    id: '/mp-webhook',
+    path: '/mp-webhook',
+    getParentRoute: () => ApiPublicHealthRoute,
   } as any)
 const ApiPublicHealthMonetizationRoute =
   ApiPublicHealthMonetizationRouteImport.update({
@@ -5559,6 +5573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -5566,6 +5581,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -6286,6 +6302,7 @@ export interface FileRoutesByTo {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -6293,6 +6310,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -7028,6 +7046,7 @@ export interface FileRoutesById {
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/mercadopago': typeof ApiPublicHealthMercadopagoRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
+  '/api/public/health/mp-webhook': typeof ApiPublicHealthMpWebhookRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -7035,6 +7054,7 @@ export interface FileRoutesById {
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
+  '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -7770,6 +7790,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -7777,6 +7798,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -8497,6 +8519,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -8504,6 +8527,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -9238,6 +9262,7 @@ export interface FileRouteTypes {
     | '/api/public/email/send'
     | '/api/public/health/mercadopago'
     | '/api/public/health/monetization'
+    | '/api/public/health/mp-webhook'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -9245,6 +9270,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/dispatch-fiscal'
+    | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/impulsionito-train'
@@ -9506,6 +9532,7 @@ export interface RootRouteChildren {
   ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
   ApiPublicHooksCorePullChrismedRoute: typeof ApiPublicHooksCorePullChrismedRoute
   ApiPublicHooksDispatchFiscalRoute: typeof ApiPublicHooksDispatchFiscalRoute
+  ApiPublicHooksExpirePremiumTrialsRoute: typeof ApiPublicHooksExpirePremiumTrialsRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
   ApiPublicHooksFocusNfeRoute: typeof ApiPublicHooksFocusNfeRoute
   ApiPublicHooksImpulsionitoTrainRoute: typeof ApiPublicHooksImpulsionitoTrainRoute
@@ -13934,6 +13961,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFiscalMonthlyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/expire-premium-trials': {
+      id: '/api/public/hooks/expire-premium-trials'
+      path: '/api/public/hooks/expire-premium-trials'
+      fullPath: '/api/public/hooks/expire-premium-trials'
+      preLoaderRoute: typeof ApiPublicHooksExpirePremiumTrialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/dispatch-fiscal': {
       id: '/api/public/hooks/dispatch-fiscal'
       path: '/api/public/hooks/dispatch-fiscal'
@@ -13982,6 +14016,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/hooks/aff-advance-commissions'
       preLoaderRoute: typeof ApiPublicHooksAffAdvanceCommissionsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health/mp-webhook': {
+      id: '/api/public/health/mp-webhook'
+      path: '/mp-webhook'
+      fullPath: '/api/public/health/mp-webhook'
+      preLoaderRoute: typeof ApiPublicHealthMpWebhookRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
     }
     '/api/public/health/monetization': {
       id: '/api/public/health/monetization'
@@ -16484,11 +16525,13 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
 interface ApiPublicHealthRouteChildren {
   ApiPublicHealthMercadopagoRoute: typeof ApiPublicHealthMercadopagoRoute
   ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
+  ApiPublicHealthMpWebhookRoute: typeof ApiPublicHealthMpWebhookRoute
 }
 
 const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
   ApiPublicHealthMercadopagoRoute: ApiPublicHealthMercadopagoRoute,
   ApiPublicHealthMonetizationRoute: ApiPublicHealthMonetizationRoute,
+  ApiPublicHealthMpWebhookRoute: ApiPublicHealthMpWebhookRoute,
 }
 
 const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
@@ -16683,6 +16726,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksCoreNotificationEventRoute,
   ApiPublicHooksCorePullChrismedRoute: ApiPublicHooksCorePullChrismedRoute,
   ApiPublicHooksDispatchFiscalRoute: ApiPublicHooksDispatchFiscalRoute,
+  ApiPublicHooksExpirePremiumTrialsRoute:
+    ApiPublicHooksExpirePremiumTrialsRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
   ApiPublicHooksFocusNfeRoute: ApiPublicHooksFocusNfeRoute,
   ApiPublicHooksImpulsionitoTrainRoute: ApiPublicHooksImpulsionitoTrainRoute,

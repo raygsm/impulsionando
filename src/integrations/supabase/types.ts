@@ -3245,11 +3245,16 @@ export type Database = {
           pix_key: string | null
           plan_id: string
           policy_id: string | null
+          previous_plan_id: string | null
           recurring_amount: number
           setup_amount: number
           setup_paid_at: string | null
           start_date: string
           status: string
+          trial_ends_at: string | null
+          trial_sku: string | null
+          trial_source: string | null
+          trial_started_at: string | null
           updated_at: string
         }
         Insert: {
@@ -3265,11 +3270,16 @@ export type Database = {
           pix_key?: string | null
           plan_id: string
           policy_id?: string | null
+          previous_plan_id?: string | null
           recurring_amount: number
           setup_amount?: number
           setup_paid_at?: string | null
           start_date: string
           status?: string
+          trial_ends_at?: string | null
+          trial_sku?: string | null
+          trial_source?: string | null
+          trial_started_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -3285,11 +3295,16 @@ export type Database = {
           pix_key?: string | null
           plan_id?: string
           policy_id?: string | null
+          previous_plan_id?: string | null
           recurring_amount?: number
           setup_amount?: number
           setup_paid_at?: string | null
           start_date?: string
           status?: string
+          trial_ends_at?: string | null
+          trial_sku?: string | null
+          trial_source?: string | null
+          trial_started_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3340,6 +3355,13 @@ export type Database = {
             columns: ["policy_id"]
             isOneToOne: false
             referencedRelation: "billing_dunning_policy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_contracts_previous_plan_id_fkey"
+            columns: ["previous_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -32705,6 +32727,8 @@ export type Database = {
         }
         Returns: number
       }
+      mp_expire_premium_trials: { Args: never; Returns: Json }
+      mp_get_webhook_health: { Args: never; Returns: Json }
       mp_send_pending_reminders: { Args: never; Returns: Json }
       mp_user_in_company: {
         Args: { _company_id: string; _user_id: string }
