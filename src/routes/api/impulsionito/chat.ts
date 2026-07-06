@@ -49,13 +49,51 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
         }
 
         const assembled = assemblePrompt(body.brain, body.context);
+        const lastUser = [...modelMessages].reverse().find((m) => m.role === "user");
+        const lastUserText =
+          typeof lastUser?.content === "string"
+            ? lastUser.content
+            : Array.isArray(lastUser?.content)
+              ? (lastUser!.content as any[]).map((p) => p.text ?? "").join(" ")
+              : "";
+
+        function mockStream(reason: string): Response {
+          const chunks = [
+            "Estou em modo demonstração no momento. ",
+            reason ? `(motivo: ${reason}) ` : "",
+            "Sobre \"",
+            lastUserText.slice(0, 80),
+            "\": posso te ajudar assim que a IA principal voltar. ",
+            "Enquanto isso, explore o Diagnóstico Rápido e o catálogo de módulos.",
+          ].filter(Boolean);
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream<Uint8Array>({
+            async start(controller) {
+              for (const c of chunks) {
+                controller.enqueue(encoder.encode(c));
+                await new Promise((r) => setTimeout(r, 60));
+              }
+              controller.close();
+            },
+          });
+          return new Response(stream, {
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-store",
+              "X-Impulsionito-Provider": "mock",
+              "X-Impulsionito-Model": "mock-1",
+              "X-Impulsionito-Brain": assembled.meta.hasBrain ? "1" : "0",
+              "X-Impulsionito-Prompt-Version": String(assembled.meta.promptVersion ?? 0),
+              "X-Impulsionito-Fallback-Reason": reason || "unknown",
+            },
+          });
+        }
 
         let resolved;
         try {
           resolved = resolveProvider({ llm: body.llm });
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : "no_llm_provider_available";
-          return Response.json({ error: msg }, { status: 503 });
+        } catch {
+          return mockStream("no_provider_available");
         }
 
         try {
@@ -78,9 +116,8 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
             },
           });
         } catch (err) {
-          const msg = err instanceof Error ? err.message : "upstream_error";
           console.error("[impulsionito/chat] stream failed", err);
-          return Response.json({ error: msg }, { status: 502 });
+          return mockStream(err instanceof Error ? err.message : "upstream_error");
         }
       },
     },

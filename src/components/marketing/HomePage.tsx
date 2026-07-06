@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MessageCircle, ArrowRight, Sparkles, PlayCircle, Calculator, Search,
   Settings, Eye, CheckCircle2, Rocket, AlertTriangle, TrendingDown, Mail, MessageSquare, Phone,
-  Building2, Gift,
+  Building2, Gift, Bot, Zap, Clock, TrendingUp, ShieldCheck, Brain,
+  Stethoscope, Beer, Home as HomeIcon, Scale, ShoppingBag, Ticket, Sparkle, Utensils,
+  Dumbbell, GraduationCap, Layers, Store, Target, Users, Wallet,
+  MessageCircleWarning, CalendarClock, BarChart3, Cog,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,19 +21,34 @@ const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20fal
 
 // ============== DIAGNÓSTICO ==============
 const NICHOS = [
-  { slug: "imobiliaria", label: "Imobiliária" },
-  { slug: "saude", label: "Clínica/consultório" },
-  { slug: "contabilidade", label: "Contabilidade" },
-  { slug: "bares", label: "Bar/restaurante" },
-  { slug: "eventos", label: "Eventos" },
-  { slug: "ecommerce", label: "E-commerce" },
-  { slug: "comercio", label: "Loja física" },
-  { slug: "servicos", label: "Serviços" },
-  { slug: "fitness", label: "Fitness" },
-  { slug: "educacao", label: "Educação" },
-  { slug: "white-label", label: "White Label" },
-  { slug: "outro", label: "Outro" },
+  { slug: "saude", label: "Clínica/consultório", icon: Stethoscope, desc: "Agenda, prontuário, cobrança" },
+  { slug: "bares", label: "Bar/restaurante", icon: Beer, desc: "Comandas, PDV, cozinha" },
+  { slug: "imobiliaria", label: "Imobiliária", icon: HomeIcon, desc: "CRM de imóveis, corretores" },
+  { slug: "contabilidade", label: "Contabilidade", icon: Scale, desc: "Portal do cliente, obrigações" },
+  { slug: "comercio", label: "Loja física", icon: Store, desc: "PDV, estoque, financeiro" },
+  { slug: "eventos", label: "Eventos", icon: Ticket, desc: "Ingressos, check-in, BI" },
+  { slug: "servicos", label: "Serviços", icon: Sparkle, desc: "Propostas, contratos, agenda" },
+  { slug: "ecommerce", label: "E-commerce", icon: ShoppingBag, desc: "Catálogo, pedidos, fulfillment" },
+  { slug: "fitness", label: "Fitness", icon: Dumbbell, desc: "Aulas, mensalidade, app aluno" },
+  { slug: "educacao", label: "Educação", icon: GraduationCap, desc: "Matrículas, portal, comunicados" },
+  { slug: "white-label", label: "White Label", icon: Layers, desc: "Multi-empresa, marca própria" },
+  { slug: "outro", label: "Outro", icon: Building2, desc: "Solução sob medida" },
 ];
+
+const DOR_ICONS: Record<string, any> = {
+  "Perco leads": TrendingDown,
+  "Demoro para responder": Clock,
+  "Não tenho CRM": Users,
+  "Atendimento perdido no WhatsApp": MessageCircleWarning,
+  "Equipe esquece follow-up": Bot,
+  "Agenda confusa": CalendarClock,
+  "Pagamentos manuais": Wallet,
+  "Falta dashboard": BarChart3,
+  "Falta área do cliente": Users,
+  "Quero automatizar comunicação": Cog,
+  "Quero vender mais": TrendingUp,
+  "Quero organizar operação": Target,
+};
 
 const DORES = [
   "Perco leads", "Demoro para responder", "Não tenho CRM",
@@ -40,208 +58,437 @@ const DORES = [
   "Quero vender mais", "Quero organizar operação",
 ];
 
+const FOCO_ICONS: Record<string, any> = {
+  "Captação": Target, "Atendimento": MessageCircle, "Vendas": TrendingUp,
+  "Agenda": CalendarClock, "Pagamentos": Wallet, "Gestão": BarChart3,
+  "Comunicação": Bot, "Fidelização": Sparkles, "Tudo junto": Zap,
+};
+
 const FOCOS = ["Captação", "Atendimento", "Vendas", "Agenda", "Pagamentos", "Gestão", "Comunicação", "Fidelização", "Tudo junto"];
 
-const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; plano: string; demo: string }> = {
+const RECOMENDACOES: Record<string, { modulos: string[]; correlatos: string[]; plano: string; demo: string; horas: number; compat: number }> = {
   imobiliaria: {
     modulos: ["CRM de imóveis", "Automação & Comunicação", "BI & Dashboards", "Área do Cliente", "Documentos & Propostas", "Gestão de Corretores"],
     correlatos: ["WhatsApp para corretores", "Portal do proprietário", "Funil comercial", "Relatórios por gerente"],
-    plano: "Integrado",
-    demo: "/nichos/imobiliaria",
+    plano: "Integrado", demo: "/nichos/imobiliaria", horas: 42, compat: 96,
   },
   saude: {
     modulos: ["Agenda online", "Prontuário eletrônico", "Cobrança recorrente", "Área do paciente", "WhatsApp confirmação"],
     correlatos: ["Lista de espera", "Telemedicina", "Faturamento TISS", "BI clínico"],
-    plano: "Integrado",
-    demo: "/nichos/saude",
+    plano: "Integrado", demo: "/nichos/saude", horas: 38, compat: 98,
   },
   contabilidade: {
     modulos: ["Portal do cliente contábil", "Calendário fiscal", "Documentos", "IRPF jornada", "BI gerencial"],
     correlatos: ["WhatsApp por departamento", "Contratos e onboarding", "Tarefas e obrigações"],
-    plano: "Avançado",
-    demo: "/contabilidade/cockpit",
+    plano: "Avançado", demo: "/contabilidade/cockpit", horas: 51, compat: 94,
   },
   bares: {
     modulos: ["PDV", "Mesas e comandas", "QR Code menu", "Estoque", "Cozinha integrada"],
     correlatos: ["Delivery", "Fidelidade", "Pagamento na mesa", "Ficha técnica"],
-    plano: "Integrado",
-    demo: "/demo/beer-house",
+    plano: "Integrado", demo: "/demo/beer-house", horas: 35, compat: 97,
   },
   eventos: {
     modulos: ["Ingressos", "Check-in QR", "CRM público", "BI evento"],
     correlatos: ["Transferência de ingresso", "Pesquisa pós-evento", "Pagamento parcelado"],
-    plano: "Essencial",
-    demo: "/demo/eventos",
+    plano: "Essencial", demo: "/demo/eventos", horas: 28, compat: 92,
   },
   ecommerce: {
     modulos: ["Catálogo", "Pedidos", "Pagamentos", "Estoque", "Área do consumidor"],
     correlatos: ["WhatsApp de carrinho", "Fidelidade", "Fulfillment", "BI vendas"],
-    plano: "Integrado",
-    demo: "/demo",
+    plano: "Integrado", demo: "/demo", horas: 40, compat: 95,
   },
   comercio: {
     modulos: ["PDV", "Estoque", "Vendas", "Financeiro", "Clientes"],
     correlatos: ["Cashback", "WhatsApp pós-venda", "Cupons"],
-    plano: "Essencial",
-    demo: "/demo",
+    plano: "Essencial", demo: "/demo", horas: 32, compat: 93,
   },
   servicos: {
     modulos: ["CRM", "Propostas", "Contratos", "Cobrança", "Agenda"],
     correlatos: ["Assinaturas", "WhatsApp", "BI comercial"],
-    plano: "Integrado",
-    demo: "/demo",
+    plano: "Integrado", demo: "/demo", horas: 36, compat: 95,
   },
   fitness: {
     modulos: ["Agenda de aulas", "Mensalidade recorrente", "App aluno", "Avaliações físicas"],
     correlatos: ["Check-in QR", "WhatsApp", "Comissão de professor"],
-    plano: "Integrado",
-    demo: "/showroom/fitness",
+    plano: "Integrado", demo: "/showroom/fitness", horas: 30, compat: 96,
   },
   educacao: {
     modulos: ["Matrículas", "Pagamento recorrente", "Portal do aluno", "Comunicados"],
     correlatos: ["WhatsApp turma", "BI evasão", "Boletos"],
-    plano: "Integrado",
-    demo: "/demo",
+    plano: "Integrado", demo: "/demo", horas: 34, compat: 94,
   },
   "white-label": {
     modulos: ["Plataforma multiempresa", "Marca própria", "BI agregado", "Faturamento por cliente"],
     correlatos: ["Setup assistido", "Treinamento", "Suporte dedicado"],
-    plano: "Sob Medida",
-    demo: "/demo/white-label",
+    plano: "Sob Medida", demo: "/demo/white-label", horas: 60, compat: 99,
   },
   outro: {
     modulos: ["CRM", "Comunicação", "Pagamentos", "Dashboard"],
     correlatos: ["Atendimento consultivo", "Customização"],
-    plano: "Sob Medida",
-    demo: "/demo",
+    plano: "Sob Medida", demo: "/demo", horas: 30, compat: 90,
   },
 };
 
+// Contador animado (números crescendo)
+function useCountUp(target: number, run: boolean, ms = 900): number {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (!run) { setV(0); return; }
+    const t0 = performance.now();
+    let raf: number;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, run, ms]);
+  return v;
+}
+
+const STEP_LABELS = ["Segmento", "Desafios", "Prioridade"] as const;
+
 function Diagnostico() {
+  const [step, setStep] = useState(0); // 0..2
   const [nicho, setNicho] = useState<string>("");
   const [dores, setDores] = useState<string[]>([]);
   const [foco, setFoco] = useState<string>("");
 
   const result = useMemo(() => nicho ? RECOMENDACOES[nicho] : null, [nicho]);
-  const showResult = nicho && foco && dores.length > 0;
+  const showResult = !!(nicho && foco && dores.length > 0);
+
+  const progress = showResult ? 100 : Math.min(95, ((nicho ? 33 : 0) + (dores.length ? 33 : 0) + (foco ? 29 : 0)));
+
+  const horas = useCountUp(result?.horas ?? 0, showResult);
+  const compat = useCountUp(result?.compat ?? 0, showResult);
+  const empresas = useCountUp(1240, true, 1400);
+  const similares = useCountUp(nicho ? 180 : 0, !!nicho, 900);
+  const automacoes = useCountUp(320, true, 1500);
+
+  function selectNicho(slug: string) {
+    setNicho(slug);
+    setTimeout(() => setStep(1), 250);
+  }
+  function toggleDor(d: string) {
+    setDores((prev) => prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]);
+  }
+  function selectFoco(f: string) {
+    setFoco(f);
+    setTimeout(() => setStep(2), 200);
+  }
 
   return (
-    <section className="bg-card/40 border-y border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <Badge className="bg-primary/10 text-primary border-primary/20 mb-3"><Search className="w-3 h-3 mr-1" /> Diagnóstico rápido</Badge>
-          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">Em 30 segundos você sabe quais módulos resolvem sua dor</h2>
-          <p className="text-muted-foreground mt-2 text-sm sm:text-base">Responda 3 perguntas e veja recomendação, demo e plano provável.</p>
+    <section id="diagnostico-wrap" className="relative overflow-hidden border-y border-primary/10 bg-[radial-gradient(ellipse_at_top,theme(colors.primary/10),transparent_60%),linear-gradient(180deg,theme(colors.slate.950/2),theme(colors.slate.950/8))]">
+      <div className="absolute inset-0 pointer-events-none opacity-40 [background-image:radial-gradient(circle_at_20%_10%,theme(colors.primary/15),transparent_40%),radial-gradient(circle_at_80%_80%,theme(colors.primary/12),transparent_40%)]" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        {/* HEADER */}
+        <div className="text-center max-w-3xl mx-auto mb-10 animate-fade-in">
+          <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 gap-1.5 px-3 py-1">
+            <Bot className="w-3.5 h-3.5" /> Impulsionito · Consultor de IA
+          </Badge>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Descubra em menos de 30 segundos como automatizar seu negócio
+          </h2>
+          <p className="text-muted-foreground mt-3 text-sm sm:text-base">
+            Responda poucas perguntas e veja imediatamente:
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-3 text-sm">
+            {["módulos recomendados", "economia estimada", "plano indicado", "demonstração personalizada"].map((x) => (
+              <span key={x} className="inline-flex items-center gap-1.5 text-foreground/80">
+                <CheckCircle2 className="w-4 h-4 text-primary" /> {x}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <Card className="p-5 sm:p-6 space-y-5">
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">1. Qual é o seu segmento?</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {NICHOS.map((n) => (
+        {/* GRID PRINCIPAL */}
+        <div id="diagnostico" className="grid gap-6 lg:grid-cols-[40fr_60fr]">
+          {/* ---------------- ESQUERDA: PERGUNTAS ---------------- */}
+          <div className="space-y-5">
+            {/* stepper */}
+            <div className="flex items-center gap-2">
+              {STEP_LABELS.map((label, i) => {
+                const active = step === i;
+                const done = step > i;
+                return (
                   <button
-                    key={n.slug}
+                    key={label}
                     type="button"
-                    onClick={() => setNicho(n.slug)}
-                    className={`text-xs px-3 py-2 rounded-lg border transition ${
-                      nicho === n.slug ? "border-primary bg-primary/10 text-primary font-medium" : "border-border hover:border-primary/40"
-                    }`}
+                    onClick={() => (i === 0 || nicho) && (i === 1 ? nicho : true) && setStep(i)}
+                    className={`group flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all
+                      ${active ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25 scale-[1.02]"
+                        : done ? "bg-primary/10 text-primary border-primary/30"
+                        : "bg-card/60 text-muted-foreground border-border/60"}`}
                   >
-                    {n.label}
+                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs font-bold
+                      ${active ? "bg-primary-foreground/20" : done ? "bg-primary/20" : "bg-muted"}`}>
+                      {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                    </span>
+                    <span className="text-xs sm:text-sm font-medium truncate">{label}</span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
 
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">2. O que mais dói hoje? (múltipla)</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {DORES.map((d) => {
-                  const on = dores.includes(d);
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDores((prev) => on ? prev.filter((x) => x !== d) : [...prev, d])}
-                      className={`text-xs px-2.5 py-1.5 rounded-full border transition ${
-                        on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/40"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">3. Resolver primeiro o quê?</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {FOCOS.map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setFoco(f)}
-                    className={`text-xs px-3 py-1.5 rounded-lg border transition ${
-                      foco === f ? "border-primary bg-primary/10 text-primary font-medium" : "border-border hover:border-primary/40"
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          <Card className={`p-5 sm:p-6 transition ${showResult ? "border-primary/40 bg-primary/[0.02]" : "border-dashed opacity-70"}`}>
-            {!showResult ? (
-              <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground py-10">
-                <Sparkles className="w-10 h-10 mb-3 text-primary/40" />
-                <p className="text-sm">Responda as 3 perguntas ao lado para ver seu diagnóstico personalizado.</p>
-              </div>
-            ) : result && (
-              <div className="space-y-4">
-                <div>
-                  <Badge className="bg-primary text-primary-foreground mb-2">Diagnóstico</Badge>
-                  <h3 className="text-lg font-bold">Para {NICHOS.find(n => n.slug === nicho)?.label}, focando em {foco}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{dores.length} dor(es) identificada(s)</p>
+            {/* STEP 1: Segmento */}
+            {step === 0 && (
+              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+                <div className="mb-4">
+                  <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 1 · Sobre você</div>
+                  <h3 className="text-xl font-bold mt-1">Qual é o seu segmento?</h3>
+                  <p className="text-xs text-muted-foreground">Escolha o que mais se aproxima do seu negócio.</p>
                 </div>
-
-                <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Módulos recomendados</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.modulos.map((m) => <Badge key={m} variant="secondary" className="text-xs">{m}</Badge>)}
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {NICHOS.map((n) => {
+                    const Icon = n.icon;
+                    const on = nicho === n.slug;
+                    return (
+                      <button
+                        key={n.slug}
+                        type="button"
+                        onClick={() => selectNicho(n.slug)}
+                        className={`group relative text-left rounded-xl p-3 border transition-all duration-200
+                          ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-md"}`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2 transition-colors
+                          ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="text-sm font-semibold leading-tight">{n.label}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{n.desc}</div>
+                      </button>
+                    );
+                  })}
                 </div>
+              </Card>
+            )}
 
-                <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Produtos correlatos</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.correlatos.map((c) => <Badge key={c} variant="outline" className="text-xs">{c}</Badge>)}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t">
+            {/* STEP 2: Dores */}
+            {step === 1 && (
+              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+                <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-xs text-muted-foreground">Plano provável</div>
-                    <div className="font-bold text-primary">{result.plano}</div>
+                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 2 · Diagnóstico</div>
+                    <h3 className="text-xl font-bold mt-1">Qual é seu maior desafio hoje?</h3>
+                    <p className="text-xs text-muted-foreground">Pode escolher quantos precisar — quanto mais, melhor o match.</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button asChild size="sm" className="bg-gradient-primary">
-                      <Link to={result.demo as any}><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
-                    </Button>
-                    <Button asChild size="sm" variant="outline">
-                      <Link to="/orcamento">Orçamento <ArrowRight className="w-4 h-4 ml-1" /></Link>
-                    </Button>
-                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(0)} className="shrink-0 text-xs">Voltar</Button>
                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {DORES.map((d) => {
+                    const Icon = DOR_ICONS[d] ?? AlertTriangle;
+                    const on = dores.includes(d);
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => toggleDor(d)}
+                        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 border text-left transition-all
+                          ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                      >
+                        <span className={`w-8 h-8 rounded-lg grid place-items-center shrink-0
+                          ${on ? "bg-primary-foreground/20" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
+                          <Icon className="w-4 h-4" />
+                        </span>
+                        <span className="text-sm font-medium">{d}</span>
+                        {on && <CheckCircle2 className="w-4 h-4 ml-auto" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">{dores.length} selecionada(s)</span>
+                  <Button size="sm" onClick={() => setStep(2)} disabled={dores.length === 0}>
+                    Continuar <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* STEP 3: Foco */}
+            {step === 2 && (
+              <Card className="p-5 sm:p-6 border-primary/20 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-card/70 animate-fade-in">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Etapa 3 · Prioridade</div>
+                    <h3 className="text-xl font-bold mt-1">O que deseja resolver primeiro?</h3>
+                    <p className="text-xs text-muted-foreground">Isso define por onde o Impulsionito começa a construir sua solução.</p>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setStep(1)} className="shrink-0 text-xs">Voltar</Button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {FOCOS.map((f) => {
+                    const Icon = FOCO_ICONS[f] ?? Target;
+                    const on = foco === f;
+                    return (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => selectFoco(f)}
+                        className={`group rounded-xl p-3 border text-left transition-all
+                          ${on ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 -translate-y-0.5"
+                            : "border-border/60 bg-card/50 hover:border-primary/50 hover:-translate-y-0.5 hover:shadow"}`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg grid place-items-center mb-2
+                          ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"}`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="text-sm font-semibold">{f}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* ---------------- DIREITA: PAINEL IA ---------------- */}
+          <div className="lg:sticky lg:top-6 self-start space-y-4">
+            <Card className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25">
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur grid place-items-center ring-1 ring-white/25">
+                    <Brain className={`w-6 h-6 ${!showResult ? "animate-pulse" : ""}`} />
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-wider opacity-80">Impulsionito</div>
+                    <div className="text-sm font-semibold">
+                      {!nicho ? "Aguardando segmento…"
+                        : !showResult ? "Analisando seu perfil…"
+                        : "Diagnóstico concluído"}
+                    </div>
+                  </div>
+                  <Badge className="ml-auto bg-white/20 border-white/30 text-primary-foreground gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" /> ao vivo
+                  </Badge>
+                </div>
+
+                {/* progresso */}
+                <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-white to-white/70 transition-all duration-700 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <div className="mt-1.5 text-[11px] opacity-80 flex justify-between">
+                  <span>Compatibilidade em cálculo</span>
+                  <span className="font-mono">{progress}%</span>
+                </div>
+
+                {/* estado inicial / streaming */}
+                {!showResult && (
+                  <ul className="mt-5 space-y-2 text-sm">
+                    <SignalRow ok={!!nicho} text="Segmento identificado" />
+                    <SignalRow ok={dores.length > 0} text={`Dores mapeadas${dores.length ? ` (${dores.length})` : ""}`} />
+                    <SignalRow ok={!!foco} text="Prioridade definida" />
+                    <SignalRow ok={false} text="Módulos compatíveis" pending />
+                    <SignalRow ok={false} text="Plano ideal" pending />
+                  </ul>
+                )}
+
+                {/* estado final */}
+                {showResult && result && (
+                  <div className="mt-5 space-y-4 animate-fade-in">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
+                        <div className="text-[11px] uppercase tracking-wider opacity-80">Economia estimada</div>
+                        <div className="mt-1 text-3xl font-black leading-none">
+                          {horas}
+                          <span className="text-sm font-medium opacity-80 ml-1">h/mês</span>
+                        </div>
+                      </div>
+                      <div className="rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
+                        <div className="text-[11px] uppercase tracking-wider opacity-80">Compatibilidade</div>
+                        <div className="mt-1 text-3xl font-black leading-none">
+                          {compat}<span className="text-sm font-medium opacity-80">%</span>
+                        </div>
+                        <div className="mt-2 h-1 rounded-full bg-white/20 overflow-hidden">
+                          <div className="h-full bg-emerald-300 transition-all duration-1000" style={{ width: `${compat}%` }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wider opacity-80 mb-1.5">Módulos recomendados</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {result.modulos.map((m) => (
+                          <Badge key={m} className="bg-white/15 hover:bg-white/25 text-primary-foreground border-white/25 text-xs">
+                            {m}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-xl bg-white/10 backdrop-blur p-3 ring-1 ring-white/20">
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wider opacity-80">Plano indicado</div>
+                        <div className="text-lg font-bold">{result.plano}</div>
+                      </div>
+                      <Rocket className="w-8 h-8 opacity-70" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* CTAs */}
+            {showResult && result && (
+              <div className="grid gap-2 sm:grid-cols-3 animate-fade-in">
+                <Button asChild size="lg" className="justify-center">
+                  <Link to={result.demo as any}><PlayCircle className="w-4 h-4 mr-1.5" /> Ver demonstração</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="justify-center">
+                  <a href="#impulsionito"><Bot className="w-4 h-4 mr-1.5" /> Falar com Impulsionito</a>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="justify-center">
+                  <Link to="/orcamento"><Calculator className="w-4 h-4 mr-1.5" /> Solicitar apresentação</Link>
+                </Button>
               </div>
             )}
-          </Card>
+
+            {/* Indicadores */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <MiniStat icon={Building2} value={`${empresas}+`} label="Empresas atendidas" />
+              <MiniStat icon={Users} value={similares > 0 ? `${similares}+` : "—"} label="Clientes similares" />
+              <MiniStat icon={Clock} value="< 7d" label="Implantação média" />
+              <MiniStat icon={Zap} value={`${automacoes}+`} label="Automações prontas" />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
+              <ShieldCheck className="w-3 h-3" /> Nenhum dado enviado. Diagnóstico executado localmente.
+            </p>
+          </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function SignalRow({ ok, text, pending }: { ok: boolean; text: string; pending?: boolean }) {
+  return (
+    <li className="flex items-center gap-2 text-sm">
+      <span className={`w-4 h-4 rounded-full grid place-items-center text-[10px] font-bold shrink-0
+        ${ok ? "bg-emerald-300 text-emerald-900"
+          : pending ? "bg-white/15 text-white/60"
+          : "bg-white/25 text-white/70"}`}>
+        {ok ? "✓" : pending ? "…" : "•"}
+      </span>
+      <span className={ok ? "opacity-100" : "opacity-70"}>{text}</span>
+    </li>
+  );
+}
+
+function MiniStat({ icon: Icon, value, label }: { icon: any; value: string; label: string }) {
+  return (
+    <div className="rounded-xl border border-primary/15 bg-card/70 backdrop-blur p-3 text-center hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30 transition-all">
+      <Icon className="w-4 h-4 text-primary mx-auto mb-1" />
+      <div className="text-base font-bold leading-none">{value}</div>
+      <div className="text-[10px] text-muted-foreground mt-1 leading-tight">{label}</div>
+    </div>
   );
 }
 
