@@ -569,46 +569,42 @@ function ChatTab({
       </div>
 
       {/* WhatsApp fallback — Impulsionito atende aqui mesmo, mas oferece o canal externo */}
-      <div className="border-t border-border bg-background/95 px-3 py-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-[11px] text-muted-foreground min-w-0 sm:truncate">
-          Prefiro tirar suas dúvidas por aqui mesmo — mais rápido e com seu contexto.
-        </span>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              const path = typeof window !== "undefined" ? window.location.pathname : "";
-              trackEvent("impulsionito_stay_in_portal_click", {
-                location: path,
-                niche: nichoSlugFromPath(path),
-                module: moduleSlugFromPath(path),
-              });
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-[11px] font-medium px-3 py-1.5 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-            Continuar conversando aqui
-          </button>
-          <a
-            href="https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20um%20especialista%20Impulsionando."
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              const path = typeof window !== "undefined" ? window.location.pathname : "";
-              trackEvent("impulsionito_whatsapp_fallback_click", {
-                location: path,
-                niche: nichoSlugFromPath(path),
-                module: moduleSlugFromPath(path),
-              });
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-medium px-3 py-1.5 transition-colors"
-          >
-            <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden xs:inline sm:inline">Se preferir WhatsApp, clique aqui</span>
-            <span className="xs:hidden sm:hidden">WhatsApp</span>
-          </a>
-        </div>
+      <div className="border-t border-border bg-background/95 px-3 py-2 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            const path = typeof window !== "undefined" ? window.location.pathname : "";
+            trackEvent("impulsionito_stay_in_portal_click", {
+              location: path,
+              niche: nichoSlugFromPath(path),
+              module: moduleSlugFromPath(path),
+            });
+          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-[11px] font-medium px-3 py-1.5 transition-colors"
+        >
+          <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+          Continuar por aqui
+        </button>
+        <a
+          href="https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20um%20especialista%20Impulsionando."
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            const path = typeof window !== "undefined" ? window.location.pathname : "";
+            trackEvent("impulsionito_whatsapp_fallback_click", {
+              location: path,
+              niche: nichoSlugFromPath(path),
+              module: moduleSlugFromPath(path),
+            });
+          }}
+          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-medium px-3 py-1.5 transition-colors"
+        >
+          <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
+          <span className="hidden xs:inline sm:inline">WhatsApp clique aqui</span>
+          <span className="xs:hidden sm:hidden">WhatsApp</span>
+        </a>
       </div>
+
 
 
 
