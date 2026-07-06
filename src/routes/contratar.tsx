@@ -11,11 +11,35 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { CheckCircle2, Sparkles } from 'lucide-react'
+import { CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react'
 import { OfficialChannelNotice } from '@/components/marketing/OfficialChannelNotice'
+import { useMinimumWage } from '@/hooks/useCoreSetting'
+
+type PlanoParam = 'essencial' | 'integrado' | 'avancado'
+const VALID_PLANS: readonly PlanoParam[] = ['essencial', 'integrado', 'avancado'] as const
+
+interface CheckoutPlanInfo {
+  code: PlanoParam
+  name: string
+  displayName: string
+  factor: number
+  factorLabel: string
+  highlight: boolean
+}
+
+const CHECKOUT_PLANS: readonly CheckoutPlanInfo[] = [
+  { code: 'essencial', name: 'Essencial',  displayName: 'Essencial', factor: 0.5, factorLabel: '½ salário mínimo', highlight: false },
+  { code: 'integrado', name: 'Integrado',  displayName: 'Ideal',     factor: 1,   factorLabel: '1 salário mínimo', highlight: true  },
+  { code: 'avancado',  name: 'Avançado',   displayName: 'Full',      factor: 2,   factorLabel: '2 salários mínimos', highlight: false },
+]
 
 export const Route = createFileRoute('/contratar')({
   component: ContratarPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = typeof search.plano === 'string' ? (search.plano as string) : undefined
+    const plano = raw && (VALID_PLANS as readonly string[]).includes(raw) ? (raw as PlanoParam) : undefined
+    return { plano }
+  },
   head: () => ({
     meta: [
       { title: 'Contratar — Impulsionando Tecnologia' },
