@@ -302,8 +302,9 @@ function TenantCard({
   tenant: AdminHubTenant;
   legacyGroups: AdminMenuGroup[];
 }) {
-  const painelHref = `/admin/clientes/${tenant.slug}/painel` as const;
-  const cockpitHref = `/admin/clientes/${tenant.slug}` as const;
+  const painelHref = `/admin/clientes/${tenant.slug}/painel` as any;
+  const cockpitHref = `/admin/clientes/${tenant.slug}` as any;
+
   const siteHref = `https://${tenant.slug}.impulsionando.com.br`;
   const initial = (tenant.name?.[0] ?? "?").toUpperCase();
   return (
