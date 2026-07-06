@@ -436,7 +436,7 @@ function Diagnostico() {
             <Card
               data-testid="impulsionito-card"
               data-stream-state={streamState}
-              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500 min-h-[440px] flex flex-col contain-[layout_paint]"
+              className="relative overflow-hidden p-5 sm:p-6 border-primary/30 bg-gradient-to-br from-primary/95 via-primary to-primary/85 text-primary-foreground shadow-2xl shadow-primary/25 transition-shadow duration-500 min-h-[440px] flex flex-col [contain:layout]"
             >
               <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl motion-safe:animate-pulse" />
               {/* barra de scanning durante streaming */}
