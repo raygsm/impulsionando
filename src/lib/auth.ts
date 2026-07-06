@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 export interface AccessProfile {
   id: string;
