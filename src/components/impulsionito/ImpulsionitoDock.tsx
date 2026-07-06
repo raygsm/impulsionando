@@ -56,6 +56,9 @@ import {
   exportConversation,
   type ImpulsionitoMessage,
 } from "./transport";
+import { collectBrainSnapshot } from "@/lib/impulsionito-ic/brain-snapshot";
+import { readLlmConfig } from "@/lib/impulsionito-ic/llm-config";
+import { pushPendingLearning } from "@/lib/impulsionito-ic/pending-learning";
 
 const HISTORY_KEY = "impulsionito.dock.history.v1";
 const OPEN_KEY_DESKTOP = "impulsionito.dock.open.desktop.v1";
@@ -201,15 +204,20 @@ export function ImpulsionitoDock() {
         context: {
           pathname: location.pathname,
           screen: typeof document !== "undefined" ? document.title : undefined,
+          channel: "web",
         },
+        brain: collectBrainSnapshot(),
+        llm: readLlmConfig(),
         signal: ac.signal,
       });
       setStatus("Impulsionito está respondendo…");
       let received = false;
+      let fullAnswer = "";
       for await (const chunk of stream) {
         if (ac.signal.aborted) break;
         if (chunk.delta) {
           received = true;
+          fullAnswer += chunk.delta;
           setMessages((prev) => prev.map((m) =>
             m.id === assistantId ? { ...m, text: m.text + chunk.delta } : m,
           ));
@@ -224,6 +232,16 @@ export function ImpulsionitoDock() {
         setMessages((prev) => prev.map((m) =>
           m.id === assistantId ? { ...m, status: "done" } : m,
         ));
+      }
+      // Captura de aprendizado — vai para Aprendizados Pendentes,
+      // nunca entra no Prompt Mestre sem aprovação humana.
+      if (received && fullAnswer.trim()) {
+        pushPendingLearning({
+          question: clean,
+          answer: fullAnswer,
+          page: location.pathname,
+          channel: "web",
+        });
       }
       setStatus("Resposta concluída.");
     } catch (err) {
