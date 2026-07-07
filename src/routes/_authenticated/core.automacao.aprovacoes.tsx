@@ -36,10 +36,46 @@ function AprovacoesPage() {
   const search = useSearch({ strict: false }) as { tenant?: string };
   const tenantSlug = search?.tenant ?? null;
   const list = useServerFn(listAutomationRequests);
+  const register = useServerFn(registerAutomationRequest);
   const { data: rows = [], isLoading, error, refetch } = useQuery({
     queryKey: ["automation-approvals", tenantSlug],
     queryFn: () => list({ data: { tenantSlug, limit: 100 } }),
   });
+
+  const counts = rows.reduce(
+    (acc, r) => {
+      const s = (r as { status: string }).status;
+      if (s === "pending") acc.pending++;
+      else if (s === "approved") acc.approved++;
+      else if (s === "rejected") acc.rejected++;
+      return acc;
+    },
+    { pending: 0, approved: 0, rejected: 0 },
+  );
+
+  const runManualTest = async () => {
+    try {
+      const res = await register({
+        data: {
+          tenantSlug,
+          mode: "demo",
+          regua: "captacao",
+          action: "test",
+          files: ["/downloads/n8n/captacao/01-lead-captado.json"],
+          note: `Teste manual disparado em ${new Date().toLocaleString("pt-BR")}`,
+        },
+      });
+      toast.success("Solicitação de teste registrada", {
+        description: `ID #${res.id.slice(0, 8)} — recarregando lista…`,
+      });
+      refetch();
+    } catch (e) {
+      toast.error("Falha ao registrar solicitação de teste", {
+        description: String((e as Error).message),
+      });
+    }
+  };
+
 
   return (
     <div className="space-y-4">
