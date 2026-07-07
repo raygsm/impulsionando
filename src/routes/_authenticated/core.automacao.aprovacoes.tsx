@@ -11,6 +11,11 @@ import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { downloadCsv } from "@/lib/exports";
 import { computeApprovalIntegrity, filterApprovalRows } from "@/lib/approval-integrity";
+import {
+  APPROVAL_CSV_COLUMNS,
+  buildApprovalCsvFilename,
+  toApprovalCsvRow,
+} from "@/lib/approval-csv";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações — Automação" }, { name: "robots", content: "noindex" }] }),
@@ -128,25 +133,11 @@ function AprovacoesPage() {
               data-testid="btn-export-csv"
               disabled={visibleRows.length === 0}
               onClick={() => {
-                const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-                const suffix = [
-                  tenantSlug ? `tenant-${tenantSlug}` : "all-tenants",
-                  `mode-${modeFilter}`,
-                  stamp,
-                ].join("_");
+                const filename = buildApprovalCsvFilename({ tenantSlug, mode: modeFilter });
                 downloadCsv(
-                  `automation-approvals_${suffix}.csv`,
-                  ["created_at", "tenant_slug", "mode", "regua", "action", "status", "files", "note"],
-                  visibleRows.map((r) => ({
-                    created_at: r.created_at,
-                    tenant_slug: r.tenant_slug ?? "",
-                    mode: r.mode,
-                    regua: r.regua ?? "",
-                    action: r.action,
-                    status: r.status,
-                    files: Array.isArray(r.files) ? (r.files as string[]).join(" | ") : "",
-                    note: (r as { note?: string | null }).note ?? "",
-                  })),
+                  filename,
+                  [...APPROVAL_CSV_COLUMNS],
+                  visibleRows.map((r) => toApprovalCsvRow(r as Parameters<typeof toApprovalCsvRow>[0])),
                 );
                 toast.success(`CSV exportado (${visibleRows.length} linha(s))`, {
                   description: `Filtro: tenant=${tenantSlug ?? "todos"} · mode=${modeFilter}`,
