@@ -7770,6 +7770,33 @@ export type Database = {
         }
         Relationships: []
       }
+      core_alert_recipients: {
+        Row: {
+          address: string
+          channel: string
+          created_at: string
+          id: string
+          is_active: boolean
+          scope: string
+        }
+        Insert: {
+          address: string
+          channel: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          scope?: string
+        }
+        Update: {
+          address?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          scope?: string
+        }
+        Relationships: []
+      }
       core_backup_runs: {
         Row: {
           created_at: string
@@ -33039,6 +33066,13 @@ export type Database = {
           membership_id: string
         }[]
       }
+      core_alert_recipients_for: {
+        Args: { _scope: string }
+        Returns: {
+          emails: string[]
+          whatsapps: string[]
+        }[]
+      }
       core_list_cron_jobs: {
         Args: never
         Returns: {
@@ -33052,6 +33086,10 @@ export type Database = {
           schedule: string
           url: string
         }[]
+      }
+      core_register_uptime_target: {
+        Args: { p_category?: string; p_label: string; p_url: string }
+        Returns: undefined
       }
       core_schedule_cron: {
         Args: { p_job_name: string; p_path: string; p_schedule: string }
