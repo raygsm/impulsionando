@@ -76,14 +76,14 @@ function AprovacoesPage() {
       const res = await register({
         data: {
           tenantSlug,
-          mode: "demo",
+          mode: currentMode,
           regua: "captacao",
           action: "test",
           files: ["/downloads/n8n/captacao/01-lead-captado.json"],
-          note: `Teste manual disparado em ${new Date().toLocaleString("pt-BR")}`,
+          note: `Teste manual (${currentMode}) disparado em ${new Date().toLocaleString("pt-BR")}`,
         },
       });
-      toast.success("Solicitação de teste registrada", {
+      toast.success(`Solicitação de teste registrada (${currentMode})`, {
         description: `ID #${res.id.slice(0, 8)} — recarregando lista…`,
       });
       refetch();
