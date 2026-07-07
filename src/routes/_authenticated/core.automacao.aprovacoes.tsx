@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { downloadCsv } from "@/lib/exports";
+import { computeApprovalIntegrity, filterApprovalRows } from "@/lib/approval-integrity";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações — Automação" }, { name: "robots", content: "noindex" }] }),
@@ -66,25 +67,22 @@ function AprovacoesPage() {
   const [modeFilter, setModeFilter] = useState<"all" | "demo" | "producao">("all");
 
   const visibleRows = useMemo(
-    () => rows.filter((r) => modeFilter === "all" || r.mode === modeFilter),
-    [rows, modeFilter],
+    () => filterApprovalRows(rows, { tenantSlug, mode: modeFilter }),
+    [rows, tenantSlug, modeFilter],
   );
 
-  const counts = visibleRows.reduce(
-    (acc, r) => {
-      const s = (r as { status: string }).status;
-      if (s === "pending") acc.pending++;
-      else if (s === "approved") acc.approved++;
-      else if (s === "rejected") acc.rejected++;
-      return acc;
-    },
-    { pending: 0, approved: 0, rejected: 0 },
+  const integrity = useMemo(
+    () => computeApprovalIntegrity(rows, { tenantSlug, mode: modeFilter }),
+    [rows, tenantSlug, modeFilter],
   );
-
-  // Integridade: soma dos status contáveis + registered nunca excede o total.
-  const registeredCount = visibleRows.filter((r) => (r as { status: string }).status === "registered").length;
-  const sumTracked = counts.pending + counts.approved + counts.rejected + registeredCount;
-  const countsConsistent = sumTracked === visibleRows.length;
+  const counts = {
+    pending: integrity.pending,
+    approved: integrity.approved,
+    rejected: integrity.rejected,
+  };
+  const registeredCount = integrity.registered;
+  const sumTracked = integrity.sumTracked;
+  const countsConsistent = integrity.consistent;
 
   const runManualTest = async () => {
     try {
