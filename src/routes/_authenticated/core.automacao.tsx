@@ -7,6 +7,7 @@ import { Users } from "lucide-react";
 
 const automacaoSearchSchema = z.object({
   tenant: z.string().min(1).optional(),
+  mode: z.enum(["demo", "producao"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/core/automacao")({
