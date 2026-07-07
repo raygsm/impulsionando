@@ -2,10 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FlowStatusBadge, ModoBadge, ChannelChip } from "./StatusBadges";
 import type { Workflow } from "@/data/automacao-catalog";
-import { REGUA_LABEL } from "@/data/automacao-catalog";
+import { REGUA_LABEL, workflowDownloadUrl } from "@/data/automacao-catalog";
 import { toast } from "sonner";
+import { Download, ExternalLink } from "lucide-react";
 
 export function FlowCard({ wf }: { wf: Workflow }) {
+  const url = workflowDownloadUrl(wf);
   const blocked = () =>
     toast.info("Ação bloqueada — requer aprovação backend", {
       description: "Nenhum disparo real é feito no frontend. Registre a solicitação em /core/automacao/aprovacoes.",
@@ -38,8 +40,16 @@ export function FlowCard({ wf }: { wf: Workflow }) {
       </div>
 
       <div className="flex flex-wrap gap-2 pt-2 border-t">
-        <Button size="sm" variant="outline" onClick={blocked}>Testar (demo)</Button>
-        <Button size="sm" variant="outline" onClick={blocked}>Ver JSON</Button>
+        <Button asChild size="sm" variant="default">
+          <a href={url} download>
+            <Download className="h-3.5 w-3.5 mr-1" /> Baixar JSON
+          </a>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <a href={url} target="_blank" rel="noreferrer">
+            <ExternalLink className="h-3.5 w-3.5 mr-1" /> Ver
+          </a>
+        </Button>
         <Button size="sm" variant="ghost" onClick={blocked}>Ativar produção</Button>
       </div>
     </Card>
