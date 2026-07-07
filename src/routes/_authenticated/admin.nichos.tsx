@@ -190,15 +190,26 @@ function AdminNichosPage() {
                         </span>
                       </td>
                       <td className="px-4 py-2 text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link
-                            to="/admin/niche-plans"
-                            search={{ niche: s.sub_slug } as never}
-                          >
-                            Planos
-                          </Link>
-                        </Button>
+                        <div className="inline-flex items-center gap-1">
+                          <Button asChild size="sm" variant="ghost">
+                            <Link
+                              to="/core/nichos/$slug"
+                              params={{ slug: s.sub_slug }}
+                            >
+                              Cockpit
+                            </Link>
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link
+                              to="/admin/niche-plans"
+                              search={{ niche: s.sub_slug } as never}
+                            >
+                              Planos
+                            </Link>
+                          </Button>
+                        </div>
                       </td>
+
                     </tr>
                   ))
                 )}
