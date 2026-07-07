@@ -8,10 +8,9 @@
  *   contextual + quick-links relevantes.
  * • Nichos futuros: fallback genérico funciona imediatamente.
  */
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useParams } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
 import {
   ArrowUpRight, Building2, ChartNoAxesCombined, HeartHandshake, Repeat, Rocket, Sparkles, TrendingUp, Users,
 } from "lucide-react";
@@ -24,17 +23,14 @@ import { cn } from "@/lib/utils";
 import { getNicheCockpit } from "@/lib/niche-cockpit.functions";
 import { getNichePlaybook, ACCENT_CLASSES } from "@/lib/niche-playbooks";
 
-const ParamsSchema = z.object({ slug: z.string().min(1).max(100) });
-
 export const Route = createFileRoute("/_authenticated/nichos/$slug")({
-  parseParams: (params) => ParamsSchema.parse(params),
   head: ({ params }) => ({
     meta: [
-      { title: `Cockpit ${params.slug} — Impulsionando` },
+      { title: `Cockpit ${(params as { slug: string }).slug} — Impulsionando` },
       { name: "robots", content: "noindex" },
       {
         name: "description",
-        content: `Cockpit de funil, KPIs e playbook do nicho ${params.slug} no core Impulsionando.`,
+        content: `Cockpit de funil, KPIs e playbook do nicho ${(params as { slug: string }).slug} no core Impulsionando.`,
       },
     ],
   }),
@@ -46,12 +42,15 @@ function fmtBRL(v: number) {
 }
 
 function NichoCockpitPage() {
-  const { slug } = Route.useParams();
+  // strict:false para tolerar geração do route tree em andamento.
+  const params = useParams({ strict: false }) as { slug?: string };
+  const slug = params.slug ?? "";
   const fn = useServerFn(getNicheCockpit);
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["niche-cockpit", slug],
     queryFn: () => fn({ data: { slug } }),
     staleTime: 60_000,
+    enabled: !!slug,
   });
 
   const playbook = getNichePlaybook(slug, data?.name ?? slug);
@@ -78,7 +77,7 @@ function NichoCockpitPage() {
       <PageHeader
         title={playbook.headline}
         description={playbook.subhead}
-        badge={
+        action={
           <Badge className={cn("text-[10px]", accent.badge)}>
             Nicho · {slug}
           </Badge>
@@ -91,15 +90,16 @@ function NichoCockpitPage() {
           Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-24" />)
         ) : (
           <>
-            <StatCard label="Tenants no nicho" value={String(data?.tenants ?? 0)} icon={<Building2 className="w-4 h-4" />} />
-            <StatCard label="Leads (30d)" value={String(data?.leads30d ?? 0)} icon={<Users className="w-4 h-4" />} />
-            <StatCard label="Oportunidades abertas" value={String(data?.opportunitiesOpen ?? 0)} icon={<TrendingUp className="w-4 h-4" />} />
-            <StatCard label="Ganhas (30d)" value={String(data?.opportunitiesWon30d ?? 0)} icon={<Rocket className="w-4 h-4" />} />
-            <StatCard label="GMV (30d)" value={fmtBRL(data?.gmv30d ?? 0)} icon={<ChartNoAxesCombined className="w-4 h-4" />} />
-            <StatCard label="Conversão" value={`${(data?.conversionRate ?? 0).toFixed(1)}%`} icon={<TrendingUp className="w-4 h-4" />} />
+            <StatCard label="Tenants no nicho" value={String(data?.tenants ?? 0)} icon={Building2} />
+            <StatCard label="Leads (30d)" value={String(data?.leads30d ?? 0)} icon={Users} />
+            <StatCard label="Oportunidades abertas" value={String(data?.opportunitiesOpen ?? 0)} icon={TrendingUp} />
+            <StatCard label="Ganhas (30d)" value={String(data?.opportunitiesWon30d ?? 0)} icon={Rocket} />
+            <StatCard label="GMV (30d)" value={fmtBRL(data?.gmv30d ?? 0)} icon={ChartNoAxesCombined} />
+            <StatCard label="Conversão" value={`${(data?.conversionRate ?? 0).toFixed(1)}%`} icon={TrendingUp} />
           </>
         )}
       </div>
+
 
       {/* Estado vazio quando não há tenants */}
       {!isLoading && (data?.tenants ?? 0) === 0 && (
