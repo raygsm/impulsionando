@@ -28,8 +28,11 @@ export const AUTOMACAO_NAV: Array<{ to: string; label: string; icon: LucideIcon 
 
 export function AutomacaoSubnav() {
   const { pathname } = useLocation();
-  const search = useSearch({ strict: false }) as { tenant?: string };
-  const scoped = search?.tenant ? { tenant: search.tenant } : undefined;
+  const search = useSearch({ strict: false }) as { tenant?: string; mode?: "demo" | "producao" };
+  const scoped =
+    search?.tenant || search?.mode
+      ? { ...(search?.tenant ? { tenant: search.tenant } : {}), ...(search?.mode ? { mode: search.mode } : {}) }
+      : undefined;
   return (
     <nav className="flex flex-wrap gap-1 border-b pb-3 mb-6" aria-label="Automação">
       {AUTOMACAO_NAV.map(({ to, label, icon: Icon }) => {
