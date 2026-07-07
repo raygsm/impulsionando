@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import {
