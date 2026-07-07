@@ -37,6 +37,7 @@ export const NAVIGATION_AREAS: Area[] = [
     icon: Home,
     accent: "primary",
     links: [
+      { label: "Auditoria em Tempo Real", to: "/auditoria" },
       { label: "Visão Geral", to: "/dashboard" },
       { label: "Buscar", to: "/buscar" },
       { label: "Painel Executivo", to: "/dashboards/core" },
@@ -44,6 +45,7 @@ export const NAVIGATION_AREAS: Area[] = [
       { label: "Atividades Recentes", to: "/notifications" },
       { label: "Alertas", to: "/admin/action-center" },
     ],
+
   },
   {
     key: "clientes",
