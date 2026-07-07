@@ -126,11 +126,15 @@ export const NICHO_VARIANTS: Workflow[] = ([
   ["clube","boas-vindas","Clube — boas-vindas","consumer.created",["email","impulsionito"]],
   ["clube","voucher-disponivel","Clube — voucher disponível","voucher.available",["email","impulsionito"]],
   ["clube","beneficio-expirando","Clube — benefício expirando","benefit.expires_in 3d",["email","impulsionito"]],
-] as const).map(([niche, slug, nome, gatilho, canais], i) => ({
-  id: 900 + i, slug: `${niche}-${slug}`, nome, regua: "nicho" as const,
-  gatilho, canais: [...canais] as Canal[], planoMin: "essencial" as const,
-  status: "rascunho" as const, modo: "demo" as const, nichos: [niche],
-}));
+] as const).map(([niche, slug, nome, gatilho, canais], i) => {
+  const arr = [...canais] as Canal[];
+  const withWa = arr.includes("whatsapp") || (arr.length === 1 && arr[0] === "internal") ? arr : [...arr, "whatsapp"];
+  return {
+    id: 900 + i, slug: `${niche}-${slug}`, nome, regua: "nicho" as const,
+    gatilho, canais: withWa, planoMin: "essencial" as const,
+    status: "rascunho" as const, modo: "demo" as const, nichos: [niche],
+  } satisfies Workflow;
+});
 
 export const ALL_WORKFLOWS: Workflow[] = [...CATALOG, ...NICHO_VARIANTS];
 
