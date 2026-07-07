@@ -891,9 +891,9 @@ const SignalRow = memo(function SignalRow({ ok, text, pending }: { ok: boolean; 
 
 const MiniStat = memo(function MiniStat({ icon: Icon, value, label }: { icon: any; value: string; label: string }) {
   return (
-    <div className="rounded-xl border border-primary/15 bg-card/70 backdrop-blur p-3 text-center hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none">
-      <Icon className="w-4 h-4 text-primary mx-auto mb-1" />
-      <div className="text-base font-bold leading-none tabular-nums">{value}</div>
+    <div className="rounded-xl border border-primary/20 bg-card p-3 text-center text-foreground hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none">
+      <Icon className="w-4 h-4 text-primary mx-auto mb-1" aria-hidden="true" />
+      <div className="text-base font-bold leading-none tabular-nums text-foreground">{value}</div>
       <div className="text-[10px] text-muted-foreground mt-1 leading-tight">{label}</div>
     </div>
   );
