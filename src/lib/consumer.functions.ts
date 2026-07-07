@@ -67,9 +67,11 @@ export const getPublicCompanyBySlug = createServerFn({ method: "GET" })
     const sb = publicClient();
     const { data: row, error } = await sb
       .from("companies")
-      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, address_line, instagram, facebook, website, whatsapp, primary_color, rating_avg, rating_count")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, address_line, instagram, facebook, website, whatsapp, primary_color, rating_avg, rating_count, subdomain, domain")
       .eq("public_slug", data.slug)
       .eq("vitrine_enabled", true)
+      .neq("is_demo", true)
+      .neq("is_active", false)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Empresa não encontrada");
