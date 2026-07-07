@@ -113,6 +113,8 @@ function CoreDashboardPage() {
       </Card>
 
       <PercebidoSection audience="core" days={30} />
+
+      <AllAreasPanel />
     </div>
   );
 }
