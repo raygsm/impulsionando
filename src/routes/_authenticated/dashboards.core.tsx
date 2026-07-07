@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
+import { AllAreasPanel } from "@/components/app/AllAreasPanel";
 import { fetchCoreAudienceDashboard } from "@/lib/audience-dashboards.functions";
 import { fetchMarketplaceKPIs } from "@/lib/marketplace.functions";
 import { Loader2, TrendingUp, ArrowRight } from "lucide-react";
@@ -113,6 +114,8 @@ function CoreDashboardPage() {
       </Card>
 
       <PercebidoSection audience="core" days={30} />
+
+      <AllAreasPanel />
     </div>
   );
 }
