@@ -1,4 +1,5 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { listAutomationRequests, registerAutomationRequest } from "@/lib/automation-approvals.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { downloadCsv } from "@/lib/exports";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações — Automação" }, { name: "robots", content: "noindex" }] }),
