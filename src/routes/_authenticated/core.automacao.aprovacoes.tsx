@@ -118,12 +118,15 @@ function AprovacoesPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          <span className="rounded border px-2 py-0.5">Pendentes: <b>{counts.pending}</b></span>
-          <span className="rounded border px-2 py-0.5">Aprovadas: <b>{counts.approved}</b></span>
-          <span className="rounded border px-2 py-0.5">Recusadas: <b>{counts.rejected}</b></span>
-          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: {rows.length}</span>
+        <div className="flex flex-wrap gap-2 text-[11px]" data-testid="approval-counts">
+          <span className="rounded border px-2 py-0.5">Pendentes: <b data-testid="count-pending">{counts.pending}</b></span>
+          <span className="rounded border px-2 py-0.5">Aprovadas: <b data-testid="count-approved">{counts.approved}</b></span>
+          <span className="rounded border px-2 py-0.5">Recusadas: <b data-testid="count-rejected">{counts.rejected}</b></span>
+          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: <b data-testid="count-total">{rows.length}</b></span>
         </div>
+        <p className="text-[10px] text-muted-foreground">
+          As contagens são derivadas da própria lista abaixo: se uma linha aparece, ela é somada aqui. Use <b>Disparar teste</b> e clique <b>Atualizar</b> para conferir o incremento em tempo real.
+        </p>
 
 
         {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
