@@ -86,7 +86,7 @@ function BuscarPage() {
   useEffect(() => {
     const t = setTimeout(() => {
       setDebounced(value.trim());
-      navigate({ search: (prev) => ({ ...prev, q: value.trim() }), replace: true });
+      navigate({ search: (prev: { q: string }) => ({ ...prev, q: value.trim() }), replace: true });
     }, 220);
     return () => clearTimeout(t);
   }, [value, navigate]);
