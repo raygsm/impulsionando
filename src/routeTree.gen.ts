@@ -380,6 +380,7 @@ import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedCoreBiEcossistemaRouteImport } from './routes/_authenticated/core.bi-ecossistema'
+import { Route as AuthenticatedCoreAutomacaoRouteImport } from './routes/_authenticated/core.automacao'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
 import { Route as AuthenticatedContabilidadeTarefasRouteImport } from './routes/_authenticated/contabilidade.tarefas'
 import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade.relatorios'
@@ -602,6 +603,7 @@ import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
 import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './routes/_authenticated/core.estudio-visual.index'
 import { Route as AuthenticatedCoreComercialIndexRouteImport } from './routes/_authenticated/core.comercial.index'
+import { Route as AuthenticatedCoreAutomacaoIndexRouteImport } from './routes/_authenticated/core.automacao.index'
 import { Route as AuthenticatedCoreAdministracaoIndexRouteImport } from './routes/_authenticated/core.administracao.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -687,6 +689,21 @@ import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_a
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
+import { Route as AuthenticatedCoreAutomacaoWebhooksRouteImport } from './routes/_authenticated/core.automacao.webhooks'
+import { Route as AuthenticatedCoreAutomacaoTemplatesRouteImport } from './routes/_authenticated/core.automacao.templates'
+import { Route as AuthenticatedCoreAutomacaoProducaoRouteImport } from './routes/_authenticated/core.automacao.producao'
+import { Route as AuthenticatedCoreAutomacaoMonitoramentoRouteImport } from './routes/_authenticated/core.automacao.monitoramento'
+import { Route as AuthenticatedCoreAutomacaoModelosTenantRouteImport } from './routes/_authenticated/core.automacao.modelos-tenant'
+import { Route as AuthenticatedCoreAutomacaoModelosPlanoRouteImport } from './routes/_authenticated/core.automacao.modelos-plano'
+import { Route as AuthenticatedCoreAutomacaoModelosNichoRouteImport } from './routes/_authenticated/core.automacao.modelos-nicho'
+import { Route as AuthenticatedCoreAutomacaoLogsRouteImport } from './routes/_authenticated/core.automacao.logs'
+import { Route as AuthenticatedCoreAutomacaoHistoricoRouteImport } from './routes/_authenticated/core.automacao.historico'
+import { Route as AuthenticatedCoreAutomacaoFluxosRouteImport } from './routes/_authenticated/core.automacao.fluxos'
+import { Route as AuthenticatedCoreAutomacaoFallbackHumanoRouteImport } from './routes/_authenticated/core.automacao.fallback-humano'
+import { Route as AuthenticatedCoreAutomacaoErrosRouteImport } from './routes/_authenticated/core.automacao.erros'
+import { Route as AuthenticatedCoreAutomacaoDemonstracoesRouteImport } from './routes/_authenticated/core.automacao.demonstracoes'
+import { Route as AuthenticatedCoreAutomacaoCanaisRouteImport } from './routes/_authenticated/core.automacao.canais'
+import { Route as AuthenticatedCoreAutomacaoAprovacoesRouteImport } from './routes/_authenticated/core.automacao.aprovacoes'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAssinaturaCheckoutPlanoRouteImport } from './routes/_authenticated/assinatura.checkout.$plano'
 import { Route as AuthenticatedAdminTenantIdRouteImport } from './routes/_authenticated/admin.tenant.$id'
@@ -2756,6 +2773,12 @@ const AuthenticatedCoreBiEcossistemaRoute =
     path: '/bi-ecossistema',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreAutomacaoRoute =
+  AuthenticatedCoreAutomacaoRouteImport.update({
+    id: '/automacao',
+    path: '/automacao',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   id: '/contrato/$id',
   path: '/contrato/$id',
@@ -4078,6 +4101,12 @@ const AuthenticatedCoreComercialIndexRoute =
     path: '/comercial/',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreAutomacaoIndexRoute =
+  AuthenticatedCoreAutomacaoIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
 const AuthenticatedCoreAdministracaoIndexRoute =
   AuthenticatedCoreAdministracaoIndexRouteImport.update({
     id: '/administracao/',
@@ -4571,6 +4600,96 @@ const AuthenticatedCoreClienteIdRoute =
     id: '/cliente/$id',
     path: '/cliente/$id',
     getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoWebhooksRoute =
+  AuthenticatedCoreAutomacaoWebhooksRouteImport.update({
+    id: '/webhooks',
+    path: '/webhooks',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoTemplatesRoute =
+  AuthenticatedCoreAutomacaoTemplatesRouteImport.update({
+    id: '/templates',
+    path: '/templates',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoProducaoRoute =
+  AuthenticatedCoreAutomacaoProducaoRouteImport.update({
+    id: '/producao',
+    path: '/producao',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoMonitoramentoRoute =
+  AuthenticatedCoreAutomacaoMonitoramentoRouteImport.update({
+    id: '/monitoramento',
+    path: '/monitoramento',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoModelosTenantRoute =
+  AuthenticatedCoreAutomacaoModelosTenantRouteImport.update({
+    id: '/modelos-tenant',
+    path: '/modelos-tenant',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoModelosPlanoRoute =
+  AuthenticatedCoreAutomacaoModelosPlanoRouteImport.update({
+    id: '/modelos-plano',
+    path: '/modelos-plano',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoModelosNichoRoute =
+  AuthenticatedCoreAutomacaoModelosNichoRouteImport.update({
+    id: '/modelos-nicho',
+    path: '/modelos-nicho',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoLogsRoute =
+  AuthenticatedCoreAutomacaoLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoHistoricoRoute =
+  AuthenticatedCoreAutomacaoHistoricoRouteImport.update({
+    id: '/historico',
+    path: '/historico',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoFluxosRoute =
+  AuthenticatedCoreAutomacaoFluxosRouteImport.update({
+    id: '/fluxos',
+    path: '/fluxos',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoFallbackHumanoRoute =
+  AuthenticatedCoreAutomacaoFallbackHumanoRouteImport.update({
+    id: '/fallback-humano',
+    path: '/fallback-humano',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoErrosRoute =
+  AuthenticatedCoreAutomacaoErrosRouteImport.update({
+    id: '/erros',
+    path: '/erros',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoDemonstracoesRoute =
+  AuthenticatedCoreAutomacaoDemonstracoesRouteImport.update({
+    id: '/demonstracoes',
+    path: '/demonstracoes',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoCanaisRoute =
+  AuthenticatedCoreAutomacaoCanaisRouteImport.update({
+    id: '/canais',
+    path: '/canais',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
+  } as any)
+const AuthenticatedCoreAutomacaoAprovacoesRoute =
+  AuthenticatedCoreAutomacaoAprovacoesRouteImport.update({
+    id: '/aprovacoes',
+    path: '/aprovacoes',
+    getParentRoute: () => AuthenticatedCoreAutomacaoRoute,
   } as any)
 const AuthenticatedBarMarketplaceNovoPedidoRoute =
   AuthenticatedBarMarketplaceNovoPedidoRouteImport.update({
@@ -5421,6 +5540,7 @@ export interface FileRoutesByFullPath {
   '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
+  '/core/automacao': typeof AuthenticatedCoreAutomacaoRouteWithChildren
   '/core/bi-ecossistema': typeof AuthenticatedCoreBiEcossistemaRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -5598,6 +5718,21 @@ export interface FileRoutesByFullPath {
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
+  '/core/automacao/aprovacoes': typeof AuthenticatedCoreAutomacaoAprovacoesRoute
+  '/core/automacao/canais': typeof AuthenticatedCoreAutomacaoCanaisRoute
+  '/core/automacao/demonstracoes': typeof AuthenticatedCoreAutomacaoDemonstracoesRoute
+  '/core/automacao/erros': typeof AuthenticatedCoreAutomacaoErrosRoute
+  '/core/automacao/fallback-humano': typeof AuthenticatedCoreAutomacaoFallbackHumanoRoute
+  '/core/automacao/fluxos': typeof AuthenticatedCoreAutomacaoFluxosRoute
+  '/core/automacao/historico': typeof AuthenticatedCoreAutomacaoHistoricoRoute
+  '/core/automacao/logs': typeof AuthenticatedCoreAutomacaoLogsRoute
+  '/core/automacao/modelos-nicho': typeof AuthenticatedCoreAutomacaoModelosNichoRoute
+  '/core/automacao/modelos-plano': typeof AuthenticatedCoreAutomacaoModelosPlanoRoute
+  '/core/automacao/modelos-tenant': typeof AuthenticatedCoreAutomacaoModelosTenantRoute
+  '/core/automacao/monitoramento': typeof AuthenticatedCoreAutomacaoMonitoramentoRoute
+  '/core/automacao/producao': typeof AuthenticatedCoreAutomacaoProducaoRoute
+  '/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
+  '/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -5683,6 +5818,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
   '/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
@@ -6335,6 +6471,21 @@ export interface FileRoutesByTo {
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
+  '/core/automacao/aprovacoes': typeof AuthenticatedCoreAutomacaoAprovacoesRoute
+  '/core/automacao/canais': typeof AuthenticatedCoreAutomacaoCanaisRoute
+  '/core/automacao/demonstracoes': typeof AuthenticatedCoreAutomacaoDemonstracoesRoute
+  '/core/automacao/erros': typeof AuthenticatedCoreAutomacaoErrosRoute
+  '/core/automacao/fallback-humano': typeof AuthenticatedCoreAutomacaoFallbackHumanoRoute
+  '/core/automacao/fluxos': typeof AuthenticatedCoreAutomacaoFluxosRoute
+  '/core/automacao/historico': typeof AuthenticatedCoreAutomacaoHistoricoRoute
+  '/core/automacao/logs': typeof AuthenticatedCoreAutomacaoLogsRoute
+  '/core/automacao/modelos-nicho': typeof AuthenticatedCoreAutomacaoModelosNichoRoute
+  '/core/automacao/modelos-plano': typeof AuthenticatedCoreAutomacaoModelosPlanoRoute
+  '/core/automacao/modelos-tenant': typeof AuthenticatedCoreAutomacaoModelosTenantRoute
+  '/core/automacao/monitoramento': typeof AuthenticatedCoreAutomacaoMonitoramentoRoute
+  '/core/automacao/producao': typeof AuthenticatedCoreAutomacaoProducaoRoute
+  '/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
+  '/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -6420,6 +6571,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/administracao': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/core/automacao': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial': typeof AuthenticatedCoreComercialIndexRoute
   '/core/estudio-visual': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
@@ -6910,6 +7062,7 @@ export interface FileRoutesById {
   '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/_authenticated/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
+  '/_authenticated/core/automacao': typeof AuthenticatedCoreAutomacaoRouteWithChildren
   '/_authenticated/core/bi-ecossistema': typeof AuthenticatedCoreBiEcossistemaRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -7087,6 +7240,21 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/_authenticated/assinatura/checkout/$plano': typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
+  '/_authenticated/core/automacao/aprovacoes': typeof AuthenticatedCoreAutomacaoAprovacoesRoute
+  '/_authenticated/core/automacao/canais': typeof AuthenticatedCoreAutomacaoCanaisRoute
+  '/_authenticated/core/automacao/demonstracoes': typeof AuthenticatedCoreAutomacaoDemonstracoesRoute
+  '/_authenticated/core/automacao/erros': typeof AuthenticatedCoreAutomacaoErrosRoute
+  '/_authenticated/core/automacao/fallback-humano': typeof AuthenticatedCoreAutomacaoFallbackHumanoRoute
+  '/_authenticated/core/automacao/fluxos': typeof AuthenticatedCoreAutomacaoFluxosRoute
+  '/_authenticated/core/automacao/historico': typeof AuthenticatedCoreAutomacaoHistoricoRoute
+  '/_authenticated/core/automacao/logs': typeof AuthenticatedCoreAutomacaoLogsRoute
+  '/_authenticated/core/automacao/modelos-nicho': typeof AuthenticatedCoreAutomacaoModelosNichoRoute
+  '/_authenticated/core/automacao/modelos-plano': typeof AuthenticatedCoreAutomacaoModelosPlanoRoute
+  '/_authenticated/core/automacao/modelos-tenant': typeof AuthenticatedCoreAutomacaoModelosTenantRoute
+  '/_authenticated/core/automacao/monitoramento': typeof AuthenticatedCoreAutomacaoMonitoramentoRoute
+  '/_authenticated/core/automacao/producao': typeof AuthenticatedCoreAutomacaoProducaoRoute
+  '/_authenticated/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
+  '/_authenticated/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -7172,6 +7340,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
+  '/_authenticated/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/_authenticated/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
   '/_authenticated/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
@@ -7662,6 +7831,7 @@ export interface FileRouteTypes {
     | '/contabilidade/relatorios'
     | '/contabilidade/tarefas'
     | '/contrato/$id'
+    | '/core/automacao'
     | '/core/bi-ecossistema'
     | '/core/briefings'
     | '/core/clientes'
@@ -7839,6 +8009,21 @@ export interface FileRouteTypes {
     | '/admin/tenant/$id'
     | '/assinatura/checkout/$plano'
     | '/bar/marketplace/novo-pedido'
+    | '/core/automacao/aprovacoes'
+    | '/core/automacao/canais'
+    | '/core/automacao/demonstracoes'
+    | '/core/automacao/erros'
+    | '/core/automacao/fallback-humano'
+    | '/core/automacao/fluxos'
+    | '/core/automacao/historico'
+    | '/core/automacao/logs'
+    | '/core/automacao/modelos-nicho'
+    | '/core/automacao/modelos-plano'
+    | '/core/automacao/modelos-tenant'
+    | '/core/automacao/monitoramento'
+    | '/core/automacao/producao'
+    | '/core/automacao/templates'
+    | '/core/automacao/webhooks'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
@@ -7924,6 +8109,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/core/administracao/'
+    | '/core/automacao/'
     | '/core/comercial/'
     | '/core/estudio-visual/'
     | '/core/nichos/'
@@ -8576,6 +8762,21 @@ export interface FileRouteTypes {
     | '/admin/tenant/$id'
     | '/assinatura/checkout/$plano'
     | '/bar/marketplace/novo-pedido'
+    | '/core/automacao/aprovacoes'
+    | '/core/automacao/canais'
+    | '/core/automacao/demonstracoes'
+    | '/core/automacao/erros'
+    | '/core/automacao/fallback-humano'
+    | '/core/automacao/fluxos'
+    | '/core/automacao/historico'
+    | '/core/automacao/logs'
+    | '/core/automacao/modelos-nicho'
+    | '/core/automacao/modelos-plano'
+    | '/core/automacao/modelos-tenant'
+    | '/core/automacao/monitoramento'
+    | '/core/automacao/producao'
+    | '/core/automacao/templates'
+    | '/core/automacao/webhooks'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
@@ -8661,6 +8862,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/core/administracao'
+    | '/core/automacao'
     | '/core/comercial'
     | '/core/estudio-visual'
     | '/core/nichos'
@@ -9150,6 +9352,7 @@ export interface FileRouteTypes {
     | '/_authenticated/contabilidade/relatorios'
     | '/_authenticated/contabilidade/tarefas'
     | '/_authenticated/contrato/$id'
+    | '/_authenticated/core/automacao'
     | '/_authenticated/core/bi-ecossistema'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
@@ -9327,6 +9530,21 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenant/$id'
     | '/_authenticated/assinatura/checkout/$plano'
     | '/_authenticated/bar/marketplace/novo-pedido'
+    | '/_authenticated/core/automacao/aprovacoes'
+    | '/_authenticated/core/automacao/canais'
+    | '/_authenticated/core/automacao/demonstracoes'
+    | '/_authenticated/core/automacao/erros'
+    | '/_authenticated/core/automacao/fallback-humano'
+    | '/_authenticated/core/automacao/fluxos'
+    | '/_authenticated/core/automacao/historico'
+    | '/_authenticated/core/automacao/logs'
+    | '/_authenticated/core/automacao/modelos-nicho'
+    | '/_authenticated/core/automacao/modelos-plano'
+    | '/_authenticated/core/automacao/modelos-tenant'
+    | '/_authenticated/core/automacao/monitoramento'
+    | '/_authenticated/core/automacao/producao'
+    | '/_authenticated/core/automacao/templates'
+    | '/_authenticated/core/automacao/webhooks'
     | '/_authenticated/core/cliente/$id'
     | '/_authenticated/core/integracoes/diagnostico'
     | '/_authenticated/core/integracoes/mercadopago'
@@ -9412,6 +9630,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/core/administracao/'
+    | '/_authenticated/core/automacao/'
     | '/_authenticated/core/comercial/'
     | '/_authenticated/core/estudio-visual/'
     | '/_authenticated/core/nichos/'
@@ -12281,6 +12500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreBiEcossistemaRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/automacao': {
+      id: '/_authenticated/core/automacao'
+      path: '/automacao'
+      fullPath: '/core/automacao'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/contrato/$id': {
       id: '/_authenticated/contrato/$id'
       path: '/contrato/$id'
@@ -13835,6 +14061,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreComercialIndexRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/automacao/': {
+      id: '/_authenticated/core/automacao/'
+      path: '/'
+      fullPath: '/core/automacao/'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
     '/_authenticated/core/administracao/': {
       id: '/_authenticated/core/administracao/'
       path: '/administracao'
@@ -14429,6 +14662,111 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/cliente/$id'
       preLoaderRoute: typeof AuthenticatedCoreClienteIdRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/automacao/webhooks': {
+      id: '/_authenticated/core/automacao/webhooks'
+      path: '/webhooks'
+      fullPath: '/core/automacao/webhooks'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoWebhooksRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/templates': {
+      id: '/_authenticated/core/automacao/templates'
+      path: '/templates'
+      fullPath: '/core/automacao/templates'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoTemplatesRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/producao': {
+      id: '/_authenticated/core/automacao/producao'
+      path: '/producao'
+      fullPath: '/core/automacao/producao'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoProducaoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/monitoramento': {
+      id: '/_authenticated/core/automacao/monitoramento'
+      path: '/monitoramento'
+      fullPath: '/core/automacao/monitoramento'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoMonitoramentoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/modelos-tenant': {
+      id: '/_authenticated/core/automacao/modelos-tenant'
+      path: '/modelos-tenant'
+      fullPath: '/core/automacao/modelos-tenant'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoModelosTenantRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/modelos-plano': {
+      id: '/_authenticated/core/automacao/modelos-plano'
+      path: '/modelos-plano'
+      fullPath: '/core/automacao/modelos-plano'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoModelosPlanoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/modelos-nicho': {
+      id: '/_authenticated/core/automacao/modelos-nicho'
+      path: '/modelos-nicho'
+      fullPath: '/core/automacao/modelos-nicho'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoModelosNichoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/logs': {
+      id: '/_authenticated/core/automacao/logs'
+      path: '/logs'
+      fullPath: '/core/automacao/logs'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoLogsRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/historico': {
+      id: '/_authenticated/core/automacao/historico'
+      path: '/historico'
+      fullPath: '/core/automacao/historico'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoHistoricoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/fluxos': {
+      id: '/_authenticated/core/automacao/fluxos'
+      path: '/fluxos'
+      fullPath: '/core/automacao/fluxos'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoFluxosRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/fallback-humano': {
+      id: '/_authenticated/core/automacao/fallback-humano'
+      path: '/fallback-humano'
+      fullPath: '/core/automacao/fallback-humano'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoFallbackHumanoRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/erros': {
+      id: '/_authenticated/core/automacao/erros'
+      path: '/erros'
+      fullPath: '/core/automacao/erros'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoErrosRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/demonstracoes': {
+      id: '/_authenticated/core/automacao/demonstracoes'
+      path: '/demonstracoes'
+      fullPath: '/core/automacao/demonstracoes'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoDemonstracoesRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/canais': {
+      id: '/_authenticated/core/automacao/canais'
+      path: '/canais'
+      fullPath: '/core/automacao/canais'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoCanaisRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
+    }
+    '/_authenticated/core/automacao/aprovacoes': {
+      id: '/_authenticated/core/automacao/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/core/automacao/aprovacoes'
+      preLoaderRoute: typeof AuthenticatedCoreAutomacaoAprovacoesRouteImport
+      parentRoute: typeof AuthenticatedCoreAutomacaoRoute
     }
     '/_authenticated/bar/marketplace/novo-pedido': {
       id: '/_authenticated/bar/marketplace/novo-pedido'
@@ -15094,6 +15432,63 @@ const AuthenticatedCervejariaRouteWithChildren =
     AuthenticatedCervejariaRouteChildren,
   )
 
+interface AuthenticatedCoreAutomacaoRouteChildren {
+  AuthenticatedCoreAutomacaoAprovacoesRoute: typeof AuthenticatedCoreAutomacaoAprovacoesRoute
+  AuthenticatedCoreAutomacaoCanaisRoute: typeof AuthenticatedCoreAutomacaoCanaisRoute
+  AuthenticatedCoreAutomacaoDemonstracoesRoute: typeof AuthenticatedCoreAutomacaoDemonstracoesRoute
+  AuthenticatedCoreAutomacaoErrosRoute: typeof AuthenticatedCoreAutomacaoErrosRoute
+  AuthenticatedCoreAutomacaoFallbackHumanoRoute: typeof AuthenticatedCoreAutomacaoFallbackHumanoRoute
+  AuthenticatedCoreAutomacaoFluxosRoute: typeof AuthenticatedCoreAutomacaoFluxosRoute
+  AuthenticatedCoreAutomacaoHistoricoRoute: typeof AuthenticatedCoreAutomacaoHistoricoRoute
+  AuthenticatedCoreAutomacaoLogsRoute: typeof AuthenticatedCoreAutomacaoLogsRoute
+  AuthenticatedCoreAutomacaoModelosNichoRoute: typeof AuthenticatedCoreAutomacaoModelosNichoRoute
+  AuthenticatedCoreAutomacaoModelosPlanoRoute: typeof AuthenticatedCoreAutomacaoModelosPlanoRoute
+  AuthenticatedCoreAutomacaoModelosTenantRoute: typeof AuthenticatedCoreAutomacaoModelosTenantRoute
+  AuthenticatedCoreAutomacaoMonitoramentoRoute: typeof AuthenticatedCoreAutomacaoMonitoramentoRoute
+  AuthenticatedCoreAutomacaoProducaoRoute: typeof AuthenticatedCoreAutomacaoProducaoRoute
+  AuthenticatedCoreAutomacaoTemplatesRoute: typeof AuthenticatedCoreAutomacaoTemplatesRoute
+  AuthenticatedCoreAutomacaoWebhooksRoute: typeof AuthenticatedCoreAutomacaoWebhooksRoute
+  AuthenticatedCoreAutomacaoIndexRoute: typeof AuthenticatedCoreAutomacaoIndexRoute
+}
+
+const AuthenticatedCoreAutomacaoRouteChildren: AuthenticatedCoreAutomacaoRouteChildren =
+  {
+    AuthenticatedCoreAutomacaoAprovacoesRoute:
+      AuthenticatedCoreAutomacaoAprovacoesRoute,
+    AuthenticatedCoreAutomacaoCanaisRoute:
+      AuthenticatedCoreAutomacaoCanaisRoute,
+    AuthenticatedCoreAutomacaoDemonstracoesRoute:
+      AuthenticatedCoreAutomacaoDemonstracoesRoute,
+    AuthenticatedCoreAutomacaoErrosRoute: AuthenticatedCoreAutomacaoErrosRoute,
+    AuthenticatedCoreAutomacaoFallbackHumanoRoute:
+      AuthenticatedCoreAutomacaoFallbackHumanoRoute,
+    AuthenticatedCoreAutomacaoFluxosRoute:
+      AuthenticatedCoreAutomacaoFluxosRoute,
+    AuthenticatedCoreAutomacaoHistoricoRoute:
+      AuthenticatedCoreAutomacaoHistoricoRoute,
+    AuthenticatedCoreAutomacaoLogsRoute: AuthenticatedCoreAutomacaoLogsRoute,
+    AuthenticatedCoreAutomacaoModelosNichoRoute:
+      AuthenticatedCoreAutomacaoModelosNichoRoute,
+    AuthenticatedCoreAutomacaoModelosPlanoRoute:
+      AuthenticatedCoreAutomacaoModelosPlanoRoute,
+    AuthenticatedCoreAutomacaoModelosTenantRoute:
+      AuthenticatedCoreAutomacaoModelosTenantRoute,
+    AuthenticatedCoreAutomacaoMonitoramentoRoute:
+      AuthenticatedCoreAutomacaoMonitoramentoRoute,
+    AuthenticatedCoreAutomacaoProducaoRoute:
+      AuthenticatedCoreAutomacaoProducaoRoute,
+    AuthenticatedCoreAutomacaoTemplatesRoute:
+      AuthenticatedCoreAutomacaoTemplatesRoute,
+    AuthenticatedCoreAutomacaoWebhooksRoute:
+      AuthenticatedCoreAutomacaoWebhooksRoute,
+    AuthenticatedCoreAutomacaoIndexRoute: AuthenticatedCoreAutomacaoIndexRoute,
+  }
+
+const AuthenticatedCoreAutomacaoRouteWithChildren =
+  AuthenticatedCoreAutomacaoRoute._addFileChildren(
+    AuthenticatedCoreAutomacaoRouteChildren,
+  )
+
 interface AuthenticatedCoreMarketplaceRouteChildren {
   AuthenticatedCoreMarketplaceCompradoresRoute: typeof AuthenticatedCoreMarketplaceCompradoresRoute
   AuthenticatedCoreMarketplaceFinanceiroRoute: typeof AuthenticatedCoreMarketplaceFinanceiroRoute
@@ -15183,6 +15578,7 @@ const AuthenticatedCoreClienteIdRouteWithChildren =
   )
 
 interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreAutomacaoRoute: typeof AuthenticatedCoreAutomacaoRouteWithChildren
   AuthenticatedCoreBiEcossistemaRoute: typeof AuthenticatedCoreBiEcossistemaRoute
   AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
@@ -15241,6 +15637,7 @@ interface AuthenticatedCoreRouteChildren {
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreAutomacaoRoute: AuthenticatedCoreAutomacaoRouteWithChildren,
   AuthenticatedCoreBiEcossistemaRoute: AuthenticatedCoreBiEcossistemaRoute,
   AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
