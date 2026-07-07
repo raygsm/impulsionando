@@ -203,6 +203,7 @@ import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedComecarRouteImport } from './routes/_authenticated/comecar'
 import { Route as AuthenticatedCervejariaRouteImport } from './routes/_authenticated/cervejaria'
+import { Route as AuthenticatedBuscarRouteImport } from './routes/_authenticated/buscar'
 import { Route as AuthenticatedBuscaRouteImport } from './routes/_authenticated/busca'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
@@ -1756,6 +1757,11 @@ const AuthenticatedComecarRoute = AuthenticatedComecarRouteImport.update({
 const AuthenticatedCervejariaRoute = AuthenticatedCervejariaRouteImport.update({
   id: '/cervejaria',
   path: '/cervejaria',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBuscarRoute = AuthenticatedBuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBuscaRoute = AuthenticatedBuscaRouteImport.update({
@@ -5180,6 +5186,7 @@ export interface FileRoutesByFullPath {
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/busca': typeof AuthenticatedBuscaRoute
+  '/buscar': typeof AuthenticatedBuscarRoute
   '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/comecar': typeof AuthenticatedComecarRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -5942,6 +5949,7 @@ export interface FileRoutesByTo {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/busca': typeof AuthenticatedBuscaRoute
+  '/buscar': typeof AuthenticatedBuscarRoute
   '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/comecar': typeof AuthenticatedComecarRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -6704,6 +6712,7 @@ export interface FileRoutesById {
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/busca': typeof AuthenticatedBuscaRoute
+  '/_authenticated/buscar': typeof AuthenticatedBuscarRoute
   '/_authenticated/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/_authenticated/comecar': typeof AuthenticatedComecarRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
@@ -7474,6 +7483,7 @@ export interface FileRouteTypes {
     | '/automacoes'
     | '/bi'
     | '/busca'
+    | '/buscar'
     | '/cervejaria'
     | '/comecar'
     | '/companies'
@@ -8236,6 +8246,7 @@ export interface FileRouteTypes {
     | '/audit'
     | '/automacoes'
     | '/busca'
+    | '/buscar'
     | '/cervejaria'
     | '/comecar'
     | '/companies'
@@ -8997,6 +9008,7 @@ export interface FileRouteTypes {
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
     | '/_authenticated/busca'
+    | '/_authenticated/buscar'
     | '/_authenticated/cervejaria'
     | '/_authenticated/comecar'
     | '/_authenticated/companies'
@@ -11271,6 +11283,13 @@ declare module '@tanstack/react-router' {
       path: '/cervejaria'
       fullPath: '/cervejaria'
       preLoaderRoute: typeof AuthenticatedCervejariaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buscar': {
+      id: '/_authenticated/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof AuthenticatedBuscarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/busca': {
@@ -16202,6 +16221,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedBuscaRoute: typeof AuthenticatedBuscaRoute
+  AuthenticatedBuscarRoute: typeof AuthenticatedBuscarRoute
   AuthenticatedCervejariaRoute: typeof AuthenticatedCervejariaRouteWithChildren
   AuthenticatedComecarRoute: typeof AuthenticatedComecarRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
@@ -16496,6 +16516,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedBuscaRoute: AuthenticatedBuscaRoute,
+  AuthenticatedBuscarRoute: AuthenticatedBuscarRoute,
   AuthenticatedCervejariaRoute: AuthenticatedCervejariaRouteWithChildren,
   AuthenticatedComecarRoute: AuthenticatedComecarRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
