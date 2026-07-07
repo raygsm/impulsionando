@@ -150,13 +150,13 @@ function AprovacoesPage() {
                 {rows.map((r) => {
                   const files = Array.isArray(r.files) ? (r.files as string[]) : [];
                   return (
-                    <tr key={r.id} className="border-t align-top">
+                    <tr key={r.id} className="border-t align-top" data-testid="approval-row" data-mode={r.mode}>
                       <td className="p-2 whitespace-nowrap text-muted-foreground">
                         {new Date(r.created_at).toLocaleString("pt-BR")}
                       </td>
                       <td className="p-2 font-mono">{r.action}</td>
                       <td className="p-2">{r.tenant_slug ?? "—"}</td>
-                      <td className="p-2 uppercase">{r.mode}</td>
+                      <td className="p-2"><ModeBadge mode={r.mode} /></td>
                       <td className="p-2">{r.regua ?? "—"}</td>
                       <td className="p-2 max-w-[280px]">
                         <div className="space-y-0.5">
