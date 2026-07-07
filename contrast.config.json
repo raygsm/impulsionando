@@ -1,0 +1,28 @@
+{
+  "$schema": "./contrast.schema.json",
+  "description": "Thresholds WCAG por rota. Ver docs/CONTRAST_METHODOLOGY.md.",
+  "defaults": {
+    "normal": 4.5,
+    "large": 3.0,
+    "ignoreBelowPx": 10,
+    "tolerance": 0.05,
+    "samplesPerElement": 5,
+    "strict": false
+  },
+  "ignoreSelectors": [
+    "[data-contrast-ignore]",
+    ".sr-only",
+    "[aria-hidden='true']",
+    "[data-slot='badge']",
+    "svg text"
+  ],
+  "routes": {
+    "/":         { "normal": 4.5, "large": 3.0, "strict": true },
+    "/nichos":   { "normal": 4.5, "large": 3.0, "strict": true },
+    "/showroom": { "normal": 4.5, "large": 3.0, "strict": true },
+    "/planos":   { "normal": 4.5, "large": 3.0, "strict": true },
+    "/vitrine":  { "normal": 4.5, "large": 3.0, "strict": true },
+    "/demo":     { "normal": 4.0, "large": 3.0, "strict": false },
+    "/_authenticated/**": { "normal": 4.0, "large": 3.0, "strict": false }
+  }
+}
