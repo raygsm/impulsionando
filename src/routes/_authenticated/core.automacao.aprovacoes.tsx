@@ -124,6 +124,39 @@ function AprovacoesPage() {
             <Button size="sm" variant="outline" onClick={runManualTest} data-testid="btn-manual-test">
               Disparar teste ({currentMode})
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              data-testid="btn-export-csv"
+              disabled={visibleRows.length === 0}
+              onClick={() => {
+                const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+                const suffix = [
+                  tenantSlug ? `tenant-${tenantSlug}` : "all-tenants",
+                  `mode-${modeFilter}`,
+                  stamp,
+                ].join("_");
+                downloadCsv(
+                  `automation-approvals_${suffix}.csv`,
+                  ["created_at", "tenant_slug", "mode", "regua", "action", "status", "files", "note"],
+                  visibleRows.map((r) => ({
+                    created_at: r.created_at,
+                    tenant_slug: r.tenant_slug ?? "",
+                    mode: r.mode,
+                    regua: r.regua ?? "",
+                    action: r.action,
+                    status: r.status,
+                    files: Array.isArray(r.files) ? (r.files as string[]).join(" | ") : "",
+                    note: (r as { note?: string | null }).note ?? "",
+                  })),
+                );
+                toast.success(`CSV exportado (${visibleRows.length} linha(s))`, {
+                  description: `Filtro: tenant=${tenantSlug ?? "todos"} · mode=${modeFilter}`,
+                });
+              }}
+            >
+              <Download className="h-3.5 w-3.5 mr-1" /> Exportar CSV
+            </Button>
             <button
               onClick={() => refetch()}
               className="text-xs underline text-muted-foreground hover:text-foreground"
@@ -133,24 +166,55 @@ function AprovacoesPage() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="text-muted-foreground">Filtrar modo:</span>
+          {(["all", "demo", "producao"] as const).map((m) => (
+            <Button
+              key={m}
+              size="sm"
+              variant={modeFilter === m ? "default" : "outline"}
+              className="h-6 px-2 text-[11px]"
+              onClick={() => setModeFilter(m)}
+              data-testid={`filter-mode-${m}`}
+            >
+              {m === "all" ? "Todos" : m === "demo" ? "Demo" : "Produção"}
+            </Button>
+          ))}
+        </div>
+
         <div className="flex flex-wrap gap-2 text-[11px]" data-testid="approval-counts">
           <span className="rounded border px-2 py-0.5">Pendentes: <b data-testid="count-pending">{counts.pending}</b></span>
           <span className="rounded border px-2 py-0.5">Aprovadas: <b data-testid="count-approved">{counts.approved}</b></span>
           <span className="rounded border px-2 py-0.5">Recusadas: <b data-testid="count-rejected">{counts.rejected}</b></span>
-          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: <b data-testid="count-total">{rows.length}</b></span>
+          <span className="rounded border px-2 py-0.5 text-muted-foreground">
+            Total visível: <b data-testid="count-total">{visibleRows.length}</b>
+            {visibleRows.length !== rows.length ? <> / {rows.length}</> : null}
+          </span>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          As contagens são derivadas da própria lista abaixo: se uma linha aparece, ela é somada aqui. Use <b>Disparar teste</b> e clique <b>Atualizar</b> para conferir o incremento em tempo real.
+          Contagens refletem apenas as linhas renderizadas abaixo (após filtros tenant/mode).
+          Pendentes + Aprovadas + Recusadas{registeredCount > 0 ? " + Registradas" : ""} devem somar o Total visível.
         </p>
+        {!countsConsistent && visibleRows.length > 0 && (
+          <div
+            role="alert"
+            data-testid="counts-integrity-warning"
+            className="text-[11px] rounded border border-destructive/40 bg-destructive/10 text-destructive px-2 py-1"
+          >
+            Divergência: soma dos status ({sumTracked}) ≠ linhas renderizadas ({visibleRows.length}). Recarregue a lista.
+          </div>
+        )}
 
 
         {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
         {error && <div className="text-xs text-destructive">Falha ao carregar: {String((error as Error).message)}</div>}
-        {!isLoading && !error && rows.length === 0 && (
-          <div className="text-xs text-muted-foreground">Nenhuma solicitação ainda.</div>
+        {!isLoading && !error && visibleRows.length === 0 && (
+          <div className="text-xs text-muted-foreground">
+            {rows.length === 0 ? "Nenhuma solicitação ainda." : "Nenhuma solicitação para o filtro selecionado."}
+          </div>
         )}
 
-        {rows.length > 0 && (
+        {visibleRows.length > 0 && (
           <div className="overflow-auto rounded-md border">
             <table className="w-full text-xs">
               <thead className="bg-muted/50">
@@ -165,7 +229,7 @@ function AprovacoesPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => {
+                {visibleRows.map((r) => {
                   const files = Array.isArray(r.files) ? (r.files as string[]) : [];
                   return (
                     <tr key={r.id} className="border-t align-top" data-testid="approval-row" data-mode={r.mode}>
