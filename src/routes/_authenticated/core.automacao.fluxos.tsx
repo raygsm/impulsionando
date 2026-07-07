@@ -23,6 +23,13 @@ function FluxosPage() {
   const tenantSlug = search?.tenant ?? null;
   const mode = search?.mode ?? "demo";
   const register = useServerFn(registerAutomationRequest);
+  const countsFn = useServerFn(getAutomationApprovalCounts);
+  const { data: counts } = useQuery({
+    queryKey: ["automation-approval-counts", tenantSlug],
+    queryFn: () => countsFn({ data: { tenantSlug } }),
+    staleTime: 30_000,
+  });
+
 
   const items = useMemo(() => {
     const needle = q.trim().toLowerCase();
