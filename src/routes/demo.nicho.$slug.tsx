@@ -15,7 +15,8 @@ import { getDemoEventos, formatBRL, NICHO_LABELS, type Nicho } from "@/lib/demoN
 import { getRichNiche, type RichNiche } from "@/lib/demoNichoExtras";
 import { NichoDemoRich } from "@/components/demo/NichoDemoRich";
 import { useDemoTracker } from "@/hooks/useDemoTracker";
-import { resolveDemoNicho } from "@/lib/demoResolver";
+import { resolveDemoNicho, logDemoFallback } from "@/lib/demoResolver";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/demo/nicho/$slug")({
   head: ({ params }) => ({
