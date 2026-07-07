@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { getNicheCockpit } from "@/lib/niche-cockpit.functions";
 import { getNichePlaybook, ACCENT_CLASSES } from "@/lib/niche-playbooks";
 
-export const Route = createFileRoute("/_authenticated/nichos/$slug")({
+export const Route = createFileRoute("/_authenticated/core/nichos/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `Cockpit ${(params as { slug: string }).slug} — Impulsionando` },

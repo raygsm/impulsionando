@@ -682,6 +682,7 @@ import { Route as AuthenticatedCrmLeadsIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreTenantsDominiosRouteImport } from './routes/_authenticated/core.tenants.dominios'
 import { Route as AuthenticatedCorePublicacaoTenantIdRouteImport } from './routes/_authenticated/core.publicacao.$tenantId'
+import { Route as AuthenticatedCoreNichosSlugRouteImport } from './routes/_authenticated/core.nichos.$slug'
 import { Route as AuthenticatedCoreModulosAgendaRouteImport } from './routes/_authenticated/core.modulos.agenda'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
@@ -4559,6 +4560,12 @@ const AuthenticatedCorePublicacaoTenantIdRoute =
     path: '/$tenantId',
     getParentRoute: () => AuthenticatedCorePublicacaoRoute,
   } as any)
+const AuthenticatedCoreNichosSlugRoute =
+  AuthenticatedCoreNichosSlugRouteImport.update({
+    id: '/nichos/$slug',
+    path: '/nichos/$slug',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreModulosAgendaRoute =
   AuthenticatedCoreModulosAgendaRouteImport.update({
     id: '/agenda',
@@ -5764,6 +5771,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/core/nichos/$slug': typeof AuthenticatedCoreNichosSlugRoute
   '/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
@@ -6520,6 +6528,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/core/nichos/$slug': typeof AuthenticatedCoreNichosSlugRoute
   '/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
@@ -7292,6 +7301,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
+  '/_authenticated/core/nichos/$slug': typeof AuthenticatedCoreNichosSlugRoute
   '/_authenticated/core/publicacao/$tenantId': typeof AuthenticatedCorePublicacaoTenantIdRoute
   '/_authenticated/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
@@ -8064,6 +8074,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/core/modulos/agenda'
+    | '/core/nichos/$slug'
     | '/core/publicacao/$tenantId'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
@@ -8820,6 +8831,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/core/modulos/agenda'
+    | '/core/nichos/$slug'
     | '/core/publicacao/$tenantId'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
@@ -9591,6 +9603,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/core/modulos/agenda'
+    | '/_authenticated/core/nichos/$slug'
     | '/_authenticated/core/publicacao/$tenantId'
     | '/_authenticated/core/tenants/dominios'
     | '/_authenticated/core/tenants/novo'
@@ -14650,6 +14663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCorePublicacaoTenantIdRouteImport
       parentRoute: typeof AuthenticatedCorePublicacaoRoute
     }
+    '/_authenticated/core/nichos/$slug': {
+      id: '/_authenticated/core/nichos/$slug'
+      path: '/nichos/$slug'
+      fullPath: '/core/nichos/$slug'
+      preLoaderRoute: typeof AuthenticatedCoreNichosSlugRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/modulos/agenda': {
       id: '/_authenticated/core/modulos/agenda'
       path: '/agenda'
@@ -15684,6 +15704,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreIntegracoesDiagnosticoRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   AuthenticatedCoreIntegracoesMercadopagoRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
+  AuthenticatedCoreNichosSlugRoute: typeof AuthenticatedCoreNichosSlugRoute
   AuthenticatedCoreTenantsDominiosRoute: typeof AuthenticatedCoreTenantsDominiosRoute
   AuthenticatedCoreTenantsNovoRoute: typeof AuthenticatedCoreTenantsNovoRoute
   AuthenticatedCoreAdministracaoIndexRoute: typeof AuthenticatedCoreAdministracaoIndexRoute
@@ -15753,6 +15774,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreIntegracoesMercadopagoRoute:
     AuthenticatedCoreIntegracoesMercadopagoRoute,
   AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,
+  AuthenticatedCoreNichosSlugRoute: AuthenticatedCoreNichosSlugRoute,
   AuthenticatedCoreTenantsDominiosRoute: AuthenticatedCoreTenantsDominiosRoute,
   AuthenticatedCoreTenantsNovoRoute: AuthenticatedCoreTenantsNovoRoute,
   AuthenticatedCoreAdministracaoIndexRoute:
