@@ -63,7 +63,14 @@ function AprovacoesPage() {
     queryFn: () => list({ data: { tenantSlug, limit: 100 } }),
   });
 
-  const counts = rows.reduce(
+  const [modeFilter, setModeFilter] = useState<"all" | "demo" | "producao">("all");
+
+  const visibleRows = useMemo(
+    () => rows.filter((r) => modeFilter === "all" || r.mode === modeFilter),
+    [rows, modeFilter],
+  );
+
+  const counts = visibleRows.reduce(
     (acc, r) => {
       const s = (r as { status: string }).status;
       if (s === "pending") acc.pending++;
@@ -73,6 +80,11 @@ function AprovacoesPage() {
     },
     { pending: 0, approved: 0, rejected: 0 },
   );
+
+  // Integridade: soma dos status contáveis + registered nunca excede o total.
+  const registeredCount = visibleRows.filter((r) => (r as { status: string }).status === "registered").length;
+  const sumTracked = counts.pending + counts.approved + counts.rejected + registeredCount;
+  const countsConsistent = sumTracked === visibleRows.length;
 
   const runManualTest = async () => {
     try {
