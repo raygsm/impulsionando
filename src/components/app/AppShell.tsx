@@ -23,7 +23,7 @@ import { CheckoutShell, isCheckoutPath } from "./CheckoutShell";
 import { useAudience } from "@/hooks/use-audience";
 import { useConsumerHasActiveMembership } from "@/hooks/use-consumer-membership";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
+// ImpulsionitoDock removido a pedido — não renderizar mais no shell.
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileBottomNav />
       <CommandPalette />
       <QuickActions />
-      <ImpulsionitoDock />
+      
     </div>
   );
 }

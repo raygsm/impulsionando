@@ -28,6 +28,10 @@ export interface EcosystemCheck {
   lastCheckAt: string | null;
   uptime24hPct: number;
   consecutiveFailures: number;
+  avgResponseMs: number | null;
+  lastResponseMs: number | null;
+  lastHttpStatus: number | null;
+  checks24h: number;
 }
 
 export interface EcosystemHealthResult {
@@ -57,9 +61,10 @@ export const getEcosystemHealth = createServerFn({ method: "GET" })
         .order("category", { ascending: true }),
       supabaseAdmin
         .from("uptime_checks")
-        .select("url, is_up")
+        .select("url, is_up, response_ms, http_status, checked_at")
         .gte("checked_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .limit(5000),
+        .order("checked_at", { ascending: false })
+        .limit(10000),
       supabaseAdmin
         .from("core_incidents")
         .select("id, status")
@@ -68,26 +73,43 @@ export const getEcosystemHealth = createServerFn({ method: "GET" })
     ]);
 
     const rows = state ?? [];
-    const uptimeByUrl = new Map<string, { total: number; up: number }>();
+    type Agg = {
+      total: number;
+      up: number;
+      msSum: number;
+      msCount: number;
+      lastMs: number | null;
+      lastStatus: number | null;
+    };
+    const byUrl = new Map<string, Agg>();
     for (const c of last24 ?? []) {
       const key = c.url as string;
-      const agg = uptimeByUrl.get(key) ?? { total: 0, up: 0 };
+      const agg =
+        byUrl.get(key) ?? { total: 0, up: 0, msSum: 0, msCount: 0, lastMs: null, lastStatus: null };
       agg.total += 1;
       if (c.is_up) agg.up += 1;
-      uptimeByUrl.set(key, agg);
+      if (typeof c.response_ms === "number") {
+        agg.msSum += c.response_ms;
+        agg.msCount += 1;
+      }
+      // rows are ordered DESC — first entry we see is the latest
+      if (agg.lastMs === null && typeof c.response_ms === "number") agg.lastMs = c.response_ms;
+      if (agg.lastStatus === null && typeof c.http_status === "number")
+        agg.lastStatus = c.http_status;
+      byUrl.set(key, agg);
     }
 
     let totalPctSum = 0;
     let totalPctCount = 0;
     const checks: EcosystemCheck[] = rows.map((r) => {
-      const agg = uptimeByUrl.get(r.url as string) ?? { total: 0, up: 0 };
+      const agg =
+        byUrl.get(r.url as string) ??
+        { total: 0, up: 0, msSum: 0, msCount: 0, lastMs: null, lastStatus: null };
       const pct = agg.total === 0 ? (r.is_up ? 100 : 0) : (agg.up / agg.total) * 100;
       totalPctSum += pct;
       totalPctCount += 1;
       return {
-        // uptime_state usa url como identificador — não há coluna `id`.
         id: String(r.url),
-        // Só expomos o label amigável; nunca a URL/endpoint interno.
         label: (r.label as string | null) ?? "Recurso",
         category: (r.category as string | null) ?? null,
         isUp: !!r.is_up,
@@ -96,6 +118,10 @@ export const getEcosystemHealth = createServerFn({ method: "GET" })
         lastCheckAt: (r.last_check_at as string | null) ?? null,
         uptime24hPct: Math.round(pct * 100) / 100,
         consecutiveFailures: Number(r.consecutive_failures ?? 0),
+        avgResponseMs: agg.msCount === 0 ? null : Math.round(agg.msSum / agg.msCount),
+        lastResponseMs: agg.lastMs,
+        lastHttpStatus: agg.lastStatus,
+        checks24h: agg.total,
       };
     });
 

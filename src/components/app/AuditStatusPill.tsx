@@ -2,12 +2,13 @@
  * Pill fixa no topo do menu lateral: monitora o ecossistema em tempo
  * real (poll a cada 30s) e navega para /auditoria ao clicar.
  *
- * Verde  → "Todos os Recursos Funcionais"
- * Vermelho → "Há recursos não Funcionais"
- * Cinza → carregando / sem dados
+ * Nome fixo: "Status do Sistema".
  *
- * Não expõe URLs, emails ou mensagens de erro. Só o resumo permitido
- * pelo server function `getEcosystemHealth`.
+ * Cores com contraste WCAG AA garantido (fundo sólido + texto claro):
+ *  - Verde sólido → todos os recursos funcionais
+ *  - Vermelho sólido (pulsando) → há recursos não funcionais
+ *  - Âmbar sólido → auditoria indisponível
+ *  - Slate sólido → carregando
  */
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -38,49 +39,44 @@ export function AuditStatusPill() {
         ? "ok"
         : "bad";
 
-  const label = loading
-    ? "Verificando recursos…"
+  const label = "Status do Sistema";
+  const sub = loading
+    ? "verificando…"
     : isError
-      ? "Auditoria indisponível"
+      ? "auditoria indisponível"
       : ok
-        ? "Todos os Recursos Funcionais"
-        : "Há recursos não Funcionais";
+        ? "todos funcionais"
+        : `${failing} recurso(s) com falha`;
 
   const Icon = tone === "ok" ? CheckCircle2 : tone === "bad" ? AlertTriangle : Activity;
 
   return (
     <Link
       to="/auditoria"
-      aria-label={`Auditoria em tempo real — ${label}`}
+      aria-label={`Status do Sistema — ${sub}`}
       data-testid="audit-status-pill"
       data-status={tone}
       className={cn(
-        "group flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors border",
+        "group flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors border shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        // Fundos sólidos + texto branco para contraste AA
         tone === "ok" &&
-          "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/15 dark:text-emerald-400",
+          "bg-emerald-600 border-emerald-700 text-white hover:bg-emerald-700",
         tone === "bad" &&
-          "bg-red-500/10 border-red-500/50 text-red-600 hover:bg-red-500/15 dark:text-red-400 animate-pulse",
+          "bg-red-600 border-red-700 text-white hover:bg-red-700 animate-pulse",
         tone === "warn" &&
-          "bg-amber-500/10 border-amber-500/40 text-amber-700 hover:bg-amber-500/15 dark:text-amber-400",
+          "bg-amber-600 border-amber-700 text-white hover:bg-amber-700",
         tone === "loading" &&
-          "bg-muted/40 border-border text-muted-foreground",
+          "bg-slate-700 border-slate-800 text-white hover:bg-slate-800",
       )}
     >
-      <span
-        className={cn(
-          "inline-block w-2.5 h-2.5 rounded-full shrink-0",
-          tone === "ok" && "bg-emerald-500",
-          tone === "bad" && "bg-red-500",
-          tone === "warn" && "bg-amber-500",
-          tone === "loading" && "bg-muted-foreground/40",
-        )}
-        aria-hidden="true"
-      />
       <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-      <span className="flex-1 min-w-0 truncate font-medium">{label}</span>
+      <span className="flex-1 min-w-0 flex flex-col leading-tight">
+        <span className="truncate">{label}</span>
+        <span className="truncate text-[10px] font-normal opacity-90">{sub}</span>
+      </span>
       {!loading && failing > 0 && (
         <span
-          className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold bg-red-500 text-white"
+          className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-bold bg-white text-red-700"
           data-testid="audit-status-count"
         >
           {failing > 99 ? "99+" : failing}
