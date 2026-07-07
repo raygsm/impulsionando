@@ -60,7 +60,7 @@ function FluxosPage() {
         <div className="text-xs text-muted-foreground max-w-2xl">
           Baixe os JSONs individualmente em cada card ou o pacote completo com os {ALL_WORKFLOWS.length} workflows para importar no N8N
           (<span className="font-mono">Workflows → Import from File</span>). Cada download é registrado em{" "}
-          <Link to="/core/automacao/aprovacoes" className="underline">Aprovações</Link>{tenantSlug ? <> — tenant <b>{tenantSlug}</b>, modo <b>{mode}</b></> : null}.
+          <Link to="/core/automacao/aprovacoes" search={(prev) => prev} className="underline">Aprovações</Link>{tenantSlug ? <> — tenant <b>{tenantSlug}</b>, modo <b>{mode}</b></> : null}.
         </div>
         <Button asChild size="sm">
           <a href={WORKFLOWS_BUNDLE_URL} download onClick={logBundle}>
