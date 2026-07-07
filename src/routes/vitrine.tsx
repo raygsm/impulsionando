@@ -393,6 +393,20 @@ function VitrineCard({ c }: { c: VitrineCompany }) {
     </Card>
   );
 
+  const siteUrl = tenantSiteUrl(c);
+  if (siteUrl) {
+    return (
+      <a
+        href={siteUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Abrir site de ${c.trade_name || c.name}`}
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+      >
+        {CardBody}
+      </a>
+    );
+  }
   if (!c.public_slug) {
     return <div className="block">{CardBody}</div>;
   }
