@@ -1,6 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { listAutomationRequests } from "@/lib/automation-approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações — Automação" }, { name: "robots", content: "noindex" }] }),
@@ -19,28 +23,116 @@ const CHECKLIST = [
   ["Aprovação manual assinada", "responsável, data e escopo"],
 ];
 
+const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  pending: "outline",
+  approved: "default",
+  rejected: "destructive",
+  registered: "secondary",
+};
+
 function AprovacoesPage() {
+  const search = useSearch({ strict: false }) as { tenant?: string };
+  const tenantSlug = search?.tenant ?? null;
+  const list = useServerFn(listAutomationRequests);
+  const { data: rows = [], isLoading, error, refetch } = useQuery({
+    queryKey: ["automation-approvals", tenantSlug],
+    queryFn: () => list({ data: { tenantSlug, limit: 100 } }),
+  });
+
   return (
-    <Card className="p-6 space-y-4">
-      <div>
-        <h2 className="text-base font-semibold">Checklist de ativação por tenant</h2>
-        <p className="text-sm text-muted-foreground">
-          Nenhum workflow entra em produção sem todos os itens abaixo. Registro real vive no backend
-          (pendente) — este painel é visual até habilitação.
-        </p>
-      </div>
-      <ul className="space-y-2">
-        {CHECKLIST.map(([label, hint]) => (
-          <li key={label} className="flex items-start gap-3 rounded-md border p-3">
-            <Checkbox disabled className="mt-0.5" />
-            <div>
-              <div className="text-sm font-medium">{label}</div>
-              <div className="text-xs text-muted-foreground">{hint}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <p className="text-[11px] text-muted-foreground">Fonte: docs/n8n/checklist-ativacao.md</p>
-    </Card>
+    <div className="space-y-4">
+      <Card className="p-6 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold">Solicitações registradas</h2>
+            <p className="text-sm text-muted-foreground">
+              Cada download de JSON, pacote ZIP ou pedido de ativação em produção fica auditado aqui{tenantSlug ? <> — filtrando por tenant <b>{tenantSlug}</b></> : null}.
+            </p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="text-xs underline text-muted-foreground hover:text-foreground"
+          >
+            Atualizar
+          </button>
+        </div>
+
+        {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
+        {error && <div className="text-xs text-destructive">Falha ao carregar: {String((error as Error).message)}</div>}
+        {!isLoading && !error && rows.length === 0 && (
+          <div className="text-xs text-muted-foreground">Nenhuma solicitação ainda.</div>
+        )}
+
+        {rows.length > 0 && (
+          <div className="overflow-auto rounded-md border">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr className="text-left">
+                  <th className="p-2">Quando</th>
+                  <th className="p-2">Ação</th>
+                  <th className="p-2">Tenant</th>
+                  <th className="p-2">Modo</th>
+                  <th className="p-2">Régua</th>
+                  <th className="p-2">Arquivos</th>
+                  <th className="p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  const files = Array.isArray(r.files) ? (r.files as string[]) : [];
+                  return (
+                    <tr key={r.id} className="border-t align-top">
+                      <td className="p-2 whitespace-nowrap text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString("pt-BR")}
+                      </td>
+                      <td className="p-2 font-mono">{r.action}</td>
+                      <td className="p-2">{r.tenant_slug ?? "—"}</td>
+                      <td className="p-2 uppercase">{r.mode}</td>
+                      <td className="p-2">{r.regua ?? "—"}</td>
+                      <td className="p-2 max-w-[280px]">
+                        <div className="space-y-0.5">
+                          {files.slice(0, 3).map((f) => (
+                            <a key={f} href={f} className="block truncate underline text-primary" target="_blank" rel="noreferrer">
+                              {f.split("/").pop()}
+                            </a>
+                          ))}
+                          {files.length > 3 && (
+                            <div className="text-muted-foreground">+ {files.length - 3} arquivo(s)</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <Badge variant={STATUS_VARIANT[r.status] ?? "outline"}>{r.status}</Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-6 space-y-4">
+        <div>
+          <h2 className="text-base font-semibold">Checklist de ativação por tenant</h2>
+          <p className="text-sm text-muted-foreground">
+            Nenhum workflow entra em produção sem todos os itens abaixo.
+          </p>
+        </div>
+        <ul className="space-y-2">
+          {CHECKLIST.map(([label, hint]) => (
+            <li key={label} className="flex items-start gap-3 rounded-md border p-3">
+              <Checkbox disabled className="mt-0.5" />
+              <div>
+                <div className="text-sm font-medium">{label}</div>
+                <div className="text-xs text-muted-foreground">{hint}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="text-[11px] text-muted-foreground">Fonte: docs/n8n/checklist-ativacao.md</p>
+      </Card>
+    </div>
   );
 }

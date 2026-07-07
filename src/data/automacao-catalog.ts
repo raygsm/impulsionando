@@ -28,9 +28,13 @@ export interface Workflow {
   nichos?: string[];
 }
 
-const c = (id: number, slug: string, nome: string, regua: Regua, gatilho: string, canais: Canal[], planoMin: Plano): Workflow => ({
-  id, slug, nome, regua, gatilho, canais, planoMin, status: "rascunho", modo: "demo",
-});
+const c = (id: number, slug: string, nome: string, regua: Regua, gatilho: string, canais: Canal[], planoMin: Plano): Workflow => {
+  // Regra global: todos os fluxos oferecem WhatsApp, exceto os puramente internos.
+  const withWa: Canal[] = canais.includes("whatsapp") || (canais.length === 1 && canais[0] === "internal")
+    ? canais
+    : [...canais, "whatsapp"];
+  return { id, slug, nome, regua, gatilho, canais: withWa, planoMin, status: "rascunho", modo: "demo" };
+};
 
 export const CATALOG: Workflow[] = [
   c(1, "lead-captado", "Lead captado", "captacao", "form/lp → lead", ["email","impulsionito"], "free"),
@@ -98,7 +102,7 @@ export const CATALOG: Workflow[] = [
   c(63, "clube-recomendacao", "Clube — recomendação", "vitrine", "recomendação IA", ["impulsionito","email"], "free"),
 ];
 
-export const NICHO_VARIANTS: Workflow[] = ([
+const NICHO_SEED: Array<[string, string, string, string, Canal[]]> = [
   ["clinica","consulta-confirmada","Consulta confirmada","appointment.confirmed",["whatsapp","email"]],
   ["clinica","no-show","No-show","appointment.no_show",["whatsapp","internal"]],
   ["clinica","retorno","Retorno de consulta","appointment.followup_due",["whatsapp","email"]],
@@ -122,11 +126,25 @@ export const NICHO_VARIANTS: Workflow[] = ([
   ["clube","boas-vindas","Clube — boas-vindas","consumer.created",["email","impulsionito"]],
   ["clube","voucher-disponivel","Clube — voucher disponível","voucher.available",["email","impulsionito"]],
   ["clube","beneficio-expirando","Clube — benefício expirando","benefit.expires_in 3d",["email","impulsionito"]],
-] as const).map(([niche, slug, nome, gatilho, canais], i) => ({
-  id: 900 + i, slug: `${niche}-${slug}`, nome, regua: "nicho" as const,
-  gatilho, canais: [...canais] as Canal[], planoMin: "essencial" as const,
-  status: "rascunho" as const, modo: "demo" as const, nichos: [niche],
-}));
+];
+
+export const NICHO_VARIANTS: Workflow[] = NICHO_SEED.map(([niche, slug, nome, gatilho, canais], i) => {
+  const withWa: Canal[] = canais.includes("whatsapp") || (canais.length === 1 && canais[0] === "internal")
+    ? canais
+    : [...canais, "whatsapp"];
+  return {
+    id: 900 + i,
+    slug: `${niche}-${slug}`,
+    nome,
+    regua: "nicho",
+    gatilho,
+    canais: withWa,
+    planoMin: "essencial",
+    status: "rascunho",
+    modo: "demo",
+    nichos: [niche],
+  };
+});
 
 export const ALL_WORKFLOWS: Workflow[] = [...CATALOG, ...NICHO_VARIANTS];
 

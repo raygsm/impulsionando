@@ -3231,6 +3231,48 @@ export type Database = {
           },
         ]
       }
+      automation_approvals: {
+        Row: {
+          action: string
+          created_at: string
+          files: Json
+          id: string
+          mode: string
+          note: string | null
+          regua: string | null
+          status: string
+          tenant_slug: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          files?: Json
+          id?: string
+          mode?: string
+          note?: string | null
+          regua?: string | null
+          status?: string
+          tenant_slug?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          files?: Json
+          id?: string
+          mode?: string
+          note?: string | null
+          regua?: string | null
+          status?: string
+          tenant_slug?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       billing_contracts: {
         Row: {
           company_id: string
