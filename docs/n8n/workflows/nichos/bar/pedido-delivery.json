@@ -1,0 +1,298 @@
+{
+  "name": "Impulsionando · nicho · bar-pedido-delivery",
+  "meta": {
+    "generated_by": "docs/n8n/generate-workflows.mjs",
+    "workflow_id": 900,
+    "regua": "nicho",
+    "slug": "bar-pedido-delivery",
+    "plano_min": "essencial",
+    "canais": [
+      "whatsapp"
+    ],
+    "gatilho": "order.delivered",
+    "status": "rascunho",
+    "mode_default": "demo"
+  },
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook · bar-pedido-delivery",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "impulsionando/{{tenant_slug}}/bar-pedido-delivery",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "mode-gate",
+      "name": "Mode Gate (demo vs producao)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "mode",
+              "leftValue": "={{$json.body.mode}}",
+              "rightValue": "producao",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "simulate",
+      "name": "Simulate (demo)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        640,
+        180
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "value": "skipped",
+              "type": "string"
+            },
+            {
+              "id": "note",
+              "name": "note",
+              "value": "demo: no real dispatch for bar-pedido-delivery",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "validate",
+      "name": "Validate tenant/canal/template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        420
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const b = $json.body || $json;\nconst errors = [];\nif (!b?.tenant?.id) errors.push('tenant.id ausente');\nif (!b?.consent?.lgpd_ok) errors.push('consent.lgpd_ok=false');\nconst canais = [\"whatsapp\"];\nfor (const c of canais) {\n  if (c === 'internal' || c === 'impulsionito') continue;\n  if (!b?.channels?.[c]?.enabled) errors.push(`canal ${c} desabilitado`);\n  if (!b?.channels?.[c]?.template_id) errors.push(`template ${c} ausente`);\n}\nreturn [{ json: { ...b, _validation: { ok: errors.length === 0, errors } } }];"
+      }
+    },
+    {
+      "id": "channel-whatsapp",
+      "name": "WhatsApp (Z-API) [demo:disabled]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        840,
+        420
+      ],
+      "disabled": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ZAPI_BASE}}/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ tenant: $json.tenant, entity: $json.entity, template_id: $json.channels?.whatsapp?.template_id, payload: $json.context }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "log",
+      "name": "Log → /api/public/hooks/n8n-log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1240,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/hooks/n8n-log",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-impulsionando-signature",
+              "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ workflow_name: 'bar-pedido-delivery', workflow_version: '1.0.0', regua: 'nicho', event_name: 'order.delivered', step: 'complete', status: ($json._validation?.ok === false ? 'failed' : ($json.status || 'ok')), tenant_id: $json.tenant?.id, entity_type: $json.entity?.type, entity_id: $json.entity?.id, payload: $json, idempotency_key: 'bar-pedido-delivery:' + ($json.tenant?.slug || 'demo') + ':' + ($json.entity?.id || $now) }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "fallback",
+      "name": "Fallback humano",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1240,
+        540
+      ],
+      "disabled": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/hooks/notify-staff",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify({ workflow: 'bar-pedido-delivery', tenant: $json.tenant, error: $json.error || 'unknown', regua: 'nicho' }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, workflow: 'bar-pedido-delivery', mode: $json.body?.mode || $json.mode || 'demo' }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook · bar-pedido-delivery": {
+      "main": [
+        [
+          {
+            "node": "Mode Gate (demo vs producao)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mode Gate (demo vs producao)": {
+      "main": [
+        [
+          {
+            "node": "Validate tenant/canal/template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Simulate (demo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate tenant/canal/template": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp (Z-API) [demo:disabled]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp (Z-API) [demo:disabled]": {
+      "main": [
+        [
+          {
+            "node": "Log → /api/public/hooks/n8n-log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulate (demo)": {
+      "main": [
+        [
+          {
+            "node": "Log → /api/public/hooks/n8n-log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log → /api/public/hooks/n8n-log": {
+      "main": [
+        [
+          {
+            "node": "Respond 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "impulsionando"
+    },
+    {
+      "name": "nicho"
+    },
+    {
+      "name": "nicho:bar"
+    }
+  ]
+}

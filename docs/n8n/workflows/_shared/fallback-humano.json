@@ -1,0 +1,73 @@
+{
+  "name": "Impulsionando · _shared · fallback-humano",
+  "meta": {
+    "description": "Sub-workflow reutilizável. Notifica staff quando um workflow falha após retries.",
+    "status": "rascunho"
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "notify",
+      "name": "Notify staff [disabled]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        300
+      ],
+      "disabled": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/hooks/notify-staff",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Notify staff [disabled]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "impulsionando"
+    },
+    {
+      "name": "_shared"
+    }
+  ]
+}
