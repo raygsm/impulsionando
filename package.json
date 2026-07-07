@@ -24,7 +24,11 @@
     "ci:security": "bun run security:check && bun run test:rls:recent && bun run test:rls:storage",
     "test:e2e": "playwright test",
     "test:e2e:visual": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts",
-    "test:e2e:visual:update": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts --update-snapshots"
+    "test:e2e:visual:update": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts --update-snapshots",
+    "contrast:scan": "node scripts/contrast-scan.mjs",
+    "contrast:scan:strict": "node scripts/contrast-scan.mjs --fail --pdf",
+    "contrast:pdf": "node scripts/contrast-report-pdf.mjs",
+    "test:contrast": "playwright test e2e/contrast-a11y.spec.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",
@@ -109,6 +113,7 @@
     "@playwright/test": "^1.60.0",
     "@types/node": "^22.16.5",
     "@types/papaparse": "^5.5.2",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
@@ -121,6 +126,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "nitro": "3.0.260603-beta",
+    "pdfkit": "^0.19.1",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
