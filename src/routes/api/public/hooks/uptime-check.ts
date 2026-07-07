@@ -102,13 +102,22 @@ async function enqueueAlertEmail(args: {
 export const Route = createFileRoute('/api/public/hooks/uptime-check')({
   server: {
     handlers: {
-      POST: async () => {
-        const { data: targets, error: stateErr } = await supabaseAdmin
+      POST: async ({ request }) => {
+        // Suporte a filtro por categoria (?category=domain) e URL específica.
+        // Usado pelos jobs pg_cron: um job geral (todas categorias, 1 min) e
+        // um job só-domínios que roda 2x em 60 s (30 s de resolução).
+        const url = new URL(request.url)
+        const categoryFilter = url.searchParams.get('category')
+        const urlFilter = url.searchParams.get('url')
+
+        let query = supabaseAdmin
           .from('uptime_state')
           .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails, alert_whatsapps')
           .eq('paused', false)
+        if (categoryFilter) query = query.eq('category', categoryFilter)
+        if (urlFilter) query = query.eq('url', urlFilter)
 
-
+        const { data: targets, error: stateErr } = await query
 
         if (stateErr || !targets) {
           console.error('uptime: failed to load state', stateErr)
