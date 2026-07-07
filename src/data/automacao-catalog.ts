@@ -28,9 +28,13 @@ export interface Workflow {
   nichos?: string[];
 }
 
-const c = (id: number, slug: string, nome: string, regua: Regua, gatilho: string, canais: Canal[], planoMin: Plano): Workflow => ({
-  id, slug, nome, regua, gatilho, canais, planoMin, status: "rascunho", modo: "demo",
-});
+const c = (id: number, slug: string, nome: string, regua: Regua, gatilho: string, canais: Canal[], planoMin: Plano): Workflow => {
+  // Regra global: todos os fluxos oferecem WhatsApp, exceto os puramente internos.
+  const withWa: Canal[] = canais.includes("whatsapp") || (canais.length === 1 && canais[0] === "internal")
+    ? canais
+    : [...canais, "whatsapp"];
+  return { id, slug, nome, regua, gatilho, canais: withWa, planoMin, status: "rascunho", modo: "demo" };
+};
 
 export const CATALOG: Workflow[] = [
   c(1, "lead-captado", "Lead captado", "captacao", "form/lp → lead", ["email","impulsionito"], "free"),
