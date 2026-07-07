@@ -1,0 +1,46 @@
+{
+  "mode": "demo",
+  "workflow": {
+    "slug": "escalonamento-humano",
+    "version": "1.0.0",
+    "regua": "suporte"
+  },
+  "tenant": {
+    "id": null,
+    "slug": "demo",
+    "plan": "free",
+    "niche": "multi"
+  },
+  "actor": {
+    "user_id": null,
+    "email": "fulano@example.com",
+    "phone": "+5521999990000",
+    "name": "Fulano da Silva"
+  },
+  "entity": {
+    "type": "demo",
+    "id": "demo-0001"
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": false,
+      "template_id": null
+    },
+    "email": {
+      "enabled": false,
+      "template_id": null
+    },
+    "impulsionito": {
+      "enabled": true
+    }
+  },
+  "consent": {
+    "lgpd_ok": true,
+    "opt_in_channels": [
+      "email"
+    ]
+  },
+  "context": {
+    "note": "payload de exemplo para escalonamento-humano — apenas demo"
+  }
+}
