@@ -74,7 +74,7 @@ function FluxosPage() {
         <div>
           <b>Downloads estão liberados</b> — só a <i>ativação em produção</i> exige aprovação backend.
           Se um botão for bloqueado, sua solicitação fica registrada em{" "}
-          <Link to="/core/automacao/aprovacoes" className="underline font-medium">/core/automacao/aprovacoes</Link>{" "}
+          <Link to="/core/automacao/aprovacoes" search={(prev: Record<string, unknown>) => prev} className="underline font-medium">/core/automacao/aprovacoes</Link>{" "}
           para acompanhamento.
         </div>
       </div>
