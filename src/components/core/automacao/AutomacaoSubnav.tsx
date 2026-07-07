@@ -28,6 +28,8 @@ export const AUTOMACAO_NAV: Array<{ to: string; label: string; icon: LucideIcon 
 
 export function AutomacaoSubnav() {
   const { pathname } = useLocation();
+  const search = useSearch({ strict: false }) as { tenant?: string };
+  const scoped = search?.tenant ? { tenant: search.tenant } : undefined;
   return (
     <nav className="flex flex-wrap gap-1 border-b pb-3 mb-6" aria-label="Automação">
       {AUTOMACAO_NAV.map(({ to, label, icon: Icon }) => {
@@ -36,6 +38,7 @@ export function AutomacaoSubnav() {
           <Link
             key={to}
             to={to}
+            search={scoped}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               active
