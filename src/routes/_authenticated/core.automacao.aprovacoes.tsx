@@ -50,8 +50,9 @@ function ModeBadge({ mode }: { mode: string }) {
 }
 
 function AprovacoesPage() {
-  const search = useSearch({ strict: false }) as { tenant?: string };
+  const search = useSearch({ strict: false }) as { tenant?: string; mode?: "demo" | "producao" };
   const tenantSlug = search?.tenant ?? null;
+  const currentMode: "demo" | "producao" = search?.mode ?? "demo";
   const list = useServerFn(listAutomationRequests);
   const register = useServerFn(registerAutomationRequest);
   const { data: rows = [], isLoading, error, refetch } = useQuery({
