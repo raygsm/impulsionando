@@ -48,8 +48,13 @@ function DemoFallbackLanding({
   requestedSlug: string;
   resolvedSlug: string;
 }) {
+  // Garante que o fallback seja registrado no buffer client-side mesmo quando a
+  // rota é servida via SSR (o loader só escreve no console do servidor).
+  useEffect(() => {
+    logDemoFallback({ requested: requestedSlug, slug: resolvedSlug, reason: "unknown-slug" });
+  }, [requestedSlug, resolvedSlug]);
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" data-testid="demo-fallback-landing" data-requested-slug={requestedSlug} data-resolved-slug={resolvedSlug}>
       <PublicHeader />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-16 text-center">
         <Badge variant="outline" className="mb-3 border-amber-400 text-amber-700 bg-amber-50">
