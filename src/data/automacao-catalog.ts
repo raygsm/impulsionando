@@ -124,7 +124,7 @@ export const NICHO_VARIANTS: Workflow[] = ([
   ["clube","beneficio-expirando","Clube — benefício expirando","benefit.expires_in 3d",["email","impulsionito"]],
 ] as const).map(([niche, slug, nome, gatilho, canais], i) => ({
   id: 900 + i, slug: `${niche}-${slug}`, nome, regua: "nicho" as const,
-  gatilho, canais: canais as Canal[], planoMin: "essencial" as const,
+  gatilho, canais: [...canais] as Canal[], planoMin: "essencial" as const,
   status: "rascunho" as const, modo: "demo" as const, nichos: [niche],
 }));
 
