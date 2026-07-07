@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
  * Também cobre o fluxo de alias desconhecido caindo no DemoFallbackLanding.
  */
 
-const QUIZ_KEY = "impulsionando:quiz-respostas";
+const QUIZ_KEY = "impulsionando:diagnostico-home:v2";
 const TRACE_KEY = "impulsionando:funnel-trace-id";
 const EVENTS_KEY = "impulsionando:funnel-events";
 const FALLBACK_KEY = "impulsionando:demo-fallback-log";
