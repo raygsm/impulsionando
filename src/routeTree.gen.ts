@@ -519,6 +519,7 @@ import { Route as AuthenticatedAdminHealthScoreRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminGrowthFunnelHealthRouteImport } from './routes/_authenticated/admin.growth-funnel-health'
 import { Route as AuthenticatedAdminGovernanceLgpdHealthRouteImport } from './routes/_authenticated/admin.governance-lgpd-health'
+import { Route as AuthenticatedAdminFunnelFallbacksRouteImport } from './routes/_authenticated/admin.funnel-fallbacks'
 import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFlagsTenantsRouteImport } from './routes/_authenticated/admin.flags-tenants'
@@ -3580,6 +3581,12 @@ const AuthenticatedAdminGovernanceLgpdHealthRoute =
     path: '/admin/governance-lgpd-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFunnelFallbacksRoute =
+  AuthenticatedAdminFunnelFallbacksRouteImport.update({
+    id: '/admin/funnel-fallbacks',
+    path: '/admin/funnel-fallbacks',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFunilReguasRoute =
   AuthenticatedAdminFunilReguasRouteImport.update({
     id: '/admin/funil-reguas',
@@ -5250,6 +5257,7 @@ export interface FileRoutesByFullPath {
   '/admin/flags-tenants': typeof AuthenticatedAdminFlagsTenantsRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/admin/funnel-fallbacks': typeof AuthenticatedAdminFunnelFallbacksRoute
   '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -5984,6 +5992,7 @@ export interface FileRoutesByTo {
   '/admin/flags-tenants': typeof AuthenticatedAdminFlagsTenantsRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/admin/funnel-fallbacks': typeof AuthenticatedAdminFunnelFallbacksRoute
   '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -6731,6 +6740,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/flags-tenants': typeof AuthenticatedAdminFlagsTenantsRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/_authenticated/admin/funnel-fallbacks': typeof AuthenticatedAdminFunnelFallbacksRoute
   '/_authenticated/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/_authenticated/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -7479,6 +7489,7 @@ export interface FileRouteTypes {
     | '/admin/flags-tenants'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
+    | '/admin/funnel-fallbacks'
     | '/admin/governance-lgpd-health'
     | '/admin/growth-funnel-health'
     | '/admin/health'
@@ -8213,6 +8224,7 @@ export interface FileRouteTypes {
     | '/admin/flags-tenants'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
+    | '/admin/funnel-fallbacks'
     | '/admin/governance-lgpd-health'
     | '/admin/growth-funnel-health'
     | '/admin/health'
@@ -8959,6 +8971,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/flags-tenants'
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/funil-reguas'
+    | '/_authenticated/admin/funnel-fallbacks'
     | '/_authenticated/admin/governance-lgpd-health'
     | '/_authenticated/admin/growth-funnel-health'
     | '/_authenticated/admin/health'
@@ -13202,6 +13215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminGovernanceLgpdHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/funnel-fallbacks': {
+      id: '/_authenticated/admin/funnel-fallbacks'
+      path: '/admin/funnel-fallbacks'
+      fullPath: '/admin/funnel-fallbacks'
+      preLoaderRoute: typeof AuthenticatedAdminFunnelFallbacksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/funil-reguas': {
       id: '/_authenticated/admin/funil-reguas'
       path: '/admin/funil-reguas'
@@ -15805,6 +15825,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFlagsTenantsRoute: typeof AuthenticatedAdminFlagsTenantsRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
+  AuthenticatedAdminFunnelFallbacksRoute: typeof AuthenticatedAdminFunnelFallbacksRoute
   AuthenticatedAdminGovernanceLgpdHealthRoute: typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   AuthenticatedAdminGrowthFunnelHealthRoute: typeof AuthenticatedAdminGrowthFunnelHealthRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
@@ -16124,6 +16145,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFlagsTenantsRoute: AuthenticatedAdminFlagsTenantsRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
+  AuthenticatedAdminFunnelFallbacksRoute:
+    AuthenticatedAdminFunnelFallbacksRoute,
   AuthenticatedAdminGovernanceLgpdHealthRoute:
     AuthenticatedAdminGovernanceLgpdHealthRoute,
   AuthenticatedAdminGrowthFunnelHealthRoute:
