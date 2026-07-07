@@ -167,3 +167,17 @@ export const CANAL_LABEL: Record<Canal, string> = {
 export function planLevel(p: Plano): number {
   return { free: 0, essencial: 1, pro: 2, premium: 3, wl: 4 }[p];
 }
+
+/** URL pública do JSON do workflow (importável no N8N). */
+export function workflowDownloadUrl(wf: Workflow): string {
+  if (wf.regua === "nicho" && wf.nichos?.[0]) {
+    const niche = wf.nichos[0];
+    const slugPart = wf.slug.startsWith(`${niche}-`) ? wf.slug.slice(niche.length + 1) : wf.slug;
+    return `/downloads/n8n/nichos/${niche}/${slugPart}.json`;
+  }
+  const padded = String(wf.id).padStart(2, "0");
+  return `/downloads/n8n/${wf.regua}/${padded}-${wf.slug}.json`;
+}
+
+/** ZIP com todos os 86 workflows do Ecossistema Impulsionando. */
+export const WORKFLOWS_BUNDLE_URL = "/downloads/impulsionando-n8n-workflows.zip";
