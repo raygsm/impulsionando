@@ -32,9 +32,27 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   registered: "secondary",
 };
 
+function ModeBadge({ mode }: { mode: string }) {
+  const isProd = mode === "producao";
+  return (
+    <span
+      data-testid={`row-mode-${mode}`}
+      className={
+        "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+        (isProd
+          ? "bg-destructive/15 text-destructive border border-destructive/40"
+          : "bg-amber-500/15 text-amber-700 border border-amber-500/40 dark:text-amber-400")
+      }
+    >
+      {isProd ? "Produção" : "Demo"}
+    </span>
+  );
+}
+
 function AprovacoesPage() {
-  const search = useSearch({ strict: false }) as { tenant?: string };
+  const search = useSearch({ strict: false }) as { tenant?: string; mode?: "demo" | "producao" };
   const tenantSlug = search?.tenant ?? null;
+  const currentMode: "demo" | "producao" = search?.mode ?? "demo";
   const list = useServerFn(listAutomationRequests);
   const register = useServerFn(registerAutomationRequest);
   const { data: rows = [], isLoading, error, refetch } = useQuery({
@@ -58,14 +76,14 @@ function AprovacoesPage() {
       const res = await register({
         data: {
           tenantSlug,
-          mode: "demo",
+          mode: currentMode,
           regua: "captacao",
           action: "test",
           files: ["/downloads/n8n/captacao/01-lead-captado.json"],
-          note: `Teste manual disparado em ${new Date().toLocaleString("pt-BR")}`,
+          note: `Teste manual (${currentMode}) disparado em ${new Date().toLocaleString("pt-BR")}`,
         },
       });
-      toast.success("Solicitação de teste registrada", {
+      toast.success(`Solicitação de teste registrada (${currentMode})`, {
         description: `ID #${res.id.slice(0, 8)} — recarregando lista…`,
       });
       refetch();
@@ -88,8 +106,8 @@ function AprovacoesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={runManualTest}>
-              Disparar teste manual
+            <Button size="sm" variant="outline" onClick={runManualTest} data-testid="btn-manual-test">
+              Disparar teste ({currentMode})
             </Button>
             <button
               onClick={() => refetch()}
@@ -100,12 +118,15 @@ function AprovacoesPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          <span className="rounded border px-2 py-0.5">Pendentes: <b>{counts.pending}</b></span>
-          <span className="rounded border px-2 py-0.5">Aprovadas: <b>{counts.approved}</b></span>
-          <span className="rounded border px-2 py-0.5">Recusadas: <b>{counts.rejected}</b></span>
-          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: {rows.length}</span>
+        <div className="flex flex-wrap gap-2 text-[11px]" data-testid="approval-counts">
+          <span className="rounded border px-2 py-0.5">Pendentes: <b data-testid="count-pending">{counts.pending}</b></span>
+          <span className="rounded border px-2 py-0.5">Aprovadas: <b data-testid="count-approved">{counts.approved}</b></span>
+          <span className="rounded border px-2 py-0.5">Recusadas: <b data-testid="count-rejected">{counts.rejected}</b></span>
+          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: <b data-testid="count-total">{rows.length}</b></span>
         </div>
+        <p className="text-[10px] text-muted-foreground">
+          As contagens são derivadas da própria lista abaixo: se uma linha aparece, ela é somada aqui. Use <b>Disparar teste</b> e clique <b>Atualizar</b> para conferir o incremento em tempo real.
+        </p>
 
 
         {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
@@ -132,13 +153,13 @@ function AprovacoesPage() {
                 {rows.map((r) => {
                   const files = Array.isArray(r.files) ? (r.files as string[]) : [];
                   return (
-                    <tr key={r.id} className="border-t align-top">
+                    <tr key={r.id} className="border-t align-top" data-testid="approval-row" data-mode={r.mode}>
                       <td className="p-2 whitespace-nowrap text-muted-foreground">
                         {new Date(r.created_at).toLocaleString("pt-BR")}
                       </td>
                       <td className="p-2 font-mono">{r.action}</td>
                       <td className="p-2">{r.tenant_slug ?? "—"}</td>
-                      <td className="p-2 uppercase">{r.mode}</td>
+                      <td className="p-2"><ModeBadge mode={r.mode} /></td>
                       <td className="p-2">{r.regua ?? "—"}</td>
                       <td className="p-2 max-w-[280px]">
                         <div className="space-y-0.5">
