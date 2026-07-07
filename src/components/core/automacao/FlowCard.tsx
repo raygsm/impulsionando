@@ -120,7 +120,7 @@ export function FlowCard({ wf, counts }: { wf: Workflow; counts?: ApprovalCounts
       </div>
       <div className="text-[11px] text-muted-foreground">
         Downloads e ativações ficam registrados em{" "}
-        <Link to="/core/automacao/aprovacoes" className="underline">Aprovações</Link>.
+        <Link to="/core/automacao/aprovacoes" search={(prev: Record<string, unknown>) => prev} className="underline">Aprovações</Link>.
       </div>
     </Card>
   );
