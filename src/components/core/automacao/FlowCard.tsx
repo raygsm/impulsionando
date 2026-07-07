@@ -5,16 +5,25 @@ import type { Workflow } from "@/data/automacao-catalog";
 import { REGUA_LABEL, workflowDownloadUrl } from "@/data/automacao-catalog";
 import { toast } from "sonner";
 import { Download, ExternalLink, ShieldAlert } from "lucide-react";
-import { useSearch, Link } from "@tanstack/react-router";
+import { useSearch, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { registerAutomationRequest } from "@/lib/automation-approvals.functions";
 
-export function FlowCard({ wf }: { wf: Workflow }) {
+export interface ApprovalCounts {
+  pending: number;
+  approved: number;
+  rejected: number;
+  registered: number;
+  total: number;
+}
+
+export function FlowCard({ wf, counts }: { wf: Workflow; counts?: ApprovalCounts }) {
   const url = workflowDownloadUrl(wf);
   const search = useSearch({ strict: false }) as { tenant?: string; mode?: "demo" | "producao" };
   const tenantSlug = search?.tenant ?? null;
   const mode = (search?.mode as "demo" | "producao" | undefined) ?? "demo";
   const register = useServerFn(registerAutomationRequest);
+  const navigate = useNavigate();
 
   const logDownload = async () => {
     try {
@@ -33,14 +42,40 @@ export function FlowCard({ wf }: { wf: Workflow }) {
     }
   };
 
-  const blockedActivation = () =>
-    toast.warning("Ação bloqueada — requer aprovação backend", {
-      description: "Nenhum disparo real é feito no frontend. Acompanhe em /core/automacao/aprovacoes.",
+  const blockedActivation = async () => {
+    let id: string | undefined;
+    try {
+      const res = await register({
+        data: {
+          tenantSlug,
+          mode,
+          regua: wf.regua,
+          action: "activate",
+          files: [url],
+          note: `Solicitação de ativação em produção — fluxo ${wf.slug}`,
+        },
+      });
+      id = res?.id;
+    } catch {
+      // segue com o toast mesmo sem persistir
+    }
+    const summary = counts
+      ? `Pendentes: ${counts.pending} · Aprovadas: ${counts.approved} · Recusadas: ${counts.rejected}`
+      : "Acompanhe o status em Aprovações.";
+    toast.warning("Ativação em produção exige aprovação backend", {
+      description: `Sua solicitação${id ? ` (#${id.slice(0, 8)})` : ""} ficou registrada em modo ${mode}. ${summary}`,
+      duration: 8000,
       action: {
         label: "Ver aprovações",
-        onClick: () => { window.location.href = "/core/automacao/aprovacoes"; },
+        onClick: () =>
+          navigate({
+            to: "/core/automacao/aprovacoes",
+            search: tenantSlug ? { tenant: tenantSlug, mode } : { mode },
+          }),
       },
     });
+  };
+
 
   return (
     <Card className="p-4 space-y-3">
