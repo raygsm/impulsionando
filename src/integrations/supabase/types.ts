@@ -3158,12 +3158,16 @@ export type Database = {
           action: string
           after: Json | null
           before: Json | null
+          category: string
           company_id: string | null
           created_at: string
           entity: string
           entity_id: string | null
           id: string
+          ip_address: unknown
           metadata: Json | null
+          severity: string
+          user_agent: string | null
           user_email: string | null
           user_id: string | null
         }
@@ -3171,12 +3175,16 @@ export type Database = {
           action: string
           after?: Json | null
           before?: Json | null
+          category?: string
           company_id?: string | null
           created_at?: string
           entity: string
           entity_id?: string | null
           id?: string
+          ip_address?: unknown
           metadata?: Json | null
+          severity?: string
+          user_agent?: string | null
           user_email?: string | null
           user_id?: string | null
         }
@@ -3184,12 +3192,16 @@ export type Database = {
           action?: string
           after?: Json | null
           before?: Json | null
+          category?: string
           company_id?: string | null
           created_at?: string
           entity?: string
           entity_id?: string | null
           id?: string
+          ip_address?: unknown
           metadata?: Json | null
+          severity?: string
+          user_agent?: string | null
           user_email?: string | null
           user_id?: string | null
         }
@@ -33324,6 +33336,22 @@ export type Database = {
           }
       is_riomed_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _after?: Json
+          _before?: Json
+          _category?: string
+          _company_id?: string
+          _entity: string
+          _entity_id?: string
+          _ip?: unknown
+          _metadata?: Json
+          _severity?: string
+          _user_agent?: string
+        }
+        Returns: string
+      }
       log_security_event: {
         Args: {
           _action: string

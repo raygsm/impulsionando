@@ -267,6 +267,8 @@ import { Route as AuthenticatedTorreConsumidoresRouteImport } from './routes/_au
 import { Route as AuthenticatedTalentosCadastroRouteImport } from './routes/_authenticated/talentos.cadastro'
 import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
 import { Route as AuthenticatedShowroomRestauranteRouteImport } from './routes/_authenticated/showroom.restaurante'
+import { Route as AuthenticatedSegurancaSenhaRouteImport } from './routes/_authenticated/seguranca.senha'
+import { Route as AuthenticatedSegurancaMfaRouteImport } from './routes/_authenticated/seguranca.mfa'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
@@ -720,6 +722,7 @@ import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './
 import { Route as AuthenticatedAdminImpulsionitoCentroInteligenciaRouteImport } from './routes/_authenticated/admin.impulsionito.centro-inteligencia'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
+import { Route as AuthenticatedAdminAuditoriaLogsRouteImport } from './routes/_authenticated/admin.auditoria.logs'
 import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
 import { Route as ApiPublicStatusSlugRssRouteImport } from './routes/api/public/status.$slug.rss'
 import { Route as ApiPublicStatusSlugBadgeDotsvgRouteImport } from './routes/api/public/status.$slug.badge[.]svg'
@@ -2110,6 +2113,18 @@ const AuthenticatedShowroomRestauranteRoute =
   AuthenticatedShowroomRestauranteRouteImport.update({
     id: '/showroom/restaurante',
     path: '/showroom/restaurante',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSegurancaSenhaRoute =
+  AuthenticatedSegurancaSenhaRouteImport.update({
+    id: '/seguranca/senha',
+    path: '/seguranca/senha',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSegurancaMfaRoute =
+  AuthenticatedSegurancaMfaRouteImport.update({
+    id: '/seguranca/mfa',
+    path: '/seguranca/mfa',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesOrdersRoute =
@@ -4788,6 +4803,12 @@ const AuthenticatedAdminClientesSlugRoute =
     path: '/admin/clientes/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAuditoriaLogsRoute =
+  AuthenticatedAdminAuditoriaLogsRouteImport.update({
+    id: '/admin/auditoria/logs',
+    path: '/admin/auditoria/logs',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugIndexRoute =
   AuthenticatedAdminClientesSlugIndexRouteImport.update({
     id: '/',
@@ -5685,6 +5706,8 @@ export interface FileRoutesByFullPath {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/seguranca/mfa': typeof AuthenticatedSegurancaMfaRoute
+  '/seguranca/senha': typeof AuthenticatedSegurancaSenhaRoute
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
@@ -5734,6 +5757,7 @@ export interface FileRoutesByFullPath {
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -6443,6 +6467,8 @@ export interface FileRoutesByTo {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/seguranca/mfa': typeof AuthenticatedSegurancaMfaRoute
+  '/seguranca/senha': typeof AuthenticatedSegurancaSenhaRoute
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
@@ -6492,6 +6518,7 @@ export interface FileRoutesByTo {
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
+  '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
@@ -7215,6 +7242,8 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/_authenticated/seguranca/mfa': typeof AuthenticatedSegurancaMfaRoute
+  '/_authenticated/seguranca/senha': typeof AuthenticatedSegurancaSenhaRoute
   '/_authenticated/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/_authenticated/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
@@ -7264,6 +7293,7 @@ export interface FileRoutesById {
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/_authenticated/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -7988,6 +8018,8 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/seguranca/mfa'
+    | '/seguranca/senha'
     | '/showroom/restaurante'
     | '/support/cockpit'
     | '/talentos/cadastro'
@@ -8037,6 +8069,7 @@ export interface FileRouteTypes {
     | '/saiba-mais/'
     | '/sales/'
     | '/tenants/'
+    | '/admin/auditoria/logs'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
@@ -8746,6 +8779,8 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/seguranca/mfa'
+    | '/seguranca/senha'
     | '/showroom/restaurante'
     | '/support/cockpit'
     | '/talentos/cadastro'
@@ -8795,6 +8830,7 @@ export interface FileRouteTypes {
     | '/saiba-mais'
     | '/sales'
     | '/tenants'
+    | '/admin/auditoria/logs'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
@@ -9517,6 +9553,8 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
+    | '/_authenticated/seguranca/mfa'
+    | '/_authenticated/seguranca/senha'
     | '/_authenticated/showroom/restaurante'
     | '/_authenticated/support/cockpit'
     | '/_authenticated/talentos/cadastro'
@@ -9566,6 +9604,7 @@ export interface FileRouteTypes {
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
     | '/_authenticated/tenants/'
+    | '/_authenticated/admin/auditoria/logs'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/impulsionito/centro-inteligencia'
@@ -11756,6 +11795,20 @@ declare module '@tanstack/react-router' {
       path: '/showroom/restaurante'
       fullPath: '/showroom/restaurante'
       preLoaderRoute: typeof AuthenticatedShowroomRestauranteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seguranca/senha': {
+      id: '/_authenticated/seguranca/senha'
+      path: '/seguranca/senha'
+      fullPath: '/seguranca/senha'
+      preLoaderRoute: typeof AuthenticatedSegurancaSenhaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seguranca/mfa': {
+      id: '/_authenticated/seguranca/mfa'
+      path: '/seguranca/mfa'
+      fullPath: '/seguranca/mfa'
+      preLoaderRoute: typeof AuthenticatedSegurancaMfaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/orders': {
@@ -14929,6 +14982,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/auditoria/logs': {
+      id: '/_authenticated/admin/auditoria/logs'
+      path: '/admin/auditoria/logs'
+      fullPath: '/admin/auditoria/logs'
+      preLoaderRoute: typeof AuthenticatedAdminAuditoriaLogsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/clientes/$slug/': {
       id: '/_authenticated/admin/clientes/$slug/'
       path: '/'
@@ -16520,6 +16580,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRiomedMinhasGarantiasRoute: typeof AuthenticatedRiomedMinhasGarantiasRoute
   AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
+  AuthenticatedSegurancaMfaRoute: typeof AuthenticatedSegurancaMfaRoute
+  AuthenticatedSegurancaSenhaRoute: typeof AuthenticatedSegurancaSenhaRoute
   AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedTalentosCadastroRoute: typeof AuthenticatedTalentosCadastroRoute
@@ -16535,6 +16597,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
   AuthenticatedTenantsIndexRoute: typeof AuthenticatedTenantsIndexRoute
+  AuthenticatedAdminAuditoriaLogsRoute: typeof AuthenticatedAdminAuditoriaLogsRoute
   AuthenticatedAdminClientesSlugRoute: typeof AuthenticatedAdminClientesSlugRouteWithChildren
   AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   AuthenticatedAdminImpulsionitoCentroInteligenciaRoute: typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -16924,6 +16987,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedRiomedMinhasGarantiasRoute,
   AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
+  AuthenticatedSegurancaMfaRoute: AuthenticatedSegurancaMfaRoute,
+  AuthenticatedSegurancaSenhaRoute: AuthenticatedSegurancaSenhaRoute,
   AuthenticatedShowroomRestauranteRoute: AuthenticatedShowroomRestauranteRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedTalentosCadastroRoute: AuthenticatedTalentosCadastroRoute,
@@ -16941,6 +17006,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
   AuthenticatedTenantsIndexRoute: AuthenticatedTenantsIndexRoute,
+  AuthenticatedAdminAuditoriaLogsRoute: AuthenticatedAdminAuditoriaLogsRoute,
   AuthenticatedAdminClientesSlugRoute:
     AuthenticatedAdminClientesSlugRouteWithChildren,
   AuthenticatedAdminClientesRiomedRoute:
