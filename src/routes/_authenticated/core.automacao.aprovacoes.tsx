@@ -32,6 +32,23 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   registered: "secondary",
 };
 
+function ModeBadge({ mode }: { mode: string }) {
+  const isProd = mode === "producao";
+  return (
+    <span
+      data-testid={`row-mode-${mode}`}
+      className={
+        "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+        (isProd
+          ? "bg-destructive/15 text-destructive border border-destructive/40"
+          : "bg-amber-500/15 text-amber-700 border border-amber-500/40 dark:text-amber-400")
+      }
+    >
+      {isProd ? "Produção" : "Demo"}
+    </span>
+  );
+}
+
 function AprovacoesPage() {
   const search = useSearch({ strict: false }) as { tenant?: string };
   const tenantSlug = search?.tenant ?? null;
