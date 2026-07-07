@@ -37,7 +37,7 @@ export const getPublicVitrine = createServerFn({ method: "GET" })
     let query = sb
       .from("companies_vitrine_public")
       .select(
-        "id, name, trade_name, segment, logo_url, cover_image_url, tagline, description, public_slug, address_city, address_state, address_neighborhood, primary_color, website, instagram, whatsapp, rating_avg, rating_count, updated_at",
+        "id, name, trade_name, segment, logo_url, cover_image_url, tagline, description, public_slug, address_city, address_state, address_neighborhood, primary_color, website, instagram, whatsapp, rating_avg, rating_count, updated_at, subdomain, domain",
       )
       .limit(data.limit);
     if (data.segment) query = query.eq("segment", data.segment);
