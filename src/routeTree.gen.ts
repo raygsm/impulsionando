@@ -438,6 +438,7 @@ import { Route as AuthenticatedAdminWhitelabelHealthRouteImport } from './routes
 import { Route as AuthenticatedAdminWhiteLabelTenantsRouteImport } from './routes/_authenticated/admin.white-label-tenants'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminVitrineLegalHealthRouteImport } from './routes/_authenticated/admin.vitrine-legal-health'
+import { Route as AuthenticatedAdminVitrineElegibilidadeRouteImport } from './routes/_authenticated/admin.vitrine-elegibilidade'
 import { Route as AuthenticatedAdminVitrineDiagnosticoRouteImport } from './routes/_authenticated/admin.vitrine-diagnostico'
 import { Route as AuthenticatedAdminVitrineRouteImport } from './routes/_authenticated/admin.vitrine'
 import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './routes/_authenticated/admin.vendor-performance'
@@ -448,6 +449,7 @@ import { Route as AuthenticatedAdminTrialOnboardingHealthRouteImport } from './r
 import { Route as AuthenticatedAdminTrialDemoHealthRouteImport } from './routes/_authenticated/admin.trial-demo-health'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
 import { Route as AuthenticatedAdminTenantsEditorRouteImport } from './routes/_authenticated/admin.tenants-editor'
+import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin.tenants'
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
 import { Route as AuthenticatedAdminTenantIdentityHealthRouteImport } from './routes/_authenticated/admin.tenant-identity-health'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
@@ -3098,6 +3100,12 @@ const AuthenticatedAdminVitrineLegalHealthRoute =
     path: '/admin/vitrine-legal-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminVitrineElegibilidadeRoute =
+  AuthenticatedAdminVitrineElegibilidadeRouteImport.update({
+    id: '/admin/vitrine-elegibilidade',
+    path: '/admin/vitrine-elegibilidade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminVitrineDiagnosticoRoute =
   AuthenticatedAdminVitrineDiagnosticoRouteImport.update({
     id: '/admin/vitrine-diagnostico',
@@ -3156,6 +3164,12 @@ const AuthenticatedAdminTenantsEditorRoute =
   AuthenticatedAdminTenantsEditorRouteImport.update({
     id: '/admin/tenants-editor',
     path: '/admin/tenants-editor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminTenantsRoute =
+  AuthenticatedAdminTenantsRouteImport.update({
+    id: '/admin/tenants',
+    path: '/admin/tenants',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminTenantLifecycleRoute =
@@ -5337,6 +5351,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -5347,6 +5362,7 @@ export interface FileRoutesByFullPath {
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/admin/vitrine-diagnostico': typeof AuthenticatedAdminVitrineDiagnosticoRoute
+  '/admin/vitrine-elegibilidade': typeof AuthenticatedAdminVitrineElegibilidadeRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -6073,6 +6089,7 @@ export interface FileRoutesByTo {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -6083,6 +6100,7 @@ export interface FileRoutesByTo {
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/admin/vitrine-diagnostico': typeof AuthenticatedAdminVitrineDiagnosticoRoute
+  '/admin/vitrine-elegibilidade': typeof AuthenticatedAdminVitrineElegibilidadeRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -6822,6 +6840,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
+  '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/_authenticated/admin/tenants-editor': typeof AuthenticatedAdminTenantsEditorRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/_authenticated/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -6832,6 +6851,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/_authenticated/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/_authenticated/admin/vitrine-diagnostico': typeof AuthenticatedAdminVitrineDiagnosticoRoute
+  '/_authenticated/admin/vitrine-elegibilidade': typeof AuthenticatedAdminVitrineElegibilidadeRoute
   '/_authenticated/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/_authenticated/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -7572,6 +7592,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
+    | '/admin/tenants'
     | '/admin/tenants-editor'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
@@ -7582,6 +7603,7 @@ export interface FileRouteTypes {
     | '/admin/vendor-performance'
     | '/admin/vitrine'
     | '/admin/vitrine-diagnostico'
+    | '/admin/vitrine-elegibilidade'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
     | '/admin/white-label-tenants'
@@ -8308,6 +8330,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
+    | '/admin/tenants'
     | '/admin/tenants-editor'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
@@ -8318,6 +8341,7 @@ export interface FileRouteTypes {
     | '/admin/vendor-performance'
     | '/admin/vitrine'
     | '/admin/vitrine-diagnostico'
+    | '/admin/vitrine-elegibilidade'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
     | '/admin/white-label-tenants'
@@ -9056,6 +9080,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/tenant-identity-health'
     | '/_authenticated/admin/tenant-lifecycle'
+    | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/tenants-editor'
     | '/_authenticated/admin/treasury-forecast'
     | '/_authenticated/admin/trial-demo-health'
@@ -9066,6 +9091,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/vendor-performance'
     | '/_authenticated/admin/vitrine'
     | '/_authenticated/admin/vitrine-diagnostico'
+    | '/_authenticated/admin/vitrine-elegibilidade'
     | '/_authenticated/admin/vitrine-legal-health'
     | '/_authenticated/admin/whatsapp-metrics'
     | '/_authenticated/admin/white-label-tenants'
@@ -12661,6 +12687,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminVitrineLegalHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/vitrine-elegibilidade': {
+      id: '/_authenticated/admin/vitrine-elegibilidade'
+      path: '/admin/vitrine-elegibilidade'
+      fullPath: '/admin/vitrine-elegibilidade'
+      preLoaderRoute: typeof AuthenticatedAdminVitrineElegibilidadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/vitrine-diagnostico': {
       id: '/_authenticated/admin/vitrine-diagnostico'
       path: '/admin/vitrine-diagnostico'
@@ -12729,6 +12762,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/tenants-editor'
       fullPath: '/admin/tenants-editor'
       preLoaderRoute: typeof AuthenticatedAdminTenantsEditorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/tenants': {
+      id: '/_authenticated/admin/tenants'
+      path: '/admin/tenants'
+      fullPath: '/admin/tenants'
+      preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/tenant-lifecycle': {
@@ -15918,6 +15958,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTenantIdentityHealthRoute: typeof AuthenticatedAdminTenantIdentityHealthRoute
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
+  AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRoute
   AuthenticatedAdminTenantsEditorRoute: typeof AuthenticatedAdminTenantsEditorRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
   AuthenticatedAdminTrialDemoHealthRoute: typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -15928,6 +15969,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminVendorPerformanceRoute: typeof AuthenticatedAdminVendorPerformanceRoute
   AuthenticatedAdminVitrineRoute: typeof AuthenticatedAdminVitrineRoute
   AuthenticatedAdminVitrineDiagnosticoRoute: typeof AuthenticatedAdminVitrineDiagnosticoRoute
+  AuthenticatedAdminVitrineElegibilidadeRoute: typeof AuthenticatedAdminVitrineElegibilidadeRoute
   AuthenticatedAdminVitrineLegalHealthRoute: typeof AuthenticatedAdminVitrineLegalHealthRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
   AuthenticatedAdminWhiteLabelTenantsRoute: typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -16278,6 +16320,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminTenantIdentityHealthRoute,
   AuthenticatedAdminTenantLifecycleRoute:
     AuthenticatedAdminTenantLifecycleRoute,
+  AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRoute,
   AuthenticatedAdminTenantsEditorRoute: AuthenticatedAdminTenantsEditorRoute,
   AuthenticatedAdminTreasuryForecastRoute:
     AuthenticatedAdminTreasuryForecastRoute,
@@ -16293,6 +16336,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminVitrineRoute: AuthenticatedAdminVitrineRoute,
   AuthenticatedAdminVitrineDiagnosticoRoute:
     AuthenticatedAdminVitrineDiagnosticoRoute,
+  AuthenticatedAdminVitrineElegibilidadeRoute:
+    AuthenticatedAdminVitrineElegibilidadeRoute,
   AuthenticatedAdminVitrineLegalHealthRoute:
     AuthenticatedAdminVitrineLegalHealthRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
