@@ -38,7 +38,15 @@ type VitrineCompany = {
   whatsapp: string | null;
   rating_avg: number | null;
   rating_count: number | null;
+  subdomain: string | null;
+  domain: string | null;
 };
+
+function tenantSiteUrl(c: VitrineCompany): string | null {
+  if (c.domain) return c.domain.startsWith("http") ? c.domain : `https://${c.domain}`;
+  if (c.subdomain) return `https://${c.subdomain}.impulsionando.com.br`;
+  return null;
+}
 
 const SEGMENTS = [
   { value: "", label: "Todos" },
