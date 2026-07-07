@@ -15,6 +15,19 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/notifications/")({
   head: () => ({ meta: [{ title: "Notificações — Impulsionando" }] }),
   component: NotificationsCenter,
+  errorComponent: ({ error, reset }) => (
+    <div className="p-6 max-w-lg mx-auto text-center space-y-4">
+      <h1 className="text-2xl font-semibold text-foreground">Central de Notificações</h1>
+      <p className="text-sm text-muted-foreground">
+        Não conseguimos carregar suas notificações agora. Tente novamente em instantes.
+      </p>
+      <pre className="text-xs text-left bg-muted p-3 rounded overflow-auto">{error?.message ?? "Erro desconhecido"}</pre>
+      <Button onClick={reset}>Tentar novamente</Button>
+    </div>
+  ),
+  pendingComponent: () => (
+    <div className="p-10 text-center text-sm text-muted-foreground">Carregando notificações…</div>
+  ),
 });
 
 const SEVERITY_ICON = { info: Info, success: CheckCircle2, warning: AlertTriangle, error: AlertCircle } as const;
