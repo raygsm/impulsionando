@@ -91,5 +91,9 @@ export const listAuditLog = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [] };
+    const normalized = (rows ?? []).map((r) => ({
+      ...r,
+      ip_address: r.ip_address == null ? null : String(r.ip_address),
+    }));
+    return { rows: normalized };
   });
