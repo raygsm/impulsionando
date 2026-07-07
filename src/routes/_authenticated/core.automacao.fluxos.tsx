@@ -6,7 +6,8 @@ import { FlowCard } from "@/components/core/automacao/FlowCard";
 import { Button } from "@/components/ui/button";
 import { Download, Info } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { registerAutomationRequest } from "@/lib/automation-approvals.functions";
+import { useQuery } from "@tanstack/react-query";
+import { registerAutomationRequest, getAutomationApprovalCounts } from "@/lib/automation-approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/fluxos")({
   head: () => ({ meta: [{ title: "Fluxos — Automação" }, { name: "robots", content: "noindex" }] }),
@@ -22,6 +23,13 @@ function FluxosPage() {
   const tenantSlug = search?.tenant ?? null;
   const mode = search?.mode ?? "demo";
   const register = useServerFn(registerAutomationRequest);
+  const countsFn = useServerFn(getAutomationApprovalCounts);
+  const { data: counts } = useQuery({
+    queryKey: ["automation-approval-counts", tenantSlug],
+    queryFn: () => countsFn({ data: { tenantSlug } }),
+    staleTime: 30_000,
+  });
+
 
   const items = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -80,10 +88,18 @@ function FluxosPage() {
           </Button>
         ))}
       </div>
-      <div className="text-xs text-muted-foreground">{items.length} workflow(s)</div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {items.map((wf) => <FlowCard key={wf.slug} wf={wf} />)}
+      <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-3">
+        <span>{items.length} workflow(s)</span>
+        {counts ? (
+          <span className="text-[11px]">
+            Aprovações — pendentes: <b>{counts.pending}</b> · aprovadas: <b>{counts.approved}</b> · recusadas: <b>{counts.rejected}</b>
+          </span>
+        ) : null}
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        {items.map((wf) => <FlowCard key={wf.slug} wf={wf} counts={counts} />)}
+      </div>
+
     </div>
   );
 }

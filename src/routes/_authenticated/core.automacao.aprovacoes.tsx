@@ -4,7 +4,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAutomationRequests } from "@/lib/automation-approvals.functions";
+import { listAutomationRequests, registerAutomationRequest } from "@/lib/automation-approvals.functions";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/aprovacoes")({
   head: () => ({ meta: [{ title: "Aprovações — Automação" }, { name: "robots", content: "noindex" }] }),
@@ -34,10 +36,46 @@ function AprovacoesPage() {
   const search = useSearch({ strict: false }) as { tenant?: string };
   const tenantSlug = search?.tenant ?? null;
   const list = useServerFn(listAutomationRequests);
+  const register = useServerFn(registerAutomationRequest);
   const { data: rows = [], isLoading, error, refetch } = useQuery({
     queryKey: ["automation-approvals", tenantSlug],
     queryFn: () => list({ data: { tenantSlug, limit: 100 } }),
   });
+
+  const counts = rows.reduce(
+    (acc, r) => {
+      const s = (r as { status: string }).status;
+      if (s === "pending") acc.pending++;
+      else if (s === "approved") acc.approved++;
+      else if (s === "rejected") acc.rejected++;
+      return acc;
+    },
+    { pending: 0, approved: 0, rejected: 0 },
+  );
+
+  const runManualTest = async () => {
+    try {
+      const res = await register({
+        data: {
+          tenantSlug,
+          mode: "demo",
+          regua: "captacao",
+          action: "test",
+          files: ["/downloads/n8n/captacao/01-lead-captado.json"],
+          note: `Teste manual disparado em ${new Date().toLocaleString("pt-BR")}`,
+        },
+      });
+      toast.success("Solicitação de teste registrada", {
+        description: `ID #${res.id.slice(0, 8)} — recarregando lista…`,
+      });
+      refetch();
+    } catch (e) {
+      toast.error("Falha ao registrar solicitação de teste", {
+        description: String((e as Error).message),
+      });
+    }
+  };
+
 
   return (
     <div className="space-y-4">
@@ -49,13 +87,26 @@ function AprovacoesPage() {
               Cada download de JSON, pacote ZIP ou pedido de ativação em produção fica auditado aqui{tenantSlug ? <> — filtrando por tenant <b>{tenantSlug}</b></> : null}.
             </p>
           </div>
-          <button
-            onClick={() => refetch()}
-            className="text-xs underline text-muted-foreground hover:text-foreground"
-          >
-            Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={runManualTest}>
+              Disparar teste manual
+            </Button>
+            <button
+              onClick={() => refetch()}
+              className="text-xs underline text-muted-foreground hover:text-foreground"
+            >
+              Atualizar
+            </button>
+          </div>
         </div>
+
+        <div className="flex flex-wrap gap-2 text-[11px]">
+          <span className="rounded border px-2 py-0.5">Pendentes: <b>{counts.pending}</b></span>
+          <span className="rounded border px-2 py-0.5">Aprovadas: <b>{counts.approved}</b></span>
+          <span className="rounded border px-2 py-0.5">Recusadas: <b>{counts.rejected}</b></span>
+          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: {rows.length}</span>
+        </div>
+
 
         {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
         {error && <div className="text-xs text-destructive">Falha ao carregar: {String((error as Error).message)}</div>}

@@ -55,3 +55,28 @@ export const listAutomationRequests = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+export const getAutomationApprovalCounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ tenantSlug: z.string().max(120).nullable().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let query = context.supabase
+      .from("automation_approvals")
+      .select("status", { head: false });
+    if (data.tenantSlug) query = query.eq("tenant_slug", data.tenantSlug);
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    const counts = { pending: 0, approved: 0, rejected: 0, registered: 0, total: 0 };
+    for (const r of rows ?? []) {
+      counts.total++;
+      const s = (r as { status: string }).status;
+      if (s === "pending") counts.pending++;
+      else if (s === "approved") counts.approved++;
+      else if (s === "rejected") counts.rejected++;
+      else if (s === "registered") counts.registered++;
+    }
+    return counts;
+  });
+
