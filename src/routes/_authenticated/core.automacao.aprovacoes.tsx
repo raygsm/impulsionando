@@ -106,8 +106,8 @@ function AprovacoesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={runManualTest}>
-              Disparar teste manual
+            <Button size="sm" variant="outline" onClick={runManualTest} data-testid="btn-manual-test">
+              Disparar teste ({currentMode})
             </Button>
             <button
               onClick={() => refetch()}
