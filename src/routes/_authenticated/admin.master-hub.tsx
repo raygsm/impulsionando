@@ -4,7 +4,7 @@
 //  - Impulsionando: grupos por finalidade (Visão, Plataforma, Integrações, etc.)
 //  - Clientes: Diretório vivo de tenants + Gestão Geral cross-tenant
 //             + módulos legados por tenant (riomed_*, etc.) embutidos no card.
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -277,9 +277,23 @@ function VerticalGrid({
 }
 
 function MenuLink({ item }: { item: AdminMenuItem }) {
+  // Preserva tenant/mode da URL atual do hub para que links de contexto
+  // (ex.: /core/automacao/*) mantenham o filtro selecionado sem exigir
+  // que o usuário reaplique manualmente.
+  const search = useSearch({ strict: false }) as {
+    tenant?: string;
+    mode?: "demo" | "producao";
+  };
+  const preserve: Record<string, string> = {};
+  if (search?.tenant) preserve.tenant = search.tenant;
+  if (search?.mode) preserve.mode = search.mode;
+  const hasPreserve = Object.keys(preserve).length > 0;
   return (
     <Link
       to={item.route as any}
+      {...(hasPreserve ? { search: preserve as any } : {})}
+      data-testid="master-hub-menu-link"
+      data-route={item.route}
       className="flex items-center justify-between gap-3 rounded-md px-2.5 py-1.5 text-sm hover:bg-muted/60 transition-colors group"
     >
       <span className="flex flex-col min-w-0">
