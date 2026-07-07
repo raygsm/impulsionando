@@ -208,7 +208,7 @@ export function OliverFab() {
   return (
     <a
       id="oliver"
-      href="https://wa.me/5521000000000?text=Ol%C3%A1%20Oliver%2C%20gostaria%20de%20atendimento%20CrisMed"
+      href="https://wa.me/5521972537868?text=Ol%C3%A1%20Oliver%2C%20gostaria%20de%20atendimento%20CrisMed"
       target="_blank"
       rel="noreferrer"
       className="fixed bottom-5 right-5 z-40 group flex items-center gap-3 rounded-full bg-emerald-950 text-amber-50 pl-3 pr-5 py-3 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] hover:bg-emerald-900 transition-all"
