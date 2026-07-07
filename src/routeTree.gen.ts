@@ -207,6 +207,7 @@ import { Route as AuthenticatedBuscarRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedBuscaRouteImport } from './routes/_authenticated/busca'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
+import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedAreaClubeRouteImport } from './routes/_authenticated/area-clube'
 import { Route as AuthenticatedAreaClienteRouteImport } from './routes/_authenticated/area-cliente'
@@ -1777,6 +1778,11 @@ const AuthenticatedBiRoute = AuthenticatedBiRouteImport.update({
 const AuthenticatedAutomacoesRoute = AuthenticatedAutomacoesRouteImport.update({
   id: '/automacoes',
   path: '/automacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
@@ -5183,6 +5189,7 @@ export interface FileRoutesByFullPath {
   '/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/busca': typeof AuthenticatedBuscaRoute
@@ -5947,6 +5954,7 @@ export interface FileRoutesByTo {
   '/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/busca': typeof AuthenticatedBuscaRoute
   '/buscar': typeof AuthenticatedBuscarRoute
@@ -6709,6 +6717,7 @@ export interface FileRoutesById {
   '/_authenticated/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/_authenticated/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
+  '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/busca': typeof AuthenticatedBuscaRoute
@@ -7480,6 +7489,7 @@ export interface FileRouteTypes {
     | '/area-cliente'
     | '/area-clube'
     | '/audit'
+    | '/auditoria'
     | '/automacoes'
     | '/bi'
     | '/busca'
@@ -8244,6 +8254,7 @@ export interface FileRouteTypes {
     | '/area-cliente'
     | '/area-clube'
     | '/audit'
+    | '/auditoria'
     | '/automacoes'
     | '/busca'
     | '/buscar'
@@ -9005,6 +9016,7 @@ export interface FileRouteTypes {
     | '/_authenticated/area-cliente'
     | '/_authenticated/area-clube'
     | '/_authenticated/audit'
+    | '/_authenticated/auditoria'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
     | '/_authenticated/busca'
@@ -11311,6 +11323,13 @@ declare module '@tanstack/react-router' {
       path: '/automacoes'
       fullPath: '/automacoes'
       preLoaderRoute: typeof AuthenticatedAutomacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/auditoria': {
+      id: '/_authenticated/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/audit': {
@@ -16218,6 +16237,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAreaClienteRoute: typeof AuthenticatedAreaClienteRoute
   AuthenticatedAreaClubeRoute: typeof AuthenticatedAreaClubeRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
+  AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedBuscaRoute: typeof AuthenticatedBuscaRoute
@@ -16513,6 +16533,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAreaClienteRoute: AuthenticatedAreaClienteRoute,
   AuthenticatedAreaClubeRoute: AuthenticatedAreaClubeRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
+  AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedBuscaRoute: AuthenticatedBuscaRoute,

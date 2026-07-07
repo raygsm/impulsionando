@@ -54,7 +54,7 @@ function ProfilesPage() {
   });
 
   const toggle = useMutation({
-    mutationFn: async ({ profile_id, permission_id, on }: { profile_id: string; permission_id: string; on: boolean }) => {
+    mutationFn: async ({ profile_id, permission_id, on, profile_name, permission_code }: { profile_id: string; permission_id: string; on: boolean; profile_name: string; permission_code: string }) => {
       if (on) {
         const { error } = await supabase.from("profile_permissions").insert({ profile_id, permission_id });
         if (error && !error.message.includes("duplicate")) throw error;
@@ -63,10 +63,19 @@ function ProfilesPage() {
           .eq("profile_id", profile_id).eq("permission_id", permission_id);
         if (error) throw error;
       }
+      return { on, profile_name, permission_code };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile-permissions"] }),
+    onSuccess: (v) => {
+      qc.invalidateQueries({ queryKey: ["profile-permissions"] });
+      toast.success(
+        v.on
+          ? `SIM — "${v.permission_code}" liberada para ${v.profile_name}`
+          : `NÃO — "${v.permission_code}" bloqueada para ${v.profile_name}`,
+      );
+    },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   if (lp || lpe || lpp) {
     return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
@@ -118,16 +127,29 @@ function ProfilesPage() {
                       {profiles?.map((pr) => {
                         const has = map.has(`${pr.id}:${perm.id}`);
                         const isMaster = pr.is_master_profile;
+                        const on = isMaster || has;
                         return (
                           <td key={pr.id} className="p-3 text-center">
-                            <Checkbox
-                              checked={isMaster || has}
-                              disabled={!canEdit || isMaster}
-                              onCheckedChange={(v) => toggle.mutate({ profile_id: pr.id, permission_id: perm.id, on: !!v })}
-                            />
+                            <div className="inline-flex items-center gap-2">
+                              <Checkbox
+                                checked={on}
+                                disabled={!canEdit || isMaster}
+                                aria-label={`${on ? "SIM" : "NÃO"} — ${perm.code} para ${pr.name}`}
+                                onCheckedChange={(v) => toggle.mutate({ profile_id: pr.id, permission_id: perm.id, on: !!v, profile_name: pr.name, permission_code: perm.code })}
+                              />
+                              <span
+                                className={`text-[10px] font-bold tabular-nums ${
+                                  on ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                }`}
+                                aria-hidden="true"
+                              >
+                                {on ? "SIM" : "NÃO"}
+                              </span>
+                            </div>
                           </td>
                         );
                       })}
+
                     </tr>
                   ))}
                 </>

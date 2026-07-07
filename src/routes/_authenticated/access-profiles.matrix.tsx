@@ -72,15 +72,24 @@ function MatrixPage() {
   }, [filtered]);
 
   const toggle = useMutation({
-    mutationFn: async (v: { profileId: string; permissionId: string; granted: boolean }) => {
+    mutationFn: async (v: { profileId: string; permissionId: string; granted: boolean; profileName: string; permissionCode: string }) => {
       const { error } = await supabase.rpc("permission_matrix_toggle" as never, {
         _profile_id: v.profileId, _permission_id: v.permissionId, _granted: v.granted,
       } as never);
       if (error) throw error;
+      return v;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["permission-matrix"] }),
+    onSuccess: (v) => {
+      qc.invalidateQueries({ queryKey: ["permission-matrix"] });
+      toast.success(
+        v.granted
+          ? `SIM — "${v.permissionCode}" liberada para ${v.profileName}`
+          : `NÃO — "${v.permissionCode}" bloqueada para ${v.profileName}`,
+      );
+    },
     onError: (e) => toast.error((e as Error).message),
   });
+
 
   return (
     <div className="container mx-auto py-6 max-w-[1400px]">
@@ -132,17 +141,35 @@ function MatrixPage() {
                         const isOn = granted.has(key);
                         return (
                           <td key={pr.id} className="px-3 py-2 text-center">
-                            <Switch
-                              checked={isOn}
-                              disabled={toggle.isPending}
-                              onCheckedChange={(v) => {
-                                if (isOn) granted.delete(key); else granted.add(key);
-                                toggle.mutate({ profileId: pr.id, permissionId: p.id, granted: v });
-                              }}
-                            />
+                            <div className="inline-flex items-center gap-2">
+                              <Switch
+                                checked={isOn}
+                                disabled={toggle.isPending}
+                                aria-label={`${isOn ? "SIM" : "NÃO"} — ${p.code} para ${pr.name}`}
+                                onCheckedChange={(v) => {
+                                  if (isOn) granted.delete(key); else granted.add(key);
+                                  toggle.mutate({
+                                    profileId: pr.id,
+                                    permissionId: p.id,
+                                    granted: v,
+                                    profileName: pr.name,
+                                    permissionCode: p.code,
+                                  });
+                                }}
+                              />
+                              <span
+                                className={`text-[10px] font-bold tabular-nums ${
+                                  isOn ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                }`}
+                                aria-hidden="true"
+                              >
+                                {isOn ? "SIM" : "NÃO"}
+                              </span>
+                            </div>
                           </td>
                         );
                       })}
+
                     </tr>
                   ))}
                 </>

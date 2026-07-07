@@ -2,6 +2,7 @@ import type { CurrentUser } from "@/lib/auth";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
 import { SidebarNav } from "./SidebarNav";
+import { AuditStatusPill } from "./AuditStatusPill";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useAudience } from "@/hooks/use-audience";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,12 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
         </a>
       </div>
 
+      <div className="px-3 pt-3">
+        <AuditStatusPill />
+      </div>
+
       <SidebarNav currentUser={currentUser} />
+
       <div className="p-3 border-t border-sidebar-border space-y-1.5">
         <div className="flex items-center justify-between gap-2">
           <span className="text-[10px] uppercase tracking-wide text-sidebar-foreground/50">Audiência</span>
