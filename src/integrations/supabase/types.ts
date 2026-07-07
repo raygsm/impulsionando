@@ -9690,6 +9690,96 @@ export type Database = {
         }
         Relationships: []
       }
+      core_integration_pendencies: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          integration_key: string
+          metadata: Json
+          module_slug: string
+          provider: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_key: string
+          metadata?: Json
+          module_slug: string
+          provider?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_key?: string
+          metadata?: Json
+          module_slug?: string
+          provider?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_integration_pendencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_integration_pendencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_integration_pendencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_integration_pendencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_integration_pendencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_integrations: {
         Row: {
           config: Json
