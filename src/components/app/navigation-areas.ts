@@ -38,6 +38,7 @@ export const NAVIGATION_AREAS: Area[] = [
     accent: "primary",
     links: [
       { label: "Visão Geral", to: "/dashboard" },
+      { label: "Buscar", to: "/buscar" },
       { label: "Painel Executivo", to: "/dashboards/core" },
       { label: "Indicadores", to: "/dashboards/operacao" },
       { label: "Atividades Recentes", to: "/notifications" },

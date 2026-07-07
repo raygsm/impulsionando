@@ -47,6 +47,7 @@ export interface NavGroup {
 
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
+  { to: "/buscar", label: "Buscar", icon: SearchIcon },
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
@@ -56,6 +57,7 @@ export const TOP_ITEMS: NavItem[] = [
   { to: "/onboarding", label: "Começar / Melhorar", icon: Sparkles },
   { to: "/saiba-mais", label: "Saiba Mais", icon: BookOpen },
 ];
+
 
 export const NAV_GROUPS: NavGroup[] = [
   // ============================================================
