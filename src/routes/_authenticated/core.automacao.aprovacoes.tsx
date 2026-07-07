@@ -87,13 +87,26 @@ function AprovacoesPage() {
               Cada download de JSON, pacote ZIP ou pedido de ativação em produção fica auditado aqui{tenantSlug ? <> — filtrando por tenant <b>{tenantSlug}</b></> : null}.
             </p>
           </div>
-          <button
-            onClick={() => refetch()}
-            className="text-xs underline text-muted-foreground hover:text-foreground"
-          >
-            Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={runManualTest}>
+              Disparar teste manual
+            </Button>
+            <button
+              onClick={() => refetch()}
+              className="text-xs underline text-muted-foreground hover:text-foreground"
+            >
+              Atualizar
+            </button>
+          </div>
         </div>
+
+        <div className="flex flex-wrap gap-2 text-[11px]">
+          <span className="rounded border px-2 py-0.5">Pendentes: <b>{counts.pending}</b></span>
+          <span className="rounded border px-2 py-0.5">Aprovadas: <b>{counts.approved}</b></span>
+          <span className="rounded border px-2 py-0.5">Recusadas: <b>{counts.rejected}</b></span>
+          <span className="rounded border px-2 py-0.5 text-muted-foreground">Total: {rows.length}</span>
+        </div>
+
 
         {isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
         {error && <div className="text-xs text-destructive">Falha ao carregar: {String((error as Error).message)}</div>}
