@@ -7770,6 +7770,63 @@ export type Database = {
         }
         Relationships: []
       }
+      core_backup_runs: {
+        Row: {
+          created_at: string
+          destination: string
+          duration_ms: number | null
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          metadata: Json
+          rows_count: number | null
+          size_bytes: number | null
+          started_at: string
+          status: string
+          storage_key: string | null
+          storage_url: string | null
+          tables_count: number | null
+          trigger: string
+          triggered_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          metadata?: Json
+          rows_count?: number | null
+          size_bytes?: number | null
+          started_at?: string
+          status?: string
+          storage_key?: string | null
+          storage_url?: string | null
+          tables_count?: number | null
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          metadata?: Json
+          rows_count?: number | null
+          size_bytes?: number | null
+          started_at?: string
+          status?: string
+          storage_key?: string | null
+          storage_url?: string | null
+          tables_count?: number | null
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       core_branding_versions: {
         Row: {
           company_id: string

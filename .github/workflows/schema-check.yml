@@ -1,0 +1,99 @@
+name: Schema & Migrations Check
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/audit-schema.ts"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+
+jobs:
+  validate-migrations:
+    name: Validar naming e sintaxe das migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar naming YYYYMMDDHHMMSS_description.sql
+        run: |
+          set -e
+          shopt -s nullglob
+          invalid=0
+          for f in supabase/migrations/*.sql; do
+            base=$(basename "$f")
+            if ! [[ "$base" =~ ^[0-9]{14}_[a-z0-9_-]+\.sql$ ]]; then
+              echo "❌ Migration com naming inválido: $base"
+              echo "   Formato esperado: YYYYMMDDHHMMSS_snake_case.sql"
+              invalid=$((invalid+1))
+            fi
+          done
+          if [ $invalid -gt 0 ]; then
+            echo ""
+            echo "🚫 $invalid migration(s) com naming inválido."
+            exit 1
+          fi
+          echo "✅ Todas as migrations seguem o naming correto."
+
+      - name: Instalar Postgres para dry-run
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Subir Postgres efêmero
+        run: |
+          docker run -d --name pg-test \
+            -e POSTGRES_PASSWORD=test \
+            -e POSTGRES_DB=test \
+            -p 5432:5432 \
+            postgres:15
+          for i in {1..30}; do
+            if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
+              echo "✅ Postgres pronto"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Aplicar migrations em ordem (dry-run)
+        env:
+          PGPASSWORD: test
+        run: |
+          set -e
+          for f in $(ls supabase/migrations/*.sql | sort); do
+            echo "▶️  Aplicando $(basename $f)..."
+            if ! psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
+              echo "❌ Falha ao aplicar $(basename $f):"
+              cat /tmp/migration.log
+              exit 1
+            fi
+          done
+          echo "✅ Todas as migrations aplicaram limpo em Postgres virgem."
+
+      - name: Verificar GRANT em toda tabela public criada
+        env:
+          PGPASSWORD: test
+        run: |
+          set -e
+          missing=$(psql -h localhost -U postgres -d test -tAc "
+            SELECT c.relname
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'public' AND c.relkind = 'r'
+              AND NOT EXISTS (
+                SELECT 1 FROM information_schema.role_table_grants g
+                WHERE g.table_schema = 'public'
+                  AND g.table_name = c.relname
+                  AND g.grantee IN ('authenticated','anon','service_role')
+              )
+          ")
+          if [ -n "$missing" ]; then
+            echo "❌ Tabelas em public sem GRANT para authenticated/anon/service_role:"
+            echo "$missing"
+            echo ""
+            echo "Toda CREATE TABLE em public exige GRANT no mesmo arquivo."
+            exit 1
+          fi
+          echo "✅ Todas as tabelas public têm GRANT configurado."
