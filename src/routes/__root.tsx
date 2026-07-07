@@ -368,6 +368,7 @@ function RootComponent() {
       <Toaster richColors position="top-right" />
       <EnvHealthBanner />
       <ScrollGuidance />
+      <RocketRouteLoader />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
