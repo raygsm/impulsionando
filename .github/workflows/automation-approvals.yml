@@ -62,13 +62,47 @@ jobs:
             --reporter=junit --outputFile=test-results/automation-approvals.junit.xml \
             2>&1 | tee test-results/automation-approvals.log
 
+      - name: Run approval CSV helper unit tests
+        id: csvunit
+        run: bunx vitest run tests/approval-csv.test.ts --reporter=default 2>&1 | tee test-results/approval-csv.log
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build app (production) for E2E
+        run: bun run build
+
+      - name: Start preview server
+        run: |
+          (bun run preview --port 8080 > test-results/preview.log 2>&1 &) 
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080 >/dev/null && break
+            sleep 1
+          done
+
+      - name: Run E2E — master-hub links + filtros + CSV (schema + RLS)
+        id: e2e
+        env:
+          E2E_BASE_URL: http://localhost:8080
+        run: |
+          bunx playwright test \
+            e2e/admin-master-hub-automacao-links.spec.ts \
+            e2e/admin-master-hub-automacao-filters.spec.ts \
+            e2e/automacao-aprovacoes-csv.spec.ts \
+            e2e/automacao-aprovacoes-csv-schema.spec.ts \
+            e2e/automacao-aprovacoes-csv-rls.spec.ts \
+            --project=desktop-chromium \
+            --reporter=list 2>&1 | tee test-results/e2e.log
+
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: automation-approvals-results
-          path: test-results/
+          path: |
+            test-results/
+            playwright-report/
 
       - name: Fail job on regression
-        if: always() && steps.vitest.outcome != 'success'
+        if: always() && (steps.vitest.outcome != 'success' || steps.csvunit.outcome != 'success' || steps.e2e.outcome != 'success')
         run: exit 1
