@@ -1,0 +1,59 @@
+{
+  "name": "Impulsionando · _shared · plano-gate",
+  "meta": {
+    "description": "Sub-workflow reutilizável. Valida plano do tenant vs matriz-planos.md antes de disparo.",
+    "status": "rascunho"
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "check",
+      "name": "Check plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const order={free:0,essencial:1,pro:2,premium:3,wl:4};const p=(($json.tenant?.plan)||'free').toLowerCase();const min=(($json.workflow?.plano_min)||'free').toLowerCase();const ok=(order[p]??0)>=(order[min]??0);return[{ json:{ ...$json, _plan:{ok,current:p,min}} }];"
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Check plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "impulsionando"
+    },
+    {
+      "name": "_shared"
+    }
+  ]
+}
