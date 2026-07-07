@@ -6,7 +6,8 @@ import { FlowCard } from "@/components/core/automacao/FlowCard";
 import { Button } from "@/components/ui/button";
 import { Download, Info } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { registerAutomationRequest } from "@/lib/automation-approvals.functions";
+import { useQuery } from "@tanstack/react-query";
+import { registerAutomationRequest, getAutomationApprovalCounts } from "@/lib/automation-approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/fluxos")({
   head: () => ({ meta: [{ title: "Fluxos — Automação" }, { name: "robots", content: "noindex" }] }),
