@@ -32276,6 +32276,7 @@ export type Database = {
           company_type: string | null
           cover_image_url: string | null
           description: string | null
+          domain: string | null
           facebook: string | null
           gallery_urls: Json | null
           id: string | null
@@ -32290,6 +32291,7 @@ export type Database = {
           rating_count: number | null
           secondary_color: string | null
           segment: string | null
+          subdomain: string | null
           tagline: string | null
           trade_name: string | null
           updated_at: string | null
@@ -32304,6 +32306,7 @@ export type Database = {
           company_type?: string | null
           cover_image_url?: string | null
           description?: string | null
+          domain?: string | null
           facebook?: string | null
           gallery_urls?: Json | null
           id?: string | null
@@ -32318,6 +32321,7 @@ export type Database = {
           rating_count?: number | null
           secondary_color?: string | null
           segment?: string | null
+          subdomain?: string | null
           tagline?: string | null
           trade_name?: string | null
           updated_at?: string | null
@@ -32332,6 +32336,7 @@ export type Database = {
           company_type?: string | null
           cover_image_url?: string | null
           description?: string | null
+          domain?: string | null
           facebook?: string | null
           gallery_urls?: Json | null
           id?: string | null
@@ -32346,6 +32351,7 @@ export type Database = {
           rating_count?: number | null
           secondary_color?: string | null
           segment?: string | null
+          subdomain?: string | null
           tagline?: string | null
           trade_name?: string | null
           updated_at?: string | null

@@ -38,7 +38,15 @@ type VitrineCompany = {
   whatsapp: string | null;
   rating_avg: number | null;
   rating_count: number | null;
+  subdomain: string | null;
+  domain: string | null;
 };
+
+function tenantSiteUrl(c: VitrineCompany): string | null {
+  if (c.domain) return c.domain.startsWith("http") ? c.domain : `https://${c.domain}`;
+  if (c.subdomain) return `https://${c.subdomain}.impulsionando.com.br`;
+  return null;
+}
 
 const SEGMENTS = [
   { value: "", label: "Todos" },
@@ -385,6 +393,20 @@ function VitrineCard({ c }: { c: VitrineCompany }) {
     </Card>
   );
 
+  const siteUrl = tenantSiteUrl(c);
+  if (siteUrl) {
+    return (
+      <a
+        href={siteUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Abrir site de ${c.trade_name || c.name}`}
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+      >
+        {CardBody}
+      </a>
+    );
+  }
   if (!c.public_slug) {
     return <div className="block">{CardBody}</div>;
   }

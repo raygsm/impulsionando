@@ -7,6 +7,7 @@ import { Users } from "lucide-react";
 
 const automacaoSearchSchema = z.object({
   tenant: z.string().min(1).optional(),
+  mode: z.enum(["demo", "producao"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/core/automacao")({
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/core/automacao")({
 });
 
 function AutomacaoLayout() {
-  const { tenant } = useSearch({ from: "/_authenticated/core/automacao" });
+  const { tenant, mode } = useSearch({ from: "/_authenticated/core/automacao" });
   return (
     <div className="mx-auto max-w-7xl p-6">
       <PageHeader
@@ -32,12 +33,17 @@ function AutomacaoLayout() {
       {tenant ? (
         <Alert className="mb-4">
           <Users className="h-4 w-4" />
-          <AlertTitle className="flex items-center gap-2">
+          <AlertTitle className="flex flex-wrap items-center gap-2">
             Escopo: cliente <code className="px-1 bg-muted rounded">{tenant}</code>
+            {mode ? (
+              <span className="text-[10px] uppercase tracking-wide rounded bg-muted px-1.5 py-0.5">
+                modo {mode === "demo" ? "demonstração" : "produção"}
+              </span>
+            ) : null}
           </AlertTitle>
           <AlertDescription className="text-xs">
-            Visualização contextual — filtros e ações permanecem em modo demo e exigem aprovação
-            backend antes de disparar canal real.{" "}
+            Visualização contextual — ações de disparo permanecem bloqueadas e exigem aprovação
+            backend antes de acionar canal real.{" "}
             <Link
               to="/admin/clientes/$slug/automacoes"
               params={{ slug: tenant }}
