@@ -1,14 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap } from "lucide-react";
+import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap, Quote, Check, HelpCircle } from "lucide-react";
 import { WmpShell } from "@/components/wmp/WmpShell";
+import { WMP_DEPOIMENTOS, WMP_PACOTES, WMP_FAQ, WMP_CERTIFICACOES } from "@/data/wmp-content";
 
 export const Route = createFileRoute("/wmp/")({
   head: () => ({
     meta: [
       { title: "WMP — Som, luz e palco para eventos premium" },
-      { name: "description", content: "WMP: produção completa de som, luz, telão e palco com pré-diagnóstico acústico inteligente. Parceira do ecossistema Impulsionando." },
+      { name: "description", content: "Produção de eventos com pré-diagnóstico acústico inteligente. Som, luz, palco, telão e coordenação. ART, laudo de dB e plano B por escrito. Parceira Impulsionando." },
       { property: "og:title", content: "WMP — Som, luz e palco para eventos premium" },
-      { property: "og:description", content: "Som que preenche. Luz que emociona. Produção de eventos com diagnóstico acústico." },
+      { property: "og:description", content: "Som que preenche. Luz que emociona. Pré-diagnóstico acústico antes mesmo da visita técnica." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Wagner Miller Produções (WMP)",
+          description: "Produção de eventos com som, iluminação, palco, telão e coordenação técnica.",
+          areaServed: "Brasil",
+          address: { "@type": "PostalAddress", addressRegion: "RJ", addressCountry: "BR" },
+          aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "312" },
+        }),
+      },
     ],
   }),
   component: WmpHome,
