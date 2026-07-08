@@ -158,6 +158,7 @@ import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
+import { Route as ColorsSuperGreenBlackKpiRouteImport } from './routes/colors.super-green-black-kpi'
 import { Route as ColorsSuperGreenBlackRouteImport } from './routes/colors.super-green-black'
 import { Route as ColorsPainelRouteImport } from './routes/colors.painel'
 import { Route as ColorsBrandRouteImport } from './routes/colors.$brand'
@@ -1538,6 +1539,12 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   path: '/como-funciona/fitness',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColorsSuperGreenBlackKpiRoute =
+  ColorsSuperGreenBlackKpiRouteImport.update({
+    id: '/super-green-black-kpi',
+    path: '/super-green-black-kpi',
+    getParentRoute: () => ColorsRoute,
+  } as any)
 const ColorsSuperGreenBlackRoute = ColorsSuperGreenBlackRouteImport.update({
   id: '/super-green-black',
   path: '/super-green-black',
@@ -5302,6 +5309,7 @@ export interface FileRoutesByFullPath {
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
+  '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -6069,6 +6077,7 @@ export interface FileRoutesByTo {
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
+  '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -6848,6 +6857,7 @@ export interface FileRoutesById {
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
+  '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -7629,6 +7639,7 @@ export interface FileRouteTypes {
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
+    | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -8396,6 +8407,7 @@ export interface FileRouteTypes {
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
+    | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -9174,6 +9186,7 @@ export interface FileRouteTypes {
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
+    | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -11094,6 +11107,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/como-funciona/fitness'
       preLoaderRoute: typeof ComoFuncionaFitnessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/colors/super-green-black-kpi': {
+      id: '/colors/super-green-black-kpi'
+      path: '/super-green-black-kpi'
+      fullPath: '/colors/super-green-black-kpi'
+      preLoaderRoute: typeof ColorsSuperGreenBlackKpiRouteImport
+      parentRoute: typeof ColorsRoute
     }
     '/colors/super-green-black': {
       id: '/colors/super-green-black'
@@ -17171,6 +17191,7 @@ interface ColorsRouteChildren {
   ColorsBrandRoute: typeof ColorsBrandRoute
   ColorsPainelRoute: typeof ColorsPainelRoute
   ColorsSuperGreenBlackRoute: typeof ColorsSuperGreenBlackRoute
+  ColorsSuperGreenBlackKpiRoute: typeof ColorsSuperGreenBlackKpiRoute
   ColorsProdutoSlugRoute: typeof ColorsProdutoSlugRoute
 }
 
@@ -17178,6 +17199,7 @@ const ColorsRouteChildren: ColorsRouteChildren = {
   ColorsBrandRoute: ColorsBrandRoute,
   ColorsPainelRoute: ColorsPainelRoute,
   ColorsSuperGreenBlackRoute: ColorsSuperGreenBlackRoute,
+  ColorsSuperGreenBlackKpiRoute: ColorsSuperGreenBlackKpiRoute,
   ColorsProdutoSlugRoute: ColorsProdutoSlugRoute,
 }
 
