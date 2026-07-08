@@ -106,7 +106,7 @@ function ProdutoPage() {
               <div className="mt-5">
                 <div className="text-sm font-semibold mb-2">Adicionais</div>
                 <div className="space-y-2">
-                  {p.adicionais.map((a) => (
+                  {p.adicionais.map((a: { nome: string; preco: number }) => (
                     <label key={a.nome} className="flex items-center justify-between gap-3 text-sm cursor-pointer p-2 rounded hover:bg-black/5">
                       <span className="inline-flex items-center gap-2">
                         <input
