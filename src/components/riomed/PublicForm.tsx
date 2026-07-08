@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, cloneElement, isValidElement } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +14,8 @@ export function PublicFormShell({ title, subtitle, children }: { title: string; 
         <h1 className="text-xl font-semibold">{title}</h1>
         {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
       </div></header>
-      <main className="container py-6 max-w-2xl">{children}</main>
+      {/* Usamos <section> aqui pois RiomedLayout já provê o <main> da página. */}
+      <section className="container py-6 max-w-2xl">{children}</section>
     </div>
   );
 }
@@ -46,6 +47,15 @@ export function PublicFormCard({
 }
 
 export function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-1"><Label>{label}</Label>{children}</div>;
+  const id = useId();
+  const child = isValidElement(children)
+    ? cloneElement(children as React.ReactElement<{ id?: string }>, { id: (children.props as { id?: string }).id ?? id })
+    : children;
+  return (
+    <div className="space-y-1">
+      <Label htmlFor={id}>{label}</Label>
+      {child}
+    </div>
+  );
 }
 export { Input, Textarea };
