@@ -9,6 +9,8 @@
  *  - Relatório semanal agregado em CSV
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -32,12 +34,12 @@ import {
   readLegacyHits,
   clearLegacyHits,
   buildCombinedFunnelLegacyCsv,
-  buildSimulatedConsolidation,
   type Ga4PingResult,
   type Ga4CsvRow,
   type CompareRow,
   type PingHistoryEntry,
 } from "@/lib/painel-audit";
+import { getPainelAggregate, type PainelAggregate } from "@/lib/painel-consolidation.functions";
 
 export const Route = createFileRoute("/colors/painel")({
   head: () => ({
@@ -166,10 +168,27 @@ function PainelPage() {
     for (const h of legacyHits) { s.add(h.from_host); s.add(h.to_host); }
     return Array.from(s).filter(Boolean).sort();
   }, [legacyHits, tick]);
-  const simulated = useMemo(
-    () => buildSimulatedConsolidation(events, legacyHits),
-    [events, legacyHits],
-  );
+  // Agregação real (Supabase) — admin-only. Reage a período e host.
+  const fetchAggregate = useServerFn(getPainelAggregate);
+  const aggregateQuery = useQuery<PainelAggregate>({
+    queryKey: ["painel_aggregate", period, hostFilter],
+    queryFn: async () => {
+      const spec = PERIODS.find((p) => p.id === period)!;
+      const now = new Date();
+      const since = spec.ms === Number.POSITIVE_INFINITY
+        ? new Date(0)
+        : new Date(now.getTime() - spec.ms);
+      return fetchAggregate({
+        data: {
+          host: hostFilter || null,
+          sinceIso: since.toISOString(),
+          untilIso: now.toISOString(),
+        },
+      });
+    },
+    refetchInterval: 30_000,
+    retry: 1,
+  });
   const compare = useMemo<CompareRow[]>(
     () => (gaCsv ? compareLocalVsGa4(local, gaCsv) : []),
     [local, gaCsv],
@@ -486,47 +505,80 @@ function PainelPage() {
           </div>
         </div>
 
-        {/* Consolidação (SIMULADA — placeholder até o backend ser destravado) */}
-        <div className="mb-6 rounded-2xl border border-dashed border-amber-400/40 bg-amber-500/5 p-6">
+        {/* Consolidação real — dados agregados no Supabase (admin-only via painel_aggregate). */}
+        <div className="mb-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold">🧪 Consolidação por tenant e host (simulada)</h2>
+              <h2 className="text-lg font-semibold">📡 Consolidação por host e período (Supabase)</h2>
               <p className="mt-1 text-xs text-white/60">
-                Prévia visual do que virá quando os endpoints server-side existirem.
-                <strong className="text-amber-200"> Hoje é 100% localStorage deste navegador</strong> —
-                não há persistência no Supabase, então é uma amostra por dispositivo.
-                Fonte: <code data-allow-copy>{simulated.source}</code> · gerado em
-                <code> {new Date(simulated.generated_at).toLocaleTimeString()}</code>.
+                Agregação real via <code>painel_aggregate()</code>, gated por
+                <code> has_role(auth.uid(),'admin')</code>. Consolida jornadas de qualquer navegador
+                em <code>painel_funnel_events</code> + hits em <code>painel_legacy_hits</code>.
+                {aggregateQuery.data && (
+                  <>
+                    {" · "}
+                    <code data-allow-copy>{aggregateQuery.data.total_events}</code> eventos ·
+                    janela <code>{new Date(aggregateQuery.data.since).toLocaleString()}</code>
+                    {" → "}<code>{new Date(aggregateQuery.data.until).toLocaleString()}</code>
+                    {aggregateQuery.data.host_filter && (<> · host <code>{aggregateQuery.data.host_filter}</code></>)}
+                  </>
+                )}
               </p>
             </div>
-            <span className="rounded-full border border-amber-300/40 px-3 py-1 text-[11px] uppercase tracking-widest text-amber-200">
-              placeholder
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={"rounded-full px-3 py-1 text-[11px] uppercase tracking-widest " + (
+                aggregateQuery.isError ? "border border-amber-400/40 text-amber-200"
+                : aggregateQuery.isFetching ? "border border-sky-400/40 text-sky-200"
+                : "border border-emerald-400/40 text-emerald-200"
+              )}>
+                {aggregateQuery.isError ? "erro" : aggregateQuery.isFetching ? "atualizando…" : "ao vivo"}
+              </span>
+              <button
+                onClick={() => aggregateQuery.refetch()}
+                className="rounded-full border border-white/20 px-3 py-1 text-xs hover:bg-white/10"
+              >
+                Recarregar
+              </button>
+            </div>
           </div>
+
+          {aggregateQuery.isError && (
+            <p className="mt-4 rounded-lg border border-amber-400/30 bg-black/40 p-3 text-[11px] text-amber-100/80">
+              Falha ao ler agregação: {String((aggregateQuery.error as Error)?.message ?? "desconhecido")}.
+              Confirme que sua conta tem <code>has_role(auth.uid(),'admin')</code> e recarregue.
+            </p>
+          )}
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-              <p className="text-xs uppercase tracking-widest text-white/50">Funil por tenant (mock)</p>
+              <p className="text-xs uppercase tracking-widest text-white/50">Funil por host</p>
               <table className="mt-2 w-full text-left text-xs">
                 <thead className="text-white/50">
                   <tr>
-                    <th className="py-1">tenant</th>
+                    <th className="py-1">host</th>
                     <th className="py-1">sessões</th>
                     <th className="py-1">CTA</th>
                     <th className="py-1">checkout</th>
                     <th className="py-1">lead</th>
+                    <th className="py-1">whats</th>
                     <th className="py-1">conv %</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {simulated.tenants.map((t) => (
-                    <tr key={t.tenant} className="border-t border-white/5">
-                      <td className="py-1 font-mono text-emerald-200">{t.tenant}</td>
-                      <td className="py-1">{t.sessions}</td>
-                      <td className="py-1">{t.cta_click}</td>
-                      <td className="py-1">{t.checkout_click}</td>
-                      <td className="py-1">{t.lead_submit}</td>
-                      <td className="py-1 text-emerald-300">{t.conversion_rate}%</td>
+                  {(aggregateQuery.data?.funnel ?? []).length === 0 && (
+                    <tr><td colSpan={7} className="py-3 text-center text-white/40">
+                      {aggregateQuery.isFetching ? "Carregando…" : "Sem eventos no período/host selecionado."}
+                    </td></tr>
+                  )}
+                  {(aggregateQuery.data?.funnel ?? []).map((r) => (
+                    <tr key={r.host} className="border-t border-white/5">
+                      <td className="py-1 font-mono text-emerald-200">{r.host}</td>
+                      <td className="py-1">{r.sessions}</td>
+                      <td className="py-1">{r.cta}</td>
+                      <td className="py-1">{r.checkout}</td>
+                      <td className="py-1">{r.lead}</td>
+                      <td className="py-1">{r.whatsapp}</td>
+                      <td className="py-1 text-emerald-300">{r.conversion_rate}%</td>
                     </tr>
                   ))}
                 </tbody>
@@ -534,7 +586,7 @@ function PainelPage() {
             </div>
 
             <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-              <p className="text-xs uppercase tracking-widest text-white/50">Legacy hits por host (mock)</p>
+              <p className="text-xs uppercase tracking-widest text-white/50">Legacy hits por host</p>
               <table className="mt-2 w-full text-left text-xs">
                 <thead className="text-white/50">
                   <tr>
@@ -544,10 +596,12 @@ function PainelPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {simulated.legacy_by_host.length === 0 && (
-                    <tr><td colSpan={3} className="py-3 text-center text-white/40">Sem hits neste dispositivo.</td></tr>
+                  {(aggregateQuery.data?.legacy ?? []).length === 0 && (
+                    <tr><td colSpan={3} className="py-3 text-center text-white/40">
+                      {aggregateQuery.isFetching ? "Carregando…" : "Nenhum acesso ao subdomínio legado neste período."}
+                    </td></tr>
                   )}
-                  {simulated.legacy_by_host.map((r) => (
+                  {(aggregateQuery.data?.legacy ?? []).map((r) => (
                     <tr key={r.host} className="border-t border-white/5">
                       <td className="py-1 font-mono text-amber-200">{r.host}</td>
                       <td className="py-1">{r.hits}</td>
@@ -559,15 +613,35 @@ function PainelPage() {
             </div>
           </div>
 
-          <p className="mt-4 rounded-lg border border-amber-400/30 bg-black/40 p-3 text-[11px] text-amber-100/80">
-            Para consolidar entre navegadores e dispositivos preciso destravar o
-            backend (<code>mem://core/frontend-only-lock</code>) e liberar: migration
-            <code> painel_funnel_events</code> com RLS por tenant, <code>createServerFn</code>
-            de ingest autenticado e rota pública <code>/api/public/painel/legacy-hit</code>
-            para os hits do subdomínio legado. Me confirme "pode destravar o backend"
-            e eu abro a migration + endpoints na próxima rodada.
-          </p>
+          {aggregateQuery.data?.campaigns && aggregateQuery.data.campaigns.length > 0 && (
+            <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
+              <p className="text-xs uppercase tracking-widest text-white/50">Top campanhas (utm_campaign)</p>
+              <table className="mt-2 w-full text-left text-xs">
+                <thead className="text-white/50">
+                  <tr>
+                    <th className="py-1">utm_campaign</th>
+                    <th className="py-1">sessões</th>
+                    <th className="py-1">CTA</th>
+                    <th className="py-1">checkout</th>
+                    <th className="py-1">lead</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {aggregateQuery.data.campaigns.slice(0, 20).map((c) => (
+                    <tr key={c.utm_campaign} className="border-t border-white/5">
+                      <td className="py-1 font-mono text-white/80">{c.utm_campaign}</td>
+                      <td className="py-1">{c.sessions}</td>
+                      <td className="py-1">{c.cta}</td>
+                      <td className="py-1">{c.checkout}</td>
+                      <td className="py-1">{c.lead}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+
 
 
 
