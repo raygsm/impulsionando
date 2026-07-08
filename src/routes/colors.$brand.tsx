@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { COLORS_BRANDS, productsByBrand, type ColorsBrand } from "@/data/colors-products";
 import { colorsEvents } from "@/lib/colors-analytics";
+import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 
 const VALID: ColorsBrand[] = ["green", "blue", "yellow", "colors"];
 
