@@ -404,7 +404,7 @@ function ComparisonSection() {
                 <tr key={label as string} className="border-t border-white/5">
                   <td className="px-4 py-3">{label}</td>
                   <td className="px-4 py-3 text-center">{a ? <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-400" /> : "—"}</td>
-                  <td className="px-4 py-3 text-center text-white/40">{b ? <CheckCircle2 className="mx-auto h-5 w-5" /> : "—"}</td>
+                  <td className="px-4 py-3 text-center text-white/60">{b ? <CheckCircle2 className="mx-auto h-5 w-5" /> : "—"}</td>
                 </tr>
               ))}
             </tbody>

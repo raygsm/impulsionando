@@ -124,7 +124,7 @@ export default function ContatoSection() {
               Abrimos seu cliente de e-mail para envio ao nosso SAC. Se preferir, fale conosco no WhatsApp.
             </p>
           )}
-          <p className="text-center text-xs text-white/40">Ao enviar, você concorda com a nossa política de privacidade.</p>
+          <p className="text-center text-xs text-white/60">Ao enviar, você concorda com a nossa política de privacidade.</p>
         </form>
       </div>
     </section>
