@@ -1,27 +1,31 @@
-/**
- * Jornada do consumidor final — rota canônica /clube.
- * Reusa o mesmo componente da rota /consumidor (alias histórico),
- * importando-o diretamente (acessar `Route.options.component` de outra
- * rota quebra com code-splitting → página renderizava em branco).
- */
-import { createFileRoute } from "@tanstack/react-router";
-import { ClubeLanding } from "@/components/clube/ClubeLanding";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { ClubeShell } from "@/components/clube/ClubeShell";
 
+/**
+ * Layout oficial do Clube Impulsionando (consumidor final).
+ * A home passou a viver em `clube.index.tsx`; esta rota apenas
+ * envelopa todas as leaf routes com o Shell + tokens do Clube.
+ */
 export const Route = createFileRoute("/clube")({
   head: () => ({
     meta: [
-      { title: "Clube Impulsionando — Free + Premium R$ 9,99/mês" },
+      { title: "Clube Impulsionando — Marketplace do Consumidor" },
       {
         name: "description",
         content:
-          "Entre grátis no Clube Impulsionando: descubra bares, restaurantes, eventos, cervejas e benefícios perto de você. Premium por R$ 9,99/mês (ou 17% off no anual) com histórico, alertas inteligentes e participação ativa.",
+          "Marketplace inteligente do Ecossistema Impulsionando: empresas, produtos, serviços, imóveis, eventos, delivery, vouchers, cashback e recomendações do Impulsionito.",
       },
-      { property: "og:title", content: "Clube Impulsionando — Free e Premium" },
-      { property: "og:description", content: "Vantagens reais, alertas inteligentes e experiências exclusivas. Cadastro grátis." },
+      { property: "og:title", content: "Clube Impulsionando" },
+      { property: "og:description", content: "Descubra, economize e ganhe cashback com todo o Ecossistema Impulsionando." },
       { property: "og:url", content: "https://impulsionando.com.br/clube" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Clube Impulsionando" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://impulsionando.com.br/clube" }],
   }),
-  component: ClubeLanding,
+  component: () => (
+    <ClubeShell>
+      <Outlet />
+    </ClubeShell>
+  ),
 });
