@@ -79,3 +79,28 @@ export function getTenantSubdomain(host: string | null | undefined): TenantSubdo
 export function tenantSubdomainTarget(slug: string): string {
   return `/vitrine/${slug}`;
 }
+
+/**
+ * Se o host atual for um subdomínio descontinuado, devolve a URL absoluta
+ * do subdomínio oficial (preservando path/search/hash). Retorna null quando
+ * o host já está correto.
+ */
+export function deprecatedSubdomainRedirect(loc: {
+  hostname: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  protocol: string;
+}): string | null {
+  const h = loc.hostname.toLowerCase().split(":")[0];
+  for (const root of ROOT_DOMAINS) {
+    if (!h.endsWith("." + root)) continue;
+    const prefix = h.slice(0, -("." + root).length);
+    const firstSeg = prefix.split(".")[0];
+    const canonical = DEPRECATED_SUBDOMAIN_ALIAS[firstSeg];
+    if (!canonical) return null;
+    const proto = loc.protocol === "http:" ? "http:" : "https:";
+    return `${proto}//${canonical}.${root}${loc.pathname}${loc.search}${loc.hash}`;
+  }
+  return null;
+}
