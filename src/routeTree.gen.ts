@@ -44,6 +44,7 @@ import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as ConsumidorRouteImport } from './routes/consumidor'
+import { Route as ColorsRouteImport } from './routes/colors'
 import { Route as ClubeRouteImport } from './routes/clube'
 import { Route as ChrismedRouteImport } from './routes/chrismed'
 import { Route as CentralDeAjudaRouteImport } from './routes/central-de-ajuda'
@@ -956,6 +957,11 @@ const ContaSuspensaRoute = ContaSuspensaRouteImport.update({
 const ConsumidorRoute = ConsumidorRouteImport.update({
   id: '/consumidor',
   path: '/consumidor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColorsRoute = ColorsRouteImport.update({
+  id: '/colors',
+  path: '/colors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClubeRoute = ClubeRouteImport.update({
@@ -5172,6 +5178,7 @@ export interface FileRoutesByFullPath {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
+  '/colors': typeof ColorsRoute
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -5946,6 +5953,7 @@ export interface FileRoutesByTo {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
+  '/colors': typeof ColorsRoute
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -6708,6 +6716,7 @@ export interface FileRoutesById {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
+  '/colors': typeof ColorsRoute
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -7484,6 +7493,7 @@ export interface FileRouteTypes {
     | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
+    | '/colors'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -8258,6 +8268,7 @@ export interface FileRouteTypes {
     | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
+    | '/colors'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -9019,6 +9030,7 @@ export interface FileRouteTypes {
     | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
+    | '/colors'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -9795,6 +9807,7 @@ export interface RootRouteChildren {
   CentralDeAjudaRoute: typeof CentralDeAjudaRoute
   ChrismedRoute: typeof ChrismedRouteWithChildren
   ClubeRoute: typeof ClubeRouteWithChildren
+  ColorsRoute: typeof ColorsRoute
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
@@ -10234,6 +10247,13 @@ declare module '@tanstack/react-router' {
       path: '/consumidor'
       fullPath: '/consumidor'
       preLoaderRoute: typeof ConsumidorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colors': {
+      id: '/colors'
+      path: '/colors'
+      fullPath: '/colors'
+      preLoaderRoute: typeof ColorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clube': {
@@ -17302,6 +17322,7 @@ const rootRouteChildren: RootRouteChildren = {
   CentralDeAjudaRoute: CentralDeAjudaRoute,
   ChrismedRoute: ChrismedRouteWithChildren,
   ClubeRoute: ClubeRouteWithChildren,
+  ColorsRoute: ColorsRoute,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
