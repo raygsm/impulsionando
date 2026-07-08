@@ -33750,6 +33750,15 @@ export type Database = {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
       }
+      set_company_courtesy_plan: {
+        Args: {
+          _company_id: string
+          _days?: number
+          _notes?: string
+          _plan_code: string
+        }
+        Returns: string
+      }
       set_tenant_subdomain: {
         Args: { _company_id: string; _new_subdomain: string }
         Returns: {
@@ -33825,6 +33834,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      sync_plan_prices_from_minimum_wage: { Args: never; Returns: Json }
       trial_advance_status: { Args: never; Returns: number }
       trial_cancel: {
         Args: { _reason?: string; _trial_id: string }
