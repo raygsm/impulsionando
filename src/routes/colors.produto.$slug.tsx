@@ -55,6 +55,8 @@ function ProductPage() {
   const { slug } = Route.useParams();
   const p = productBySlug(slug)!;
   const brand = COLORS_BRANDS[p.brand];
+  useColorsUtmHydration(`produto_${slug}`, { content: p.brand });
+
 
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white">
