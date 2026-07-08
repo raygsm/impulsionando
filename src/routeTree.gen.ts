@@ -37,6 +37,7 @@ import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as HealthzRouteImport } from './routes/healthz'
+import { Route as GarridoRouteImport } from './routes/garrido'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as EcossistemaRouteImport } from './routes/ecossistema'
@@ -62,6 +63,7 @@ import { Route as RiomedIndexRouteImport } from './routes/riomed.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
+import { Route as GarridoIndexRouteImport } from './routes/garrido.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
@@ -138,6 +140,11 @@ import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
 import { Route as MarocasLoginRouteImport } from './routes/marocas.login'
 import { Route as MarocasAssistenteRouteImport } from './routes/marocas.assistente'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as GarridoFinanciamentoRouteImport } from './routes/garrido.financiamento'
+import { Route as GarridoContatoRouteImport } from './routes/garrido.contato'
+import { Route as GarridoBuscarRouteImport } from './routes/garrido.buscar'
+import { Route as GarridoAvaliarRouteImport } from './routes/garrido.avaliar'
+import { Route as GarridoAnunciarRouteImport } from './routes/garrido.anunciar'
 import { Route as EmpresaLoginRouteImport } from './routes/empresa.login'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -255,6 +262,7 @@ import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.co
 import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
+import { Route as GarridoImovelSlugRouteImport } from './routes/garrido.imovel.$slug'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
@@ -933,6 +941,11 @@ const HealthzRoute = HealthzRouteImport.update({
   path: '/healthz',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GarridoRoute = GarridoRouteImport.update({
+  id: '/garrido',
+  path: '/garrido',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EscolherNichoRoute = EscolherNichoRouteImport.update({
   id: '/escolher-nicho',
   path: '/escolher-nicho',
@@ -1056,6 +1069,11 @@ const ModulosIndexRoute = ModulosIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ModulosRoute,
+} as any)
+const GarridoIndexRoute = GarridoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GarridoRoute,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
@@ -1442,6 +1460,31 @@ const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   id: '/imoveis/$slug',
   path: '/imoveis/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GarridoFinanciamentoRoute = GarridoFinanciamentoRouteImport.update({
+  id: '/financiamento',
+  path: '/financiamento',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoContatoRoute = GarridoContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoBuscarRoute = GarridoBuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoAvaliarRoute = GarridoAvaliarRouteImport.update({
+  id: '/avaliar',
+  path: '/avaliar',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoAnunciarRoute = GarridoAnunciarRouteImport.update({
+  id: '/anunciar',
+  path: '/anunciar',
+  getParentRoute: () => GarridoRoute,
 } as any)
 const EmpresaLoginRoute = EmpresaLoginRouteImport.update({
   id: '/empresa/login',
@@ -2053,6 +2096,11 @@ const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
   id: '/$propertyId',
   path: '/$propertyId',
   getParentRoute: () => ImoveisSlugRoute,
+} as any)
+const GarridoImovelSlugRoute = GarridoImovelSlugRouteImport.update({
+  id: '/imovel/$slug',
+  path: '/imovel/$slug',
+  getParentRoute: () => GarridoRoute,
 } as any)
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
@@ -5243,6 +5291,7 @@ export interface FileRoutesByFullPath {
   '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/garrido': typeof GarridoRouteWithChildren
   '/healthz': typeof HealthzRoute
   '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
@@ -5358,6 +5407,11 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/garrido/anunciar': typeof GarridoAnunciarRoute
+  '/garrido/avaliar': typeof GarridoAvaliarRoute
+  '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/contato': typeof GarridoContatoRoute
+  '/garrido/financiamento': typeof GarridoFinanciamentoRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/login': typeof MarocasLoginRoute
@@ -5434,6 +5488,7 @@ export interface FileRoutesByFullPath {
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
+  '/garrido/': typeof GarridoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
@@ -5798,6 +5853,7 @@ export interface FileRoutesByFullPath {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
@@ -6128,6 +6184,11 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/garrido/anunciar': typeof GarridoAnunciarRoute
+  '/garrido/avaliar': typeof GarridoAvaliarRoute
+  '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/contato': typeof GarridoContatoRoute
+  '/garrido/financiamento': typeof GarridoFinanciamentoRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/login': typeof MarocasLoginRoute
@@ -6204,6 +6265,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutIndexRoute
   '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
+  '/garrido': typeof GarridoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
@@ -6567,6 +6629,7 @@ export interface FileRoutesByTo {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
@@ -6797,6 +6860,7 @@ export interface FileRoutesById {
   '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/garrido': typeof GarridoRouteWithChildren
   '/healthz': typeof HealthzRoute
   '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
@@ -6912,6 +6976,11 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/garrido/anunciar': typeof GarridoAnunciarRoute
+  '/garrido/avaliar': typeof GarridoAvaliarRoute
+  '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/contato': typeof GarridoContatoRoute
+  '/garrido/financiamento': typeof GarridoFinanciamentoRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/login': typeof MarocasLoginRoute
@@ -6988,6 +7057,7 @@ export interface FileRoutesById {
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
+  '/garrido/': typeof GarridoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
@@ -7352,6 +7422,7 @@ export interface FileRoutesById {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
@@ -7583,6 +7654,7 @@ export interface FileRouteTypes {
     | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
+    | '/garrido'
     | '/healthz'
     | '/legal'
     | '/manutencao'
@@ -7698,6 +7770,11 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/garrido/anunciar'
+    | '/garrido/avaliar'
+    | '/garrido/buscar'
+    | '/garrido/contato'
+    | '/garrido/financiamento'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/login'
@@ -7774,6 +7851,7 @@ export interface FileRouteTypes {
     | '/checkout/'
     | '/colors/'
     | '/demo/'
+    | '/garrido/'
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
@@ -8138,6 +8216,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
@@ -8468,6 +8547,11 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/garrido/anunciar'
+    | '/garrido/avaliar'
+    | '/garrido/buscar'
+    | '/garrido/contato'
+    | '/garrido/financiamento'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/login'
@@ -8544,6 +8628,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/colors'
     | '/demo'
+    | '/garrido'
     | '/modulos'
     | '/nichos'
     | '/paciente'
@@ -8907,6 +8992,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
@@ -9136,6 +9222,7 @@ export interface FileRouteTypes {
     | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
+    | '/garrido'
     | '/healthz'
     | '/legal'
     | '/manutencao'
@@ -9251,6 +9338,11 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/garrido/anunciar'
+    | '/garrido/avaliar'
+    | '/garrido/buscar'
+    | '/garrido/contato'
+    | '/garrido/financiamento'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/login'
@@ -9327,6 +9419,7 @@ export interface FileRouteTypes {
     | '/checkout/'
     | '/colors/'
     | '/demo/'
+    | '/garrido/'
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
@@ -9691,6 +9784,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
@@ -9922,6 +10016,7 @@ export interface RootRouteChildren {
   EcossistemaRoute: typeof EcossistemaRoute
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
+  GarridoRoute: typeof GarridoRouteWithChildren
   HealthzRoute: typeof HealthzRoute
   LegalRoute: typeof LegalRoute
   ManutencaoRoute: typeof ManutencaoRoute
@@ -10309,6 +10404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthzRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/garrido': {
+      id: '/garrido'
+      path: '/garrido'
+      fullPath: '/garrido'
+      preLoaderRoute: typeof GarridoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/escolher-nicho': {
       id: '/escolher-nicho'
       path: '/escolher-nicho'
@@ -10483,6 +10585,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/modulos/'
       preLoaderRoute: typeof ModulosIndexRouteImport
       parentRoute: typeof ModulosRoute
+    }
+    '/garrido/': {
+      id: '/garrido/'
+      path: '/'
+      fullPath: '/garrido/'
+      preLoaderRoute: typeof GarridoIndexRouteImport
+      parentRoute: typeof GarridoRoute
     }
     '/demo/': {
       id: '/demo/'
@@ -11015,6 +11124,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/imoveis/$slug'
       preLoaderRoute: typeof ImoveisSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/garrido/financiamento': {
+      id: '/garrido/financiamento'
+      path: '/financiamento'
+      fullPath: '/garrido/financiamento'
+      preLoaderRoute: typeof GarridoFinanciamentoRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/contato': {
+      id: '/garrido/contato'
+      path: '/contato'
+      fullPath: '/garrido/contato'
+      preLoaderRoute: typeof GarridoContatoRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/buscar': {
+      id: '/garrido/buscar'
+      path: '/buscar'
+      fullPath: '/garrido/buscar'
+      preLoaderRoute: typeof GarridoBuscarRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/avaliar': {
+      id: '/garrido/avaliar'
+      path: '/avaliar'
+      fullPath: '/garrido/avaliar'
+      preLoaderRoute: typeof GarridoAvaliarRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/anunciar': {
+      id: '/garrido/anunciar'
+      path: '/anunciar'
+      fullPath: '/garrido/anunciar'
+      preLoaderRoute: typeof GarridoAnunciarRouteImport
+      parentRoute: typeof GarridoRoute
     }
     '/empresa/login': {
       id: '/empresa/login'
@@ -11834,6 +11978,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/imoveis/$slug/$propertyId'
       preLoaderRoute: typeof ImoveisSlugPropertyIdRouteImport
       parentRoute: typeof ImoveisSlugRoute
+    }
+    '/garrido/imovel/$slug': {
+      id: '/garrido/imovel/$slug'
+      path: '/imovel/$slug'
+      fullPath: '/garrido/imovel/$slug'
+      preLoaderRoute: typeof GarridoImovelSlugRouteImport
+      parentRoute: typeof GarridoRoute
     }
     '/demo/nicho/$slug': {
       id: '/demo/nicho/$slug'
@@ -17296,6 +17447,29 @@ const ContratarRouteWithChildren = ContratarRoute._addFileChildren(
   ContratarRouteChildren,
 )
 
+interface GarridoRouteChildren {
+  GarridoAnunciarRoute: typeof GarridoAnunciarRoute
+  GarridoAvaliarRoute: typeof GarridoAvaliarRoute
+  GarridoBuscarRoute: typeof GarridoBuscarRoute
+  GarridoContatoRoute: typeof GarridoContatoRoute
+  GarridoFinanciamentoRoute: typeof GarridoFinanciamentoRoute
+  GarridoIndexRoute: typeof GarridoIndexRoute
+  GarridoImovelSlugRoute: typeof GarridoImovelSlugRoute
+}
+
+const GarridoRouteChildren: GarridoRouteChildren = {
+  GarridoAnunciarRoute: GarridoAnunciarRoute,
+  GarridoAvaliarRoute: GarridoAvaliarRoute,
+  GarridoBuscarRoute: GarridoBuscarRoute,
+  GarridoContatoRoute: GarridoContatoRoute,
+  GarridoFinanciamentoRoute: GarridoFinanciamentoRoute,
+  GarridoIndexRoute: GarridoIndexRoute,
+  GarridoImovelSlugRoute: GarridoImovelSlugRoute,
+}
+
+const GarridoRouteWithChildren =
+  GarridoRoute._addFileChildren(GarridoRouteChildren)
+
 interface MarocasRouteChildren {
   MarocasAssistenteRoute: typeof MarocasAssistenteRoute
   MarocasLoginRoute: typeof MarocasLoginRoute
@@ -17525,6 +17699,7 @@ const rootRouteChildren: RootRouteChildren = {
   EcossistemaRoute: EcossistemaRoute,
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
+  GarridoRoute: GarridoRouteWithChildren,
   HealthzRoute: HealthzRoute,
   LegalRoute: LegalRoute,
   ManutencaoRoute: ManutencaoRoute,
