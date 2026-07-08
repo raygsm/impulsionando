@@ -63,6 +63,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as WmpParceiroRouteImport } from './routes/wmp.parceiro'
 import { Route as WmpOrcamentoRouteImport } from './routes/wmp.orcamento'
@@ -1060,6 +1061,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ColorsIndexRoute = ColorsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ColorsRoute,
 } as any)
 const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
@@ -5426,6 +5432,7 @@ export interface FileRoutesByFullPath {
   '/wmp/orcamento': typeof WmpOrcamentoRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout/': typeof CheckoutIndexRoute
+  '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -6012,7 +6019,6 @@ export interface FileRoutesByTo {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
-  '/colors': typeof ColorsRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -6196,6 +6202,7 @@ export interface FileRoutesByTo {
   '/wmp/orcamento': typeof WmpOrcamentoRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout': typeof CheckoutIndexRoute
+  '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -6979,6 +6986,7 @@ export interface FileRoutesById {
   '/wmp/orcamento': typeof WmpOrcamentoRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout/': typeof CheckoutIndexRoute
+  '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -7764,6 +7772,7 @@ export interface FileRouteTypes {
     | '/wmp/orcamento'
     | '/wmp/parceiro'
     | '/checkout/'
+    | '/colors/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -8350,7 +8359,6 @@ export interface FileRouteTypes {
     | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
-    | '/colors'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -8534,6 +8542,7 @@ export interface FileRouteTypes {
     | '/wmp/orcamento'
     | '/wmp/parceiro'
     | '/checkout'
+    | '/colors'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -9316,6 +9325,7 @@ export interface FileRouteTypes {
     | '/wmp/orcamento'
     | '/wmp/parceiro'
     | '/checkout/'
+    | '/colors/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -10480,6 +10490,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/colors/': {
+      id: '/colors/'
+      path: '/'
+      fullPath: '/colors/'
+      preLoaderRoute: typeof ColorsIndexRouteImport
+      parentRoute: typeof ColorsRoute
     }
     '/checkout/': {
       id: '/checkout/'
@@ -17251,6 +17268,7 @@ interface ColorsRouteChildren {
   ColorsPainelRoute: typeof ColorsPainelRoute
   ColorsSuperGreenBlackRoute: typeof ColorsSuperGreenBlackRoute
   ColorsSuperGreenBlackKpiRoute: typeof ColorsSuperGreenBlackKpiRoute
+  ColorsIndexRoute: typeof ColorsIndexRoute
   ColorsProdutoSlugRoute: typeof ColorsProdutoSlugRoute
 }
 
@@ -17259,6 +17277,7 @@ const ColorsRouteChildren: ColorsRouteChildren = {
   ColorsPainelRoute: ColorsPainelRoute,
   ColorsSuperGreenBlackRoute: ColorsSuperGreenBlackRoute,
   ColorsSuperGreenBlackKpiRoute: ColorsSuperGreenBlackKpiRoute,
+  ColorsIndexRoute: ColorsIndexRoute,
   ColorsProdutoSlugRoute: ColorsProdutoSlugRoute,
 }
 
