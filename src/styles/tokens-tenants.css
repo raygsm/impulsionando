@@ -76,6 +76,11 @@
   --marocas-primary: oklch(0.55 0.12 155);
   --marocas-accent:  oklch(0.80 0.09 75);
   --marocas-surface: oklch(0.99 0.006 100);
+
+  /* White Label — índigo SaaS + violeta parceiro */
+  --whitelabel-primary: oklch(0.52 0.18 275);
+  --whitelabel-accent:  oklch(0.72 0.16 305);
+  --whitelabel-surface: oklch(0.99 0.005 275);
 }
 
 /* Ativação por escopo — use no wrapper da rota do tenant.
@@ -87,6 +92,7 @@
 [data-tenant="wmp"]      { --primary: var(--wmp-primary);      --ring: var(--wmp-primary); }
 [data-tenant="marocas"]  { --primary: var(--marocas-primary);  --ring: var(--marocas-primary); }
 [data-tenant="foodservice"] { --primary: oklch(0.66 0.16 55);  --ring: oklch(0.66 0.16 55); }
+[data-tenant="whitelabel"]  { --primary: var(--whitelabel-primary); --ring: var(--whitelabel-primary); }
 
 /* ============================================================
    TOKENS LEGADOS POR TENANT (declarados anteriormente inline
