@@ -145,10 +145,34 @@ export const COLORS_PRODUCTS: ColorsProduct[] = [
     emoji: "🌿",
     accent: "from-emerald-500 to-teal-500",
     links: [
-      { label: "Maisfy", href: "http://supersoshair.com.br/m" },
-      { label: "Monetizze", href: "http://supersoshair.com.br/" },
+      { label: "Maisfy", href: "https://supersoshair.com.br/m" },
+      { label: "Monetizze", href: "https://supersoshair.com.br/" },
       { label: "Perfect Pay", href: "https://supersoshair.com.br/p/" },
     ],
+    howToUse: [
+      "Tome 2 cápsulas ao dia, preferencialmente após o café da manhã.",
+      "Ingerir com água — evite chás quentes que podem oxidar as vitaminas.",
+      "Uso mínimo de 90 dias para ciclo capilar completo.",
+    ],
+    composition: [
+      "Biotina (B7) — o combustível do crescimento capilar",
+      "Vitaminas A, C, D, E — antioxidantes que protegem o folículo",
+      "Complexo B3, B5, B6 — nutrem o couro cabeludo",
+      "Zinco quelato — reduz queda hormonal",
+      "L-cisteína — matéria-prima do fio",
+    ],
+    faq: [
+      { q: "Em quanto tempo vejo resultado?", a: "Fortalecimento das unhas em 15 dias. Redução da queda em 30 a 45 dias. Crescimento visível a partir de 60 dias." },
+      { q: "Funciona para calvície?", a: "Não trata calvície androgenética, mas potencializa qualquer tratamento capilar médico ao nutrir folículos ainda ativos." },
+      { q: "Serve para homens?", a: "Sim. A fórmula é unissex e igualmente eficaz para cabelos masculinos e barba." },
+      { q: "Pode tomar junto com outros suplementos?", a: "Sim, é seguro combinar com colágeno, ômega 3 e proteínas. Evite empilhar outras multivitamínicas para não exceder a dose diária de vitamina A." },
+    ],
+    testimonials: [
+      { name: "Ana P.", city: "Curitiba — PR", result: "6cm em 3 meses", text: "Meu cabelo estava caindo aos punhados. Em 45 dias parou a queda e agora cresce muito rápido." },
+      { name: "Marina S.", city: "Salvador — BA", result: "Unhas fortes em 20 dias", text: "As unhas nunca mais quebraram. E o brilho do cabelo voltou." },
+    ],
+    guarantee: "Garantia de 7 dias — devolução total se não sentir diferença.",
+    urgencyBadge: "🌿 Fórmula com 8 vitaminas — envio em até 3 dias úteis",
   },
   {
     slug: "creatina",
