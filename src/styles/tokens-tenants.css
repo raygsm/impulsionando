@@ -81,6 +81,11 @@
   --whitelabel-primary: oklch(0.52 0.18 275);
   --whitelabel-accent:  oklch(0.72 0.16 305);
   --whitelabel-surface: oklch(0.99 0.005 275);
+
+  /* Clube Impulsionando — laranja consumidor + coral vantagens */
+  --clube-primary: oklch(0.65 0.20 35);
+  --clube-accent:  oklch(0.75 0.16 60);
+  --clube-surface: oklch(0.99 0.006 60);
 }
 
 /* Ativação por escopo — use no wrapper da rota do tenant.
@@ -93,6 +98,7 @@
 [data-tenant="marocas"]  { --primary: var(--marocas-primary);  --ring: var(--marocas-primary); }
 [data-tenant="foodservice"] { --primary: oklch(0.66 0.16 55);  --ring: oklch(0.66 0.16 55); }
 [data-tenant="whitelabel"]  { --primary: var(--whitelabel-primary); --ring: var(--whitelabel-primary); }
+[data-tenant="clube"]       { --primary: var(--clube-primary);       --ring: var(--clube-primary); }
 
 /* ============================================================
    TOKENS LEGADOS POR TENANT (declarados anteriormente inline

@@ -68,6 +68,7 @@ import { Route as GarridoIndexRouteImport } from './routes/garrido.index'
 import { Route as FoodserviceIndexRouteImport } from './routes/foodservice.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
+import { Route as ClubeIndexRouteImport } from './routes/clube.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as WmpSobreRouteImport } from './routes/wmp.sobre'
 import { Route as WmpParceiroRouteImport } from './routes/wmp.parceiro'
@@ -186,8 +187,23 @@ import { Route as ColorsSuperGreenBlackKpiRouteImport } from './routes/colors.su
 import { Route as ColorsSuperGreenBlackRouteImport } from './routes/colors.super-green-black'
 import { Route as ColorsPainelRouteImport } from './routes/colors.painel'
 import { Route as ColorsBrandRouteImport } from './routes/colors.$brand'
+import { Route as ClubeVouchersRouteImport } from './routes/clube.vouchers'
+import { Route as ClubeServicosRouteImport } from './routes/clube.servicos'
+import { Route as ClubeRecomendacoesRouteImport } from './routes/clube.recomendacoes'
+import { Route as ClubeProdutosRouteImport } from './routes/clube.produtos'
+import { Route as ClubePlanosRouteImport } from './routes/clube.planos'
+import { Route as ClubeMinhaContaRouteImport } from './routes/clube.minha-conta'
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
+import { Route as ClubeImoveisRouteImport } from './routes/clube.imoveis'
+import { Route as ClubeHistoricoRouteImport } from './routes/clube.historico'
+import { Route as ClubeFavoritosRouteImport } from './routes/clube.favoritos'
+import { Route as ClubeEventosRouteImport } from './routes/clube.eventos'
+import { Route as ClubeEmpresasRouteImport } from './routes/clube.empresas'
+import { Route as ClubeDeliveryRouteImport } from './routes/clube.delivery'
+import { Route as ClubeCashbackRouteImport } from './routes/clube.cashback'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
+import { Route as ClubeBuscarRouteImport } from './routes/clube.buscar'
+import { Route as ClubeAvaliacoesRouteImport } from './routes/clube.avaliacoes'
 import { Route as ChrismedTeleconsultaRouteImport } from './routes/chrismed.teleconsulta'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as ChrismedOcupacionalRouteImport } from './routes/chrismed.ocupacional'
@@ -1111,6 +1127,11 @@ const ColorsIndexRoute = ColorsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ColorsRoute,
 } as any)
+const ClubeIndexRoute = ClubeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClubeRoute,
+} as any)
 const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
@@ -1708,14 +1729,89 @@ const ColorsBrandRoute = ColorsBrandRouteImport.update({
   path: '/$brand',
   getParentRoute: () => ColorsRoute,
 } as any)
+const ClubeVouchersRoute = ClubeVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeServicosRoute = ClubeServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeRecomendacoesRoute = ClubeRecomendacoesRouteImport.update({
+  id: '/recomendacoes',
+  path: '/recomendacoes',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeProdutosRoute = ClubeProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubePlanosRoute = ClubePlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeMinhaContaRoute = ClubeMinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
+  getParentRoute: () => ClubeRoute,
+} as any)
 const ClubeLoginRoute = ClubeLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => ClubeRoute,
 } as any)
+const ClubeImoveisRoute = ClubeImoveisRouteImport.update({
+  id: '/imoveis',
+  path: '/imoveis',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeHistoricoRoute = ClubeHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeFavoritosRoute = ClubeFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeEventosRoute = ClubeEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeEmpresasRoute = ClubeEmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeDeliveryRoute = ClubeDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeCashbackRoute = ClubeCashbackRouteImport.update({
+  id: '/cashback',
+  path: '/cashback',
+  getParentRoute: () => ClubeRoute,
+} as any)
 const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
   id: '/cadastro',
   path: '/cadastro',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeBuscarRoute = ClubeBuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeAvaliacoesRoute = ClubeAvaliacoesRouteImport.update({
+  id: '/avaliacoes',
+  path: '/avaliacoes',
   getParentRoute: () => ClubeRoute,
 } as any)
 const ChrismedTeleconsultaRoute = ChrismedTeleconsultaRouteImport.update({
@@ -5476,8 +5572,23 @@ export interface FileRoutesByFullPath {
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
+  '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/cashback': typeof ClubeCashbackRoute
+  '/clube/delivery': typeof ClubeDeliveryRoute
+  '/clube/empresas': typeof ClubeEmpresasRoute
+  '/clube/eventos': typeof ClubeEventosRoute
+  '/clube/favoritos': typeof ClubeFavoritosRoute
+  '/clube/historico': typeof ClubeHistoricoRoute
+  '/clube/imoveis': typeof ClubeImoveisRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/clube/minha-conta': typeof ClubeMinhaContaRoute
+  '/clube/planos': typeof ClubePlanosRoute
+  '/clube/produtos': typeof ClubeProdutosRoute
+  '/clube/recomendacoes': typeof ClubeRecomendacoesRoute
+  '/clube/servicos': typeof ClubeServicosRoute
+  '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
@@ -5596,6 +5707,7 @@ export interface FileRoutesByFullPath {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/foodservice/': typeof FoodserviceIndexRoute
@@ -6186,7 +6298,6 @@ export interface FileRoutesByTo {
   '/catalogo': typeof CatalogoRoute
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
-  '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -6268,8 +6379,23 @@ export interface FileRoutesByTo {
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
+  '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/cashback': typeof ClubeCashbackRoute
+  '/clube/delivery': typeof ClubeDeliveryRoute
+  '/clube/empresas': typeof ClubeEmpresasRoute
+  '/clube/eventos': typeof ClubeEventosRoute
+  '/clube/favoritos': typeof ClubeFavoritosRoute
+  '/clube/historico': typeof ClubeHistoricoRoute
+  '/clube/imoveis': typeof ClubeImoveisRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/clube/minha-conta': typeof ClubeMinhaContaRoute
+  '/clube/planos': typeof ClubePlanosRoute
+  '/clube/produtos': typeof ClubeProdutosRoute
+  '/clube/recomendacoes': typeof ClubeRecomendacoesRoute
+  '/clube/servicos': typeof ClubeServicosRoute
+  '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
@@ -6388,6 +6514,7 @@ export interface FileRoutesByTo {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/clube': typeof ClubeIndexRoute
   '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
   '/foodservice': typeof FoodserviceIndexRoute
@@ -7076,8 +7203,23 @@ export interface FileRoutesById {
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
+  '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/cashback': typeof ClubeCashbackRoute
+  '/clube/delivery': typeof ClubeDeliveryRoute
+  '/clube/empresas': typeof ClubeEmpresasRoute
+  '/clube/eventos': typeof ClubeEventosRoute
+  '/clube/favoritos': typeof ClubeFavoritosRoute
+  '/clube/historico': typeof ClubeHistoricoRoute
+  '/clube/imoveis': typeof ClubeImoveisRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/clube/minha-conta': typeof ClubeMinhaContaRoute
+  '/clube/planos': typeof ClubePlanosRoute
+  '/clube/produtos': typeof ClubeProdutosRoute
+  '/clube/recomendacoes': typeof ClubeRecomendacoesRoute
+  '/clube/servicos': typeof ClubeServicosRoute
+  '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
   '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
@@ -7196,6 +7338,7 @@ export interface FileRoutesById {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/foodservice/': typeof FoodserviceIndexRoute
@@ -7886,8 +8029,23 @@ export interface FileRouteTypes {
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
     | '/chrismed/teleconsulta'
+    | '/clube/avaliacoes'
+    | '/clube/buscar'
     | '/clube/cadastro'
+    | '/clube/cashback'
+    | '/clube/delivery'
+    | '/clube/empresas'
+    | '/clube/eventos'
+    | '/clube/favoritos'
+    | '/clube/historico'
+    | '/clube/imoveis'
     | '/clube/login'
+    | '/clube/minha-conta'
+    | '/clube/planos'
+    | '/clube/produtos'
+    | '/clube/recomendacoes'
+    | '/clube/servicos'
+    | '/clube/vouchers'
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
@@ -8006,6 +8164,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout/'
+    | '/clube/'
     | '/colors/'
     | '/demo/'
     | '/foodservice/'
@@ -8596,7 +8755,6 @@ export interface FileRouteTypes {
     | '/catalogo'
     | '/central-de-ajuda'
     | '/chrismed'
-    | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -8678,8 +8836,23 @@ export interface FileRouteTypes {
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
     | '/chrismed/teleconsulta'
+    | '/clube/avaliacoes'
+    | '/clube/buscar'
     | '/clube/cadastro'
+    | '/clube/cashback'
+    | '/clube/delivery'
+    | '/clube/empresas'
+    | '/clube/eventos'
+    | '/clube/favoritos'
+    | '/clube/historico'
+    | '/clube/imoveis'
     | '/clube/login'
+    | '/clube/minha-conta'
+    | '/clube/planos'
+    | '/clube/produtos'
+    | '/clube/recomendacoes'
+    | '/clube/servicos'
+    | '/clube/vouchers'
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
@@ -8798,6 +8971,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout'
+    | '/clube'
     | '/colors'
     | '/demo'
     | '/foodservice'
@@ -9485,8 +9659,23 @@ export interface FileRouteTypes {
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
     | '/chrismed/teleconsulta'
+    | '/clube/avaliacoes'
+    | '/clube/buscar'
     | '/clube/cadastro'
+    | '/clube/cashback'
+    | '/clube/delivery'
+    | '/clube/empresas'
+    | '/clube/eventos'
+    | '/clube/favoritos'
+    | '/clube/historico'
+    | '/clube/imoveis'
     | '/clube/login'
+    | '/clube/minha-conta'
+    | '/clube/planos'
+    | '/clube/produtos'
+    | '/clube/recomendacoes'
+    | '/clube/servicos'
+    | '/clube/vouchers'
     | '/colors/$brand'
     | '/colors/painel'
     | '/colors/super-green-black'
@@ -9605,6 +9794,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout/'
+    | '/clube/'
     | '/colors/'
     | '/demo/'
     | '/foodservice/'
@@ -10812,6 +11002,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ColorsIndexRouteImport
       parentRoute: typeof ColorsRoute
     }
+    '/clube/': {
+      id: '/clube/'
+      path: '/'
+      fullPath: '/clube/'
+      preLoaderRoute: typeof ClubeIndexRouteImport
+      parentRoute: typeof ClubeRoute
+    }
     '/checkout/': {
       id: '/checkout/'
       path: '/checkout'
@@ -11638,6 +11835,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ColorsBrandRouteImport
       parentRoute: typeof ColorsRoute
     }
+    '/clube/vouchers': {
+      id: '/clube/vouchers'
+      path: '/vouchers'
+      fullPath: '/clube/vouchers'
+      preLoaderRoute: typeof ClubeVouchersRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/servicos': {
+      id: '/clube/servicos'
+      path: '/servicos'
+      fullPath: '/clube/servicos'
+      preLoaderRoute: typeof ClubeServicosRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/recomendacoes': {
+      id: '/clube/recomendacoes'
+      path: '/recomendacoes'
+      fullPath: '/clube/recomendacoes'
+      preLoaderRoute: typeof ClubeRecomendacoesRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/produtos': {
+      id: '/clube/produtos'
+      path: '/produtos'
+      fullPath: '/clube/produtos'
+      preLoaderRoute: typeof ClubeProdutosRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/planos': {
+      id: '/clube/planos'
+      path: '/planos'
+      fullPath: '/clube/planos'
+      preLoaderRoute: typeof ClubePlanosRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/minha-conta': {
+      id: '/clube/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/clube/minha-conta'
+      preLoaderRoute: typeof ClubeMinhaContaRouteImport
+      parentRoute: typeof ClubeRoute
+    }
     '/clube/login': {
       id: '/clube/login'
       path: '/login'
@@ -11645,11 +11884,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubeLoginRouteImport
       parentRoute: typeof ClubeRoute
     }
+    '/clube/imoveis': {
+      id: '/clube/imoveis'
+      path: '/imoveis'
+      fullPath: '/clube/imoveis'
+      preLoaderRoute: typeof ClubeImoveisRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/historico': {
+      id: '/clube/historico'
+      path: '/historico'
+      fullPath: '/clube/historico'
+      preLoaderRoute: typeof ClubeHistoricoRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/favoritos': {
+      id: '/clube/favoritos'
+      path: '/favoritos'
+      fullPath: '/clube/favoritos'
+      preLoaderRoute: typeof ClubeFavoritosRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/eventos': {
+      id: '/clube/eventos'
+      path: '/eventos'
+      fullPath: '/clube/eventos'
+      preLoaderRoute: typeof ClubeEventosRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/empresas': {
+      id: '/clube/empresas'
+      path: '/empresas'
+      fullPath: '/clube/empresas'
+      preLoaderRoute: typeof ClubeEmpresasRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/delivery': {
+      id: '/clube/delivery'
+      path: '/delivery'
+      fullPath: '/clube/delivery'
+      preLoaderRoute: typeof ClubeDeliveryRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/cashback': {
+      id: '/clube/cashback'
+      path: '/cashback'
+      fullPath: '/clube/cashback'
+      preLoaderRoute: typeof ClubeCashbackRouteImport
+      parentRoute: typeof ClubeRoute
+    }
     '/clube/cadastro': {
       id: '/clube/cadastro'
       path: '/cadastro'
       fullPath: '/clube/cadastro'
       preLoaderRoute: typeof ClubeCadastroRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/buscar': {
+      id: '/clube/buscar'
+      path: '/buscar'
+      fullPath: '/clube/buscar'
+      preLoaderRoute: typeof ClubeBuscarRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/avaliacoes': {
+      id: '/clube/avaliacoes'
+      path: '/avaliacoes'
+      fullPath: '/clube/avaliacoes'
+      preLoaderRoute: typeof ClubeAvaliacoesRouteImport
       parentRoute: typeof ClubeRoute
     }
     '/chrismed/teleconsulta': {
@@ -17706,13 +18008,45 @@ const ChrismedRouteWithChildren = ChrismedRoute._addFileChildren(
 )
 
 interface ClubeRouteChildren {
+  ClubeAvaliacoesRoute: typeof ClubeAvaliacoesRoute
+  ClubeBuscarRoute: typeof ClubeBuscarRoute
   ClubeCadastroRoute: typeof ClubeCadastroRoute
+  ClubeCashbackRoute: typeof ClubeCashbackRoute
+  ClubeDeliveryRoute: typeof ClubeDeliveryRoute
+  ClubeEmpresasRoute: typeof ClubeEmpresasRoute
+  ClubeEventosRoute: typeof ClubeEventosRoute
+  ClubeFavoritosRoute: typeof ClubeFavoritosRoute
+  ClubeHistoricoRoute: typeof ClubeHistoricoRoute
+  ClubeImoveisRoute: typeof ClubeImoveisRoute
   ClubeLoginRoute: typeof ClubeLoginRoute
+  ClubeMinhaContaRoute: typeof ClubeMinhaContaRoute
+  ClubePlanosRoute: typeof ClubePlanosRoute
+  ClubeProdutosRoute: typeof ClubeProdutosRoute
+  ClubeRecomendacoesRoute: typeof ClubeRecomendacoesRoute
+  ClubeServicosRoute: typeof ClubeServicosRoute
+  ClubeVouchersRoute: typeof ClubeVouchersRoute
+  ClubeIndexRoute: typeof ClubeIndexRoute
 }
 
 const ClubeRouteChildren: ClubeRouteChildren = {
+  ClubeAvaliacoesRoute: ClubeAvaliacoesRoute,
+  ClubeBuscarRoute: ClubeBuscarRoute,
   ClubeCadastroRoute: ClubeCadastroRoute,
+  ClubeCashbackRoute: ClubeCashbackRoute,
+  ClubeDeliveryRoute: ClubeDeliveryRoute,
+  ClubeEmpresasRoute: ClubeEmpresasRoute,
+  ClubeEventosRoute: ClubeEventosRoute,
+  ClubeFavoritosRoute: ClubeFavoritosRoute,
+  ClubeHistoricoRoute: ClubeHistoricoRoute,
+  ClubeImoveisRoute: ClubeImoveisRoute,
   ClubeLoginRoute: ClubeLoginRoute,
+  ClubeMinhaContaRoute: ClubeMinhaContaRoute,
+  ClubePlanosRoute: ClubePlanosRoute,
+  ClubeProdutosRoute: ClubeProdutosRoute,
+  ClubeRecomendacoesRoute: ClubeRecomendacoesRoute,
+  ClubeServicosRoute: ClubeServicosRoute,
+  ClubeVouchersRoute: ClubeVouchersRoute,
+  ClubeIndexRoute: ClubeIndexRoute,
 }
 
 const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
