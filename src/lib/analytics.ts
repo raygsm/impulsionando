@@ -2,6 +2,7 @@
 // Eventos só são enviados quando o usuário aceitou "analytics" (e/ou "marketing").
 
 import { readConsent, onConsentChange, type ConsentState } from "./consent";
+import { getSessionId, getVisitorId } from "./session-id";
 
 // ID público do GA4 do grupo Impulsionando — pode ficar em código.
 // Sobrescreva definindo `VITE_GA4_MEASUREMENT_ID` em Workspace Settings → Build Secrets.
@@ -13,6 +14,7 @@ declare global {
     gtag: (...args: unknown[]) => void;
   }
 }
+
 
 let initialized = false;
 let scriptInjected = false;
@@ -99,16 +101,51 @@ export function trackPageView(path: string, title?: string) {
 
 export function trackEvent(name: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
+  const enriched = {
+    ...params,
+    session_id: getSessionId(),
+    visitor_id: getVisitorId(),
+  };
   // Sempre espelha no dataLayer — permite que GTM/Segment/tests capturem o evento
   // mesmo antes do consentimento GA4 ser aceito (o hit para o GA4 continua gated).
   try {
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: name, ...params });
+    window.dataLayer.push({ event: name, ...enriched });
   } catch { /* ignore */ }
   if (!GA_ID) return;
   const c = readConsent();
   if (!c?.analytics) return;
-  window.gtag?.("event", name, params);
+  window.gtag?.("event", name, enriched);
 }
 
 export const analyticsEnabled = Boolean(GA_ID);
+
+/**
+ * Diagnóstico do estado atual de analytics — usado no /colors/painel para
+ * explicar por que eventos podem não aparecer no GA4.
+ */
+export function getAnalyticsDiagnostic() {
+  const c = readConsent();
+  const gaLoaded = typeof window !== "undefined"
+    && typeof (window as unknown as { gtag?: unknown }).gtag === "function";
+  const gaScriptTag = typeof document !== "undefined"
+    && Boolean(document.querySelector('script[src*="googletagmanager.com/gtag/js"]'));
+  const reasons: string[] = [];
+  if (!GA_ID) reasons.push("VITE_GA4_MEASUREMENT_ID ausente");
+  if (!c) reasons.push("Consentimento LGPD ainda não decidido pelo visitante");
+  if (c && !c.analytics) reasons.push("Categoria 'analytics' negada pelo visitante");
+  if (!gaLoaded) reasons.push("gtag.js ainda não carregou (verifique adblock / rede)");
+  if (!gaScriptTag) reasons.push("Tag <script> do GA4 não foi injetada");
+  return {
+    ga_id: GA_ID,
+    initialized,
+    ga_script_injected: gaScriptTag,
+    gtag_ready: gaLoaded,
+    consent: c,
+    session_id: getSessionId(),
+    visitor_id: getVisitorId(),
+    events_will_reach_ga4: reasons.length === 0,
+    blocking_reasons: reasons,
+  };
+}
+
