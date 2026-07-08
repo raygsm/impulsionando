@@ -8,8 +8,37 @@
 
 import { trackEvent } from "./analytics";
 
+type LocalEvent = { name: string; params: Record<string, unknown>; ts: number };
+const BUFFER_KEY = "colors_ga_debug_buffer";
+const BUFFER_MAX = 200;
+
+function pushLocal(name: string, params: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(BUFFER_KEY);
+    const list: LocalEvent[] = raw ? JSON.parse(raw) : [];
+    list.push({ name, params, ts: Date.now() });
+    while (list.length > BUFFER_MAX) list.shift();
+    window.localStorage.setItem(BUFFER_KEY, JSON.stringify(list));
+  } catch { /* ignore quota */ }
+}
+
+export function readColorsEventBuffer(): LocalEvent[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(BUFFER_KEY);
+    return raw ? (JSON.parse(raw) as LocalEvent[]) : [];
+  } catch { return []; }
+}
+
+export function clearColorsEventBuffer() {
+  if (typeof window !== "undefined") window.localStorage.removeItem(BUFFER_KEY);
+}
+
 export function track(event: string, params: Record<string, unknown> = {}) {
-  trackEvent(event, { site: "colors", ...params });
+  const full = { site: "colors", ...params };
+  trackEvent(event, full);
+  pushLocal(event, full);
 }
 
 export const colorsEvents = {

@@ -159,6 +159,7 @@ import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as ColorsSuperGreenBlackRouteImport } from './routes/colors.super-green-black'
+import { Route as ColorsPainelRouteImport } from './routes/colors.painel'
 import { Route as ColorsBrandRouteImport } from './routes/colors.$brand'
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
@@ -1540,6 +1541,11 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
 const ColorsSuperGreenBlackRoute = ColorsSuperGreenBlackRouteImport.update({
   id: '/super-green-black',
   path: '/super-green-black',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsPainelRoute = ColorsPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
   getParentRoute: () => ColorsRoute,
 } as any)
 const ColorsBrandRoute = ColorsBrandRouteImport.update({
@@ -5294,6 +5300,7 @@ export interface FileRoutesByFullPath {
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -6060,6 +6067,7 @@ export interface FileRoutesByTo {
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -6838,6 +6846,7 @@ export interface FileRoutesById {
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/painel': typeof ColorsPainelRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -7618,6 +7627,7 @@ export interface FileRouteTypes {
     | '/clube/cadastro'
     | '/clube/login'
     | '/colors/$brand'
+    | '/colors/painel'
     | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -8384,6 +8394,7 @@ export interface FileRouteTypes {
     | '/clube/cadastro'
     | '/clube/login'
     | '/colors/$brand'
+    | '/colors/painel'
     | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -9161,6 +9172,7 @@ export interface FileRouteTypes {
     | '/clube/cadastro'
     | '/clube/login'
     | '/colors/$brand'
+    | '/colors/painel'
     | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -11088,6 +11100,13 @@ declare module '@tanstack/react-router' {
       path: '/super-green-black'
       fullPath: '/colors/super-green-black'
       preLoaderRoute: typeof ColorsSuperGreenBlackRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/painel': {
+      id: '/colors/painel'
+      path: '/painel'
+      fullPath: '/colors/painel'
+      preLoaderRoute: typeof ColorsPainelRouteImport
       parentRoute: typeof ColorsRoute
     }
     '/colors/$brand': {
@@ -17150,12 +17169,14 @@ const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
 
 interface ColorsRouteChildren {
   ColorsBrandRoute: typeof ColorsBrandRoute
+  ColorsPainelRoute: typeof ColorsPainelRoute
   ColorsSuperGreenBlackRoute: typeof ColorsSuperGreenBlackRoute
   ColorsProdutoSlugRoute: typeof ColorsProdutoSlugRoute
 }
 
 const ColorsRouteChildren: ColorsRouteChildren = {
   ColorsBrandRoute: ColorsBrandRoute,
+  ColorsPainelRoute: ColorsPainelRoute,
   ColorsSuperGreenBlackRoute: ColorsSuperGreenBlackRoute,
   ColorsProdutoSlugRoute: ColorsProdutoSlugRoute,
 }

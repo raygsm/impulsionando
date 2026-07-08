@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { ArrowRight, ShieldCheck, Truck, Sparkles, Heart, MessageCircle, CheckCircle2, Phone } from "lucide-react";
 import { COLORS_PRODUCTS, COLORS_BRANDS, type ColorsBrand } from "@/data/colors-products";
 import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
+import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 
 /**
  * colors.impulsionando.com.br — Landing FRONT-END.
@@ -53,6 +54,8 @@ type BrandFilter = (typeof BRAND_FILTERS)[number];
 
 function ColorsSaudePage() {
   const [filter, setFilter] = useState<BrandFilter>("Todos");
+  useColorsUtmHydration("colors_home");
+
 
   useEffect(() => {
     ensureGaInstalled();

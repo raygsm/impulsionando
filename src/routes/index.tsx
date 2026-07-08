@@ -3,9 +3,22 @@ import { useEffect } from "react";
 import { HomePage } from "@/components/marketing/HomePage";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
+// Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
+// Sem entrada explícita, cai no fallback /vitrine/{public_slug}.
 const SUBDOMAIN_LANDING: Record<string, string> = {
+  // Landings dedicadas
   marocas: "/marocas",
   colors: "/colors",
+  chrismed: "/chrismed",
+  riomed: "/riomed",
+  wmp: "/wmp",
+  // Sem landing dedicada → vitrine pública do tenant
+  garrido: "/vitrine/imobiliaria-garrido",
+  impulsity: "/vitrine/impulsity",
+  dqa: "/vitrine/dqa-panini",
+  "plataforma-saude": "/vitrine/patricia-lenine",
+  relacionamento: "/vitrine/relacionamento",
+  "impulsionando-brasil": "/vitrine/impulsionando-brasil",
 };
 
 
