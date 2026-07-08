@@ -21,7 +21,7 @@ import { TenantHostFallback } from "@/components/app/TenantHostFallback";
 import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
-import { getTenantSubdomain, tenantSubdomainTarget } from "@/lib/subdomain";
+import { getTenantSubdomain, tenantSubdomainTarget, deprecatedSubdomainRedirect } from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
@@ -32,10 +32,17 @@ import { CoreWatermark } from "@/components/app/CoreWatermark";
 function TenantSubdomainRedirect() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // 1) Host descontinuado (ex.: colorssaude.impulsionando.com.br) →
+    //    redireciona cross-origin para o subdomínio oficial preservando path.
+    const legacy = deprecatedSubdomainRedirect(window.location);
+    if (legacy) {
+      window.location.replace(legacy);
+      return;
+    }
+    // 2) Subdomínio de tenant conhecido → vai para a landing/vitrine na app.
     const match = getTenantSubdomain(window.location.hostname);
     if (!match) return;
     const target = tenantSubdomainTarget(match.slug);
-    // Só redireciona se ainda não estamos na rota de destino ou em subrota do tenant.
     const p = window.location.pathname;
     if (p === "/" || p === "") {
       window.location.replace(target + window.location.search + window.location.hash);
