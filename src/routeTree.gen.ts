@@ -38,6 +38,7 @@ import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as GarridoRouteImport } from './routes/garrido'
+import { Route as FoodserviceRouteImport } from './routes/foodservice'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as EcossistemaRouteImport } from './routes/ecossistema'
@@ -64,6 +65,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as GarridoIndexRouteImport } from './routes/garrido.index'
+import { Route as FoodserviceIndexRouteImport } from './routes/foodservice.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
@@ -145,6 +147,14 @@ import { Route as GarridoContatoRouteImport } from './routes/garrido.contato'
 import { Route as GarridoBuscarRouteImport } from './routes/garrido.buscar'
 import { Route as GarridoAvaliarRouteImport } from './routes/garrido.avaliar'
 import { Route as GarridoAnunciarRouteImport } from './routes/garrido.anunciar'
+import { Route as FoodserviceReservasRouteImport } from './routes/foodservice.reservas'
+import { Route as FoodservicePromocoesRouteImport } from './routes/foodservice.promocoes'
+import { Route as FoodserviceOperacaoRouteImport } from './routes/foodservice.operacao'
+import { Route as FoodserviceFidelidadeRouteImport } from './routes/foodservice.fidelidade'
+import { Route as FoodserviceDeliveryRouteImport } from './routes/foodservice.delivery'
+import { Route as FoodserviceCrmRouteImport } from './routes/foodservice.crm'
+import { Route as FoodserviceContatoRouteImport } from './routes/foodservice.contato'
+import { Route as FoodserviceCardapioRouteImport } from './routes/foodservice.cardapio'
 import { Route as EmpresaLoginRouteImport } from './routes/empresa.login'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -263,6 +273,7 @@ import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.cont
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as GarridoImovelSlugRouteImport } from './routes/garrido.imovel.$slug'
+import { Route as FoodserviceProdutoSlugRouteImport } from './routes/foodservice.produto.$slug'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
@@ -946,6 +957,11 @@ const GarridoRoute = GarridoRouteImport.update({
   path: '/garrido',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FoodserviceRoute = FoodserviceRouteImport.update({
+  id: '/foodservice',
+  path: '/foodservice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EscolherNichoRoute = EscolherNichoRouteImport.update({
   id: '/escolher-nicho',
   path: '/escolher-nicho',
@@ -1074,6 +1090,11 @@ const GarridoIndexRoute = GarridoIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => GarridoRoute,
+} as any)
+const FoodserviceIndexRoute = FoodserviceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FoodserviceRoute,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
@@ -1485,6 +1506,46 @@ const GarridoAnunciarRoute = GarridoAnunciarRouteImport.update({
   id: '/anunciar',
   path: '/anunciar',
   getParentRoute: () => GarridoRoute,
+} as any)
+const FoodserviceReservasRoute = FoodserviceReservasRouteImport.update({
+  id: '/reservas',
+  path: '/reservas',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodservicePromocoesRoute = FoodservicePromocoesRouteImport.update({
+  id: '/promocoes',
+  path: '/promocoes',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceOperacaoRoute = FoodserviceOperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceFidelidadeRoute = FoodserviceFidelidadeRouteImport.update({
+  id: '/fidelidade',
+  path: '/fidelidade',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceDeliveryRoute = FoodserviceDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceCrmRoute = FoodserviceCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceContatoRoute = FoodserviceContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => FoodserviceRoute,
+} as any)
+const FoodserviceCardapioRoute = FoodserviceCardapioRouteImport.update({
+  id: '/cardapio',
+  path: '/cardapio',
+  getParentRoute: () => FoodserviceRoute,
 } as any)
 const EmpresaLoginRoute = EmpresaLoginRouteImport.update({
   id: '/empresa/login',
@@ -2101,6 +2162,11 @@ const GarridoImovelSlugRoute = GarridoImovelSlugRouteImport.update({
   id: '/imovel/$slug',
   path: '/imovel/$slug',
   getParentRoute: () => GarridoRoute,
+} as any)
+const FoodserviceProdutoSlugRoute = FoodserviceProdutoSlugRouteImport.update({
+  id: '/produto/$slug',
+  path: '/produto/$slug',
+  getParentRoute: () => FoodserviceRoute,
 } as any)
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
@@ -5291,6 +5357,7 @@ export interface FileRoutesByFullPath {
   '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/foodservice': typeof FoodserviceRouteWithChildren
   '/garrido': typeof GarridoRouteWithChildren
   '/healthz': typeof HealthzRoute
   '/legal': typeof LegalRoute
@@ -5407,6 +5474,14 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/foodservice/cardapio': typeof FoodserviceCardapioRoute
+  '/foodservice/contato': typeof FoodserviceContatoRoute
+  '/foodservice/crm': typeof FoodserviceCrmRoute
+  '/foodservice/delivery': typeof FoodserviceDeliveryRoute
+  '/foodservice/fidelidade': typeof FoodserviceFidelidadeRoute
+  '/foodservice/operacao': typeof FoodserviceOperacaoRoute
+  '/foodservice/promocoes': typeof FoodservicePromocoesRoute
+  '/foodservice/reservas': typeof FoodserviceReservasRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
@@ -5488,6 +5563,7 @@ export interface FileRoutesByFullPath {
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
+  '/foodservice/': typeof FoodserviceIndexRoute
   '/garrido/': typeof GarridoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -5853,6 +5929,7 @@ export interface FileRoutesByFullPath {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -6184,6 +6261,14 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/foodservice/cardapio': typeof FoodserviceCardapioRoute
+  '/foodservice/contato': typeof FoodserviceContatoRoute
+  '/foodservice/crm': typeof FoodserviceCrmRoute
+  '/foodservice/delivery': typeof FoodserviceDeliveryRoute
+  '/foodservice/fidelidade': typeof FoodserviceFidelidadeRoute
+  '/foodservice/operacao': typeof FoodserviceOperacaoRoute
+  '/foodservice/promocoes': typeof FoodservicePromocoesRoute
+  '/foodservice/reservas': typeof FoodserviceReservasRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
@@ -6265,6 +6350,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutIndexRoute
   '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
+  '/foodservice': typeof FoodserviceIndexRoute
   '/garrido': typeof GarridoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -6629,6 +6715,7 @@ export interface FileRoutesByTo {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -6860,6 +6947,7 @@ export interface FileRoutesById {
   '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/foodservice': typeof FoodserviceRouteWithChildren
   '/garrido': typeof GarridoRouteWithChildren
   '/healthz': typeof HealthzRoute
   '/legal': typeof LegalRoute
@@ -6976,6 +7064,14 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
+  '/foodservice/cardapio': typeof FoodserviceCardapioRoute
+  '/foodservice/contato': typeof FoodserviceContatoRoute
+  '/foodservice/crm': typeof FoodserviceCrmRoute
+  '/foodservice/delivery': typeof FoodserviceDeliveryRoute
+  '/foodservice/fidelidade': typeof FoodserviceFidelidadeRoute
+  '/foodservice/operacao': typeof FoodserviceOperacaoRoute
+  '/foodservice/promocoes': typeof FoodservicePromocoesRoute
+  '/foodservice/reservas': typeof FoodserviceReservasRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
@@ -7057,6 +7153,7 @@ export interface FileRoutesById {
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
+  '/foodservice/': typeof FoodserviceIndexRoute
   '/garrido/': typeof GarridoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -7422,6 +7519,7 @@ export interface FileRoutesById {
   '/api/public/version': typeof ApiPublicVersionRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -7654,6 +7752,7 @@ export interface FileRouteTypes {
     | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
+    | '/foodservice'
     | '/garrido'
     | '/healthz'
     | '/legal'
@@ -7770,6 +7869,14 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/foodservice/cardapio'
+    | '/foodservice/contato'
+    | '/foodservice/crm'
+    | '/foodservice/delivery'
+    | '/foodservice/fidelidade'
+    | '/foodservice/operacao'
+    | '/foodservice/promocoes'
+    | '/foodservice/reservas'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
@@ -7851,6 +7958,7 @@ export interface FileRouteTypes {
     | '/checkout/'
     | '/colors/'
     | '/demo/'
+    | '/foodservice/'
     | '/garrido/'
     | '/modulos/'
     | '/nichos/'
@@ -8216,6 +8324,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -8547,6 +8656,14 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/foodservice/cardapio'
+    | '/foodservice/contato'
+    | '/foodservice/crm'
+    | '/foodservice/delivery'
+    | '/foodservice/fidelidade'
+    | '/foodservice/operacao'
+    | '/foodservice/promocoes'
+    | '/foodservice/reservas'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
@@ -8628,6 +8745,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/colors'
     | '/demo'
+    | '/foodservice'
     | '/garrido'
     | '/modulos'
     | '/nichos'
@@ -8992,6 +9110,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -9222,6 +9341,7 @@ export interface FileRouteTypes {
     | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
+    | '/foodservice'
     | '/garrido'
     | '/healthz'
     | '/legal'
@@ -9338,6 +9458,14 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/empresa/login'
+    | '/foodservice/cardapio'
+    | '/foodservice/contato'
+    | '/foodservice/crm'
+    | '/foodservice/delivery'
+    | '/foodservice/fidelidade'
+    | '/foodservice/operacao'
+    | '/foodservice/promocoes'
+    | '/foodservice/reservas'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
@@ -9419,6 +9547,7 @@ export interface FileRouteTypes {
     | '/checkout/'
     | '/colors/'
     | '/demo/'
+    | '/foodservice/'
     | '/garrido/'
     | '/modulos/'
     | '/nichos/'
@@ -9784,6 +9913,7 @@ export interface FileRouteTypes {
     | '/api/public/version'
     | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
+    | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -10016,6 +10146,7 @@ export interface RootRouteChildren {
   EcossistemaRoute: typeof EcossistemaRoute
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
+  FoodserviceRoute: typeof FoodserviceRouteWithChildren
   GarridoRoute: typeof GarridoRouteWithChildren
   HealthzRoute: typeof HealthzRoute
   LegalRoute: typeof LegalRoute
@@ -10411,6 +10542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GarridoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/foodservice': {
+      id: '/foodservice'
+      path: '/foodservice'
+      fullPath: '/foodservice'
+      preLoaderRoute: typeof FoodserviceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/escolher-nicho': {
       id: '/escolher-nicho'
       path: '/escolher-nicho'
@@ -10592,6 +10730,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/garrido/'
       preLoaderRoute: typeof GarridoIndexRouteImport
       parentRoute: typeof GarridoRoute
+    }
+    '/foodservice/': {
+      id: '/foodservice/'
+      path: '/'
+      fullPath: '/foodservice/'
+      preLoaderRoute: typeof FoodserviceIndexRouteImport
+      parentRoute: typeof FoodserviceRoute
     }
     '/demo/': {
       id: '/demo/'
@@ -11159,6 +11304,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/garrido/anunciar'
       preLoaderRoute: typeof GarridoAnunciarRouteImport
       parentRoute: typeof GarridoRoute
+    }
+    '/foodservice/reservas': {
+      id: '/foodservice/reservas'
+      path: '/reservas'
+      fullPath: '/foodservice/reservas'
+      preLoaderRoute: typeof FoodserviceReservasRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/promocoes': {
+      id: '/foodservice/promocoes'
+      path: '/promocoes'
+      fullPath: '/foodservice/promocoes'
+      preLoaderRoute: typeof FoodservicePromocoesRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/operacao': {
+      id: '/foodservice/operacao'
+      path: '/operacao'
+      fullPath: '/foodservice/operacao'
+      preLoaderRoute: typeof FoodserviceOperacaoRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/fidelidade': {
+      id: '/foodservice/fidelidade'
+      path: '/fidelidade'
+      fullPath: '/foodservice/fidelidade'
+      preLoaderRoute: typeof FoodserviceFidelidadeRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/delivery': {
+      id: '/foodservice/delivery'
+      path: '/delivery'
+      fullPath: '/foodservice/delivery'
+      preLoaderRoute: typeof FoodserviceDeliveryRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/crm': {
+      id: '/foodservice/crm'
+      path: '/crm'
+      fullPath: '/foodservice/crm'
+      preLoaderRoute: typeof FoodserviceCrmRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/contato': {
+      id: '/foodservice/contato'
+      path: '/contato'
+      fullPath: '/foodservice/contato'
+      preLoaderRoute: typeof FoodserviceContatoRouteImport
+      parentRoute: typeof FoodserviceRoute
+    }
+    '/foodservice/cardapio': {
+      id: '/foodservice/cardapio'
+      path: '/cardapio'
+      fullPath: '/foodservice/cardapio'
+      preLoaderRoute: typeof FoodserviceCardapioRouteImport
+      parentRoute: typeof FoodserviceRoute
     }
     '/empresa/login': {
       id: '/empresa/login'
@@ -11985,6 +12186,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/garrido/imovel/$slug'
       preLoaderRoute: typeof GarridoImovelSlugRouteImport
       parentRoute: typeof GarridoRoute
+    }
+    '/foodservice/produto/$slug': {
+      id: '/foodservice/produto/$slug'
+      path: '/produto/$slug'
+      fullPath: '/foodservice/produto/$slug'
+      preLoaderRoute: typeof FoodserviceProdutoSlugRouteImport
+      parentRoute: typeof FoodserviceRoute
     }
     '/demo/nicho/$slug': {
       id: '/demo/nicho/$slug'
@@ -17447,6 +17655,36 @@ const ContratarRouteWithChildren = ContratarRoute._addFileChildren(
   ContratarRouteChildren,
 )
 
+interface FoodserviceRouteChildren {
+  FoodserviceCardapioRoute: typeof FoodserviceCardapioRoute
+  FoodserviceContatoRoute: typeof FoodserviceContatoRoute
+  FoodserviceCrmRoute: typeof FoodserviceCrmRoute
+  FoodserviceDeliveryRoute: typeof FoodserviceDeliveryRoute
+  FoodserviceFidelidadeRoute: typeof FoodserviceFidelidadeRoute
+  FoodserviceOperacaoRoute: typeof FoodserviceOperacaoRoute
+  FoodservicePromocoesRoute: typeof FoodservicePromocoesRoute
+  FoodserviceReservasRoute: typeof FoodserviceReservasRoute
+  FoodserviceIndexRoute: typeof FoodserviceIndexRoute
+  FoodserviceProdutoSlugRoute: typeof FoodserviceProdutoSlugRoute
+}
+
+const FoodserviceRouteChildren: FoodserviceRouteChildren = {
+  FoodserviceCardapioRoute: FoodserviceCardapioRoute,
+  FoodserviceContatoRoute: FoodserviceContatoRoute,
+  FoodserviceCrmRoute: FoodserviceCrmRoute,
+  FoodserviceDeliveryRoute: FoodserviceDeliveryRoute,
+  FoodserviceFidelidadeRoute: FoodserviceFidelidadeRoute,
+  FoodserviceOperacaoRoute: FoodserviceOperacaoRoute,
+  FoodservicePromocoesRoute: FoodservicePromocoesRoute,
+  FoodserviceReservasRoute: FoodserviceReservasRoute,
+  FoodserviceIndexRoute: FoodserviceIndexRoute,
+  FoodserviceProdutoSlugRoute: FoodserviceProdutoSlugRoute,
+}
+
+const FoodserviceRouteWithChildren = FoodserviceRoute._addFileChildren(
+  FoodserviceRouteChildren,
+)
+
 interface GarridoRouteChildren {
   GarridoAnunciarRoute: typeof GarridoAnunciarRoute
   GarridoAvaliarRoute: typeof GarridoAvaliarRoute
@@ -17699,6 +17937,7 @@ const rootRouteChildren: RootRouteChildren = {
   EcossistemaRoute: EcossistemaRoute,
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
+  FoodserviceRoute: FoodserviceRouteWithChildren,
   GarridoRoute: GarridoRouteWithChildren,
   HealthzRoute: HealthzRoute,
   LegalRoute: LegalRoute,
