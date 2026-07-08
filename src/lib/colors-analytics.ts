@@ -43,11 +43,11 @@ export function readColorsEventBuffer(): LocalEvent[] {
   try {
     const raw = window.localStorage.getItem(BUFFER_KEY);
     const list = raw ? (JSON.parse(raw) as LocalEvent[]) : [];
-    // Retrocompat: eventos antigos sem session_id.
+    // Retrocompat: eventos antigos sem session_id/visitor_id.
     return list.map((e) => ({
-      session_id: "legacy",
-      visitor_id: "legacy",
       ...e,
+      session_id: e.session_id ?? "legacy",
+      visitor_id: e.visitor_id ?? "legacy",
     }));
   } catch { return []; }
 }
