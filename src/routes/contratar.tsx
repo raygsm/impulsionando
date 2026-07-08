@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { listPublicPlans, startTrial } from '@/lib/contratar.functions'
+import { startTrial } from '@/lib/contratar.functions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, Sparkles, ShieldCheck, Crown, Users } from 'lucide-react'
 import { OfficialChannelNotice } from '@/components/marketing/OfficialChannelNotice'
 import { useMinimumWage } from '@/hooks/useCoreSetting'
 
@@ -48,36 +47,26 @@ export const Route = createFileRoute('/contratar')({
   }),
 })
 
-const PLAN_TO_TRIAL: Record<string, 'essencial' | 'integrado' | 'avancado'> = {
-  'essencial-mensal': 'essencial',
-  'completo-mensal': 'integrado',
-}
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 function ContratarPage() {
-  const fetchPlans = useServerFn(listPublicPlans)
   const submitTrial = useServerFn(startTrial)
-  const { data: plans, isLoading } = useQuery({ queryKey: ['public-plans'], queryFn: () => fetchPlans() })
   const { plano } = Route.useSearch()
   const wage = useMinimumWage()
   const selectedInfo = plano ? CHECKOUT_PLANS.find((p) => p.code === plano) : undefined
 
   const [open, setOpen] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<PlanoParam | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({
     contact_name: '', contact_company: '', contact_email: '',
     contact_whatsapp: '', contact_doc: '', accept_terms: false,
   })
 
-  const openTrial = (code: string) => {
-    if (!PLAN_TO_TRIAL[code]) {
-      window.location.href = '/contratar/sob-medida'
-      return
-    }
+  const openTrial = (code: PlanoParam) => {
     setSelectedPlan(code)
     setOpen(true)
   }
@@ -87,7 +76,7 @@ function ContratarPage() {
     if (!selectedPlan || !form.accept_terms) return
     setSubmitting(true)
     try {
-      const res = await submitTrial({ data: { ...form, plan_code: PLAN_TO_TRIAL[selectedPlan] } })
+      const res = await submitTrial({ data: { ...form, plan_code: selectedPlan } })
       if (res.ok) {
         toast.success('Trial criado! Verifique seu e-mail e WhatsApp.')
         setOpen(false)
@@ -102,16 +91,31 @@ function ContratarPage() {
     }
   }
 
+  const businessPlans = CHECKOUT_PLANS.map((p) => ({
+    ...p,
+    monthly: wage * p.factor,
+    setup: wage * p.factor,
+    modules: p.code === 'essencial'
+      ? '3 módulos inclusos'
+      : p.code === 'integrado'
+        ? 'Até 6 módulos do seu nicho'
+        : 'Todos os módulos do nicho',
+    minDays: p.code === 'essencial' ? 90 : p.code === 'integrado' ? 120 : 180,
+  }))
+
   return (
     <main className="min-h-screen bg-background py-16 px-4">
       <div className="container max-w-6xl mx-auto">
         <header className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">
-            <Sparkles className="w-3 h-3 mr-1" /> 3 dias grátis em qualquer plano
+            <Sparkles className="w-3 h-3 mr-1" /> 3 dias grátis em qualquer plano empresarial
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Escolha seu plano</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Comece com trial de 3 dias. Sem cartão. Setup + 1ª mensalidade só ao ativar.
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Preços atrelados ao salário mínimo vigente ({formatBRL(wage)}).
           </p>
         </header>
 
@@ -155,53 +159,93 @@ function ContratarPage() {
           </section>
         )}
 
-        {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">Carregando planos…</div>
-        ) : (
+        {/* Planos empresariais */}
+        <section aria-labelledby="planos-empresariais" className="mb-16">
+          <h2 id="planos-empresariais" className="sr-only">Planos empresariais</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {plans?.map((p) => (
-              <Card key={p.code} className={p.code === 'completo-mensal' ? 'border-primary shadow-lg' : ''}>
+            {businessPlans.map((p) => (
+              <Card key={p.code} className={p.highlight ? 'border-primary shadow-lg relative' : 'relative'}>
                 <CardHeader>
-                  {p.code === 'completo-mensal' && <Badge className="w-fit mb-2">Mais vendido</Badge>}
-                  <CardTitle className="text-2xl">{p.name}</CardTitle>
-                  <CardDescription>{p.description}</CardDescription>
+                  {p.highlight && <Badge className="w-fit mb-2">Recomendado</Badge>}
+                  <CardTitle className="text-2xl">{p.displayName}</CardTitle>
+                  <CardDescription>{p.factorLabel} do salário mínimo vigente</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-4xl font-bold">{formatBRL(Number(p.recurring_amount))}</div>
+                    <div className="text-4xl font-bold">{formatBRL(p.monthly)}</div>
                     <div className="text-sm text-muted-foreground">/mês</div>
                   </div>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Setup: {formatBRL(Number(p.setup_fee))}</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />{p.included_module_count >= 99 ? 'Módulos ilimitados' : `${p.included_module_count} módulos inclusos`}</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Contrato mínimo {p.min_contract_days} dias</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Setup: {formatBRL(p.setup)}</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />{p.modules}</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Contrato mínimo {p.minDays} dias</li>
                     <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Trial 3 dias grátis</li>
                   </ul>
                   <Button className="w-full" size="lg" onClick={() => openTrial(p.code)}>
-                    {p.cta || 'Começar trial'}
+                    Começar trial grátis
                   </Button>
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+
+        {/* White Label + Clube */}
+        <section aria-labelledby="planos-especiais" className="mb-8">
+          <h2 id="planos-especiais" className="text-center text-lg font-semibold mb-6 text-muted-foreground">
+            Outras opções
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card className="border-dashed">
               <CardHeader>
-                <CardTitle className="text-2xl">Sob Medida</CardTitle>
-                <CardDescription>Operação maior, White Label ou integrações específicas.</CardDescription>
+                <Crown className="w-6 h-6 text-primary mb-2" aria-hidden="true" />
+                <CardTitle className="text-2xl">White Label</CardTitle>
+                <CardDescription>Operação maior, marca própria ou integrações específicas.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-4xl font-bold">Sob consulta</div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Briefing dedicado</li>
-                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Módulos personalizados</li>
-                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Suporte priorizado</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Módulos personalizados e marca própria</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />SLA e suporte priorizado</li>
                 </ul>
                 <Button asChild variant="outline" className="w-full" size="lg">
                   <Link to="/contratar/sob-medida">Solicitar proposta</Link>
                 </Button>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <Users className="w-6 h-6 text-primary mb-2" aria-hidden="true" />
+                <CardTitle className="text-2xl">Clube Impulsionando</CardTitle>
+                <CardDescription>Para o consumidor final — benefícios, cashback e alertas.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md border p-3">
+                    <div className="text-xs font-medium text-muted-foreground">Free</div>
+                    <div className="text-2xl font-bold">R$ 0</div>
+                    <div className="text-xs text-muted-foreground">para sempre</div>
+                  </div>
+                  <div className="rounded-md border-2 border-primary p-3">
+                    <div className="text-xs font-medium text-primary">Premium</div>
+                    <div className="text-2xl font-bold">R$ 9,99</div>
+                    <div className="text-xs text-muted-foreground">/mês</div>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Cashback e alertas inteligentes</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Histórico e biblioteca pessoal</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Enquetes e ofertas exclusivas (Premium)</li>
+                </ul>
+                <Button asChild className="w-full" size="lg" variant="secondary">
+                  <Link to="/clube">Entrar no Clube</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </section>
 
         <p className="text-center text-sm text-muted-foreground mt-12">
           Ao contratar você aceita nossos <Link to="/termos" className="underline">Termos</Link> e <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
