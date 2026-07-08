@@ -370,6 +370,7 @@ function RootComponent() {
       <EnvHealthBanner />
       <ScrollGuidance />
       <RocketRouteLoader />
+      <CoreCopyGuard />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
