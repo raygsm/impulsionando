@@ -56,7 +56,7 @@ function ExecutivoPage() {
     .slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-dvh bg-gradient-to-b from-background to-muted/20">
       <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-start justify-between gap-4 flex-wrap">

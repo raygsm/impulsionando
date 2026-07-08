@@ -101,7 +101,7 @@ const STATUS_VARIANT: Record<ModuleDemo["status"], string> = {
 
 function DemoLanding() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
       <DemoModeBanner />
 

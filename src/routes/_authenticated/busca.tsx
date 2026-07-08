@@ -97,7 +97,7 @@ function BuscaGatePage() {
 
   if (membership.isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-dvh flex flex-col bg-background">
         <PublicHeader />
         <main className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Validando seu acesso…</p>
@@ -109,7 +109,7 @@ function BuscaGatePage() {
 
   if (!membership.data) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-dvh flex flex-col bg-background">
         <PublicHeader />
         <main className="flex-1">
           <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
@@ -235,7 +235,7 @@ function BuscaResultsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
       <main className="flex-1">
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">

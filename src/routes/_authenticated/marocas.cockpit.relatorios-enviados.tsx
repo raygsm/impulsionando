@@ -78,7 +78,7 @@ function ReportsHistoryPage() {
   const rateTone30 = !d30 || d30.total === 0 ? "default" : d30.rate >= 95 ? "good" : d30.rate >= 80 ? "warn" : "bad";
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-dvh bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-3 flex-wrap">
           <Link to="/marocas/cockpit" className="inline-flex items-center gap-1 text-sm hover:underline">

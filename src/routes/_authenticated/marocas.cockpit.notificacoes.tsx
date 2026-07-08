@@ -126,7 +126,7 @@ function NotificationsConfigPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-dvh bg-background p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-3 flex-wrap">
           <Link to="/marocas/cockpit" className="inline-flex items-center gap-1 text-sm hover:underline">

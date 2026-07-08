@@ -133,7 +133,7 @@ function MarocasReportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <div className="print:hidden border-b bg-card">
         <div className="max-w-5xl mx-auto p-4 flex items-center gap-3 flex-wrap">
           <Link to="/marocas/cockpit" className="inline-flex items-center gap-1 text-sm hover:underline">

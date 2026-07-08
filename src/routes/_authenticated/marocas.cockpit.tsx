@@ -198,7 +198,7 @@ function MarocasCockpit() {
   }, [aptsQ.data, svcList, stmQ.data, supList]);
 
   return (
-    <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-screen">
+    <div className="space-y-8 p-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-dvh">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/15 via-fuchsia-500/10 to-amber-400/15 p-8">
         <div className="absolute inset-0 opacity-30 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/30 to-transparent" />
         <div className="relative">
