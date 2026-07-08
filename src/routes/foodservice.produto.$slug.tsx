@@ -59,8 +59,8 @@ function ProdutoPage() {
   const [adicionais, setAdicionais] = useState<Set<string>>(new Set());
 
   const totalAdicionais = (p.adicionais ?? [])
-    .filter((a) => adicionais.has(a.nome))
-    .reduce((s, a) => s + a.preco, 0);
+    .filter((a: { nome: string; preco: number }) => adicionais.has(a.nome))
+    .reduce((s: number, a: { nome: string; preco: number }) => s + a.preco, 0);
   const total = (p.preco + totalAdicionais) * qtd;
 
   const relacionados = FOOD_PRODUTOS.filter((r) => r.slug !== p.slug && (r.categoria === p.categoria || p.harmonizacao?.includes(r.slug))).slice(0, 4);
