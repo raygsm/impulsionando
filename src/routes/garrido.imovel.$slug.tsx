@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { findImovel, relacionados, formatBRL, IMOVEIS } from "@/data/garrido-imoveis";
+import { findImovel, relacionados, formatBRL, IMOVEIS, type Imovel } from "@/data/garrido-imoveis";
 import { MapPin, BedDouble, Bath, Car, Ruler, Calendar, ShieldCheck, MessageCircle, Phone, ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, Star } from "lucide-react";
 
 export const Route = createFileRoute("/garrido/imovel/$slug")({
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/garrido/imovel/$slug")({
 });
 
 function ImovelDetail() {
-  const { imovel: i } = Route.useLoaderData();
+  const { imovel: i } = Route.useLoaderData() as { imovel: Imovel };
   const rel = relacionados(i.slug, 3);
   const [foto, setFoto] = useState(0);
 
