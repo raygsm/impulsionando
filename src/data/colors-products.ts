@@ -97,6 +97,33 @@ export const COLORS_PRODUCTS: ColorsProduct[] = [
       { label: "Monetizze", href: "https://supergreenblack.com.br/" },
       { label: "Perfect Pay", href: "https://supergreenblack.com.br/p" },
     ],
+    howToUse: [
+      "Tome 2 cápsulas ao dia, uma pela manhã e uma antes do almoço.",
+      "Ingerir com um copo de água (250 ml).",
+      "Combine com alimentação equilibrada e 2 litros de água por dia.",
+      "Uso contínuo mínimo de 30 dias para resultado pleno.",
+    ],
+    composition: [
+      "Cafeína anidra — foco e queima energética",
+      "Chá verde (EGCG) — termogênico natural",
+      "Faseolamina — bloqueia parte da absorção de carboidratos",
+      "Cromo quelato — reduz compulsão por doces",
+      "Fibras solúveis — sensação de saciedade",
+    ],
+    faq: [
+      { q: "Em quantos dias começo a sentir efeito?", a: "A maioria das clientes relata redução de apetite e mais energia nos 3 primeiros dias. Perda de medidas visível a partir da 2ª semana." },
+      { q: "Posso tomar tomando anticoncepcional?", a: "Sim, o Super Green Black não interfere em anticoncepcionais. Em caso de dúvida clínica, converse com seu médico." },
+      { q: "Tem contraindicação?", a: "Não é indicado para gestantes, lactantes, menores de 18 anos e pessoas com hipertensão descontrolada." },
+      { q: "É seguro para uso contínuo?", a: "Sim. A fórmula usa ativos naturais e é segura para uso prolongado com pausas semestrais recomendadas." },
+      { q: "Recebo em quanto tempo?", a: "Despacho em até 3 dias úteis pela Colors Log. Entrega entre 3 e 10 dias úteis conforme CEP." },
+    ],
+    testimonials: [
+      { name: "Juliana R.", city: "São Paulo — SP", result: "-8kg em 60 dias", text: "Já tinha tentado de tudo. Com o Super Green Black perdi 8kg em 2 meses sem passar fome. Recomendo!" },
+      { name: "Camila M.", city: "Rio de Janeiro — RJ", result: "-6kg em 45 dias", text: "A energia é outra história. Consegui voltar aos treinos e emagrecer ao mesmo tempo." },
+      { name: "Patrícia L.", city: "Belo Horizonte — MG", result: "-11kg em 90 dias", text: "Mudou minha relação com comida. A compulsão praticamente sumiu." },
+    ],
+    guarantee: "Garantia incondicional de 7 dias — dinheiro de volta se não sentir diferença.",
+    urgencyBadge: "🔥 Mais vendido · frete grátis acima de R$ 250",
   },
   {
     slug: "sos-hair",
