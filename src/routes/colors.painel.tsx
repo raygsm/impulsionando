@@ -1,13 +1,16 @@
 /**
- * /colors/painel — Painel FRONT-END de conversão + diagnóstico Colors Saúde.
+ * /colors/painel — Painel FRONT-END de conversão + auditoria + segurança.
  *
- *  - Contadores por evento
- *  - Funil CTA → Checkout com session_id/visitor_id (jornada real)
- *  - Diagnóstico de consentimento (por que eventos podem não chegar ao GA4)
- *  - Exportação CSV por período (últimas 24h / 7d / 30d / tudo)
+ *  - Contadores por evento e funil por sessão
+ *  - Diagnóstico de consentimento LGPD / GA4
+ *  - Diagnóstico rápido: ping sintético no gtag e resumo em 1 tela
+ *  - Notificação em tempo real de tentativas de cópia (toast)
+ *  - Import de CSV do GA4 e comparação com o buffer local por utm_campaign
+ *  - Relatório semanal agregado em CSV
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   readColorsEventBuffer,
   clearColorsEventBuffer,
@@ -17,6 +20,17 @@ import {
 } from "@/lib/colors-analytics";
 import { getAnalyticsDiagnostic } from "@/lib/analytics";
 import { readCopyAttempts, clearCopyAttempts } from "@/components/app/CoreCopyGuard";
+import {
+  pingGa4,
+  parseGa4Csv,
+  aggregateByCampaign,
+  aggregateWeekly,
+  weeklyToCsv,
+  compareLocalVsGa4,
+  type Ga4PingResult,
+  type Ga4CsvRow,
+  type CompareRow,
+} from "@/lib/painel-audit";
 
 export const Route = createFileRoute("/colors/painel")({
   head: () => ({
@@ -63,15 +77,54 @@ function filterByPeriod(events: LocalEvent[], period: PeriodId): LocalEvent[] {
 function PainelPage() {
   const [tick, setTick] = useState(0);
   const [period, setPeriod] = useState<PeriodId>("7d");
+  const [ping, setPing] = useState<Ga4PingResult | null>(null);
+  const [pinging, setPinging] = useState(false);
+  const [gaCsv, setGaCsv] = useState<Ga4CsvRow[] | null>(null);
+  const [gaCsvName, setGaCsvName] = useState<string>("");
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     const id = window.setInterval(() => setTick((t) => t + 1), 3000);
     return () => window.clearInterval(id);
+  }, []);
+
+  // Notificação em tempo real (mesma aba + cross-tab via BroadcastChannel).
+  useEffect(() => {
+    const onAttempt = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as Record<string, unknown> | undefined;
+      if (!detail) return;
+      toast.error(`🛡️ Cópia detectada: ${detail.kind}`, {
+        description: `${detail.host} · ${detail.path} · ${new Date(Number(detail.ts)).toLocaleTimeString()}`,
+        duration: 8000,
+      });
+      setTick((t) => t + 1);
+    };
+    window.addEventListener("imp:copy-attempt", onAttempt as EventListener);
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("imp-security");
+      bc.onmessage = (m) => {
+        if (m.data?.type === "copy_attempt") {
+          onAttempt(new CustomEvent("imp:copy-attempt", { detail: m.data.entry }));
+        }
+      };
+    } catch { /* noop */ }
+    return () => {
+      window.removeEventListener("imp:copy-attempt", onAttempt as EventListener);
+      bc?.close();
+    };
   }, []);
 
   const allEvents = useMemo(() => readColorsEventBuffer(), [tick]);
   const events = useMemo(() => filterByPeriod(allEvents, period), [allEvents, period]);
   const attempts = useMemo(() => readCopyAttempts(), [tick]);
   const diag = useMemo(() => getAnalyticsDiagnostic(), [tick]);
+  const local = useMemo(() => aggregateByCampaign(events), [events]);
+  const weekly = useMemo(() => aggregateWeekly(events), [events]);
+  const compare = useMemo<CompareRow[]>(
+    () => (gaCsv ? compareLocalVsGa4(local, gaCsv) : []),
+    [local, gaCsv],
+  );
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -79,7 +132,6 @@ function PainelPage() {
     return c;
   }, [events]);
 
-  // Funil por sessão: uma sessão conta 1× para cada etapa que atingiu.
   const funnel = useMemo(() => {
     const bySession = new Map<string, Set<string>>();
     for (const e of events) {
@@ -103,6 +155,32 @@ function PainelPage() {
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
     downloadCsv(`colors-eventos-${period}-${stamp}.csv`, csv);
   }
+  function handleExportWeekly() {
+    const csv = weeklyToCsv(weekly);
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(`colors-relatorio-semanal-${stamp}.csv`, csv);
+  }
+  async function runPing() {
+    setPinging(true);
+    try {
+      const r = await pingGa4();
+      setPing(r);
+      if (r.ok) toast.success("Ping GA4 recebido"); else toast.warning("Ping GA4 não confirmado");
+    } finally { setPinging(false); }
+  }
+  async function handleCsvFile(file: File) {
+    const text = await file.text();
+    const rows = parseGa4Csv(text);
+    if (rows.length === 0) {
+      toast.error("Não consegui reconhecer o CSV do GA4", {
+        description: "Exporte pela Exploração > Formato Tabela com colunas utm_campaign, Sessões e Conversões.",
+      });
+      return;
+    }
+    setGaCsv(rows);
+    setGaCsvName(file.name);
+    toast.success(`Importadas ${rows.length} campanhas do GA4`);
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white">
@@ -122,7 +200,10 @@ function PainelPage() {
               KPIs Super Green Black
             </Link>
             <button onClick={handleExport} className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-black hover:bg-emerald-400">
-              Exportar CSV
+              Exportar eventos
+            </button>
+            <button onClick={handleExportWeekly} className="rounded-full bg-emerald-500/80 px-4 py-2 text-sm font-semibold text-black hover:bg-emerald-400">
+              Relatório semanal CSV
             </button>
             <button
               onClick={() => { clearColorsEventBuffer(); clearCopyAttempts(); setTick((t) => t + 1); }}
@@ -150,6 +231,38 @@ function PainelPage() {
               {p.label}
             </button>
           ))}
+        </div>
+
+        {/* Diagnóstico rápido — ping gtag */}
+        <div className="mb-6 rounded-2xl border border-sky-500/30 bg-sky-500/5 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">⚡ Diagnóstico rápido do GA4</h2>
+              <p className="mt-1 text-sm text-white/70">
+                Dispara um evento sintético <code>painel_ping</code> e resume em 1 tela por que
+                pode não chegar ao GA4 (consentimento, adblock, gtag ausente, hit bloqueado).
+              </p>
+            </div>
+            <button
+              onClick={runPing}
+              disabled={pinging}
+              className="rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-black hover:bg-sky-400 disabled:opacity-60"
+            >
+              {pinging ? "Testando…" : "Rodar ping agora"}
+            </button>
+          </div>
+          {ping && (
+            <div className={"mt-4 rounded-xl border p-4 " + (ping.ok ? "border-emerald-500/40 bg-emerald-500/10" : "border-amber-500/40 bg-amber-500/10")}>
+              <p className="text-sm font-semibold">{ping.ok ? "✅ GA4 confirmou o hit" : "⚠️ Ping enviado, mas não chegou ao GA4"}</p>
+              <p className="mt-1 text-sm text-white/80">{ping.message}</p>
+              <ul className="mt-3 grid gap-1 text-xs text-white/70 sm:grid-cols-2">
+                {ping.details.map((d) => (<li key={d}>• {d}</li>))}
+              </ul>
+              <p className="mt-3 text-[11px] text-white/50">
+                ping_id: <code data-allow-copy>{ping.ping_id}</code> — cole em <b>GA4 → Tempo real → Contagem de eventos por parâmetro</b> para confirmar.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Diagnóstico de consentimento / GA4 */}
@@ -228,10 +341,125 @@ function PainelPage() {
             <Metric label="→ Lead" value={funnel.lead} />
             <Metric label="Conversão CTA→CO" value={`${funnel.rateCoCta}%`} />
           </div>
-          <p className="mt-3 text-xs text-white/50">
-            Cada sessão conta 1× por etapa. <code>session_id</code> e <code>visitor_id</code> são
-            enviados em todo evento GA4 — permitem replicar este funil no GA4 → Explorar → Funil.
-          </p>
+        </div>
+
+        {/* Import GA4 CSV & comparação */}
+        <div className="mt-6 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">📥 Importar CSV do GA4 e comparar</h2>
+              <p className="mt-1 text-sm text-white/70">
+                No GA4 → <b>Explorar</b> → nova exploração, dimensão <code>utm_campaign</code>,
+                métricas <b>Sessões</b> + <b>Conversões</b>, exporte como CSV e envie aqui.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCsvFile(f); }}
+              />
+              <button onClick={() => fileRef.current?.click()} className="rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-black hover:bg-indigo-400">
+                Selecionar CSV GA4
+              </button>
+              {gaCsv && (
+                <button onClick={() => { setGaCsv(null); setGaCsvName(""); }} className="rounded-full border border-white/20 px-4 py-2 text-sm hover:bg-white/10">
+                  Limpar
+                </button>
+              )}
+            </div>
+          </div>
+          {gaCsv && (
+            <p className="mt-2 text-xs text-white/50">
+              Arquivo: <code data-allow-copy>{gaCsvName}</code> · {gaCsv.length} campanhas importadas
+            </p>
+          )}
+          <div className="mt-4 max-h-96 overflow-auto rounded-xl border border-white/10 bg-black/40">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 bg-black/70 uppercase tracking-widest text-white/50">
+                <tr>
+                  <th className="p-3">utm_campaign</th>
+                  <th className="p-3">Sessões (local)</th>
+                  <th className="p-3">Sessões (GA4)</th>
+                  <th className="p-3">Checkout local</th>
+                  <th className="p-3">Conv. GA4</th>
+                  <th className="p-3">Taxa local</th>
+                  <th className="p-3">Taxa GA4</th>
+                  <th className="p-3">Δ sessões</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compare.map((r) => (
+                  <tr key={r.utm_campaign} className="border-t border-white/5">
+                    <td className="p-3 font-mono text-indigo-200" data-allow-copy>{r.utm_campaign}</td>
+                    <td className="p-3">{r.local_sessions}</td>
+                    <td className="p-3">{r.ga_sessions}</td>
+                    <td className="p-3">{r.local_checkout}</td>
+                    <td className="p-3">{r.ga_conversions}</td>
+                    <td className="p-3">{r.local_rate}%</td>
+                    <td className="p-3">{r.ga_rate}%</td>
+                    <td className={"p-3 " + (r.delta_sessions === 0 ? "text-white/40" : r.delta_sessions > 0 ? "text-emerald-300" : "text-amber-300")}>
+                      {r.delta_sessions > 0 ? "+" : ""}{r.delta_sessions}
+                    </td>
+                  </tr>
+                ))}
+                {compare.length === 0 && (
+                  <tr><td colSpan={8} className="p-6 text-center text-white/40">
+                    {gaCsv ? "Nenhuma campanha em comum ainda." : "Importe um CSV do GA4 para comparar taxas de conversão por campanha."}
+                  </td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Relatório semanal */}
+        <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-white/[0.03] p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">📈 Relatório semanal por origem/utm_campaign</h2>
+              <p className="mt-1 text-sm text-white/60">
+                Agregação automática do buffer local por semana ISO. Baixe em CSV para auditar
+                tendências sem filtrar manualmente no GA4.
+              </p>
+            </div>
+            <button onClick={handleExportWeekly} className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-black hover:bg-emerald-400">
+              Baixar CSV semanal
+            </button>
+          </div>
+          <div className="mt-4 max-h-80 overflow-auto rounded-xl border border-white/10 bg-black/40">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 bg-black/70 uppercase tracking-widest text-white/50">
+                <tr>
+                  <th className="p-3">Semana</th>
+                  <th className="p-3">utm_campaign</th>
+                  <th className="p-3">Sessões</th>
+                  <th className="p-3">CTA</th>
+                  <th className="p-3">Checkout</th>
+                  <th className="p-3">Lead</th>
+                  <th className="p-3">Conv. %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {weekly.map((r, i) => (
+                  <tr key={i} className="border-t border-white/5">
+                    <td className="p-3 font-mono text-white/70">{r.week}</td>
+                    <td className="p-3 font-mono text-emerald-200" data-allow-copy>{r.utm_campaign}</td>
+                    <td className="p-3">{r.sessions}</td>
+                    <td className="p-3">{r.cta_click}</td>
+                    <td className="p-3">{r.checkout_click}</td>
+                    <td className="p-3">{r.lead_submit}</td>
+                    <td className="p-3">{r.conversion_rate}%</td>
+                  </tr>
+                ))}
+                {weekly.length === 0 && (
+                  <tr><td colSpan={7} className="p-6 text-center text-white/40">Sem dados no período.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Últimos eventos */}
@@ -258,8 +486,7 @@ function PainelPage() {
                 ))}
                 {events.length === 0 && (
                   <tr><td colSpan={4} className="p-6 text-center text-white/40">
-                    Nenhum evento no período. Navegue pelo site, clique em CTAs / WhatsApp / checkout
-                    e volte aqui.
+                    Nenhum evento no período. Navegue pelo site, clique em CTAs / WhatsApp / checkout e volte aqui.
                   </td></tr>
                 )}
               </tbody>
@@ -267,11 +494,12 @@ function PainelPage() {
           </div>
         </div>
 
-        {/* Tentativas de cópia */}
+        {/* Tentativas de cópia — com toast em tempo real */}
         <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
           <h2 className="text-lg font-semibold">🛡️ Tentativas de cópia detectadas</h2>
           <p className="mt-1 text-xs text-white/60">
-            Registradas pelo CopyGuard do core Impulsionando. Também disparam <code>copy_attempt</code> no GA4.
+            Toast em tempo real (mesma aba + entre abas). Também logadas no GA4 como
+            <code> copy_attempt</code>.
           </p>
           <div className="mt-3 max-h-64 overflow-auto rounded-xl border border-white/10 bg-black/40">
             <table className="w-full text-left text-xs">
@@ -309,9 +537,8 @@ function PainelPage() {
           <ol className="mt-3 list-decimal space-y-1 pl-5">
             <li>GA4 → <b>Admin</b> → <b>Eventos</b>: confirme <code>cta_click</code>, <code>checkout_click</code>, <code>whatsapp_click</code>, <code>ebook_download</code>, <code>lead_submit</code> (até 24h após o 1º disparo).</li>
             <li>Marque <code>checkout_click</code> e <code>lead_submit</code> como <b>Evento principal</b>.</li>
-            <li><b>Admin → Dimensões personalizadas</b>: crie <code>session_id</code> e <code>visitor_id</code> (escopo: evento) — enviados em todo evento.</li>
-            <li><b>Explorar → Exploração de funil</b>: <span className="font-mono">page_view (/colors/super-green-black) → cta_click → checkout_click → lead_submit</span>.</li>
-            <li>Dimensão secundária: <code>utm_campaign</code> (rotulado por página: colors_home, super_green_black, produto_{`{slug}`}, linha_{`{brand}`}).</li>
+            <li><b>Admin → Dimensões personalizadas</b>: crie <code>session_id</code> e <code>visitor_id</code> (escopo: evento).</li>
+            <li><b>Explorar → Funil</b>: <span className="font-mono">page_view → cta_click → checkout_click → lead_submit</span>.</li>
           </ol>
         </div>
       </div>
