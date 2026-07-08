@@ -113,7 +113,7 @@ function MarocasLoginPage() {
               <label className="flex items-center gap-2">
                 <input type="checkbox" /> Lembrar de mim
               </label>
-              <a href="#" className="text-primary hover:underline">Esqueci a senha</a>
+              <Link to="/reset-password" className="text-primary hover:underline">Esqueci a senha</Link>
             </div>
 
             <button

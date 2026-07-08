@@ -53,7 +53,7 @@ export function PromptMasterEditor() {
     if (enabled.nichos) parts.push("## NICHOS\n" + niches.map((n) => `- ${n.title}: ${n.body}`).join("\n"));
     if (enabled.faq) parts.push("## FAQ\n" + faqs.map((f) => `Q: ${f.title}\nA: ${f.body}`).join("\n\n"));
     if (enabled.aprendizados)
-      parts.push("## APRENDIZADOS APROVADOS\n(placeholder — só entram após aprovação na aba Aprendizados.)");
+      parts.push("## APRENDIZADOS APROVADOS\n(Nenhum aprendizado aprovado ainda. Os itens aparecem aqui após aprovação na aba Aprendizados.)");
     if (enabled.contexto)
       parts.push(
         "## CONTEXTO DINÂMICO\n- Página atual: {{pathname}}\n- Tenant: {{tenant}}\n- Perfil: {{profile}}\n- Histórico recente: {{recent_messages}}",
