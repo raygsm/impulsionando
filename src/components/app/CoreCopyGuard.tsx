@@ -1,32 +1,35 @@
 import { useEffect } from "react";
 
 /**
- * CoreCopyGuard — blindagem client-side contra cópia casual do core
- * Impulsionando (impulsionando.com.br). NÃO substitui proteção jurídica
- * nem impede um dev determinado; é dissuasor visual + fricção.
+ * CopyGuard — blindagem client-side contra cópia casual de qualquer
+ * projeto do ecossistema Impulsionando (core + todos os tenants/clientes,
+ * atuais e futuros). Ativa por padrão em produção; suspenso em ambientes
+ * de desenvolvimento/preview para não travar QA.
  *
- * Ativa APENAS no domínio institucional do core; tenants, subdomínios
- * de cliente, previews Lovable e localhost ficam livres para não
- * quebrar operação, DevTools e QA.
- *
- * Bloqueia (no core):
+ * Bloqueia (visualmente / com fricção):
  *  - menu de contexto (botão direito)
  *  - seleção de texto fora de inputs/textareas/[contenteditable]
  *  - copiar/recortar/arrastar conteúdo textual
  *  - atalhos de salvar/ver-fonte/print/imprimir/devtools
  *
- * Deixa passar interação em campos de formulário e áreas com o
- * atributo `data-allow-copy` (para blocos onde queremos permitir
- * cópia — ex.: código de erro, cupom, telefone).
+ * Reporta tentativas via GA4 (`copy_attempt`), buffer local
+ * (`imp_copy_attempts`) e log no console. Áreas marcadas com
+ * `data-allow-copy` (código de erro, cupom, telefone) continuam livres.
  */
 
-const CORE_HOSTS = new Set<string>([
-  "impulsionando.com.br",
-  "www.impulsionando.com.br",
-]);
+// Hosts SEM proteção — preview interno, dev e localhost.
+const UNPROTECTED_HOST_SUFFIX = [
+  ".lovable.dev",
+  "-preview--", // subdomínios id-preview--*.lovable.app etc.
+];
+const UNPROTECTED_HOSTS = new Set<string>(["localhost", "127.0.0.1", "0.0.0.0"]);
 
-function isCoreHost(host: string): boolean {
-  return CORE_HOSTS.has(host.toLowerCase());
+function isProtectedHost(host: string): boolean {
+  const h = host.toLowerCase();
+  if (UNPROTECTED_HOSTS.has(h)) return false;
+  if (h.endsWith(".lovable.dev")) return false;
+  if (UNPROTECTED_HOST_SUFFIX.some((s) => h.includes(s))) return false;
+  return true; // qualquer domínio de produção (core ou tenant)
 }
 
 function isEditable(target: EventTarget | null): boolean {
@@ -39,12 +42,91 @@ function isEditable(target: EventTarget | null): boolean {
   return false;
 }
 
+type AttemptKind =
+  | "contextmenu"
+  | "copy"
+  | "cut"
+  | "dragstart"
+  | "selectstart"
+  | "devtools_shortcut"
+  | "save_shortcut"
+  | "view_source_shortcut"
+  | "print_shortcut"
+  | "select_all_shortcut"
+  | "print_dialog"
+  | "devtools_open";
+
+const ATTEMPT_KEY = "imp_copy_attempts";
+const ATTEMPT_MAX = 100;
+
+function pushAttempt(kind: AttemptKind, extra: Record<string, unknown> = {}) {
+  if (typeof window === "undefined") return;
+  const entry = {
+    kind,
+    ts: Date.now(),
+    path: window.location.pathname,
+    host: window.location.hostname,
+    ua: navigator.userAgent,
+    ref: document.referrer || null,
+    ...extra,
+  };
+  try {
+    const raw = window.localStorage.getItem(ATTEMPT_KEY);
+    const list = raw ? (JSON.parse(raw) as unknown[]) : [];
+    list.push(entry);
+    while (list.length > ATTEMPT_MAX) list.shift();
+    window.localStorage.setItem(ATTEMPT_KEY, JSON.stringify(list));
+  } catch { /* ignore quota */ }
+
+  // GA4 (respeita consent mode; se negado, permanece no dataLayer).
+  import("@/lib/analytics").then(({ trackEvent }) => {
+    trackEvent("copy_attempt", entry as unknown as Record<string, unknown>);
+  }).catch(() => { /* noop */ });
+
+  try {
+    // eslint-disable-next-line no-console
+    console.warn("[Impulsionando] Tentativa de cópia registrada:", entry);
+  } catch { /* noop */ }
+}
+
+export function readCopyAttempts(): Array<Record<string, unknown>> {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(ATTEMPT_KEY);
+    return raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
+  } catch { return []; }
+}
+
+export function clearCopyAttempts() {
+  if (typeof window !== "undefined") window.localStorage.removeItem(ATTEMPT_KEY);
+}
+
 export function CoreCopyGuard() {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isCoreHost(window.location.hostname)) return;
+    if (!isProtectedHost(window.location.hostname)) return;
 
-    const prevent = (e: Event) => {
+    const onContext = (e: Event) => {
+      if (isEditable(e.target)) return;
+      e.preventDefault();
+      pushAttempt("contextmenu");
+    };
+    const onCopy = (e: Event) => {
+      if (isEditable(e.target)) return;
+      e.preventDefault();
+      pushAttempt("copy");
+    };
+    const onCut = (e: Event) => {
+      if (isEditable(e.target)) return;
+      e.preventDefault();
+      pushAttempt("cut");
+    };
+    const onDrag = (e: Event) => {
+      if (isEditable(e.target)) return;
+      e.preventDefault();
+      pushAttempt("dragstart");
+    };
+    const onSelect = (e: Event) => {
       if (isEditable(e.target)) return;
       e.preventDefault();
     };
@@ -53,33 +135,42 @@ export function CoreCopyGuard() {
       const k = e.key.toLowerCase();
       const mod = e.ctrlKey || e.metaKey;
 
-      // F12 — DevTools
-      if (k === "f12") {
-        e.preventDefault();
-        return;
-      }
-
-      // Ctrl/Cmd + Shift + (I | J | C) — DevTools / inspecionar
+      if (k === "f12") { e.preventDefault(); pushAttempt("devtools_shortcut", { key: "F12" }); return; }
       if (mod && e.shiftKey && (k === "i" || k === "j" || k === "c")) {
-        e.preventDefault();
-        return;
+        e.preventDefault(); pushAttempt("devtools_shortcut", { key: `mod+shift+${k}` }); return;
       }
-
-      // Ctrl/Cmd + (S | U | P) — salvar página / ver fonte / imprimir
-      if (mod && (k === "s" || k === "u" || k === "p")) {
-        e.preventDefault();
-        return;
+      if (mod && k === "s") { e.preventDefault(); pushAttempt("save_shortcut"); return; }
+      if (mod && k === "u") { e.preventDefault(); pushAttempt("view_source_shortcut"); return; }
+      if (mod && k === "p") { e.preventDefault(); pushAttempt("print_shortcut"); return; }
+      if (mod && (k === "c" || k === "x") && !isEditable(e.target)) {
+        e.preventDefault(); pushAttempt(k === "c" ? "copy" : "cut", { via: "shortcut" }); return;
       }
-
-      // Ctrl/Cmd + (C | X | A) fora de campos editáveis
-      if (mod && (k === "c" || k === "x" || k === "a")) {
-        if (!isEditable(e.target)) e.preventDefault();
+      if (mod && k === "a" && !isEditable(e.target)) {
+        e.preventDefault(); pushAttempt("select_all_shortcut");
       }
     };
 
-    // CSS: bloqueia seleção fora de áreas permitidas.
+    const onBeforePrint = () => pushAttempt("print_dialog");
+
+    // Heurística leve para DevTools aberto: detecta salto de resolução
+    // (funciona quando o painel é ancorado no lado da janela).
+    const devtoolsCheck = () => {
+      try {
+        const wDiff = window.outerWidth - window.innerWidth;
+        const hDiff = window.outerHeight - window.innerHeight;
+        if (wDiff > 160 || hDiff > 200) {
+          const flagged = (window as unknown as { __impDevtoolsFlagged?: boolean }).__impDevtoolsFlagged;
+          if (!flagged) {
+            (window as unknown as { __impDevtoolsFlagged?: boolean }).__impDevtoolsFlagged = true;
+            pushAttempt("devtools_open", { wDiff, hDiff });
+          }
+        }
+      } catch { /* noop */ }
+    };
+    const devtoolsTimer = window.setInterval(devtoolsCheck, 4000);
+
     const styleEl = document.createElement("style");
-    styleEl.setAttribute("data-core-copy-guard", "true");
+    styleEl.setAttribute("data-copy-guard", "true");
     styleEl.textContent = `
       html, body { -webkit-user-select: none; -ms-user-select: none; user-select: none; }
       input, textarea, select, [contenteditable="true"], [data-allow-copy], [data-allow-copy] * {
@@ -98,14 +189,14 @@ export function CoreCopyGuard() {
     `;
     document.head.appendChild(styleEl);
 
-    document.addEventListener("contextmenu", prevent);
-    document.addEventListener("copy", prevent);
-    document.addEventListener("cut", prevent);
-    document.addEventListener("dragstart", prevent);
-    document.addEventListener("selectstart", prevent);
+    document.addEventListener("contextmenu", onContext);
+    document.addEventListener("copy", onCopy);
+    document.addEventListener("cut", onCut);
+    document.addEventListener("dragstart", onDrag);
+    document.addEventListener("selectstart", onSelect);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("beforeprint", onBeforePrint);
 
-    // Aviso legal no console (dissuasor para curiosos técnicos).
     try {
       const title = "background:#0F172A;color:#fff;font-size:16px;padding:8px 14px;border-radius:6px";
       const body = "color:#0F172A;font-size:12px;line-height:1.5";
@@ -113,23 +204,23 @@ export function CoreCopyGuard() {
       console.log("%c⛔ Impulsionando — Código protegido", title);
       // eslint-disable-next-line no-console
       console.log(
-        "%cEste é o core proprietário da Impulsionando Tecnologia.\n" +
-          "Cópia, engenharia reversa, redistribuição ou uso do código-fonte\n" +
-          "sem autorização por escrito viola contrato e a Lei 9.609/98 (LSI)\n" +
-          "e a Lei 9.610/98 (LDA). Acessos são registrados.",
+        "%cEcossistema Impulsionando Tecnologia (core + tenants).\n" +
+          "Cópia, engenharia reversa, redistribuição ou uso não autorizado do\n" +
+          "código-fonte viola contrato, Lei 9.609/98 (LSI) e Lei 9.610/98 (LDA).\n" +
+          "Todas as tentativas de cópia/inspeção são registradas.",
         body,
       );
-    } catch {
-      /* noop */
-    }
+    } catch { /* noop */ }
 
     return () => {
-      document.removeEventListener("contextmenu", prevent);
-      document.removeEventListener("copy", prevent);
-      document.removeEventListener("cut", prevent);
-      document.removeEventListener("dragstart", prevent);
-      document.removeEventListener("selectstart", prevent);
+      document.removeEventListener("contextmenu", onContext);
+      document.removeEventListener("copy", onCopy);
+      document.removeEventListener("cut", onCut);
+      document.removeEventListener("dragstart", onDrag);
+      document.removeEventListener("selectstart", onSelect);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("beforeprint", onBeforePrint);
+      window.clearInterval(devtoolsTimer);
       styleEl.remove();
     };
   }, []);
