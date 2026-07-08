@@ -20,6 +20,37 @@ export type LocalEvent = {
 };
 const BUFFER_KEY = "colors_ga_debug_buffer";
 const BUFFER_MAX = 500;
+const REMOTE_ENDPOINT = "/api/public/painel/funnel-hit";
+const REMOTE_EVENTS = new Set([
+  "cta_click",
+  "checkout_click",
+  "whatsapp_click",
+  "ebook_download",
+  "lead_submit",
+]);
+
+function currentHost(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.hostname;
+}
+function currentPath(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.pathname;
+}
+
+function extractUtmFromHref(href: unknown): Record<string, string> {
+  if (typeof href !== "string") return {};
+  try {
+    const u = new URL(href, typeof window !== "undefined" ? window.location.origin : "https://colors.impulsionando.com.br");
+    return {
+      utm_source: u.searchParams.get("utm_source") ?? "",
+      utm_medium: u.searchParams.get("utm_medium") ?? "",
+      utm_campaign: u.searchParams.get("utm_campaign") ?? "",
+      utm_content: u.searchParams.get("utm_content") ?? "",
+      utm_term: u.searchParams.get("utm_term") ?? "",
+    };
+  } catch { return {}; }
+}
 
 function pushLocal(name: string, params: Record<string, unknown>) {
   if (typeof window === "undefined") return;
@@ -36,6 +67,43 @@ function pushLocal(name: string, params: Record<string, unknown>) {
     while (list.length > BUFFER_MAX) list.shift();
     window.localStorage.setItem(BUFFER_KEY, JSON.stringify(list));
   } catch { /* ignore quota */ }
+}
+
+/** Fire-and-forget: envia o evento para persistência real no Supabase.
+ *  Usa `sendBeacon` quando disponível (não bloqueia navegação em CTAs). */
+function pushRemote(name: string, params: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  if (!REMOTE_EVENTS.has(name)) return;
+  try {
+    const utm = extractUtmFromHref((params as Record<string, unknown>).href);
+    const payload = {
+      event_name: name,
+      session_id: getSessionId(),
+      visitor_id: getVisitorId(),
+      host: (params as Record<string, unknown>).host as string ?? currentHost(),
+      path: (params as Record<string, unknown>).path as string ?? currentPath(),
+      href: (params as Record<string, unknown>).href as string ?? undefined,
+      utm_source: (params as Record<string, unknown>).utm_source as string ?? utm.utm_source ?? undefined,
+      utm_medium: (params as Record<string, unknown>).utm_medium as string ?? utm.utm_medium ?? undefined,
+      utm_campaign: (params as Record<string, unknown>).utm_campaign as string ?? utm.utm_campaign ?? undefined,
+      utm_content: (params as Record<string, unknown>).utm_content as string ?? utm.utm_content ?? undefined,
+      utm_term: (params as Record<string, unknown>).utm_term as string ?? utm.utm_term ?? undefined,
+      params,
+      ts: Date.now(),
+    };
+    const body = JSON.stringify(payload);
+    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+      const blob = new Blob([body], { type: "application/json" });
+      navigator.sendBeacon(REMOTE_ENDPOINT, blob);
+      return;
+    }
+    void fetch(REMOTE_ENDPOINT, {
+      method: "POST",
+      keepalive: true,
+      headers: { "content-type": "application/json" },
+      body,
+    }).catch(() => { /* noop */ });
+  } catch { /* noop */ }
 }
 
 export function readColorsEventBuffer(): LocalEvent[] {
