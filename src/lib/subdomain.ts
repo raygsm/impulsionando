@@ -33,6 +33,20 @@ const RESERVED_SUBDOMAINS = new Set([
   "project",
 ]);
 
+/**
+ * Subdomínios legados que foram descontinuados. Quando alguém acessa
+ * o host antigo, redirecionamos para o subdomínio oficial em vigor
+ * (mesma app, preservando path/query/hash).
+ *
+ * Colors Saúde: `colorssaude.impulsionando.com.br` foi substituído por
+ * `colors.impulsionando.com.br`. O host antigo não deve mais servir
+ * conteúdo — só redireciona.
+ */
+export const DEPRECATED_SUBDOMAIN_ALIAS: Record<string, string> = {
+  colorssaude: "colors",
+  "colors-saude": "colors",
+};
+
 export type TenantSubdomainMatch = {
   slug: string;
   host: string;
