@@ -1,231 +1,311 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, PlayCircle, MessageCircle, Globe, Palette, Wallet, Users, ShieldCheck, Layers, CheckCircle2, Rocket, TrendingUp, Crown } from "lucide-react";
+import {
+  ArrowRight,
+  PlayCircle,
+  MessageCircle,
+  Globe,
+  Palette,
+  Wallet,
+  Users,
+  ShieldCheck,
+  Layers,
+  Rocket,
+  TrendingUp,
+  Crown,
+  Building2,
+  BarChart3,
+  KeyRound,
+  Lock,
+  LifeBuoy,
+  Receipt,
+  Store,
+  Boxes,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import {
+  TenantHero,
+  FeatureGrid,
+  StatGrid,
+  TestimonialGrid,
+  TrustBadges,
+  FaqAccordion,
+  CtaBlock,
+  SectionHeader,
+  StepList,
+  buildFaqJsonLd,
+  type FaqItem,
+} from "@/components/impulsionando";
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
+const WHATSAPP_URL =
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
+
+/* --------------------------------- Dados --------------------------------- */
 
 const RECEIVES = [
-  { icon: Layers, title: "Plataforma pronta", desc: "Stack completa com agenda, CRM, financeiro, WhatsApp, PDV, BI e área do cliente." },
-  { icon: Globe, title: "Seu domínio", desc: "Use o seu domínio próprio — sistema acessado em sistemas.suamarca.com." },
-  { icon: Palette, title: "Seu logotipo e identidade", desc: "Cores, logo, e-mails e área do cliente com a sua marca em todos os pontos." },
-  { icon: Wallet, title: "Seus planos e preços", desc: "Você define a tabela, ciclos, módulos por plano e margens." },
-  { icon: Users, title: "Seus clientes", desc: "Cadastra, gerencia e cobra direto — sem intermediação." },
-  { icon: ShieldCheck, title: "Seu faturamento", desc: "Receba dos seus clientes na sua conta, com gateway próprio se quiser." },
+  { icon: Layers, title: "Plataforma pronta", description: "Stack completa com agenda, CRM, financeiro, WhatsApp, PDV, BI e área do cliente." },
+  { icon: Globe, title: "Seu domínio", description: "Use o seu domínio próprio — sistema acessado em sistemas.suamarca.com." },
+  { icon: Palette, title: "Sua identidade", description: "Logotipo, paleta, e-mails transacionais e área do cliente com a sua marca em todos os pontos." },
+  { icon: Wallet, title: "Seus planos e preços", description: "Você define a tabela, ciclos, módulos por plano e margens." },
+  { icon: Users, title: "Seus clientes", description: "Cadastra, gerencia e cobra direto — sem intermediação." },
+  { icon: ShieldCheck, title: "Seu faturamento", description: "Receba dos seus clientes na sua conta, com gateway próprio se quiser." },
 ];
 
-const BENEFITS = [
-  "Reduz custo de aquisição vendendo um produto recorrente",
-  "Aumenta o LTM amarrando clientes em uma operação completa",
-  "Posiciona sua marca como tech sem precisar montar time de produto",
-  "Escala sem desenvolver: novos módulos chegam prontos",
+const PARTNER_STACK = [
+  { icon: Building2, title: "Multi-tenant isolado", description: "Cada cliente-final tem dados, usuários, permissões, cobrança e branding próprios — sem vazamento entre parceiros." },
+  { icon: KeyRound, title: "Perfis & permissões", description: "Modelos reutilizáveis de acesso aplicáveis em segundos a qualquer cliente do seu portfólio." },
+  { icon: Boxes, title: "Módulos por plano", description: "Ative agenda, CRM, PDV, BI, WhatsApp e mais por cliente/plano — com limites por volume." },
+  { icon: BarChart3, title: "Relatórios consolidados", description: "MRR, churn, NPS e uso por cliente, nicho e plano — dashboard executivo do parceiro." },
+  { icon: Receipt, title: "Financeiro do parceiro", description: "Cobrança recorrente dos seus clientes, split, extrato e conciliação — na sua conta." },
+  { icon: LifeBuoy, title: "Suporte white-label", description: "Sua equipe atende com sua marca; nossa engenharia entra apenas via escalonamento." },
+  { icon: Store, title: "Vitrine própria", description: "Sua página de captação com seus planos, cases e nichos-modelo do ecossistema." },
+  { icon: Lock, title: "Isolamento entre parceiros", description: "Cada parceiro enxerga apenas o próprio portfólio — arquitetura multi-tenant nativa." },
 ];
+
+const STEPS = [
+  { title: "Setup da marca", description: "Você entrega logo, cores e domínio. Publicamos sua plataforma em até 48h." },
+  { title: "Definição de planos", description: "Monte 2 a 4 planos com módulos, limites e preços da sua tabela." },
+  { title: "Onboarding do 1º cliente", description: "Seu 1º cliente entra assistido — replicamos o padrão para os demais." },
+  { title: "Escala guiada", description: "Cada novo cliente herda o padrão. Você foca em vender; nós entregamos a tecnologia." },
+];
+
+const STATS = [
+  { value: "48h", label: "para publicação" },
+  { value: "100%", label: "marca própria" },
+  { value: "8", label: "verticais modelo" },
+  { value: "0", label: "linha de código" },
+];
+
+const TESTIMONIALS = [
+  { author: "Agência de marketing", role: "Portfólio de 40 clientes B2B", quote: "Transformei serviço em recorrência. Hoje 30% da receita da agência é White Label Impulsionando." },
+  { author: "Consultoria de saúde", role: "Rede de 12 clínicas", quote: "Substituí três SaaS por uma plataforma única com a nossa marca. As clínicas amaram." },
+  { author: "Franqueadora regional", role: "24 franqueados", quote: "Cada franqueado agora tem PDV, CRM e agenda no padrão da franquia — sem projeto sob medida." },
+];
+
+const TRUST: { title: string; description?: string }[] = [
+  { title: "LGPD & isolamento", description: "Dados de cada cliente-final isolados por RLS multi-tenant." },
+  { title: "SSO & MFA", description: "Login corporativo e 2º fator no console do parceiro." },
+  { title: "Uptime 99,9%", description: "Infra elástica, backups automáticos e monitoramento 24×7." },
+  { title: "Roadmap incluso", description: "Novos módulos chegam prontos — sem mensalidade extra de evolução." },
+];
+
+const FAQS: FaqItem[] = [
+  { question: "Quem é dono da relação com o cliente?", answer: "Você. O White Label mantém 100% da relação comercial, financeira e de suporte com o cliente-final sob a sua marca." },
+  { question: "Posso usar meu próprio domínio?", answer: "Sim. Configuramos sistemas.suamarca.com (ou o subdomínio que preferir) com SSL e e-mails transacionais assinados pela sua marca." },
+  { question: "E o faturamento dos meus clientes?", answer: "Você define preços, ciclos e cobra pelos seus meios. Suportamos gateway próprio (Stripe, Mercado Pago, PagSeguro etc.) ou repasse consolidado." },
+  { question: "Quantos módulos posso ativar por cliente?", answer: "Todos os módulos do ecossistema estão disponíveis. Você escolhe o mix por plano e por cliente, com limites e permissões finas." },
+  { question: "Um parceiro enxerga outro parceiro?", answer: "Não. Arquitetura multi-tenant garante isolamento total: cada parceiro só vê seu portfólio; cada cliente-final só vê seus dados." },
+  { question: "Consigo migrar clientes que já uso hoje?", answer: "Sim. Fornecemos assistente de importação (planilha ou API) para clientes, planos e usuários dos SaaS que você já opera." },
+];
+
+/* --------------------------------- Rota --------------------------------- */
 
 export const Route = createFileRoute("/white-label")({
   head: () => ({
     meta: [
-      { title: "White Label — Crie sua própria plataforma SaaS | Impulsionando Tecnologia" },
-      { name: "description", content: "Venda sistemas com sua marca, seu domínio e seu faturamento. Plataforma white label completa para agências, consultorias, franqueadoras e grupos empresariais." },
+      { title: "White Label — Crie sua própria plataforma SaaS | Impulsionando" },
+      { name: "description", content: "Venda sistemas com sua marca, seu domínio e seu faturamento. Arquitetura SaaS white-label completa para agências, consultorias, franqueadoras e grupos empresariais." },
       { property: "og:title", content: "White Label — Sua plataforma SaaS pronta" },
       { property: "og:description", content: "Sua marca, seu domínio, seus clientes, seu faturamento — sem precisar desenvolver." },
       { property: "og:url", content: "https://impulsionando.com.br/white-label" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/white-label" }],
+    scripts: [buildFaqJsonLd(FAQS)],
   }),
   component: WhiteLabelPage,
 });
 
 function WhiteLabelPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div data-tenant="whitelabel" className="min-h-screen flex flex-col bg-background text-foreground">
       <PublicHeader />
       <main className="flex-1">
         {/* HERO */}
-        <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
-          <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
-          <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-28">
-            <div className="max-w-3xl space-y-5 sm:space-y-6">
-              <Badge className="bg-white/15 text-primary-foreground border-0">
-                <Layers className="w-3.5 h-3.5 mr-1" /> White Label
-              </Badge>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight break-words">
-                Crie sua própria plataforma SaaS — sem precisar desenvolver.
-              </h1>
-              <p className="text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl">
-                Venda sistemas com a sua marca. Controle clientes, faturamento e módulos.
-                Para agências, consultorias, franqueadoras e grupos empresariais que querem
-                transformar serviço em receita recorrente.
-              </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
-                <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90 w-full sm:w-auto">
-                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                    Quero minha plataforma White Label <ArrowRight className="w-4 h-4 shrink-0" />
-                  </a>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
-                  <Link to="/demo/escolher-nicho">
-                    <PlayCircle className="w-4 h-4 shrink-0" /> Ver demonstração
-                  </Link>
-                </Button>
-              </div>
+        <TenantHero
+          className="bg-gradient-to-br from-primary/95 via-primary to-primary/80 text-primary-foreground"
+          align="left"
+          eyebrow={<><Layers className="h-3.5 w-3.5" /> White Label · Arquitetura SaaS</>}
+          title={
+            <>
+              Crie sua própria plataforma SaaS —{" "}
+              <span className="opacity-80">sem precisar desenvolver.</span>
+            </>
+          }
+          subtitle="Venda sistemas com a sua marca. Controle clientes, faturamento e módulos. Para agências, consultorias, franqueadoras e grupos empresariais que querem transformar serviço em receita recorrente."
+          actions={
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button asChild size="lg" className="gap-2 bg-background text-primary hover:bg-background/90">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                  Quero minha plataforma <ArrowRight className="w-4 h-4" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
+                <Link to="/white-label/parceiro">
+                  <PlayCircle className="w-4 h-4" /> Ver console do parceiro
+                </Link>
+              </Button>
             </div>
-          </div>
+          }
+        />
+
+        {/* STATS */}
+        <section className="mx-auto max-w-7xl px-6 py-12">
+          <StatGrid stats={STATS} columns={4} />
         </section>
 
         {/* O QUE VOCÊ RECEBE */}
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="max-w-2xl mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">O que você recebe</h2>
-            <p className="text-muted-foreground mt-3 leading-relaxed">
-              Uma operação SaaS completa entregue chave-na-mão. Você só precisa cuidar do que
-              faz melhor: vender e atender seus clientes.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {RECEIVES.map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="p-6">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{desc}</p>
-              </Card>
-            ))}
+        <section className="mx-auto max-w-7xl px-6 py-16">
+          <SectionHeader
+            eyebrow="O que você recebe"
+            title="Uma operação SaaS completa, chave-na-mão"
+            description="Você cuida de vender e atender seus clientes. Nós entregamos a tecnologia."
+          />
+          <div className="mt-10">
+            <FeatureGrid features={RECEIVES} columns={3} />
           </div>
         </section>
 
-        {/* BENEFÍCIOS */}
+        {/* STACK DO PARCEIRO */}
         <section className="bg-muted/30 border-y border-border">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <Badge variant="secondary" className="mb-3">Por que White Label</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Transforme serviço em receita recorrente.
-              </h2>
-              <p className="text-muted-foreground mt-4 leading-relaxed">
-                White Label é um produto completamente diferente de revender uma ferramenta.
-                Você é dono da relação, do faturamento e da experiência — a Impulsionando
-                fica nos bastidores entregando tecnologia.
-              </p>
+          <div className="mx-auto max-w-7xl px-6 py-16">
+            <SectionHeader
+              eyebrow="Stack do parceiro"
+              title="Console completo para revender com controle total"
+              description="Cada capacidade abaixo já vem entregue no console do parceiro. Nada precisa ser desenvolvido."
+            />
+            <div className="mt-10">
+              <FeatureGrid features={PARTNER_STACK} columns={4} />
             </div>
-            <ul className="space-y-3">
-              {BENEFITS.map((b) => (
-                <li key={b} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 leading-relaxed">{b}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 
-        {/* TIERS WHITE LABEL ----------------------------------------- */}
-        <section id="tiers" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
-          <div className="max-w-2xl mb-10">
-            <Badge variant="secondary" className="mb-3">Planos White Label</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Escolha por volume e maturidade</h2>
-            <p className="text-muted-foreground mt-3 leading-relaxed">
-              Você vende, atende, cobra e opera. A tecnologia é fornecida pela Impulsionando — sua marca na frente, nossa estrutura no backstage.
-            </p>
+        {/* JORNADA */}
+        <section className="mx-auto max-w-4xl px-6 py-16">
+          <SectionHeader
+            eyebrow="Como implantamos"
+            title="Sua plataforma publicada em 48h"
+            description="Metodologia usada em todos os parceiros homologados do ecossistema."
+          />
+          <div className="mt-10">
+            <StepList steps={STEPS} />
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {/* Start */}
+        </section>
+
+        {/* PLANOS */}
+        <section id="tiers" className="mx-auto max-w-7xl px-6 py-16 scroll-mt-24">
+          <SectionHeader
+            eyebrow="Planos White Label"
+            title="Escolha por volume e maturidade"
+            description="Você vende, atende, cobra e opera. A tecnologia é fornecida pela Impulsionando."
+          />
+          <div className="grid gap-5 md:grid-cols-3 mt-10">
             <Card className="p-6 flex flex-col">
               <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
                 <Rocket className="w-5 h-5" />
               </div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Entrada</div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Start</h3>
-              <p className="text-sm text-muted-foreground mt-2">Mesmo valor do Plano Ideal (1 SM).</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Sua operação inclusa</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Até <strong>5 clientes no Essencial</strong></li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Ou até <strong>2 clientes no Ideal</strong></li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Sua marca, seu domínio, seus preços</li>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">Start</h3>
+              <p className="text-sm text-muted-foreground mt-2">Para começar a produtizar sua carteira.</p>
+              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
+                <li>• Até 5 clientes no Essencial</li>
+                <li>• Ou até 2 clientes no Ideal</li>
+                <li>• Sua marca, seu domínio, seus preços</li>
+                <li>• Console do parceiro completo</li>
               </ul>
-              <Button asChild className="mt-5 bg-gradient-primary">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar White Label Start</a>
+              <Button asChild className="mt-5">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar Start</a>
               </Button>
             </Card>
 
-            {/* Growth (destaque) */}
-            <Card className="p-6 flex flex-col border-primary/60 ring-1 ring-primary/30 shadow-elegant">
-              <div className="w-11 h-11 rounded-xl bg-gradient-primary text-primary-foreground inline-flex items-center justify-center mb-4">
+            <Card className="p-6 flex flex-col border-primary/60 ring-1 ring-primary/30 shadow-lg">
+              <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground inline-flex items-center justify-center mb-4">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <div className="flex items-center gap-2">
-                <div className="text-xs uppercase tracking-wider text-primary">Recomendado</div>
-                <Badge variant="secondary">Popular</Badge>
-              </div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Growth</h3>
+              <div className="text-xs uppercase tracking-wider text-primary">Recomendado</div>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">Growth</h3>
               <p className="text-sm text-muted-foreground mt-2">Para quem já tem carteira e quer escalar.</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Limites ampliados de clientes</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Mais módulos por cliente</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Dashboards consolidados por carteira</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Onboarding guiado dos seus clientes</li>
+              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
+                <li>• Limites ampliados de clientes</li>
+                <li>• Todos os módulos disponíveis</li>
+                <li>• Dashboards consolidados</li>
+                <li>• Onboarding assistido dos seus clientes</li>
               </ul>
-              <Button asChild className="mt-5 bg-gradient-primary">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar White Label Growth</a>
+              <Button asChild className="mt-5">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar Growth</a>
               </Button>
             </Card>
 
-            {/* Enterprise */}
             <Card className="p-6 flex flex-col">
               <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
                 <Crown className="w-5 h-5" />
               </div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Sob consulta</div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Enterprise</h3>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">Enterprise</h3>
               <p className="text-sm text-muted-foreground mt-2">Sem limites práticos.</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Volume ilimitado de clientes</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Módulos sob medida</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> SLA dedicado e gerente de conta</li>
-                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Infra isolada e gateway próprio</li>
+              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
+                <li>• Volume ilimitado de clientes</li>
+                <li>• Módulos sob medida</li>
+                <li>• SLA dedicado e gerente de conta</li>
+                <li>• Infra isolada e gateway próprio</li>
               </ul>
               <Button asChild variant="outline" className="mt-5">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Solicitar Apresentação</a>
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Solicitar apresentação</a>
               </Button>
             </Card>
           </div>
-          <p className="text-xs text-muted-foreground mt-5 max-w-3xl">
-            Em todos os tiers: <strong>você vende, você atende, você cobra, você opera</strong>. A tecnologia é fornecida pela Impulsionando — atualizações automáticas, sem mensalidade extra de roadmap.
-          </p>
         </section>
 
-
-
-        {/* PLANOS / CTA */}
-        <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
-            Pronto para lançar a sua plataforma?
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
-            Planos White Label montados por volume de clientes, módulos ativos e nível de suporte.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
-            <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                Quero minha plataforma White Label <ArrowRight className="w-4 h-4" />
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-              <Link to="/demo/escolher-nicho">
-                <PlayCircle className="w-4 h-4" /> Ver demonstração
-              </Link>
-            </Button>
-            <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> Falar com especialista
-              </a>
-            </Button>
+        {/* TRUST */}
+        <section className="mx-auto max-w-7xl px-6 py-16">
+          <SectionHeader eyebrow="Garantias" title="Arquitetura pronta para escala corporativa" />
+          <div className="mt-10">
+            <TrustBadges badges={TRUST} columns={4} />
           </div>
         </section>
+
+        {/* DEPOIMENTOS */}
+        <section className="bg-muted/30 border-y border-border">
+          <div className="mx-auto max-w-7xl px-6 py-16">
+            <SectionHeader eyebrow="Quem já opera" title="Parceiros que produtizaram sua carteira" />
+            <div className="mt-10">
+              <TestimonialGrid testimonials={TESTIMONIALS} />
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="mx-auto max-w-4xl px-6 py-16">
+          <SectionHeader eyebrow="Perguntas frequentes" title="Tudo o que parceiros perguntam antes de assinar" />
+          <div className="mt-10">
+            <FaqAccordion faqs={FAQS} />
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <CtaBlock
+          variant="primary"
+          eyebrow="Pronto para lançar?"
+          title="Sua plataforma White Label no ar em 48h"
+          description="Fale com um especialista e receba a proposta com plano, módulos e cronograma de implantação."
+          actions={
+            <>
+              <Button asChild size="lg" className="gap-2 bg-background text-primary hover:bg-background/90">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-4 h-4" /> Falar com especialista
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
+                <Link to="/white-label/parceiro">
+                  Explorar console do parceiro <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </>
+          }
+        />
       </main>
       <PublicFooter />
     </div>
