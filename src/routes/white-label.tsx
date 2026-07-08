@@ -35,6 +35,7 @@ import {
   buildFaqJsonLd,
   type FaqItem,
 } from "@/components/impulsionando";
+import { WhiteLabelSimulator } from "@/components/whitelabel/WhiteLabelSimulator";
 
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
@@ -89,12 +90,15 @@ const TRUST: { title: string; description?: string }[] = [
 ];
 
 const FAQS: FaqItem[] = [
+  { question: "Posso contratar menos de 10 domínios?", answer: "Não. O plano White Label tem contratação mínima de 10 domínios ativos (R$ 2.999,00/mês). Abaixo disso, indicamos os planos diretos do Ecossistema Impulsionando." },
+  { question: "WhatsApp Business API está incluído?", answer: "Não. WhatsApp Business API, VoIP, SMS e telefonia são serviços de terceiros e contratados separadamente conforme o consumo ou pacote escolhido pelo parceiro." },
+  { question: "Posso adicionar novos domínios depois?", answer: "Sim. O desconto é recalculado automaticamente em tempo real conforme sua operação cresce e muda de faixa (11–50 = −10%, 51–100 = −15%, 101+ = −20%)." },
+  { question: "Existe fidelidade?", answer: "Conforme contrato comercial. O modelo padrão é mensal e recalculado por volume, sem necessidade de renegociação a cada nova faixa." },
   { question: "Quem é dono da relação com o cliente?", answer: "Você. O White Label mantém 100% da relação comercial, financeira e de suporte com o cliente-final sob a sua marca." },
-  { question: "Posso usar meu próprio domínio?", answer: "Sim. Configuramos sistemas.suamarca.com (ou o subdomínio que preferir) com SSL e e-mails transacionais assinados pela sua marca." },
+  { question: "Posso usar meu próprio domínio?", answer: "Sim. Cada cliente-final entra como um domínio próprio (ex.: sistemas.suamarca.com) com SSL e e-mails transacionais assinados pela sua marca." },
   { question: "E o faturamento dos meus clientes?", answer: "Você define preços, ciclos e cobra pelos seus meios. Suportamos gateway próprio (Stripe, Mercado Pago, PagSeguro etc.) ou repasse consolidado." },
-  { question: "Quantos módulos posso ativar por cliente?", answer: "Todos os módulos do ecossistema estão disponíveis. Você escolhe o mix por plano e por cliente, com limites e permissões finas." },
+  { question: "Quantos módulos posso ativar por cliente?", answer: "Todos os módulos do ecossistema estão disponíveis, sem custo adicional na mensalidade por domínio. Você escolhe o mix por plano e por cliente." },
   { question: "Um parceiro enxerga outro parceiro?", answer: "Não. Arquitetura multi-tenant garante isolamento total: cada parceiro só vê seu portfólio; cada cliente-final só vê seus dados." },
-  { question: "Consigo migrar clientes que já uso hoje?", answer: "Sim. Fornecemos assistente de importação (planilha ou API) para clientes, planos e usuários dos SaaS que você já opera." },
 ];
 
 /* --------------------------------- Rota --------------------------------- */
@@ -295,6 +299,11 @@ function WhiteLabelPage() {
                 <Link to="/white-label/parceiro">Ver console do parceiro</Link>
               </Button>
             </div>
+          </div>
+
+          {/* SIMULADOR INTERATIVO */}
+          <div className="mt-12">
+            <WhiteLabelSimulator ctaHref={WHATSAPP_URL} />
           </div>
         </section>
 
