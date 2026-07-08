@@ -65,10 +65,10 @@ const PARTNER_STACK = [
 ];
 
 const STEPS = [
-  { title: "Setup da marca", description: "Você entrega logo, cores e domínio. Publicamos sua plataforma em até 48h." },
-  { title: "Definição de planos", description: "Monte 2 a 4 planos com módulos, limites e preços da sua tabela." },
-  { title: "Onboarding do 1º cliente", description: "Seu 1º cliente entra assistido — replicamos o padrão para os demais." },
-  { title: "Escala guiada", description: "Cada novo cliente herda o padrão. Você foca em vender; nós entregamos a tecnologia." },
+  { number: "1", title: "Setup da marca", description: "Você entrega logo, cores e domínio. Publicamos sua plataforma em até 48h." },
+  { number: "2", title: "Definição de planos", description: "Monte 2 a 4 planos com módulos, limites e preços da sua tabela." },
+  { number: "3", title: "Onboarding do 1º cliente", description: "Seu 1º cliente entra assistido — replicamos o padrão para os demais." },
+  { number: "4", title: "Escala guiada", description: "Cada novo cliente herda o padrão. Você foca em vender; nós entregamos a tecnologia." },
 ];
 
 const STATS = [
