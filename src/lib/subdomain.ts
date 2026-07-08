@@ -33,6 +33,20 @@ const RESERVED_SUBDOMAINS = new Set([
   "project",
 ]);
 
+/**
+ * Subdomínios legados que foram descontinuados. Quando alguém acessa
+ * o host antigo, redirecionamos para o subdomínio oficial em vigor
+ * (mesma app, preservando path/query/hash).
+ *
+ * Colors Saúde: `colorssaude.impulsionando.com.br` foi substituído por
+ * `colors.impulsionando.com.br`. O host antigo não deve mais servir
+ * conteúdo — só redireciona.
+ */
+export const DEPRECATED_SUBDOMAIN_ALIAS: Record<string, string> = {
+  colorssaude: "colors",
+  "colors-saude": "colors",
+};
+
 export type TenantSubdomainMatch = {
   slug: string;
   host: string;
@@ -64,4 +78,29 @@ export function getTenantSubdomain(host: string | null | undefined): TenantSubdo
 /** Rota destino para um tenant detectado por subdomínio. */
 export function tenantSubdomainTarget(slug: string): string {
   return `/vitrine/${slug}`;
+}
+
+/**
+ * Se o host atual for um subdomínio descontinuado, devolve a URL absoluta
+ * do subdomínio oficial (preservando path/search/hash). Retorna null quando
+ * o host já está correto.
+ */
+export function deprecatedSubdomainRedirect(loc: {
+  hostname: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  protocol: string;
+}): string | null {
+  const h = loc.hostname.toLowerCase().split(":")[0];
+  for (const root of ROOT_DOMAINS) {
+    if (!h.endsWith("." + root)) continue;
+    const prefix = h.slice(0, -("." + root).length);
+    const firstSeg = prefix.split(".")[0];
+    const canonical = DEPRECATED_SUBDOMAIN_ALIAS[firstSeg];
+    if (!canonical) return null;
+    const proto = loc.protocol === "http:" ? "http:" : "https:";
+    return `${proto}//${canonical}.${root}${loc.pathname}${loc.search}${loc.hash}`;
+  }
+  return null;
 }
