@@ -13,6 +13,7 @@ import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 const LazyContato = lazy(() => import("@/components/colors/ContatoSection"));
 const LazyEbooks = lazy(() => import("@/components/colors/EbooksSection"));
 const LazyDepoimentos = lazy(() => import("@/components/colors/DepoimentosSection"));
+const LazyEcosystem = lazy(() => import("@/components/colors/EcosystemBlock"));
 
 export const Route = createFileRoute("/colors/")({
   head: () => ({
