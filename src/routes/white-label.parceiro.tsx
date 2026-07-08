@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { SectionHeader, StatGrid, TrustBadges } from "@/components/impulsionando";
+import { WhiteLabelSimulator } from "@/components/whitelabel/WhiteLabelSimulator";
 
 /* --------------------------- Console do Parceiro --------------------------- */
 
@@ -196,6 +197,18 @@ function PartnerConsoleHub() {
                 </Button>
               </Card>
             ))}
+          </div>
+        </section>
+
+        {/* Simulador comercial */}
+        <section className="mx-auto max-w-7xl px-6 pb-16">
+          <SectionHeader
+            eyebrow="Simulador comercial"
+            title="Calcule sua mensalidade e a próxima faixa de desconto"
+            description="Modelo único: R$ 299,90 por domínio ativo, mínimo de 10, com descontos automáticos por volume."
+          />
+          <div className="mt-8">
+            <WhiteLabelSimulator />
           </div>
         </section>
 
