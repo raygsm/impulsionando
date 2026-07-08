@@ -12,8 +12,8 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
+  garrido: "/garrido",
   // Sem landing dedicada → vitrine pública do tenant
-  garrido: "/vitrine/imobiliaria-garrido",
   impulsity: "/vitrine/impulsity",
   dqa: "/vitrine/dqa-panini",
   "plataforma-saude": "/vitrine/patricia-lenine",
