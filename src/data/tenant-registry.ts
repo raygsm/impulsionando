@@ -242,6 +242,26 @@ export const TENANT_MODELS: TenantModel[] = [
     status: "homologado",
     datasetPath: "src/data/wmp-content.ts",
   },
+  {
+    slug: "whitelabel",
+    name: "White Label Impulsionando",
+    route: "/white-label",
+    segment: "white-label",
+    segmentLabel: "White Label / Arquitetura SaaS",
+    tagline: "Sua marca, seu domínio, seus clientes — a tecnologia é nossa.",
+    description:
+      "Modelo oficial da vertente White Label: arquitetura SaaS multi-tenant pronta para agências, consultorias, franqueadoras e grupos empresariais revenderem o ecossistema Impulsionando com marca própria, planos próprios e faturamento próprio.",
+    primaryVar: "--whitelabel-primary",
+    dataTenant: "whitelabel",
+    impulsionitoDimensoes: ["servicos"],
+    semantica: {
+      objetivos: ["revender-saas", "monetizar-carteira", "produtizar-servico"],
+      publico: ["agencia", "consultoria", "franqueadora", "grupo-empresarial"],
+      faixaPreco: "sob-consulta",
+      tags: ["white-label", "saas", "multi-tenant", "revenda", "arquitetura"],
+    },
+    status: "homologado",
+  },
 ];
 
 /** Todos os segmentos oficiais do ecossistema (para filtros/vitrine). */
@@ -254,6 +274,7 @@ export const OFFICIAL_SEGMENTS: Array<{ id: TenantSegment; label: string }> = [
   { id: "gastronomia", label: "Gastronomia" },
   { id: "eventos-e-producao", label: "Eventos e Produção" },
   { id: "servicos", label: "Serviços" },
+  { id: "white-label", label: "White Label / Arquitetura SaaS" },
 ];
 
 export function getTenantModel(slug: string): TenantModel | undefined {
