@@ -71,6 +71,33 @@ export function logLegacySubdomainHit(hit: Omit<LegacyHit, "ts" | "ua"> & { ua?:
   import("@/lib/analytics").then(({ trackEvent }) => {
     trackEvent("legacy_subdomain_hit", entry as unknown as Record<string, unknown>);
   }).catch(() => { /* noop */ });
+  // Persistência real no Supabase (fire-and-forget) — consolida hits de
+  // qualquer navegador em `painel_legacy_hits`. Usa sendBeacon quando possível
+  // para não bloquear o redirect subsequente.
+  try {
+    const payload = JSON.stringify({
+      from_host: entry.from_host,
+      to_host: entry.to_host,
+      path: entry.path,
+      search: entry.search,
+      hash: entry.hash,
+      ua: entry.ua,
+      referer: typeof document !== "undefined" ? document.referrer : undefined,
+      ts: entry.ts,
+    });
+    const url = "/api/public/painel/legacy-hit";
+    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon(url, blob);
+    } else {
+      void fetch(url, {
+        method: "POST",
+        keepalive: true,
+        headers: { "content-type": "application/json" },
+        body: payload,
+      }).catch(() => { /* noop */ });
+    }
+  } catch { /* noop */ }
 }
 export function readLegacyHits(): LegacyHit[] {
   if (typeof window === "undefined") return [];
