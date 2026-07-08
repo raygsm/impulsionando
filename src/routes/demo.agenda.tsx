@@ -174,7 +174,7 @@ function DemoAgenda() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
       <DemoModeBanner current="agenda" leadNiche="servicos" leadLabel="Agenda e Reservas" leadOrigin="hub-modulo-agenda" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">

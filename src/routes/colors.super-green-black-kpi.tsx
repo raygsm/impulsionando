@@ -129,7 +129,7 @@ function SgbKpiPage() {
             <div key={k} className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/50 to-transparent p-5">
               <p className="text-xs uppercase tracking-widest text-emerald-300/80">{label}</p>
               <p className="mt-2 text-4xl font-black">{counts[k] ?? 0}</p>
-              <p className="mt-1 text-xs text-white/40 font-mono">{k}</p>
+              <p className="mt-1 text-xs text-white/60 font-mono">{k}</p>
             </div>
           ))}
         </div>
@@ -212,7 +212,7 @@ function SgbKpiPage() {
                   </tr>
                 ))}
                 {sgbEvents.length === 0 && (
-                  <tr><td colSpan={4} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={4} className="p-6 text-center text-white/60">
                     Sem eventos do SGB ainda. Abra a landing e clique nos CTAs.
                   </td></tr>
                 )}

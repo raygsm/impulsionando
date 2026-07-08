@@ -61,7 +61,7 @@ function EscolherNicho() {
   const plansForNiche = selectedNiche ? NICHE_MODULE_SLUGS[selectedNiche] : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
       <main className="flex-1 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="text-center mb-8">

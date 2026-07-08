@@ -188,12 +188,12 @@ function DemoQrShell() {
   );
 
   if (scenarioQ.isLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
+    return <div className="min-h-dvh flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
   }
 
   if (!scenarioQ.data || !currentQr) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="min-h-dvh flex items-center justify-center p-6">
         <Card className="p-6 max-w-sm text-center space-y-2">
           <ShieldAlert className="w-8 h-8 mx-auto text-amber-600" />
           <h1 className="text-lg font-semibold">QR Code não reconhecido</h1>
@@ -221,7 +221,7 @@ function DemoQrShell() {
 
   return (
     <main
-      className="min-h-screen pb-28"
+      className="min-h-dvh pb-28"
       style={{ background: `linear-gradient(180deg, ${scenario.primary_color}14, transparent 220px)` }}
     >
       {/* Banner obrigatório de demo */}

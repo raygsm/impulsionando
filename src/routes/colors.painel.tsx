@@ -402,7 +402,7 @@ function PainelPage() {
                 value={pingFilter.q}
                 onChange={(e) => setPingFilter((s) => ({ ...s, q: e.target.value }))}
                 placeholder="Buscar host, path, motivo…"
-                className="rounded-full border border-white/15 bg-black/50 px-4 py-1.5 text-sm text-white placeholder:text-white/40 focus:border-sky-400 focus:outline-none"
+                className="rounded-full border border-white/15 bg-black/50 px-4 py-1.5 text-sm text-white placeholder:text-white/70 focus:border-sky-400 focus:outline-none"
               />
               <label className="flex items-center gap-2 text-xs text-white/70">
                 <input
@@ -447,7 +447,7 @@ function PainelPage() {
                   </tr>
                 ))}
                 {filteredPings.length === 0 && (
-                  <tr><td colSpan={6} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={6} className="p-6 text-center text-white/60">
                     {pingHistory.length === 0 ? "Nenhum diagnóstico ainda. Rode o ping acima." : "Nenhum resultado com esse filtro."}
                   </td></tr>
                 )}
@@ -492,11 +492,11 @@ function PainelPage() {
                     <td className="p-3 font-mono text-amber-200">{h.from_host}</td>
                     <td className="p-3 font-mono text-emerald-200">{h.to_host}</td>
                     <td className="p-3 font-mono text-white/70">{h.path}{h.search}{h.hash}</td>
-                    <td className="p-3 text-white/40 truncate max-w-[220px]" title={h.ua}>{h.ua.slice(0, 60)}</td>
+                    <td className="p-3 text-white/60 truncate max-w-[220px]" title={h.ua}>{h.ua.slice(0, 60)}</td>
                   </tr>
                 ))}
                 {legacyHits.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={5} className="p-6 text-center text-white/60">
                     Nenhum acesso ao subdomínio legado registrado neste dispositivo.
                   </td></tr>
                 )}
@@ -566,7 +566,7 @@ function PainelPage() {
                 </thead>
                 <tbody>
                   {(aggregateQuery.data?.funnel ?? []).length === 0 && (
-                    <tr><td colSpan={7} className="py-3 text-center text-white/40">
+                    <tr><td colSpan={7} className="py-3 text-center text-white/60">
                       {aggregateQuery.isFetching ? "Carregando…" : "Sem eventos no período/host selecionado."}
                     </td></tr>
                   )}
@@ -597,7 +597,7 @@ function PainelPage() {
                 </thead>
                 <tbody>
                   {(aggregateQuery.data?.legacy ?? []).length === 0 && (
-                    <tr><td colSpan={3} className="py-3 text-center text-white/40">
+                    <tr><td colSpan={3} className="py-3 text-center text-white/60">
                       {aggregateQuery.isFetching ? "Carregando…" : "Nenhum acesso ao subdomínio legado neste período."}
                     </td></tr>
                   )}
@@ -704,7 +704,7 @@ function PainelPage() {
             <div key={k} className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <p className="text-xs uppercase tracking-widest text-white/60">{LABELS[k]}</p>
               <p className="mt-2 text-4xl font-bold">{counts[k] ?? 0}</p>
-              <p className="mt-1 text-xs text-white/40">evento <code>{k}</code></p>
+              <p className="mt-1 text-xs text-white/60">evento <code>{k}</code></p>
             </div>
           ))}
         </div>
@@ -781,13 +781,13 @@ function PainelPage() {
                     <td className="p-3">{r.ga_conversions}</td>
                     <td className="p-3">{r.local_rate}%</td>
                     <td className="p-3">{r.ga_rate}%</td>
-                    <td className={"p-3 " + (r.delta_sessions === 0 ? "text-white/40" : r.delta_sessions > 0 ? "text-emerald-300" : "text-amber-300")}>
+                    <td className={"p-3 " + (r.delta_sessions === 0 ? "text-white/60" : r.delta_sessions > 0 ? "text-emerald-300" : "text-amber-300")}>
                       {r.delta_sessions > 0 ? "+" : ""}{r.delta_sessions}
                     </td>
                   </tr>
                 ))}
                 {compare.length === 0 && (
-                  <tr><td colSpan={8} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={8} className="p-6 text-center text-white/60">
                     {gaCsv ? "Nenhuma campanha em comum ainda." : "Importe um CSV do GA4 para comparar taxas de conversão por campanha."}
                   </td></tr>
                 )}
@@ -836,7 +836,7 @@ function PainelPage() {
                   </tr>
                 ))}
                 {weekly.length === 0 && (
-                  <tr><td colSpan={7} className="p-6 text-center text-white/40">Sem dados no período.</td></tr>
+                  <tr><td colSpan={7} className="p-6 text-center text-white/60">Sem dados no período.</td></tr>
                 )}
               </tbody>
             </table>
@@ -866,7 +866,7 @@ function PainelPage() {
                   </tr>
                 ))}
                 {events.length === 0 && (
-                  <tr><td colSpan={4} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={4} className="p-6 text-center text-white/60">
                     Nenhum evento no período. Navegue pelo site, clique em CTAs / WhatsApp / checkout e volte aqui.
                   </td></tr>
                 )}
@@ -904,7 +904,7 @@ function PainelPage() {
                   </tr>
                 ))}
                 {attempts.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-white/40">
+                  <tr><td colSpan={5} className="p-6 text-center text-white/60">
                     Nenhuma tentativa registrada neste dispositivo.
                   </td></tr>
                 )}
