@@ -58,6 +58,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WmpIndexRouteImport } from './routes/wmp.index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
 import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
+import { Route as RiomedIndexRouteImport } from './routes/riomed.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
@@ -1034,6 +1035,11 @@ const ShowroomIndexRoute = ShowroomIndexRouteImport.update({
   id: '/showroom/',
   path: '/showroom/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const RiomedIndexRoute = RiomedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RiomedRoute,
 } as any)
 const PacienteIndexRoute = PacienteIndexRouteImport.update({
   id: '/',
@@ -5424,6 +5430,7 @@ export interface FileRoutesByFullPath {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
@@ -6027,7 +6034,6 @@ export interface FileRoutesByTo {
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
-  '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/status': typeof StatusRouteWithChildren
@@ -6194,6 +6200,7 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
+  '/riomed': typeof RiomedIndexRoute
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/wmp': typeof WmpIndexRoute
@@ -6976,6 +6983,7 @@ export interface FileRoutesById {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
@@ -7760,6 +7768,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/riomed/'
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
@@ -8363,7 +8372,6 @@ export interface FileRouteTypes {
     | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
-    | '/riomed'
     | '/sobre'
     | '/solucoes'
     | '/status'
@@ -8530,6 +8538,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/nichos'
     | '/paciente'
+    | '/riomed'
     | '/showroom'
     | '/trabalhe-conosco'
     | '/wmp'
@@ -9311,6 +9320,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/riomed/'
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
@@ -10435,6 +10445,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/showroom/'
       preLoaderRoute: typeof ShowroomIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/riomed/': {
+      id: '/riomed/'
+      path: '/'
+      fullPath: '/riomed/'
+      preLoaderRoute: typeof RiomedIndexRouteImport
+      parentRoute: typeof RiomedRoute
     }
     '/paciente/': {
       id: '/paciente/'
@@ -17318,6 +17335,7 @@ interface RiomedRouteChildren {
   RiomedSoporteRoute: typeof RiomedSoporteRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   RiomedVendedorRoute: typeof RiomedVendedorRoute
+  RiomedIndexRoute: typeof RiomedIndexRoute
   RiomedCotizacionTokenRoute: typeof RiomedCotizacionTokenRoute
   RiomedFornecedorCadastroRoute: typeof RiomedFornecedorCadastroRoute
   RiomedHospitalPortalRoute: typeof RiomedHospitalPortalRoute
@@ -17338,6 +17356,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedSoporteRoute: RiomedSoporteRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   RiomedVendedorRoute: RiomedVendedorRoute,
+  RiomedIndexRoute: RiomedIndexRoute,
   RiomedCotizacionTokenRoute: RiomedCotizacionTokenRoute,
   RiomedFornecedorCadastroRoute: RiomedFornecedorCadastroRoute,
   RiomedHospitalPortalRoute: RiomedHospitalPortalRoute,
