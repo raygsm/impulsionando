@@ -69,8 +69,12 @@ import { Route as FoodserviceIndexRouteImport } from './routes/foodservice.index
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
+import { Route as WmpSobreRouteImport } from './routes/wmp.sobre'
 import { Route as WmpParceiroRouteImport } from './routes/wmp.parceiro'
+import { Route as WmpPacotesRouteImport } from './routes/wmp.pacotes'
 import { Route as WmpOrcamentoRouteImport } from './routes/wmp.orcamento'
+import { Route as WmpFaqRouteImport } from './routes/wmp.faq'
+import { Route as WmpCasesRouteImport } from './routes/wmp.cases'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
@@ -1111,14 +1115,34 @@ const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   path: '/checkout/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WmpSobreRoute = WmpSobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => WmpRoute,
+} as any)
 const WmpParceiroRoute = WmpParceiroRouteImport.update({
   id: '/parceiro',
   path: '/parceiro',
   getParentRoute: () => WmpRoute,
 } as any)
+const WmpPacotesRoute = WmpPacotesRouteImport.update({
+  id: '/pacotes',
+  path: '/pacotes',
+  getParentRoute: () => WmpRoute,
+} as any)
 const WmpOrcamentoRoute = WmpOrcamentoRouteImport.update({
   id: '/orcamento',
   path: '/orcamento',
+  getParentRoute: () => WmpRoute,
+} as any)
+const WmpFaqRoute = WmpFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => WmpRoute,
+} as any)
+const WmpCasesRoute = WmpCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => WmpRoute,
 } as any)
 const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
@@ -5558,8 +5582,12 @@ export interface FileRoutesByFullPath {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/cases': typeof WmpCasesRoute
+  '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/pacotes': typeof WmpPacotesRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
+  '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
@@ -6345,8 +6373,12 @@ export interface FileRoutesByTo {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/cases': typeof WmpCasesRoute
+  '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/pacotes': typeof WmpPacotesRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
+  '/wmp/sobre': typeof WmpSobreRoute
   '/checkout': typeof CheckoutIndexRoute
   '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
@@ -7148,8 +7180,12 @@ export interface FileRoutesById {
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/cases': typeof WmpCasesRoute
+  '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/pacotes': typeof WmpPacotesRoute
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
+  '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
@@ -7953,8 +7989,12 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/cases'
+    | '/wmp/faq'
     | '/wmp/orcamento'
+    | '/wmp/pacotes'
     | '/wmp/parceiro'
+    | '/wmp/sobre'
     | '/checkout/'
     | '/colors/'
     | '/demo/'
@@ -8740,8 +8780,12 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/cases'
+    | '/wmp/faq'
     | '/wmp/orcamento'
+    | '/wmp/pacotes'
     | '/wmp/parceiro'
+    | '/wmp/sobre'
     | '/checkout'
     | '/colors'
     | '/demo'
@@ -9542,8 +9586,12 @@ export interface FileRouteTypes {
     | '/trial_/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/cases'
+    | '/wmp/faq'
     | '/wmp/orcamento'
+    | '/wmp/pacotes'
     | '/wmp/parceiro'
+    | '/wmp/sobre'
     | '/checkout/'
     | '/colors/'
     | '/demo/'
@@ -10759,6 +10807,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wmp/sobre': {
+      id: '/wmp/sobre'
+      path: '/sobre'
+      fullPath: '/wmp/sobre'
+      preLoaderRoute: typeof WmpSobreRouteImport
+      parentRoute: typeof WmpRoute
+    }
     '/wmp/parceiro': {
       id: '/wmp/parceiro'
       path: '/parceiro'
@@ -10766,11 +10821,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WmpParceiroRouteImport
       parentRoute: typeof WmpRoute
     }
+    '/wmp/pacotes': {
+      id: '/wmp/pacotes'
+      path: '/pacotes'
+      fullPath: '/wmp/pacotes'
+      preLoaderRoute: typeof WmpPacotesRouteImport
+      parentRoute: typeof WmpRoute
+    }
     '/wmp/orcamento': {
       id: '/wmp/orcamento'
       path: '/orcamento'
       fullPath: '/wmp/orcamento'
       preLoaderRoute: typeof WmpOrcamentoRouteImport
+      parentRoute: typeof WmpRoute
+    }
+    '/wmp/faq': {
+      id: '/wmp/faq'
+      path: '/faq'
+      fullPath: '/wmp/faq'
+      preLoaderRoute: typeof WmpFaqRouteImport
+      parentRoute: typeof WmpRoute
+    }
+    '/wmp/cases': {
+      id: '/wmp/cases'
+      path: '/cases'
+      fullPath: '/wmp/cases'
+      preLoaderRoute: typeof WmpCasesRouteImport
       parentRoute: typeof WmpRoute
     }
     '/white-label/login': {
@@ -17848,15 +17924,23 @@ const WmpParceiroRouteWithChildren = WmpParceiroRoute._addFileChildren(
 )
 
 interface WmpRouteChildren {
+  WmpCasesRoute: typeof WmpCasesRoute
+  WmpFaqRoute: typeof WmpFaqRoute
   WmpOrcamentoRoute: typeof WmpOrcamentoRoute
+  WmpPacotesRoute: typeof WmpPacotesRoute
   WmpParceiroRoute: typeof WmpParceiroRouteWithChildren
+  WmpSobreRoute: typeof WmpSobreRoute
   WmpIndexRoute: typeof WmpIndexRoute
   WmpObrigadoTipoRoute: typeof WmpObrigadoTipoRoute
 }
 
 const WmpRouteChildren: WmpRouteChildren = {
+  WmpCasesRoute: WmpCasesRoute,
+  WmpFaqRoute: WmpFaqRoute,
   WmpOrcamentoRoute: WmpOrcamentoRoute,
+  WmpPacotesRoute: WmpPacotesRoute,
   WmpParceiroRoute: WmpParceiroRouteWithChildren,
+  WmpSobreRoute: WmpSobreRoute,
   WmpIndexRoute: WmpIndexRoute,
   WmpObrigadoTipoRoute: WmpObrigadoTipoRoute,
 }
