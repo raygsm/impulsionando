@@ -125,9 +125,15 @@ export function clearColorsEventBuffer() {
 }
 
 export function track(event: string, params: Record<string, unknown> = {}) {
-  const full = { site: "colors", ...params };
+  const full = {
+    site: "colors",
+    host: currentHost(),
+    path: currentPath(),
+    ...params,
+  };
   trackEvent(event, full);
   pushLocal(event, full);
+  pushRemote(event, full);
 }
 
 export const colorsEvents = {
