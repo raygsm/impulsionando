@@ -1,0 +1,83 @@
+/* ============================================================
+   TOKENS-TENANTS — Marcas do ecossistema Impulsionando
+   Cada tenant tem paleta própria. NUNCA usar estes tokens fora
+   do escopo do respectivo tenant. Ativação por container
+   [data-tenant="<slug>"] ou por rotas com wrapper próprio.
+   ============================================================ */
+
+@theme inline {
+  /* COLORS SAÚDE — dark medical / super green */
+  --color-colors-primary:   var(--colors-primary);
+  --color-colors-green:     var(--colors-green);
+  --color-colors-yellow:    var(--colors-yellow);
+  --color-colors-blue:      var(--colors-blue);
+  --color-colors-surface:   var(--colors-surface);
+
+  /* CHRISMED — clínica premium */
+  --color-chrismed-primary: var(--chrismed-primary);
+  --color-chrismed-accent:  var(--chrismed-accent);
+  --color-chrismed-surface: var(--chrismed-surface);
+
+  /* RIOMED — distribuição médico-hospitalar */
+  --color-riomed-primary:   var(--riomed-primary);
+  --color-riomed-accent:    var(--riomed-accent);
+  --color-riomed-surface:   var(--riomed-surface);
+
+  /* GARRIDO — imobiliária */
+  --color-garrido-primary:  var(--garrido-primary);
+  --color-garrido-accent:   var(--garrido-accent);
+  --color-garrido-surface:  var(--garrido-surface);
+
+  /* WMP — Web Marketing Pro */
+  --color-wmp-primary:      var(--wmp-primary);
+  --color-wmp-accent:       var(--wmp-accent);
+  --color-wmp-surface:      var(--wmp-surface);
+
+  /* MAROCAS — hospedagem/eventos */
+  --color-marocas-primary:  var(--marocas-primary);
+  --color-marocas-accent:   var(--marocas-accent);
+  --color-marocas-surface:  var(--marocas-surface);
+}
+
+:root {
+  /* Colors Saúde — verde suplementos + preto premium */
+  --colors-primary:  oklch(0.72 0.19 145);   /* super green */
+  --colors-green:    oklch(0.72 0.19 145);
+  --colors-yellow:   oklch(0.85 0.17 90);
+  --colors-blue:     oklch(0.62 0.17 235);
+  --colors-surface:  oklch(0.14 0.02 240);   /* preto azulado */
+
+  /* CHRISMED — azul clínico + coral */
+  --chrismed-primary: oklch(0.55 0.15 235);
+  --chrismed-accent:  oklch(0.75 0.14 25);
+  --chrismed-surface: oklch(0.99 0.005 220);
+
+  /* Riomed — azul médico institucional */
+  --riomed-primary: oklch(0.42 0.13 245);
+  --riomed-accent:  oklch(0.70 0.16 35);
+  --riomed-surface: oklch(0.985 0.005 240);
+
+  /* Garrido — dourado imobiliário + grafite */
+  --garrido-primary: oklch(0.62 0.13 75);
+  --garrido-accent:  oklch(0.30 0.03 260);
+  --garrido-surface: oklch(0.98 0.005 90);
+
+  /* WMP — laranja marketing + navy */
+  --wmp-primary: oklch(0.68 0.19 45);
+  --wmp-accent:  oklch(0.30 0.11 260);
+  --wmp-surface: oklch(0.99 0.005 240);
+
+  /* Marocas — verde eventos + areia */
+  --marocas-primary: oklch(0.55 0.12 155);
+  --marocas-accent:  oklch(0.80 0.09 75);
+  --marocas-surface: oklch(0.99 0.006 100);
+}
+
+/* Ativação por escopo — use no wrapper da rota do tenant.
+   Ex: <div data-tenant="chrismed" className="min-h-dvh"> */
+[data-tenant="colors"]   { --primary: var(--colors-primary);   --ring: var(--colors-primary); }
+[data-tenant="chrismed"] { --primary: var(--chrismed-primary); --ring: var(--chrismed-primary); }
+[data-tenant="riomed"]   { --primary: var(--riomed-primary);   --ring: var(--riomed-primary); }
+[data-tenant="garrido"]  { --primary: var(--garrido-primary);  --ring: var(--garrido-primary); }
+[data-tenant="wmp"]      { --primary: var(--wmp-primary);      --ring: var(--wmp-primary); }
+[data-tenant="marocas"]  { --primary: var(--marocas-primary);  --ring: var(--marocas-primary); }
