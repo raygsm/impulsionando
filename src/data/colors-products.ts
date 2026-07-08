@@ -291,6 +291,31 @@ export const COLORS_PRODUCTS: ColorsProduct[] = [
       { label: "Monetizze", href: "https://superbambam.com.br/" },
       { label: "Perfect Pay", href: "https://superbambam.com.br/p" },
     ],
+    howToUse: [
+      "Crianças de 4 a 12 anos: 2 gominhas por dia.",
+      "Adolescentes: 3 gominhas por dia.",
+      "Pode ser oferecido após qualquer refeição — não precisa de água.",
+      "Guarde em local seco e longe do alcance de crianças pequenas.",
+    ],
+    composition: [
+      "Vitamina A, C, D3, E — imunidade e crescimento",
+      "Complexo B — energia e concentração",
+      "Zinco — desenvolvimento saudável",
+      "Sabor natural de framboesa",
+      "Sem corantes artificiais, sem glúten",
+    ],
+    faq: [
+      { q: "A partir de que idade posso oferecer?", a: "A partir de 4 anos. Para crianças menores, consulte o pediatra." },
+      { q: "Tem açúcar?", a: "Contém teor reduzido de açúcar. Não substitui uma alimentação equilibrada." },
+      { q: "É seguro tomar todos os dias?", a: "Sim, dentro da posologia indicada. É um suplemento vitamínico infantil registrado." },
+      { q: "Meu filho é seletivo — vai gostar?", a: "O sabor framboesa e o formato de ursinho tornam a suplementação divertida. É o preferido pelas crianças brasileiras." },
+    ],
+    testimonials: [
+      { name: "Fernanda (mãe do Théo, 6 anos)", city: "Porto Alegre — RS", text: "Meu filho comia mal e vivia doente. Depois do Bam Bam Bam melhorou a imunidade e o apetite." },
+      { name: "Rodrigo (pai da Sofia, 8 anos)", city: "Recife — PE", text: "Ela pede todo dia — pensa que é doce. Melhor forma de suplementar." },
+    ],
+    guarantee: "Garantia de 7 dias. Se a criança não gostar, devolvemos seu dinheiro.",
+    urgencyBadge: "🧸 Preferido pelas famílias brasileiras",
   },
   {
     slug: "sos-sleep",
@@ -315,6 +340,30 @@ export const COLORS_PRODUCTS: ColorsProduct[] = [
       { label: "Monetizze", href: "https://supersossleep.com.br/" },
       { label: "Perfect Pay", href: "https://supersossleep.com.br/p" },
     ],
+    howToUse: [
+      "Tome 1 cápsula 30 minutos antes de dormir.",
+      "Ingerir com água — evite café, energético ou tela azul após.",
+      "Uso contínuo por 15 dias para regular o ciclo do sono.",
+    ],
+    composition: [
+      "Melatonina — o hormônio do sono",
+      "Triptofano — precursor natural da serotonina",
+      "Passiflora e valeriana — relaxantes botânicos",
+      "Magnésio bisglicinato — relaxamento muscular",
+      "Vitamina B6 — regula o ciclo circadiano",
+    ],
+    faq: [
+      { q: "Vicia?", a: "Não. A fórmula é natural e pode ser suspensa a qualquer momento sem efeito rebote." },
+      { q: "Posso dirigir no dia seguinte?", a: "Sim. Diferente de indutores químicos, o S.O.S Sleep não deixa sonolência residual." },
+      { q: "Funciona para insônia crônica?", a: "Auxilia como suporte. Casos crônicos precisam de acompanhamento médico." },
+      { q: "Combina com ansiolíticos?", a: "Consulte seu médico. Não recomendamos combinar com medicamentos psiquiátricos sem orientação." },
+    ],
+    testimonials: [
+      { name: "Beatriz T.", city: "Florianópolis — SC", result: "Dorme em 20 minutos", text: "Levava 2 horas para pegar no sono. Hoje apago em 20 minutos e acordo descansada." },
+      { name: "Renata C.", city: "Brasília — DF", result: "Sono profundo", text: "Acordava várias vezes na madrugada. Agora durmo a noite toda." },
+    ],
+    guarantee: "Garantia de 7 dias — devolvemos seu dinheiro se não notar diferença.",
+    urgencyBadge: "🌙 Fórmula natural · sem efeito rebote",
   },
 ];
 
