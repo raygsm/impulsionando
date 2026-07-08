@@ -9,6 +9,8 @@
  *  - Relatório semanal agregado em CSV
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -32,12 +34,12 @@ import {
   readLegacyHits,
   clearLegacyHits,
   buildCombinedFunnelLegacyCsv,
-  buildSimulatedConsolidation,
   type Ga4PingResult,
   type Ga4CsvRow,
   type CompareRow,
   type PingHistoryEntry,
 } from "@/lib/painel-audit";
+import { getPainelAggregate, type PainelAggregate } from "@/lib/painel-consolidation.functions";
 
 export const Route = createFileRoute("/colors/painel")({
   head: () => ({
