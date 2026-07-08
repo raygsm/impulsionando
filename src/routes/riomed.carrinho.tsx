@@ -69,7 +69,7 @@ function Page() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <section className="max-w-4xl mx-auto px-4 py-6">
         {items.length === 0 ? (
           <Card><CardContent className="py-16 text-center text-muted-foreground">
             Seu carrinho está vazio. <Link to="/riomed/cotizar" className="text-primary underline ml-1">Ver catálogo</Link>
@@ -146,7 +146,7 @@ function Page() {
             </div>
           </div>
         )}
-      </main>
+      </section>
     </div>
   );
 }
