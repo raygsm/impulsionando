@@ -46,17 +46,18 @@ export interface NavGroup {
 }
 
 export const TOP_ITEMS: NavItem[] = [
-  { to: "/auditoria", label: "Auditoria", icon: Activity },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
+  // TOP-BAR: 7 itens máximos, sem dashboards duplicados.
+  // Cada perfil vê apenas 1 dashboard graças ao filtro por `audiences`.
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read", audiences: ["empresa", "white-label"] },
+  { to: "/dashboards/core", label: "Dashboard", icon: LayoutDashboard, audiences: ["core"] },
+  { to: "/dashboards/consumidor", label: "Início", icon: Home, audiences: ["consumidor"] },
   { to: "/buscar", label: "Buscar", icon: SearchIcon },
-  { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
-  { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
-  { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
-  { to: "/dashboards/operacao", label: "Operação Core", icon: LayoutDashboard, audiences: ["core", "empresa"] },
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
-  { to: "/onboarding", label: "Começar / Melhorar", icon: Sparkles },
+  { to: "/onboarding", label: "Começar", icon: Sparkles },
   { to: "/saiba-mais", label: "Saiba Mais", icon: BookOpen },
+  // "Auditoria" movida para Administração → Qualidade & Observabilidade
+  // (removida do topo por ser área operacional interna, não de uso diário).
 ];
 
 
