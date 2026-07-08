@@ -47,10 +47,6 @@ export const Route = createFileRoute('/contratar')({
   }),
 })
 
-const PLAN_TO_TRIAL: Record<string, 'essencial' | 'integrado' | 'avancado'> = {
-  'essencial-mensal': 'essencial',
-  'completo-mensal': 'integrado',
-}
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
