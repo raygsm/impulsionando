@@ -27,7 +27,7 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
  * biblioteca `src/components/impulsionando/*` herdem o token de cor
  * do Clube automaticamente.
  */
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof Home; exact?: boolean }[] = [
   { to: "/clube", label: "Home", icon: Home, exact: true },
   { to: "/clube/buscar", label: "Buscar", icon: Search },
   { to: "/clube/empresas", label: "Empresas", icon: Building2 },
@@ -44,7 +44,7 @@ const NAV = [
   { to: "/clube/historico", label: "Histórico", icon: History },
   { to: "/clube/minha-conta", label: "Minha Conta", icon: User },
   { to: "/clube/planos", label: "Planos", icon: Crown },
-] as const;
+];
 
 export function ClubeShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
