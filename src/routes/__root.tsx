@@ -26,6 +26,7 @@ import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
 import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
+import { CoreWatermark } from "@/components/app/CoreWatermark";
 
 
 function TenantSubdomainRedirect() {
@@ -285,6 +286,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Impulsionando" },
       { name: "mobile-web-app-capable", content: "yes" },
+      // Segurança — cabeçalhos aplicáveis via <meta>. Frame-ancestors, HSTS e
+      // X-Content-Type-Options são melhor aplicados no hosting; aqui garantimos
+      // o que o navegador aceita em <meta http-equiv> (CSP conservadora, referrer,
+      // permissions-policy) para dificultar carregamento/embed indevido.
+      {
+        httpEquiv: "Content-Security-Policy",
+        content: [
+          "default-src 'self' https: data: blob:",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev",
+          "style-src 'self' 'unsafe-inline' https: data:",
+          "img-src 'self' data: blob: https:",
+          "font-src 'self' data: https:",
+          "connect-src 'self' https: wss: data: blob:",
+          "media-src 'self' https: data: blob:",
+          "frame-src 'self' https:",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self' https:",
+          "upgrade-insecure-requests",
+        ].join("; "),
+      },
+      { name: "referrer", content: "strict-origin-when-cross-origin" },
+      { httpEquiv: "X-Content-Type-Options", content: "nosniff" },
+      { httpEquiv: "Permissions-Policy", content: "camera=(), microphone=(), geolocation=(self), interest-cohort=()" },
       // Cache-busting: garante que a navegação/menu novo apareça imediatamente após publicar.
       { httpEquiv: "Cache-Control", content: "no-cache, no-store, must-revalidate" },
       { httpEquiv: "Pragma", content: "no-cache" },
@@ -371,6 +396,7 @@ function RootComponent() {
       <ScrollGuidance />
       <RocketRouteLoader />
       <CoreCopyGuard />
+      <CoreWatermark />
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />

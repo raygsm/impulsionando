@@ -83,6 +83,17 @@ function pushAttempt(kind: AttemptKind, extra: Record<string, unknown> = {}) {
     trackEvent("copy_attempt", entry as unknown as Record<string, unknown>);
   }).catch(() => { /* noop */ });
 
+  // Notificação em tempo real para painéis abertos (mesma aba).
+  try {
+    window.dispatchEvent(new CustomEvent("imp:copy-attempt", { detail: entry }));
+  } catch { /* noop */ }
+  // Broadcast entre abas (painel em outra guia recebe também).
+  try {
+    const bc = new BroadcastChannel("imp-security");
+    bc.postMessage({ type: "copy_attempt", entry });
+    bc.close();
+  } catch { /* noop */ }
+
   try {
     // eslint-disable-next-line no-console
     console.warn("[Impulsionando] Tentativa de cópia registrada:", entry);

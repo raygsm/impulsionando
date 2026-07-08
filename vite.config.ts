@@ -7,6 +7,9 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
+// Blindagem de produção: sem sourcemaps + minificação agressiva (terser).
+// Assim o bundle publicado em impulsionando.com.br fica muito mais difícil
+// de reengenhar / copiar. Dev/preview continuam legíveis para debug.
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -15,5 +18,28 @@ export default defineConfig({
   },
   vite: {
     plugins: [mcpPlugin()],
+    build: {
+      sourcemap: false,
+      cssMinify: "lightningcss",
+      minify: "terser",
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+          passes: 2,
+          ecma: 2020,
+          pure_funcs: ["console.log", "console.info", "console.debug"],
+        },
+        mangle: {
+          toplevel: true,
+        },
+        format: {
+          comments: false,
+        },
+      },
+    },
+    esbuild: {
+      legalComments: "none",
+    },
   },
 });
