@@ -631,6 +631,7 @@ import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/r
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPainelFunnelHitRouteImport } from './routes/api/public/painel.funnel-hit'
 import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/outbox/process'
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
@@ -4267,6 +4268,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPainelFunnelHitRoute =
+  ApiPublicPainelFunnelHitRouteImport.update({
+    id: '/api/public/painel/funnel-hit',
+    path: '/api/public/painel/funnel-hit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOutboxProcessRoute = ApiPublicOutboxProcessRouteImport.update({
   id: '/api/public/outbox/process',
   path: '/api/public/outbox/process',
@@ -5898,6 +5905,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -6664,6 +6672,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -7446,6 +7455,7 @@ export interface FileRoutesById {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -8228,6 +8238,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/painel/funnel-hit'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -8994,6 +9005,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/painel/funnel-hit'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -9775,6 +9787,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/painel/funnel-hit'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -10041,6 +10054,7 @@ export interface RootRouteChildren {
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
+  ApiPublicPainelFunnelHitRoute: typeof ApiPublicPainelFunnelHitRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
@@ -14419,6 +14433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/painel/funnel-hit': {
+      id: '/api/public/painel/funnel-hit'
+      path: '/api/public/painel/funnel-hit'
+      fullPath: '/api/public/painel/funnel-hit'
+      preLoaderRoute: typeof ApiPublicPainelFunnelHitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/outbox/process': {
       id: '/api/public/outbox/process'
       path: '/api/public/outbox/process'
@@ -17620,6 +17641,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
+  ApiPublicPainelFunnelHitRoute: ApiPublicPainelFunnelHitRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
