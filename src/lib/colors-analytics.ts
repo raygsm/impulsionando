@@ -4,12 +4,11 @@
  * Sem env, os eventos viram no-op (com console.debug) — nenhum backend envolvido.
  */
 
-declare global {
-  interface Window {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  }
-}
+type GaWindow = Window & {
+  dataLayer: unknown[];
+  gtag: (...args: unknown[]) => void;
+};
+
 
 const GA_ID =
   (typeof import.meta !== "undefined" &&
