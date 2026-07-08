@@ -31,8 +31,7 @@ export const startTrial = createServerFn({ method: 'POST' })
       await supabaseAdmin.rpc('log_admin_action', {
         _action: error ? 'billing.trial_failed' : 'billing.trial_started',
         _entity: 'trial_subscriptions',
-        _entity_id: (trialId as string | null) ?? null,
-        _before: null,
+        _entity_id: (trialId as string | null) ?? undefined,
         _after: {
           plan_code: data.plan_code,
           trial_days: 3,
@@ -46,9 +45,6 @@ export const startTrial = createServerFn({ method: 'POST' })
           started_at: startedAt,
           error: error?.message ?? null,
         },
-        _company_id: null,
-        _ip: null,
-        _user_agent: null,
         _severity: error ? 'warning' : 'notice',
         _category: 'billing',
       })
