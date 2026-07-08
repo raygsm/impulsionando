@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck } from "lucide-react";
 import { COLORS_BRANDS, productBySlug } from "@/data/colors-products";
 import { colorsEvents } from "@/lib/colors-analytics";
+import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 
 export const Route = createFileRoute("/colors/produto/$slug")({
   beforeLoad: ({ params }) => {
