@@ -91,7 +91,7 @@ function CardapioPage() {
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
-                  navigate({ search: (prev) => ({ ...prev, q: e.target.value || undefined }), replace: true });
+                  navigate({ search: (prev: any) => ({ ...prev, q: e.target.value || undefined }), replace: true });
                 }}
                 className="w-full pl-10 pr-4 py-2.5 rounded-md bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-[color:var(--fs-amber)]"
               />
@@ -106,7 +106,7 @@ function CardapioPage() {
           <Filter className="h-4 w-4 text-black/50 shrink-0" />
           <button
             type="button"
-            onClick={() => navigate({ search: (prev) => ({ ...prev, cat: undefined }) })}
+            onClick={() => navigate({ search: (prev: any) => ({ ...prev, cat: undefined }) })}
             className={`px-3 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap ${!cat ? "bg-[color:var(--fs-brick)] text-white" : "bg-black/5 hover:bg-black/10"}`}
           >
             Todas
@@ -115,7 +115,7 @@ function CardapioPage() {
             <button
               key={c.slug}
               type="button"
-              onClick={() => navigate({ search: (prev) => ({ ...prev, cat: c.slug }) })}
+              onClick={() => navigate({ search: (prev: any) => ({ ...prev, cat: c.slug }) })}
               className={`px-3 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap ${cat === c.slug ? "bg-[color:var(--fs-brick)] text-white" : "bg-black/5 hover:bg-black/10"}`}
             >
               {c.nome}
@@ -126,7 +126,7 @@ function CardapioPage() {
             <button
               key={d.key}
               type="button"
-              onClick={() => navigate({ search: (prev) => ({ ...prev, dieta: dieta === d.key ? undefined : d.key }) })}
+              onClick={() => navigate({ search: (prev: any) => ({ ...prev, dieta: dieta === d.key ? undefined : d.key }) })}
               className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap ${dieta === d.key ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"}`}
             >
               <d.icon className="h-3 w-3" /> {d.label}
