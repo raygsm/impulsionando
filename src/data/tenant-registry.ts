@@ -26,7 +26,8 @@ export type TenantSegment =
   | "property-management"
   | "gastronomia"
   | "eventos-e-producao"
-  | "servicos";
+  | "servicos"
+  | "white-label";
 
 export type ImpulsionitoDimensao =
   | "produtos"
