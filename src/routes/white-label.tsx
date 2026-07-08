@@ -79,9 +79,9 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { author: "Agência de marketing", role: "Portfólio de 40 clientes B2B", quote: "Transformei serviço em recorrência. Hoje 30% da receita da agência é White Label Impulsionando." },
-  { author: "Consultoria de saúde", role: "Rede de 12 clínicas", quote: "Substituí três SaaS por uma plataforma única com a nossa marca. As clínicas amaram." },
-  { author: "Franqueadora regional", role: "24 franqueados", quote: "Cada franqueado agora tem PDV, CRM e agenda no padrão da franquia — sem projeto sob medida." },
+  { name: "Agência de marketing", role: "Portfólio de 40 clientes B2B", text: "Transformei serviço em recorrência. Hoje 30% da receita da agência é White Label Impulsionando." },
+  { name: "Consultoria de saúde", role: "Rede de 12 clínicas", text: "Substituí três SaaS por uma plataforma única com a nossa marca. As clínicas amaram." },
+  { name: "Franqueadora regional", role: "24 franqueados", text: "Cada franqueado agora tem PDV, CRM e agenda no padrão da franquia — sem projeto sob medida." },
 ];
 
 const TRUST: { title: string; description?: string }[] = [
