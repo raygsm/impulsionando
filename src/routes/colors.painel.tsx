@@ -168,10 +168,27 @@ function PainelPage() {
     for (const h of legacyHits) { s.add(h.from_host); s.add(h.to_host); }
     return Array.from(s).filter(Boolean).sort();
   }, [legacyHits, tick]);
-  const simulated = useMemo(
-    () => buildSimulatedConsolidation(events, legacyHits),
-    [events, legacyHits],
-  );
+  // Agregação real (Supabase) — admin-only. Reage a período e host.
+  const fetchAggregate = useServerFn(getPainelAggregate);
+  const aggregateQuery = useQuery<PainelAggregate>({
+    queryKey: ["painel_aggregate", period, hostFilter],
+    queryFn: async () => {
+      const spec = PERIODS.find((p) => p.id === period)!;
+      const now = new Date();
+      const since = spec.ms === Number.POSITIVE_INFINITY
+        ? new Date(0)
+        : new Date(now.getTime() - spec.ms);
+      return fetchAggregate({
+        data: {
+          host: hostFilter || null,
+          sinceIso: since.toISOString(),
+          untilIso: now.toISOString(),
+        },
+      });
+    },
+    refetchInterval: 30_000,
+    retry: 1,
+  });
   const compare = useMemo<CompareRow[]>(
     () => (gaCsv ? compareLocalVsGa4(local, gaCsv) : []),
     [local, gaCsv],
