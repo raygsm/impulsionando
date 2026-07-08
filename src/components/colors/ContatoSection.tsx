@@ -74,7 +74,7 @@ export default function ContatoSection() {
                 maxLength={80}
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/40 focus:border-emerald-400"
+                className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/70 focus:border-emerald-400"
                 placeholder="Seu nome completo"
               />
             </label>
@@ -86,7 +86,7 @@ export default function ContatoSection() {
                 maxLength={120}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/40 focus:border-emerald-400"
+                className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/70 focus:border-emerald-400"
                 placeholder="voce@email.com"
               />
             </label>
@@ -97,7 +97,7 @@ export default function ContatoSection() {
               maxLength={120}
               value={assunto}
               onChange={(e) => setAssunto(e.target.value)}
-              className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/40 focus:border-emerald-400"
+              className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/70 focus:border-emerald-400"
               placeholder="Ex: dúvida sobre pedido, parceria, sugestão…"
             />
           </label>
@@ -109,7 +109,7 @@ export default function ContatoSection() {
               rows={5}
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
-              className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/40 focus:border-emerald-400"
+              className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/70 focus:border-emerald-400"
               placeholder="Conte pra gente como podemos ajudar."
             />
           </label>

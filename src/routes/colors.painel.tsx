@@ -402,7 +402,7 @@ function PainelPage() {
                 value={pingFilter.q}
                 onChange={(e) => setPingFilter((s) => ({ ...s, q: e.target.value }))}
                 placeholder="Buscar host, path, motivo…"
-                className="rounded-full border border-white/15 bg-black/50 px-4 py-1.5 text-sm text-white placeholder:text-white/40 focus:border-sky-400 focus:outline-none"
+                className="rounded-full border border-white/15 bg-black/50 px-4 py-1.5 text-sm text-white placeholder:text-white/70 focus:border-sky-400 focus:outline-none"
               />
               <label className="flex items-center gap-2 text-xs text-white/70">
                 <input
