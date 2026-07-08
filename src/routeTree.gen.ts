@@ -158,6 +158,8 @@ import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
+import { Route as ColorsSuperGreenBlackRouteImport } from './routes/colors.super-green-black'
+import { Route as ColorsBrandRouteImport } from './routes/colors.$brand'
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ChrismedTeleconsultaRouteImport } from './routes/chrismed.teleconsulta'
@@ -250,6 +252,7 @@ import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.cont
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
 import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
@@ -1534,6 +1537,16 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   path: '/como-funciona/fitness',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColorsSuperGreenBlackRoute = ColorsSuperGreenBlackRouteImport.update({
+  id: '/super-green-black',
+  path: '/super-green-black',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsBrandRoute = ColorsBrandRouteImport.update({
+  id: '/$brand',
+  path: '/$brand',
+  getParentRoute: () => ColorsRoute,
+} as any)
 const ClubeLoginRoute = ClubeLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -2018,6 +2031,11 @@ const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ColorsProdutoSlugRoute = ColorsProdutoSlugRouteImport.update({
+  id: '/produto/$slug',
+  path: '/produto/$slug',
+  getParentRoute: () => ColorsRoute,
 } as any)
 const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   id: '/api/public/version',
@@ -5178,7 +5196,7 @@ export interface FileRoutesByFullPath {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
-  '/colors': typeof ColorsRoute
+  '/colors': typeof ColorsRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -5275,6 +5293,8 @@ export interface FileRoutesByFullPath {
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -5733,6 +5753,7 @@ export interface FileRoutesByFullPath {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -5953,7 +5974,7 @@ export interface FileRoutesByTo {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
-  '/colors': typeof ColorsRoute
+  '/colors': typeof ColorsRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -6038,6 +6059,8 @@ export interface FileRoutesByTo {
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -6495,6 +6518,7 @@ export interface FileRoutesByTo {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -6716,7 +6740,7 @@ export interface FileRoutesById {
   '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
-  '/colors': typeof ColorsRoute
+  '/colors': typeof ColorsRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -6813,6 +6837,8 @@ export interface FileRoutesById {
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
+  '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -7271,6 +7297,7 @@ export interface FileRoutesById {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -7590,6 +7617,8 @@ export interface FileRouteTypes {
     | '/chrismed/teleconsulta'
     | '/clube/cadastro'
     | '/clube/login'
+    | '/colors/$brand'
+    | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -8048,6 +8077,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -8353,6 +8383,8 @@ export interface FileRouteTypes {
     | '/chrismed/teleconsulta'
     | '/clube/cadastro'
     | '/clube/login'
+    | '/colors/$brand'
+    | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -8810,6 +8842,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -9127,6 +9160,8 @@ export interface FileRouteTypes {
     | '/chrismed/teleconsulta'
     | '/clube/cadastro'
     | '/clube/login'
+    | '/colors/$brand'
+    | '/colors/super-green-black'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -9585,6 +9620,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/produto/$slug'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -9807,7 +9843,7 @@ export interface RootRouteChildren {
   CentralDeAjudaRoute: typeof CentralDeAjudaRoute
   ChrismedRoute: typeof ChrismedRouteWithChildren
   ClubeRoute: typeof ClubeRouteWithChildren
-  ColorsRoute: typeof ColorsRoute
+  ColorsRoute: typeof ColorsRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
@@ -11047,6 +11083,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoFuncionaFitnessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colors/super-green-black': {
+      id: '/colors/super-green-black'
+      path: '/super-green-black'
+      fullPath: '/colors/super-green-black'
+      preLoaderRoute: typeof ColorsSuperGreenBlackRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/$brand': {
+      id: '/colors/$brand'
+      path: '/$brand'
+      fullPath: '/colors/$brand'
+      preLoaderRoute: typeof ColorsBrandRouteImport
+      parentRoute: typeof ColorsRoute
+    }
     '/clube/login': {
       id: '/clube/login'
       path: '/login'
@@ -11690,6 +11740,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/colors/produto/$slug': {
+      id: '/colors/produto/$slug'
+      path: '/produto/$slug'
+      fullPath: '/colors/produto/$slug'
+      preLoaderRoute: typeof ColorsProdutoSlugRouteImport
+      parentRoute: typeof ColorsRoute
     }
     '/api/public/version': {
       id: '/api/public/version'
@@ -17091,6 +17148,21 @@ const ClubeRouteChildren: ClubeRouteChildren = {
 
 const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
 
+interface ColorsRouteChildren {
+  ColorsBrandRoute: typeof ColorsBrandRoute
+  ColorsSuperGreenBlackRoute: typeof ColorsSuperGreenBlackRoute
+  ColorsProdutoSlugRoute: typeof ColorsProdutoSlugRoute
+}
+
+const ColorsRouteChildren: ColorsRouteChildren = {
+  ColorsBrandRoute: ColorsBrandRoute,
+  ColorsSuperGreenBlackRoute: ColorsSuperGreenBlackRoute,
+  ColorsProdutoSlugRoute: ColorsProdutoSlugRoute,
+}
+
+const ColorsRouteWithChildren =
+  ColorsRoute._addFileChildren(ColorsRouteChildren)
+
 interface ContratarRouteChildren {
   ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
 }
@@ -17322,7 +17394,7 @@ const rootRouteChildren: RootRouteChildren = {
   CentralDeAjudaRoute: CentralDeAjudaRoute,
   ChrismedRoute: ChrismedRouteWithChildren,
   ClubeRoute: ClubeRouteWithChildren,
-  ColorsRoute: ColorsRoute,
+  ColorsRoute: ColorsRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
