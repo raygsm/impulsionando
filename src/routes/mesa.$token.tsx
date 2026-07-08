@@ -77,7 +77,7 @@ export const Route = createFileRoute("/mesa/$token")({
     return { resolved: resolvedRes.data as Resolved, menu: (menuRes.data ?? { ok: false }) as MenuData };
   },
   notFoundComponent: () => (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+    <div className="min-h-dvh flex items-center justify-center p-6 bg-background">
       <Card className="p-8 text-center max-w-sm">
         <UtensilsCrossed className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
         <h1 className="text-xl font-bold">Mesa não encontrada</h1>
@@ -86,7 +86,7 @@ export const Route = createFileRoute("/mesa/$token")({
     </div>
   ),
   errorComponent: ({ error }) => (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+    <div className="min-h-dvh flex items-center justify-center p-6 bg-background">
       <Card className="p-8 text-center max-w-sm">
         <h1 className="text-xl font-bold">Erro ao carregar</h1>
         <p className="text-sm text-muted-foreground mt-2">{String(error)}</p>
@@ -280,7 +280,7 @@ function MesaPage() {
   const failedOrExpired = bill && (bill.status === "failed" || bill.status === "expired" || bill.status === "cancelled" || expiryInfo?.expired);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-8">
+    <div className="min-h-dvh bg-gradient-to-b from-background to-muted/30 px-4 py-8">
       <div className="max-w-md mx-auto">
         <header className="text-center mb-6">
           {data.company?.logo_url ? (

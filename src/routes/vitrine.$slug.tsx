@@ -56,7 +56,7 @@ export const Route = createFileRoute("/vitrine/$slug")({
     };
   },
   errorComponent: ({ error, reset }) => (
-    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+    <div className="min-h-dvh flex items-center justify-center p-6 text-center">
       <div>
         <h1 className="text-xl font-semibold">Não foi possível carregar a empresa</h1>
         <p className="text-sm text-muted-foreground mt-2">{(error as Error)?.message}</p>
@@ -68,7 +68,7 @@ export const Route = createFileRoute("/vitrine/$slug")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+    <div className="min-h-dvh flex items-center justify-center p-6 text-center">
       <div>
         <h1 className="text-xl font-semibold">Empresa não encontrada</h1>
         <Button asChild className="mt-4"><Link to="/vitrine">Voltar à vitrine</Link></Button>
@@ -176,7 +176,7 @@ function VitrineDetailPage() {
   const showForm = !myReview || editing;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
       <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <Card className="p-6 sm:p-8">
