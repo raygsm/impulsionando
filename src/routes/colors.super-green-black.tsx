@@ -44,6 +44,7 @@ const PRODUCT = productBySlug("super-green-black")!;
 
 function SgbLanding() {
   useEffect(() => { ensureGaInstalled(); }, []);
+  useColorsUtmHydration("super_green_black", { content: "sgb_landing" });
 
   return (
     <div className="min-h-screen bg-[#050a08] text-white antialiased">
