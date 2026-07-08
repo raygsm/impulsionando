@@ -11,6 +11,78 @@
 
 import type { LocalEvent } from "@/lib/colors-analytics";
 
+/* ============================ Ping history ============================ */
+
+const PING_HISTORY_KEY = "imp_painel_ping_history";
+const PING_HISTORY_MAX = 200;
+
+export type PingHistoryEntry = Ga4PingResult & {
+  ts: number;
+  host: string;
+  path: string;
+};
+
+export function readPingHistory(): PingHistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PING_HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as PingHistoryEntry[]) : [];
+  } catch { return []; }
+}
+export function clearPingHistory() {
+  if (typeof window !== "undefined") window.localStorage.removeItem(PING_HISTORY_KEY);
+}
+function persistPing(entry: PingHistoryEntry) {
+  if (typeof window === "undefined") return;
+  try {
+    const list = readPingHistory();
+    list.push(entry);
+    while (list.length > PING_HISTORY_MAX) list.shift();
+    window.localStorage.setItem(PING_HISTORY_KEY, JSON.stringify(list));
+  } catch { /* quota */ }
+}
+
+/* ============================ Legacy subdomain access log ============================ */
+
+const LEGACY_LOG_KEY = "imp_legacy_subdomain_hits";
+const LEGACY_LOG_MAX = 100;
+
+export type LegacyHit = {
+  ts: number;
+  from_host: string;
+  to_host: string;
+  path: string;
+  search: string;
+  hash: string;
+  ua: string;
+};
+
+export function logLegacySubdomainHit(hit: Omit<LegacyHit, "ts" | "ua"> & { ua?: string }) {
+  if (typeof window === "undefined") return;
+  const entry: LegacyHit = { ts: Date.now(), ua: hit.ua ?? navigator.userAgent, ...hit };
+  try {
+    const raw = window.localStorage.getItem(LEGACY_LOG_KEY);
+    const list = raw ? (JSON.parse(raw) as LegacyHit[]) : [];
+    list.push(entry);
+    while (list.length > LEGACY_LOG_MAX) list.shift();
+    window.localStorage.setItem(LEGACY_LOG_KEY, JSON.stringify(list));
+  } catch { /* quota */ }
+  // Também dispara evento GA4 para consolidação multi-usuário.
+  import("@/lib/analytics").then(({ trackEvent }) => {
+    trackEvent("legacy_subdomain_hit", entry as unknown as Record<string, unknown>);
+  }).catch(() => { /* noop */ });
+}
+export function readLegacyHits(): LegacyHit[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(LEGACY_LOG_KEY);
+    return raw ? (JSON.parse(raw) as LegacyHit[]) : [];
+  } catch { return []; }
+}
+export function clearLegacyHits() {
+  if (typeof window !== "undefined") window.localStorage.removeItem(LEGACY_LOG_KEY);
+}
+
 /* ============================ GA4 ping ============================ */
 
 export type Ga4PingResult = {
@@ -67,7 +139,7 @@ export async function pingGa4(): Promise<Ga4PingResult> {
     ? "GA4 recebeu o ping. Se o evento não aparecer no relatório em tempo real, verifique se o filtro por IP interno está desativado."
     : diag.blocking_reasons[0] ?? "Ping enviado ao dataLayer, mas nenhum hit HTTP foi detectado. Verifique adblock, extensões de privacidade ou consentimento LGPD.";
 
-  return {
+  const result: Ga4PingResult = {
     ok,
     ga_id: diag.ga_id,
     gtag_ready: diag.gtag_ready,
@@ -77,6 +149,15 @@ export async function pingGa4(): Promise<Ga4PingResult> {
     message,
     details,
   };
+  try {
+    persistPing({
+      ...result,
+      ts: Date.now(),
+      host: typeof window !== "undefined" ? window.location.hostname : "",
+      path: typeof window !== "undefined" ? window.location.pathname : "",
+    });
+  } catch { /* noop */ }
+  return result;
 }
 
 /* ============================ GA4 CSV import ============================ */

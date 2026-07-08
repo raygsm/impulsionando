@@ -186,6 +186,15 @@ function TopBar() {
           <Link to="/colors/$brand" params={{ brand: "green" }} className="hover:text-white">Green</Link>
           <Link to="/colors/$brand" params={{ brand: "blue" }} className="hover:text-white">Blue</Link>
           <Link to="/colors/$brand" params={{ brand: "yellow" }} className="hover:text-white">Yellow</Link>
+          <a
+            href="https://rastreamento.correios.com.br/app/index.php"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => colorsEvents.ctaClick("menu_rastreios", "correios")}
+            className="hover:text-white"
+          >
+            Rastreios
+          </a>
           <a href="#contato" className="hover:text-white">Contato</a>
         </nav>
         <a
