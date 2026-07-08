@@ -37,6 +37,11 @@
   --color-marocas-primary:  var(--marocas-primary);
   --color-marocas-accent:   var(--marocas-accent);
   --color-marocas-surface:  var(--marocas-surface);
+
+  /* WHITE LABEL — arquitetura SaaS para parceiros */
+  --color-whitelabel-primary: var(--whitelabel-primary);
+  --color-whitelabel-accent:  var(--whitelabel-accent);
+  --color-whitelabel-surface: var(--whitelabel-surface);
 }
 
 :root {
