@@ -381,3 +381,176 @@ export function compareLocalVsGa4(local: LocalCampaignAgg[], ga: Ga4CsvRow[]): C
   out.sort((a, b) => Math.abs(b.delta_sessions) - Math.abs(a.delta_sessions));
   return out;
 }
+
+/* ============================ Funnel + Legacy combined export ============================ */
+
+export type CombinedExportRow = {
+  kind: "funnel_event" | "legacy_hit";
+  ts: number;
+  iso: string;
+  host: string;
+  path: string;
+  session_id: string;
+  visitor_id: string;
+  event: string;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
+  href: string;
+  ua: string;
+  extra: string;
+};
+
+function utmFromHref(href: string | undefined): Record<string, string> {
+  const empty = { utm_source: "", utm_medium: "", utm_campaign: "", utm_content: "", utm_term: "" };
+  if (!href || typeof href !== "string") return empty;
+  try {
+    const u = new URL(href, "https://colors.impulsionando.com.br");
+    return {
+      utm_source: u.searchParams.get("utm_source") ?? "",
+      utm_medium: u.searchParams.get("utm_medium") ?? "",
+      utm_campaign: u.searchParams.get("utm_campaign") ?? "",
+      utm_content: u.searchParams.get("utm_content") ?? "",
+      utm_term: u.searchParams.get("utm_term") ?? "",
+    };
+  } catch { return empty; }
+}
+
+/** Junta eventos de funil (localStorage) + hits ao subdomínio legado num único
+ *  CSV, filtrando por período e host, com colunas UTM já explodidas. */
+export function buildCombinedFunnelLegacyCsv(opts: {
+  events: LocalEvent[];
+  hits: LegacyHit[];
+  hostFilter?: string; // "" = todos
+  periodStart?: number; // epoch ms, inclusive
+  periodEnd?: number;   // epoch ms, inclusive
+}): { csv: string; count: number } {
+  const { events, hits, hostFilter = "", periodStart = 0, periodEnd = Number.POSITIVE_INFINITY } = opts;
+  const rows: CombinedExportRow[] = [];
+
+  for (const e of events) {
+    if (e.ts < periodStart || e.ts > periodEnd) continue;
+    const p = (e.params ?? {}) as Record<string, unknown>;
+    const href = typeof p.href === "string" ? p.href : "";
+    const utm = utmFromHref(href);
+    const host = typeof window !== "undefined" ? window.location.hostname : "";
+    if (hostFilter && host !== hostFilter) continue;
+    rows.push({
+      kind: "funnel_event",
+      ts: e.ts,
+      iso: new Date(e.ts).toISOString(),
+      host,
+      path: typeof p.path === "string" ? p.path : "",
+      session_id: e.session_id,
+      visitor_id: e.visitor_id,
+      event: e.name,
+      utm_source: (typeof p.utm_source === "string" ? p.utm_source : "") || utm.utm_source,
+      utm_medium: (typeof p.utm_medium === "string" ? p.utm_medium : "") || utm.utm_medium,
+      utm_campaign: (typeof p.utm_campaign === "string" ? p.utm_campaign : "") || utm.utm_campaign,
+      utm_content: (typeof p.utm_content === "string" ? p.utm_content : "") || utm.utm_content,
+      utm_term: (typeof p.utm_term === "string" ? p.utm_term : "") || utm.utm_term,
+      href,
+      ua: "",
+      extra: JSON.stringify(p),
+    });
+  }
+
+  for (const h of hits) {
+    if (h.ts < periodStart || h.ts > periodEnd) continue;
+    if (hostFilter && h.from_host !== hostFilter && h.to_host !== hostFilter) continue;
+    const utm = utmFromHref(`https://${h.to_host}${h.path}${h.search}${h.hash}`);
+    rows.push({
+      kind: "legacy_hit",
+      ts: h.ts,
+      iso: new Date(h.ts).toISOString(),
+      host: h.from_host,
+      path: `${h.path}${h.search}${h.hash}`,
+      session_id: "",
+      visitor_id: "",
+      event: "legacy_subdomain_hit",
+      utm_source: utm.utm_source,
+      utm_medium: utm.utm_medium,
+      utm_campaign: utm.utm_campaign,
+      utm_content: utm.utm_content,
+      utm_term: utm.utm_term,
+      href: `https://${h.to_host}${h.path}${h.search}${h.hash}`,
+      ua: h.ua,
+      extra: "",
+    });
+  }
+
+  rows.sort((a, b) => a.ts - b.ts);
+
+  const cols: (keyof CombinedExportRow)[] = [
+    "kind", "iso", "ts", "host", "path", "session_id", "visitor_id", "event",
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+    "href", "ua", "extra",
+  ];
+  const header = cols.join(",");
+  const body = rows.map((r) => cols.map((c) => csvCell(r[c])).join(","));
+  return { csv: [header, ...body].join("\n"), count: rows.length };
+}
+
+/* ============================ Simulated consolidation (placeholder) ============================ */
+
+/** Consolida — em memória, apenas com dados locais — uma prévia do que virá
+ *  quando os endpoints server-side existirem: funil por tenant + hits legados
+ *  por host. Enquanto não há persistência, tudo vem do localStorage deste
+ *  navegador. */
+export type SimulatedConsolidation = {
+  generated_at: number;
+  source: "localStorage (simulado)";
+  tenants: Array<{
+    tenant: string;
+    sessions: number;
+    cta_click: number;
+    checkout_click: number;
+    lead_submit: number;
+    conversion_rate: number;
+  }>;
+  legacy_by_host: Array<{ host: string; hits: number; last_hit: number }>;
+};
+
+export function buildSimulatedConsolidation(events: LocalEvent[], hits: LegacyHit[]): SimulatedConsolidation {
+  // Tenant é inferido do host atual (localStorage é por origem). Placeholder até
+  // o endpoint server-side agregar de todos os navegadores por company_id.
+  const currentHost = typeof window !== "undefined" ? window.location.hostname : "unknown";
+  const tenant = currentHost.split(".")[0] || currentHost;
+  const sessions = new Set<string>();
+  let cta = 0, co = 0, lead = 0;
+  const bySession = new Map<string, Set<string>>();
+  for (const e of events) {
+    sessions.add(e.session_id);
+    if (!bySession.has(e.session_id)) bySession.set(e.session_id, new Set());
+    bySession.get(e.session_id)!.add(e.name);
+  }
+  for (const set of bySession.values()) {
+    if (set.has("cta_click")) cta++;
+    if (set.has("checkout_click")) co++;
+    if (set.has("lead_submit")) lead++;
+  }
+  const legacyMap = new Map<string, { hits: number; last_hit: number }>();
+  for (const h of hits) {
+    const row = legacyMap.get(h.from_host) ?? { hits: 0, last_hit: 0 };
+    row.hits += 1;
+    if (h.ts > row.last_hit) row.last_hit = h.ts;
+    legacyMap.set(h.from_host, row);
+  }
+  return {
+    generated_at: Date.now(),
+    source: "localStorage (simulado)",
+    tenants: [{
+      tenant,
+      sessions: sessions.size,
+      cta_click: cta,
+      checkout_click: co,
+      lead_submit: lead,
+      conversion_rate: cta > 0 ? Math.round((co / cta) * 1000) / 10 : 0,
+    }],
+    legacy_by_host: Array.from(legacyMap.entries())
+      .map(([host, v]) => ({ host, ...v }))
+      .sort((a, b) => b.hits - a.hits),
+  };
+}

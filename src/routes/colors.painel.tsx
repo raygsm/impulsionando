@@ -31,6 +31,8 @@ import {
   clearPingHistory,
   readLegacyHits,
   clearLegacyHits,
+  buildCombinedFunnelLegacyCsv,
+  buildSimulatedConsolidation,
   type Ga4PingResult,
   type Ga4CsvRow,
   type CompareRow,
@@ -86,6 +88,7 @@ function PainelPage() {
   const [pinging, setPinging] = useState(false);
   const [gaCsv, setGaCsv] = useState<Ga4CsvRow[] | null>(null);
   const [gaCsvName, setGaCsvName] = useState<string>("");
+  const [hostFilter, setHostFilter] = useState<string>("");
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -157,6 +160,16 @@ function PainelPage() {
   const weekly = useMemo(() => aggregateWeekly(events), [events]);
   const pingHistory = useMemo(() => readPingHistory(), [tick]);
   const legacyHits = useMemo(() => readLegacyHits(), [tick]);
+  const availableHosts = useMemo(() => {
+    const s = new Set<string>();
+    if (typeof window !== "undefined") s.add(window.location.hostname);
+    for (const h of legacyHits) { s.add(h.from_host); s.add(h.to_host); }
+    return Array.from(s).filter(Boolean).sort();
+  }, [legacyHits, tick]);
+  const simulated = useMemo(
+    () => buildSimulatedConsolidation(events, legacyHits),
+    [events, legacyHits],
+  );
   const compare = useMemo<CompareRow[]>(
     () => (gaCsv ? compareLocalVsGa4(local, gaCsv) : []),
     [local, gaCsv],
@@ -211,6 +224,24 @@ function PainelPage() {
     const stamp = new Date().toISOString().slice(0, 10);
     downloadCsv(`colors-relatorio-semanal-${stamp}.csv`, csv);
   }
+  function handleExportCombined() {
+    const spec = PERIODS.find((p) => p.id === period)!;
+    const periodStart = spec.ms === Number.POSITIVE_INFINITY ? 0 : Date.now() - spec.ms;
+    const { csv, count } = buildCombinedFunnelLegacyCsv({
+      events: allEvents,
+      hits: legacyHits,
+      hostFilter,
+      periodStart,
+    });
+    if (count === 0) {
+      toast.warning("Nada para exportar no filtro atual");
+      return;
+    }
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    const hostTag = hostFilter ? hostFilter.replace(/[^a-z0-9]+/gi, "-") : "todos";
+    downloadCsv(`colors-funil-legado-${period}-${hostTag}-${stamp}.csv`, csv);
+    toast.success(`Exportado ${count} registros`);
+  }
   async function runPing() {
     setPinging(true);
     try {
@@ -256,6 +287,26 @@ function PainelPage() {
             <button onClick={handleExportWeekly} className="rounded-full bg-emerald-500/80 px-4 py-2 text-sm font-semibold text-black hover:bg-emerald-400">
               Relatório semanal CSV
             </button>
+            <div className="flex items-center gap-1 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 pl-3 text-sm text-fuchsia-100">
+              <span className="text-xs uppercase tracking-widest text-fuchsia-200/70">Host</span>
+              <select
+                value={hostFilter}
+                onChange={(e) => setHostFilter(e.target.value)}
+                className="bg-transparent px-2 py-2 text-sm outline-none"
+                title="Filtra o export combinado por host"
+              >
+                <option value="" className="text-black">todos</option>
+                {availableHosts.map((h) => (
+                  <option key={h} value={h} className="text-black">{h}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleExportCombined}
+                className="rounded-full bg-fuchsia-500 px-4 py-2 text-sm font-semibold text-black hover:bg-fuchsia-400"
+              >
+                Funil + legado (CSV)
+              </button>
+            </div>
             <button
               onClick={() => { clearColorsEventBuffer(); clearCopyAttempts(); setTick((t) => t + 1); }}
               className="rounded-full border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
@@ -434,6 +485,91 @@ function PainelPage() {
             </table>
           </div>
         </div>
+
+        {/* Consolidação (SIMULADA — placeholder até o backend ser destravado) */}
+        <div className="mb-6 rounded-2xl border border-dashed border-amber-400/40 bg-amber-500/5 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">🧪 Consolidação por tenant e host (simulada)</h2>
+              <p className="mt-1 text-xs text-white/60">
+                Prévia visual do que virá quando os endpoints server-side existirem.
+                <strong className="text-amber-200"> Hoje é 100% localStorage deste navegador</strong> —
+                não há persistência no Supabase, então é uma amostra por dispositivo.
+                Fonte: <code data-allow-copy>{simulated.source}</code> · gerado em
+                <code> {new Date(simulated.generated_at).toLocaleTimeString()}</code>.
+              </p>
+            </div>
+            <span className="rounded-full border border-amber-300/40 px-3 py-1 text-[11px] uppercase tracking-widest text-amber-200">
+              placeholder
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+              <p className="text-xs uppercase tracking-widest text-white/50">Funil por tenant (mock)</p>
+              <table className="mt-2 w-full text-left text-xs">
+                <thead className="text-white/50">
+                  <tr>
+                    <th className="py-1">tenant</th>
+                    <th className="py-1">sessões</th>
+                    <th className="py-1">CTA</th>
+                    <th className="py-1">checkout</th>
+                    <th className="py-1">lead</th>
+                    <th className="py-1">conv %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {simulated.tenants.map((t) => (
+                    <tr key={t.tenant} className="border-t border-white/5">
+                      <td className="py-1 font-mono text-emerald-200">{t.tenant}</td>
+                      <td className="py-1">{t.sessions}</td>
+                      <td className="py-1">{t.cta_click}</td>
+                      <td className="py-1">{t.checkout_click}</td>
+                      <td className="py-1">{t.lead_submit}</td>
+                      <td className="py-1 text-emerald-300">{t.conversion_rate}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+              <p className="text-xs uppercase tracking-widest text-white/50">Legacy hits por host (mock)</p>
+              <table className="mt-2 w-full text-left text-xs">
+                <thead className="text-white/50">
+                  <tr>
+                    <th className="py-1">host</th>
+                    <th className="py-1">hits</th>
+                    <th className="py-1">último</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {simulated.legacy_by_host.length === 0 && (
+                    <tr><td colSpan={3} className="py-3 text-center text-white/40">Sem hits neste dispositivo.</td></tr>
+                  )}
+                  {simulated.legacy_by_host.map((r) => (
+                    <tr key={r.host} className="border-t border-white/5">
+                      <td className="py-1 font-mono text-amber-200">{r.host}</td>
+                      <td className="py-1">{r.hits}</td>
+                      <td className="py-1 text-white/60">{new Date(r.last_hit).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p className="mt-4 rounded-lg border border-amber-400/30 bg-black/40 p-3 text-[11px] text-amber-100/80">
+            Para consolidar entre navegadores e dispositivos preciso destravar o
+            backend (<code>mem://core/frontend-only-lock</code>) e liberar: migration
+            <code> painel_funnel_events</code> com RLS por tenant, <code>createServerFn</code>
+            de ingest autenticado e rota pública <code>/api/public/painel/legacy-hit</code>
+            para os hits do subdomínio legado. Me confirme "pode destravar o backend"
+            e eu abro a migration + endpoints na próxima rodada.
+          </p>
+        </div>
+
+
 
 
         {/* Diagnóstico de consentimento / GA4 */}
