@@ -20446,6 +20446,141 @@ export type Database = {
           },
         ]
       }
+      painel_funnel_events: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          event_name: string
+          host: string
+          href: string | null
+          id: string
+          ip_hash: string | null
+          params: Json
+          path: string | null
+          session_id: string
+          ua: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          event_name: string
+          host: string
+          href?: string | null
+          id?: string
+          ip_hash?: string | null
+          params?: Json
+          path?: string | null
+          session_id: string
+          ua?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          event_name?: string
+          host?: string
+          href?: string | null
+          id?: string
+          ip_hash?: string | null
+          params?: Json
+          path?: string | null
+          session_id?: string
+          ua?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "painel_funnel_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "painel_funnel_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "painel_funnel_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "painel_funnel_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "painel_funnel_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      painel_legacy_hits: {
+        Row: {
+          created_at: string
+          from_host: string
+          hash: string
+          id: string
+          ip_hash: string | null
+          path: string
+          referer: string | null
+          search: string
+          to_host: string
+          ua: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_host: string
+          hash?: string
+          id?: string
+          ip_hash?: string | null
+          path?: string
+          referer?: string | null
+          search?: string
+          to_host: string
+          ua?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_host?: string
+          hash?: string
+          id?: string
+          ip_hash?: string | null
+          path?: string
+          referer?: string | null
+          search?: string
+          to_host?: string
+          ua?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount_cents: number
@@ -33413,6 +33548,10 @@ export type Database = {
           _url?: string
         }
         Returns: string
+      }
+      painel_aggregate: {
+        Args: { host_filter?: string; since_ts?: string; until_ts?: string }
+        Returns: Json
       }
       permission_matrix: {
         Args: never
