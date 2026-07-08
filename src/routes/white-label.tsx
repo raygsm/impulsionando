@@ -9,9 +9,6 @@ import {
   Users,
   ShieldCheck,
   Layers,
-  Rocket,
-  TrendingUp,
-  Crown,
   Building2,
   BarChart3,
   KeyRound,
@@ -195,67 +192,109 @@ function WhiteLabelPage() {
           </div>
         </section>
 
-        {/* PLANOS */}
+        {/* PLANO ÚNICO POR DOMÍNIO — descontos por volume */}
         <section id="tiers" className="mx-auto max-w-7xl px-6 py-16 scroll-mt-24">
           <SectionHeader
-            eyebrow="Planos White Label"
-            title="Escolha por volume e maturidade"
-            description="Você vende, atende, cobra e opera. A tecnologia é fornecida pela Impulsionando."
+            eyebrow="Modelo comercial White Label"
+            title="Plano único por domínio, com desconto por volume"
+            description="R$ 299,90 mensais por cliente (por domínio ativo), independentemente dos módulos ou recursos que cada cliente utilize. Mínimo de 10 domínios por parceiro. A mensalidade se recalcula em tempo real conforme o volume de domínios ativos no seu White Label."
           />
-          <div className="grid gap-5 md:grid-cols-3 mt-10">
-            <Card className="p-6 flex flex-col">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
-                <Rocket className="w-5 h-5" />
+
+          {/* Preço-âncora */}
+          <div className="mt-8 flex flex-col md:flex-row items-stretch gap-5">
+            <Card className="p-8 flex-1 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
+                <Wallet className="w-4 h-4" /> Preço por domínio ativo
               </div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Entrada</div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">Start</h3>
-              <p className="text-sm text-muted-foreground mt-2">Para começar a produtizar sua carteira.</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
-                <li>• Até 5 clientes no Essencial</li>
-                <li>• Ou até 2 clientes no Ideal</li>
-                <li>• Sua marca, seu domínio, seus preços</li>
-                <li>• Console do parceiro completo</li>
-              </ul>
-              <Button asChild className="mt-5">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar Start</a>
-              </Button>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-5xl font-bold tracking-tight">R$ 299,90</span>
+                <span className="text-sm text-muted-foreground">/mês por cliente</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                Inclui plataforma completa, todos os módulos, marca própria, domínio próprio,
+                console do parceiro, isolamento multi-tenant e roadmap de novos módulos —
+                sem mensalidade extra por recurso.
+              </p>
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/15 text-primary px-3 py-1 text-xs font-medium">
+                <ShieldCheck className="w-3.5 h-3.5" /> Mínimo de 10 domínios · R$ 2.999,00/mês
+              </div>
             </Card>
 
-            <Card className="p-6 flex flex-col border-primary/60 ring-1 ring-primary/30 shadow-lg">
-              <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground inline-flex items-center justify-center mb-4">
-                <TrendingUp className="w-5 h-5" />
+            <Card className="p-8 flex-1">
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Cobrado à parte (uso variável)
               </div>
-              <div className="text-xs uppercase tracking-wider text-primary">Recomendado</div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">Growth</h3>
-              <p className="text-sm text-muted-foreground mt-2">Para quem já tem carteira e quer escalar.</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
-                <li>• Limites ampliados de clientes</li>
-                <li>• Todos os módulos disponíveis</li>
-                <li>• Dashboards consolidados</li>
-                <li>• Onboarding assistido dos seus clientes</li>
+              <h3 className="text-lg font-semibold mt-2">Serviços de mensageria e voz</h3>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                WhatsApp Business API, VoIP e SMS têm investimento próprio conforme o
+                pacote escolhido por cada cliente-final. Não estão inclusos na mensalidade
+                por domínio.
+              </p>
+              <ul className="text-sm mt-4 space-y-2 opacity-90">
+                <li>• WhatsApp — pacotes por sessão/mês</li>
+                <li>• VoIP — pacotes por minuto/mês</li>
+                <li>• SMS — pacotes por envio/mês</li>
               </ul>
-              <Button asChild className="mt-5">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar Growth</a>
-              </Button>
             </Card>
+          </div>
 
-            <Card className="p-6 flex flex-col">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
-                <Crown className="w-5 h-5" />
-              </div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Sob consulta</div>
-              <h3 className="text-xl font-semibold tracking-tight mt-1">Enterprise</h3>
-              <p className="text-sm text-muted-foreground mt-2">Sem limites práticos.</p>
-              <ul className="text-sm mt-4 space-y-2 flex-1 opacity-90">
-                <li>• Volume ilimitado de clientes</li>
-                <li>• Módulos sob medida</li>
-                <li>• SLA dedicado e gerente de conta</li>
-                <li>• Infra isolada e gateway próprio</li>
-              </ul>
-              <Button asChild variant="outline" className="mt-5">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Solicitar apresentação</a>
+          {/* Tabela de descontos por volume */}
+          <div className="mt-10">
+            <h3 className="font-serif text-2xl md:text-3xl mb-4">Descontos por volume — recálculo em tempo real</h3>
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="text-left px-5 py-3">Faixa de domínios ativos</th>
+                    <th className="text-left px-5 py-3">Desconto</th>
+                    <th className="text-left px-5 py-3">Valor por domínio</th>
+                    <th className="text-left px-5 py-3">Exemplo de mensalidade</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr>
+                    <td className="px-5 py-4">Até 10 <span className="text-xs text-muted-foreground">(mínimo)</span></td>
+                    <td className="px-5 py-4">—</td>
+                    <td className="px-5 py-4 font-medium">R$ 299,90</td>
+                    <td className="px-5 py-4"><strong>R$ 2.999,00</strong> <span className="text-xs text-muted-foreground">(10 domínios)</span></td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-4">11 a 50</td>
+                    <td className="px-5 py-4"><span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">-10%</span></td>
+                    <td className="px-5 py-4 font-medium">R$ 269,91</td>
+                    <td className="px-5 py-4"><strong>R$ 13.495,50</strong> <span className="text-xs text-muted-foreground">(50 domínios)</span></td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-4">51 a 100</td>
+                    <td className="px-5 py-4"><span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">-15%</span></td>
+                    <td className="px-5 py-4 font-medium">R$ 254,92</td>
+                    <td className="px-5 py-4"><strong>R$ 25.491,50</strong> <span className="text-xs text-muted-foreground">(100 domínios)</span></td>
+                  </tr>
+                  <tr className="bg-primary/5">
+                    <td className="px-5 py-4">A partir de 101</td>
+                    <td className="px-5 py-4"><span className="inline-flex items-center rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs font-medium">-20%</span></td>
+                    <td className="px-5 py-4 font-medium">R$ 239,92</td>
+                    <td className="px-5 py-4"><strong>R$ 24.231,92</strong> <span className="text-xs text-muted-foreground">(101 domínios)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4 leading-relaxed max-w-3xl">
+              O desconto é aplicado sobre o valor por domínio e se ajusta automaticamente
+              conforme o número de domínios ativos varia no console do parceiro — sem
+              renegociação de contrato. Serviços de WhatsApp, VoIP e SMS seguem cobrança
+              própria por pacote, conforme o consumo de cada cliente-final.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                  Simular minha mensalidade <ArrowRight className="w-4 h-4 ml-2" />
+                </a>
               </Button>
-            </Card>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/white-label/parceiro">Ver console do parceiro</Link>
+              </Button>
+            </div>
           </div>
         </section>
 
