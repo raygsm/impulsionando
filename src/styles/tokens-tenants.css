@@ -81,3 +81,24 @@
 [data-tenant="garrido"]  { --primary: var(--garrido-primary);  --ring: var(--garrido-primary); }
 [data-tenant="wmp"]      { --primary: var(--wmp-primary);      --ring: var(--wmp-primary); }
 [data-tenant="marocas"]  { --primary: var(--marocas-primary);  --ring: var(--marocas-primary); }
+[data-tenant="foodservice"] { --primary: oklch(0.66 0.16 55);  --ring: oklch(0.66 0.16 55); }
+
+/* ============================================================
+   TOKENS LEGADOS POR TENANT (declarados anteriormente inline
+   via useEffect nas rotas raiz). Mantidos aqui como fonte única
+   para eliminar duplicação. As rotas continuam funcionando com
+   ou sem o setProperty — este bloco garante consistência.
+   ============================================================ */
+:root {
+  /* GARRIDO — dourado / creme / grafite (imobiliária premium) */
+  --garrido-gold:   #b8935a;
+  --garrido-cream:  #f5efe4;
+  --garrido-ink:    #1a1d24;
+
+  /* FOOD SERVICE — âmbar / tijolo / creme / tinta (gastronomia) */
+  --fs-amber:  #d97706;
+  --fs-brick:  #9a3412;
+  --fs-cream:  #fef7ed;
+  --fs-ink:    #1c1917;
+}
+
