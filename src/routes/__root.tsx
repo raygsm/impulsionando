@@ -32,14 +32,24 @@ import { CoreWatermark } from "@/components/app/CoreWatermark";
 function TenantSubdomainRedirect() {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // 1) Host descontinuado (ex.: colorssaude.impulsionando.com.br) →
-    //    redireciona cross-origin para o subdomínio oficial preservando path.
     const legacy = deprecatedSubdomainRedirect(window.location);
     if (legacy) {
+      // Log e evento GA4 antes do reload cross-origin (best effort).
+      const from_host = window.location.hostname;
+      let to_host = from_host;
+      try { to_host = new URL(legacy).hostname; } catch { /* noop */ }
+      import("@/lib/painel-audit").then(({ logLegacySubdomainHit }) => {
+        logLegacySubdomainHit({
+          from_host,
+          to_host,
+          path: window.location.pathname,
+          search: window.location.search,
+          hash: window.location.hash,
+        });
+      }).catch(() => { /* noop */ });
       window.location.replace(legacy);
       return;
     }
-    // 2) Subdomínio de tenant conhecido → vai para a landing/vitrine na app.
     const match = getTenantSubdomain(window.location.hostname);
     if (!match) return;
     const target = tenantSubdomainTarget(match.slug);

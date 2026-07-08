@@ -159,15 +159,65 @@ function SgbHero() {
         </div>
 
         <div className="relative">
-          <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-emerald-500/40 via-lime-400/20 to-transparent blur-3xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-emerald-950 to-black p-10">
-            <div className="grid aspect-square place-items-center text-[240px]" aria-hidden>🔥</div>
-            <div className="mt-6 flex items-center justify-between">
-              <div className="flex items-center gap-1 text-yellow-400" aria-label="5 estrelas">
-                {Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400" />))}
-                <span className="ml-2 text-sm font-semibold text-white/80">4.9 · 25.000+ avaliações</span>
+          {/* Aura / glow */}
+          <div className="absolute -inset-10 rounded-[3rem] bg-gradient-to-br from-emerald-500/50 via-lime-400/25 to-transparent blur-3xl" aria-hidden />
+          {/* Cartão do produto — pote renderizado em CSS */}
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-emerald-950 via-black to-emerald-950/60 p-6 shadow-[0_40px_120px_-20px_rgba(16,185,129,0.55)] sm:p-8">
+            {/* Selos flutuantes */}
+            <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-2">
+              <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-lg">Top #1</span>
+              <span className="rounded-full bg-yellow-400 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-lg">-40% hoje</span>
+            </div>
+            <div className="pointer-events-none absolute right-4 top-4 flex flex-col items-end gap-2">
+              <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/90 backdrop-blur">🇧🇷 Fórmula BR</span>
+              <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-300 backdrop-blur">Frete grátis</span>
+            </div>
+
+            {/* Pote em CSS puro (sem asset externo, imutável no build) */}
+            <div className="relative mx-auto flex aspect-square max-w-[380px] items-end justify-center pt-6">
+              {/* Sombra no chão */}
+              <div className="absolute bottom-2 left-1/2 h-6 w-56 -translate-x-1/2 rounded-full bg-black/70 blur-xl" aria-hidden />
+              {/* Corpo do pote */}
+              <div className="relative flex h-[78%] w-[64%] flex-col overflow-hidden rounded-b-[36px] rounded-t-[28px] bg-gradient-to-br from-neutral-800 via-black to-neutral-900 shadow-[inset_0_0_60px_rgba(16,185,129,0.35),0_30px_60px_-20px_rgba(0,0,0,0.9)] ring-1 ring-white/10">
+                {/* Reflexo lateral */}
+                <div className="pointer-events-none absolute inset-y-6 left-3 w-3 rounded-full bg-white/10 blur-[2px]" aria-hidden />
+                {/* Rótulo */}
+                <div className="mx-4 mt-16 flex-1 rounded-2xl border border-emerald-400/40 bg-gradient-to-b from-emerald-500/25 via-black/60 to-black/80 p-4 text-center backdrop-blur">
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-300">Colors Saúde</div>
+                  <div className="mt-2 bg-gradient-to-b from-emerald-300 to-lime-300 bg-clip-text text-3xl font-black leading-none text-transparent drop-shadow sm:text-4xl">
+                    SUPER<br />GREEN<br />BLACK
+                  </div>
+                  <div className="mt-2 text-[9px] font-bold uppercase tracking-widest text-white/70">
+                    Fórmula termogênica premium
+                  </div>
+                  <div className="mt-3 flex items-center justify-center gap-1 text-[9px] font-bold text-emerald-200">
+                    <span className="rounded-full bg-emerald-500/25 px-2 py-0.5">60 cápsulas</span>
+                    <span className="rounded-full bg-emerald-500/25 px-2 py-0.5">30 dias</span>
+                  </div>
+                </div>
+                {/* Base metálica */}
+                <div className="h-4 bg-gradient-to-b from-neutral-700 via-neutral-900 to-black" />
               </div>
-              <span className="rounded-full bg-emerald-500 px-3 py-1 text-xs font-black text-black">TOP #1</span>
+              {/* Tampa */}
+              <div className="absolute left-1/2 top-2 h-6 w-[68%] -translate-x-1/2 rounded-t-[24px] rounded-b-[6px] bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-700 shadow-[0_6px_16px_rgba(16,185,129,0.6)] ring-1 ring-emerald-900" aria-hidden />
+              {/* Ingredientes flutuantes */}
+              <span className="absolute left-2 top-1/3 hidden rounded-full border border-white/20 bg-black/70 px-3 py-1 text-[10px] font-bold text-emerald-200 backdrop-blur sm:inline">🌿 Chá verde</span>
+              <span className="absolute right-2 top-1/2 hidden rounded-full border border-white/20 bg-black/70 px-3 py-1 text-[10px] font-bold text-orange-200 backdrop-blur sm:inline">🌶️ Pimenta</span>
+              <span className="absolute right-4 top-[75%] hidden rounded-full border border-white/20 bg-black/70 px-3 py-1 text-[10px] font-bold text-yellow-200 backdrop-blur sm:inline">⚡ Cafeína</span>
+            </div>
+
+            {/* Rodapé do card — avaliação + urgência */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex items-center gap-1 text-yellow-400" aria-label="5 estrelas">
+                  {Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="h-4 w-4 fill-yellow-400" />))}
+                </div>
+                <div className="mt-1 text-xs font-semibold text-white/80">4.9 · 25.000+ avaliações</div>
+              </div>
+              <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3">
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Estoque limitado</div>
+                <div className="mt-1 text-xs font-semibold text-white/90">Últimas 128 unidades desta remessa</div>
+              </div>
             </div>
           </div>
         </div>

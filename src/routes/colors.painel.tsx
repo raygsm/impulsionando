@@ -27,9 +27,14 @@ import {
   aggregateWeekly,
   weeklyToCsv,
   compareLocalVsGa4,
+  readPingHistory,
+  clearPingHistory,
+  readLegacyHits,
+  clearLegacyHits,
   type Ga4PingResult,
   type Ga4CsvRow,
   type CompareRow,
+  type PingHistoryEntry,
 } from "@/lib/painel-audit";
 
 export const Route = createFileRoute("/colors/painel")({
@@ -88,16 +93,44 @@ function PainelPage() {
     return () => window.clearInterval(id);
   }, []);
 
-  // Notificação em tempo real (mesma aba + cross-tab via BroadcastChannel).
+  // Rate-limit / agregação de toasts para tentativas de cópia:
+  //  - máximo 1 toast a cada 1500ms
+  //  - se estourar, agrega e mostra 1 resumo com N eventos no fim da rajada
   useEffect(() => {
+    let lastToastAt = 0;
+    let pending: Array<Record<string, unknown>> = [];
+    let flushTimer: number | null = null;
+    const WINDOW = 1500;
+    const flush = () => {
+      flushTimer = null;
+      if (pending.length === 0) return;
+      const first = pending[0];
+      if (pending.length === 1) {
+        toast.error(`🛡️ Cópia detectada: ${first.kind}`, {
+          description: `${first.host} · ${first.path} · ${new Date(Number(first.ts)).toLocaleTimeString()}`,
+          duration: 8000,
+        });
+      } else {
+        const kinds = new Set(pending.map((p) => String(p.kind)));
+        toast.error(`🛡️ ${pending.length} tentativas de cópia em ${(WINDOW / 1000).toFixed(1)}s`, {
+          description: `${first.host} · tipos: ${Array.from(kinds).join(", ")}`,
+          duration: 10000,
+        });
+      }
+      pending = [];
+      lastToastAt = Date.now();
+    };
     const onAttempt = (ev: Event) => {
       const detail = (ev as CustomEvent).detail as Record<string, unknown> | undefined;
       if (!detail) return;
-      toast.error(`🛡️ Cópia detectada: ${detail.kind}`, {
-        description: `${detail.host} · ${detail.path} · ${new Date(Number(detail.ts)).toLocaleTimeString()}`,
-        duration: 8000,
-      });
+      pending.push(detail);
       setTick((t) => t + 1);
+      const since = Date.now() - lastToastAt;
+      if (since >= WINDOW && pending.length === 1) {
+        flush();
+      } else if (flushTimer === null) {
+        flushTimer = window.setTimeout(flush, WINDOW);
+      }
     };
     window.addEventListener("imp:copy-attempt", onAttempt as EventListener);
     let bc: BroadcastChannel | null = null;
@@ -111,6 +144,7 @@ function PainelPage() {
     } catch { /* noop */ }
     return () => {
       window.removeEventListener("imp:copy-attempt", onAttempt as EventListener);
+      if (flushTimer !== null) window.clearTimeout(flushTimer);
       bc?.close();
     };
   }, []);
@@ -121,10 +155,27 @@ function PainelPage() {
   const diag = useMemo(() => getAnalyticsDiagnostic(), [tick]);
   const local = useMemo(() => aggregateByCampaign(events), [events]);
   const weekly = useMemo(() => aggregateWeekly(events), [events]);
+  const pingHistory = useMemo(() => readPingHistory(), [tick]);
+  const legacyHits = useMemo(() => readLegacyHits(), [tick]);
   const compare = useMemo<CompareRow[]>(
     () => (gaCsv ? compareLocalVsGa4(local, gaCsv) : []),
     [local, gaCsv],
   );
+
+  // Filtros do histórico de ping.
+  const [pingFilter, setPingFilter] = useState<{ q: string; onlyFail: boolean }>({ q: "", onlyFail: false });
+  const filteredPings = useMemo(() => {
+    const q = pingFilter.q.trim().toLowerCase();
+    return pingHistory
+      .slice()
+      .reverse()
+      .filter((p) => {
+        if (pingFilter.onlyFail && p.ok) return false;
+        if (!q) return true;
+        const hay = `${p.host} ${p.path} ${p.message} ${p.ping_id} ${p.details.join(" ")}`.toLowerCase();
+        return hay.includes(q);
+      });
+  }, [pingHistory, pingFilter]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -264,6 +315,126 @@ function PainelPage() {
             </div>
           )}
         </div>
+
+        {/* Histórico dos pings de diagnóstico — persistente + filtros */}
+        <div className="mb-6 rounded-2xl border border-sky-500/20 bg-white/[0.03] p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">🕒 Histórico de diagnósticos</h2>
+              <p className="mt-1 text-xs text-white/60">
+                {pingHistory.length} execuções armazenadas localmente (máx. 200). Sobrevivem a
+                reload; filtre por host, motivo ou <code>ping_id</code>.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="search"
+                value={pingFilter.q}
+                onChange={(e) => setPingFilter((s) => ({ ...s, q: e.target.value }))}
+                placeholder="Buscar host, path, motivo…"
+                className="rounded-full border border-white/15 bg-black/50 px-4 py-1.5 text-sm text-white placeholder:text-white/40 focus:border-sky-400 focus:outline-none"
+              />
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  checked={pingFilter.onlyFail}
+                  onChange={(e) => setPingFilter((s) => ({ ...s, onlyFail: e.target.checked }))}
+                  className="accent-amber-500"
+                />
+                só falhas
+              </label>
+              <button
+                onClick={() => { clearPingHistory(); setTick((t) => t + 1); toast.success("Histórico limpo"); }}
+                className="rounded-full border border-white/20 px-3 py-1 text-xs hover:bg-white/10"
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+          <div className="mt-4 max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 bg-black/70 uppercase tracking-widest text-white/50">
+                <tr>
+                  <th className="p-3">Quando</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Host</th>
+                  <th className="p-3">Path</th>
+                  <th className="p-3">Motivo</th>
+                  <th className="p-3">ping_id</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPings.map((p: PingHistoryEntry, i) => (
+                  <tr key={p.ping_id + i} className="border-t border-white/5">
+                    <td className="p-3 text-white/60">{new Date(p.ts).toLocaleString()}</td>
+                    <td className={"p-3 font-mono " + (p.ok ? "text-emerald-300" : "text-amber-300")}>
+                      {p.ok ? "OK" : "FAIL"}
+                    </td>
+                    <td className="p-3 font-mono text-white/70">{p.host}</td>
+                    <td className="p-3 font-mono text-white/70">{p.path}</td>
+                    <td className="p-3 text-white/80">{p.message}</td>
+                    <td className="p-3 font-mono text-white/50" data-allow-copy>{p.ping_id}</td>
+                  </tr>
+                ))}
+                {filteredPings.length === 0 && (
+                  <tr><td colSpan={6} className="p-6 text-center text-white/40">
+                    {pingHistory.length === 0 ? "Nenhum diagnóstico ainda. Rode o ping acima." : "Nenhum resultado com esse filtro."}
+                  </td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Registro de acessos ao subdomínio legado colorssaude */}
+        <div className="mb-6 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/5 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">🔀 Acessos ao subdomínio legado</h2>
+              <p className="mt-1 text-xs text-white/60">
+                Toda visita a <code>colorssaude.impulsionando.com.br</code> é redirecionada para
+                <code> colors.impulsionando.com.br</code> e logada aqui (path/query/hash preservados).
+                Também dispara <code>legacy_subdomain_hit</code> no GA4.
+              </p>
+            </div>
+            <button
+              onClick={() => { clearLegacyHits(); setTick((t) => t + 1); }}
+              className="rounded-full border border-white/20 px-3 py-1 text-xs hover:bg-white/10"
+            >
+              Limpar log
+            </button>
+          </div>
+          <div className="mt-4 max-h-64 overflow-auto rounded-xl border border-white/10 bg-black/40">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 bg-black/70 uppercase tracking-widest text-white/50">
+                <tr>
+                  <th className="p-3">Quando</th>
+                  <th className="p-3">De</th>
+                  <th className="p-3">Para</th>
+                  <th className="p-3">Path + query</th>
+                  <th className="p-3">UA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {legacyHits.slice().reverse().map((h, i) => (
+                  <tr key={i} className="border-t border-white/5">
+                    <td className="p-3 text-white/60">{new Date(h.ts).toLocaleString()}</td>
+                    <td className="p-3 font-mono text-amber-200">{h.from_host}</td>
+                    <td className="p-3 font-mono text-emerald-200">{h.to_host}</td>
+                    <td className="p-3 font-mono text-white/70">{h.path}{h.search}{h.hash}</td>
+                    <td className="p-3 text-white/40 truncate max-w-[220px]" title={h.ua}>{h.ua.slice(0, 60)}</td>
+                  </tr>
+                ))}
+                {legacyHits.length === 0 && (
+                  <tr><td colSpan={5} className="p-6 text-center text-white/40">
+                    Nenhum acesso ao subdomínio legado registrado neste dispositivo.
+                  </td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
 
         {/* Diagnóstico de consentimento / GA4 */}
         <div
