@@ -3,7 +3,9 @@
 
 import { readConsent, onConsentChange, type ConsentState } from "./consent";
 
-const GA_ID = (import.meta.env.VITE_GA4_MEASUREMENT_ID as string | undefined)?.trim();
+// ID público do GA4 do grupo Impulsionando — pode ficar em código.
+// Sobrescreva definindo `VITE_GA4_MEASUREMENT_ID` em Workspace Settings → Build Secrets.
+const GA_ID = ((import.meta.env.VITE_GA4_MEASUREMENT_ID as string | undefined) ?? "G-TGG4HG3JDJ").trim();
 
 declare global {
   interface Window {
