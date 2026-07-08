@@ -108,11 +108,11 @@ function NotificationItem({
           <span className="text-[10px] text-muted-foreground">{time}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {!n.is_read && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRead} title="Marcar como lida">
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRead} title="Marcar como lida" aria-label="Marcar notificação como lida">
                 <Check className="w-3 h-3" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRemove} title="Remover">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRemove} title="Remover" aria-label="Remover notificação">
               <Trash2 className="w-3 h-3" />
             </Button>
           </div>

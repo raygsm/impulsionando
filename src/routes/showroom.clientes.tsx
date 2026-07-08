@@ -407,17 +407,17 @@ function ShowroomClientes() {
               </div>
               <div className="flex gap-2 sm:self-start">
                 {p.channels.wa && (
-                  <Button size="icon" variant="outline" className="h-9 w-9 text-emerald-600">
+                  <Button size="icon" variant="outline" className="h-9 w-9 text-emerald-600" aria-label="Contatar via WhatsApp">
                     <MessageCircle className="h-4 w-4" />
                   </Button>
                 )}
                 {p.channels.email && (
-                  <Button size="icon" variant="outline" className="h-9 w-9 text-sky-600">
+                  <Button size="icon" variant="outline" className="h-9 w-9 text-sky-600" aria-label="Contatar via e-mail">
                     <Mail className="h-4 w-4" />
                   </Button>
                 )}
                 {p.channels.phone && (
-                  <Button size="icon" variant="outline" className="h-9 w-9 text-amber-600">
+                  <Button size="icon" variant="outline" className="h-9 w-9 text-amber-600" aria-label="Contatar por telefone">
                     <Phone className="h-4 w-4" />
                   </Button>
                 )}

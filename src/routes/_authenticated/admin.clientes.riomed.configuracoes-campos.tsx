@@ -139,10 +139,10 @@ function EntityFields({ companyId, entity, entityLabel }: { companyId: string | 
             {fields.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-3">
                 <div className="flex flex-col gap-1">
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => reorder.mutate({ f, dir: "up" })}>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" aria-label="Mover campo para cima" onClick={() => reorder.mutate({ f, dir: "up" })}>
                     <ArrowUp className="h-3 w-3" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => reorder.mutate({ f, dir: "down" })}>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" aria-label="Mover campo para baixo" onClick={() => reorder.mutate({ f, dir: "down" })}>
                     <ArrowDown className="h-3 w-3" />
                   </Button>
                 </div>
@@ -161,15 +161,16 @@ function EntityFields({ companyId, entity, entityLabel }: { companyId: string | 
                 </div>
                 <div className="flex items-center gap-1">
                   {(f.field_type === "select" || f.field_type === "multiselect") && (
-                    <Button size="icon" variant="ghost" onClick={() => setOptionsFor(f)} title="Gerenciar opções">
+                    <Button size="icon" variant="ghost" aria-label="Gerenciar opções do campo" onClick={() => setOptionsFor(f)} title="Gerenciar opções">
                       <List className="h-4 w-4" />
                     </Button>
                   )}
                   <Switch checked={f.is_active} onCheckedChange={() => toggle.mutate(f)} />
-                  <Button size="icon" variant="ghost" onClick={() => setEditing(f)}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" aria-label="Editar campo" onClick={() => setEditing(f)}><Pencil className="h-4 w-4" /></Button>
                   <Button
                     size="icon"
                     variant="ghost"
+                    aria-label="Excluir campo"
                     onClick={() => {
                       if (confirm(`Excluir "${f.label}"?`)) remove.mutate(f);
                     }}
@@ -390,7 +391,7 @@ function OptionsDialog({
                 <p className="font-medium">{o.label}</p>
                 <code className="text-xs text-muted-foreground">{o.value}</code>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => remove.mutate(o.id)}><Trash2 className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label="Remover opção" onClick={() => remove.mutate(o.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
           <div className="grid grid-cols-2 gap-2 pt-2 border-t">

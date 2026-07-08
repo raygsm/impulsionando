@@ -123,7 +123,7 @@ function ComissoesPage() {
                       <TableCell className="font-mono text-xs">{r.product_id ?? r.category ?? r.user_id ?? "—"}</TableCell>
                       <TableCell>{r.rate_pct}%</TableCell>
                       <TableCell>{r.active ? "Sim" : "Não"}</TableCell>
-                      <TableCell><Button size="icon" variant="ghost" onClick={() => delMut.mutate(r.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
+                      <TableCell><Button size="icon" variant="ghost" aria-label="Excluir comissão" onClick={() => delMut.mutate(r.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                     </TableRow>
                   ))}
                   {(rules.data?.rules ?? []).length === 0 && (

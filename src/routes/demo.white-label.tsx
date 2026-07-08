@@ -230,7 +230,7 @@ function ClientsSection() {
                     {STATUSES.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -277,7 +277,7 @@ function NichesSection() {
                 <TableCell className="font-medium">{r.name}</TableCell>
                 <TableCell><Badge variant="outline">{r.template}</Badge></TableCell>
                 <TableCell>{r.clients}</TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -389,7 +389,7 @@ function ProfilesSection() {
                   </div>
                 </TableCell>
                 <TableCell>{r.users}</TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -436,7 +436,7 @@ function TeamSection() {
                 <TableCell className="font-medium">{r.name}</TableCell>
                 <TableCell><Badge variant="outline">{r.role}</Badge></TableCell>
                 <TableCell><Badge className={r.status === "Ativo" ? "bg-success text-success-foreground" : ""} variant={r.status === "Ativo" ? "default" : "outline"}>{r.status}</Badge></TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>

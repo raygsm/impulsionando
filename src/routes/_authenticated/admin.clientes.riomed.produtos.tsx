@@ -293,8 +293,8 @@ function ProductsPage() {
                       <span>• Estoque: {p.stock}</span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => edit(p)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => p.id && confirm("Remover?") && remove.mutate(p.id)}>
+                  <Button variant="ghost" size="icon" aria-label="Editar produto" onClick={() => edit(p)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Remover produto" onClick={() => p.id && confirm("Remover?") && remove.mutate(p.id)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>

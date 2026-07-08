@@ -106,8 +106,8 @@ function Page() {
                 </p>
               </div>
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(pl); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => confirm(`Excluir "${pl.name}"?`) && remove.mutate(pl)} disabled={pl.is_default}>
+                <Button size="icon" variant="ghost" aria-label="Editar lista de preços" onClick={() => { setEditing(pl); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" aria-label="Excluir lista de preços" onClick={() => confirm(`Excluir "${pl.name}"?`) && remove.mutate(pl)} disabled={pl.is_default}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

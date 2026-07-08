@@ -311,6 +311,7 @@ function ShowroomPDV() {
                       size="icon"
                       variant="outline"
                       className="h-7 w-7"
+                      aria-label="Diminuir quantidade"
                       onClick={() => sub(i.id)}
                     >
                       <Minus className="h-3 w-3" />
@@ -320,6 +321,7 @@ function ShowroomPDV() {
                       size="icon"
                       variant="outline"
                       className="h-7 w-7"
+                      aria-label="Aumentar quantidade"
                       onClick={() => add(i.id)}
                     >
                       <Plus className="h-3 w-3" />

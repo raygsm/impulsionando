@@ -223,7 +223,7 @@ function SaleForm({ sessionId }: { sessionId: string }) {
             <div className="col-span-2"><Label>Qtd</Label><Input type="number" step="0.001" value={it.qty} onChange={(e) => update(idx, { qty: Number(e.target.value) })} /></div>
             <div className="col-span-3"><Label>Preço</Label><Input type="number" step="0.01" value={it.unitPrice} onChange={(e) => update(idx, { unitPrice: Number(e.target.value) })} /></div>
             <div className="col-span-1">
-              <Button variant="ghost" size="icon" onClick={() => setItems(items.filter((_, i) => i !== idx))} disabled={items.length === 1}>
+              <Button variant="ghost" size="icon" aria-label="Remover item" onClick={() => setItems(items.filter((_, i) => i !== idx))} disabled={items.length === 1}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
