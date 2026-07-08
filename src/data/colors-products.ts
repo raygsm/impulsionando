@@ -6,6 +6,9 @@
 
 export type ColorsBrand = "green" | "blue" | "yellow" | "colors";
 
+export interface ColorsFaq { q: string; a: string }
+export interface ColorsTestimonial { name: string; city?: string; text: string; result?: string }
+
 export interface ColorsProduct {
   slug: string;
   brand: ColorsBrand;
@@ -19,7 +22,20 @@ export interface ColorsProduct {
   emoji: string;
   accent: string; // tailwind gradient classes
   links: { label: string; href: string }[];
+  /** Como usar / posologia (front-end informativo). */
+  howToUse?: string[];
+  /** Composição / ativos principais (front-end informativo). */
+  composition?: string[];
+  /** Perguntas frequentes (FAQ). Renderiza schema.org FAQPage. */
+  faq?: ColorsFaq[];
+  /** Depoimentos exibidos na página do produto. */
+  testimonials?: ColorsTestimonial[];
+  /** Selo de garantia — ex.: "Garantia de 7 dias · dinheiro de volta". */
+  guarantee?: string;
+  /** Badge de urgência sutil — ex.: "Frete grátis acima de R$ 250". */
+  urgencyBadge?: string;
 }
+
 
 export const COLORS_BRANDS: Record<
   ColorsBrand,
