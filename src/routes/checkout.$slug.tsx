@@ -228,7 +228,7 @@ function PixForm({ planId, userEmail, createPix, getStatus }: any) {
             <Label className="text-xs">Pix copia e cola</Label>
             <div className="flex gap-2">
               <Input readOnly value={pix.qr_code} className="text-xs" />
-              <Button variant="outline" size="icon" onClick={() => {
+              <Button variant="outline" size="icon" aria-label="Copiar código PIX" onClick={() => {
                 navigator.clipboard.writeText(pix.qr_code);
                 toast.success("Copiado!");
               }}><Copy className="w-4 h-4" /></Button>

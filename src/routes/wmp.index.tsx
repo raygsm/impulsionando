@@ -88,7 +88,7 @@ function WmpHome() {
         </div>
       </section>
 
-      {/* CASES (placeholder com dados reais virão na Onda 2) */}
+      {/* CASES */}
       <section id="cases" className="mx-auto max-w-7xl px-6 py-20">
         <div className="text-center mb-12">
           <span className="wmp-chip mb-3"><Sparkles className="size-3" /> Cases recentes</span>

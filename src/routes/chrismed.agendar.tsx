@@ -323,7 +323,7 @@ function ChrismedPage() {
                     <Label>Código PIX copia-e-cola</Label>
                     <div className="flex gap-2">
                       <Input readOnly value={pixResult.qr_code} className="font-mono text-xs" />
-                      <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(pixResult.qr_code); toast.success('Copiado!'); }}>
+                      <Button variant="outline" size="icon" aria-label="Copiar código PIX" onClick={() => { navigator.clipboard.writeText(pixResult.qr_code); toast.success('Copiado!'); }}>
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
