@@ -146,7 +146,7 @@ function Page() {
             </div>
           </div>
         )}
-      </main>
+      </section>
     </div>
   );
 }

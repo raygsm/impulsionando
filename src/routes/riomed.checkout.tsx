@@ -130,19 +130,19 @@ function Page() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b bg-white"><div className="max-w-3xl mx-auto px-4 py-4"><h1 className="font-bold text-lg">Finalizar pedido</h1></div></header>
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+      <section className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         <Card>
           <CardHeader><CardTitle className="text-base">Contato</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>Nombre*</Label><Input value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} /></div>
-            <div className="space-y-1"><Label>Teléfono / WhatsApp*</Label><Input value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></div>
-            <div className="space-y-1"><Label>E-mail</Label><Input type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} /></div>
-            <div className="space-y-1"><Label>NIT / CI</Label><Input value={form.contactDoc} onChange={(e) => setForm({ ...form, contactDoc: e.target.value })} /></div>
-            <div className="space-y-1 sm:col-span-2"><Label>Empresa / Institución</Label><Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} /></div>
+            <div className="space-y-1"><Label htmlFor="co-name">Nombre*</Label><Input id="co-name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} /></div>
+            <div className="space-y-1"><Label htmlFor="co-phone">Teléfono / WhatsApp*</Label><Input id="co-phone" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></div>
+            <div className="space-y-1"><Label htmlFor="co-email">E-mail</Label><Input id="co-email" type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} /></div>
+            <div className="space-y-1"><Label htmlFor="co-doc">NIT / CI</Label><Input id="co-doc" value={form.contactDoc} onChange={(e) => setForm({ ...form, contactDoc: e.target.value })} /></div>
+            <div className="space-y-1 sm:col-span-2"><Label htmlFor="co-company">Empresa / Institución</Label><Input id="co-company" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} /></div>
             <div className="space-y-1">
-              <Label>Perfil</Label>
+              <Label htmlFor="co-profile">Perfil</Label>
               <Select value={form.audience} onValueChange={(v: any) => setForm({ ...form, audience: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="co-profile"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="public">Consumidor</SelectItem>
                   <SelectItem value="b2b">Empresa / Reventa</SelectItem>
@@ -171,8 +171,8 @@ function Page() {
             </div>
             {delivery === "delivery" && (
               <>
-                <div className="space-y-1 sm:col-span-2"><Label>Dirección</Label><Input value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} /></div>
-                <div className="space-y-1"><Label>Ciudad</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+                <div className="space-y-1 sm:col-span-2"><Label htmlFor="co-address">Dirección</Label><Input id="co-address" value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} /></div>
+                <div className="space-y-1"><Label htmlFor="co-city">Ciudad</Label><Input id="co-city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
               </>
             )}
           </CardContent>
@@ -180,7 +180,7 @@ function Page() {
 
         <Card>
           <CardHeader><CardTitle className="text-base">Observaciones</CardTitle></CardHeader>
-          <CardContent><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></CardContent>
+          <CardContent><Label htmlFor="co-notes" className="sr-only">Observaciones</Label><Textarea id="co-notes" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></CardContent>
         </Card>
 
         <Card>
@@ -211,7 +211,7 @@ function Page() {
             </p>
           </CardContent>
         </Card>
-      </main>
+      </section>
     </div>
   );
 }
