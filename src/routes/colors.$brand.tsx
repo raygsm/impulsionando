@@ -48,6 +48,7 @@ function BrandPage() {
   const b = brand as ColorsBrand;
   const meta = COLORS_BRANDS[b];
   const products = productsByBrand(b);
+  useColorsUtmHydration(`linha_${b}`, { content: b });
 
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white">
