@@ -13,9 +13,11 @@ export function WmpShell({ children }: { children: React.ReactNode }) {
               Wagner Miller Produções
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <Link to="/wmp" hash="servicos" className="opacity-80 hover:opacity-100">Serviços</Link>
-            <Link to="/wmp" hash="cases" className="opacity-80 hover:opacity-100">Cases</Link>
+          <nav className="hidden md:flex items-center gap-5 text-sm">
+            <Link to="/wmp/pacotes" className="opacity-80 hover:opacity-100">Pacotes</Link>
+            <Link to="/wmp/cases" className="opacity-80 hover:opacity-100">Cases</Link>
+            <Link to="/wmp/sobre" className="opacity-80 hover:opacity-100">Sobre</Link>
+            <Link to="/wmp/faq" className="opacity-80 hover:opacity-100">FAQ</Link>
             <Link to="/wmp/parceiro" className="opacity-80 hover:opacity-100">Seja Parceiro</Link>
             <Link to="/wmp/orcamento" className="wmp-cta" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
               <Sparkles className="size-4" /> Orçamento em 60s
