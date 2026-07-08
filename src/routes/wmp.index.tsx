@@ -126,6 +126,112 @@ function WmpHome() {
         </div>
       </section>
 
+      {/* PACOTES (preview) */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <div className="text-center mb-12">
+          <span className="wmp-chip mb-3"><Sparkles className="size-3" /> Pacotes comerciais</span>
+          <h2 className="wmp-display text-3xl md:text-4xl mb-2">Escolha o porte. O escopo é transparente.</h2>
+          <p className="opacity-70">Três referências para acelerar sua decisão — todas personalizáveis no briefing.</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {WMP_PACOTES.map((p) => (
+            <div
+              key={p.slug}
+              className="wmp-surface p-7 flex flex-col relative"
+              style={p.destaque ? { borderColor: "var(--wmp-gold)", borderWidth: 2 } : undefined}
+            >
+              {p.destaque && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 wmp-chip text-xs"
+                  style={{ background: "var(--gradient-wmp-cta)", color: "var(--wmp-bg)", borderColor: "var(--wmp-gold)" }}>
+                  Mais contratado
+                </span>
+              )}
+              <h3 className="wmp-display text-xl mb-1">{p.nome}</h3>
+              <p className="text-xs opacity-70 mb-3">{p.publico}</p>
+              <div className="mb-4">
+                <span className="text-xs opacity-60 block">a partir de</span>
+                <span className="wmp-display text-2xl" style={{ color: "var(--wmp-gold)" }}>{p.preco_a_partir}</span>
+              </div>
+              <ul className="space-y-1.5 mb-5 flex-1">
+                {p.bullets.slice(0, 4).map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-xs opacity-85">
+                    <Check className="size-3.5 mt-0.5 shrink-0" style={{ color: "var(--wmp-gold)" }} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/wmp/pacotes" className="wmp-cta wmp-cta-outline text-sm">
+                Ver escopo completo <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* DEPOIMENTOS */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <div className="text-center mb-12">
+          <span className="wmp-chip mb-3"><Quote className="size-3" /> Prova social</span>
+          <h2 className="wmp-display text-3xl md:text-4xl">Quem contratou. Quem voltou a contratar.</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {WMP_DEPOIMENTOS.map((d) => (
+            <figure key={d.nome} className="wmp-surface p-6 flex flex-col">
+              <Quote className="size-6 mb-3" style={{ color: "var(--wmp-gold)" }} />
+              <blockquote className="text-sm opacity-90 flex-1 leading-relaxed">"{d.texto}"</blockquote>
+              <figcaption className="mt-4 pt-4 border-t text-sm" style={{ borderColor: "var(--wmp-border)" }}>
+                <div className="wmp-display">{d.nome}</div>
+                <div className="text-xs opacity-70">{d.cargo}</div>
+                <div className="text-xs opacity-60 mt-1">{d.evento}</div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      {/* GARANTIAS */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="text-center mb-12">
+          <span className="wmp-chip mb-3"><ShieldCheck className="size-3" /> Garantias técnicas</span>
+          <h2 className="wmp-display text-3xl md:text-4xl">Sem improviso. Documentado por escrito.</h2>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {WMP_CERTIFICACOES.map((c) => (
+            <div key={c.titulo} className="wmp-surface p-5">
+              <ShieldCheck className="size-6 mb-3" style={{ color: "var(--wmp-gold)" }} />
+              <h3 className="wmp-display text-base mb-1">{c.titulo}</h3>
+              <p className="text-xs opacity-75 leading-relaxed">{c.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ (preview) */}
+      <section className="mx-auto max-w-3xl px-6 py-20">
+        <div className="text-center mb-10">
+          <span className="wmp-chip mb-3"><HelpCircle className="size-3" /> Dúvidas frequentes</span>
+          <h2 className="wmp-display text-3xl md:text-4xl">Antes de você perguntar…</h2>
+        </div>
+        <div className="wmp-surface p-2 md:p-4">
+          {WMP_FAQ.slice(0, 4).map((f, i) => (
+            <details key={f.pergunta} className="group p-5 border-b last:border-0"
+              style={{ borderColor: "var(--wmp-border)" }} open={i === 0}>
+              <summary className="cursor-pointer list-none flex items-start justify-between gap-4">
+                <span className="wmp-display text-base">{f.pergunta}</span>
+                <span className="shrink-0 size-6 rounded-full flex items-center justify-center text-sm transition group-open:rotate-45"
+                  style={{ background: "var(--wmp-surface-2)", color: "var(--wmp-gold)" }}>+</span>
+              </summary>
+              <p className="mt-3 text-sm opacity-80 leading-relaxed">{f.resposta}</p>
+            </details>
+          ))}
+        </div>
+        <div className="text-center mt-6">
+          <Link to="/wmp/faq" className="wmp-cta wmp-cta-outline text-sm">
+            Ver todas as perguntas <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      </section>
+
       {/* PARCEIROS */}
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="wmp-surface p-10 text-center">
@@ -138,6 +244,24 @@ function WmpHome() {
           <Link to="/wmp/parceiro/cadastro" className="wmp-cta">
             Quero me cadastrar <ArrowRight className="size-4" />
           </Link>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="mx-auto max-w-4xl px-6 py-20">
+        <div className="wmp-surface p-10 md:p-14 text-center" style={{ borderColor: "var(--wmp-gold)", borderWidth: 2 }}>
+          <h2 className="wmp-display text-3xl md:text-5xl mb-4">Pronto para começar?</h2>
+          <p className="opacity-85 max-w-xl mx-auto mb-8">
+            Briefing em 60 segundos, com pré-diagnóstico acústico instantâneo. Proposta detalhada em até 24 horas.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link to="/wmp/orcamento" className="wmp-cta">
+              <Sparkles className="size-4" /> Quero meu orçamento
+            </Link>
+            <Link to="/wmp/cases" className="wmp-cta wmp-cta-outline">
+              Ver cases <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
       </section>
     </WmpShell>
