@@ -174,7 +174,7 @@ export function ResourceListPage<T extends { id: string }>({
                   ))}
                   {!noDelete && (
                     <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => {
+                      <Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => {
                         if (confirm("Remover este registro?")) remove.mutate(row.id);
                       }}>
                         <Trash2 className="w-4 h-4 text-destructive" />

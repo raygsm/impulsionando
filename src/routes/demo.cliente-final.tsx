@@ -338,7 +338,7 @@ function AgendaSection() {
                   </select>
                 </TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => remove(r.id)}>
+                  <Button size="icon" variant="ghost" aria-label="Remover registro" onClick={() => remove(r.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </TableCell>
@@ -699,7 +699,7 @@ function EstoqueSection() {
                 </TableCell>
                 <TableCell>{brl(p.price)}</TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => removeProduct(p.id)}>
+                  <Button size="icon" variant="ghost" aria-label="Remover produto" onClick={() => removeProduct(p.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </TableCell>
@@ -808,7 +808,7 @@ function FinanceiroSection() {
                 </TableCell>
                 <TableCell className="flex gap-1">
                   <Button size="sm" variant="outline" onClick={() => togglePaid(t.id)}>{t.status === "Pago" ? "↺" : "✓"}</Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button size="icon" variant="ghost" aria-label="Remover lançamento" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -865,7 +865,7 @@ function SetoresSection() {
                 <TableCell><Badge className={r.active ? "bg-success text-success-foreground" : ""} variant={r.active ? "default" : "outline"}>{r.active ? "Ativo" : "Inativo"}</Badge></TableCell>
                 <TableCell className="flex gap-1">
                   <Button size="sm" variant="outline" onClick={() => toggle(r.id)}>{r.active ? "Desativar" : "Ativar"}</Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button size="icon" variant="ghost" aria-label="Remover integração" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -923,7 +923,7 @@ function UsuariosSection() {
                     {USER_STATUS.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label="Remover usuário" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>

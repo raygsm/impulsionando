@@ -39,12 +39,12 @@ function PortalProprietario() {
   });
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Carregando…</div>;
+    return <div className="min-h-dvh flex items-center justify-center text-muted-foreground">Carregando…</div>;
   }
 
   if (!data || data.error || !data.owner) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-dvh flex items-center justify-center p-4">
         <Card className="p-8 text-center max-w-md">
           <AlertTriangle className="w-10 h-10 mx-auto text-amber-500 mb-3" />
           <h1 className="font-semibold text-lg mb-2">Acesso não encontrado</h1>
@@ -59,7 +59,7 @@ function PortalProprietario() {
   const { owner, properties = [] } = data;
 
   return (
-    <div className="min-h-screen bg-muted/30 p-4 md:p-8">
+    <div className="min-h-dvh bg-muted/30 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <header className="mb-6 flex items-center gap-3">
           <div className="rounded-lg bg-primary/10 p-3"><Building2 className="w-6 h-6 text-primary" /></div>

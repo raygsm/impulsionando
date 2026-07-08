@@ -35,6 +35,7 @@ function CopyButton({ value }: { value: string }) {
       variant="ghost"
       size="icon"
       className="h-7 w-7"
+      aria-label="Copiar valor"
       onClick={() => {
         navigator.clipboard.writeText(value);
         toast.success("Copiado");

@@ -113,7 +113,7 @@ function Page() {
                           <p className="text-xs text-muted-foreground">{fmt(it.override_price ?? it.riomed_products?.price_sale)}</p>
                         </div>
                         {it.is_featured && <Badge variant="secondary">Destaque</Badge>}
-                        <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" aria-label="Remover item do portal" onClick={() => remove(it.id)}><Trash2 className="h-4 w-4" /></Button>
                       </CardContent>
                     </Card>
                   ))}

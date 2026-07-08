@@ -93,7 +93,7 @@ function Page() {
                         <div className="font-bold">{fmtBOB(total)}</div>
                         <div className="text-[11px] text-slate-500">≈ {fmtUSD(total / rate)}</div>
                       </div>
-                      <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      <Button size="icon" variant="ghost" aria-label="Remover item do carrinho" onClick={() => remove(it.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </CardContent>
                   </Card>
                 );

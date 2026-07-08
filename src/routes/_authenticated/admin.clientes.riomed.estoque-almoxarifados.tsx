@@ -109,8 +109,8 @@ function Page() {
                   {w.notes && <p className="text-xs text-muted-foreground mt-1">{w.notes}</p>}
                 </div>
                 <div className="flex gap-1">
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(w); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => confirm(`Excluir "${w.name}"?`) && remove.mutate(w)} disabled={w.is_default}>
+                  <Button size="icon" variant="ghost" aria-label="Editar almoxarifado" onClick={() => { setEditing(w); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" aria-label="Excluir almoxarifado" onClick={() => confirm(`Excluir "${w.name}"?`) && remove.mutate(w)} disabled={w.is_default}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

@@ -52,13 +52,13 @@ function Page() {
     } catch (e: any) { toast.error(e?.message ?? "Erro"); }
   };
 
-  if (showcase.isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-  if (showcase.error || !showcase.data) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Vitrine indisponível</div>;
+  if (showcase.isLoading) return <div className="min-h-dvh flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (showcase.error || !showcase.data) return <div className="min-h-dvh flex items-center justify-center text-muted-foreground">Vitrine indisponível</div>;
 
   const { showcase: s, products } = showcase.data;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <header className="border-b sticky top-0 bg-background/80 backdrop-blur z-10">
         <div className="container py-3 flex items-center justify-between">
           <div>

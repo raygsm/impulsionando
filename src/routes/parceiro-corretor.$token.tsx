@@ -39,10 +39,10 @@ function Page() {
     onError: (e: any) => toast.error(e?.message ?? "Erro"),
   });
 
-  if (q.isLoading) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando…</div>;
+  if (q.isLoading) return <div className="min-h-dvh flex items-center justify-center text-sm text-muted-foreground">Carregando…</div>;
   if (!q.data?.ok) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-dvh flex items-center justify-center p-6">
         <Card className="max-w-md w-full">
           <CardContent className="p-6 text-center space-y-2">
             <Home className="w-10 h-10 mx-auto text-muted-foreground" />
@@ -58,7 +58,7 @@ function Page() {
   const isActive = partner.status === "active";
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-dvh bg-muted/30">
       <header className="bg-background border-b">
         <div className="max-w-5xl mx-auto p-6 flex items-center justify-between gap-3 flex-wrap">
           <div>

@@ -180,7 +180,7 @@ function QuoteDialog({ onSave }: { onSave: (d: any) => void }) {
                   <Input className="col-span-2" type="number" placeholder="Qtde" value={it.qty} onChange={(e) => update(i, "qty", e.target.value)} />
                   <Input className="col-span-2" type="number" placeholder="Unit." value={it.unit_price} onChange={(e) => update(i, "unit_price", e.target.value)} />
                   <Input className="col-span-2" type="number" placeholder="Desc." value={it.discount} onChange={(e) => update(i, "discount", e.target.value)} />
-                  <Button className="col-span-1" size="icon" variant="ghost" onClick={() => del(i)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button className="col-span-1" size="icon" variant="ghost" aria-label="Remover item do pedido" onClick={() => del(i)}><Trash2 className="h-4 w-4" /></Button>
                 </div>
               ))}
             </div>

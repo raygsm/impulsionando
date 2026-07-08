@@ -121,8 +121,8 @@ function SellersPage() {
                       <TableCell>{Number(s.monthly_goal ?? 0).toLocaleString()}</TableCell>
                       <TableCell><Badge variant={s.status === "active" ? "default" : "secondary"}>{s.status}</Badge></TableCell>
                       <TableCell className="flex gap-2">
-                        <SellerDialog initial={s} onSave={(d) => saveMut.mutate({ ...d, id: s.id })} trigger={<Button size="icon" variant="ghost"><Pencil className="h-4 w-4" /></Button>} />
-                        <Button size="icon" variant="ghost" onClick={() => delMut.mutate(s.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <SellerDialog initial={s} onSave={(d) => saveMut.mutate({ ...d, id: s.id })} trigger={<Button size="icon" variant="ghost" aria-label="Editar vendedor"><Pencil className="h-4 w-4" /></Button>} />
+                        <Button size="icon" variant="ghost" aria-label="Excluir vendedor" onClick={() => delMut.mutate(s.id)}><Trash2 className="h-4 w-4" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}

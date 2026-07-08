@@ -472,7 +472,7 @@ function ListaProdutos({ items, onRemove }: { items: Produto[]; onRemove: (id: s
           <span>{p.nome} <Badge variant="outline" className="ml-1 text-[10px]">{p.recorrencia}</Badge></span>
           <span className="flex items-center gap-3">
             <span className="font-medium">{brl(p.preco)}</span>
-            <Button size="icon" variant="ghost" onClick={() => onRemove(p.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+            <Button size="icon" variant="ghost" aria-label="Remover parceiro" onClick={() => onRemove(p.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
           </span>
         </li>
       ))}
@@ -521,7 +521,7 @@ function ListaOfertas({ ofertas, produtos, onRemove }: { ofertas: Oferta[]; prod
             <span className="flex items-center gap-3">
               <Badge variant="outline" className="text-[10px]"><Percent className="w-3 h-3 mr-1" />com {o.comissaoPct}%</Badge>
               <Badge variant="outline" className="text-[10px]">bump {o.bumpPct}%</Badge>
-              <Button size="icon" variant="ghost" onClick={() => onRemove(o.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+              <Button size="icon" variant="ghost" aria-label="Remover oferta" onClick={() => onRemove(o.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
             </span>
           </li>
         );
@@ -558,7 +558,7 @@ function ListaAfiliados({ items, onRemove }: { items: Afiliado[]; onRemove: (id:
       {items.map((a) => (
         <li key={a.id} className="flex items-center justify-between text-sm border rounded-md px-3 py-1.5">
           <span>{a.nome} <span className="text-muted-foreground">· {a.email || "sem email"}</span></span>
-          <Button size="icon" variant="ghost" onClick={() => onRemove(a.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+          <Button size="icon" variant="ghost" aria-label="Remover afiliado" onClick={() => onRemove(a.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
         </li>
       ))}
     </ul>
@@ -603,7 +603,7 @@ function ListaCupons({ cupons, afiliados, onRemove }: { cupons: Cupom[]; afiliad
         return (
           <li key={c.id} className="flex items-center justify-between text-sm border rounded-md px-3 py-1.5">
             <span><code className="px-1 py-0.5 bg-muted rounded">{c.code}</code> · {c.descontoPct}% off {a && <span className="text-muted-foreground">· {a.nome}</span>}</span>
-            <Button size="icon" variant="ghost" onClick={() => onRemove(c.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+            <Button size="icon" variant="ghost" aria-label="Remover comissão" onClick={() => onRemove(c.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
           </li>
         );
       })}
