@@ -9,6 +9,7 @@ import { Mail, MessageCircle, MapPin, CalendarCheck, Briefcase, Stethoscope } fr
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { CHRISMED_WHATSAPP } from '@/lib/chrismed';
 
 export const Route = createFileRoute('/chrismed/contato')({
   head: () => ({
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/chrismed/contato')({
   component: ContatoPage,
 });
 
-const WHATSAPP = 'https://wa.me/5521000000000?text=Ol%C3%A1%20CrisMed';
+const WHATSAPP = `${CHRISMED_WHATSAPP.waMe}?text=Ol%C3%A1%20CrisMed`;
 const EMAIL = 'contato@crismed.com.br';
 
 function ContatoPage() {
@@ -71,7 +72,7 @@ function ContatoPage() {
         <div className="space-y-4">
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="block rounded-2xl border border-emerald-900/10 bg-white p-6 hover:bg-emerald-900/5 transition">
             <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><MessageCircle className="h-4 w-4" /> WhatsApp principal</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Atendimento rápido para dúvidas e suporte ao agendamento.</p>
+            <p className="mt-2 text-emerald-900/80 text-sm">{CHRISMED_WHATSAPP.display} — atendimento rápido para dúvidas e suporte ao agendamento.</p>
           </a>
           <a href={`mailto:${EMAIL}`} className="block rounded-2xl border border-emerald-900/10 bg-white p-6 hover:bg-emerald-900/5 transition">
             <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><Mail className="h-4 w-4" /> E-mail</h3>

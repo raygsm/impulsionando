@@ -32,6 +32,8 @@ describe("validateOfficialChannelMessage", () => {
       "Meu fixo é 21 3333-4444",
       "WhatsApp +55 11 98888-7777",
       "Tel: 11987654321",
+      "Cuidado: WhatsApp (11) 99307-5000",
+      "https://wa.me/5511993075000",
     ])("rejeita %s", (msg) => {
       const r = validateOfficialChannelMessage(msg);
       expect(r).toMatch(ERR_PHONE);

@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { renderEmergencyHomePage } from "./lib/emergency-home-page";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -16,6 +17,41 @@ async function getServerEntry(): Promise<ServerEntry> {
     );
   }
   return serverEntryPromise;
+}
+
+function isDocumentRequest(request: Request): boolean {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  const url = new URL(request.url);
+  const isStaticOrApi =
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/assets/") ||
+    url.pathname.startsWith("/__l5e/");
+  if (isStaticOrApi) return false;
+  const accept = request.headers.get("accept") ?? "";
+  return accept.includes("text/html") || accept === "" || accept.includes("*/*");
+}
+
+async function normalizeUnexpectedNotFoundResponse(
+  request: Request,
+  response: Response,
+): Promise<Response> {
+  if (response.status !== 404 || !isDocumentRequest(request)) return response;
+
+  const url = new URL(request.url);
+  const body = await response.clone().text();
+  const genericNotFound = body.trim().toLowerCase() === "404 page not found";
+  if (url.pathname !== "/" && !genericNotFound) return response;
+
+  console.error(
+    new Error(`SSR returned a generic 404 for ${url.pathname}; serving emergency home fallback.`),
+  );
+  return new Response(renderEmergencyHomePage(), {
+    status: 200,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store, must-revalidate",
+    },
+  });
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
@@ -42,7 +78,8 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalizedNotFound = await normalizeUnexpectedNotFoundResponse(request, response);
+      return await normalizeCatastrophicSsrResponse(normalizedNotFound);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

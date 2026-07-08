@@ -9,10 +9,13 @@
  *    não oficiais (outros telefones, e-mails, redes sociais).
  */
 import { trackEvent } from "@/lib/analytics";
+import { IMPULSIONANDO_WHATSAPP } from "@/lib/contact-channels";
 
-export const OFFICIAL_WHATSAPP_PHONE_DISPLAY = "(21) 99307-5000";
-export const OFFICIAL_WHATSAPP_PHONE_E164 = "+5521993075000";
-export const OFFICIAL_WHATSAPP_DIGITS = "5521993075000";
+export const OFFICIAL_WHATSAPP_PHONE_DISPLAY = IMPULSIONANDO_WHATSAPP.display;
+export const OFFICIAL_WHATSAPP_PHONE_E164 = IMPULSIONANDO_WHATSAPP.e164;
+export const OFFICIAL_WHATSAPP_DIGITS = IMPULSIONANDO_WHATSAPP.digits;
+const OFFICIAL_WHATSAPP_LOCAL_DIGITS = OFFICIAL_WHATSAPP_DIGITS.slice(2);
+const OFFICIAL_WHATSAPP_SUBSCRIBER_DIGITS = OFFICIAL_WHATSAPP_LOCAL_DIGITS.slice(2);
 export const OFFICIAL_EMAIL_DOMAIN = "impulsionando.com.br";
 
 export type WhatsAppCTAVariant = "A" | "B" | "control" | string;
@@ -883,9 +886,20 @@ export function validateOfficialChannelMessage(text: string): string | null {
 
   // 1) telefones alternativos
   const phoneMatches = lower.match(/(?:\+?\d[\s\-().]*){10,}/g) ?? [];
+  const isOfficialPhone = (digits: string) => {
+    if (digits === OFFICIAL_WHATSAPP_DIGITS || digits === OFFICIAL_WHATSAPP_LOCAL_DIGITS) {
+      return true;
+    }
+
+    // Só aceite o número sem DDD quando ele aparece sozinho (9 dígitos).
+    // Se a mensagem inclui DDD/código do país, eles também precisam bater:
+    // "(11) 99307-5000" não pode passar só por terminar com "993075000".
+    return digits.length === OFFICIAL_WHATSAPP_SUBSCRIBER_DIGITS.length &&
+      digits === OFFICIAL_WHATSAPP_SUBSCRIBER_DIGITS;
+  };
   const hasForeignPhone = phoneMatches.some((m) => {
     const digits = m.replace(/\D/g, "");
-    return digits.length >= 10 && !digits.endsWith("993075000");
+    return digits.length >= 10 && !isOfficialPhone(digits);
   });
   if (hasForeignPhone) {
     return "Identificamos outro número de telefone na mensagem. Use somente o WhatsApp oficial (21) 99307-5000.";
