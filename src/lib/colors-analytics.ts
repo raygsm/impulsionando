@@ -21,31 +21,33 @@ export function ensureGaInstalled() {
   if (typeof window === "undefined") return;
   if (installed || !GA_ID) return;
   installed = true;
+  const w = window as unknown as GaWindow;
 
   const s = document.createElement("script");
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   document.head.appendChild(s);
 
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag() {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer!.push(arguments);
+  w.dataLayer = w.dataLayer || [];
+  w.gtag = function gtag(...args: unknown[]) {
+    w.dataLayer.push(args);
   };
-  window.gtag("js", new Date());
-  window.gtag("config", GA_ID, { anonymize_ip: true });
+  w.gtag("js", new Date());
+  w.gtag("config", GA_ID, { anonymize_ip: true });
 }
 
 export function track(event: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
   ensureGaInstalled();
-  if (window.gtag) {
-    window.gtag("event", event, params);
+  const w = window as unknown as Partial<GaWindow>;
+  if (w.gtag) {
+    w.gtag("event", event, params);
   } else if (typeof console !== "undefined") {
     // eslint-disable-next-line no-console
     console.debug("[colors-analytics]", event, params);
   }
 }
+
 
 export const colorsEvents = {
   checkoutClick: (product: string, platform: string, href: string) =>
