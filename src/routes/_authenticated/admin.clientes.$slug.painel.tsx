@@ -56,7 +56,7 @@ function PainelPage() {
   const features = useMemo(() => getTenantFeatures(slug), [slug]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-dvh bg-gradient-to-b from-background to-muted/20">
       <ClientDashboardHero
         tenantName={company.name}
         subdomain={company.subdomain ?? slug}

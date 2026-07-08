@@ -107,7 +107,7 @@ function CheckoutPlanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
+    <div className="min-h-dvh bg-background py-10 px-4">
       <div className="max-w-3xl mx-auto grid md:grid-cols-[1fr_320px] gap-6">
         <div className="space-y-4">
           <Card>
