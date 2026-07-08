@@ -13,6 +13,7 @@ import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 const LazyContato = lazy(() => import("@/components/colors/ContatoSection"));
 const LazyEbooks = lazy(() => import("@/components/colors/EbooksSection"));
 const LazyDepoimentos = lazy(() => import("@/components/colors/DepoimentosSection"));
+const LazyEcosystem = lazy(() => import("@/components/colors/EcosystemBlock"));
 
 export const Route = createFileRoute("/colors/")({
   head: () => ({
@@ -75,96 +76,100 @@ function ColorsSaudePage() {
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white antialiased">
       <TopBar />
-      <Hero />
-      <TrustStrip />
-      <QuemSomos />
-      <SubmarcasGrid />
+      <main>
+        <Hero />
+        <TrustStrip />
+        <QuemSomos />
+        <SubmarcasGrid />
 
-      <section id="produtos" className="relative py-20 sm:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.15),transparent_60%)]" />
-        <div className="container relative mx-auto max-w-7xl px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Nossos Produtos</p>
-            <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Linha completa. Qualidade premium.</h2>
-            <p className="mt-4 text-lg text-white/70">
-              Produtos oficiais das submarcas Green, Blue, Yellow e Colors. Compre apenas pelos canais autorizados.
-            </p>
-          </div>
+        <section id="produtos" className="relative py-20 sm:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.15),transparent_60%)]" />
+          <div className="container relative mx-auto max-w-7xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Nossos Produtos</p>
+              <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Linha completa. Qualidade premium.</h2>
+              <p className="mt-4 text-lg text-white/70">
+                Produtos oficiais das submarcas Green, Blue, Yellow e Colors. Compre apenas pelos canais autorizados.
+              </p>
+            </div>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Filtrar por marca">
-            {BRAND_FILTERS.map((b) => (
-              <button
-                key={b}
-                role="tab"
-                aria-selected={filter === b}
-                onClick={() => setFilter(b)}
-                className={
-                  "rounded-full border px-5 py-2 text-sm font-medium transition " +
-                  (filter === b
-                    ? "border-emerald-400 bg-emerald-500/20 text-emerald-300"
-                    : "border-white/15 text-white/70 hover:border-white/30 hover:text-white")
-                }
-              >
-                {b}
-              </button>
-            ))}
-          </div>
+            <div className="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Filtrar por marca">
+              {BRAND_FILTERS.map((b) => (
+                <button
+                  key={b}
+                  role="tab"
+                  aria-selected={filter === b}
+                  onClick={() => setFilter(b)}
+                  className={
+                    "rounded-full border px-5 py-2 text-sm font-medium transition " +
+                    (filter === b
+                      ? "border-emerald-400 bg-emerald-500/20 text-emerald-300"
+                      : "border-white/15 text-white/70 hover:border-white/30 hover:text-white")
+                  }
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((p) => (
-              <article key={p.slug} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]">
-                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${p.accent}`} />
-                <div className="flex items-center justify-between">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r ${p.accent} px-3 py-1 text-xs font-bold text-black`}>
-                    {p.brandLabel}
-                  </span>
-                  <span className="text-2xl" aria-hidden>{p.emoji}</span>
-                </div>
-                <h3 className="mt-4 text-2xl font-bold leading-tight">{p.name}</h3>
-                <p className="mt-1 text-sm font-semibold text-emerald-300">{p.tagline}</p>
-                <p className="mt-3 text-sm text-white/70">{p.short}</p>
-                <div className="mt-auto pt-5">
-                  <Link
-                    to="/colors/produto/$slug"
-                    params={{ slug: p.slug }}
-                    onClick={() => colorsEvents.ctaClick("ver_detalhes", p.slug)}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-300 hover:text-emerald-200"
-                  >
-                    Ver detalhes e comprar <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-                <div className="mt-4 border-t border-white/10 pt-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-white/50">Canais oficiais</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {p.links.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() => colorsEvents.checkoutClick(p.name, l.label, l.href)}
-                        className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-                      >
-                        {l.label}
-                      </a>
-                    ))}
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.map((p) => (
+                <article key={p.slug} className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]">
+                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${p.accent}`} />
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r ${p.accent} px-3 py-1 text-xs font-bold text-black`}>
+                      {p.brandLabel}
+                    </span>
+                    <span className="text-2xl" aria-hidden>{p.emoji}</span>
                   </div>
-                </div>
-              </article>
-            ))}
+                  <h3 className="mt-4 text-2xl font-bold leading-tight">{p.name}</h3>
+                  <p className="mt-1 text-sm font-semibold text-emerald-300">{p.tagline}</p>
+                  <p className="mt-3 text-sm text-white/70">{p.short}</p>
+                  <div className="mt-auto pt-5">
+                    <Link
+                      to="/colors/produto/$slug"
+                      params={{ slug: p.slug }}
+                      onClick={() => colorsEvents.ctaClick("ver_detalhes", p.slug)}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-300 hover:text-emerald-200"
+                    >
+                      Ver detalhes e comprar <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                  <div className="mt-4 border-t border-white/10 pt-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-white/50">Canais oficiais</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {p.links.map((l) => (
+                        <a
+                          key={l.href}
+                          href={l.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={() => colorsEvents.checkoutClick(p.name, l.label, l.href)}
+                          className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                        >
+                          {l.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Suspense fallback={<SectionSkeleton />}><LazyDepoimentos /></Suspense>
-      <Logistica />
-      <Suspense fallback={<SectionSkeleton />}><LazyEbooks /></Suspense>
-      <Suspense fallback={<SectionSkeleton />}><LazyContato /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyDepoimentos /></Suspense>
+        <Logistica />
+        <Suspense fallback={<SectionSkeleton />}><LazyEcosystem /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyEbooks /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyContato /></Suspense>
+      </main>
       <SiteFooter />
       <FloatingWhats />
     </div>
   );
 }
+
 
 function SectionSkeleton() {
   return <div className="mx-auto my-12 h-40 max-w-4xl animate-pulse rounded-3xl bg-white/5" />;
