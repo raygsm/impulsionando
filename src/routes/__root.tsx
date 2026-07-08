@@ -25,6 +25,7 @@ import { getTenantSubdomain, tenantSubdomainTarget } from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
+import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
 
 
 function TenantSubdomainRedirect() {
