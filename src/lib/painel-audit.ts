@@ -462,7 +462,9 @@ export function buildCombinedFunnelLegacyCsv(opts: {
     const p = (e.params ?? {}) as Record<string, unknown>;
     const href = typeof p.href === "string" ? p.href : "";
     const utm = utmFromHref(href);
-    const host = typeof window !== "undefined" ? window.location.hostname : "";
+    const host = (typeof p.host === "string" && p.host)
+      ? p.host
+      : (typeof window !== "undefined" ? window.location.hostname : "");
     if (hostFilter && host !== hostFilter) continue;
     rows.push({
       kind: "funnel_event",
