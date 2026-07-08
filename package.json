@@ -128,6 +128,7 @@
     "nitro": "3.0.260603-beta",
     "pdfkit": "^0.19.1",
     "prettier": "^3.7.3",
+    "terser": "^5.48.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1",
