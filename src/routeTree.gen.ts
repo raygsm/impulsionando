@@ -75,6 +75,7 @@ import { Route as WmpPacotesRouteImport } from './routes/wmp.pacotes'
 import { Route as WmpOrcamentoRouteImport } from './routes/wmp.orcamento'
 import { Route as WmpFaqRouteImport } from './routes/wmp.faq'
 import { Route as WmpCasesRouteImport } from './routes/wmp.cases'
+import { Route as WhiteLabelParceiroRouteImport } from './routes/white-label.parceiro'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
@@ -1144,6 +1145,11 @@ const WmpCasesRoute = WmpCasesRouteImport.update({
   id: '/cases',
   path: '/cases',
   getParentRoute: () => WmpRoute,
+} as any)
+const WhiteLabelParceiroRoute = WhiteLabelParceiroRouteImport.update({
+  id: '/parceiro',
+  path: '/parceiro',
+  getParentRoute: () => WhiteLabelRoute,
 } as any)
 const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
   id: '/login',
@@ -5582,6 +5588,7 @@ export interface FileRoutesByFullPath {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/white-label/parceiro': typeof WhiteLabelParceiroRoute
   '/wmp/cases': typeof WmpCasesRoute
   '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
@@ -6373,6 +6380,7 @@ export interface FileRoutesByTo {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/white-label/parceiro': typeof WhiteLabelParceiroRoute
   '/wmp/cases': typeof WmpCasesRoute
   '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
@@ -7180,6 +7188,7 @@ export interface FileRoutesById {
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/white-label/parceiro': typeof WhiteLabelParceiroRoute
   '/wmp/cases': typeof WmpCasesRoute
   '/wmp/faq': typeof WmpFaqRoute
   '/wmp/orcamento': typeof WmpOrcamentoRoute
@@ -7989,6 +7998,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/white-label/parceiro'
     | '/wmp/cases'
     | '/wmp/faq'
     | '/wmp/orcamento'
@@ -8780,6 +8790,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/white-label/parceiro'
     | '/wmp/cases'
     | '/wmp/faq'
     | '/wmp/orcamento'
@@ -9586,6 +9597,7 @@ export interface FileRouteTypes {
     | '/trial_/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/white-label/parceiro'
     | '/wmp/cases'
     | '/wmp/faq'
     | '/wmp/orcamento'
@@ -10848,6 +10860,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/wmp/cases'
       preLoaderRoute: typeof WmpCasesRouteImport
       parentRoute: typeof WmpRoute
+    }
+    '/white-label/parceiro': {
+      id: '/white-label/parceiro'
+      path: '/parceiro'
+      fullPath: '/white-label/parceiro'
+      preLoaderRoute: typeof WhiteLabelParceiroRouteImport
+      parentRoute: typeof WhiteLabelRoute
     }
     '/white-label/login': {
       id: '/white-label/login'
@@ -17901,10 +17920,12 @@ const VitrineRouteWithChildren =
 
 interface WhiteLabelRouteChildren {
   WhiteLabelLoginRoute: typeof WhiteLabelLoginRoute
+  WhiteLabelParceiroRoute: typeof WhiteLabelParceiroRoute
 }
 
 const WhiteLabelRouteChildren: WhiteLabelRouteChildren = {
   WhiteLabelLoginRoute: WhiteLabelLoginRoute,
+  WhiteLabelParceiroRoute: WhiteLabelParceiroRoute,
 }
 
 const WhiteLabelRouteWithChildren = WhiteLabelRoute._addFileChildren(
