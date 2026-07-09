@@ -9,6 +9,7 @@ import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchConsumidorDashboard } from "@/lib/audience-dashboards.functions";
 import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, TicketCheck, CalendarDays, Star, Lock, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { CardSkeleton } from "@/components/feedback";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboards/consumidor")({
