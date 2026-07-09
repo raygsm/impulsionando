@@ -199,9 +199,17 @@ function NichosMenu() {
               </div>
 
               <div className="mt-2 flex items-center justify-center">
-                <a href={WHATSAPP_NICHO_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary">
-                  <MessageCircle className="h-3.5 w-3.5" /> Falar com consultor no WhatsApp
-                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                    }
+                  }}
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary focus-ring rounded-sm"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" /> Falar com Impulsionito
+                </button>
               </div>
             </div>
           </NavigationMenuContent>
