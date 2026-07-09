@@ -1270,20 +1270,18 @@ export function HomePage() {
                 </a>
               </Button>
               <Button
-                asChild
                 size="sm"
                 variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
-                onClick={() => trackHeroCta("falar_impulsionito")}
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5 focus-ring"
+                onClick={() => {
+                  trackHeroCta("falar_impulsionito");
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  }
+                }}
+                data-analytics="hero-impulsionito"
               >
-                <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-analytics="hero-whatsapp"
-                >
-                  <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-                </a>
+                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
               </Button>
               <Button
                 asChild
