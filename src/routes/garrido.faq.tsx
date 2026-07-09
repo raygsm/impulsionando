@@ -6,36 +6,36 @@ const CANONICAL = "https://impulsionando.com.br/garrido/faq";
 
 const FAQS = [
   {
-    q: "Qual é o custo para anunciar meu imóvel com a Garrido?",
-    a: "Não cobramos taxa de cadastro. A comissão é acordada em contrato de mediação e só é devida quando o imóvel é efetivamente vendido ou alugado.",
+    question: "Qual é o custo para anunciar meu imóvel com a Garrido?",
+    answer: "Não cobramos taxa de cadastro. A comissão é acordada em contrato de mediação e só é devida quando o imóvel é efetivamente vendido ou alugado.",
   },
   {
-    q: "Como funciona a avaliação gratuita?",
-    a: "Fazemos Análise Comparativa de Mercado (ACM), vistoria técnica opcional e entregamos um laudo com faixa recomendada para venda e locação — sem compromisso.",
+    question: "Como funciona a avaliação gratuita?",
+    answer: "Fazemos Análise Comparativa de Mercado (ACM), vistoria técnica opcional e entregamos um laudo com faixa recomendada para venda e locação — sem compromisso.",
   },
   {
-    q: "Vocês trabalham com financiamento?",
-    a: "Sim. Trabalhamos com CEF, Itaú, Bradesco, Santander, portabilidade e uso de FGTS. O simulador em nosso site mostra o cenário SAC — a taxa final depende de análise de crédito.",
+    question: "Vocês trabalham com financiamento?",
+    answer: "Sim. Trabalhamos com CEF, Itaú, Bradesco, Santander, portabilidade e uso de FGTS. O simulador em nosso site mostra o cenário SAC — a taxa final depende de análise de crédito.",
   },
   {
-    q: "Como agendo uma visita?",
-    a: "Na página do imóvel, clique em Agendar visita. Um corretor confirma o horário. Você também pode gerenciar visitas na Área do cliente.",
+    question: "Como agendo uma visita?",
+    answer: "Na página do imóvel, clique em Agendar visita. Um corretor confirma o horário. Você também pode gerenciar visitas na Área do cliente.",
   },
   {
-    q: "Vocês administram aluguel para proprietários?",
-    a: "Sim. A Garrido oferece administração completa: divulgação, seleção do inquilino, contrato digital, boleto, cobrança, repasse e prestação de contas mensal.",
+    question: "Vocês administram aluguel para proprietários?",
+    answer: "Sim. A Garrido oferece administração completa: divulgação, seleção do inquilino, contrato digital, boleto, cobrança, repasse e prestação de contas mensal.",
   },
   {
-    q: "Como é o contrato de locação?",
-    a: "Contrato digital padrão do mercado, com garantia flexível (fiador, seguro-fiança, caução ou título de capitalização). Assinatura pela sua Área do cliente ou presencial.",
+    question: "Como é o contrato de locação?",
+    answer: "Contrato digital padrão do mercado, com garantia flexível (fiador, seguro-fiança, caução ou título de capitalização). Assinatura pela sua Área do cliente ou presencial.",
   },
   {
-    q: "Meus dados estão seguros?",
-    a: "Sim. Sua conta é gerida pelo Core Impulsionando, com autenticação segura, opção de 2FA e política em conformidade com a LGPD.",
+    question: "Meus dados estão seguros?",
+    answer: "Sim. Sua conta é gerida pelo Core Impulsionando, com autenticação segura, opção de 2FA e política em conformidade com a LGPD.",
   },
   {
-    q: "O WhatsApp é canal de negociação?",
-    a: "Não. O WhatsApp da Garrido é canal de suporte e pós-venda. Todas as negociações formais (visitas, propostas, contratos) acontecem nos fluxos internos do site com trilha de auditoria.",
+    question: "O WhatsApp é canal de negociação?",
+    answer: "Não. O WhatsApp da Garrido é canal de suporte e pós-venda. Todas as negociações formais (visitas, propostas, contratos) acontecem nos fluxos internos do site com trilha de auditoria.",
   },
 ];
 
