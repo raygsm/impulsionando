@@ -136,7 +136,35 @@ function WmpHome() {
         </div>
       </section>
 
-      {/* PACOTES (preview) */}
+      {/* AGENDA / INGRESSOS — placeholder institucional (roadmap Codex) */}
+      <section id="agenda" className="mx-auto max-w-7xl px-6 py-20">
+        <div className="text-center mb-10">
+          <span className="wmp-chip mb-3"><Calendar className="size-3" aria-hidden /> Agenda &amp; ingressos</span>
+          <h2 className="wmp-display text-3xl md:text-4xl mb-3">Eventos abertos ao público</h2>
+          <p className="opacity-75 max-w-2xl mx-auto">
+            A WMP está preparando a plataforma de venda de ingressos, inscrições e credenciamento
+            integrada ao ecossistema Impulsionando. Enquanto a agenda pública é liberada, os eventos
+            fechados seguem atendidos por briefing direto.
+          </p>
+        </div>
+        <div className="wmp-surface p-8 md:p-10 text-center max-w-3xl mx-auto">
+          <Ticket className="size-10 mx-auto mb-4" style={{ color: "var(--wmp-gold)" }} aria-hidden />
+          <h3 className="wmp-display text-xl mb-2">Nenhum evento público em cartaz no momento</h3>
+          <p className="opacity-75 text-sm mb-6">
+            Produz um evento e quer vender ingressos, gerir lotes, check-in por QR Code e área
+            do participante? Fale com a WMP: montamos a operação técnica e comercial ponta a ponta.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link to="/wmp/orcamento" className="wmp-cta">
+              <Sparkles className="size-4" aria-hidden /> Solicitar proposta para meu evento
+            </Link>
+            <Link to="/wmp/cases" className="wmp-cta wmp-cta-outline">
+              Ver eventos já entregues <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="text-center mb-12">
           <span className="wmp-chip mb-3"><Sparkles className="size-3" /> Pacotes comerciais</span>
