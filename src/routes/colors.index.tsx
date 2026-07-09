@@ -4,6 +4,8 @@ import { ArrowRight, ShieldCheck, Truck, Sparkles, Heart, MessageCircle, CheckCi
 import { COLORS_PRODUCTS, COLORS_BRANDS, type ColorsBrand } from "@/data/colors-products";
 import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
+import AntiFakePopup from "@/components/colors/AntiFakePopup";
+import ComprarOriginalFab from "@/components/colors/ComprarOriginalFab";
 
 /**
  * colors.impulsionando.com.br — Landing FRONT-END.
@@ -177,7 +179,8 @@ function ColorsSaudePage() {
         <Suspense fallback={<SectionSkeleton />}><LazyContato /></Suspense>
       </main>
       <SiteFooter />
-      <FloatingWhats />
+      <ComprarOriginalFab source="home" />
+      <AntiFakePopup />
     </div>
   );
 }
