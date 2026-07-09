@@ -1419,195 +1419,150 @@ export function HomePage() {
       <PublicHeader />
 
       <main className="flex-1">
-        {/* HERO VENDEDOR */}
+        {/* HERO — foco em conversão: 1 CTA principal + 1 secundário + chips */}
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
           <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+          <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
             <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-6 px-3 py-1">
-              <Sparkles className="w-3 h-3 mr-1.5" /> Tecnologia + Estratégia + Comunicação
+              <Sparkles className="w-3 h-3 mr-1.5" /> Plataforma SaaS modular para PMEs brasileiras
             </Badge>
 
-            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
-              Tecnologia que conecta{" "}
-              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atendimento, vendas e operação</span>{" "}
-              em um só ecossistema.
+            <h1 className="text-[2.15rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
+              Um único sistema para{" "}
+              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atender, vender e operar</span>{" "}
+              o seu negócio.
             </h1>
             <p className="mt-6 text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl mx-auto">
-              CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação —
-              modular, por nicho, com White Label pronto para revender com a sua marca.
+              CRM, WhatsApp, agenda, pagamento, área do cliente e dashboards conectados em um só lugar —
+              modular, por nicho, com implantação assistida.
             </p>
 
-            {/* SR-only section heading — dá ao tablist de perfis um H2
-              indexável sem competir com o H1 visível do hero. */}
-            <h2 className="sr-only">Escolha o seu perfil</h2>
-
-            {/*
-              Hero CTAs — três cartões de perfil.
-              Layout responsivo:
-              - <sm  : 1 coluna, full-width, altura confortável.
-              - >=sm : 3 colunas equal, mesma altura via items-stretch.
-              Estrutura interna em flex-col centralizado garante alinhamento
-              de ícone+título e subtítulo em qualquer breakpoint.
-            */}
-            <div
-              className="mt-8 grid gap-3 grid-cols-1 sm:grid-cols-3 items-stretch max-w-3xl mx-auto"
-              aria-label="Perfis de uso da Impulsionando"
-              role="group"
-            >
-              <article aria-labelledby="hero-perfil-empresa" className="h-full">
-                <h3 id="hero-perfil-empresa" className="sr-only">
-                  Sou empresa — usar a plataforma na minha operação
-                </h3>
-                <Link
-                  to="/orcamento"
-                  data-analytics="hero-sou-empresa"
-                  onClick={() => trackHeroCta("sou_empresa")}
-                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-white text-primary px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:bg-white/95 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Building2 className="w-4 h-4 shrink-0" />
-                    <span>Sou empresa</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-75">
-                    Quero usar na minha operação
-                  </span>
-                </Link>
-              </article>
-
-              <article aria-labelledby="hero-perfil-white-label" className="h-full">
-                <h3 id="hero-perfil-white-label" className="sr-only">
-                  White Label — revender a plataforma com a minha marca
-                </h3>
-                <Link
-                  to="/nichos/$slug"
-                  params={{ slug: "white-label" }}
-                  data-analytics="hero-white-label"
-                  onClick={() => trackHeroCta("white_label")}
-                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-gradient-primary text-primary-foreground px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:brightness-110 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Rocket className="w-4 h-4 shrink-0" />
-                    <span>White Label</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-90">
-                    Quero revender com a minha marca
-                  </span>
-                </Link>
-              </article>
-
-              <article aria-labelledby="hero-perfil-clube" className="h-full">
-                <h3 id="hero-perfil-clube" className="sr-only">
-                  Clube de Vantagens — descontos e benefícios para consumidores
-                </h3>
-                <Link
-                  to="/clube"
-                  data-analytics="hero-clube"
-                  data-cta="clube"
-                  onClick={() => trackHeroCta("clube")}
-                  className="group glass-cta flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl px-4 py-4 text-center shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Gift className="w-4 h-4 shrink-0" />
-                    <span>Clube de Vantagens</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-90">
-                    Quero descontos e benefícios
-                  </span>
-                </Link>
-              </article>
-            </div>
-
-            {/* CTA Ecossistema — porta de entrada do consumidor final */}
-            <div className="mt-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-5 sm:p-6 text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex-1">
-                  <Badge className="bg-white/20 text-white border-0 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 mr-1" /> Para o consumidor
-                  </Badge>
-                  <h3 className="text-xl sm:text-2xl font-bold">Conheça o Ecossistema</h3>
-                  <p className="text-sm sm:text-base text-white/85 mt-1">
-                    Encontre empresas, serviços, benefícios e experiências próximas de você dentro da rede Impulsionando.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
-                  <Button asChild size="sm" className="bg-white text-primary hover:bg-white/90 gap-1.5">
-                    <Link to="/ecossistema" data-analytics="hero-ecossistema"><Sparkles className="w-4 h-4" /> Conheça o Ecossistema</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
-                    <Link to="/ecossistema" search={{ geo: 1 }} data-analytics="hero-ecossistema-geo"><Building2 className="w-4 h-4" /> Empresas perto de mim</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
-                    <Link to="/clube" data-analytics="hero-ecossistema-clube"><Gift className="w-4 h-4" /> Entrar no Clube</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            {/* CTAs principais — 1 primário + 1 secundário */}
+            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
                 asChild
-                size="sm"
-                className="bg-white text-primary hover:bg-white/90 gap-1.5 shadow-sm"
-                onClick={() => trackHeroCta("diagnostico_30s")}
+                size="lg"
+                className="bg-white text-primary hover:bg-white/90 gap-2 shadow-lg w-full sm:w-auto min-w-[220px]"
+                onClick={() => trackHeroCta("sou_empresa")}
               >
-                <a href="#diagnostico" data-analytics="hero-diagnostico-30s">
-                  <Search className="w-4 h-4" /> Diagnóstico em 30 segundos
-                </a>
+                <Link to="/orcamento" data-analytics="hero-sou-empresa">
+                  <Rocket className="w-4 h-4" /> Montar minha operação
+                </Link>
               </Button>
               <Button
-                size="sm"
+                asChild
+                size="lg"
                 variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5 focus-ring"
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto min-w-[220px]"
+                onClick={() => trackHeroCta("ver_demonstracoes")}
+              >
+                <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
+                  <PlayCircle className="w-4 h-4" /> Ver demonstração ao vivo
+                </Link>
+              </Button>
+            </div>
+
+            {/* Ações complementares — chips discretos, não competem visualmente */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+              <a
+                href="#diagnostico"
+                data-analytics="hero-diagnostico-30s"
+                onClick={() => trackHeroCta("diagnostico_30s")}
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+              >
+                <Search className="w-3.5 h-3.5" /> Fazer diagnóstico em 30s
+              </a>
+              <span aria-hidden className="text-white/30">·</span>
+              <a
+                href="#planos-home"
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+              >
+                <ArrowRight className="w-3.5 h-3.5" /> Ver planos
+              </a>
+              <span aria-hidden className="text-white/30">·</span>
+              <button
+                type="button"
+                data-analytics="hero-impulsionito"
                 onClick={() => {
                   trackHeroCta("falar_impulsionito");
                   if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "home" } }));
                   }
                 }}
-                data-analytics="hero-impulsionito"
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
               >
-                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-              </Button>
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
-                onClick={() => trackHeroCta("ver_demonstracoes")}
-              >
-                <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
-                  <PlayCircle className="w-4 h-4" /> Ver demonstrações
-                </Link>
-              </Button>
+                <MessageCircle className="w-3.5 h-3.5" /> Falar com o Impulsionito
+              </button>
             </div>
 
-            {/* Trust bar — reforço visual de segurança/leveza */}
+            {/* Trust chips — reforço rápido de segurança */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Sem cartão para testar</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Setup assistido</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Implantação assistida</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> LGPD & dados no Brasil</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Modular por nicho</span>
             </div>
 
-
-
-
+            {/* Vertentes complementares — White Label + Consumidor, discretos e fora do CTA principal */}
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 max-w-3xl mx-auto text-left">
+              <Link
+                to="/nichos/$slug"
+                params={{ slug: "white-label" }}
+                data-analytics="hero-white-label"
+                onClick={() => trackHeroCta("white_label")}
+                className="group rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 hover:bg-white/15 transition"
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Rocket className="w-4 h-4" /> Revender com sua marca
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:translate-x-0.5 transition" />
+                </div>
+                <p className="text-xs text-white/75 mt-1 leading-relaxed">
+                  White Label pronto para agências, consultorias e franquias.
+                </p>
+              </Link>
+              <Link
+                to="/ecossistema"
+                data-analytics="hero-ecossistema"
+                onClick={() => trackHeroCta("clube")}
+                className="group rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 hover:bg-white/15 transition"
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Gift className="w-4 h-4" /> Sou consumidor final
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:translate-x-0.5 transition" />
+                </div>
+                <p className="text-xs text-white/75 mt-1 leading-relaxed">
+                  Ecossistema, Clube de Vantagens e empresas próximas.
+                </p>
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* DIAGNÓSTICO */}
-        <div id="diagnostico"><Diagnostico /></div>
+        {/* TRUST BAR — diferenciais da plataforma */}
+        <TrustBar />
 
-        {/* SIMULADOR */}
-        <SimuladorPerda />
-
-        {/* 5 FASES */}
+        {/* 5 FASES — o que é / como funciona */}
         <CincoFases />
 
-        {/* CANAIS */}
+        {/* DIAGNÓSTICO — nichos + recursos personalizados */}
+        <div id="diagnostico"><Diagnostico /></div>
+
+        {/* CANAIS — recursos de comunicação */}
         <CanaisComunicacao />
+
+        {/* MINI COMPARATIVO — planos */}
+        <MiniComparativoPlanos />
+
+        {/* SIMULADOR — prova de valor */}
+        <SimuladorPerda />
+
+        {/* PROVA SOCIAL — segmentos, números, depoimentos */}
+        <ProvaSocial />
+
+        {/* FAQ */}
+        <FaqHome />
+
 
         {/* CTA FINAL */}
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
