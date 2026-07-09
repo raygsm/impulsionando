@@ -322,6 +322,3 @@ function fmt(iso: string | null | undefined) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("pt-BR");
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _KeepImport = Textarea; // reserva para futura nota; import mantido para lint estável
