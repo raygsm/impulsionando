@@ -1,29 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap, Quote, Check, HelpCircle } from "lucide-react";
+import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap, Quote, Check, HelpCircle, Ticket } from "lucide-react";
 import { WmpShell } from "@/components/wmp/WmpShell";
 import { WMP_DEPOIMENTOS, WMP_PACOTES, WMP_FAQ, WMP_CERTIFICACOES } from "@/data/wmp-content";
 
 export const Route = createFileRoute("/wmp/")({
   head: () => ({
     meta: [
-      { title: "WMP — Som, luz e palco para eventos premium" },
-      { name: "description", content: "Produção de eventos com pré-diagnóstico acústico inteligente. Som, luz, palco, telão e coordenação. ART, laudo de dB e plano B por escrito. Parceira Impulsionando." },
-      { property: "og:title", content: "WMP — Som, luz e palco para eventos premium" },
-      { property: "og:description", content: "Som que preenche. Luz que emociona. Pré-diagnóstico acústico antes mesmo da visita técnica." },
+      { title: "WMP — Plataforma de produção e gestão de eventos" },
+      { name: "description", content: "Plataforma completa de produção, gestão e comercialização de eventos: som, luz, palco, telão, coordenação, ART e laudo de dB. Referência Impulsionando em eventos, shows, festivais e corporativos." },
+      { property: "og:title", content: "WMP — Plataforma completa para eventos" },
+      { property: "og:description", content: "Do briefing à execução: pré-diagnóstico acústico, estrutura, coordenação e experiência. Um único interlocutor, sem improviso." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/wmp" }],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
+          "@type": "Organization",
           name: "Wagner Miller Produções (WMP)",
-          description: "Produção de eventos com som, iluminação, palco, telão e coordenação técnica.",
+          description: "Plataforma de produção, gestão e comercialização de eventos: som, iluminação, palco, telão e coordenação técnica.",
           areaServed: "Brasil",
           address: { "@type": "PostalAddress", addressRegion: "RJ", addressCountry: "BR" },
-          aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "312" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "WMP", item: "/wmp" },
+          ],
         }),
       },
     ],
@@ -126,7 +136,35 @@ function WmpHome() {
         </div>
       </section>
 
-      {/* PACOTES (preview) */}
+      {/* AGENDA / INGRESSOS — placeholder institucional (roadmap Codex) */}
+      <section id="agenda" className="mx-auto max-w-7xl px-6 py-20">
+        <div className="text-center mb-10">
+          <span className="wmp-chip mb-3"><Calendar className="size-3" aria-hidden /> Agenda &amp; ingressos</span>
+          <h2 className="wmp-display text-3xl md:text-4xl mb-3">Eventos abertos ao público</h2>
+          <p className="opacity-75 max-w-2xl mx-auto">
+            A WMP está preparando a plataforma de venda de ingressos, inscrições e credenciamento
+            integrada ao ecossistema Impulsionando. Enquanto a agenda pública é liberada, os eventos
+            fechados seguem atendidos por briefing direto.
+          </p>
+        </div>
+        <div className="wmp-surface p-8 md:p-10 text-center max-w-3xl mx-auto">
+          <Ticket className="size-10 mx-auto mb-4" style={{ color: "var(--wmp-gold)" }} aria-hidden />
+          <h3 className="wmp-display text-xl mb-2">Nenhum evento público em cartaz no momento</h3>
+          <p className="opacity-75 text-sm mb-6">
+            Produz um evento e quer vender ingressos, gerir lotes, check-in por QR Code e área
+            do participante? Fale com a WMP: montamos a operação técnica e comercial ponta a ponta.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link to="/wmp/orcamento" className="wmp-cta">
+              <Sparkles className="size-4" aria-hidden /> Solicitar proposta para meu evento
+            </Link>
+            <Link to="/wmp/cases" className="wmp-cta wmp-cta-outline">
+              Ver eventos já entregues <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="text-center mb-12">
           <span className="wmp-chip mb-3"><Sparkles className="size-3" /> Pacotes comerciais</span>
