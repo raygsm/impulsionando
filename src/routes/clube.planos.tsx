@@ -56,7 +56,7 @@ function ClubePlanos() {
         />
 
         <div className="grid md:grid-cols-2 gap-5 mt-8">
-          <Card className="p-8 flex flex-col">
+          <Card className="p-8 flex flex-col hover-lift">
             <div className="text-xs uppercase tracking-[0.2em] opacity-70">Free</div>
             <div className="font-serif text-4xl mt-2">R$ 0</div>
             <div className="text-xs opacity-70 mt-1">Para sempre. Sem cartão.</div>
@@ -67,7 +67,7 @@ function ClubePlanos() {
                 </li>
               ))}
             </ul>
-            <Button asChild variant="outline" className="mt-6"><Link to="/clube/cadastro">Entrar grátis</Link></Button>
+            <Button asChild variant="outline" className="mt-6 focus-ring"><Link to="/clube/cadastro">Entrar grátis</Link></Button>
           </Card>
 
           <Card className="p-8 flex flex-col border-primary/60 ring-1 ring-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
