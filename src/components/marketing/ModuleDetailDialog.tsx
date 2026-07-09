@@ -213,14 +213,14 @@ export function ModuleDetailDialog({ module, trigger }: Props) {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild className="gap-2 bg-gradient-primary">
-                <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" />{" "}
-                  {module.ctaLabel ?? "Contratar agora no WhatsApp"}
-                </a>
+                <Link to="/orcamento">
+                  {module.ctaLabel ?? "Contratar este módulo"}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2">
-                <Link to="/orcamento">
-                  Montar orçamento <ArrowRight className="w-4 h-4" />
+                <Link to="/planos">
+                  Ver planos <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
               {module.demoRoute && (
@@ -230,6 +230,11 @@ export function ModuleDetailDialog({ module, trigger }: Props) {
                   </Link>
                 </Button>
               )}
+              <Button asChild variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                <a href={waUrl} target="_blank" rel="noopener noreferrer" aria-label="Tirar dúvida no WhatsApp">
+                  <MessageCircle className="w-4 h-4" /> Dúvida no WhatsApp
+                </a>
+              </Button>
             </div>
             <p className="text-[11px] text-muted-foreground">
               Resposta em até 1 dia útil. Sem compromisso. Sem cadastro

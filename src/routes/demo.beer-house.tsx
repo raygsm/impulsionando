@@ -155,13 +155,18 @@ function BeerHouseDemo() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Quero uma demo guiada
-                  </a>
+                  <Link to="/orcamento">
+                    Quero esta operação no meu bar
+                  </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
                   <Link to="/demo">Ver outras demos</Link>
+                </Button>
+                <Button asChild variant="ghost" size="lg">
+                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Tirar dúvida no WhatsApp">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Dúvida no WhatsApp
+                  </a>
                 </Button>
               </div>
             </div>
