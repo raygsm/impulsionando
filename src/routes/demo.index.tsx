@@ -275,7 +275,7 @@ function DemoLanding() {
                 e disparo automático de e-mail de boas-vindas.
               </p>
             </div>
-            <Button asChild size="lg" className="bg-gradient-primary gap-2">
+            <Button asChild size="lg" className="bg-gradient-primary btn-alive gap-2">
               <Link to="/demo/feira"><PlayCircle className="w-4 h-4" /> Abrir demo de feira</Link>
             </Button>
           </div>
