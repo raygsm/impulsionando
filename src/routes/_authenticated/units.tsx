@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,7 @@ function UnitsPage() {
     return companyOptions.find((c) => c.id === activeCompanyId)?.name ?? "—";
   }, [isImpersonating, impersonatedCompanyName, companyOptions, activeCompanyId]);
 
-  const { data: units } = useQuery({
+  const { data: units, isLoading } = useQuery({
     queryKey: ["units", scopedCompanyId ?? "master"],
     queryFn: async () => {
       let q = supabase
@@ -150,7 +151,14 @@ function UnitsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {units?.length === 0 && (
+            {isLoading && Array.from({ length: 4 }).map((_, i) => (
+              <TableRow key={`sk-un-${i}`}>
+                {Array.from({ length: isMasterView ? 5 : 4 }).map((_, j) => (
+                  <TableCell key={j}><Skeleton className="h-3 w-full" /></TableCell>
+                ))}
+              </TableRow>
+            ))}
+            {!isLoading && units?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={isMasterView ? 5 : 4} className="text-center text-muted-foreground py-8">
                   Nenhuma unidade cadastrada{!isMasterView ? ` para ${activeCompanyName}` : ""}.

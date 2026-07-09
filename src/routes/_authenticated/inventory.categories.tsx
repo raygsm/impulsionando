@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Tags } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -24,7 +26,7 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", description: "" });
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["inv-cats", companyId], enabled: !!companyId,
     queryFn: async () => (await supabase.from("inv_categories").select("*").eq("company_id", companyId).order("name")).data ?? [],
   });
@@ -62,7 +64,10 @@ function Page() {
           </Dialog></div>
       } />
       <Card className="shadow-card divide-y">
-        {!data?.length && <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma categoria.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={4} /></div>}
+        {!isLoading && !data?.length && (
+          <EmptyStateV2 icon={Tags} title="Nenhuma categoria" description="Organize seus produtos em categorias para facilitar buscas e relatórios." className="border-0 shadow-none" />
+        )}
         {data?.map((c) => (
           <div key={c.id} className="p-3 flex items-center gap-3">
             <div className="flex-1"><div className="font-medium text-sm">{c.name}</div>{c.description && <div className="text-xs text-muted-foreground">{c.description}</div>}</div>

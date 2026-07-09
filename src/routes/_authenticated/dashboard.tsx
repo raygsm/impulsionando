@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
+import { CardSkeleton } from "@/components/feedback";
 import { Building2, Users, Boxes, Tags, FileSearch, MapPin, LayoutGrid, RotateCcw, Star, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -138,8 +139,8 @@ function RecentsPanel() {
 
 function DashboardPage() {
   const { data: me } = useCurrentUser();
-  const { data: stats } = useQuery({ queryKey: ["dashboard-stats"], queryFn: fetchStats });
-  const { data: audit } = useQuery({ queryKey: ["dashboard-audit"], queryFn: fetchRecentAudit });
+  const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ["dashboard-stats"], queryFn: fetchStats });
+  const { data: audit, isLoading: auditLoading } = useQuery({ queryKey: ["dashboard-audit"], queryFn: fetchRecentAudit });
   const { isEnabled } = useDashboardWidgets();
 
   const greeting = me?.memberships[0]?.display_name ?? me?.user.email ?? "";
@@ -162,6 +163,9 @@ function DashboardPage() {
       <NicheOnboardingBanner companyId={me?.memberships?.[0]?.company_id} />
 
       {anyStat && (
+        statsLoading && !stats ? (
+          <div className="mb-8"><CardSkeleton count={4} className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" /></div>
+        ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
           {isEnabled("stat-companies") && <StatCard label="Empresas" value={stats?.companies ?? "—"} hint={`${stats?.activeCompanies ?? 0} ativas`} icon={Building2} accent />}
           {isEnabled("stat-units") && <StatCard label="Unidades" value={stats?.units ?? "—"} icon={MapPin} />}
@@ -170,6 +174,7 @@ function DashboardPage() {
           {isEnabled("stat-modules") && <StatCard label="Módulos" value={stats?.modules ?? "—"} icon={Boxes} />}
           {isEnabled("stat-audit") && <StatCard label="Eventos de auditoria" value={stats?.auditEvents ?? "—"} icon={FileSearch} />}
         </div>
+        )
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -182,7 +187,13 @@ function DashboardPage() {
               </div>
             </div>
             <div className="divide-y">
-              {(audit ?? []).length === 0 && (
+              {auditLoading && Array.from({ length: 4 }).map((_, i) => (
+                <div key={`sk-a-${i}`} className="py-3 flex items-center justify-between gap-4">
+                  <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+                </div>
+              ))}
+              {!auditLoading && (audit ?? []).length === 0 && (
                 <p className="text-sm text-muted-foreground py-6 text-center">Sem eventos registrados ainda.</p>
               )}
               {audit?.map((row) => (

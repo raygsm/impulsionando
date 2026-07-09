@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { ArrowLeftRight } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -34,7 +36,7 @@ function Page() {
     queryFn: async () => (await supabase.from("inv_products").select("id,name,unit").eq("company_id", companyId).eq("is_active", true).order("name")).data ?? [],
   });
 
-  const { data: movs } = useQuery({
+  const { data: movs, isLoading } = useQuery({
     queryKey: ["inv-movs", companyId, tab], enabled: !!companyId,
     queryFn: async () => {
       let q = supabase.from("inv_movements")
@@ -115,7 +117,10 @@ function Page() {
       </Tabs>
 
       <Card className="shadow-card divide-y">
-        {!movs?.length && <div className="p-8 text-center text-sm text-muted-foreground">Sem movimentações.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={5} /></div>}
+        {!isLoading && !movs?.length && (
+          <EmptyStateV2 icon={ArrowLeftRight} title="Sem movimentações" description="Nenhuma entrada, saída ou ajuste no filtro atual." className="border-0 shadow-none" />
+        )}
         {movs?.map((m) => {
           const prod = (m as { inv_products: { name: string; unit: string } | null }).inv_products;
           const Icon = m.kind === "in" ? ArrowDown : m.kind === "out" ? ArrowUp : RefreshCw;
