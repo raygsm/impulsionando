@@ -1091,6 +1091,294 @@ function CanaisComunicacao() {
   );
 }
 
+// ============== TRUST BAR ==============
+const TRUST_ITEMS = [
+  { icon: ShieldCheck, title: "LGPD & dados no Brasil", desc: "Servidores nacionais, criptografia em trânsito e em repouso." },
+  { icon: Layers, title: "Plataforma SaaS modular", desc: "Ative apenas os módulos que fazem sentido para seu nicho." },
+  { icon: Bot, title: "Automação & IA integrada", desc: "Impulsionito, réguas por nicho e agentes prontos para operar." },
+  { icon: RefreshCw, title: "Atualização contínua", desc: "Novas features publicadas sem custo adicional para clientes ativos." },
+  { icon: MessageCircle, title: "Suporte humano", desc: "Time de sucesso do cliente por WhatsApp, chat e e-mail." },
+  { icon: Zap, title: "Integrações abertas", desc: "APIs, webhooks e N8N para conectar seu stack atual." },
+];
+
+function TrustBar() {
+  return (
+    <section aria-labelledby="trust-bar-title" className="border-b bg-card/40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <h2 id="trust-bar-title" className="sr-only">Diferenciais da plataforma</h2>
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TRUST_ITEMS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <div key={t.title} className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Icon className="w-4.5 h-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold">{t.title}</div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{t.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============== MINI COMPARATIVO DE PLANOS ==============
+const HOME_PLANOS = [
+  {
+    slug: "essencial" as const,
+    nome: "Essencial",
+    tagline: "Para começar organizado.",
+    publico: "Autônomos, MEIs e negócios locais em fase inicial.",
+    beneficios: [
+      "CRM + WhatsApp integrado",
+      "Agenda online e pagamento avulso",
+      "Área do cliente básica",
+    ],
+    destaque: false,
+  },
+  {
+    slug: "integrado" as const,
+    nome: "Integrado",
+    tagline: "O plano mais escolhido.",
+    publico: "Clínicas, imobiliárias, bares, lojas com operação ativa.",
+    beneficios: [
+      "Módulos combinados por nicho",
+      "Automação, réguas e cobrança recorrente",
+      "Dashboards e área do cliente completa",
+    ],
+    destaque: true,
+  },
+  {
+    slug: "avancado" as const,
+    nome: "Avançado",
+    tagline: "Operação completa e White Label.",
+    publico: "Empresas com times, filiais ou revenda com marca própria.",
+    beneficios: [
+      "Multi-empresa, RBAC e auditoria",
+      "White Label pronto para revender",
+      "Integrações via API, N8N e IA dedicada",
+    ],
+    destaque: false,
+  },
+];
+
+function MiniComparativoPlanos() {
+  return (
+    <section id="planos-home" aria-labelledby="planos-home-title" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Planos</Badge>
+        <h2 id="planos-home-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+          Um plano para cada fase da sua operação
+        </h2>
+        <p className="text-muted-foreground mt-3">
+          Todos incluem suporte humano, atualizações contínuas e dados no Brasil. Você pode migrar entre planos a qualquer momento.
+        </p>
+      </div>
+      <div className="grid gap-5 md:grid-cols-3">
+        {HOME_PLANOS.map((p) => (
+          <Card
+            key={p.slug}
+            className={`relative p-6 flex flex-col ${
+              p.destaque
+                ? "border-primary ring-2 ring-primary/30 shadow-xl shadow-primary/10 md:-translate-y-2"
+                : "border-border"
+            }`}
+          >
+            {p.destaque && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground shadow">
+                Mais escolhido
+              </Badge>
+            )}
+            <div className="mb-3">
+              <div className="text-lg font-bold">{p.nome}</div>
+              <div className="text-sm text-muted-foreground">{p.tagline}</div>
+            </div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Ideal para</div>
+            <p className="text-sm mt-1 mb-4 leading-relaxed">{p.publico}</p>
+            <ul className="space-y-2 mb-6">
+              {p.beneficios.map((b) => (
+                <li key={b} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto grid gap-2">
+              <Button asChild className={p.destaque ? "" : "bg-primary/90 hover:bg-primary"}>
+                <Link to="/contratar" search={{ plano: p.slug }}>
+                  Contratar {p.nome} <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
+                <Link to="/planos">Ver comparativo completo</Link>
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <p className="text-center text-xs text-muted-foreground mt-6">
+        7 dias para testar · Migração inclusa · LGPD · Sem multa por cancelamento
+      </p>
+    </section>
+  );
+}
+
+// ============== PROVA SOCIAL ==============
+const PROVA_STATS = [
+  { value: "10+", label: "Nichos atendidos" },
+  { value: "24/7", label: "Automação ativa" },
+  { value: "R$ 0", label: "Para testar" },
+  { value: "100%", label: "Dados no Brasil" },
+];
+
+const PROVA_SEGMENTOS = [
+  "Saúde", "Alimentação", "Imobiliário", "Educação", "Eventos",
+  "Serviços", "Varejo", "Fornecedores", "White Label",
+];
+
+// Placeholders identificados — trocar por depoimentos reais quando o time de
+// customer success liberar. Não usar como prova pública sem consentimento.
+const PROVA_DEPOIMENTOS = [
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Diretor · Clínica multiespecialidade",
+    texto: "Substituímos 4 sistemas por um só. A agenda, o WhatsApp e a cobrança agora conversam sem retrabalho.",
+    placeholder: true,
+  },
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Proprietária · Bar e cervejaria",
+    texto: "O time do salão para de digitar a mesma coisa 3 vezes. O gerente vê o dia inteiro em uma tela.",
+    placeholder: true,
+  },
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Gestor comercial · Imobiliária",
+    texto: "Cada corretor tem visão do funil, do lead e do imóvel — sem planilha, sem grupo de WhatsApp perdido.",
+    placeholder: true,
+  },
+];
+
+function ProvaSocial() {
+  return (
+    <section aria-labelledby="prova-social-title" className="bg-card/40 border-y">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Quem já opera com a Impulsionando</Badge>
+          <h2 id="prova-social-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+            Empresas de diferentes segmentos, operando na mesma plataforma
+          </h2>
+        </div>
+
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+          {PROVA_STATS.map((s) => (
+            <div key={s.label} className="text-center">
+              <dt className="text-3xl md:text-4xl font-black text-primary">{s.value}</dt>
+              <dd className="text-xs uppercase tracking-wider mt-1 opacity-70">{s.label}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-12" aria-label="Segmentos atendidos">
+          {PROVA_SEGMENTOS.map((s) => (
+            <Badge key={s} variant="secondary" className="text-xs px-3 py-1">
+              {s}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {PROVA_DEPOIMENTOS.map((d) => (
+            <Card key={d.autor + d.cargo} className="p-5 relative">
+              {d.placeholder && (
+                <Badge variant="outline" className="absolute top-3 right-3 text-[10px] border-dashed">
+                  Placeholder
+                </Badge>
+              )}
+              <p className="text-sm leading-relaxed">"{d.texto}"</p>
+              <div className="mt-4 pt-4 border-t">
+                <div className="text-sm font-semibold">{d.autor}</div>
+                <div className="text-xs text-muted-foreground">{d.cargo}</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============== FAQ HOME ==============
+const FAQ_HOME = [
+  {
+    q: "Preciso de cartão para testar?",
+    a: "Não. Você navega pelas demos, faz o diagnóstico e conversa com o Impulsionito sem cadastrar cartão. O cartão só é pedido na contratação de um plano.",
+  },
+  {
+    q: "Consigo usar só um módulo?",
+    a: "Sim. A plataforma é modular — o plano Essencial atende quem só quer CRM + WhatsApp ou só agenda + pagamento. Ative outros módulos quando precisar.",
+  },
+  {
+    q: "Meus dados ficam no Brasil?",
+    a: "Sim. Toda a infraestrutura e cópias operam em território nacional, com criptografia em trânsito e em repouso, em conformidade com a LGPD.",
+  },
+  {
+    q: "A Impulsionando substitui minha equipe de atendimento?",
+    a: "Não. A plataforma organiza, automatiza confirmações e reduz retrabalho, mas o atendimento humano continua com o seu time — inclusive com fallback humano quando o canal digital travar.",
+  },
+  {
+    q: "Consigo revender a plataforma com a minha marca?",
+    a: "Sim, no plano Avançado. O modelo White Label libera multi-empresa, marca própria, cobrança e onboarding do seu cliente final.",
+  },
+];
+
+function FaqHome() {
+  const [open, setOpen] = useState<number>(0);
+  return (
+    <section aria-labelledby="faq-home-title" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      <div className="text-center mb-10">
+        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Perguntas frequentes</Badge>
+        <h2 id="faq-home-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+          Antes de contratar, o que costumam perguntar
+        </h2>
+      </div>
+      <div className="rounded-xl border bg-card divide-y">
+        {FAQ_HOME.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={item.q}>
+              <button
+                type="button"
+                onClick={() => setOpen(isOpen ? -1 : i)}
+                aria-expanded={isOpen}
+                className="w-full flex items-start justify-between gap-4 p-5 text-left hover:bg-muted/40 transition"
+              >
+                <span className="font-semibold text-base">{item.q}</span>
+                <span
+                  aria-hidden
+                  className={`shrink-0 h-6 w-6 rounded-full grid place-items-center bg-primary/10 text-primary transition ${isOpen ? "rotate-45" : ""}`}
+                >
+                  <span className="text-lg leading-none">+</span>
+                </span>
+              </button>
+              {isOpen && (
+                <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                  {item.a}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ============== HOMEPAGE ==============
 
 /**
@@ -1131,195 +1419,150 @@ export function HomePage() {
       <PublicHeader />
 
       <main className="flex-1">
-        {/* HERO VENDEDOR */}
+        {/* HERO — foco em conversão: 1 CTA principal + 1 secundário + chips */}
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
           <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+          <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
             <Badge className="bg-white/10 backdrop-blur text-white border-white/20 mb-6 px-3 py-1">
-              <Sparkles className="w-3 h-3 mr-1.5" /> Tecnologia + Estratégia + Comunicação
+              <Sparkles className="w-3 h-3 mr-1.5" /> Plataforma SaaS modular para PMEs brasileiras
             </Badge>
 
-            <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
-              Tecnologia que conecta{" "}
-              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atendimento, vendas e operação</span>{" "}
-              em um só ecossistema.
+            <h1 className="text-[2.15rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight max-w-4xl mx-auto text-balance">
+              Um único sistema para{" "}
+              <span className="bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">atender, vender e operar</span>{" "}
+              o seu negócio.
             </h1>
             <p className="mt-6 text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl mx-auto">
-              CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação —
-              modular, por nicho, com White Label pronto para revender com a sua marca.
+              CRM, WhatsApp, agenda, pagamento, área do cliente e dashboards conectados em um só lugar —
+              modular, por nicho, com implantação assistida.
             </p>
 
-            {/* SR-only section heading — dá ao tablist de perfis um H2
-              indexável sem competir com o H1 visível do hero. */}
-            <h2 className="sr-only">Escolha o seu perfil</h2>
-
-            {/*
-              Hero CTAs — três cartões de perfil.
-              Layout responsivo:
-              - <sm  : 1 coluna, full-width, altura confortável.
-              - >=sm : 3 colunas equal, mesma altura via items-stretch.
-              Estrutura interna em flex-col centralizado garante alinhamento
-              de ícone+título e subtítulo em qualquer breakpoint.
-            */}
-            <div
-              className="mt-8 grid gap-3 grid-cols-1 sm:grid-cols-3 items-stretch max-w-3xl mx-auto"
-              aria-label="Perfis de uso da Impulsionando"
-              role="group"
-            >
-              <article aria-labelledby="hero-perfil-empresa" className="h-full">
-                <h3 id="hero-perfil-empresa" className="sr-only">
-                  Sou empresa — usar a plataforma na minha operação
-                </h3>
-                <Link
-                  to="/orcamento"
-                  data-analytics="hero-sou-empresa"
-                  onClick={() => trackHeroCta("sou_empresa")}
-                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-white text-primary px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:bg-white/95 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Building2 className="w-4 h-4 shrink-0" />
-                    <span>Sou empresa</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-75">
-                    Quero usar na minha operação
-                  </span>
-                </Link>
-              </article>
-
-              <article aria-labelledby="hero-perfil-white-label" className="h-full">
-                <h3 id="hero-perfil-white-label" className="sr-only">
-                  White Label — revender a plataforma com a minha marca
-                </h3>
-                <Link
-                  to="/nichos/$slug"
-                  params={{ slug: "white-label" }}
-                  data-analytics="hero-white-label"
-                  onClick={() => trackHeroCta("white_label")}
-                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-gradient-primary text-primary-foreground px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:brightness-110 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Rocket className="w-4 h-4 shrink-0" />
-                    <span>White Label</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-90">
-                    Quero revender com a minha marca
-                  </span>
-                </Link>
-              </article>
-
-              <article aria-labelledby="hero-perfil-clube" className="h-full">
-                <h3 id="hero-perfil-clube" className="sr-only">
-                  Clube de Vantagens — descontos e benefícios para consumidores
-                </h3>
-                <Link
-                  to="/clube"
-                  data-analytics="hero-clube"
-                  data-cta="clube"
-                  onClick={() => trackHeroCta("clube")}
-                  className="group glass-cta flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl px-4 py-4 text-center shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
-                    <Gift className="w-4 h-4 shrink-0" />
-                    <span>Clube de Vantagens</span>
-                  </span>
-                  <span className="text-xs font-normal leading-snug opacity-90">
-                    Quero descontos e benefícios
-                  </span>
-                </Link>
-              </article>
-            </div>
-
-            {/* CTA Ecossistema — porta de entrada do consumidor final */}
-            <div className="mt-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-5 sm:p-6 text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex-1">
-                  <Badge className="bg-white/20 text-white border-0 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 mr-1" /> Para o consumidor
-                  </Badge>
-                  <h3 className="text-xl sm:text-2xl font-bold">Conheça o Ecossistema</h3>
-                  <p className="text-sm sm:text-base text-white/85 mt-1">
-                    Encontre empresas, serviços, benefícios e experiências próximas de você dentro da rede Impulsionando.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
-                  <Button asChild size="sm" className="bg-white text-primary hover:bg-white/90 gap-1.5">
-                    <Link to="/ecossistema" data-analytics="hero-ecossistema"><Sparkles className="w-4 h-4" /> Conheça o Ecossistema</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
-                    <Link to="/ecossistema" search={{ geo: 1 }} data-analytics="hero-ecossistema-geo"><Building2 className="w-4 h-4" /> Empresas perto de mim</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
-                    <Link to="/clube" data-analytics="hero-ecossistema-clube"><Gift className="w-4 h-4" /> Entrar no Clube</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            {/* CTAs principais — 1 primário + 1 secundário */}
+            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
                 asChild
-                size="sm"
-                className="bg-white text-primary hover:bg-white/90 gap-1.5 shadow-sm"
-                onClick={() => trackHeroCta("diagnostico_30s")}
+                size="lg"
+                className="bg-white text-primary hover:bg-white/90 gap-2 shadow-lg w-full sm:w-auto min-w-[220px]"
+                onClick={() => trackHeroCta("sou_empresa")}
               >
-                <a href="#diagnostico" data-analytics="hero-diagnostico-30s">
-                  <Search className="w-4 h-4" /> Diagnóstico em 30 segundos
-                </a>
+                <Link to="/orcamento" data-analytics="hero-sou-empresa">
+                  <Rocket className="w-4 h-4" /> Montar minha operação
+                </Link>
               </Button>
               <Button
-                size="sm"
+                asChild
+                size="lg"
                 variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5 focus-ring"
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto min-w-[220px]"
+                onClick={() => trackHeroCta("ver_demonstracoes")}
+              >
+                <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
+                  <PlayCircle className="w-4 h-4" /> Ver demonstração ao vivo
+                </Link>
+              </Button>
+            </div>
+
+            {/* Ações complementares — chips discretos, não competem visualmente */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+              <a
+                href="#diagnostico"
+                data-analytics="hero-diagnostico-30s"
+                onClick={() => trackHeroCta("diagnostico_30s")}
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+              >
+                <Search className="w-3.5 h-3.5" /> Fazer diagnóstico em 30s
+              </a>
+              <span aria-hidden className="text-white/30">·</span>
+              <a
+                href="#planos-home"
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+              >
+                <ArrowRight className="w-3.5 h-3.5" /> Ver planos
+              </a>
+              <span aria-hidden className="text-white/30">·</span>
+              <button
+                type="button"
+                data-analytics="hero-impulsionito"
                 onClick={() => {
                   trackHeroCta("falar_impulsionito");
                   if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "home" } }));
                   }
                 }}
-                data-analytics="hero-impulsionito"
+                className="inline-flex items-center gap-1.5 text-white/85 hover:text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
               >
-                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-              </Button>
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
-                onClick={() => trackHeroCta("ver_demonstracoes")}
-              >
-                <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
-                  <PlayCircle className="w-4 h-4" /> Ver demonstrações
-                </Link>
-              </Button>
+                <MessageCircle className="w-3.5 h-3.5" /> Falar com o Impulsionito
+              </button>
             </div>
 
-            {/* Trust bar — reforço visual de segurança/leveza */}
+            {/* Trust chips — reforço rápido de segurança */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Sem cartão para testar</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Setup assistido</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Implantação assistida</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> LGPD & dados no Brasil</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Modular por nicho</span>
             </div>
 
-
-
-
+            {/* Vertentes complementares — White Label + Consumidor, discretos e fora do CTA principal */}
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 max-w-3xl mx-auto text-left">
+              <Link
+                to="/nichos/$slug"
+                params={{ slug: "white-label" }}
+                data-analytics="hero-white-label"
+                onClick={() => trackHeroCta("white_label")}
+                className="group rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 hover:bg-white/15 transition"
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Rocket className="w-4 h-4" /> Revender com sua marca
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:translate-x-0.5 transition" />
+                </div>
+                <p className="text-xs text-white/75 mt-1 leading-relaxed">
+                  White Label pronto para agências, consultorias e franquias.
+                </p>
+              </Link>
+              <Link
+                to="/ecossistema"
+                data-analytics="hero-ecossistema"
+                onClick={() => trackHeroCta("clube")}
+                className="group rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4 hover:bg-white/15 transition"
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Gift className="w-4 h-4" /> Sou consumidor final
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-60 group-hover:translate-x-0.5 transition" />
+                </div>
+                <p className="text-xs text-white/75 mt-1 leading-relaxed">
+                  Ecossistema, Clube de Vantagens e empresas próximas.
+                </p>
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* DIAGNÓSTICO */}
-        <div id="diagnostico"><Diagnostico /></div>
+        {/* TRUST BAR — diferenciais da plataforma */}
+        <TrustBar />
 
-        {/* SIMULADOR */}
-        <SimuladorPerda />
-
-        {/* 5 FASES */}
+        {/* 5 FASES — o que é / como funciona */}
         <CincoFases />
 
-        {/* CANAIS */}
+        {/* DIAGNÓSTICO — nichos + recursos personalizados */}
+        <div id="diagnostico"><Diagnostico /></div>
+
+        {/* CANAIS — recursos de comunicação */}
         <CanaisComunicacao />
+
+        {/* MINI COMPARATIVO — planos */}
+        <MiniComparativoPlanos />
+
+        {/* SIMULADOR — prova de valor */}
+        <SimuladorPerda />
+
+        {/* PROVA SOCIAL — segmentos, números, depoimentos */}
+        <ProvaSocial />
+
+        {/* FAQ */}
+        <FaqHome />
+
 
         {/* CTA FINAL */}
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
