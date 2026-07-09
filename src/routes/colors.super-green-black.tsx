@@ -78,6 +78,7 @@ function SgbLanding() {
       <Suspense fallback={<SgbSectionSkeleton />}><LazyCheckoutPreview /></Suspense>
       <FaqSection />
       <FinalCTA />
+      <LegalDisclaimer />
       <ComprarOriginalFab source="pdp_sgb" />
       <AntiFakePopup />
     </div>
