@@ -42,6 +42,15 @@ export function ImpulsionitoFab() {
     return getImpulsionitoContext(pathname, niche);
   }, [pathname, searchStr]);
 
+  // Permite que CTAs comerciais espalhados pelo site abram o Impulsionito
+  // sem precisar exibir WhatsApp fora deste balão.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setOpen(true);
+    window.addEventListener("impulsionito:open", handler);
+    return () => window.removeEventListener("impulsionito:open", handler);
+  }, []);
+
   if (
     pathname.startsWith("/_authenticated") ||
     HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
