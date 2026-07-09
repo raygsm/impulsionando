@@ -119,9 +119,6 @@ function ModulePage() {
   const integrations: string[] = detail?.integrations ?? [];
   const impact: string[] = detail?.impact ?? [];
 
-  const waUrl =
-    WHATSAPP_BASE + encodeURIComponent(title) + "%20da%20Impulsionando.";
-
   const orcamentoOrigin = `modulos:${slugParam}`;
 
   return (
@@ -195,14 +192,13 @@ function ModulePage() {
                 </Link>
               </Button>
               <Button
-                asChild
+                type="button"
                 size="lg"
                 variant="ghost"
                 className="gap-2 text-white hover:bg-white/10 hover:text-white"
+                onClick={() => openImpulsionito(`modulos:${slugParam}`)}
               >
-                <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com consultor
-                </a>
+                <MessageCircle className="w-4 h-4" /> Falar com consultor
               </Button>
             </div>
           </div>
