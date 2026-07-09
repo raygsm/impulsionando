@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
@@ -59,6 +60,7 @@ function Page() {
   });
 
   const { data, isLoading } = useQuery({
+    // (mantido) — isLoading agora alimenta ListSkeleton
     queryKey: ["customers", companyId], enabled: !!companyId,
     queryFn: async () => {
       const { data, error } = await supabase.from("customers").select("*").eq("company_id", companyId).order("name");
@@ -181,8 +183,14 @@ function Page() {
           <Badge variant="secondary"><Users className="w-3 h-3 mr-1" />{filtered.length}</Badge>
         </div>
         <div className="divide-y">
-          {isLoading && <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>}
-          {!isLoading && !filtered.length && <div className="p-8 text-center text-sm text-muted-foreground">Nenhum cliente encontrado.</div>}
+          {isLoading && <div className="p-3"><ListSkeleton rows={6} /></div>}
+          {!isLoading && !filtered.length && (
+            <EmptyStateV2
+              icon={Users}
+              title="Nenhum cliente encontrado"
+              description={q ? "Ajuste a busca ou limpe o filtro para ver todos." : "Cadastre seu primeiro cliente para começar."}
+            />
+          )}
           {filtered.map((c) => (
             <div key={c.id} className="p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
