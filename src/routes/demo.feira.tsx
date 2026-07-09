@@ -253,10 +253,8 @@ function FeiraLanding() {
               <Button size="lg" className="bg-gradient-primary" onClick={() => navigate({ to: done.demoUrl.replace("https://impulsionando.com.br", "") as any })}>
                 Abrir demonstração agora <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href="https://wa.me/5521993075000" target="_blank" rel="noreferrer">
-                  Falar com consultor no WhatsApp
-                </a>
+              <Button size="lg" variant="outline" type="button" onClick={() => (typeof window !== "undefined" ? window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "demo-feira-sucesso" } })) : null)}>
+                Falar com consultor no Impulsionito
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-6">
