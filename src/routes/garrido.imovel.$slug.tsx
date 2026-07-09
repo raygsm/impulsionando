@@ -247,7 +247,15 @@ function ImovelDetail() {
               </a>
               <button
                 type="button"
-                onClick={() => toggleFavorito(i.slug)}
+                onClick={() => {
+                  try {
+                    const KEY = "garrido:favoritos";
+                    const raw = localStorage.getItem(KEY);
+                    const arr: string[] = raw ? JSON.parse(raw) : [];
+                    const next = arr.includes(i.slug) ? arr.filter((s) => s !== i.slug) : [...arr, i.slug];
+                    localStorage.setItem(KEY, JSON.stringify(next));
+                  } catch { /* SSR or storage bloqueado */ }
+                }}
                 className="rounded-lg border border-[color:var(--garrido-ink)]/20 font-semibold py-2.5 text-sm inline-flex items-center justify-center gap-2 hover:bg-[color:var(--garrido-cream)] min-h-11"
                 aria-label="Favoritar este imóvel na minha área"
               >
