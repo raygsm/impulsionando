@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { CardSkeleton, EmptyState } from "@/components/feedback";
 import { getPublicVitrine } from "@/lib/consumer.functions";
 import {
   MapPin, Sparkles, Crown, ArrowRight, Building2, Star, Search,
-  Globe, Instagram, MessageCircle,
+  Globe, Instagram, MessageCircle, SearchX,
 } from "lucide-react";
 
 type VitrineCompany = {
@@ -252,31 +253,19 @@ function VitrinePage() {
         {/* GRID */}
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
           {query.isLoading ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="h-32 bg-muted animate-pulse" />
-                  <div className="p-5 space-y-3">
-                    <div className="h-5 bg-muted rounded animate-pulse w-2/3" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-full" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-4/5" />
-                  </div>
-                </Card>
-              ))}
-            </div>
+            <CardSkeleton count={6} className="lg:grid-cols-3" />
           ) : companies.length === 0 ? (
-            <Card className="p-12 text-center">
-              <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <h3 className="font-semibold text-lg">Nenhum parceiro encontrado</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ajuste os filtros, troque o segmento ou diminua a nota mínima.
-              </p>
-              {activeFilters > 0 && (
-                <Button variant="outline" size="sm" onClick={clearFilters} className="mt-4">
-                  Limpar filtros
-                </Button>
-              )}
-            </Card>
+            <EmptyState
+              icon={activeFilters > 0 ? SearchX : Building2}
+              title={activeFilters > 0 ? "Nenhum parceiro corresponde aos filtros" : "Nenhum parceiro publicado ainda"}
+              description={
+                activeFilters > 0
+                  ? "Ajuste a busca, troque o segmento ou reduza a nota mínima para ver mais parceiros do ecossistema."
+                  : "Os primeiros parceiros do ecossistema Impulsionando aparecem aqui em breve."
+              }
+              actionLabel={activeFilters > 0 ? "Limpar filtros" : undefined}
+              onAction={activeFilters > 0 ? clearFilters : undefined}
+            />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {companies.map((c) => (

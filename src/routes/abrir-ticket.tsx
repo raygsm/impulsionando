@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, LifeBuoy, Loader2 } from "lucide-react";
+import { CheckCircle2, LifeBuoy, Loader2, Sparkles, Layers, Compass } from "lucide-react";
 import { toast } from "sonner";
 
 const TIPOS = [
@@ -83,64 +83,104 @@ function PageContent() {
   }
 
   return (
-    <Card className="max-w-2xl mx-auto mt-8">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <LifeBuoy className="w-6 h-6 text-primary" />
-          <CardTitle>Central de suporte</CardTitle>
-        </div>
-        <CardDescription>
-          Fale com nosso time. Retornamos por e-mail em até 1 dia útil. Para urgências, use o WhatsApp.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Nome*</Label>
-              <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="email">E-mail*</Label>
-              <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="phone">WhatsApp (opcional)</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div>
-              <Label>Tipo</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TIPOS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Prioridade</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRIORIDADES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="subject">Assunto*</Label>
-              <Input id="subject" required minLength={4} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
-            </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="description">Descreva sua situação*</Label>
-              <Textarea id="description" required minLength={10} rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            </div>
+    <div className="max-w-2xl mx-auto mt-4 space-y-6">
+      {/* Orientação: quando abrir ticket vs outros caminhos */}
+      <Card className="bg-muted/40 border-dashed">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Compass className="w-5 h-5 text-primary" />
+            <CardTitle className="text-base">Antes de abrir um ticket</CardTitle>
           </div>
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</> : "Abrir ticket"}
+          <CardDescription>
+            Abra um ticket quando precisar de <strong>rastreio com protocolo</strong>: erros, cobranças, integrações e situações que exigem histórico auditável. Para dúvidas comerciais ou de uso, o Impulsionito responde na hora.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2 pt-0">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="focus-ring"
+            onClick={() => window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "abrir-ticket" } }))}
+          >
+            <Sparkles className="w-4 h-4 mr-1.5" /> Falar com Impulsionito
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+          <Button asChild size="sm" variant="outline" className="focus-ring">
+            <Link to="/planos"><Layers className="w-4 h-4 mr-1.5" /> Ver planos</Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="focus-ring">
+            <Link to="/central-de-ajuda">Central de ajuda</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <LifeBuoy className="w-6 h-6 text-primary" />
+            <CardTitle>Abrir ticket de suporte</CardTitle>
+          </div>
+          <CardDescription>
+            Retornamos por e-mail em até 1 dia útil com um protocolo único. Casos críticos entram na fila prioritária.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Nome*</Label>
+                <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <Label htmlFor="email">E-mail*</Label>
+                <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div>
+                <Label htmlFor="phone">WhatsApp (opcional)</Label>
+                <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <div>
+                <Label>Tipo</Label>
+                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TIPOS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Prioridade</Label>
+                <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PRIORIDADES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="subject">Assunto*</Label>
+                <Input id="subject" required minLength={4} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Resuma o problema em uma frase" />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="description">Descreva sua situação*</Label>
+                <Textarea
+                  id="description"
+                  required
+                  minLength={10}
+                  rows={6}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="O que aconteceu, quando começou, o que você já tentou e como reproduzir. Não inclua senhas ou dados sensíveis."
+                />
+              </div>
+            </div>
+            <Button type="submit" disabled={loading} className="w-full btn-alive focus-ring">
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</> : "Abrir ticket"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

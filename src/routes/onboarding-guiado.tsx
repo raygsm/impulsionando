@@ -73,9 +73,10 @@ function OnboardingPage() {
       <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
         <div className="mb-8">
           <Badge variant="secondary" className="mb-2">Onboarding guiado</Badge>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Sua jornada Impulsionando em 15 passos</h1>
-          <p className="text-muted-foreground">
-            Do "nunca usei" até "operando 100% no automático". Marque cada etapa conforme avança — seu progresso fica salvo neste dispositivo.
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Do zero à operação rodando — em 15 passos claros</h1>
+          <p className="text-muted-foreground max-w-2xl">
+            Um checklist objetivo para ativar o Impulsionando com segurança. Marque cada etapa conforme conclui —
+            seu progresso fica salvo neste dispositivo e você pode retomar a qualquer momento.
           </p>
         </div>
 
@@ -157,13 +158,23 @@ function OnboardingPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-muted-foreground" />
-              <CardTitle className="text-base">Precisa de ajuda em alguma etapa?</CardTitle>
+              <CardTitle className="text-base">Travou em alguma etapa?</CardTitle>
             </div>
+            <CardDescription>
+              O Impulsionito guia você em qualquer passo. Para bugs ou cobranças, abra um ticket com protocolo.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline"><Link to="/abrir-ticket">Abrir ticket</Link></Button>
-            <Button asChild size="sm" variant="outline"><Link to="/contato">Falar com consultor</Link></Button>
-            <Button asChild size="sm" variant="outline"><Link to="/canal-oficial">Canal oficial WhatsApp</Link></Button>
+            <Button
+              type="button"
+              size="sm"
+              className="btn-alive focus-ring"
+              onClick={() => window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "onboarding-help" } }))}
+            >
+              <Sparkles className="w-4 h-4 mr-1.5" /> Falar com Impulsionito
+            </Button>
+            <Button asChild size="sm" variant="outline" className="focus-ring"><Link to="/abrir-ticket">Abrir ticket</Link></Button>
+            <Button asChild size="sm" variant="outline" className="focus-ring"><Link to="/planos">Ver planos</Link></Button>
           </CardContent>
         </Card>
       </main>
