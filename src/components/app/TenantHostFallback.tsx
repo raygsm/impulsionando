@@ -74,7 +74,9 @@ export function TenantHostFallback() {
         <div className="border-t pt-4 flex flex-col sm:flex-row gap-2">
           <a
             href="https://impulsionando.com.br"
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground text-sm font-medium py-2.5 hover:bg-primary/90 focus-ring btn-alive transition-colors"
           >
             <Home className="h-4 w-4" /> Ir para Impulsionando
           </a>
