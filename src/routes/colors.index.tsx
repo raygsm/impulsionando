@@ -16,6 +16,7 @@ const LazyDepoimentos = lazy(() => import("@/components/colors/DepoimentosSectio
 const LazyEcosystem = lazy(() => import("@/components/colors/EcosystemBlock"));
 const LazyVideo = lazy(() => import("@/components/colors/VideoShowcase"));
 const LazyCheckoutPreview = lazy(() => import("@/components/colors/CheckoutTransparentePreview"));
+const LazyComoComprar = lazy(() => import("@/components/colors/ComoComprarSeguranca"));
 
 export const Route = createFileRoute("/colors/")({
   head: () => ({
@@ -169,6 +170,7 @@ function ColorsSaudePage() {
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyDepoimentos /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyCheckoutPreview /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyComoComprar /></Suspense>
         <Logistica />
         <Suspense fallback={<SectionSkeleton />}><LazyEcosystem /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyEbooks /></Suspense>
