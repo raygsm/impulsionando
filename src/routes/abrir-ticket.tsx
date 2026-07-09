@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, LifeBuoy, Loader2 } from "lucide-react";
+import { CheckCircle2, LifeBuoy, Loader2, Sparkles, Layers, Compass } from "lucide-react";
 import { toast } from "sonner";
 
 const TIPOS = [
