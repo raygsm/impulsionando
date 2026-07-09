@@ -154,11 +154,17 @@ import { Route as MarocasCarrinhoRouteImport } from './routes/marocas.carrinho'
 import { Route as MarocasCardapioRouteImport } from './routes/marocas.cardapio'
 import { Route as MarocasAssistenteRouteImport } from './routes/marocas.assistente'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as GarridoTemporadaRouteImport } from './routes/garrido.temporada'
+import { Route as GarridoRuralRouteImport } from './routes/garrido.rural'
+import { Route as GarridoLancamentosRouteImport } from './routes/garrido.lancamentos'
 import { Route as GarridoFinanciamentoRouteImport } from './routes/garrido.financiamento'
 import { Route as GarridoContatoRouteImport } from './routes/garrido.contato'
+import { Route as GarridoComprarRouteImport } from './routes/garrido.comprar'
+import { Route as GarridoComercialRouteImport } from './routes/garrido.comercial'
 import { Route as GarridoBuscarRouteImport } from './routes/garrido.buscar'
 import { Route as GarridoAvaliarRouteImport } from './routes/garrido.avaliar'
 import { Route as GarridoAnunciarRouteImport } from './routes/garrido.anunciar'
+import { Route as GarridoAlugarRouteImport } from './routes/garrido.alugar'
 import { Route as FoodserviceReservasRouteImport } from './routes/foodservice.reservas'
 import { Route as FoodservicePromocoesRouteImport } from './routes/foodservice.promocoes'
 import { Route as FoodserviceOperacaoRouteImport } from './routes/foodservice.operacao'
@@ -1581,6 +1587,21 @@ const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   path: '/imoveis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GarridoTemporadaRoute = GarridoTemporadaRouteImport.update({
+  id: '/temporada',
+  path: '/temporada',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoRuralRoute = GarridoRuralRouteImport.update({
+  id: '/rural',
+  path: '/rural',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoLancamentosRoute = GarridoLancamentosRouteImport.update({
+  id: '/lancamentos',
+  path: '/lancamentos',
+  getParentRoute: () => GarridoRoute,
+} as any)
 const GarridoFinanciamentoRoute = GarridoFinanciamentoRouteImport.update({
   id: '/financiamento',
   path: '/financiamento',
@@ -1589,6 +1610,16 @@ const GarridoFinanciamentoRoute = GarridoFinanciamentoRouteImport.update({
 const GarridoContatoRoute = GarridoContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoComprarRoute = GarridoComprarRouteImport.update({
+  id: '/comprar',
+  path: '/comprar',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoComercialRoute = GarridoComercialRouteImport.update({
+  id: '/comercial',
+  path: '/comercial',
   getParentRoute: () => GarridoRoute,
 } as any)
 const GarridoBuscarRoute = GarridoBuscarRouteImport.update({
@@ -1604,6 +1635,11 @@ const GarridoAvaliarRoute = GarridoAvaliarRouteImport.update({
 const GarridoAnunciarRoute = GarridoAnunciarRouteImport.update({
   id: '/anunciar',
   path: '/anunciar',
+  getParentRoute: () => GarridoRoute,
+} as any)
+const GarridoAlugarRoute = GarridoAlugarRouteImport.update({
+  id: '/alugar',
+  path: '/alugar',
   getParentRoute: () => GarridoRoute,
 } as any)
 const FoodserviceReservasRoute = FoodserviceReservasRouteImport.update({
@@ -5736,11 +5772,17 @@ export interface FileRoutesByFullPath {
   '/foodservice/operacao': typeof FoodserviceOperacaoRoute
   '/foodservice/promocoes': typeof FoodservicePromocoesRoute
   '/foodservice/reservas': typeof FoodserviceReservasRoute
+  '/garrido/alugar': typeof GarridoAlugarRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/comercial': typeof GarridoComercialRoute
+  '/garrido/comprar': typeof GarridoComprarRoute
   '/garrido/contato': typeof GarridoContatoRoute
   '/garrido/financiamento': typeof GarridoFinanciamentoRoute
+  '/garrido/lancamentos': typeof GarridoLancamentosRoute
+  '/garrido/rural': typeof GarridoRuralRoute
+  '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
@@ -6560,11 +6602,17 @@ export interface FileRoutesByTo {
   '/foodservice/operacao': typeof FoodserviceOperacaoRoute
   '/foodservice/promocoes': typeof FoodservicePromocoesRoute
   '/foodservice/reservas': typeof FoodserviceReservasRoute
+  '/garrido/alugar': typeof GarridoAlugarRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/comercial': typeof GarridoComercialRoute
+  '/garrido/comprar': typeof GarridoComprarRoute
   '/garrido/contato': typeof GarridoContatoRoute
   '/garrido/financiamento': typeof GarridoFinanciamentoRoute
+  '/garrido/lancamentos': typeof GarridoLancamentosRoute
+  '/garrido/rural': typeof GarridoRuralRoute
+  '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
@@ -7402,11 +7450,17 @@ export interface FileRoutesById {
   '/foodservice/operacao': typeof FoodserviceOperacaoRoute
   '/foodservice/promocoes': typeof FoodservicePromocoesRoute
   '/foodservice/reservas': typeof FoodserviceReservasRoute
+  '/garrido/alugar': typeof GarridoAlugarRoute
   '/garrido/anunciar': typeof GarridoAnunciarRoute
   '/garrido/avaliar': typeof GarridoAvaliarRoute
   '/garrido/buscar': typeof GarridoBuscarRoute
+  '/garrido/comercial': typeof GarridoComercialRoute
+  '/garrido/comprar': typeof GarridoComprarRoute
   '/garrido/contato': typeof GarridoContatoRoute
   '/garrido/financiamento': typeof GarridoFinanciamentoRoute
+  '/garrido/lancamentos': typeof GarridoLancamentosRoute
+  '/garrido/rural': typeof GarridoRuralRoute
+  '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/marocas/assistente': typeof MarocasAssistenteRoute
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
@@ -8246,11 +8300,17 @@ export interface FileRouteTypes {
     | '/foodservice/operacao'
     | '/foodservice/promocoes'
     | '/foodservice/reservas'
+    | '/garrido/alugar'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
+    | '/garrido/comercial'
+    | '/garrido/comprar'
     | '/garrido/contato'
     | '/garrido/financiamento'
+    | '/garrido/lancamentos'
+    | '/garrido/rural'
+    | '/garrido/temporada'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/cardapio'
@@ -9070,11 +9130,17 @@ export interface FileRouteTypes {
     | '/foodservice/operacao'
     | '/foodservice/promocoes'
     | '/foodservice/reservas'
+    | '/garrido/alugar'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
+    | '/garrido/comercial'
+    | '/garrido/comprar'
     | '/garrido/contato'
     | '/garrido/financiamento'
+    | '/garrido/lancamentos'
+    | '/garrido/rural'
+    | '/garrido/temporada'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/cardapio'
@@ -9911,11 +9977,17 @@ export interface FileRouteTypes {
     | '/foodservice/operacao'
     | '/foodservice/promocoes'
     | '/foodservice/reservas'
+    | '/garrido/alugar'
     | '/garrido/anunciar'
     | '/garrido/avaliar'
     | '/garrido/buscar'
+    | '/garrido/comercial'
+    | '/garrido/comprar'
     | '/garrido/contato'
     | '/garrido/financiamento'
+    | '/garrido/lancamentos'
+    | '/garrido/rural'
+    | '/garrido/temporada'
     | '/imoveis/$slug'
     | '/marocas/assistente'
     | '/marocas/cardapio'
@@ -11819,6 +11891,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/garrido/temporada': {
+      id: '/garrido/temporada'
+      path: '/temporada'
+      fullPath: '/garrido/temporada'
+      preLoaderRoute: typeof GarridoTemporadaRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/rural': {
+      id: '/garrido/rural'
+      path: '/rural'
+      fullPath: '/garrido/rural'
+      preLoaderRoute: typeof GarridoRuralRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/lancamentos': {
+      id: '/garrido/lancamentos'
+      path: '/lancamentos'
+      fullPath: '/garrido/lancamentos'
+      preLoaderRoute: typeof GarridoLancamentosRouteImport
+      parentRoute: typeof GarridoRoute
+    }
     '/garrido/financiamento': {
       id: '/garrido/financiamento'
       path: '/financiamento'
@@ -11831,6 +11924,20 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/garrido/contato'
       preLoaderRoute: typeof GarridoContatoRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/comprar': {
+      id: '/garrido/comprar'
+      path: '/comprar'
+      fullPath: '/garrido/comprar'
+      preLoaderRoute: typeof GarridoComprarRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/comercial': {
+      id: '/garrido/comercial'
+      path: '/comercial'
+      fullPath: '/garrido/comercial'
+      preLoaderRoute: typeof GarridoComercialRouteImport
       parentRoute: typeof GarridoRoute
     }
     '/garrido/buscar': {
@@ -11852,6 +11959,13 @@ declare module '@tanstack/react-router' {
       path: '/anunciar'
       fullPath: '/garrido/anunciar'
       preLoaderRoute: typeof GarridoAnunciarRouteImport
+      parentRoute: typeof GarridoRoute
+    }
+    '/garrido/alugar': {
+      id: '/garrido/alugar'
+      path: '/alugar'
+      fullPath: '/garrido/alugar'
+      preLoaderRoute: typeof GarridoAlugarRouteImport
       parentRoute: typeof GarridoRoute
     }
     '/foodservice/reservas': {
@@ -18497,21 +18611,33 @@ const FoodserviceRouteWithChildren = FoodserviceRoute._addFileChildren(
 )
 
 interface GarridoRouteChildren {
+  GarridoAlugarRoute: typeof GarridoAlugarRoute
   GarridoAnunciarRoute: typeof GarridoAnunciarRoute
   GarridoAvaliarRoute: typeof GarridoAvaliarRoute
   GarridoBuscarRoute: typeof GarridoBuscarRoute
+  GarridoComercialRoute: typeof GarridoComercialRoute
+  GarridoComprarRoute: typeof GarridoComprarRoute
   GarridoContatoRoute: typeof GarridoContatoRoute
   GarridoFinanciamentoRoute: typeof GarridoFinanciamentoRoute
+  GarridoLancamentosRoute: typeof GarridoLancamentosRoute
+  GarridoRuralRoute: typeof GarridoRuralRoute
+  GarridoTemporadaRoute: typeof GarridoTemporadaRoute
   GarridoIndexRoute: typeof GarridoIndexRoute
   GarridoImovelSlugRoute: typeof GarridoImovelSlugRoute
 }
 
 const GarridoRouteChildren: GarridoRouteChildren = {
+  GarridoAlugarRoute: GarridoAlugarRoute,
   GarridoAnunciarRoute: GarridoAnunciarRoute,
   GarridoAvaliarRoute: GarridoAvaliarRoute,
   GarridoBuscarRoute: GarridoBuscarRoute,
+  GarridoComercialRoute: GarridoComercialRoute,
+  GarridoComprarRoute: GarridoComprarRoute,
   GarridoContatoRoute: GarridoContatoRoute,
   GarridoFinanciamentoRoute: GarridoFinanciamentoRoute,
+  GarridoLancamentosRoute: GarridoLancamentosRoute,
+  GarridoRuralRoute: GarridoRuralRoute,
+  GarridoTemporadaRoute: GarridoTemporadaRoute,
   GarridoIndexRoute: GarridoIndexRoute,
   GarridoImovelSlugRoute: GarridoImovelSlugRoute,
 }
