@@ -310,7 +310,7 @@ function DemoLanding() {
             ))}
           </div>
           <div className="text-center mt-6">
-            <Button asChild size="lg" className="bg-gradient-primary gap-2">
+            <Button asChild size="lg" className="bg-gradient-primary btn-alive gap-2">
               <Link to="/planos"><BarChart3 className="w-4 h-4" /> Ver comparativo completo dos planos</Link>
             </Button>
           </div>
