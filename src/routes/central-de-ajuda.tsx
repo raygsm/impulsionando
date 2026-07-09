@@ -229,15 +229,23 @@ function AjudaPage() {
         <Card className="bg-primary/5 border-primary">
           <CardHeader>
             <CardTitle>Não achou o que procurava?</CardTitle>
-            <CardDescription>Nosso time responde em até 1 dia útil — e por WhatsApp, em minutos.</CardDescription>
+            <CardDescription>Nosso time responde em até 1 dia útil. Prefere conversar agora? O Impulsionito ajuda em segundos.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <Button asChild><Link to="/abrir-ticket">Abrir ticket</Link></Button>
-            <Button asChild variant="outline">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">WhatsApp oficial</a>
+            <Button asChild className="btn-alive focus-ring"><Link to="/abrir-ticket">Abrir ticket</Link></Button>
+            <Button
+              variant="outline"
+              className="focus-ring"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                }
+              }}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
             </Button>
-            <Button asChild variant="outline"><Link to="/contato">Falar com consultor</Link></Button>
-            <Button asChild variant="ghost"><Link to="/onboarding-guiado">Ver onboarding guiado</Link></Button>
+            <Button asChild variant="outline" className="focus-ring"><Link to="/contato">Falar com consultor</Link></Button>
+            <Button asChild variant="ghost" className="focus-ring"><Link to="/onboarding-guiado">Ver onboarding guiado</Link></Button>
           </CardContent>
         </Card>
       </main>
