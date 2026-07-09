@@ -75,14 +75,14 @@ function NavLinkRow({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+        "group/nav flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150 focus-ring",
         depth > 0 && "ml-4 pl-3 border-l border-sidebar-border/40",
         active
           ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-elegant"
-          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-0.5"
       )}
     >
-      <Icon className="w-4 h-4 shrink-0" />
+      <Icon className={cn("w-4 h-4 shrink-0 transition-transform", !active && "group-hover/nav:scale-110")} />
       <span className="truncate">{item.label}</span>
       {item.badge === "pendingPix" && <NavBadge count={badgeCount ?? 0} />}
     </Link>
@@ -116,8 +116,9 @@ function SubMenu({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className={cn(
-          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors focus-ring",
           active
             ? "text-sidebar-foreground bg-sidebar-accent/60"
             : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -126,9 +127,9 @@ function SubMenu({
         <Icon className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1 text-left">{item.label}</span>
         {open ? (
-          <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+          <ChevronDown className="w-3.5 h-3.5 opacity-60 transition-transform" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+          <ChevronRight className="w-3.5 h-3.5 opacity-60 transition-transform" />
         )}
       </button>
       {open && (
@@ -201,14 +202,15 @@ function Group({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className={cn(
-          "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-colors shadow-sm",
+          "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-all shadow-sm focus-ring hover:shadow-md hover:-translate-y-0.5",
           tone,
         )}
       >
         <span className="truncate">{group.label}</span>
         <ChevronDown
-          className={cn("w-4 h-4 transition-transform", open ? "rotate-0" : "-rotate-90")}
+          className={cn("w-4 h-4 transition-transform duration-200", open ? "rotate-0" : "-rotate-90")}
         />
       </button>
       {open && (
