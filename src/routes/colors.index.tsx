@@ -14,6 +14,8 @@ const LazyContato = lazy(() => import("@/components/colors/ContatoSection"));
 const LazyEbooks = lazy(() => import("@/components/colors/EbooksSection"));
 const LazyDepoimentos = lazy(() => import("@/components/colors/DepoimentosSection"));
 const LazyEcosystem = lazy(() => import("@/components/colors/EcosystemBlock"));
+const LazyVideo = lazy(() => import("@/components/colors/VideoShowcase"));
+const LazyCheckoutPreview = lazy(() => import("@/components/colors/CheckoutTransparentePreview"));
 
 export const Route = createFileRoute("/colors/")({
   head: () => ({
@@ -158,7 +160,15 @@ function ColorsSaudePage() {
           </div>
         </section>
 
+        <Suspense fallback={<SectionSkeleton />}>
+          <LazyVideo
+            eyebrow="Colors Saúde em vídeo"
+            title="Conheça a marca queridinha do Brasil."
+            description="A história da Colors, a força da linha Super Green Black e depoimentos reais em minutos. O vídeo oficial chega em breve."
+          />
+        </Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyDepoimentos /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyCheckoutPreview /></Suspense>
         <Logistica />
         <Suspense fallback={<SectionSkeleton />}><LazyEcosystem /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyEbooks /></Suspense>

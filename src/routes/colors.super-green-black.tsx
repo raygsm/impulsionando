@@ -1,9 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Flame, MessageCircle, ShieldCheck, Star, Timer, TrendingDown, Zap } from "lucide-react";
 import { productBySlug } from "@/data/colors-products";
 import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
+
+const LazyVideo = lazy(() => import("@/components/colors/VideoShowcase"));
+const LazyJornada = lazy(() => import("@/components/colors/JornadaTransformacao"));
+const LazyCheckoutPreview = lazy(() => import("@/components/colors/CheckoutTransparentePreview"));
+
+function SgbSectionSkeleton() {
+  return <div className="mx-auto my-12 h-40 max-w-4xl animate-pulse rounded-3xl bg-white/5" />;
+}
 
 /**
  * /colors/super-green-black — LANDING DE VENDA AGRESSIVA (FRONT-END).
@@ -52,12 +60,21 @@ function SgbLanding() {
       <StickyCTA />
       <SgbHero />
       <SocialProofBar />
+      <Suspense fallback={<SgbSectionSkeleton />}>
+        <LazyVideo
+          eyebrow="Assista antes de decidir"
+          title="Veja o Super Green Black em ação."
+          description="Apresentação oficial da fórmula, ingredientes premium e depoimentos reais. Vídeo em breve — enquanto isso, confira os benefícios e a oferta abaixo."
+        />
+      </Suspense>
       <ProblemSection />
       <BenefitsSection />
+      <Suspense fallback={<SgbSectionSkeleton />}><LazyJornada /></Suspense>
       <HowItWorksSection />
       <OfferSection />
       <ComparisonSection />
       <TestimonialsSection />
+      <Suspense fallback={<SgbSectionSkeleton />}><LazyCheckoutPreview /></Suspense>
       <FaqSection />
       <FinalCTA />
       <FloatingWhats />
