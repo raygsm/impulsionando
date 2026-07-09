@@ -96,12 +96,18 @@ export function TenantSwitcher() {
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2 max-w-[220px]" data-tenant-switcher-trigger>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 max-w-[220px] focus-ring transition-shadow"
+            data-tenant-switcher-trigger
+            aria-label={isImpersonating ? `Tenant: ${impersonatedCompanyName}` : "Selecionar tenant"}
+          >
             <Building2 className="size-4 shrink-0" />
-            <span className="truncate">
+            <span className="truncate hidden xs:inline sm:inline">
               {isImpersonating ? impersonatedCompanyName : "Tenant"}
             </span>
-            <ChevronsUpDown className="size-3.5 opacity-60 ml-auto" />
+            <ChevronsUpDown className="size-3.5 opacity-60 ml-auto hidden xs:inline sm:inline" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="end">
