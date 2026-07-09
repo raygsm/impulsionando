@@ -181,9 +181,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     }
   }
 
-  const whatsappHelp = `https://wa.me/5521993075000?text=${encodeURIComponent(
-    `Olá, preciso de suporte no portal Impulsionando.\nCódigo do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`,
-  )}`;
+  const supportCtx = `Código do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`;
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-10">
