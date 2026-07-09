@@ -70,7 +70,7 @@ function ClubePlanos() {
             <Button asChild variant="outline" className="mt-6 focus-ring"><Link to="/clube/cadastro">Entrar grátis</Link></Button>
           </Card>
 
-          <Card className="p-8 flex flex-col border-primary/60 ring-1 ring-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
+          <Card className="p-8 flex flex-col hover-lift border-primary/60 ring-1 ring-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
               <Crown className="w-4 h-4" /> Premium
             </div>
@@ -86,7 +86,7 @@ function ClubePlanos() {
                 </li>
               ))}
             </ul>
-            <Button asChild className="mt-6 gap-1">
+            <Button asChild className="mt-6 gap-1 btn-alive">
               <Link to="/clube/cadastro">Ativar teste de 30 dias <ArrowRight className="w-4 h-4" /></Link>
             </Button>
             <p className="text-[11px] opacity-60 mt-3">
