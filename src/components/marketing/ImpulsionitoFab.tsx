@@ -7,7 +7,7 @@
  * Posicionado em bottom-left para não conflitar com o OfficialWhatsAppFAB
  * (bottom-right). Não aparece em áreas autenticadas, login ou painéis internos.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Bot, X, MessageCircle } from "lucide-react";
 import { buildOfficialWhatsAppUrl, trackWhatsAppCTA } from "@/lib/whatsapp-cta";
