@@ -3,6 +3,7 @@ import { LifeBuoy, MessageCircle, Mail, Ticket, BookOpen, ArrowRight } from "luc
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/suporte")({
   head: () => ({
@@ -24,16 +25,16 @@ type Channel = {
   href?: string;
   to?: string;
   external?: boolean;
+  onClick?: () => void;
 };
 
 const CHANNELS: Channel[] = [
   {
     icon: MessageCircle,
-    title: "WhatsApp do Impulsionito",
+    title: "Impulsionito — Assistente Impulsionando",
     description: "Atendimento humano + IA, das 8h às 22h (BRT). Resposta em até 5 min em horário comercial.",
     cta: "Falar agora",
-    href: "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20Impulsionando.",
-    external: true,
+    onClick: () => openImpulsionito("suporte-central"),
   },
   {
     icon: Ticket,
@@ -92,7 +93,11 @@ function SuportePage() {
                       <h2 className="text-base font-semibold text-foreground">{c.title}</h2>
                       <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{c.description}</p>
                       <div className="mt-4">
-                        {"external" in c && c.external ? (
+                        {c.onClick ? (
+                          <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={c.onClick}>
+                            {c.cta} <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : "external" in c && c.external ? (
                           <Button asChild size="sm" variant="outline" className="gap-1.5">
                             <a href={c.href} target="_blank" rel="noopener noreferrer">
                               {c.cta} <ArrowRight className="h-3.5 w-3.5" />

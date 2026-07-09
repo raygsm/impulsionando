@@ -26,6 +26,7 @@ import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
 import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 
 
@@ -181,9 +182,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     }
   }
 
-  const whatsappHelp = `https://wa.me/5521993075000?text=${encodeURIComponent(
-    `Olá, preciso de suporte no portal Impulsionando.\nCódigo do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`,
-  )}`;
+  const supportCtx = `Código do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`;
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-10">
@@ -247,14 +246,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             >
               Ver status do sistema
             </a>
-            <a
-              href={whatsappHelp}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openImpulsionito(`erro:${kind}:${errorId}`)}
+              aria-label={`Falar com o Impulsionito sobre este erro (${supportCtx.slice(0, 80)})`}
               className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               Falar com suporte
-            </a>
+            </button>
           </div>
 
           <div className="mt-5 rounded-md border border-dashed border-border bg-muted/40 p-3">

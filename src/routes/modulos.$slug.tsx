@@ -16,6 +16,7 @@ import type { ModuleDetail } from "@/components/marketing/ModuleDetailDialog";
 import { MOTHER_MODULES, type MotherModule } from "@/data/motherModules";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { getDeps, MODULE_EXTERNAL_REQUIREMENTS } from "@/data/moduleDependencies";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 /** Valor fictício de referência por slug (R$/mês) — usado apenas na tela demo. */
 const DEMO_REFERENCE_AMOUNT: Record<string, number> = {
@@ -39,8 +40,6 @@ const DEMO_TEST_ROUTE: Record<string, "/demo/afiliados" | "/demo/checkout" | "/d
   parceiros: "/demo/parceiros",
 };
 
-const WHATSAPP_BASE =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20contratar%20o%20m%C3%B3dulo%20";
 
 /** Aliases entre slug do catálogo principal e id do MODULE_DETAILS. */
 const DETAIL_ALIASES: Record<string, string> = {
@@ -120,9 +119,6 @@ function ModulePage() {
   const integrations: string[] = detail?.integrations ?? [];
   const impact: string[] = detail?.impact ?? [];
 
-  const waUrl =
-    WHATSAPP_BASE + encodeURIComponent(title) + "%20da%20Impulsionando.";
-
   const orcamentoOrigin = `modulos:${slugParam}`;
 
   return (
@@ -196,14 +192,13 @@ function ModulePage() {
                 </Link>
               </Button>
               <Button
-                asChild
+                type="button"
                 size="lg"
                 variant="ghost"
                 className="gap-2 text-white hover:bg-white/10 hover:text-white"
+                onClick={() => openImpulsionito(`modulos:${slugParam}`)}
               >
-                <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com consultor
-                </a>
+                <MessageCircle className="w-4 h-4" /> Falar com consultor
               </Button>
             </div>
           </div>

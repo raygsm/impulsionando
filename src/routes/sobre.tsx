@@ -4,6 +4,7 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Target, Eye, Heart, Sparkles, ArrowRight, MessageCircle } from "lucide-react";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/sobre")({
   component: SobrePage,
 });
 
-const WHATSAPP_URL = "https://wa.me/5521993075000";
+
 
 function SobrePage() {
   return (
@@ -100,10 +101,8 @@ function SobrePage() {
               <Button asChild variant="outline">
                 <Link to="/modulos">Ver módulos</Link>
               </Button>
-              <Button asChild className="btn-whatsapp">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp
-                </a>
+              <Button type="button" onClick={() => openImpulsionito("sobre")}>
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com o Impulsionito
               </Button>
             </div>
           </Card>

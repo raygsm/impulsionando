@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ShieldAlert, Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/conta-suspensa")({
   head: () => ({ meta: [{ title: "Serviço temporariamente indisponível — Impulsionando" }] }),
@@ -90,14 +91,8 @@ function SuspendedPage() {
           <Button asChild variant="outline" className="flex-1">
             <Link to="/auth">Sair da conta</Link>
           </Button>
-          <Button asChild className="flex-1">
-            <a
-              href="https://wa.me/5521993075000?text=Olá%2C%20preciso%20de%20suporte%20financeiro"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Falar com a Impulsionando <ExternalLink className="w-3.5 h-3.5 ml-1" />
-            </a>
+          <Button type="button" className="flex-1" onClick={() => openImpulsionito("conta-suspensa")}>
+            Falar com a Impulsionando <ExternalLink className="w-3.5 h-3.5 ml-1" />
           </Button>
         </div>
       </Card>

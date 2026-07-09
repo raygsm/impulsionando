@@ -13,8 +13,7 @@ import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { getDemoNichoLink } from "@/lib/demoResolver";
 import { trackFunnelCta } from "@/lib/funnelTracking";
-
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20solicitar%20uma%20demonstra%C3%A7%C3%A3o%20da%20Impulsionando.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/demo/")({
   head: () => ({
@@ -37,7 +36,7 @@ type AudienceCard = {
   description: string;
   cta: string;
   to: string;
-  implantationCta?: { label: string; href: string };
+  implantationCta?: { label: string; origin: string };
   accent?: boolean;
 };
 
@@ -49,7 +48,7 @@ const AUDIENCES: AudienceCard[] = [
     description: "Plataforma navegável com agenda, CRM, vendas, financeiro, WhatsApp e BI — pronta para operar no seu segmento.",
     cta: "Ver demonstração",
     to: "/demo/modulos",
-    implantationCta: { label: "Solicitar implantação", href: WHATSAPP_URL },
+    implantationCta: { label: "Solicitar implantação", origin: "demo-empresas-implantacao" },
   },
   {
     icon: Layers,
@@ -58,7 +57,7 @@ const AUDIENCES: AudienceCard[] = [
     description: "Painel master, gestão de clientes, módulos liberados, branding próprio e faturamento — operação de revenda completa.",
     cta: "Ver demonstração",
     to: "/demo/white-label",
-    implantationCta: { label: "Solicitar implantação", href: WHATSAPP_URL },
+    implantationCta: { label: "Solicitar implantação", origin: "demo-whitelabel-implantacao" },
     accent: true,
   },
   {
@@ -143,10 +142,8 @@ function DemoLanding() {
                     </Link>
                   </Button>
                   {implantationCta && (
-                    <Button asChild variant="outline" size="sm" className="gap-1.5 w-full">
-                      <a href={implantationCta.href} target="_blank" rel="noopener noreferrer">
-                        {implantationCta.label} <ArrowRight className="w-3.5 h-3.5" />
-                      </a>
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5 w-full" onClick={() => openImpulsionito(implantationCta.origin)}>
+                      {implantationCta.label} <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   )}
                 </div>
@@ -326,10 +323,8 @@ function DemoLanding() {
                 de implantação, integrações e planos.
               </p>
             </div>
-            <Button asChild size="lg" className="btn-whatsapp gap-2">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> Falar com especialista
-              </a>
+            <Button type="button" size="lg" className="gap-2" onClick={() => openImpulsionito("demo-hub-especialista")}>
+              <MessageCircle className="w-4 h-4" /> Falar com especialista
             </Button>
           </div>
         </div>

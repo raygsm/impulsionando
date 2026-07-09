@@ -7,6 +7,7 @@ import {
   Headphones, MessageCircle, Mail, RotateCcw, Sparkles, Shield, Clock,
   CheckCircle2, X, TrendingUp, Users, Zap, AlertTriangle, ArrowRight,
 } from 'lucide-react'
+import { openImpulsionito } from '@/lib/impulsionito-tracking'
 
 export const Route = createFileRoute('/modulos/suporte-inteligente')({
   head: () => ({ meta: [
@@ -18,7 +19,7 @@ export const Route = createFileRoute('/modulos/suporte-inteligente')({
   component: SuporteIntelLanding,
 })
 
-const WHATSAPP = 'https://wa.me/5521993075000?text=Quero%20contratar%20o%20m%C3%B3dulo%20Suporte%20Inteligente'
+
 
 function SuporteIntelLanding() {
   return (
@@ -43,10 +44,8 @@ function SuporteIntelLanding() {
             <Badge variant="outline" className="text-xs">Sem cobrança por seat</Badge>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" asChild className="bg-gradient-to-r from-primary to-primary/80">
-              <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-4 w-4 mr-2" /> Contratar agora
-              </a>
+            <Button size="lg" type="button" className="bg-gradient-to-r from-primary to-primary/80" onClick={() => openImpulsionito('suporte-inteligente-hero')}>
+              <MessageCircle className="h-4 w-4 mr-2" /> Contratar agora
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link to="/escolher-nicho">Adicionar ao meu plano</Link>
@@ -232,10 +231,8 @@ function SuporteIntelLanding() {
             Cada cliente recebe acompanhamento por WhatsApp e Email automaticamente.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button size="lg" variant="secondary" asChild>
-              <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-                Contratar por R$ 497/mês <ArrowRight className="h-4 w-4 ml-2" />
-              </a>
+            <Button size="lg" variant="secondary" type="button" onClick={() => openImpulsionito('suporte-inteligente-cta')}>
+              Contratar por R$ 497/mês <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" asChild>
               <Link to="/escolher-nicho">Ver no orçamento</Link>

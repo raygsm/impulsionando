@@ -8,8 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
-
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20automatizar%20minha%20empresa%20com%20a%20Impulsionando.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 const APLICACOES = [
   { icon: HeartPulse, title: "Saúde", desc: "Clínicas, consultórios e terapias — agenda, prontuário, lembretes e área do paciente." },
@@ -167,10 +166,8 @@ function EmpresasPage() {
               <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
                 <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  Solicitar implantação <ArrowRight className="w-4 h-4" />
-                </a>
+              <Button type="button" size="lg" variant="outline" className="gap-2 w-full sm:w-auto" onClick={() => openImpulsionito("empresas-implantacao")}>
+                Solicitar implantação <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -193,10 +190,8 @@ function EmpresasPage() {
                     Quero automatizar minha empresa <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
-                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="w-4 h-4" /> Falar com especialista
-                  </a>
+                <Button type="button" size="lg" variant="outline" className="gap-2 w-full sm:w-auto" onClick={() => openImpulsionito("empresas-planos")}>
+                  <MessageCircle className="w-4 h-4" /> Falar com especialista
                 </Button>
               </div>
             </div>

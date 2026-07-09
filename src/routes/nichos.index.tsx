@@ -9,9 +9,7 @@ import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
 import { getDemoNichoLink } from "@/lib/demoResolver";
 import { trackFunnelCta } from "@/lib/funnelTracking";
-
-const WA_HOME =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20escolher%20o%20meu%20nicho%20e%20conhecer%20a%20Impulsionando.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/nichos/")({
   head: () => ({
@@ -135,10 +133,8 @@ function NichosIndex() {
               modelo de negócio.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button asChild size="lg" className="btn-whatsapp gap-2 shadow-lg">
-                <a href={WA_HOME} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
-                </a>
+              <Button type="button" size="lg" className="gap-2 shadow-lg" onClick={() => openImpulsionito("nichos-hub")}>
+                <MessageCircle className="w-4 h-4" /> Falar com o Impulsionito
               </Button>
               <Button
                 asChild

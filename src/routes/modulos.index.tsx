@@ -9,9 +9,7 @@ import {
   MOTHER_MODULE_CATEGORIES,
 } from "@/data/motherModules";
 import { getDeps } from "@/data/moduleDependencies";
-
-const WHATSAPP_URL =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20conhecer%20os%20m%C3%B3dulos%20da%20Impulsionando.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/modulos/")({
   head: () => ({
@@ -71,10 +69,8 @@ function ModulosPage() {
                   Montar meu sistema <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Tirar dúvidas
-                </a>
+              <Button type="button" size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white" onClick={() => openImpulsionito("modulos-hub")}>
+                <MessageCircle className="w-4 h-4" /> Tirar dúvidas
               </Button>
             </div>
           </div>
