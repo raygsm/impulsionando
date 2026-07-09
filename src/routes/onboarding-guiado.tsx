@@ -73,9 +73,10 @@ function OnboardingPage() {
       <main className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
         <div className="mb-8">
           <Badge variant="secondary" className="mb-2">Onboarding guiado</Badge>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Sua jornada Impulsionando em 15 passos</h1>
-          <p className="text-muted-foreground">
-            Do "nunca usei" até "operando 100% no automático". Marque cada etapa conforme avança — seu progresso fica salvo neste dispositivo.
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Do zero à operação rodando — em 15 passos claros</h1>
+          <p className="text-muted-foreground max-w-2xl">
+            Um checklist objetivo para ativar o Impulsionando com segurança. Marque cada etapa conforme conclui —
+            seu progresso fica salvo neste dispositivo e você pode retomar a qualquer momento.
           </p>
         </div>
 
