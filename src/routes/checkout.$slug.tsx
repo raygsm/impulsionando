@@ -462,9 +462,9 @@ function OrderSummary({
 }) {
   const usingCart = cart && cart.planName;
 
-  const bumpsTotalCents = ORDER_BUMPS
-    .filter((b) => selectedBumps.has(b.id))
-    .reduce((s, b) => s + b.priceCents, 0);
+  // Complementos são apenas INTERESSE — não somam ao total cobrado agora.
+  const interestedBumps = ORDER_BUMPS.filter((b) => selectedBumps.has(b.id));
+
 
   // Fallback: se não há cart, usar o preço direto do plano do backend.
   const summaryPreview = usingCart
