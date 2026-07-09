@@ -131,8 +131,10 @@ function TrialCadastro() {
                 volte aqui e repita o cadastro com o mesmo e-mail para receber um novo.
               </div>
             </div>
-            <Button asChild variant="outline" className="w-full">
-              <a href="https://impulsionando.com.br/auth">Já tenho conta — fazer login</a>
+            <Button asChild variant="outline" className="w-full focus-ring">
+              <a href="https://impulsionando.com.br/auth" target="_blank" rel="noopener noreferrer">
+                Já tenho conta — fazer login
+              </a>
             </Button>
           </Card>
         </main>
