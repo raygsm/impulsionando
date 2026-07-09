@@ -1,7 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { findImovel, relacionados, formatBRL, IMOVEIS, type Imovel } from "@/data/garrido-imoveis";
-import { MapPin, BedDouble, Bath, Car, Ruler, Calendar, ShieldCheck, MessageCircle, Phone, ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, Star } from "lucide-react";
+import {
+  MapPin, BedDouble, Bath, Car, Ruler, Calendar, ShieldCheck, MessageCircle,
+  ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, Star, Heart, FileText,
+} from "lucide-react";
+import { GarridoBreadcrumbs, buildGarridoBreadcrumbJsonLd } from "@/components/garrido/Breadcrumbs";
 
 export const Route = createFileRoute("/garrido/imovel/$slug")({
   loader: ({ params }) => {
@@ -16,6 +20,7 @@ export const Route = createFileRoute("/garrido/imovel/$slug")({
     const i = loaderData.imovel;
     const title = `${i.titulo} — Imobiliária Garrido`;
     const desc = `${i.categoria.toUpperCase()} em ${i.bairro}, ${i.cidade}/${i.uf}. ${i.quartos}Q · ${i.areaUtil}m² · ${i.precoVenda ? formatBRL(i.precoVenda) : i.precoAluguel ? `${formatBRL(i.precoAluguel)}/mês` : "consulta"}.`;
+    const canonical = `https://impulsionando.com.br/garrido/imovel/${params.slug}`;
     return {
       meta: [
         { title },
@@ -24,26 +29,51 @@ export const Route = createFileRoute("/garrido/imovel/$slug")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "product" },
         { property: "og:image", content: i.fotos[0] },
-        { property: "og:url", content: `https://garrido.impulsionando.com.br/garrido/imovel/${params.slug}` },
+        { property: "og:url", content: canonical },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: i.fotos[0] },
       ],
-      links: [{ rel: "canonical", href: `https://garrido.impulsionando.com.br/garrido/imovel/${params.slug}` }],
-      scripts: [{
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: i.titulo,
-          image: i.fotos,
-          description: desc,
-          offers: i.precoVenda ? {
-            "@type": "Offer",
-            price: i.precoVenda,
-            priceCurrency: "BRL",
-            availability: "https://schema.org/InStock",
-          } : undefined,
-          brand: { "@type": "RealEstateAgent", name: "Imobiliária Garrido" },
-        }),
-      }],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            name: i.titulo,
+            description: desc,
+            url: canonical,
+            image: i.fotos,
+            numberOfRooms: i.quartos,
+            numberOfBathroomsTotal: i.banheiros,
+            numberOfBedrooms: i.quartos,
+            floorSize: { "@type": "QuantitativeValue", value: i.areaUtil, unitCode: "MTK" },
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: i.bairro,
+              addressLocality: i.cidade,
+              addressRegion: i.uf,
+              postalCode: i.cep,
+              addressCountry: "BR",
+            },
+            geo: { "@type": "GeoCoordinates", latitude: i.mapa.lat, longitude: i.mapa.lng },
+            offers: i.precoVenda
+              ? { "@type": "Offer", price: i.precoVenda, priceCurrency: "BRL", availability: "https://schema.org/InStock" }
+              : i.precoAluguel
+              ? { "@type": "Offer", price: i.precoAluguel, priceCurrency: "BRL", priceSpecification: { "@type": "UnitPriceSpecification", price: i.precoAluguel, priceCurrency: "BRL", unitText: "MONTH" } }
+              : undefined,
+            broker: { "@type": "RealEstateAgent", name: "Imobiliária Garrido" },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(buildGarridoBreadcrumbJsonLd([
+            { label: "Início", to: "/garrido" },
+            { label: "Buscar imóveis", to: "/garrido/buscar" },
+            { label: `${i.bairro}, ${i.cidade}` },
+          ])),
+        },
+      ],
     };
   },
   errorComponent: ({ reset }) => (
