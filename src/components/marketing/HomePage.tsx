@@ -1091,6 +1091,330 @@ function CanaisComunicacao() {
   );
 }
 
+// ============== CANAIS ==============
+function CanaisComunicacao() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Comunicação omnichannel</Badge>
+        <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
+          Um só sistema fala com seu cliente pelo canal certo
+        </h2>
+        <p className="text-muted-foreground mt-3">
+          WhatsApp, e-mail, SMS e push — com deduplicação inteligente e fallback humano.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { icon: MessageCircle, title: "WhatsApp oficial", desc: "API oficial, templates aprovados e fila humana." },
+          { icon: Mail, title: "E-mail transacional", desc: "Confirmações, cobranças e boletos com entregabilidade." },
+          { icon: MessageSquare, title: "SMS e push", desc: "Camada extra para não perder mensagem crítica." },
+          { icon: Phone, title: "Ligação e voice", desc: "Retomada humana quando o canal digital travar." },
+        ].map((c) => {
+          const Icon = c.icon;
+          return (
+            <Card key={c.title} className="p-5">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary grid place-items-center mb-3">
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="font-semibold">{c.title}</div>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ============== TRUST BAR ==============
+const TRUST_ITEMS = [
+  { icon: ShieldCheck, title: "LGPD & dados no Brasil", desc: "Servidores nacionais, criptografia em trânsito e em repouso." },
+  { icon: Layers, title: "Plataforma SaaS modular", desc: "Ative apenas os módulos que fazem sentido para seu nicho." },
+  { icon: Bot, title: "Automação & IA integrada", desc: "Impulsionito, réguas por nicho e agentes prontos para operar." },
+  { icon: RefreshCw, title: "Atualização contínua", desc: "Novas features publicadas sem custo adicional para clientes ativos." },
+  { icon: MessageCircle, title: "Suporte humano", desc: "Time de sucesso do cliente por WhatsApp, chat e e-mail." },
+  { icon: Zap, title: "Integrações abertas", desc: "APIs, webhooks e N8N para conectar seu stack atual." },
+];
+
+function TrustBar() {
+  return (
+    <section aria-labelledby="trust-bar-title" className="border-b bg-card/40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <h2 id="trust-bar-title" className="sr-only">Diferenciais da plataforma</h2>
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TRUST_ITEMS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <div key={t.title} className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Icon className="w-4.5 h-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold">{t.title}</div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{t.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============== MINI COMPARATIVO DE PLANOS ==============
+const HOME_PLANOS = [
+  {
+    slug: "essencial" as const,
+    nome: "Essencial",
+    tagline: "Para começar organizado.",
+    publico: "Autônomos, MEIs e negócios locais em fase inicial.",
+    beneficios: [
+      "CRM + WhatsApp integrado",
+      "Agenda online e pagamento avulso",
+      "Área do cliente básica",
+    ],
+    destaque: false,
+  },
+  {
+    slug: "integrado" as const,
+    nome: "Integrado",
+    tagline: "O plano mais escolhido.",
+    publico: "Clínicas, imobiliárias, bares, lojas com operação ativa.",
+    beneficios: [
+      "Módulos combinados por nicho",
+      "Automação, réguas e cobrança recorrente",
+      "Dashboards e área do cliente completa",
+    ],
+    destaque: true,
+  },
+  {
+    slug: "avancado" as const,
+    nome: "Avançado",
+    tagline: "Operação completa e White Label.",
+    publico: "Empresas com times, filiais ou revenda com marca própria.",
+    beneficios: [
+      "Multi-empresa, RBAC e auditoria",
+      "White Label pronto para revender",
+      "Integrações via API, N8N e IA dedicada",
+    ],
+    destaque: false,
+  },
+];
+
+function MiniComparativoPlanos() {
+  return (
+    <section id="planos-home" aria-labelledby="planos-home-title" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Planos</Badge>
+        <h2 id="planos-home-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+          Um plano para cada fase da sua operação
+        </h2>
+        <p className="text-muted-foreground mt-3">
+          Todos incluem suporte humano, atualizações contínuas e dados no Brasil. Você pode migrar entre planos a qualquer momento.
+        </p>
+      </div>
+      <div className="grid gap-5 md:grid-cols-3">
+        {HOME_PLANOS.map((p) => (
+          <Card
+            key={p.slug}
+            className={`relative p-6 flex flex-col ${
+              p.destaque
+                ? "border-primary ring-2 ring-primary/30 shadow-xl shadow-primary/10 md:-translate-y-2"
+                : "border-border"
+            }`}
+          >
+            {p.destaque && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground shadow">
+                Mais escolhido
+              </Badge>
+            )}
+            <div className="mb-3">
+              <div className="text-lg font-bold">{p.nome}</div>
+              <div className="text-sm text-muted-foreground">{p.tagline}</div>
+            </div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Ideal para</div>
+            <p className="text-sm mt-1 mb-4 leading-relaxed">{p.publico}</p>
+            <ul className="space-y-2 mb-6">
+              {p.beneficios.map((b) => (
+                <li key={b} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto grid gap-2">
+              <Button asChild className={p.destaque ? "" : "bg-primary/90 hover:bg-primary"}>
+                <Link to="/contratar" search={{ plano: p.slug }}>
+                  Contratar {p.nome} <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
+                <Link to="/planos">Ver comparativo completo</Link>
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+      <p className="text-center text-xs text-muted-foreground mt-6">
+        7 dias para testar · Migração inclusa · LGPD · Sem multa por cancelamento
+      </p>
+    </section>
+  );
+}
+
+// ============== PROVA SOCIAL ==============
+const PROVA_STATS = [
+  { value: "10+", label: "Nichos atendidos" },
+  { value: "24/7", label: "Automação ativa" },
+  { value: "R$ 0", label: "Para testar" },
+  { value: "100%", label: "Dados no Brasil" },
+];
+
+const PROVA_SEGMENTOS = [
+  "Saúde", "Alimentação", "Imobiliário", "Educação", "Eventos",
+  "Serviços", "Varejo", "Fornecedores", "White Label",
+];
+
+// Placeholders identificados — trocar por depoimentos reais quando o time de
+// customer success liberar. Não usar como prova pública sem consentimento.
+const PROVA_DEPOIMENTOS = [
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Diretor · Clínica multiespecialidade",
+    texto: "Substituímos 4 sistemas por um só. A agenda, o WhatsApp e a cobrança agora conversam sem retrabalho.",
+    placeholder: true,
+  },
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Proprietária · Bar e cervejaria",
+    texto: "O time do salão para de digitar a mesma coisa 3 vezes. O gerente vê o dia inteiro em uma tela.",
+    placeholder: true,
+  },
+  {
+    autor: "Cliente Impulsionando",
+    cargo: "Gestor comercial · Imobiliária",
+    texto: "Cada corretor tem visão do funil, do lead e do imóvel — sem planilha, sem grupo de WhatsApp perdido.",
+    placeholder: true,
+  },
+];
+
+function ProvaSocial() {
+  return (
+    <section aria-labelledby="prova-social-title" className="bg-card/40 border-y">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Quem já opera com a Impulsionando</Badge>
+          <h2 id="prova-social-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+            Empresas de diferentes segmentos, operando na mesma plataforma
+          </h2>
+        </div>
+
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+          {PROVA_STATS.map((s) => (
+            <div key={s.label} className="text-center">
+              <dt className="text-3xl md:text-4xl font-black text-primary">{s.value}</dt>
+              <dd className="text-xs uppercase tracking-wider mt-1 opacity-70">{s.label}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-12" aria-label="Segmentos atendidos">
+          {PROVA_SEGMENTOS.map((s) => (
+            <Badge key={s} variant="secondary" className="text-xs px-3 py-1">
+              {s}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {PROVA_DEPOIMENTOS.map((d) => (
+            <Card key={d.autor + d.cargo} className="p-5 relative">
+              {d.placeholder && (
+                <Badge variant="outline" className="absolute top-3 right-3 text-[10px] border-dashed">
+                  Placeholder
+                </Badge>
+              )}
+              <p className="text-sm leading-relaxed">"{d.texto}"</p>
+              <div className="mt-4 pt-4 border-t">
+                <div className="text-sm font-semibold">{d.autor}</div>
+                <div className="text-xs text-muted-foreground">{d.cargo}</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============== FAQ HOME ==============
+const FAQ_HOME = [
+  {
+    q: "Preciso de cartão para testar?",
+    a: "Não. Você navega pelas demos, faz o diagnóstico e conversa com o Impulsionito sem cadastrar cartão. O cartão só é pedido na contratação de um plano.",
+  },
+  {
+    q: "Consigo usar só um módulo?",
+    a: "Sim. A plataforma é modular — o plano Essencial atende quem só quer CRM + WhatsApp ou só agenda + pagamento. Ative outros módulos quando precisar.",
+  },
+  {
+    q: "Meus dados ficam no Brasil?",
+    a: "Sim. Toda a infraestrutura e cópias operam em território nacional, com criptografia em trânsito e em repouso, em conformidade com a LGPD.",
+  },
+  {
+    q: "A Impulsionando substitui minha equipe de atendimento?",
+    a: "Não. A plataforma organiza, automatiza confirmações e reduz retrabalho, mas o atendimento humano continua com o seu time — inclusive com fallback humano quando o canal digital travar.",
+  },
+  {
+    q: "Consigo revender a plataforma com a minha marca?",
+    a: "Sim, no plano Avançado. O modelo White Label libera multi-empresa, marca própria, cobrança e onboarding do seu cliente final.",
+  },
+];
+
+function FaqHome() {
+  const [open, setOpen] = useState<number>(0);
+  return (
+    <section aria-labelledby="faq-home-title" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+      <div className="text-center mb-10">
+        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Perguntas frequentes</Badge>
+        <h2 id="faq-home-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
+          Antes de contratar, o que costumam perguntar
+        </h2>
+      </div>
+      <div className="rounded-xl border bg-card divide-y">
+        {FAQ_HOME.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={item.q}>
+              <button
+                type="button"
+                onClick={() => setOpen(isOpen ? -1 : i)}
+                aria-expanded={isOpen}
+                className="w-full flex items-start justify-between gap-4 p-5 text-left hover:bg-muted/40 transition"
+              >
+                <span className="font-semibold text-base">{item.q}</span>
+                <span
+                  aria-hidden
+                  className={`shrink-0 h-6 w-6 rounded-full grid place-items-center bg-primary/10 text-primary transition ${isOpen ? "rotate-45" : ""}`}
+                >
+                  <span className="text-lg leading-none">+</span>
+                </span>
+              </button>
+              {isOpen && (
+                <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                  {item.a}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ============== HOMEPAGE ==============
 
 /**
