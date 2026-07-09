@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Users } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -39,7 +42,7 @@ function LeadsPage() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", source: "", notes: "" });
 
-  const { data: leads } = useQuery({
+  const { data: leads, isLoading } = useQuery({
     queryKey: ["crm-leads", companyId, search],
     enabled: !!companyId,
     queryFn: async () => {
@@ -116,7 +119,20 @@ function LeadsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!leads?.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum lead.</TableCell></TableRow>}
+            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={`sk-${i}`}>
+                {Array.from({ length: 6 }).map((_, j) => (
+                  <TableCell key={j}><Skeleton className="h-3 w-full" /></TableCell>
+                ))}
+              </TableRow>
+            ))}
+            {!isLoading && !leads?.length && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-6">
+                  <EmptyStateV2 icon={Users} title="Nenhum lead ainda" description="Cadastre o primeiro lead ou aguarde captação via marketing." className="border-0 shadow-none" />
+                </TableCell>
+              </TableRow>
+            )}
             {leads?.map((l) => (
               <TableRow key={l.id}>
                 <TableCell>
