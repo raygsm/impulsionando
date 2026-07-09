@@ -30,8 +30,6 @@ import { NICHO_DETAILS, findNicho } from "@/components/marketing/nichoDetails";
 import { LanguageSwitcher } from "@/components/marketing/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
-const WHATSAPP_NICHO_URL =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20ajuda%20para%20escolher%20o%20meu%20nicho%20na%20Impulsionando.";
 
 type NavItem = {
   to: string;
@@ -199,9 +197,17 @@ function NichosMenu() {
               </div>
 
               <div className="mt-2 flex items-center justify-center">
-                <a href={WHATSAPP_NICHO_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary">
-                  <MessageCircle className="h-3.5 w-3.5" /> Falar com consultor no WhatsApp
-                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                    }
+                  }}
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary focus-ring rounded-sm"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" /> Falar com Impulsionito
+                </button>
               </div>
             </div>
           </NavigationMenuContent>
