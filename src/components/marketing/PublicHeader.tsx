@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { NICHO_DETAILS, findNicho } from "@/components/marketing/nichoDetails";
+import { LanguageSwitcher } from "@/components/marketing/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 const WHATSAPP_NICHO_URL =
@@ -229,7 +230,9 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
+          <LanguageSwitcher />
+
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5 hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring transition-colors">
             <Link to="/auth">
               <LogIn className="w-4 h-4" /> Entrar
             </Link>
@@ -238,7 +241,7 @@ export function PublicHeader() {
           <Button
             asChild
             size="sm"
-            className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant hover:shadow-lg hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring transition-all"
+            className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant btn-alive"
           >
             <Link to="/checkout">
               <ShoppingCart className="w-4 h-4" /> Contratar Agora
@@ -301,6 +304,10 @@ export function PublicHeader() {
                 <NavLink to="/suporte" label="Suporte" onClick={() => setOpen(false)} />
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
+                  <div className="flex items-center justify-between px-1 pb-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Idioma</span>
+                    <LanguageSwitcher />
+                  </div>
                   <Button asChild variant="ghost">
                     <Link to="/auth" onClick={() => setOpen(false)}>
                       <LogIn className="w-4 h-4 mr-2" /> Entrar
