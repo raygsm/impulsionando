@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -70,8 +70,16 @@ function CotizarPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
+      <nav aria-label="Migas de pan" className="text-xs text-slate-500 mb-3">
+        <Link to="/riomed" className="hover:text-slate-800">RioMed</Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-slate-700 font-medium">Cotizar</span>
+      </nav>
       <h1 className="text-3xl lg:text-4xl font-bold mb-2">Solicitar cotización</h1>
-      <p className="text-muted-foreground mb-8">Completá el formulario y te respondemos por WhatsApp con la propuesta.</p>
+      <p className="text-muted-foreground mb-8">
+        Completá el formulario y un especialista RioMed te responde con propuesta, disponibilidad y plazo.
+        ¿Ya tenés lista de productos? <Link to="/riomed/hospital/portal" className="underline text-[color:var(--riomed-primary,#0B3D74)] font-medium">Ingresá al portal hospitalario</Link>.
+      </p>
 
       <form
         className="space-y-5 bg-white border rounded-2xl p-6 shadow-sm"
@@ -82,7 +90,7 @@ function CotizarPage() {
             <input required value={f.name} onChange={(e) => upd("name", e.target.value)} className="input" />
           </Field>
           <Field label="WhatsApp *">
-            <input required value={f.whatsapp} onChange={(e) => upd("whatsapp", e.target.value)} placeholder="+595 ..." className="input" />
+            <input required value={f.whatsapp} onChange={(e) => upd("whatsapp", e.target.value)} placeholder="+591 7..." className="input" />
           </Field>
         </div>
 

@@ -28,7 +28,7 @@ function PacientesPage() {
           </div>
         ))}
       </div>
-      <Link to="/riomed/cotizar" className="inline-flex rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0E7C66)" }}>Hablar con un asesor</Link>
+      <Link to="/riomed/cotizar" className="inline-flex rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Hablar con un asesor</Link>
     </div>
   );
 }
