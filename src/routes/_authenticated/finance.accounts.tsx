@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { CardSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -31,7 +32,7 @@ function AccountsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", type: "cash", opening_balance: "0" });
 
-  const { data: accounts } = useQuery({
+  const { data: accounts, isLoading } = useQuery({
     queryKey: ["fin-accounts", companyId],
     enabled: !!companyId,
     queryFn: async () => (await supabase.from("fin_accounts").select("*").eq("company_id", companyId).order("name")).data ?? [],
@@ -80,8 +81,12 @@ function AccountsPage() {
             </DialogContent>
           </Dialog></div>} />
 
+      {isLoading ? (
+        <CardSkeleton count={3} />
+      ) : !accounts?.length ? (
+        <EmptyStateV2 icon={Wallet} title="Nenhuma conta financeira" description="Crie sua primeira conta (caixa, banco ou cartão) para começar." />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {!accounts?.length && <EmptyState title="Nenhuma conta" description="Crie sua primeira conta." />}
         {accounts?.map((a) => (
           <Card key={a.id} className="p-4 shadow-card">
             <div className="flex items-start justify-between">
