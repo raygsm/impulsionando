@@ -71,7 +71,7 @@ function HubAutomacoes() {
   const rt = h.data?.runtime;
   const intOverview = h.data?.integrations;
 
-  const integList = (integs.data as any[]) ?? [];
+  const integList = ((integs.data as any)?.items ?? []) as any[];
   const missingCreds = integList.filter((i) => i.status === "not_configured" || !i.is_active);
   const withErrors = integList.filter((i) => i.last_error);
 
