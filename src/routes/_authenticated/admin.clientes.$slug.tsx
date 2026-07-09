@@ -34,16 +34,21 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
 
 type TabDef = { key: string; label: string; to: string; exact?: boolean };
 
+// Cliente 360 — 12 abas oficiais (Onda 3.2). Ordem espelhando o cockpit
+// definido pelo dono do produto. Copy usa "cliente/empresa" — nunca "tenant".
 function buildTabs(slug: string): TabDef[] {
   return [
-    { key: "resumo", label: "Resumo", to: `/admin/clientes/${slug}`, exact: true },
     { key: "painel", label: "Painel", to: `/admin/clientes/${slug}/painel` },
+    { key: "dados", label: "Dados do cliente", to: `/admin/clientes/${slug}/dados` },
+    { key: "plano", label: "Plano e cortesia", to: `/admin/clientes/${slug}/plano` },
     { key: "modulos", label: "Módulos", to: `/admin/clientes/${slug}/modulos` },
-    { key: "financeiro", label: "Financeiro", to: `/admin/clientes/${slug}/financeiro` },
-    { key: "crm", label: "CRM & Leads", to: `/admin/clientes/${slug}/crm` },
+    { key: "cerebro-ia", label: "Cérebro IA", to: `/admin/clientes/${slug}/cerebro-ia` },
     { key: "automacoes", label: "Automações", to: `/admin/clientes/${slug}/automacoes` },
-    { key: "dominio", label: "Domínio", to: `/admin/clientes/${slug}/dominio` },
-    { key: "logs", label: "Logs & Auditoria", to: `/admin/clientes/${slug}/logs` },
+    { key: "financeiro", label: "Financeiro", to: `/admin/clientes/${slug}/financeiro` },
+    { key: "mercado-pago", label: "Mercado Pago", to: `/admin/clientes/${slug}/mercado-pago` },
+    { key: "dominio", label: "Domínios", to: `/admin/clientes/${slug}/dominio` },
+    { key: "publicacao", label: "Publicação", to: `/admin/clientes/${slug}/publicacao` },
+    { key: "logs", label: "Logs", to: `/admin/clientes/${slug}/logs` },
     { key: "configuracoes", label: "Configurações", to: `/admin/clientes/${slug}/configuracoes` },
   ];
 }
@@ -102,7 +107,7 @@ function TenantWorkspaceLayout() {
             </Button>
           ) : null}
         </div>
-        <nav className="px-4 sm:px-6 lg:px-8 -mb-px overflow-x-auto">
+        <nav className="px-4 sm:px-6 lg:px-8 -mb-px overflow-x-auto scroll-contrast">
           <ul className="flex gap-1 text-sm">
             {tabs.map((t) => {
               const active = isActive(t);

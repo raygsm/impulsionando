@@ -853,13 +853,18 @@ import { Route as AuthenticatedAdminClientesRiomedAutomacaoRouteImport } from '.
 import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistente'
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
 import { Route as AuthenticatedAdminClientesRiomedAgentesRouteImport } from './routes/_authenticated/admin.clientes.riomed.agentes'
+import { Route as AuthenticatedAdminClientesSlugPublicacaoRouteImport } from './routes/_authenticated/admin.clientes.$slug.publicacao'
+import { Route as AuthenticatedAdminClientesSlugPlanoRouteImport } from './routes/_authenticated/admin.clientes.$slug.plano'
 import { Route as AuthenticatedAdminClientesSlugPainelRouteImport } from './routes/_authenticated/admin.clientes.$slug.painel'
 import { Route as AuthenticatedAdminClientesSlugModulosRouteImport } from './routes/_authenticated/admin.clientes.$slug.modulos'
+import { Route as AuthenticatedAdminClientesSlugMercadoPagoRouteImport } from './routes/_authenticated/admin.clientes.$slug.mercado-pago'
 import { Route as AuthenticatedAdminClientesSlugLogsRouteImport } from './routes/_authenticated/admin.clientes.$slug.logs'
 import { Route as AuthenticatedAdminClientesSlugFinanceiroRouteImport } from './routes/_authenticated/admin.clientes.$slug.financeiro'
 import { Route as AuthenticatedAdminClientesSlugDominioRouteImport } from './routes/_authenticated/admin.clientes.$slug.dominio'
+import { Route as AuthenticatedAdminClientesSlugDadosRouteImport } from './routes/_authenticated/admin.clientes.$slug.dados'
 import { Route as AuthenticatedAdminClientesSlugCrmRouteImport } from './routes/_authenticated/admin.clientes.$slug.crm'
 import { Route as AuthenticatedAdminClientesSlugConfiguracoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.configuracoes'
+import { Route as AuthenticatedAdminClientesSlugCerebroIaRouteImport } from './routes/_authenticated/admin.clientes.$slug.cerebro-ia'
 import { Route as AuthenticatedAdminClientesSlugAutomacoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.automacoes'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
@@ -5591,6 +5596,18 @@ const AuthenticatedAdminClientesRiomedAgentesRoute =
     path: '/agentes',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesSlugPublicacaoRoute =
+  AuthenticatedAdminClientesSlugPublicacaoRouteImport.update({
+    id: '/publicacao',
+    path: '/publicacao',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugPlanoRoute =
+  AuthenticatedAdminClientesSlugPlanoRouteImport.update({
+    id: '/plano',
+    path: '/plano',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugPainelRoute =
   AuthenticatedAdminClientesSlugPainelRouteImport.update({
     id: '/painel',
@@ -5601,6 +5618,12 @@ const AuthenticatedAdminClientesSlugModulosRoute =
   AuthenticatedAdminClientesSlugModulosRouteImport.update({
     id: '/modulos',
     path: '/modulos',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugMercadoPagoRoute =
+  AuthenticatedAdminClientesSlugMercadoPagoRouteImport.update({
+    id: '/mercado-pago',
+    path: '/mercado-pago',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const AuthenticatedAdminClientesSlugLogsRoute =
@@ -5621,6 +5644,12 @@ const AuthenticatedAdminClientesSlugDominioRoute =
     path: '/dominio',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
+const AuthenticatedAdminClientesSlugDadosRoute =
+  AuthenticatedAdminClientesSlugDadosRouteImport.update({
+    id: '/dados',
+    path: '/dados',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugCrmRoute =
   AuthenticatedAdminClientesSlugCrmRouteImport.update({
     id: '/crm',
@@ -5631,6 +5660,12 @@ const AuthenticatedAdminClientesSlugConfiguracoesRoute =
   AuthenticatedAdminClientesSlugConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugCerebroIaRoute =
+  AuthenticatedAdminClientesSlugCerebroIaRouteImport.update({
+    id: '/cerebro-ia',
+    path: '/cerebro-ia',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const AuthenticatedAdminClientesSlugAutomacoesRoute =
@@ -6448,13 +6483,18 @@ export interface FileRoutesByFullPath {
   '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
+  '/admin/clientes/$slug/dados': typeof AuthenticatedAdminClientesSlugDadosRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
   '/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
   '/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/admin/clientes/$slug/mercado-pago': typeof AuthenticatedAdminClientesSlugMercadoPagoRoute
   '/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
+  '/admin/clientes/$slug/plano': typeof AuthenticatedAdminClientesSlugPlanoRoute
+  '/admin/clientes/$slug/publicacao': typeof AuthenticatedAdminClientesSlugPublicacaoRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -7283,13 +7323,18 @@ export interface FileRoutesByTo {
   '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants': typeof AuthenticatedCoreTenantsIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
+  '/admin/clientes/$slug/dados': typeof AuthenticatedAdminClientesSlugDadosRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
   '/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
   '/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/admin/clientes/$slug/mercado-pago': typeof AuthenticatedAdminClientesSlugMercadoPagoRoute
   '/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
+  '/admin/clientes/$slug/plano': typeof AuthenticatedAdminClientesSlugPlanoRoute
+  '/admin/clientes/$slug/publicacao': typeof AuthenticatedAdminClientesSlugPublicacaoRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -8140,13 +8185,18 @@ export interface FileRoutesById {
   '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/_authenticated/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/_authenticated/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/_authenticated/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/_authenticated/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   '/_authenticated/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
+  '/_authenticated/admin/clientes/$slug/dados': typeof AuthenticatedAdminClientesSlugDadosRoute
   '/_authenticated/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
   '/_authenticated/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
   '/_authenticated/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/_authenticated/admin/clientes/$slug/mercado-pago': typeof AuthenticatedAdminClientesSlugMercadoPagoRoute
   '/_authenticated/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/_authenticated/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
+  '/_authenticated/admin/clientes/$slug/plano': typeof AuthenticatedAdminClientesSlugPlanoRoute
+  '/_authenticated/admin/clientes/$slug/publicacao': typeof AuthenticatedAdminClientesSlugPublicacaoRoute
   '/_authenticated/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/_authenticated/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -8997,13 +9047,18 @@ export interface FileRouteTypes {
     | '/core/nichos/'
     | '/core/tenants/'
     | '/admin/clientes/$slug/automacoes'
+    | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
     | '/admin/clientes/$slug/crm'
+    | '/admin/clientes/$slug/dados'
     | '/admin/clientes/$slug/dominio'
     | '/admin/clientes/$slug/financeiro'
     | '/admin/clientes/$slug/logs'
+    | '/admin/clientes/$slug/mercado-pago'
     | '/admin/clientes/$slug/modulos'
     | '/admin/clientes/$slug/painel'
+    | '/admin/clientes/$slug/plano'
+    | '/admin/clientes/$slug/publicacao'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
@@ -9832,13 +9887,18 @@ export interface FileRouteTypes {
     | '/core/nichos'
     | '/core/tenants'
     | '/admin/clientes/$slug/automacoes'
+    | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
     | '/admin/clientes/$slug/crm'
+    | '/admin/clientes/$slug/dados'
     | '/admin/clientes/$slug/dominio'
     | '/admin/clientes/$slug/financeiro'
     | '/admin/clientes/$slug/logs'
+    | '/admin/clientes/$slug/mercado-pago'
     | '/admin/clientes/$slug/modulos'
     | '/admin/clientes/$slug/painel'
+    | '/admin/clientes/$slug/plano'
+    | '/admin/clientes/$slug/publicacao'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
@@ -10688,13 +10748,18 @@ export interface FileRouteTypes {
     | '/_authenticated/core/nichos/'
     | '/_authenticated/core/tenants/'
     | '/_authenticated/admin/clientes/$slug/automacoes'
+    | '/_authenticated/admin/clientes/$slug/cerebro-ia'
     | '/_authenticated/admin/clientes/$slug/configuracoes'
     | '/_authenticated/admin/clientes/$slug/crm'
+    | '/_authenticated/admin/clientes/$slug/dados'
     | '/_authenticated/admin/clientes/$slug/dominio'
     | '/_authenticated/admin/clientes/$slug/financeiro'
     | '/_authenticated/admin/clientes/$slug/logs'
+    | '/_authenticated/admin/clientes/$slug/mercado-pago'
     | '/_authenticated/admin/clientes/$slug/modulos'
     | '/_authenticated/admin/clientes/$slug/painel'
+    | '/_authenticated/admin/clientes/$slug/plano'
+    | '/_authenticated/admin/clientes/$slug/publicacao'
     | '/_authenticated/admin/clientes/riomed/agentes'
     | '/_authenticated/admin/clientes/riomed/assistencia'
     | '/_authenticated/admin/clientes/riomed/assistente'
@@ -16868,6 +16933,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAgentesRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/$slug/publicacao': {
+      id: '/_authenticated/admin/clientes/$slug/publicacao'
+      path: '/publicacao'
+      fullPath: '/admin/clientes/$slug/publicacao'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugPublicacaoRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/plano': {
+      id: '/_authenticated/admin/clientes/$slug/plano'
+      path: '/plano'
+      fullPath: '/admin/clientes/$slug/plano'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugPlanoRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/_authenticated/admin/clientes/$slug/painel': {
       id: '/_authenticated/admin/clientes/$slug/painel'
       path: '/painel'
@@ -16880,6 +16959,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/admin/clientes/$slug/modulos'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugModulosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/mercado-pago': {
+      id: '/_authenticated/admin/clientes/$slug/mercado-pago'
+      path: '/mercado-pago'
+      fullPath: '/admin/clientes/$slug/mercado-pago'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugMercadoPagoRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/_authenticated/admin/clientes/$slug/logs': {
@@ -16903,6 +16989,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugDominioRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
+    '/_authenticated/admin/clientes/$slug/dados': {
+      id: '/_authenticated/admin/clientes/$slug/dados'
+      path: '/dados'
+      fullPath: '/admin/clientes/$slug/dados'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugDadosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/_authenticated/admin/clientes/$slug/crm': {
       id: '/_authenticated/admin/clientes/$slug/crm'
       path: '/crm'
@@ -16915,6 +17008,13 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/admin/clientes/$slug/configuracoes'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/cerebro-ia': {
+      id: '/_authenticated/admin/clientes/$slug/cerebro-ia'
+      path: '/cerebro-ia'
+      fullPath: '/admin/clientes/$slug/cerebro-ia'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugCerebroIaRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/_authenticated/admin/clientes/$slug/automacoes': {
@@ -17686,13 +17786,18 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
 
 interface AuthenticatedAdminClientesSlugRouteChildren {
   AuthenticatedAdminClientesSlugAutomacoesRoute: typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  AuthenticatedAdminClientesSlugCerebroIaRoute: typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   AuthenticatedAdminClientesSlugConfiguracoesRoute: typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
   AuthenticatedAdminClientesSlugCrmRoute: typeof AuthenticatedAdminClientesSlugCrmRoute
+  AuthenticatedAdminClientesSlugDadosRoute: typeof AuthenticatedAdminClientesSlugDadosRoute
   AuthenticatedAdminClientesSlugDominioRoute: typeof AuthenticatedAdminClientesSlugDominioRoute
   AuthenticatedAdminClientesSlugFinanceiroRoute: typeof AuthenticatedAdminClientesSlugFinanceiroRoute
   AuthenticatedAdminClientesSlugLogsRoute: typeof AuthenticatedAdminClientesSlugLogsRoute
+  AuthenticatedAdminClientesSlugMercadoPagoRoute: typeof AuthenticatedAdminClientesSlugMercadoPagoRoute
   AuthenticatedAdminClientesSlugModulosRoute: typeof AuthenticatedAdminClientesSlugModulosRoute
   AuthenticatedAdminClientesSlugPainelRoute: typeof AuthenticatedAdminClientesSlugPainelRoute
+  AuthenticatedAdminClientesSlugPlanoRoute: typeof AuthenticatedAdminClientesSlugPlanoRoute
+  AuthenticatedAdminClientesSlugPublicacaoRoute: typeof AuthenticatedAdminClientesSlugPublicacaoRoute
   AuthenticatedAdminClientesSlugIndexRoute: typeof AuthenticatedAdminClientesSlugIndexRoute
 }
 
@@ -17700,20 +17805,30 @@ const AuthenticatedAdminClientesSlugRouteChildren: AuthenticatedAdminClientesSlu
   {
     AuthenticatedAdminClientesSlugAutomacoesRoute:
       AuthenticatedAdminClientesSlugAutomacoesRoute,
+    AuthenticatedAdminClientesSlugCerebroIaRoute:
+      AuthenticatedAdminClientesSlugCerebroIaRoute,
     AuthenticatedAdminClientesSlugConfiguracoesRoute:
       AuthenticatedAdminClientesSlugConfiguracoesRoute,
     AuthenticatedAdminClientesSlugCrmRoute:
       AuthenticatedAdminClientesSlugCrmRoute,
+    AuthenticatedAdminClientesSlugDadosRoute:
+      AuthenticatedAdminClientesSlugDadosRoute,
     AuthenticatedAdminClientesSlugDominioRoute:
       AuthenticatedAdminClientesSlugDominioRoute,
     AuthenticatedAdminClientesSlugFinanceiroRoute:
       AuthenticatedAdminClientesSlugFinanceiroRoute,
     AuthenticatedAdminClientesSlugLogsRoute:
       AuthenticatedAdminClientesSlugLogsRoute,
+    AuthenticatedAdminClientesSlugMercadoPagoRoute:
+      AuthenticatedAdminClientesSlugMercadoPagoRoute,
     AuthenticatedAdminClientesSlugModulosRoute:
       AuthenticatedAdminClientesSlugModulosRoute,
     AuthenticatedAdminClientesSlugPainelRoute:
       AuthenticatedAdminClientesSlugPainelRoute,
+    AuthenticatedAdminClientesSlugPlanoRoute:
+      AuthenticatedAdminClientesSlugPlanoRoute,
+    AuthenticatedAdminClientesSlugPublicacaoRoute:
+      AuthenticatedAdminClientesSlugPublicacaoRoute,
     AuthenticatedAdminClientesSlugIndexRoute:
       AuthenticatedAdminClientesSlugIndexRoute,
   }
