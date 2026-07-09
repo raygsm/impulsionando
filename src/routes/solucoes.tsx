@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
-
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20conhecer%20as%20solu%C3%A7%C3%B5es%20da%20Impulsionando.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 // Reusable placeholder for routes that still want the simple coming-soon shell.
 function ComingSoon({ title, description }: { title: string; description: string }) {
@@ -157,10 +156,8 @@ function SolucoesPage() {
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
                 <Link to="/orcamento" search={{ origem: "solucoes" }}>Montar minha solução <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com especialista
-                </a>
+              <Button type="button" size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white" onClick={() => openImpulsionito("solucoes")}>
+                <MessageCircle className="w-4 h-4" /> Falar com especialista
               </Button>
             </div>
           </div>

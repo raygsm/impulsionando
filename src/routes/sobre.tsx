@@ -4,6 +4,7 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Target, Eye, Heart, Sparkles, ArrowRight, MessageCircle } from "lucide-react";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/sobre")({
   component: SobrePage,
 });
 
-const WHATSAPP_URL = "https://wa.me/5521993075000";
+
 
 function SobrePage() {
   return (
