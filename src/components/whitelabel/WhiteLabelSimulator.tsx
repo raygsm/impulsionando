@@ -213,15 +213,21 @@ export function WhiteLabelSimulator({ ctaHref, onCtaClick, ctaLabel }: Props) {
           )}
 
           <div className="mt-5 flex flex-col sm:flex-row gap-2">
-            {ctaHref && (
+            {onCtaClick ? (
+              <Button type="button" onClick={onCtaClick} className="gap-2">
+                <MessageCircle className="w-4 h-4" /> {ctaLabel ?? "Falar com o comercial"}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            ) : ctaHref ? (
               <Button asChild className="gap-2">
                 <a href={ctaHref} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com o comercial
+                  <MessageCircle className="w-4 h-4" /> {ctaLabel ?? "Falar com o comercial"}
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </Button>
-            )}
+            ) : null}
           </div>
+
 
           <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
             WhatsApp Business API, VoIP, SMS e telefonia não estão incluídos —
