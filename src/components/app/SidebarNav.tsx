@@ -202,14 +202,15 @@ function Group({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className={cn(
-          "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-colors shadow-sm",
+          "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-all shadow-sm focus-ring hover:shadow-md hover:-translate-y-0.5",
           tone,
         )}
       >
         <span className="truncate">{group.label}</span>
         <ChevronDown
-          className={cn("w-4 h-4 transition-transform", open ? "rotate-0" : "-rotate-90")}
+          className={cn("w-4 h-4 transition-transform duration-200", open ? "rotate-0" : "-rotate-90")}
         />
       </button>
       {open && (
