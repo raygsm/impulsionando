@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { NICHO_DETAILS, findNicho } from "@/components/marketing/nichoDetails";
-import { LanguageSwitcher } from "@/components/marketing/LanguageSwitcher";
+// LanguageSwitcher removido do cabeçalho a pedido.
 import { cn } from "@/lib/utils";
 
 
@@ -236,7 +236,7 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
+
 
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5 hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring transition-colors">
             <Link to="/auth">
@@ -310,10 +310,6 @@ export function PublicHeader() {
                 <NavLink to="/suporte" label="Suporte" onClick={() => setOpen(false)} />
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
-                  <div className="flex items-center justify-between px-1 pb-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Idioma</span>
-                    <LanguageSwitcher />
-                  </div>
                   <Button asChild variant="ghost">
                     <Link to="/auth" onClick={() => setOpen(false)}>
                       <LogIn className="w-4 h-4 mr-2" /> Entrar
