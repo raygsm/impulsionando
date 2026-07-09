@@ -23,8 +23,10 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
           <a
             href="https://impulsionando.com.br"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Ir para a home Impulsionando"
-            className="flex items-center gap-2 font-semibold hover:opacity-90"
+            className="flex items-center gap-2 font-semibold hover:opacity-90 focus-ring rounded-md"
           >
             <Sparkles className="w-5 h-5 text-primary" />
             <span>Impulsionando</span>
