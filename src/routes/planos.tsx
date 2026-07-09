@@ -1072,24 +1072,37 @@ function PlanosPage() {
       </div>
 
 
-      {/* GUARANTEES */}
+      {/* GUARANTEES — apenas informações verificáveis */}
       <section className="bg-muted/30 border-y border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="max-w-3xl mx-auto text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
+              <ShieldCheck className="w-3.5 h-3.5" /> Compromissos verificáveis
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratação segura, sem letras miúdas</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { t: "Sem fidelidade obrigatória", d: "Cancele quando quiser no mensal. Sem multa." },
-              { t: "Dados seus, sempre", d: "Exportação completa a qualquer momento, LGPD em dia." },
-              { t: "Pagamento simples", d: "Cartão, Pix ou boleto. Nota fiscal mensal." },
-              { t: "Atualizações inclusas", d: "Novas funções e correções sem custo extra." },
-            ].map((g) => (
-              <div key={g.t} className="p-5 rounded-lg border border-border bg-card">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  <div className="font-semibold text-sm">{g.t}</div>
+              { icon: ShieldCheck, t: "Contratação 100% online", d: "Cartão, Pix ou boleto no checkout transparente. Sem burocracia offline." },
+              { icon: ShieldCheck, t: "Ambiente seguro", d: "HTTPS obrigatório, tokens rotativos, backups automáticos e logs de auditoria." },
+              { icon: ShieldCheck, t: "Conformidade LGPD", d: "Exportação de dados a qualquer momento, DPO nomeado e política pública." },
+              { icon: Headphones, t: "Suporte responsivo", d: "E-mail no Essencial, prioritário no Ideal, técnico dedicado no Full." },
+              { icon: Zap, t: "Atualizações contínuas", d: "Novos módulos, correções e melhorias sem custo adicional." },
+              { icon: TrendingUp, t: "Upgrade a qualquer momento", d: "Suba de plano sem perder dados, histórico ou automações configuradas." },
+            ].map((g) => {
+              const GIcon = g.icon;
+              return (
+                <div key={g.t} className="p-5 rounded-lg border border-border bg-card">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary/10 text-primary">
+                      <GIcon className="w-4 h-4" />
+                    </span>
+                    <div className="font-semibold text-sm">{g.t}</div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{g.d}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{g.d}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
