@@ -5885,6 +5885,11 @@ export type Database = {
           financial_email: string | null
           fiscal_auto_emit: boolean
           fiscal_provider: string | null
+          full_courtesy_days: number | null
+          full_courtesy_ends_at: string | null
+          full_courtesy_plan_id: string | null
+          full_courtesy_started_at: string | null
+          full_courtesy_status: string
           gallery_urls: Json
           id: string
           instagram: string | null
@@ -5957,6 +5962,11 @@ export type Database = {
           financial_email?: string | null
           fiscal_auto_emit?: boolean
           fiscal_provider?: string | null
+          full_courtesy_days?: number | null
+          full_courtesy_ends_at?: string | null
+          full_courtesy_plan_id?: string | null
+          full_courtesy_started_at?: string | null
+          full_courtesy_status?: string
           gallery_urls?: Json
           id?: string
           instagram?: string | null
@@ -6029,6 +6039,11 @@ export type Database = {
           financial_email?: string | null
           fiscal_auto_emit?: boolean
           fiscal_provider?: string | null
+          full_courtesy_days?: number | null
+          full_courtesy_ends_at?: string | null
+          full_courtesy_plan_id?: string | null
+          full_courtesy_started_at?: string | null
+          full_courtesy_status?: string
           gallery_urls?: Json
           id?: string
           instagram?: string | null
@@ -6075,6 +6090,13 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "companies_full_courtesy_plan_id_fkey"
+            columns: ["full_courtesy_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "companies_niche_id_fkey"
             columns: ["niche_id"]
@@ -8597,6 +8619,94 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_courtesy_events: {
+        Row: {
+          actor_user_id: string | null
+          company_id: string
+          created_at: string
+          days: number | null
+          ends_at: string | null
+          event_type: string
+          id: string
+          new_status: string | null
+          note: string | null
+          plan_id: string | null
+          previous_status: string | null
+          starts_at: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          company_id: string
+          created_at?: string
+          days?: number | null
+          ends_at?: string | null
+          event_type: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          plan_id?: string | null
+          previous_status?: string | null
+          starts_at?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          days?: number | null
+          ends_at?: string | null
+          event_type?: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          plan_id?: string | null
+          previous_status?: string | null
+          starts_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_courtesy_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_courtesy_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_courtesy_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_courtesy_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_courtesy_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_courtesy_events_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
           },
         ]
       }
