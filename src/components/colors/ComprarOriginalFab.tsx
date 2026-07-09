@@ -32,11 +32,12 @@ export default function ComprarOriginalFab({
           target="_blank"
           rel="noreferrer"
           onClick={() => colorsEvents.whatsappClick(source)}
-          aria-label="Falar no WhatsApp oficial"
+          aria-label="Suporte Colors no WhatsApp (SAC e pós-venda)"
+          title="Suporte SAC · pós-venda e dúvidas de pedido"
           className="group inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,0.7)] transition hover:scale-[1.03] hover:bg-[#20bd5a]"
         >
           <MessageCircle className="h-5 w-5" aria-hidden />
-          <span className="hidden sm:inline">WhatsApp</span>
+          <span className="hidden sm:inline">Suporte</span>
         </a>
 
         <Link

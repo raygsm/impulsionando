@@ -217,15 +217,24 @@ function TopBar() {
           </a>
           <a href="#contato" className="hover:text-white">Contato</a>
         </nav>
-        <a
-          href="https://wa.me/5521967862834"
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => colorsEvents.whatsappClick("topbar")}
-          className="hidden rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-black shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400 sm:inline-flex"
-        >
-          WhatsApp
-        </a>
+        <div className="hidden items-center gap-2 sm:flex">
+          <Link
+            to="/colors/rastreio"
+            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/10"
+          >
+            Rastrear pedido
+          </Link>
+          <a
+            href="https://wa.me/5521967862834"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => colorsEvents.whatsappClick("topbar_suporte")}
+            aria-label="Suporte Colors no WhatsApp (SAC)"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+          >
+            <MessageCircle className="h-4 w-4" aria-hidden /> Suporte SAC
+          </a>
+        </div>
       </div>
     </header>
   );
