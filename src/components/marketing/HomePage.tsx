@@ -1328,13 +1328,11 @@ export function HomePage() {
             <h2 className="text-2xl sm:text-4xl font-bold mb-3">Pronto para parar de perder oportunidade?</h2>
             <p className="text-white/85 max-w-2xl mx-auto mb-6">Veja a plataforma funcionando no seu nicho. Sem cartão, sem compromisso.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 btn-alive focus-ring">
                 <Link to="/demo/feira"><PlayCircle className="w-4 h-4" /> Liberar demo agora</Link>
               </Button>
-              <Button asChild size="lg" className="btn-whatsapp gap-2">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com especialista
-                </a>
+              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-2 focus-ring">
+                <Link to="/planos"><ArrowRight className="w-4 h-4" /> Ver planos</Link>
               </Button>
             </div>
           </Card>
