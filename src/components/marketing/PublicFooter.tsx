@@ -103,7 +103,12 @@ export function PublicFooter() {
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 {col.links.map((l, i) => (
                   <li key={`${col.title}-${i}`}>
-                    <Link to={l.to} className="hover:text-foreground">{l.label}</Link>
+                    <Link
+                      to={l.to}
+                      className="inline-block text-muted-foreground hover:text-foreground focus-ring rounded-sm transition-colors"
+                    >
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

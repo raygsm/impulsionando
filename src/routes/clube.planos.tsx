@@ -56,7 +56,7 @@ function ClubePlanos() {
         />
 
         <div className="grid md:grid-cols-2 gap-5 mt-8">
-          <Card className="p-8 flex flex-col">
+          <Card className="p-8 flex flex-col hover-lift">
             <div className="text-xs uppercase tracking-[0.2em] opacity-70">Free</div>
             <div className="font-serif text-4xl mt-2">R$ 0</div>
             <div className="text-xs opacity-70 mt-1">Para sempre. Sem cartão.</div>
@@ -67,10 +67,10 @@ function ClubePlanos() {
                 </li>
               ))}
             </ul>
-            <Button asChild variant="outline" className="mt-6"><Link to="/clube/cadastro">Entrar grátis</Link></Button>
+            <Button asChild variant="outline" className="mt-6 focus-ring"><Link to="/clube/cadastro">Entrar grátis</Link></Button>
           </Card>
 
-          <Card className="p-8 flex flex-col border-primary/60 ring-1 ring-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
+          <Card className="p-8 flex flex-col hover-lift border-primary/60 ring-1 ring-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary">
               <Crown className="w-4 h-4" /> Premium
             </div>
@@ -86,7 +86,7 @@ function ClubePlanos() {
                 </li>
               ))}
             </ul>
-            <Button asChild className="mt-6 gap-1">
+            <Button asChild className="mt-6 gap-1 btn-alive">
               <Link to="/clube/cadastro">Ativar teste de 30 dias <ArrowRight className="w-4 h-4" /></Link>
             </Button>
             <p className="text-[11px] opacity-60 mt-3">
