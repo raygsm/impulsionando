@@ -307,9 +307,7 @@ function ConsumidorDashboardPage() {
       )}
 
       {isLoading || !data ? (
-        <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Carregando sua área pessoal…
-        </Card>
+        <CardSkeleton count={3} />
       ) : (
         <>
           <Card className="p-4 flex flex-wrap items-center justify-between gap-3">
