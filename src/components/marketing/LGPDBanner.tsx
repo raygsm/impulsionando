@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Cookie, X, Shield } from "lucide-react";
+import { Cookie, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY as STORAGE_KEY, emitConsentChanged } from "@/lib/consent";
 
@@ -66,26 +66,18 @@ export function LGPDBanner() {
               <Cookie className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-semibold text-sm">Sua privacidade importa</h3>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Usamos cookies essenciais para o funcionamento do site. Com seu consentimento, também
-                    utilizamos cookies de análise para melhorar a experiência e de marketing para personalizar
-                    conteúdo. Você pode ajustar a qualquer momento.{" "}
-                    <Link to="/privacidade" className="text-primary hover:underline">
-                      Política de Privacidade
-                    </Link>
-                  </p>
-                </div>
-                <button
-                  onClick={() => save({ analytics: false, marketing: false })}
-                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                  aria-label="Recusar todos"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div>
+                <h3 className="font-semibold text-sm">Sua privacidade importa</h3>
+                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                  Usamos cookies essenciais para o funcionamento do site. Com seu consentimento, também
+                  utilizamos cookies de análise para melhorar a experiência e de marketing para personalizar
+                  conteúdo. Você pode ajustar a qualquer momento.{" "}
+                  <Link to="/privacidade" className="text-primary hover:underline">
+                    Política de Privacidade
+                  </Link>
+                </p>
               </div>
+
 
               {details && (
                 <div className="mt-4 space-y-3 border-t pt-4">
