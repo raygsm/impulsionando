@@ -304,6 +304,10 @@ export function PublicHeader() {
                 <NavLink to="/suporte" label="Suporte" onClick={() => setOpen(false)} />
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
+                  <div className="flex items-center justify-between px-1 pb-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Idioma</span>
+                    <LanguageSwitcher />
+                  </div>
                   <Button asChild variant="ghost">
                     <Link to="/auth" onClick={() => setOpen(false)}>
                       <LogIn className="w-4 h-4 mr-2" /> Entrar
