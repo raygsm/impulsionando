@@ -230,7 +230,9 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
+          <LanguageSwitcher />
+
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5 hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring transition-colors">
             <Link to="/auth">
               <LogIn className="w-4 h-4" /> Entrar
             </Link>
