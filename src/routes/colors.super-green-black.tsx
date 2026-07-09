@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Flame, MessageCircle, ShieldCheck, Star, Timer, TrendingDown, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle2, Flame, ShieldCheck, Star, Timer, TrendingDown, Zap } from "lucide-react";
 import { productBySlug } from "@/data/colors-products";
 import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
