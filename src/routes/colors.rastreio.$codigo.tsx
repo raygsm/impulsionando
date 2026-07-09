@@ -20,7 +20,7 @@ export const Route = createFileRoute("/colors/rastreio/$codigo")({
 });
 
 function RastreioResultPage() {
-  const { order, code } = Route.useLoaderData();
+  const { order, code } = Route.useLoaderData() as { order: ReturnType<typeof findOrderByTracking> | null; code: string };
   return (
     <div className="min-h-dvh bg-[#050a08] text-white">
       <header className="border-b border-white/10 bg-[#050a08]/85 backdrop-blur-xl">
