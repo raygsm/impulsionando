@@ -3,42 +3,70 @@
 Empresa: **Imobiliária Garrido** (`id: 8e90a584-a5f6-40b3-8975-dad968db39ba`, subdomain `garrido`)
 Nicho: `imobiliaria`
 
-## Status atual — ativo neste round
+## Onda 2.6 — Refinamento premium (concluído)
 
-### Empresa & contexto
-- ✅ Empresa ativa, vinculada ao nicho **Imobiliárias**
-- ✅ Unidade **Matriz Garrido** (RJ) criada
-- ✅ Aparece corretamente no seletor de empresa e em "Acessar como"
-- ✅ A página `/units` agora respeita o contexto: ao acessar como Garrido, só aparecem as unidades da Garrido (bug do CHRISMED × Garrido corrigido)
+Reposicionada como **referência do ecossistema para imobiliárias, corretores, incorporadoras, construtoras e administradoras**.
 
-### Módulos habilitados em `company_modules` (todos `is_enabled = true`)
-`administracao`, `area_cliente`, `auditoria`, `automacao`, `configuracoes`, `crm`, `dashboard`,
-`empresas`, `financeiro`, `imobiliaria_crm`, `imobiliaria_erp`, `imobiliaria_vitrine`,
-`perfis`, `setores`, `unidades`, `usuarios`
+### Shell & navegação
+- `src/components/garrido/GarridoShell.tsx` novo — header/footer/skip-link/mobile-nav padronizados; WhatsApp restrito a suporte no rodapé + PDP.
+- Nav com landings dedicadas: `/garrido/comprar`, `/alugar`, `/temporada`, `/lancamentos`, `/comercial`, `/rural`.
+- FAB global "**Há mais conteúdo — role para ver**" (`MoreContentFab`).
 
-### Seeds de teste (idempotentes — rotulados `[SEED-GARRIDO]`)
-- **3 imóveis** publicados:
-  - `GAR-FLM-203` Apartamento 3qts Flamengo — venda R$ 1.800.000
-  - `GAR-BOT-118` Apartamento 2qts mobiliado Botafogo — locação R$ 4.500/mês
-  - `GAR-BRR-044` Casa 4qts c/ piscina Barra — venda R$ 3.200.000
-- **2 perfis de busca** ativos (Mariana Costa, Carlos Eduardo) — alimentam o motor de matching em `realestate_run_match_for_property`
-- **4 leads** no CRM imobiliário (Mariana, Carlos, Família Andrade, Investidor Silva) com status válidos (`new`, `working`, `qualified`, `converted`)
+### Busca
+- `garrido.buscar.tsx` reescrita: filtros ampliados (cidade, bairro, diferencial/tag, mín. quartos, mín. vagas, área mínima, preço máximo, ordenação) sincronizados à URL via `validateSearch` (Zod).
+- Estado vazio educacional + "Limpar filtros" + "Cadastrar interesse".
 
-### Demos
-- ✅ Página pública rica em `/demo/nicho/imobiliaria` (carteira, leads/SLA, app do corretor, BI)
-- ✅ Demo Eventos / WMP continua em `/demo/nicho/eventos`
-- ✅ Demos novas: `saude`, `bar`, `comercio`, `servicos`, `comunidade`
+### PDP
+- CTA primário **Agendar visita** (rola para `#agendar-visita`), secundário **Solicitar proposta**, terciário **Favoritar** (localStorage).
+- WhatsApp reduzido a link discreto de suporte pós-venda.
+- `RealEstateListing` JSON-LD (área, quartos, banheiros, endereço, geo, oferta).
+- `BreadcrumbList` JSON-LD nas leaves.
+- Formulário "Agendar visita ou solicitar proposta" embutido ao fim do artigo.
 
-## Como o cliente Garrido pode testar agora
+### Contas & jornadas
+- `/garrido/entrar`, `/cadastro`, `/recuperar` — bridges para o Core Auth.
+- `/garrido/area` — hub do cliente (favoritos, propostas, visitas, documentos, notificações, histórico); `noindex`.
+- `/garrido/corretor` — hub do corretor (carteira, leads, agenda, propostas, funil, comissões, indicadores); `noindex`.
 
-1. Logar com usuário vinculado à Garrido (ou super admin "Acessar como Garrido" em `/core/clientes`)
-2. Abrir `/units` → ver Matriz Garrido (e somente ela)
-3. Abrir `/customers`, `/crm/leads` → ver os 4 leads-teste
-4. Abrir páginas de gestão imobiliária quando os módulos `imobiliaria_*` estiverem mapeados em rotas (próximo round)
-5. Receber e-mails de teste: o cadastro de novo lead já dispara `tg_notify_new_lead` (in-app + e-mail via outbox)
+### Institucional
+- `/garrido/faq` com `FAQPage` JSON-LD.
+- `/garrido/politicas` — Privacidade, Termos, Condições de anúncio, DPO.
+- Todas as leaves com `head()` completo, `canonical` self-referencing e `BreadcrumbList`.
 
-## O que NÃO está construído (roadmap)
+### Compliance
+- Removidos "desde 1998", "27 anos de mercado", "CRECI-J-RJ 12.345", "+18.000 leads/ano", "45 dias em média".
+- Depoimentos fictícios substituídos por bloco institucional (política de consentimento).
+- WhatsApp posicionado apenas como suporte/pós-venda.
 
-O prompt mestre descreve uma plataforma completa de ~38 áreas (pré-cadastro por voz, agente IA WhatsApp, motor de filas e SLA, administração de aluguel com boletos+repasse, área do proprietário/inquilino, Power BI etc.). Hoje existem as tabelas (`realestate_properties`, `realestate_search_intents`, `realestate_property_matches`) + função de matching + notificações. UI dedicada para corretor mobile-first, voz, IA conversacional, contratos de locação, boletos e repasses ainda não foram implementados.
+### Padrões globais (Onda 2.6, aplicados a partir da Garrido)
+- **Scrollbar contrastada** via `html` + utilitários `@utility scroll-contrast` / `.scroll-invert` em `src/styles.css`.
+- **`MoreContentFab`** em `src/components/impulsionando/` — próxima rodada instala nos demais tenants.
 
-Ver `docs/IMOBILIARIA_ROADMAP.md` para o plano por entrega.
+## Backend
+Nenhuma alteração nesta onda. Módulos, seeds e demos mantidos.
+
+## Pendências para o Codex
+
+1. Wire real do formulário de visita/proposta → `realestate_search_intents` + notificação ao corretor (`crm_notifications`).
+2. Favoritos persistentes por usuário (`localStorage` → tabela com RLS `auth.uid()`).
+3. Área do cliente real (favoritos, propostas, visitas, documentos, notificações via Core).
+4. Área do corretor real (kanban de funil, matching via `realestate_run_match_for_property`, comissões).
+5. Contratos digitais + boletos + repasse (módulo aluguel).
+6. WhatsApp IA (Impulsionito) para captação/qualificação.
+7. App do corretor mobile-first (PWA em campo).
+
+## Oportunidades futuras
+- Motor de matching bidirecional (imóvel↔perfil) com alertas push.
+- Página do bairro com dados de mercado (preço médio, tempo de venda).
+- Integração com bancos parceiros para pré-aprovação real.
+- Painel do proprietário administrado.
+
+## Nota de maturidade UX
+**Avançado** — jornadas principais completas (busca sólida, PDP premium com JSON-LD real, contas institucionalizadas, políticas publicadas, SEO leaf-a-leaf, WhatsApp fora do caminho comercial). Premium chega com os wires reais em `realestate_*`.
+
+## Top 5 melhorias de maior impacto pendentes
+1. Wire real Agendar visita/Solicitar proposta.
+2. Favoritos persistentes por conta + alerta de queda de preço.
+3. Área do cliente logada com dados reais do Core.
+4. Administração de aluguel completa (contrato + boleto + repasse).
+5. App do corretor + IA de captação (Impulsionito).
