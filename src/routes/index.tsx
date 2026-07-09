@@ -26,6 +26,11 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
 const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
+  // Alias Lovable do tenant Colors — resolve para a landing quando o
+  // domínio estiver conectado a este projeto Core.
+  "colors.impulsionando.lovable.app": "/colors",
+  "colorsaude.lovable.app": "/colors",
+  "colorssaude.lovable.app": "/colors",
 };
 
 function resolveSubdomainRedirect(host: string | null | undefined): string | null {
