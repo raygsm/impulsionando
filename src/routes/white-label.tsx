@@ -137,10 +137,8 @@ function WhiteLabelPage() {
           subtitle="Venda sistemas com a sua marca. Controle clientes, faturamento e módulos. Para agências, consultorias, franqueadoras e grupos empresariais que querem transformar serviço em receita recorrente."
           actions={
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button asChild size="lg" className="gap-2 bg-background text-primary hover:bg-background/90">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  Quero minha plataforma <ArrowRight className="w-4 h-4" />
-                </a>
+              <Button type="button" size="lg" className="gap-2 bg-background text-primary hover:bg-background/90" onClick={() => openImpulsionito("white-label-hero")}>
+                Quero minha plataforma <ArrowRight className="w-4 h-4" />
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
                 <Link to="/white-label/parceiro">
@@ -288,10 +286,8 @@ function WhiteLabelPage() {
               própria por pacote, conforme o consumo de cada cliente-final.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  Simular minha mensalidade <ArrowRight className="w-4 h-4 ml-2" />
-                </a>
+              <Button type="button" size="lg" onClick={() => openImpulsionito("white-label-simular")}>
+                Simular minha mensalidade <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/white-label/parceiro">Ver console do parceiro</Link>
@@ -301,7 +297,7 @@ function WhiteLabelPage() {
 
           {/* SIMULADOR INTERATIVO */}
           <div className="mt-12">
-            <WhiteLabelSimulator ctaHref={WHATSAPP_URL} />
+            <WhiteLabelSimulator onCtaClick={() => openImpulsionito("white-label-simulador")} />
           </div>
         </section>
 
@@ -339,10 +335,8 @@ function WhiteLabelPage() {
           description="Fale com um especialista e receba a proposta com plano, módulos e cronograma de implantação."
           actions={
             <>
-              <Button asChild size="lg" className="gap-2 bg-background text-primary hover:bg-background/90">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com especialista
-                </a>
+              <Button type="button" size="lg" className="gap-2 bg-background text-primary hover:bg-background/90" onClick={() => openImpulsionito("white-label-cta-final")}>
+                <MessageCircle className="w-4 h-4" /> Falar com especialista
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
                 <Link to="/white-label/parceiro">
