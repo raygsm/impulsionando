@@ -59,8 +59,13 @@ export function LGPDBanner() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 pointer-events-none">
-      <div className="max-w-4xl mx-auto pointer-events-auto rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
+      <div
+        role="region"
+        aria-label="Consentimento de cookies — LGPD"
+        className="max-w-4xl mx-auto pointer-events-auto rounded-xl border border-border bg-card shadow-2xl overflow-hidden"
+      >
         <div className="p-4 sm:p-6">
+
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 grid place-content-center shrink-0">
               <Cookie className="w-5 h-5 text-primary" />
