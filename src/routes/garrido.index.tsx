@@ -73,7 +73,7 @@ function HeroBusca() {
       <div className="relative max-w-6xl mx-auto px-4 py-20 md:py-28">
         <div className="max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-semibold text-[color:var(--garrido-gold)] uppercase tracking-wider">
-            <Crown className="h-3.5 w-3.5" /> Tradição no mercado imobiliário do Rio desde 1998
+            <Crown className="h-3.5 w-3.5" /> Curadoria imobiliária no Rio de Janeiro
           </span>
           <h1 className="font-serif text-4xl md:text-6xl font-bold mt-4 leading-tight">
             O imóvel certo para <span className="text-[color:var(--garrido-gold)]">morar, investir</span> ou passar temporada.
@@ -159,10 +159,10 @@ function HeroBusca() {
 
 function TrustStrip() {
   const items = [
-    { icon: ShieldCheck, title: "27 anos de mercado", desc: "Tradição, reputação e transparência." },
-    { icon: Clock,       title: "Atendimento 7 dias", desc: "Corretor dedicado em todas as etapas." },
-    { icon: Star,        title: "Curadoria premium", desc: "Só anunciamos imóveis com documentação em ordem." },
-    { icon: Crown,       title: "Alto padrão e investimento", desc: "Portfólio exclusivo para investidor e HNW." },
+    { icon: ShieldCheck, title: "CRECI ativo", desc: "Operação regulamentada com corretor responsável." },
+    { icon: Clock,       title: "Atendimento humano", desc: "Corretor dedicado em todas as etapas." },
+    { icon: Star,        title: "Curadoria de portfólio", desc: "Só publicamos imóveis com documentação verificada." },
+    { icon: Crown,       title: "Alto padrão e investimento", desc: "Portfólio dedicado para investidor e HNW." },
   ];
   return (
     <section className="bg-white border-b border-black/5">
@@ -355,33 +355,33 @@ function BairrosGrid() {
 }
 
 /* ============================ DEPOIMENTOS ============================ */
+/* Bloco institucional. Depoimentos reais serão publicados quando o módulo
+   de avaliações do Core estiver ativo (RLS + moderação). Nenhum depoimento
+   é inventado aqui para respeitar a regra de compliance do ecossistema.  */
 
 function Depoimentos() {
-  const D = [
-    { nome: "Camila R.", texto: "Vendi meu apartamento em 45 dias com preço acima da média do bairro. Atendimento impecável.", cargo: "Proprietária, Botafogo" },
-    { nome: "Eduardo M.", texto: "Compramos nossa primeira casa. A Garrido cuidou de tudo, do financiamento à escritura.", cargo: "Comprador, Barra da Tijuca" },
-    { nome: "Ana Paula S.", texto: "Alugo temporadas em Copacabana há 3 anos. Ocupação alta e zero dor de cabeça.", cargo: "Investidora" },
-  ];
   return (
     <section className="py-16 bg-[color:var(--garrido-ink)] text-white">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <div className="text-xs uppercase tracking-[0.25em] text-[color:var(--garrido-gold)] font-bold">Prova social</div>
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mt-2">Clientes que confiaram na Garrido</h2>
+      <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="text-xs uppercase tracking-[0.25em] text-[color:var(--garrido-gold)] font-bold">
+          Prova social verificada
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {D.map((d) => (
-            <blockquote key={d.nome} className="rounded-xl bg-white/5 border border-white/10 p-6">
-              <div className="flex text-[color:var(--garrido-gold)] mb-3" aria-hidden>
-                {[1,2,3,4,5].map((n) => <Star key={n} className="h-4 w-4 fill-current" />)}
-              </div>
-              <p className="text-white/90 leading-relaxed">"{d.texto}"</p>
-              <footer className="mt-4 text-sm">
-                <div className="font-semibold text-white">{d.nome}</div>
-                <div className="text-white/60 text-xs">{d.cargo}</div>
-              </footer>
-            </blockquote>
-          ))}
+        <h2 className="font-serif text-3xl md:text-4xl font-bold mt-2">
+          Depoimentos com identificação e consentimento
+        </h2>
+        <p className="mt-4 text-white/80 max-w-2xl mx-auto leading-relaxed">
+          A Garrido publica apenas depoimentos verificados e com consentimento explícito
+          do cliente. Estamos consolidando as autorizações no módulo de avaliações do Core
+          Impulsionando — em breve esta área traz nome, foto opcional, tipo de negócio,
+          bairro e link para o processo real.
+        </p>
+        <div className="mt-6">
+          <Link
+            to="/garrido/contato"
+            className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--garrido-gold)] text-[color:var(--garrido-ink)] font-bold px-5 py-2.5 hover:brightness-110 transition min-h-11"
+          >
+            Fui cliente e quero autorizar meu depoimento
+          </Link>
         </div>
       </div>
     </section>
@@ -439,31 +439,21 @@ function CTAFinal() {
           Pronto para dar o próximo passo?
         </h2>
         <p className="mt-3 text-slate-600 max-w-2xl mx-auto">
-          Fale com um corretor Garrido agora. Sem robô, sem fila. Atendimento humano,
-          personalizado, em minutos.
+          Escolha o melhor caminho: buscar um imóvel, avaliar o seu ou falar com nosso time.
+          O WhatsApp fica reservado para suporte e pós-venda.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <a
-            href="https://wa.me/5521999990000?text=Ol%C3%A1%21%20Quero%20falar%20com%20a%20Garrido."
-            target="_blank" rel="noopener"
-            className="rounded-lg px-6 py-3 bg-[#25D366] text-white font-bold hover:brightness-110 transition inline-flex items-center gap-2"
-          >
-            <MessageCircleIcon /> WhatsApp
-          </a>
-          <Link to="/garrido/contato" className="rounded-lg px-6 py-3 bg-[color:var(--garrido-ink)] text-white font-bold hover:brightness-125 transition">
-            Enviar mensagem
+          <Link to="/garrido/buscar" className="rounded-lg px-6 py-3 bg-[color:var(--garrido-ink)] text-white font-bold hover:brightness-125 transition min-h-11 inline-flex items-center">
+            Buscar imóveis
           </Link>
-          <Link to="/garrido/avaliar" className="rounded-lg px-6 py-3 border border-[color:var(--garrido-ink)]/20 font-semibold text-[color:var(--garrido-ink)] hover:bg-white transition">
+          <Link to="/garrido/avaliar" className="rounded-lg px-6 py-3 bg-[color:var(--garrido-gold)] text-[color:var(--garrido-ink)] font-bold hover:brightness-110 transition min-h-11 inline-flex items-center">
             Avaliar meu imóvel
+          </Link>
+          <Link to="/garrido/contato" className="rounded-lg px-6 py-3 border border-[color:var(--garrido-ink)]/20 font-semibold text-[color:var(--garrido-ink)] hover:bg-white transition min-h-11 inline-flex items-center">
+            Falar com o time
           </Link>
         </div>
       </div>
     </section>
-  );
-}
-
-function MessageCircleIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
   );
 }

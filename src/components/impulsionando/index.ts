@@ -11,10 +11,6 @@
  * `[data-tenant="<slug>"]` (ver src/styles/tokens-tenants.css) e
  * pelos tokens semânticos do design system global.
  *
- * Cada componente aceita `accentColor` opcional (CSS custom property
- * OU cor válida) para permitir tenants que ainda tenham identidade
- * legada. Sem esse override, cai no `--primary` do escopo.
- *
  * Uso típico dentro de um tenant:
  *   <div data-tenant="garrido">
  *     <TenantHero eyebrow="Imobiliária" title="Encontre seu imóvel" ... />
@@ -22,6 +18,7 @@
  *     <TestimonialGrid testimonials={[...]} />
  *     <FaqAccordion faqs={[...]} />
  *     <CtaBlock title="Pronto para começar?" ... />
+ *     <MoreContentFab bg="var(--garrido-ink)" accent="var(--garrido-gold)" />
  *   </div>
  *
  * Homologação: qualquer tenant novo criado pelo Core Impulsionando
@@ -37,6 +34,7 @@ export { CtaBlock } from "./CtaBlock";
 export { SectionHeader } from "./SectionHeader";
 export { FeatureGrid } from "./FeatureGrid";
 export { StepList } from "./StepList";
+export { MoreContentFab } from "./MoreContentFab";
 
 export type { TenantHeroProps } from "./TenantHero";
 export type { StatItem } from "./StatGrid";
@@ -45,3 +43,4 @@ export type { FaqItem } from "./FaqAccordion";
 export type { TrustBadge } from "./TrustBadges";
 export type { FeatureItem } from "./FeatureGrid";
 export type { StepItem } from "./StepList";
+export type { MoreContentFabProps } from "./MoreContentFab";

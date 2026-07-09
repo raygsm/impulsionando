@@ -1,7 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { findImovel, relacionados, formatBRL, IMOVEIS, type Imovel } from "@/data/garrido-imoveis";
-import { MapPin, BedDouble, Bath, Car, Ruler, Calendar, ShieldCheck, MessageCircle, Phone, ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, Star } from "lucide-react";
+import {
+  MapPin, BedDouble, Bath, Car, Ruler, Calendar, ShieldCheck, MessageCircle,
+  ChevronLeft, ChevronRight, ArrowRight, CheckCircle2, Star, Heart, FileText,
+} from "lucide-react";
+import { GarridoBreadcrumbs, buildGarridoBreadcrumbJsonLd } from "@/components/garrido/Breadcrumbs";
 
 export const Route = createFileRoute("/garrido/imovel/$slug")({
   loader: ({ params }) => {
@@ -16,6 +20,7 @@ export const Route = createFileRoute("/garrido/imovel/$slug")({
     const i = loaderData.imovel;
     const title = `${i.titulo} — Imobiliária Garrido`;
     const desc = `${i.categoria.toUpperCase()} em ${i.bairro}, ${i.cidade}/${i.uf}. ${i.quartos}Q · ${i.areaUtil}m² · ${i.precoVenda ? formatBRL(i.precoVenda) : i.precoAluguel ? `${formatBRL(i.precoAluguel)}/mês` : "consulta"}.`;
+    const canonical = `https://impulsionando.com.br/garrido/imovel/${params.slug}`;
     return {
       meta: [
         { title },
@@ -24,26 +29,51 @@ export const Route = createFileRoute("/garrido/imovel/$slug")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "product" },
         { property: "og:image", content: i.fotos[0] },
-        { property: "og:url", content: `https://garrido.impulsionando.com.br/garrido/imovel/${params.slug}` },
+        { property: "og:url", content: canonical },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: i.fotos[0] },
       ],
-      links: [{ rel: "canonical", href: `https://garrido.impulsionando.com.br/garrido/imovel/${params.slug}` }],
-      scripts: [{
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: i.titulo,
-          image: i.fotos,
-          description: desc,
-          offers: i.precoVenda ? {
-            "@type": "Offer",
-            price: i.precoVenda,
-            priceCurrency: "BRL",
-            availability: "https://schema.org/InStock",
-          } : undefined,
-          brand: { "@type": "RealEstateAgent", name: "Imobiliária Garrido" },
-        }),
-      }],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            name: i.titulo,
+            description: desc,
+            url: canonical,
+            image: i.fotos,
+            numberOfRooms: i.quartos,
+            numberOfBathroomsTotal: i.banheiros,
+            numberOfBedrooms: i.quartos,
+            floorSize: { "@type": "QuantitativeValue", value: i.areaUtil, unitCode: "MTK" },
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: i.bairro,
+              addressLocality: i.cidade,
+              addressRegion: i.uf,
+              postalCode: i.cep,
+              addressCountry: "BR",
+            },
+            geo: { "@type": "GeoCoordinates", latitude: i.mapa.lat, longitude: i.mapa.lng },
+            offers: i.precoVenda
+              ? { "@type": "Offer", price: i.precoVenda, priceCurrency: "BRL", availability: "https://schema.org/InStock" }
+              : i.precoAluguel
+              ? { "@type": "Offer", price: i.precoAluguel, priceCurrency: "BRL", priceSpecification: { "@type": "UnitPriceSpecification", price: i.precoAluguel, priceCurrency: "BRL", unitText: "MONTH" } }
+              : undefined,
+            broker: { "@type": "RealEstateAgent", name: "Imobiliária Garrido" },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(buildGarridoBreadcrumbJsonLd([
+            { label: "Início", to: "/garrido" },
+            { label: "Buscar imóveis", to: "/garrido/buscar" },
+            { label: `${i.bairro}, ${i.cidade}` },
+          ])),
+        },
+      ],
     };
   },
   errorComponent: ({ reset }) => (
@@ -77,14 +107,14 @@ function ImovelDetail() {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 py-4 text-xs text-slate-500">
-        <Link to="/garrido" className="hover:underline">Início</Link>
-        <span className="mx-1">›</span>
-        <Link to="/garrido/buscar" className="hover:underline">Imóveis</Link>
-        <span className="mx-1">›</span>
-        <span className="text-[color:var(--garrido-ink)] font-semibold">{i.bairro}, {i.cidade}</span>
-      </div>
+      <GarridoBreadcrumbs
+        items={[
+          { label: "Início", to: "/garrido" },
+          { label: "Buscar imóveis", to: "/garrido/buscar" },
+          { label: `${i.bairro}, ${i.cidade}` },
+        ]}
+      />
+
 
       {/* Galeria */}
       <section className="max-w-7xl mx-auto px-4">
@@ -191,7 +221,19 @@ function ImovelDetail() {
               </div>
             </Bloco>
           )}
+
+          <section id="agendar-visita" className="rounded-xl bg-white p-5 md:p-6 border border-black/5 scroll-mt-28">
+            <h2 className="font-serif text-xl font-bold text-[color:var(--garrido-ink)] mb-1">
+              Agendar visita ou solicitar proposta
+            </h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Envie seus dados — um corretor Garrido confirma o horário ou apresenta a proposta em até 1 dia útil.
+              Trilha registrada na sua Área do cliente.
+            </p>
+            <FormInteresse imovelSlug={i.slug} />
+          </section>
         </article>
+
 
         {/* Sidebar CTA */}
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
@@ -204,23 +246,50 @@ function ImovelDetail() {
 
             <div className="mt-4 grid gap-2">
               <a
-                href={`https://wa.me/${i.corretor.whatsapp}?text=${encodeURIComponent(`Olá! Tenho interesse no imóvel "${i.titulo}" (${i.slug}).`)}`}
-                target="_blank" rel="noopener"
-                className="rounded-lg bg-[#25D366] text-white font-bold py-2.5 text-center inline-flex items-center justify-center gap-2 hover:brightness-110"
+                href="#agendar-visita"
+                className="rounded-lg bg-[color:var(--garrido-ink)] text-white font-bold py-3 text-center inline-flex items-center justify-center gap-2 hover:brightness-125 min-h-11"
               >
-                <MessageCircle className="h-4 w-4" /> WhatsApp com corretor
+                <Calendar className="h-4 w-4" aria-hidden /> Agendar visita
               </a>
-              <a href={`tel:+55${i.corretor.whatsapp}`} className="rounded-lg border border-[color:var(--garrido-ink)]/20 font-semibold py-2.5 text-center text-sm inline-flex items-center justify-center gap-2 hover:bg-[color:var(--garrido-cream)]">
-                <Phone className="h-4 w-4" /> Ligar agora
+              <a
+                href="#agendar-visita"
+                className="rounded-lg bg-[color:var(--garrido-gold)] text-[color:var(--garrido-ink)] font-bold py-2.5 text-center inline-flex items-center justify-center gap-2 hover:brightness-110 min-h-11"
+              >
+                <FileText className="h-4 w-4" aria-hidden /> Solicitar proposta
               </a>
-              <FormInteresse imovelSlug={i.slug} />
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    const KEY = "garrido:favoritos";
+                    const raw = localStorage.getItem(KEY);
+                    const arr: string[] = raw ? JSON.parse(raw) : [];
+                    const next = arr.includes(i.slug) ? arr.filter((s) => s !== i.slug) : [...arr, i.slug];
+                    localStorage.setItem(KEY, JSON.stringify(next));
+                  } catch { /* SSR or storage bloqueado */ }
+                }}
+                className="rounded-lg border border-[color:var(--garrido-ink)]/20 font-semibold py-2.5 text-sm inline-flex items-center justify-center gap-2 hover:bg-[color:var(--garrido-cream)] min-h-11"
+                aria-label="Favoritar este imóvel na minha área"
+              >
+                <Heart className="h-4 w-4" aria-hidden /> Favoritar
+              </button>
             </div>
 
             <div className="mt-5 pt-4 border-t text-xs">
               <div className="font-semibold text-[color:var(--garrido-ink)]">{i.corretor.nome}</div>
               <div className="text-slate-500">{i.corretor.creci}</div>
+              <a
+                href={`https://wa.me/${i.corretor.whatsapp}?text=${encodeURIComponent(`Olá! Preciso de suporte sobre o imóvel "${i.titulo}" (${i.slug}).`)}`}
+                target="_blank"
+                rel="noopener"
+                className="mt-2 inline-flex items-center gap-1 text-[color:var(--garrido-ink)]/70 hover:text-[color:var(--garrido-ink)] hover:underline"
+              >
+                <MessageCircle className="h-3 w-3" aria-hidden />
+                Suporte via WhatsApp (pós-venda)
+              </a>
             </div>
           </div>
+
 
           <div className="rounded-xl bg-[color:var(--garrido-ink)] text-white p-5">
             <div className="text-xs uppercase tracking-widest text-[color:var(--garrido-gold)] font-bold">Financiamento</div>

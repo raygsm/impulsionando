@@ -1,24 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useId } from "react";
+import { useId, useState } from "react";
 import { CheckCircle2, Building2, Users, TrendingUp, ShieldCheck } from "lucide-react";
+import { buildGarridoBreadcrumbJsonLd, GarridoBreadcrumbs } from "@/components/garrido/Breadcrumbs";
+
+const CANONICAL = "https://impulsionando.com.br/garrido/anunciar";
 
 export const Route = createFileRoute("/garrido/anunciar")({
   head: () => ({
     meta: [
       { title: "Anuncie seu imóvel — Imobiliária Garrido" },
-      { name: "description", content: "Anuncie seu imóvel com a Garrido: divulgação premium, curadoria de leads, contratos digitais e corretor dedicado." },
+      { name: "description", content: "Anuncie seu imóvel com a Garrido: divulgação premium, curadoria de leads qualificados, contratos digitais e corretor dedicado." },
       { property: "og:title", content: "Anuncie seu imóvel com a Imobiliária Garrido" },
       { property: "og:description", content: "Divulgação premium, curadoria de leads e corretor dedicado." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: CANONICAL },
     ],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify(buildGarridoBreadcrumbJsonLd([
+        { label: "Início", to: "/garrido" },
+        { label: "Anunciar imóvel" },
+      ])),
+    }],
   }),
   component: AnunciarPage,
 });
 
 function AnunciarPage() {
   const [sent, setSent] = useState(false);
-  const nomeId = useId(); emailId; // ensure hooks stable
   return (
     <>
+      <GarridoBreadcrumbs items={[{ label: "Início", to: "/garrido" }, { label: "Anunciar imóvel" }]} />
+
       <section className="bg-[color:var(--garrido-ink)] text-white py-14">
         <div className="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
           <div>
@@ -26,11 +40,11 @@ function AnunciarPage() {
             <h1 className="font-serif text-3xl md:text-5xl font-bold mt-2">Anuncie seu imóvel com a Garrido</h1>
             <p className="mt-4 text-white/85 leading-relaxed">
               Divulgação premium, curadoria de leads qualificados, contratos digitais, corretor dedicado
-              e transparência total. Vendemos e alugamos mais rápido — e sem dor de cabeça.
+              e transparência total. Vendemos e alugamos com apoio de todo o ecossistema Impulsionando.
             </p>
             <ul className="mt-5 space-y-2">
               {["Anúncio profissional (fotos, textos, tour)", "Publicação nos principais portais", "Corretor dedicado com CRECI ativo", "Contratos digitais e documentação assistida"].map((v) => (
-                <li key={v} className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-[color:var(--garrido-gold)] mt-0.5" /> <span className="text-sm">{v}</span></li>
+                <li key={v} className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-[color:var(--garrido-gold)] mt-0.5" aria-hidden /> <span className="text-sm">{v}</span></li>
               ))}
             </ul>
           </div>
@@ -49,10 +63,10 @@ function AnunciarPage() {
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-center text-[color:var(--garrido-ink)]">Por que anunciar com a Garrido?</h2>
           <div className="mt-8 grid md:grid-cols-4 gap-4">
             {[
-              { icon: TrendingUp, t: "45 dias em média", d: "Prazo médio de venda no portfólio Garrido." },
-              { icon: Users,      t: "+18.000 leads/ano", d: "Base ativa de clientes qualificados." },
-              { icon: Building2,  t: "27 anos de mercado", d: "Tradição no Rio de Janeiro desde 1998." },
-              { icon: ShieldCheck,t: "Documentação segura", d: "Curadoria de contratos e certidões." },
+              { icon: TrendingUp, t: "Curadoria de mercado", d: "Sugerimos faixa de preço realista com base em ACM." },
+              { icon: Users,      t: "Leads qualificados", d: "Matching automático de perfis do CRM do ecossistema." },
+              { icon: Building2,  t: "Divulgação profissional", d: "Fotos, textos e vídeo produzidos pela nossa equipe." },
+              { icon: ShieldCheck,t: "Documentação segura", d: "Curadoria de contratos, certidões e assinatura digital." },
             ].map((k) => (
               <div key={k.t} className="rounded-xl bg-white p-5 border border-black/5 text-center">
                 <k.icon className="h-8 w-8 text-[color:var(--garrido-gold)] mx-auto mb-2" aria-hidden />
@@ -62,7 +76,7 @@ function AnunciarPage() {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link to="/garrido/avaliar" className="rounded-lg px-6 py-3 bg-[color:var(--garrido-ink)] text-white font-bold hover:brightness-125 transition">
+            <Link to="/garrido/avaliar" className="rounded-lg px-6 py-3 bg-[color:var(--garrido-ink)] text-white font-bold hover:brightness-125 transition inline-flex items-center min-h-11">
               Quero avaliar meu imóvel antes
             </Link>
           </div>
@@ -70,9 +84,8 @@ function AnunciarPage() {
       </section>
     </>
   );
-  // hoisted id declared below to satisfy lint
-  function emailId() { return nomeId; }
 }
+
 
 function SuccessMessage() {
   return (
