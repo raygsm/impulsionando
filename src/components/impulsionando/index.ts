@@ -35,6 +35,8 @@ export { SectionHeader } from "./SectionHeader";
 export { FeatureGrid } from "./FeatureGrid";
 export { StepList } from "./StepList";
 export { MoreContentFab } from "./MoreContentFab";
+export { Breadcrumbs, buildBreadcrumbJsonLd } from "./Breadcrumbs";
+export { SupportFab } from "./SupportFab";
 
 export type { TenantHeroProps } from "./TenantHero";
 export type { StatItem } from "./StatGrid";
@@ -44,3 +46,5 @@ export type { TrustBadge } from "./TrustBadges";
 export type { FeatureItem } from "./FeatureGrid";
 export type { StepItem } from "./StepList";
 export type { MoreContentFabProps } from "./MoreContentFab";
+export type { Crumb, BreadcrumbsProps } from "./Breadcrumbs";
+export type { SupportOption, SupportFabProps } from "./SupportFab";

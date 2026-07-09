@@ -7,6 +7,7 @@ import { UtensilsCrossed, ShoppingBag, Menu as MenuIcon, X, ChevronRight } from 
 import { useState } from "react";
 import { useMarocasCart } from "./useMarocasCart";
 import { MarocasHelpFab } from "./MarocasHelpFab";
+import { MoreContentFab } from "@/components/impulsionando";
 
 export interface Crumb {
   label: string;
@@ -172,6 +173,9 @@ export function MarocasShell({ breadcrumbs, children, hideCartBadge }: Props) {
       </footer>
 
       <MarocasHelpFab />
+
+      {/* Onda 2.9 — padrão global "role para ver mais" */}
+      <MoreContentFab offsetBottom={92} />
     </div>
   );
 }

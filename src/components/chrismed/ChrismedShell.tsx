@@ -3,6 +3,7 @@ import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { MoreContentFab } from '@/components/impulsionando';
 
 export type Lang = 'pt' | 'en' | 'es';
 
@@ -194,6 +195,8 @@ export function ChrismedShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       <ChrismedFooter />
       <OliverFab />
+      {/* Onda 2.9 — padrão global. Offset extra p/ não colidir com Oliver FAB. */}
+      <MoreContentFab bg="#0f3b2c" accent="#fef3c7" offsetBottom={96} />
     </div>
   );
 }
