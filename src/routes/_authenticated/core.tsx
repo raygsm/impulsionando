@@ -278,7 +278,7 @@ function CoreLayout() {
         </div>
 
         {/* Grouped dropdowns — desktop */}
-        <div className="hidden md:flex items-center gap-1 px-2 py-1.5 overflow-x-auto">
+        <div className="hidden md:flex items-center gap-1 px-2 py-1.5 overflow-x-auto scroll-contrast">
           {GROUPS.map((g) => {
             const GIcon = g.icon;
             const groupActive = g.items.some((i) => isActive(location.pathname, i));
