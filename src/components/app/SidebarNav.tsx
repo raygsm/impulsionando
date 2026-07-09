@@ -75,14 +75,14 @@ function NavLinkRow({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+        "group/nav flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-150 focus-ring",
         depth > 0 && "ml-4 pl-3 border-l border-sidebar-border/40",
         active
           ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-elegant"
-          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-0.5"
       )}
     >
-      <Icon className="w-4 h-4 shrink-0" />
+      <Icon className={cn("w-4 h-4 shrink-0 transition-transform", !active && "group-hover/nav:scale-110")} />
       <span className="truncate">{item.label}</span>
       {item.badge === "pendingPix" && <NavBadge count={badgeCount ?? 0} />}
     </Link>
