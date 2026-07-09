@@ -101,10 +101,8 @@ function SobrePage() {
               <Button asChild variant="outline">
                 <Link to="/modulos">Ver módulos</Link>
               </Button>
-              <Button asChild className="btn-whatsapp">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp
-                </a>
+              <Button type="button" onClick={() => openImpulsionito("sobre")}>
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com o Impulsionito
               </Button>
             </div>
           </Card>
