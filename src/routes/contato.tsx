@@ -30,7 +30,6 @@ export const Route = createFileRoute("/contato")({
 });
 
 
-const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
 
 function ContatoPage() {
