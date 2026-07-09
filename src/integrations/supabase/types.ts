@@ -7804,6 +7804,263 @@ export type Database = {
         }
         Relationships: []
       }
+      core_ai_brain_events: {
+        Row: {
+          actor_user_id: string | null
+          brain_id: string | null
+          changes: Json
+          company_id: string
+          created_at: string
+          event_type: string
+          id: string
+          new_status: string | null
+          note: string | null
+          previous_status: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          brain_id?: string | null
+          changes?: Json
+          company_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          previous_status?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          brain_id?: string | null
+          changes?: Json
+          company_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_ai_brain_events_brain_id_fkey"
+            columns: ["brain_id"]
+            isOneToOne: false
+            referencedRelation: "core_ai_brains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_ai_brain_knowledge: {
+        Row: {
+          brain_id: string
+          company_id: string
+          content: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          source_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brain_id: string
+          company_id: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          source_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brain_id?: string
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          source_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_ai_brain_knowledge_brain_id_fkey"
+            columns: ["brain_id"]
+            isOneToOne: false
+            referencedRelation: "core_ai_brains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_knowledge_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_knowledge_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_knowledge_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_knowledge_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brain_knowledge_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_ai_brains: {
+        Row: {
+          agent_name: string | null
+          approach: string | null
+          base_prompt: string | null
+          channels: string[]
+          company_id: string
+          complementary_prompt: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          languages: string[]
+          schedule: Json
+          status: string
+          tone: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          approach?: string | null
+          base_prompt?: string | null
+          channels?: string[]
+          company_id: string
+          complementary_prompt?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          languages?: string[]
+          schedule?: Json
+          status?: string
+          tone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          approach?: string | null
+          base_prompt?: string | null
+          channels?: string[]
+          company_id?: string
+          complementary_prompt?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          languages?: string[]
+          schedule?: Json
+          status?: string
+          tone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_ai_brains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_ai_brains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_ai_brains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_alert_recipients: {
         Row: {
           address: string
