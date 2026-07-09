@@ -15,7 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Send, ArrowRight, Copy, Trash2 } from "lucide-react";
+import { Plus, Send, ArrowRight, Copy, Trash2, FileText, PackageCheck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/pedidos")({
@@ -102,8 +103,20 @@ function PedidosPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(quotes.data?.quotes ?? []).length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Sem cotizações.</TableCell></TableRow>
+                  {quotes.isLoading && Array.from({ length: 4 }).map((_, i) => (
+                    <TableRow key={`sk-q-${i}`}>
+                      {Array.from({ length: 6 }).map((_, j) => (
+                        <TableCell key={j}><Skeleton className="h-3 w-full" /></TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                  {!quotes.isLoading && (quotes.data?.quotes ?? []).length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="py-8">
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <FileText className="w-6 h-6 opacity-60" />
+                        <span className="text-sm">Sem cotizações.</span>
+                      </div>
+                    </TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -135,8 +148,20 @@ function PedidosPage() {
                       <TableCell>{new Date(o.created_at).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
-                  {(orders.data?.orders ?? []).length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">Sem pedidos.</TableCell></TableRow>
+                  {orders.isLoading && Array.from({ length: 4 }).map((_, i) => (
+                    <TableRow key={`sk-o-${i}`}>
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <TableCell key={j}><Skeleton className="h-3 w-full" /></TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                  {!orders.isLoading && (orders.data?.orders ?? []).length === 0 && (
+                    <TableRow><TableCell colSpan={5} className="py-8">
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <PackageCheck className="w-6 h-6 opacity-60" />
+                        <span className="text-sm">Sem pedidos.</span>
+                      </div>
+                    </TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>

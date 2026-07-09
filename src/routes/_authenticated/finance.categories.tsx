@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { FolderTree } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -26,7 +28,7 @@ function CategoriesPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", kind: "income", color: "#10b981" });
 
-  const { data: cats } = useQuery({
+  const { data: cats, isLoading } = useQuery({
     queryKey: ["fin-categories", companyId],
     enabled: !!companyId,
     queryFn: async () => (await supabase.from("fin_categories").select("*").eq("company_id", companyId).order("kind").order("name")).data ?? [],
@@ -67,7 +69,10 @@ function CategoriesPage() {
           </Dialog></div>} />
 
       <Card className="shadow-card divide-y">
-        {!cats?.length && <div className="p-8 text-center text-sm text-muted-foreground">Sem categorias.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={4} /></div>}
+        {!isLoading && !cats?.length && (
+          <EmptyStateV2 icon={FolderTree} title="Sem categorias" description="Organize suas receitas e despesas em categorias para relatórios mais precisos." className="border-0 shadow-none" />
+        )}
         {cats?.map((c) => (
           <div key={c.id} className="p-3 flex items-center gap-3">
             <div className="w-3 h-3 rounded-full" style={{ background: c.color ?? "#64748b" }} />
