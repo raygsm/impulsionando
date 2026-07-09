@@ -41,7 +41,6 @@ const PLAN_QUOTA: Record<string, number> = {
 /** Preço por módulo adicional além da quota do plano. */
 const EXTRA_MODULE_BRL = 497;
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
 export const Route = createFileRoute("/planos")({
   ssr: false,
@@ -856,10 +855,17 @@ function PlanosPage() {
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
                 <Link to="/orcamento" search={{ origem: "planos:cta" }}>Fazer briefing <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp
-                </a>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white focus-ring"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  }
+                }}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
               </Button>
             </div>
           </div>
@@ -946,13 +952,20 @@ function WhiteLabelPlansPanel() {
             Recursos detalhados estão na jornada White Label.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 w-full sm:w-auto">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                Quero minha plataforma White Label <ArrowRight className="w-4 h-4" />
-              </a>
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 w-full sm:w-auto btn-alive focus-ring">
+              <Link to="/white-label">Quero minha plataforma White Label <ArrowRight className="w-4 h-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto">
-              <Link to="/white-label">Ver jornada White Label <ArrowRight className="w-4 h-4" /></Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto focus-ring"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                }
+              }}
+            >
+              <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
             </Button>
           </div>
         </div>
@@ -971,12 +984,22 @@ function WhiteLabelPlansPanel() {
           ))}
         </div>
         <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-          <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" /> Falar com especialista
-            </a>
+          <Button asChild size="lg" className="gap-2 w-full sm:w-auto btn-alive focus-ring">
+            <Link to="/contratar" search={{ plano: undefined }}><ArrowRight className="w-4 h-4" /> Começar agora</Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2 w-full sm:w-auto focus-ring"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("impulsionito:open"));
+              }
+            }}
+          >
+            <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
+          </Button>
+          <Button asChild size="lg" variant="ghost" className="gap-2 w-full sm:w-auto focus-ring">
             <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
           </Button>
         </div>

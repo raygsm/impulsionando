@@ -20,7 +20,6 @@ import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
 import { getDemoNichoLink } from "@/lib/demoResolver";
 import { trackFunnelCta, getFunnelTraceId } from "@/lib/funnelTracking";
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
 // ============== DIAGNÓSTICO ==============
 const NICHOS = [
@@ -1270,20 +1269,18 @@ export function HomePage() {
                 </a>
               </Button>
               <Button
-                asChild
                 size="sm"
                 variant="outline"
-                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
-                onClick={() => trackHeroCta("falar_impulsionito")}
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5 focus-ring"
+                onClick={() => {
+                  trackHeroCta("falar_impulsionito");
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  }
+                }}
+                data-analytics="hero-impulsionito"
               >
-                <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-analytics="hero-whatsapp"
-                >
-                  <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-                </a>
+                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
               </Button>
               <Button
                 asChild
@@ -1330,13 +1327,11 @@ export function HomePage() {
             <h2 className="text-2xl sm:text-4xl font-bold mb-3">Pronto para parar de perder oportunidade?</h2>
             <p className="text-white/85 max-w-2xl mx-auto mb-6">Veja a plataforma funcionando no seu nicho. Sem cartão, sem compromisso.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 btn-alive focus-ring">
                 <Link to="/demo/feira"><PlayCircle className="w-4 h-4" /> Liberar demo agora</Link>
               </Button>
-              <Button asChild size="lg" className="btn-whatsapp gap-2">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com especialista
-                </a>
+              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-2 focus-ring">
+                <Link to="/planos"><ArrowRight className="w-4 h-4" /> Ver planos</Link>
               </Button>
             </div>
           </Card>

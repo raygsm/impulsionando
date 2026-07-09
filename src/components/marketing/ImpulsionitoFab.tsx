@@ -7,7 +7,7 @@
  * Posicionado em bottom-left para não conflitar com o OfficialWhatsAppFAB
  * (bottom-right). Não aparece em áreas autenticadas, login ou painéis internos.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Bot, X, MessageCircle } from "lucide-react";
 import { buildOfficialWhatsAppUrl, trackWhatsAppCTA } from "@/lib/whatsapp-cta";
@@ -41,6 +41,15 @@ export function ImpulsionitoFab() {
     const niche = extractNiche(pathname, searchStr ?? "");
     return getImpulsionitoContext(pathname, niche);
   }, [pathname, searchStr]);
+
+  // Permite que CTAs comerciais espalhados pelo site abram o Impulsionito
+  // sem precisar exibir WhatsApp fora deste balão.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setOpen(true);
+    window.addEventListener("impulsionito:open", handler);
+    return () => window.removeEventListener("impulsionito:open", handler);
+  }, []);
 
   if (
     pathname.startsWith("/_authenticated") ||
