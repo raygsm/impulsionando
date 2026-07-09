@@ -1,47 +1,37 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building2, Check, X, ArrowRight } from "lucide-react";
+import { Check, X, ArrowRight } from "lucide-react";
 import { marocasPlanos } from "@/components/marocas/marocasPlanos";
-import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
+import { MarocasShell } from "@/components/marocas/MarocasShell";
+
+const CANONICAL = "/marocas/planos";
 
 export const Route = createFileRoute("/marocas/planos")({
   head: () => ({
     meta: [
-      { title: "Planos e Proteção Patrimonial — Marocas" },
-      { name: "description", content: "Compare os planos Marocas: serviço avulso, gestão mensal 360º e Marocas Care+ com cobertura patrimonial e plantão 24h." },
-      { property: "og:title", content: "Planos Marocas — Avulso, Mensal e Care+" },
-      { property: "og:description", content: "Da limpeza pontual à gestão completa do seu apartamento de temporada, com proteção patrimonial opcional." },
+      { title: "Planos para bares, restaurantes e delivery — Marocas" },
+      { name: "description", content: "Compare os planos Marocas para food service: Balcão (cardápio digital), Salão (operação completa) e Rede (franquias e dark kitchens)." },
+      { property: "og:title", content: "Planos Marocas — Balcão, Salão e Rede" },
+      { property: "og:description", content: "Do cardápio digital ao dashboard consolidado para redes de restaurantes." },
+      { property: "og:url", content: CANONICAL },
     ],
+    links: [{ rel: "canonical", href: CANONICAL }],
   }),
   component: PlanosPage,
 });
 
 function PlanosPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/marocas" className="flex items-center gap-2 font-bold text-xl">
-            <Building2 className="h-6 w-6 text-primary" />
-            Marocas
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link to="/marocas" className="hover:underline">Home</Link>
-            <Link to="/marocas/assistente" className="hover:underline">Assistente</Link>
-            <Link to="/marocas/login" className="rounded-md border px-3 py-1.5 font-medium">Entrar</Link>
-          </nav>
-        </div>
-      </header>
-
-      <section className="container mx-auto px-6 py-12 text-center max-w-3xl">
+    <MarocasShell breadcrumbs={[{ label: "Marocas", to: "/marocas" }, { label: "Planos" }]}>
+      <section className="container mx-auto px-4 md:px-6 py-12 text-center max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">Planos Marocas</p>
-        <h1 className="text-4xl md:text-5xl font-bold mt-2">Escolha como cuidamos do seu apartamento</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mt-2">Sua operação de food service, do balcão à rede</h1>
         <p className="text-muted-foreground mt-4">
-          Três níveis de operação, do serviço avulso à proteção patrimonial contínua.
-          Sem letras miúdas, com transparência total no portal do proprietário.
+          Três níveis para bares, restaurantes, cafeterias, hamburguerias, pizzarias, delivery e dark kitchens.
+          Sem taxa por pedido, sem intermediário, preparado para comandas por pulseira numerada.
         </p>
       </section>
 
-      <section className="container mx-auto px-6 pb-16">
+      <section className="container mx-auto px-4 md:px-6 pb-16">
         <div className="grid lg:grid-cols-3 gap-6">
           {marocasPlanos.map((plano) => (
             <div
@@ -108,7 +98,7 @@ function PlanosPage() {
       </section>
 
       <section className="bg-muted/30 py-16">
-        <div className="container mx-auto px-6 max-w-4xl">
+        <div className="container mx-auto px-4 md:px-6 max-w-4xl">
           <h2 className="text-2xl font-bold text-center mb-10">Diferenciais por plano</h2>
           <div className="space-y-8">
             {marocasPlanos.map((plano) => (
@@ -128,7 +118,7 @@ function PlanosPage() {
         </div>
       </section>
 
-      <section className="container mx-auto px-6 py-16 max-w-3xl">
+      <section className="container mx-auto px-4 md:px-6 py-16 max-w-3xl">
         <h2 className="text-2xl font-bold text-center mb-8">Perguntas frequentes</h2>
         {marocasPlanos.map((plano) => (
           <div key={plano.id} className="mb-8">
@@ -144,12 +134,6 @@ function PlanosPage() {
           </div>
         ))}
       </section>
-
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        <Link to="/marocas" className="underline">Voltar para Marocas</Link>
-      </footer>
-
-      <MarocasHelpFab />
-    </main>
+    </MarocasShell>
   );
 }

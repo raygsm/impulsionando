@@ -1,300 +1,242 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building2, ShieldCheck, Sparkles, BarChart3, Banknote, Wrench, Camera, Wifi, Waves, UtensilsCrossed, ShoppingBag, Bus, Mountain, Pill, LifeBuoy, Check } from "lucide-react";
-import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
+import { UtensilsCrossed, Clock, MapPin, Truck, Store, CalendarDays, ShieldCheck, Sparkles, Star, ArrowRight, Flame, Leaf } from "lucide-react";
+import { MarocasShell } from "@/components/marocas/MarocasShell";
+import { marocasCategorias, marocasItens } from "@/components/marocas/foodMenu";
+import { formatBRL } from "@/components/marocas/useMarocasCart";
+
+const CANONICAL = "/marocas";
 
 export const Route = createFileRoute("/marocas")({
   head: () => ({
     meta: [
-      { title: "Marocas — Gestão profissional de aluguel por temporada" },
-      { name: "description", content: "Operação completa do seu apartamento de temporada: limpeza, enxoval, manutenção, repasse PIX e portal do proprietário. Integrado ao ecossistema Impulsionando." },
-      { property: "og:title", content: "Marocas — Gestão profissional de aluguel por temporada" },
-      { property: "og:description", content: "Operação 360º: limpeza, enxoval, manutenção, financeiro e portal transparente para o proprietário." },
-      { property: "og:type", content: "website" },
+      { title: "Marocas — Cardápio, delivery e reservas" },
+      { name: "description", content: "Peça pelo cardápio digital, reserve mesa ou receba em casa. Marocas é o cliente de referência do ecossistema Impulsionando para bares, restaurantes, cafeterias, hamburguerias, pizzarias e delivery." },
+      { property: "og:title", content: "Marocas — Cardápio, delivery e reservas" },
+      { property: "og:description", content: "Cozinha da casa. Delivery próprio. Reservas em 2 cliques." },
+      { property: "og:type", content: "restaurant.restaurant" },
+      { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Restaurant",
+          name: "Marocas",
+          servesCuisine: ["Brasileira", "Contemporânea"],
+          priceRange: "$$",
+          acceptsReservations: true,
+          hasMenu: { "@type": "Menu", url: "/marocas/cardapio" },
+        }),
+      },
+    ],
   }),
-  component: MarocasLanding,
+  component: MarocasHome,
 });
 
-function MarocasLanding() {
+const HERO_IMG = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&auto=format&fit=crop&q=80";
+
+function MarocasHome() {
+  const destaques = marocasItens.filter((i) => i.tags?.includes("mais-pedido")).slice(0, 4);
+  const novidades = marocasItens.filter((i) => i.tags?.includes("novo")).slice(0, 3);
+
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl">
-            <Building2 className="h-6 w-6 text-primary" />
-            Marocas
-          </div>
-          <nav className="flex items-center gap-4 text-sm">
-            <a href="#aproveite-o-rio" className="hover:underline">Aproveite o Rio</a>
-            <a href="#como-funciona" className="hover:underline">Como funciona</a>
-            <Link to="/marocas/planos" className="hover:underline">Planos</Link>
-            <Link to="/marocas/assistente" className="hover:underline">Assistente</Link>
-            <Link to="/marocas/login" className="hover:underline">Entrar</Link>
-            <Link to="/contato" className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium">Quero gerir meu apto</Link>
-          </nav>
+    <MarocasShell>
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <img src={HERO_IMG} alt="Ambiente Marocas" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/25" />
         </div>
-      </header>
-
-      {/* Faixa fixa: Primeira vez no Rio? — acesso rápido para hóspedes */}
-      <div className="sticky top-0 z-40 bg-sky-600 text-white shadow-md">
-        <div className="container mx-auto px-6 py-2 flex items-center gap-4 overflow-x-auto text-sm">
-          <span className="font-semibold whitespace-nowrap flex items-center gap-1">
-            <Waves className="h-4 w-4" /> Primeira vez no Rio?
-          </span>
-          {[
-            { t: "Praias", topico: "praias", i: <Waves className="h-3.5 w-3.5" /> },
-            { t: "Restaurantes", topico: "restaurantes", i: <UtensilsCrossed className="h-3.5 w-3.5" /> },
-            { t: "Mercados", topico: "mercados", i: <ShoppingBag className="h-3.5 w-3.5" /> },
-            { t: "Farmácias", topico: "farmacias", i: <Pill className="h-3.5 w-3.5" /> },
-            { t: "Transporte", topico: "transporte", i: <Bus className="h-3.5 w-3.5" /> },
-            { t: "Passeios", topico: "passeios", i: <Mountain className="h-3.5 w-3.5" /> },
-            { t: "Emergências", topico: "emergencia", i: <LifeBuoy className="h-3.5 w-3.5" /> },
-            { t: "Dicas locais", topico: "dicas", i: <Sparkles className="h-3.5 w-3.5" /> },
-          ].map((q) => (
-            <Link
-              key={q.topico}
-              to="/marocas/assistente"
-              search={{ topico: q.topico } as any}
-              className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/10 hover:bg-white/20 px-3 py-1 transition"
-            >
-              {q.i} {q.t}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <section className="container mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider">Aluguel por temporada · turnkey</p>
-          <h1 className="text-4xl md:text-5xl font-bold mt-2 leading-tight">
-            Seu apartamento sempre pronto. Seu repasse sempre no PIX.
+        <div className="container mx-auto px-4 md:px-6 py-20 md:py-28 text-white max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-300 flex items-center gap-2">
+            <UtensilsCrossed className="h-4 w-4" /> Cozinha da casa · Rio de Janeiro
+          </p>
+          <h1 className="text-4xl md:text-6xl font-bold mt-3 leading-tight">
+            Peça agora. Ou reserve mesa.<br />A Marocas cuida do resto.
           </h1>
-          <p className="text-lg text-muted-foreground mt-4">
-            A Marocas opera limpeza, reposição, enxoval, lavanderia, manutenção e cobrança do seu imóvel de temporada — com transparência total no portal do proprietário e integração nativa ao CORE Impulsionando.
+          <p className="mt-4 text-lg text-white/85 max-w-2xl">
+            Cardápio digital, delivery próprio, retirada em 15 min e reservas em 2 cliques. Preparado para comandas por pulseira numerada.
           </p>
-          <div className="flex gap-3 mt-6">
-            <Link to="/contato" className="rounded-md bg-primary text-primary-foreground px-5 py-3 font-semibold">Cadastrar meu apartamento</Link>
-            <a href="#como-funciona" className="rounded-md border px-5 py-3 font-semibold">Como funciona</a>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/marocas/cardapio" className="rounded-lg bg-primary text-primary-foreground px-6 py-3 font-semibold hover:opacity-90 transition inline-flex items-center gap-2">
+              Ver cardápio <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/marocas/reservas" className="rounded-lg bg-white/10 backdrop-blur border border-white/30 px-6 py-3 font-semibold hover:bg-white/20 transition inline-flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" /> Reservar mesa
+            </Link>
           </div>
-          <div className="flex items-center gap-4 mt-6 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4" /> Transparência total</span>
-            <span className="flex items-center gap-1"><Banknote className="h-4 w-4" /> Repasse PIX mensal</span>
-            <span className="flex items-center gap-1"><Camera className="h-4 w-4" /> Vistoria fotográfica</span>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/85">
+            <span className="flex items-center gap-1.5"><Truck className="h-4 w-4" /> Delivery próprio Zona Sul</span>
+            <span className="flex items-center gap-1.5"><Store className="h-4 w-4" /> Retirada em 15 min</span>
+            <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> Aberto até 23h</span>
           </div>
-        </div>
-        <div className="rounded-2xl overflow-hidden shadow-xl border">
-          <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200" alt="Loft Copacabana 811" className="w-full h-full object-cover" />
         </div>
       </section>
 
-      <section id="como-funciona" className="bg-muted/30 py-16">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center">Como funciona</h2>
-          <div className="grid md:grid-cols-3 gap-6 mt-10">
-            {[
-              { t: "1. Cadastre o imóvel", d: "Fotos, diária, características e PIX do proprietário. Em até 48h o apartamento está no ar." },
-              { t: "2. Marocas opera", d: "Limpeza, enxoval, lavanderia, manutenção, cobrança e relacionamento com o hóspede — tudo coordenado." },
-              { t: "3. Você acompanha e recebe", d: "Portal do proprietário com diário operacional, fotos, ocupação e repasse PIX automático no início do mês." },
-            ].map((s) => (
-              <div key={s.t} className="rounded-xl bg-card p-6 border">
-                <h3 className="font-semibold text-lg">{s.t}</h3>
-                <p className="text-muted-foreground mt-2 text-sm">{s.d}</p>
+      {/* MODOS */}
+      <section className="container mx-auto px-4 md:px-6 py-10 grid md:grid-cols-3 gap-4">
+        {[
+          { icon: <Truck className="h-6 w-6" />, t: "Delivery", d: "Entrega própria. Taxa por bairro, sem intermediário.", to: "/marocas/cardapio" },
+          { icon: <Store className="h-6 w-6" />, t: "Retirada", d: "Pronto em 15 min. Aviso quando estiver na bandeja.", to: "/marocas/cardapio" },
+          { icon: <CalendarDays className="h-6 w-6" />, t: "Reserva de mesa", d: "Confirmação em 2 cliques. Sem taxa de reserva.", to: "/marocas/reservas" },
+        ].map((m) => (
+          <Link key={m.t} to={m.to} className="rounded-2xl border p-5 hover:border-primary hover:shadow-md transition bg-card">
+            <div className="text-primary">{m.icon}</div>
+            <div className="font-semibold mt-3">{m.t}</div>
+            <div className="text-sm text-muted-foreground mt-1">{m.d}</div>
+          </Link>
+        ))}
+      </section>
+
+      {/* CATEGORIAS */}
+      <section className="container mx-auto px-4 md:px-6 py-6">
+        <div className="flex items-end justify-between gap-3 flex-wrap">
+          <h2 className="text-2xl md:text-3xl font-bold">Explore o cardápio</h2>
+          <Link to="/marocas/cardapio" className="text-sm font-semibold text-primary hover:underline">
+            Ver tudo →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mt-6">
+          {marocasCategorias.map((c) => (
+            <Link
+              key={c.id}
+              to="/marocas/cardapio"
+              search={{ cat: c.id } as any}
+              className="rounded-xl border p-4 text-center hover:border-primary hover:bg-primary/5 transition"
+            >
+              <div className="text-3xl">{c.emoji}</div>
+              <div className="font-semibold mt-2 text-sm">{c.nome}</div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* MAIS PEDIDOS */}
+      <section className="container mx-auto px-4 md:px-6 py-10">
+        <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+          <Flame className="h-6 w-6 text-primary" /> Mais pedidos
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          {destaques.map((item) => (
+            <Link
+              key={item.slug}
+              to="/marocas/cardapio/$slug"
+              params={{ slug: item.slug }}
+              className="group rounded-2xl border overflow-hidden bg-card hover:shadow-md transition"
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-muted">
+                <img src={item.imagem} alt={item.nome} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
               </div>
-            ))}
-          </div>
+              <div className="p-4">
+                <div className="font-semibold">{item.nome}</div>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{item.descricao}</p>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="font-bold">{formatBRL(item.precoBase)}</span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> {item.tempoPreparoMin} min
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
-      <section id="operacao" className="container mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-center">Operação 360º</h2>
-        <div className="grid md:grid-cols-4 gap-4 mt-10">
+      {/* NOVIDADES */}
+      {novidades.length > 0 && (
+        <section className="bg-muted/30 py-12">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-primary" /> Novidades da temporada
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {novidades.map((item) => (
+                <Link
+                  key={item.slug}
+                  to="/marocas/cardapio/$slug"
+                  params={{ slug: item.slug }}
+                  className="group rounded-2xl border overflow-hidden bg-card hover:shadow-md transition flex gap-3"
+                >
+                  <div className="w-32 aspect-square shrink-0 overflow-hidden bg-muted">
+                    <img src={item.imagem} alt={item.nome} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                  </div>
+                  <div className="p-3 flex-1 min-w-0">
+                    <div className="text-[10px] font-semibold uppercase text-primary tracking-wider">Novo</div>
+                    <div className="font-semibold text-sm">{item.nome}</div>
+                    <div className="mt-2 font-bold text-sm">{formatBRL(item.precoBase)}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CONFIANÇA */}
+      <section className="container mx-auto px-4 md:px-6 py-12">
+        <div className="grid md:grid-cols-4 gap-4">
           {[
-            { i: <Sparkles className="h-5 w-5" />, t: "Limpeza & enxoval", d: "Checklist por estadia, fotos antes/depois, reposição automática." },
-            { i: <Wrench className="h-5 w-5" />, t: "Manutenção", d: "Marketplace de prestadores com cotações comparadas e aprovação do proprietário." },
-            { i: <Banknote className="h-5 w-5" />, t: "Financeiro & PIX", d: "Cobrança do hóspede, extrato mensal e repasse PIX rastreável." },
-            { i: <BarChart3 className="h-5 w-5" />, t: "Dashboard", d: "Ocupação, receita, despesas e prazo médio de manutenção." },
+            { i: <ShieldCheck className="h-5 w-5" />, t: "Pagamento seguro", d: "PIX, cartão e pagar na retirada." },
+            { i: <Truck className="h-5 w-5" />, t: "Entrega própria", d: "Sem intermediário. Rastreio em tempo real." },
+            { i: <Leaf className="h-5 w-5" />, t: "Ingredientes frescos", d: "Feiras locais e produtores da região." },
+            { i: <Star className="h-5 w-5" />, t: "Feito por gente da casa", d: "Cozinha própria. Sem terceirização." },
           ].map((b) => (
-            <div key={b.t} className="rounded-xl border p-5">
+            <div key={b.t} className="rounded-xl border p-4">
               <div className="text-primary">{b.i}</div>
-              <h3 className="font-semibold mt-2">{b.t}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{b.d}</p>
+              <div className="font-semibold mt-2">{b.t}</div>
+              <div className="text-sm text-muted-foreground mt-1">{b.d}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Aproveite o Rio — quick-access guide */}
-      <section id="aproveite-o-rio" className="bg-gradient-to-br from-sky-50 via-amber-50 to-emerald-50 py-16 border-y">
-        <div className="container mx-auto px-6">
-          <div className="flex items-end justify-between flex-wrap gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-sky-700">Primeira vez no Rio?</p>
-              <h2 className="text-3xl font-bold mt-1">Aproveite o Rio com a Marocas</h2>
-              <p className="text-muted-foreground mt-2 max-w-2xl">
-                Praia, gastronomia, transporte, mercados e emergências — tudo curado pela nossa equipe local da Zona Sul,
-                disponível para hóspedes e proprietários durante toda a estadia.
-              </p>
-            </div>
-            <Link to="/contato" className="text-sm font-semibold underline">Falar com a Marocas</Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mt-8">
-            {[
-              { i: <Waves className="h-5 w-5" />, t: "Praias", d: "Copacabana, Ipanema, Leblon, Arpoador" },
-              { i: <UtensilsCrossed className="h-5 w-5" />, t: "Restaurantes", d: "Cafés, almoço, jantar, bares" },
-              { i: <ShoppingBag className="h-5 w-5" />, t: "Mercados", d: "Padarias, conveniências" },
-              { i: <Pill className="h-5 w-5" />, t: "Farmácias", d: "24h e mais próximas" },
-              { i: <Bus className="h-5 w-5" />, t: "Transporte", d: "Uber, metrô, VLT, bikes" },
-              { i: <Mountain className="h-5 w-5" />, t: "Passeios", d: "Cristo, Pão de Açúcar, Lage" },
-              { i: <LifeBuoy className="h-5 w-5" />, t: "Emergências", d: "Pronto-socorro, polícia" },
-            ].map((c) => (
-              <div key={c.t} className="rounded-xl bg-white/80 backdrop-blur p-4 border hover:shadow-md transition cursor-default">
-                <div className="text-sky-700">{c.i}</div>
-                <div className="font-semibold text-sm mt-2">{c.t}</div>
-                <div className="text-xs text-muted-foreground mt-1">{c.d}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Planos e Proteção Patrimonial */}
-      <section id="planos" className="container mx-auto px-6 py-16">
-        <div className="text-center max-w-2xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Planos e Proteção Patrimonial</p>
-          <h2 className="text-3xl font-bold mt-2">Você hospeda. A Marocas cuida do resto.</h2>
-          <p className="text-muted-foreground mt-3">
-            Da preparação do apartamento à proteção operacional contínua — escolha entre serviços avulsos
-            ou planos mensais com cobertura completa.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 mt-10">
-          {/* Avulso */}
-          <div className="rounded-2xl border p-6 bg-card">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Plano Avulso</div>
-            <h3 className="text-2xl font-bold mt-1">Sob demanda</h3>
-            <p className="text-sm text-muted-foreground mt-2">Para proprietários que contratam conforme a necessidade.</p>
-
-            <div className="mt-6 space-y-4">
-              <div className="border-l-2 border-primary pl-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-semibold">Limpeza Completa</span>
-                  <span className="font-bold">R$ 160,00</span>
-                </div>
-                <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                  <li className="flex gap-1"><Check className="h-3 w-3 mt-0.5 text-emerald-600" /> Limpeza geral, cozinha e banheiro</li>
-                  <li className="flex gap-1"><Check className="h-3 w-3 mt-0.5 text-emerald-600" /> Organização e conferência visual</li>
-                  <li className="flex gap-1"><Check className="h-3 w-3 mt-0.5 text-emerald-600" /> Preparação para o próximo hóspede</li>
-                  <li className="flex gap-1"><Check className="h-3 w-3 mt-0.5 text-emerald-600" /> Checklist operacional fotográfico</li>
-                </ul>
-              </div>
-
-              <div className="border-l-2 border-muted pl-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-semibold">Lavagem + Troca de Roupa de Cama</span>
-                  <span className="font-bold">R$ 29,90</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Válido apenas em conjunto com a limpeza completa.</p>
-              </div>
-
-              <div className="border-l-2 border-muted pl-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-semibold">Apenas Lavagem de Roupa de Cama</span>
-                  <span className="font-bold">R$ 49,90</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Coleta, lavagem profissional e devolução.</p>
-              </div>
-            </div>
-
-            <Link to="/marocas/contratar/$plano" params={{ plano: "avulso" }} className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
-              Contratar serviço avulso
-            </Link>
-          </div>
-
-          {/* Mensal — destaque */}
-          <div className="rounded-2xl border-2 border-primary p-6 bg-gradient-to-b from-primary/5 to-background relative shadow-lg">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-              Mais escolhido
-            </span>
-            <div className="text-xs font-semibold uppercase tracking-wider text-primary">Plano Marocas Mensal</div>
-            <h3 className="text-2xl font-bold mt-1">Gestão completa</h3>
-            <p className="text-sm text-muted-foreground mt-2">Operação 360º com previsibilidade e proteção patrimonial.</p>
-
-            <ul className="mt-6 space-y-2 text-sm">
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Limpezas ilimitadas entre estadias</li>
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Enxoval e lavanderia inclusos</li>
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Vistoria fotográfica check-in/check-out</li>
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Atendimento ao hóspede 7 dias</li>
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Manutenção preventiva agendada</li>
-              <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Portal do proprietário + repasse PIX</li>
-            </ul>
-
-            <Link to="/marocas/contratar/$plano" params={{ plano: "mensal" }} className="block text-center mt-6 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold">
-              Falar com consultor
-            </Link>
-            <p className="text-xs text-center text-muted-foreground mt-3">Valor sob consulta conforme metragem e ocupação.</p>
-          </div>
-
-          {/* Proteção Patrimonial */}
-          <div className="rounded-2xl border p-6 bg-card">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proteção Patrimonial</div>
-            <h3 className="text-2xl font-bold mt-1">Marocas Care+</h3>
-            <p className="text-sm text-muted-foreground mt-2">Camada extra de cobertura para danos, avarias e imprevistos.</p>
-
-            <ul className="mt-6 space-y-2 text-sm">
-              <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Cobertura de danos do hóspede</li>
-              <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Reposição expressa de itens essenciais</li>
-              <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Plantão de emergência 24h</li>
-              <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Relatório de incidentes com fotos</li>
-              <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Mediação direta com plataformas (Airbnb, Booking)</li>
-            </ul>
-
-            <Link to="/marocas/contratar/$plano" params={{ plano: "care-plus" }} className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
-              Adicionar proteção
-            </Link>
-            <p className="text-xs text-center text-muted-foreground mt-3">Disponível como add-on do plano mensal.</p>
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-muted-foreground mt-8">
-          Valores de referência para imóveis até 60m² na Zona Sul do Rio. Outras regiões e metragens sob consulta.
-        </p>
-      </section>
-
-      <section id="proprietario" className="bg-primary text-primary-foreground py-16">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+      {/* ENDEREÇO / HORÁRIO */}
+      <section className="container mx-auto px-4 md:px-6 pb-16">
+        <div className="rounded-2xl border p-6 grid md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-3xl font-bold">Para o proprietário</h2>
-            <ul className="mt-6 space-y-3 text-base">
-              <li className="flex gap-2"><ShieldCheck className="h-5 w-5 mt-0.5" /> Histórico completo de cada estadia, com fotos e checklist.</li>
-              <li className="flex gap-2"><Banknote className="h-5 w-5 mt-0.5" /> Extrato mensal com receita, taxa Marocas, despesas e repasse PIX.</li>
-              <li className="flex gap-2"><Wifi className="h-5 w-5 mt-0.5" /> Acesso ao portal e ao diário operacional do seu apartamento.</li>
-              <li className="flex gap-2"><Camera className="h-5 w-5 mt-0.5" /> Vistoria fotográfica entre check-outs e check-ins.</li>
-            </ul>
-            <Link to="/contato" className="inline-block mt-8 rounded-md bg-background text-foreground px-6 py-3 font-semibold">
-              Quero cadastrar meu apartamento
-            </Link>
+            <div className="flex items-center gap-2 text-primary">
+              <MapPin className="h-5 w-5" /> <span className="text-xs font-semibold uppercase tracking-wider">Endereço</span>
+            </div>
+            <p className="mt-2 font-semibold">Rua Exemplo, 123 · Zona Sul · Rio de Janeiro</p>
+            <p className="text-sm text-muted-foreground mt-1">Delivery próprio nos bairros vizinhos.</p>
           </div>
-          <div className="rounded-2xl bg-primary-foreground/10 p-6 border border-primary-foreground/20">
-            <p className="text-xs uppercase tracking-wider opacity-80">Vitrine</p>
-            <h3 className="text-2xl font-bold mt-1">Loft Copacabana 811</h3>
-            <p className="opacity-90 text-sm mt-2">
-              42m² · 1 quarto · até 2 hóspedes · vista mar · Wi-Fi 600MB.
-              Diária a partir de R$ 480. Ocupação atual: 87%.
-            </p>
-            <p className="opacity-70 text-xs mt-4">Operado pela Marocas desde 2024.</p>
+          <div>
+            <div className="flex items-center gap-2 text-primary">
+              <Clock className="h-5 w-5" /> <span className="text-xs font-semibold uppercase tracking-wider">Horário</span>
+            </div>
+            <ul className="mt-2 text-sm space-y-1">
+              <li className="flex justify-between"><span>Ter–Qui</span><span className="font-medium">18h–23h</span></li>
+              <li className="flex justify-between"><span>Sex–Sáb</span><span className="font-medium">12h–00h</span></li>
+              <li className="flex justify-between"><span>Domingo</span><span className="font-medium">12h–22h</span></li>
+              <li className="flex justify-between text-muted-foreground"><span>Segunda</span><span>Fechado</span></li>
+            </ul>
           </div>
         </div>
       </section>
 
-      <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        Marocas é uma operação integrada ao{" "}
-        <Link to="/" className="underline">CORE Impulsionando</Link>.
-      </footer>
-
-      <MarocasHelpFab />
-    </main>
+      {/* PLATAFORMA IMPULSIONANDO */}
+      <section className="bg-primary text-primary-foreground py-14">
+        <div className="container mx-auto px-4 md:px-6 grid md:grid-cols-[2fr_1fr] gap-8 items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest opacity-80">Você também opera um bar, restaurante ou dark kitchen?</p>
+            <h2 className="text-2xl md:text-3xl font-bold mt-2">
+              A Marocas roda sobre a plataforma Impulsionando de food service.
+            </h2>
+            <p className="mt-3 opacity-90">
+              Cardápio digital, delivery próprio, reservas, comandas por pulseira e dashboard consolidado — tudo em um só lugar.
+              Sem taxa por pedido, sem intermediário.
+            </p>
+          </div>
+          <div className="flex md:justify-end">
+            <Link to="/marocas/planos" className="rounded-lg bg-background text-foreground px-6 py-3 font-semibold inline-flex items-center gap-2 hover:opacity-90 transition">
+              Ver planos <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </MarocasShell>
   );
 }

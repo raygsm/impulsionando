@@ -1,25 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { Building2, MessageCircle, ChevronRight, ArrowLeft, Wrench, ShoppingBag, LifeBuoy, MapPin, Sparkles } from "lucide-react";
-import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
+import { MessageCircle, ChevronRight, ArrowLeft, Truck, CalendarDays, Store, HelpCircle, ClipboardList } from "lucide-react";
+import { MarocasShell } from "@/components/marocas/MarocasShell";
 
 const searchSchema = z.object({
-  topico: z
-    .enum([
-      "suporte",
-      "emergencia",
-      "manutencao",
-      "contratacao",
-      "dicas",
-      "praias",
-      "restaurantes",
-      "mercados",
-      "farmacias",
-      "transporte",
-      "passeios",
-    ])
-    .optional(),
+  topico: z.enum(["pedidos", "delivery", "reservas", "pagamento", "cardapio", "operador"]).optional(),
 });
 
 export const Route = createFileRoute("/marocas/assistente")({
@@ -27,311 +13,145 @@ export const Route = createFileRoute("/marocas/assistente")({
   head: () => ({
     meta: [
       { title: "Assistente Marocas — Respostas guiadas 24h" },
-      { name: "description", content: "Tire dúvidas sobre manutenção, contratação de serviços e dicas do Rio com o Assistente Marocas." },
+      { name: "description", content: "Assistente Marocas para pedidos, delivery, reservas, pagamento e dúvidas de operadores." },
+      { name: "robots", content: "noindex" },
     ],
   }),
   component: AssistentePage,
 });
 
-interface AssistantAnswer {
-  text: string;
-  cta?: { label: string; href: string; external?: boolean };
-}
-
-interface AssistantNode {
+interface Node {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  answer?: AssistantAnswer;
-  children?: AssistantNode[];
+  answer?: { text: string; cta?: { label: string; href: string } };
+  children?: Node[];
 }
 
-const WHATSAPP_URL = "https://wa.me/5521999999999?text=Ol%C3%A1%20Marocas";
+const WHATSAPP_SAC = "https://wa.me/5521999999999?text=Ol%C3%A1%20Marocas%2C%20SAC";
 
-const TREE: AssistantNode[] = [
+const TREE: Node[] = [
   {
-    id: "manutencao",
-    label: "Manutenção",
-    icon: <Wrench className="h-4 w-4" />,
+    id: "pedidos",
+    label: "Meus pedidos",
+    icon: <ClipboardList className="h-4 w-4" />,
     children: [
-      {
-        id: "vazamento",
-        label: "Vazamento de água",
-        answer: {
-          text: "Feche o registro geral imediatamente. Acione a Marocas pelo WhatsApp informando o apartamento. Nossa equipe disponibiliza encanador parceiro em até 90 minutos na Zona Sul.",
-          cta: { label: "Acionar Marocas", href: WHATSAPP_URL, external: true },
-        },
-      },
-      {
-        id: "ar-condicionado",
-        label: "Ar-condicionado não gela",
-        answer: {
-          text: "Verifique se o filtro está limpo e se a temperatura está abaixo de 22°C. Persistindo, agendamos higienização ou visita técnica em até 48h pelo plano mensal.",
-          cta: { label: "Solicitar visita", href: "/marocas/contratar/mensal" },
-        },
-      },
-      {
-        id: "eletrico",
-        label: "Falta de energia / quadro disparou",
-        answer: {
-          text: "Localize o quadro de força e religue os disjuntores. Se persistir, desconecte aparelhos de alta carga (ar, micro-ondas) e religue um por um. Para emergência elétrica, acione plantão 24h.",
-          cta: { label: "Plantão 24h", href: WHATSAPP_URL, external: true },
-        },
-      },
-      {
-        id: "preventiva",
-        label: "Agendar manutenção preventiva",
-        answer: {
-          text: "Proprietários do Plano Mensal têm preventiva incluída a cada 3 meses. Para Avulso, agendamos sob orçamento.",
-          cta: { label: "Ver planos", href: "/marocas/planos" },
-        },
-      },
+      { id: "rastrear", label: "Rastrear pedido", answer: { text: "Use o código MRC enviado no WhatsApp e acompanhe em tempo real (recebido → preparando → saiu → entregue).", cta: { label: "Rastrear", href: "/marocas/pedidos" } } },
+      { id: "atraso", label: "Meu pedido está atrasado", answer: { text: "Se passou o tempo estimado + 15 min, aciona o SAC no WhatsApp com o código do pedido. Resolvemos ou reenviamos.", cta: { label: "Abrir SAC", href: WHATSAPP_SAC } } },
+      { id: "erro", label: "Veio errado ou faltou item", answer: { text: "Registramos o incidente e reenviamos o item ou estornamos. Prazo médio: 24h.", cta: { label: "Registrar SAC", href: WHATSAPP_SAC } } },
     ],
   },
   {
-    id: "contratacao",
-    label: "Contratação de serviços",
-    icon: <ShoppingBag className="h-4 w-4" />,
+    id: "delivery",
+    label: "Delivery e retirada",
+    icon: <Truck className="h-4 w-4" />,
     children: [
-      {
-        id: "limpeza-avulsa",
-        label: "Contratar limpeza avulsa",
-        answer: {
-          text: "Limpeza completa por R$ 160,00, com checklist fotográfico. Lavagem de roupa de cama: R$ 29,90 em conjunto ou R$ 49,90 avulso.",
-          cta: { label: "Contratar avulso", href: "/marocas/contratar/avulso" },
-        },
-      },
-      {
-        id: "gestao",
-        label: "Contratar gestão completa do imóvel",
-        answer: {
-          text: "Plano Mensal inclui limpezas ilimitadas, enxoval, atendimento ao hóspede, portal do proprietário e repasse PIX automático. Valor sob consulta.",
-          cta: { label: "Solicitar proposta", href: "/marocas/contratar/mensal" },
-        },
-      },
-      {
-        id: "care",
-        label: "Adicionar proteção patrimonial",
-        answer: {
-          text: "Marocas Care+ é add-on do plano mensal com cobertura de danos, reposição expressa e plantão 24h.",
-          cta: { label: "Conhecer Care+", href: "/marocas/contratar/care-plus" },
-        },
-      },
+      { id: "area", label: "Vocês entregam no meu bairro?", answer: { text: "Delivery próprio para bairros da Zona Sul. No checkout, ao informar o CEP, você vê taxa e tempo estimados." } },
+      { id: "tempo", label: "Qual o tempo médio?", answer: { text: "35 a 45 min para delivery. 15 min para retirada — avisamos no WhatsApp quando estiver na bandeja." } },
+      { id: "taxa", label: "Como funciona a taxa?", answer: { text: "Taxa fixa por bairro, sem surge. Aparece no checkout antes de finalizar." } },
     ],
   },
   {
-    id: "emergencia",
-    label: "Emergência 24h",
-    icon: <LifeBuoy className="h-4 w-4" />,
+    id: "reservas",
+    label: "Reservas",
+    icon: <CalendarDays className="h-4 w-4" />,
     children: [
-      {
-        id: "seguranca",
-        label: "Sinto-me inseguro / problema com hóspede",
-        answer: {
-          text: "Saia para local seguro. Acione a Marocas e a polícia (190) imediatamente. Nossa equipe assume a mediação e contato com a plataforma de hospedagem.",
-          cta: { label: "Acionar Marocas", href: WHATSAPP_URL, external: true },
-        },
-      },
-      {
-        id: "saude",
-        label: "Mal súbito / acidente",
-        answer: {
-          text: "SAMU 192 · Bombeiros 193. Hospitais próximos: Copa D'Or, Pasteur (Copacabana), Clínica São Vicente (Gávea). A Marocas pode ajudar com tradução e deslocamento.",
-        },
-      },
-      {
-        id: "trancado",
-        label: "Esqueci as chaves / fechei sem chave",
-        answer: {
-          text: "Acione a Marocas. Mantemos cópia de chaves dos imóveis do plano mensal; entrega em até 60 min na Zona Sul.",
-          cta: { label: "Pedir chave reserva", href: WHATSAPP_URL, external: true },
-        },
-      },
+      { id: "nova", label: "Como reservar", answer: { text: "Escolha data, horário e nº de pessoas. Confirmação chega em minutos pelo WhatsApp.", cta: { label: "Reservar", href: "/marocas/reservas" } } },
+      { id: "remarcar", label: "Remarcar ou cancelar", answer: { text: "Sem taxa, até 2h antes. Use o link na mensagem de confirmação." } },
     ],
   },
   {
-    id: "dicas",
-    label: "Dicas do Rio",
-    icon: <MapPin className="h-4 w-4" />,
+    id: "pagamento",
+    label: "Pagamento",
+    icon: <Store className="h-4 w-4" />,
     children: [
-      {
-        id: "praias",
-        label: "Praias e horários",
-        answer: {
-          text: "Copacabana e Ipanema têm posto salva-vidas das 8h às 17h. Arpoador para o pôr do sol. Leblon (posto 12) é mais família. Sempre confira bandeira de balneabilidade.",
-        },
-      },
-      {
-        id: "restaurantes",
-        label: "Onde comer perto",
-        answer: {
-          text: "Café: Cafeína (Ipanema), Talho Capixaba (Leblon). Almoço: Galeto Sat's (Copa), Aconchego Carioca (Praça da Bandeira). Jantar: Oro, Lasai, Sushi Leblon.",
-        },
-      },
-      {
-        id: "transporte",
-        label: "Como me locomover",
-        answer: {
-          text: "Metrô Linha 1 conecta Ipanema, Copacabana e Centro. Bike Itaú via app. Uber funciona em toda Zona Sul. Evite carro no Centro nos horários de pico.",
-        },
-      },
-      {
-        id: "passeios",
-        label: "Passeios essenciais",
-        answer: {
-          text: "Cristo Redentor (compre online), Pão de Açúcar (entardecer é o melhor horário), Jardim Botânico, Parque Lage, Floresta da Tijuca. Reserve 1 dia para o Centro Histórico.",
-        },
-      },
-      {
-        id: "mercados",
-        label: "Mercados e farmácias",
-        answer: {
-          text: "Mercados: Hortifruti, Zona Sul, Pão de Açúcar (24h em Copa). Farmácias 24h: Drogaria Pacheco e Drogasil em Copacabana e Ipanema.",
-        },
-      },
+      { id: "formas", label: "Formas aceitas", answer: { text: "PIX (aprovação em segundos), cartão de crédito/débito e presencial (retirada/entrega)." } },
+      { id: "recibo", label: "Preciso de nota fiscal", answer: { text: "Solicite pelo SAC com o código do pedido. Emitimos em até 2 dias úteis.", cta: { label: "Solicitar", href: WHATSAPP_SAC } } },
     ],
   },
   {
-    id: "suporte",
-    label: "Suporte geral",
-    icon: <MessageCircle className="h-4 w-4" />,
+    id: "cardapio",
+    label: "Cardápio",
+    icon: <HelpCircle className="h-4 w-4" />,
     children: [
-      {
-        id: "falar-humano",
-        label: "Falar com pessoa do time",
-        answer: {
-          text: "Atendimento humano via WhatsApp das 7h às 22h. Plantão 24h para emergências.",
-          cta: { label: "Abrir WhatsApp", href: WHATSAPP_URL, external: true },
-        },
-      },
-      {
-        id: "repasse",
-        label: "Dúvida sobre repasse PIX",
-        answer: {
-          text: "Repasse processado entre os dias 1 e 5 de cada mês. Acompanhe extrato e comprovantes no Portal do Proprietário.",
-          cta: { label: "Entrar no portal", href: "/marocas/login" },
-        },
-      },
+      { id: "vegetariano", label: "Opções vegetarianas/veganas", answer: { text: "Filtre no cardápio pelas tags 'vegetariano' e 'vegano'.", cta: { label: "Ver cardápio", href: "/marocas/cardapio" } } },
+      { id: "esgotado", label: "Prato aparece como esgotado", answer: { text: "Nosso cardápio é inteligente: itens somem quando esgotam e voltam sozinhos ao repor estoque." } },
+    ],
+  },
+  {
+    id: "operador",
+    label: "Sou operador (bar, restaurante, delivery)",
+    icon: <Store className="h-4 w-4" />,
+    children: [
+      { id: "planos", label: "Conhecer os planos", answer: { text: "Balcão para cardápio digital, Salão para operação completa, Rede para franquias e dark kitchens.", cta: { label: "Ver planos", href: "/marocas/planos" } } },
+      { id: "pulseira", label: "Comandas por pulseira", answer: { text: "Módulo previsto no plano Salão. Você já cadastra hoje e ativa quando o hardware chegar — sem retrabalho." } },
     ],
   },
 ];
 
-function findNode(id: string | undefined, nodes: AssistantNode[] = TREE): AssistantNode | undefined {
-  if (!id) return undefined;
-  for (const n of nodes) {
-    if (n.id === id) return n;
-    const found = n.children && findNode(id, n.children);
-    if (found) return found;
-  }
-}
-
 function AssistentePage() {
   const { topico } = Route.useSearch();
-  const initialPath = useMemo(() => (topico ? [topico] : []), [topico]);
-  const [path, setPath] = useState<string[]>(initialPath);
+  const [openId, setOpenId] = useState<string | null>(topico ?? null);
+  const [answerId, setAnswerId] = useState<string | null>(null);
 
-  const currentList = useMemo(() => {
-    let nodes: AssistantNode[] = TREE;
-    for (const id of path) {
-      const next = nodes.find((n) => n.id === id);
-      if (!next || !next.children) return [];
-      nodes = next.children;
-    }
-    return nodes;
-  }, [path]);
-
-  const currentNode = path.length ? findNode(path[path.length - 1]) : undefined;
-  const showAnswer = currentNode && currentNode.answer && (!currentNode.children || currentNode.children.length === 0);
+  const open = useMemo(() => TREE.find((t) => t.id === openId) ?? null, [openId]);
+  const answer = useMemo(() => open?.children?.find((c) => c.id === answerId)?.answer ?? null, [open, answerId]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/marocas" className="flex items-center gap-2 font-bold text-xl">
-            <Building2 className="h-6 w-6 text-primary" /> Marocas
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link to="/marocas/planos" className="hover:underline">Planos</Link>
-            <Link to="/marocas/login" className="rounded-md border px-3 py-1.5 font-medium">Entrar</Link>
-          </nav>
-        </div>
-      </header>
+    <MarocasShell breadcrumbs={[{ label: "Marocas", to: "/marocas" }, { label: "Assistente" }]}>
+      <div className="container mx-auto px-4 md:px-6 py-10 max-w-3xl">
+        <h1 className="text-3xl font-bold">Assistente Marocas</h1>
+        <p className="text-muted-foreground mt-2">Escolha um tópico. WhatsApp entra apenas quando precisar falar com pessoa.</p>
 
-      <section className="container mx-auto px-6 py-12 max-w-3xl">
-        <div className="flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-widest">
-          <Sparkles className="h-4 w-4" /> Assistente Marocas
-        </div>
-        <h1 className="text-3xl md:text-4xl font-bold mt-2">Como podemos ajudar agora?</h1>
-        <p className="text-muted-foreground mt-2">
-          Respostas guiadas para manutenção, contratação de serviços, emergências e dicas do Rio.
-          Atendimento humano a qualquer momento pelo WhatsApp.
-        </p>
-
-        {path.length > 0 && (
-          <button
-            onClick={() => setPath((p) => p.slice(0, -1))}
-            className="inline-flex items-center gap-1 mt-6 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-3 w-3" /> Voltar
-          </button>
+        {!open && (
+          <ul className="mt-8 grid sm:grid-cols-2 gap-3">
+            {TREE.map((n) => (
+              <li key={n.id}>
+                <button onClick={() => { setOpenId(n.id); setAnswerId(null); }} className="w-full text-left rounded-2xl border p-4 hover:border-primary hover:bg-primary/5 transition flex items-center gap-3">
+                  <div className="rounded-md p-2 bg-primary/10 text-primary">{n.icon}</div>
+                  <div className="flex-1 font-semibold">{n.label}</div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
 
-        <div className="mt-6 rounded-2xl border bg-card p-2">
-          {showAnswer ? (
-            <div className="p-5">
-              <h2 className="font-semibold text-lg">{currentNode!.label}</h2>
-              <p className="text-muted-foreground mt-3 whitespace-pre-line">{currentNode!.answer!.text}</p>
-              {currentNode!.answer!.cta && (
-                currentNode!.answer!.cta.external ? (
-                  <a
-                    href={currentNode!.answer!.cta.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-4 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold"
-                  >
-                    {currentNode!.answer!.cta.label}
-                  </a>
-                ) : (
-                  <Link
-                    to={currentNode!.answer!.cta.href}
-                    className="inline-block mt-4 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold"
-                  >
-                    {currentNode!.answer!.cta.label}
-                  </Link>
-                )
-              )}
-              <div className="mt-6 pt-4 border-t flex flex-wrap gap-2">
-                <button onClick={() => setPath([])} className="text-sm underline">Recomeçar</button>
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-sm underline">
-                  Falar com pessoa do time
-                </a>
-              </div>
-            </div>
-          ) : (
-            <ul className="divide-y">
-              {currentList.map((node) => (
-                <li key={node.id}>
-                  <button
-                    onClick={() => setPath((p) => [...p, node.id])}
-                    className="w-full flex items-center justify-between text-left p-4 hover:bg-muted/50 transition rounded-lg"
-                  >
-                    <span className="flex items-center gap-3">
-                      {node.icon && <span className="text-primary">{node.icon}</span>}
-                      <span className="font-medium">{node.label}</span>
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        {open && (
+          <div className="mt-8 rounded-2xl border p-5">
+            <button onClick={() => { setOpenId(null); setAnswerId(null); }} className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:text-primary">
+              <ArrowLeft className="h-3.5 w-3.5" /> Tópicos
+            </button>
+            <h2 className="text-xl font-bold mt-2">{open.label}</h2>
+            <ul className="mt-4 divide-y">
+              {open.children?.map((c) => (
+                <li key={c.id}>
+                  <button onClick={() => setAnswerId((prev) => (prev === c.id ? null : c.id))} aria-expanded={answerId === c.id}
+                    className="w-full text-left py-3 flex items-center justify-between gap-3 hover:text-primary">
+                    <span className="font-medium">{c.label}</span>
+                    <ChevronRight className={`h-4 w-4 transition ${answerId === c.id ? "rotate-90" : ""}`} />
                   </button>
+                  {answerId === c.id && c.answer && (
+                    <div className="pb-4 pl-1 text-sm text-muted-foreground">
+                      <p>{c.answer.text}</p>
+                      {c.answer.cta && (
+                        <Link to={c.answer.cta.href as any} className="inline-flex items-center gap-1 mt-3 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold">
+                          {c.answer.cta.label}
+                        </Link>
+                      )}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
 
-        <p className="text-xs text-muted-foreground mt-6">
-          Em emergências com risco imediato, ligue 190 (polícia), 192 (SAMU) ou 193 (bombeiros).
-        </p>
-      </section>
-      <MarocasHelpFab />
-    </main>
+        <div className="mt-10 rounded-xl border-dashed border p-4 text-sm text-muted-foreground flex items-center gap-3">
+          <MessageCircle className="h-5 w-5 text-primary shrink-0" />
+          <span>Precisa falar com pessoa? Use o SAC no botão de ajuda ou pelo WhatsApp — somente pós-venda em horário comercial.</span>
+        </div>
+      </div>
+    </MarocasShell>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { Building2, Check, ArrowLeft, ArrowRight } from "lucide-react";
-import { getMarocasPlano } from "@/components/marocas/marocasPlanos";
+import { Check, ArrowLeft, ArrowRight, UtensilsCrossed } from "lucide-react";
+import { getMarocasPlano, type MarocasPlano } from "@/components/marocas/marocasPlanos";
 import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
 
 export const Route = createFileRoute("/marocas/contratar/$plano")({
@@ -13,11 +13,12 @@ export const Route = createFileRoute("/marocas/contratar/$plano")({
   head: ({ loaderData }) => ({
     meta: [
       { title: loaderData ? `Contratar ${loaderData.plano.nome} — Marocas` : "Contratar — Marocas" },
-      { name: "description", content: "Solicite contratação do plano Marocas em 3 passos: imóvel, perfil e confirmação." },
+      { name: "description", content: "Solicite contratação do plano Marocas em 3 passos: operação, contato e confirmação." },
+      { name: "robots", content: "noindex" },
     ],
   }),
   notFoundComponent: () => (
-    <main className="min-h-screen flex items-center justify-center px-6 text-center">
+    <main className="min-h-dvh flex items-center justify-center px-6 text-center">
       <div>
         <h1 className="text-2xl font-bold">Plano não encontrado</h1>
         <p className="text-muted-foreground mt-2">Confira os planos disponíveis.</p>
@@ -31,15 +32,14 @@ export const Route = createFileRoute("/marocas/contratar/$plano")({
 type Step = 1 | 2 | 3 | 4;
 
 function ContratarPage() {
-  const { plano } = Route.useLoaderData();
+  const { plano } = Route.useLoaderData() as { plano: MarocasPlano };
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState({
-    imovelTipo: "apartamento",
-    bairro: "",
-    metragem: "",
-    quartos: "1",
-    ocupacaoMedia: "",
+    tipoOperacao: "restaurante",
+    unidades: "1",
+    canais: [] as string[],
+    ticketMedio: "",
     nome: "",
     email: "",
     telefone: "",
@@ -48,28 +48,29 @@ function ContratarPage() {
   });
 
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const toggleCanal = (c: string) => setForm((f) => ({ ...f, canais: f.canais.includes(c) ? f.canais.filter((x) => x !== c) : [...f.canais, c] }));
 
   const next = () => setStep((s) => (s < 4 ? ((s + 1) as Step) : s));
   const back = () => setStep((s) => (s > 1 ? ((s - 1) as Step) : s));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: integrar com createServerFn de leads. Por ora apenas avança para confirmação.
+    // TODO Codex: integrar com createServerFn de leads B2B (nicho food service).
     setStep(4);
   };
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <header className="border-b">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link to="/marocas" className="flex items-center gap-2 font-bold text-xl">
-            <Building2 className="h-6 w-6 text-primary" /> Marocas
+            <UtensilsCrossed className="h-6 w-6 text-primary" /> Marocas
           </Link>
           <Link to="/marocas/planos" className="text-sm underline">Comparar planos</Link>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-10 grid lg:grid-cols-[1fr_360px] gap-10">
+      <div className="container mx-auto px-4 md:px-6 py-10 grid lg:grid-cols-[1fr_360px] gap-10">
         <div>
           <Link to="/marocas/planos" className="text-sm text-muted-foreground inline-flex items-center gap-1 hover:underline">
             <ArrowLeft className="h-3 w-3" /> Voltar para planos
@@ -78,7 +79,7 @@ function ContratarPage() {
           <p className="text-muted-foreground mt-2">{plano.resumo}</p>
 
           <ol className="flex items-center gap-2 mt-8 text-xs">
-            {(["Imóvel", "Perfil", "Confirmação", "Pronto"] as const).map((label, i) => {
+            {(["Operação", "Contato", "Confirmação", "Pronto"] as const).map((label, i) => {
               const n = (i + 1) as Step;
               const active = step === n;
               const done = step > n;
@@ -101,34 +102,43 @@ function ContratarPage() {
           <form onSubmit={submit} className="mt-8 rounded-2xl border bg-card p-6">
             {step === 1 && (
               <div className="space-y-4">
-                <h2 className="font-semibold text-lg">Conte sobre o imóvel</h2>
+                <h2 className="font-semibold text-lg">Sobre sua operação</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Tipo de imóvel">
-                    <select className="input" value={form.imovelTipo} onChange={(e) => update("imovelTipo", e.target.value)}>
-                      <option value="apartamento">Apartamento</option>
-                      <option value="cobertura">Cobertura</option>
-                      <option value="loft">Loft / Studio</option>
-                      <option value="casa">Casa</option>
+                  <Field label="Tipo de operação">
+                    <select className="input" value={form.tipoOperacao} onChange={(e) => update("tipoOperacao", e.target.value)}>
+                      <option value="bar">Bar</option>
+                      <option value="restaurante">Restaurante</option>
+                      <option value="cafeteria">Cafeteria</option>
+                      <option value="hamburgueria">Hamburgueria</option>
+                      <option value="pizzaria">Pizzaria</option>
+                      <option value="delivery">Delivery / Dark kitchen</option>
+                      <option value="rede">Rede / Franquia</option>
                     </select>
                   </Field>
-                  <Field label="Bairro">
-                    <input className="input" required value={form.bairro} onChange={(e) => update("bairro", e.target.value)} placeholder="Copacabana" />
-                  </Field>
-                  <Field label="Metragem (m²)">
-                    <input className="input" required type="number" value={form.metragem} onChange={(e) => update("metragem", e.target.value)} />
-                  </Field>
-                  <Field label="Quartos">
-                    <select className="input" value={form.quartos} onChange={(e) => update("quartos", e.target.value)}>
-                      {["1", "2", "3", "4+"].map((q) => (
-                        <option key={q}>{q}</option>
-                      ))}
+                  <Field label="Quantas unidades?">
+                    <select className="input" value={form.unidades} onChange={(e) => update("unidades", e.target.value)}>
+                      {["1", "2-4", "5-9", "10+"].map((q) => <option key={q}>{q}</option>)}
                     </select>
                   </Field>
-                  <Field label="Ocupação média (%)">
-                    <input className="input" type="number" value={form.ocupacaoMedia} onChange={(e) => update("ocupacaoMedia", e.target.value)} placeholder="Ex: 70" />
+                  <Field label="Ticket médio (R$)">
+                    <input className="input" inputMode="numeric" value={form.ticketMedio} onChange={(e) => update("ticketMedio", e.target.value)} placeholder="Ex.: 65" />
                   </Field>
                 </div>
-                <StepNav onNext={next} canNext={!!form.bairro && !!form.metragem} />
+                <div>
+                  <div className="text-sm font-medium mb-2">Canais que você opera</div>
+                  <div className="flex flex-wrap gap-2">
+                    {["Salão", "Delivery próprio", "Retirada", "iFood/Rappi", "WhatsApp"].map((c) => {
+                      const active = form.canais.includes(c);
+                      return (
+                        <button key={c} type="button" onClick={() => toggleCanal(c)} aria-pressed={active}
+                          className={`rounded-full border px-3 py-1.5 text-sm ${active ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}>
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <StepNav onNext={next} canNext />
               </div>
             )}
 
@@ -137,17 +147,17 @@ function ContratarPage() {
                 <h2 className="font-semibold text-lg">Seus dados</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="Nome completo">
-                    <input className="input" required value={form.nome} onChange={(e) => update("nome", e.target.value)} />
+                    <input className="input" required autoComplete="name" value={form.nome} onChange={(e) => update("nome", e.target.value)} />
                   </Field>
                   <Field label="E-mail">
-                    <input className="input" required type="email" value={form.email} onChange={(e) => update("email", e.target.value)} />
+                    <input className="input" required type="email" autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} />
                   </Field>
                   <Field label="Telefone / WhatsApp">
-                    <input className="input" required value={form.telefone} onChange={(e) => update("telefone", e.target.value)} placeholder="(21) 9..." />
+                    <input className="input" required inputMode="tel" autoComplete="tel" value={form.telefone} onChange={(e) => update("telefone", e.target.value)} placeholder="(21) 9..." />
                   </Field>
                 </div>
                 <Field label="Observações (opcional)">
-                  <textarea className="input min-h-24" value={form.observacoes} onChange={(e) => update("observacoes", e.target.value)} />
+                  <textarea className="input min-h-24" value={form.observacoes} onChange={(e) => update("observacoes", e.target.value)} placeholder="Conte prazos, integrações necessárias, particularidades da operação..." />
                 </Field>
                 <StepNav onBack={back} onNext={next} canNext={!!form.nome && !!form.email && !!form.telefone} />
               </div>
@@ -158,14 +168,15 @@ function ContratarPage() {
                 <h2 className="font-semibold text-lg">Revisar e confirmar</h2>
                 <div className="rounded-lg bg-muted/40 p-4 text-sm space-y-1">
                   <div><strong>Plano:</strong> {plano.nome}</div>
-                  <div><strong>Imóvel:</strong> {form.imovelTipo} · {form.bairro} · {form.metragem}m² · {form.quartos} quarto(s)</div>
+                  <div><strong>Operação:</strong> {form.tipoOperacao} · {form.unidades} unidade(s) · ticket médio R$ {form.ticketMedio || "—"}</div>
+                  <div><strong>Canais:</strong> {form.canais.length ? form.canais.join(", ") : "—"}</div>
                   <div><strong>Contato:</strong> {form.nome} · {form.email} · {form.telefone}</div>
                   {form.observacoes && <div><strong>Observações:</strong> {form.observacoes}</div>}
                 </div>
                 <label className="flex items-start gap-2 text-sm">
                   <input type="checkbox" checked={form.aceite} onChange={(e) => update("aceite", e.target.checked)} className="mt-1" />
                   <span>
-                    Autorizo a Marocas a entrar em contato para apresentar a proposta e agendar visita técnica.
+                    Autorizo a Marocas a entrar em contato para apresentar a proposta e agendar diagnóstico.
                     Concordo com a política de privacidade.
                   </span>
                 </label>
@@ -181,7 +192,7 @@ function ContratarPage() {
                 <h2 className="text-xl font-bold mt-4">Solicitação recebida!</h2>
                 <p className="text-muted-foreground mt-2 max-w-md mx-auto">
                   Um consultor Marocas vai entrar em contato em até 1 dia útil para apresentar a proposta de
-                  <strong> {plano.nome}</strong> e agendar visita técnica.
+                  <strong> {plano.nome}</strong> e planejar a ativação.
                 </p>
                 <div className="flex gap-3 justify-center mt-6">
                   <button type="button" onClick={() => navigate({ to: "/marocas" })} className="rounded-md border px-4 py-2 font-semibold">
