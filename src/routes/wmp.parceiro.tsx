@@ -11,7 +11,7 @@ export const Route = createFileRoute("/wmp/parceiro")({
 
 function WmpParceiroLanding() {
   return (
-    <WmpShell>
+    <WmpShell breadcrumbs={[{ label: "Seja Parceiro" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-5xl px-6 pt-16 pb-20 text-center">
           <span className="wmp-chip mb-4"><Handshake className="size-3" /> Rede de parceiros WMP</span>

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/wmp/faq")({
 
 function WmpFaqPage() {
   return (
-    <WmpShell>
+    <WmpShell breadcrumbs={[{ label: "FAQ" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-3xl px-6 pt-16 pb-12 text-center">
           <span className="wmp-chip mb-4"><HelpCircle className="size-3" /> Perguntas frequentes</span>

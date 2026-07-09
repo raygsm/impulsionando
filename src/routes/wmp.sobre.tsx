@@ -33,7 +33,7 @@ export const Route = createFileRoute("/wmp/sobre")({
 
 function WmpSobre() {
   return (
-    <WmpShell>
+    <WmpShell breadcrumbs={[{ label: "Sobre" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-4xl px-6 pt-16 pb-14 text-center">
           <span className="wmp-chip mb-4"><Award className="size-3" /> Nossa história</span>

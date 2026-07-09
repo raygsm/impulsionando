@@ -28,7 +28,7 @@ function WmpCases() {
   );
 
   return (
-    <WmpShell>
+    <WmpShell breadcrumbs={[{ label: "Cases" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-5xl px-6 pt-16 pb-10 text-center">
           <span className="wmp-chip mb-4"><Sparkles className="size-3" /> Portfólio</span>

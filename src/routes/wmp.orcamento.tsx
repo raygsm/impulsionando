@@ -143,7 +143,7 @@ function WmpOrcamento() {
   }
 
   return (
-    <WmpShell>
+    <WmpShell breadcrumbs={[{ label: "Orçamento" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-3xl px-6 pt-14 pb-10 text-center">
           <span className="wmp-chip mb-4"><Wand2 className="size-3" /> Briefing inteligente</span>
