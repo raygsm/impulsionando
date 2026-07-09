@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { NICHO_DETAILS, findNicho } from "@/components/marketing/nichoDetails";
+import { LanguageSwitcher } from "@/components/marketing/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 const WHATSAPP_NICHO_URL =
