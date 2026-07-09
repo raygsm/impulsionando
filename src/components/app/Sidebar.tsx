@@ -16,8 +16,10 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
       <div className="px-4 py-4 flex items-center justify-center border-b border-sidebar-border" data-bg-tone="dark">
         <a
           href="https://impulsionando.com.br"
-          aria-label="Ir para a home Impulsionando"
-          className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 transition-opacity"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Ir para a home Impulsionando (abre em nova aba)"
+          className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 hover-lift focus-ring transition-opacity"
         >
           <img
             src={logoAsset.url}
