@@ -260,10 +260,10 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
           <div className="text-sm font-medium leading-tight">{name}</div>
           <div className="text-xs text-muted-foreground leading-tight">{roleLabel}</div>
         </div>
-        <Avatar className="w-9 h-9">
+        <Avatar className="w-9 h-9 ring-1 ring-border transition-transform hover:scale-105">
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
         </Avatar>
-        <Button variant="ghost" size="icon" onClick={logout} title="Sair" aria-label="Sair da conta">
+        <Button variant="ghost" size="icon" onClick={logout} title="Sair" aria-label="Sair da conta" className="focus-ring hover:bg-destructive/10 hover:text-destructive transition-colors">
           <LogOut className="w-4 h-4" />
         </Button>
       </div>
