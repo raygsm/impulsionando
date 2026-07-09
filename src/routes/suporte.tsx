@@ -3,6 +3,7 @@ import { LifeBuoy, MessageCircle, Mail, Ticket, BookOpen, ArrowRight } from "luc
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/suporte")({
   head: () => ({
@@ -24,16 +25,16 @@ type Channel = {
   href?: string;
   to?: string;
   external?: boolean;
+  onClick?: () => void;
 };
 
 const CHANNELS: Channel[] = [
   {
     icon: MessageCircle,
-    title: "WhatsApp do Impulsionito",
+    title: "Impulsionito — Assistente Impulsionando",
     description: "Atendimento humano + IA, das 8h às 22h (BRT). Resposta em até 5 min em horário comercial.",
     cta: "Falar agora",
-    href: "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20Impulsionando.",
-    external: true,
+    onClick: () => openImpulsionito("suporte-central"),
   },
   {
     icon: Ticket,
