@@ -1,29 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap, Quote, Check, HelpCircle } from "lucide-react";
+import { Sparkles, Music2, Lightbulb, Mic2, Calendar, Handshake, ArrowRight, ShieldCheck, Headphones, Zap, Quote, Check, HelpCircle, Ticket } from "lucide-react";
 import { WmpShell } from "@/components/wmp/WmpShell";
 import { WMP_DEPOIMENTOS, WMP_PACOTES, WMP_FAQ, WMP_CERTIFICACOES } from "@/data/wmp-content";
 
 export const Route = createFileRoute("/wmp/")({
   head: () => ({
     meta: [
-      { title: "WMP — Som, luz e palco para eventos premium" },
-      { name: "description", content: "Produção de eventos com pré-diagnóstico acústico inteligente. Som, luz, palco, telão e coordenação. ART, laudo de dB e plano B por escrito. Parceira Impulsionando." },
-      { property: "og:title", content: "WMP — Som, luz e palco para eventos premium" },
-      { property: "og:description", content: "Som que preenche. Luz que emociona. Pré-diagnóstico acústico antes mesmo da visita técnica." },
+      { title: "WMP — Plataforma de produção e gestão de eventos" },
+      { name: "description", content: "Plataforma completa de produção, gestão e comercialização de eventos: som, luz, palco, telão, coordenação, ART e laudo de dB. Referência Impulsionando em eventos, shows, festivais e corporativos." },
+      { property: "og:title", content: "WMP — Plataforma completa para eventos" },
+      { property: "og:description", content: "Do briefing à execução: pré-diagnóstico acústico, estrutura, coordenação e experiência. Um único interlocutor, sem improviso." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/wmp" }],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
+          "@type": "Organization",
           name: "Wagner Miller Produções (WMP)",
-          description: "Produção de eventos com som, iluminação, palco, telão e coordenação técnica.",
+          description: "Plataforma de produção, gestão e comercialização de eventos: som, iluminação, palco, telão e coordenação técnica.",
           areaServed: "Brasil",
           address: { "@type": "PostalAddress", addressRegion: "RJ", addressCountry: "BR" },
-          aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "312" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "WMP", item: "/wmp" },
+          ],
         }),
       },
     ],
