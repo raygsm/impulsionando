@@ -158,13 +158,23 @@ function OnboardingPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-muted-foreground" />
-              <CardTitle className="text-base">Precisa de ajuda em alguma etapa?</CardTitle>
+              <CardTitle className="text-base">Travou em alguma etapa?</CardTitle>
             </div>
+            <CardDescription>
+              O Impulsionito guia você em qualquer passo. Para bugs ou cobranças, abra um ticket com protocolo.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline"><Link to="/abrir-ticket">Abrir ticket</Link></Button>
-            <Button asChild size="sm" variant="outline"><Link to="/contato">Falar com consultor</Link></Button>
-            <Button asChild size="sm" variant="outline"><Link to="/canal-oficial">Canal oficial WhatsApp</Link></Button>
+            <Button
+              type="button"
+              size="sm"
+              className="btn-alive focus-ring"
+              onClick={() => window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "onboarding-help" } }))}
+            >
+              <Sparkles className="w-4 h-4 mr-1.5" /> Falar com Impulsionito
+            </Button>
+            <Button asChild size="sm" variant="outline" className="focus-ring"><Link to="/abrir-ticket">Abrir ticket</Link></Button>
+            <Button asChild size="sm" variant="outline" className="focus-ring"><Link to="/planos">Ver planos</Link></Button>
           </CardContent>
         </Card>
       </main>
