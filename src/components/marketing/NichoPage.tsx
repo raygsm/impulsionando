@@ -65,11 +65,10 @@ export function NichoPage({ nicho }: Props) {
           </div>
           <p className="text-lg text-white/85 max-w-3xl leading-relaxed">{nicho.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-6">
-            <Button asChild size="lg" className="btn-whatsapp gap-2 shadow-lg">
-              <a href={wa} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" />
-                {nicho.ctaPrimary.label}
-              </a>
+            <Button asChild size="lg" className="gap-2 shadow-lg bg-white text-primary hover:bg-white/90">
+              <Link to="/orcamento">
+                {nicho.ctaPrimary.label} <ArrowRight className="w-4 h-4" />
+              </Link>
             </Button>
             <Button
               asChild
@@ -80,6 +79,16 @@ export function NichoPage({ nicho }: Props) {
               <Link to={nicho.ctaSecondary.href}>
                 {nicho.ctaSecondary.label} <ArrowRight className="w-4 h-4" />
               </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="ghost"
+              className="gap-2 text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="Tirar dúvida no WhatsApp">
+                <MessageCircle className="w-4 h-4" /> Tirar dúvida
+              </a>
             </Button>
             {nicho.slug === "eventos" && (
               <Button
@@ -532,11 +541,10 @@ export function NichoPage({ nicho }: Props) {
               o seu nicho.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button asChild size="lg" className="btn-whatsapp gap-2 shadow-lg">
-                <a href={wa} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" />
-                  {nicho.ctaPrimary.label}
-                </a>
+              <Button asChild size="lg" className="gap-2 shadow-lg bg-white text-primary hover:bg-white/90">
+                <Link to="/orcamento">
+                  {nicho.ctaPrimary.label} <ArrowRight className="w-4 h-4" />
+                </Link>
               </Button>
               <Button
                 asChild
@@ -553,6 +561,16 @@ export function NichoPage({ nicho }: Props) {
                 className="text-white hover:bg-white/10 hover:text-white"
               >
                 <Link to="/contato">Falar com consultor</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="gap-2 text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="Tirar dúvida no WhatsApp">
+                  <MessageCircle className="w-4 h-4" /> Dúvida no WhatsApp
+                </a>
               </Button>
             </div>
           </div>
@@ -571,11 +589,11 @@ export function NichoPage({ nicho }: Props) {
           <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
             <Link to={nicho.ctaSecondary.href}>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</Link>
           </Button>
-          <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial btn-whatsapp">
-            <a href={wa} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+          <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial">
+            <Link to="/orcamento">
               <span className="truncate">{nicho.ctaPrimary.label}</span>
-            </a>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </Button>
         </div>
       </div>
