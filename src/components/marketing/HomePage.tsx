@@ -1091,42 +1091,6 @@ function CanaisComunicacao() {
   );
 }
 
-// ============== CANAIS ==============
-function CanaisComunicacao() {
-  return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Comunicação omnichannel</Badge>
-        <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
-          Um só sistema fala com seu cliente pelo canal certo
-        </h2>
-        <p className="text-muted-foreground mt-3">
-          WhatsApp, e-mail, SMS e push — com deduplicação inteligente e fallback humano.
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { icon: MessageCircle, title: "WhatsApp oficial", desc: "API oficial, templates aprovados e fila humana." },
-          { icon: Mail, title: "E-mail transacional", desc: "Confirmações, cobranças e boletos com entregabilidade." },
-          { icon: MessageSquare, title: "SMS e push", desc: "Camada extra para não perder mensagem crítica." },
-          { icon: Phone, title: "Ligação e voice", desc: "Retomada humana quando o canal digital travar." },
-        ].map((c) => {
-          const Icon = c.icon;
-          return (
-            <Card key={c.title} className="p-5">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary grid place-items-center mb-3">
-                <Icon className="w-5 h-5" />
-              </div>
-              <div className="font-semibold">{c.title}</div>
-              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
-            </Card>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 // ============== TRUST BAR ==============
 const TRUST_ITEMS = [
   { icon: ShieldCheck, title: "LGPD & dados no Brasil", desc: "Servidores nacionais, criptografia em trânsito e em repouso." },
