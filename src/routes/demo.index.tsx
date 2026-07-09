@@ -298,12 +298,12 @@ function DemoLanding() {
               { code: "sob-medida", name: "Sob Medida", price: "Sob proposta", desc: "Multi-unidade, white label, integrações.", cta: "Solicitar proposta", featured: false },
               { code: "clube_premium", name: "Clube Premium", price: "R$ 9,99/mês", desc: "Consumidor final — benefícios em toda a rede.", cta: "Assinar Clube", featured: false },
             ].map((p) => (
-              <Card key={p.code} className={`p-5 flex flex-col ${p.featured ? "border-2 border-primary shadow-elegant" : ""}`}>
+              <Card key={p.code} className={`p-5 flex flex-col hover-lift ${p.featured ? "border-2 border-primary shadow-elegant" : ""}`}>
                 {p.featured && <Badge className="self-start mb-2 bg-gradient-primary text-[10px]">Mais escolhido</Badge>}
                 <h3 className="font-semibold text-base">{p.name}</h3>
                 <div className="text-2xl font-bold mt-1">{p.price}</div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">{p.desc}</p>
-                <Button asChild size="sm" variant={p.featured ? "default" : "outline"} className="mt-4">
+                <Button asChild size="sm" variant={p.featured ? "default" : "outline"} className={`mt-4 ${p.featured ? "btn-alive" : "focus-ring"}`}>
                   <Link to="/planos" search={{ plano: p.code } as never}>{p.cta} <ArrowRight className="w-3 h-3 ml-1" /></Link>
                 </Button>
               </Card>
