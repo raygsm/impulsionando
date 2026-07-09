@@ -32,7 +32,7 @@ function DraCristianePage() {
           <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{t.lead}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
-              <Link to="/chrismed">{t.book}</Link>
+              <Link to="/chrismed/agendar">{t.book}</Link>
             </Button>
             <Button asChild variant="outline" className="border-emerald-900/30 text-emerald-900 hover:bg-emerald-900/5">
               <a href="#oliver">{t.oliver}</a>

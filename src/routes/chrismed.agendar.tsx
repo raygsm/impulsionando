@@ -202,31 +202,31 @@ function ChrismedPage() {
             </div>
 
             {loading ? (
-              <div className="flex justify-center py-16"><Loader2 className="animate-spin text-teal-600" /></div>
+              <div className="flex justify-center py-16"><Loader2 className="animate-spin text-emerald-900" /></div>
             ) : (
               <div className="grid md:grid-cols-2 gap-5">
                 {offerings.map((o) => {
                   const Icon = MODALITY_META[o.modality].icon;
                   return (
-                    <Card key={o.id} className="border-teal-100/80 hover:border-teal-400 hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer group bg-white" onClick={() => setSelected(o)}>
+                    <Card key={o.id} className="border-emerald-900/10 hover:border-emerald-900/30 hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] hover:-translate-y-0.5 transition-all cursor-pointer group bg-white" onClick={() => setSelected(o)}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
-                          <div className="h-12 w-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                          <div className="h-12 w-12 rounded-xl bg-emerald-900/5 text-emerald-900 flex items-center justify-center group-hover:bg-emerald-900 group-hover:text-amber-50 transition-colors">
                             <Icon className="h-6 w-6" />
                           </div>
-                          <Badge variant="secondary" className="bg-teal-50 text-teal-700 hover:bg-teal-100">{MODALITY_META[o.modality].label}</Badge>
+                          <Badge variant="secondary" className="bg-amber-100/70 text-emerald-950 hover:bg-amber-100 border border-amber-300/60 uppercase tracking-[0.14em] text-[10px]">{MODALITY_META[o.modality].label}</Badge>
                         </div>
-                        <CardTitle className="mt-3 text-xl">{o.name}</CardTitle>
-                        <CardDescription className="text-slate-600">{o.description}</CardDescription>
+                        <CardTitle className="mt-3 text-xl font-serif text-emerald-950">{o.name}</CardTitle>
+                        <CardDescription className="text-emerald-900/70">{o.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="flex items-end justify-between">
                         <div>
-                          <div className="text-3xl font-bold text-slate-900">
+                          <div className="text-3xl font-serif text-emerald-950">
                             {o.price_cents === 0 ? 'Cortesia' : `R$ ${(o.price_cents / 100).toFixed(2).replace('.', ',')}`}
                           </div>
-                          <div className="text-xs text-muted-foreground">Duração estimada: {o.duration_minutes} min</div>
+                          <div className="text-xs text-emerald-900/60">Duração estimada: {o.duration_minutes} min</div>
                         </div>
-                        <Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button>
+                        <Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 shadow-sm">Reservar horário</Button>
                       </CardContent>
                     </Card>
                   );
@@ -235,15 +235,15 @@ function ChrismedPage() {
             )}
 
             {/* Trust signals */}
-            <div className="grid sm:grid-cols-3 gap-4 mt-14 pt-10 border-t border-teal-100">
+            <div className="grid sm:grid-cols-3 gap-4 mt-14 pt-10 border-t border-emerald-900/10">
               {[
                 { t: 'Confirmação imediata', d: 'Pagou, está confirmado. Horário reservado e bloqueado em sua agenda.' },
                 { t: 'Sigilo absoluto', d: 'Prontuário eletrônico criptografado. Conformidade total com a LGPD.' },
-                { t: 'Equipe à disposição', d: 'WhatsApp dedicado para dúvidas antes e suporte clínico após o atendimento.' },
+                { t: 'Suporte pelo WhatsApp', d: 'Canal de SAC e pós-atendimento para dúvidas antes e orientação após a consulta.' },
               ].map((b) => (
                 <div key={b.t} className="text-center sm:text-left">
-                  <div className="font-semibold text-slate-900 mb-1">{b.t}</div>
-                  <div className="text-sm text-slate-600">{b.d}</div>
+                  <div className="font-medium text-emerald-950 mb-1">{b.t}</div>
+                  <div className="text-sm text-emerald-900/70">{b.d}</div>
                 </div>
               ))}
             </div>
@@ -252,11 +252,11 @@ function ChrismedPage() {
 
         {/* Form */}
         {selected && !pixResult && (
-          <Card className="max-w-xl mx-auto border-teal-100">
+          <Card className="max-w-xl mx-auto border-emerald-900/10 bg-white">
             <CardHeader>
-              <button onClick={() => setSelected(null)} className="text-sm text-teal-700 hover:underline self-start mb-2">← Trocar modalidade</button>
-              <CardTitle>{selected.name}</CardTitle>
-              <CardDescription>
+              <button onClick={() => setSelected(null)} className="text-sm text-emerald-900 hover:underline self-start mb-2">← Trocar modalidade</button>
+              <CardTitle className="font-serif text-emerald-950">{selected.name}</CardTitle>
+              <CardDescription className="text-emerald-900/70">
                 {selected.price_cents === 0
                   ? 'Sem custo — confirme seus dados e reservamos seu horário.'
                   : `Investimento de R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} · pagamento via PIX com confirmação imediata`}
@@ -275,17 +275,17 @@ function ChrismedPage() {
               </div>
               <div>
                 <Label htmlFor="em">E-mail*</Label>
-                <Input id="em" type="email" value={payer.email} onChange={(e) => setPayer({ ...payer, email: e.target.value })} />
+                <Input id="em" type="email" inputMode="email" autoComplete="email" value={payer.email} onChange={(e) => setPayer({ ...payer, email: e.target.value })} />
               </div>
               <div>
                 <Label htmlFor="doc">CPF</Label>
-                <Input id="doc" value={payer.doc} onChange={(e) => setPayer({ ...payer, doc: e.target.value })} placeholder="000.000.000-00" />
+                <Input id="doc" inputMode="numeric" value={payer.doc} onChange={(e) => setPayer({ ...payer, doc: e.target.value })} placeholder="000.000.000-00" />
               </div>
-              <Button onClick={handlePay} disabled={submitting} className="w-full bg-teal-600 hover:bg-teal-700">
+              <Button onClick={handlePay} disabled={submitting} className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50">
                 {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
                 {selected.price_cents === 0 ? 'Confirmar reserva' : 'Reservar e pagar via PIX'}
               </Button>
-              <p className="text-xs text-center text-slate-500 mt-2">
+              <p className="text-xs text-center text-emerald-900/60 mt-2">
                 Seu horário só é bloqueado após a confirmação do pagamento. Reembolso integral para cancelamentos com mais de 24h.
               </p>
             </CardContent>
@@ -294,20 +294,20 @@ function ChrismedPage() {
 
         {/* PIX result */}
         {pixResult && (
-          <Card className="max-w-xl mx-auto border-teal-100">
+          <Card className="max-w-xl mx-auto border-emerald-900/10 bg-white">
             <CardHeader className="text-center">
               {pollStatus === 'approved' ? (
                 <>
-                  <div className="mx-auto h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                  <div className="mx-auto h-16 w-16 rounded-full bg-emerald-900/10 text-emerald-900 flex items-center justify-center mb-3">
                     <CheckCircle2 className="h-9 w-9" />
                   </div>
-                  <CardTitle>Atendimento confirmado</CardTitle>
-                  <CardDescription>Seu horário está bloqueado em nossa agenda. Enviamos os detalhes e orientações para o seu e-mail e WhatsApp.</CardDescription>
+                  <CardTitle className="font-serif text-emerald-950">Atendimento confirmado</CardTitle>
+                  <CardDescription className="text-emerald-900/70">Seu horário está bloqueado em nossa agenda. Enviamos os detalhes e orientações para o seu e-mail e WhatsApp.</CardDescription>
                 </>
               ) : (
                 <>
-                  <CardTitle>Reserve seu horário em segundos</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="font-serif text-emerald-950">Reserve seu horário em segundos</CardTitle>
+                  <CardDescription className="text-emerald-900/70">
                     Aponte a câmera para o QR Code ou use o código copia-e-cola. Confirmaremos automaticamente após o pagamento.
                   </CardDescription>
                 </>
@@ -329,14 +329,14 @@ function ChrismedPage() {
                     </div>
                   </div>
                 ) : null}
-                <Button variant="outline" className="w-full" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); router.invalidate(); }}>
+                <Button variant="outline" className="w-full border-emerald-900/20" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); router.invalidate(); }}>
                   Cancelar e voltar
                 </Button>
               </CardContent>
             )}
             {pollStatus === 'approved' && (
               <CardContent>
-                <Button className="w-full bg-teal-600 hover:bg-teal-700" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); }}>
+                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); }}>
                   Agendar outra consulta
                 </Button>
               </CardContent>

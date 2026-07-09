@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Stethoscope, Video, Home, RefreshCw, Filter } from 'lucide-react';
+import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -19,19 +20,19 @@ type Offering = {
 };
 
 const MODALITY_META = {
-  presencial: { icon: Stethoscope, label: 'No consultório', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-  telemedicina: { icon: Video, label: 'Por vídeo', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-  domiciliar: { icon: Home, label: 'Onde você estiver', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  retorno: { icon: RefreshCw, label: 'Retorno acompanhado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  presencial: { icon: Stethoscope, label: 'No consultório' },
+  telemedicina: { icon: Video, label: 'Por vídeo' },
+  domiciliar: { icon: Home, label: 'Onde você estiver' },
+  retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 } as const;
 
 export const Route = createFileRoute('/chrismed/ofertas')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Modalidades de Atendimento Premium' },
-      { name: 'description', content: 'Conheça as modalidades CHRISMED: atendimento no consultório, por vídeo, médico onde você estiver e retornos acompanhados. Concierge médico com confirmação imediata.' },
-      { property: 'og:title', content: 'CHRISMED — Modalidades de Atendimento' },
-      { property: 'og:description', content: 'Atendimento médico no formato que se encaixa na sua rotina. Confirmação imediata, sigilo absoluto e equipe disponível.' },
+      { title: 'Modalidades de atendimento · CrisMed' },
+      { name: 'description', content: 'Conheça as modalidades CrisMed: consulta presencial em Copacabana, teleconsulta, atendimento domiciliar e retornos acompanhados — com a Dra. Cristiane Alencar.' },
+      { property: 'og:title', content: 'Modalidades de atendimento · CrisMed' },
+      { property: 'og:description', content: 'Atendimento médico no formato que se encaixa na sua rotina, com sigilo, precisão e conforto.' },
     ],
   }),
   component: OfertasPage,
@@ -63,45 +64,34 @@ function OfertasPage() {
   const modalities: Array<'todos' | Offering['modality']> = ['todos', 'presencial', 'telemedicina', 'domiciliar', 'retorno'];
 
   return (
-    <div className="chrismed-brand min-h-screen bg-gradient-to-b from-teal-50/40 to-white">
-      <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="container flex items-center justify-between py-4">
-          <Link to="/chrismed" className="flex items-center gap-2.5">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
-            <div>
-              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
-              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Modalidades de atendimento</div>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-1">
-            <Link to="/chrismed"><Button variant="ghost" size="sm">Agendar</Button></Link>
-            <Link to="/chrismed/ofertas"><Button variant="secondary" size="sm">Modalidades</Button></Link>
-          </nav>
-        </div>
-      </header>
-
-      <main className="container py-12 max-w-5xl">
-        <div className="text-center mb-10">
-          <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Concierge médico · você escolhe como ser atendido</Badge>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3 leading-[1.1]">
-            O atendimento certo, <span className="text-teal-600">no formato que cabe na sua rotina</span>
+    <ChrismedShell>
+      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+        <div className="container py-16 max-w-5xl">
+          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">
+            Modalidades de atendimento
+          </Badge>
+          <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 leading-[1.05] max-w-3xl">
+            O atendimento certo, no formato que cabe na sua rotina
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="mt-5 text-lg text-emerald-900/75 max-w-2xl">
             Cada modalidade entrega a mesma qualidade clínica, com prontuário eletrônico, prescrição digital e equipe sempre acessível.
           </p>
         </div>
+      </section>
 
+      <section className="container py-12 max-w-5xl">
         <div className="flex items-center gap-2 justify-center flex-wrap mb-8">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Filter className="h-4 w-4 text-emerald-900/60" />
           {modalities.map((m) => (
             <button
               key={m}
               onClick={() => setFilter(m)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${
+              className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 filter === m
-                  ? 'bg-teal-600 text-white border-teal-600'
-                  : 'bg-white text-slate-700 border-slate-200 hover:border-teal-300'
+                  ? 'bg-emerald-900 text-amber-50 border-emerald-900'
+                  : 'bg-white text-emerald-900/80 border-emerald-900/15 hover:border-emerald-900/40'
               }`}
+              aria-pressed={filter === m}
             >
               {m === 'todos' ? 'Todas' : MODALITY_META[m].label}
             </button>
@@ -109,49 +99,44 @@ function OfertasPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-teal-600" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-emerald-900" /></div>
         ) : (
           <div className="grid md:grid-cols-2 gap-5">
             {filtered.map((o) => {
               const meta = MODALITY_META[o.modality];
               const Icon = meta.icon;
               return (
-                <Card key={o.id} className="border-teal-100 hover:shadow-md transition">
+                <Card key={o.id} className="border-emerald-900/10 bg-white hover:border-emerald-900/30 hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] transition">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center border ${meta.color}`}>
+                      <div className="h-12 w-12 rounded-xl bg-emerald-900/5 text-emerald-900 flex items-center justify-center">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <Badge variant="outline" className={meta.color}>{meta.label}</Badge>
+                      <Badge variant="outline" className="bg-amber-100/70 text-emerald-950 border-amber-300/60 uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
                     </div>
-                    <CardTitle className="mt-3">{o.name}</CardTitle>
-                    <CardDescription>{o.description}</CardDescription>
+                    <CardTitle className="mt-3 font-serif text-emerald-950">{o.name}</CardTitle>
+                    <CardDescription className="text-emerald-900/70">{o.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="flex items-end justify-between">
                     <div>
-                      <div className="text-2xl font-bold text-slate-900">{brl(o.price_cents)}</div>
-                      <div className="text-xs text-muted-foreground">~{o.duration_minutes} min</div>
+                      <div className="text-2xl font-serif text-emerald-950">{brl(o.price_cents)}</div>
+                      <div className="text-xs text-emerald-900/60">~{o.duration_minutes} min</div>
                     </div>
-                    <Link to="/chrismed"><Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button></Link>
+                    <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 shadow-sm">
+                      <Link to="/chrismed/agendar" search={{ modality: o.modality }}>Reservar horário</Link>
+                    </Button>
                   </CardContent>
                 </Card>
               );
             })}
             {filtered.length === 0 && (
-              <div className="md:col-span-2 text-center py-12 text-muted-foreground">
+              <div className="md:col-span-2 text-center py-12 text-emerald-900/60">
                 Nenhuma modalidade ativa nesse filtro no momento.
               </div>
             )}
           </div>
         )}
-      </main>
-
-      <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
-        <div className="container">
-          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
-          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
-        </div>
-      </footer>
-    </div>
+      </section>
+    </ChrismedShell>
   );
 }
