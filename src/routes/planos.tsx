@@ -953,13 +953,20 @@ function WhiteLabelPlansPanel() {
             Recursos detalhados estão na jornada White Label.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 w-full sm:w-auto">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                Quero minha plataforma White Label <ArrowRight className="w-4 h-4" />
-              </a>
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 w-full sm:w-auto btn-alive focus-ring">
+              <Link to="/white-label">Quero minha plataforma White Label <ArrowRight className="w-4 h-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto">
-              <Link to="/white-label">Ver jornada White Label <ArrowRight className="w-4 h-4" /></Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto focus-ring"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                }
+              }}
+            >
+              <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
             </Button>
           </div>
         </div>
