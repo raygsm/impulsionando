@@ -115,8 +115,45 @@ function ContatoPage() {
         <div className="text-center space-y-3 mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Fale com a Impulsionando Tecnologia</h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Atendimento humano para sistemas, automação e integrações. Responda em poucos minutos no horário comercial.
+            Atendimento humano para sistemas, automação e integrações. Para dúvidas comerciais, o Impulsionito responde na hora — para suporte técnico, abra um ticket.
           </p>
+        </div>
+
+        {/* Atalhos comerciais — direcionam antes do formulário */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "contato-atalho" } }))}
+            className="group text-left rounded-lg border border-border bg-card p-4 hover-lift focus-ring transition-all"
+          >
+            <Sparkles className="w-5 h-5 text-primary mb-2" />
+            <div className="text-sm font-semibold">Falar com Impulsionito</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Assistente consultivo — responde na hora.</div>
+          </button>
+          <Link
+            to="/planos"
+            className="group text-left rounded-lg border border-border bg-card p-4 hover-lift focus-ring transition-all"
+          >
+            <Layers className="w-5 h-5 text-primary mb-2" />
+            <div className="text-sm font-semibold">Ver planos</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Essencial, Ideal, Full e Sob Medida.</div>
+          </Link>
+          <Link
+            to="/escolher-nicho"
+            className="group text-left rounded-lg border border-border bg-card p-4 hover-lift focus-ring transition-all"
+          >
+            <Rocket className="w-5 h-5 text-primary mb-2" />
+            <div className="text-sm font-semibold">Começar agora</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Escolha seu nicho e monte sua operação.</div>
+          </Link>
+          <Link
+            to="/abrir-ticket"
+            className="group text-left rounded-lg border border-border bg-card p-4 hover-lift focus-ring transition-all"
+          >
+            <LifeBuoy className="w-5 h-5 text-primary mb-2" />
+            <div className="text-sm font-semibold">Abrir ticket</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Suporte técnico ou financeiro com protocolo.</div>
+          </Link>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -130,11 +167,15 @@ function ContatoPage() {
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   Recebemos sua solicitação. Nossa equipe vai responder no e-mail e/ou WhatsApp informado.
                 </p>
-                <div className="flex justify-center gap-2 pt-2">
-                  <Button asChild className="btn-whatsapp">
-                    <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp agora
-                    </a>
+                <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <Button
+                    className="btn-alive focus-ring"
+                    onClick={() => window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "contato-sent" } }))}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" /> Enquanto isso, fale com o Impulsionito
+                  </Button>
+                  <Button asChild variant="outline" className="focus-ring">
+                    <Link to="/planos">Ver planos</Link>
                   </Button>
                 </div>
               </div>
@@ -179,7 +220,7 @@ function ContatoPage() {
                   e confirma que documentos e comprovantes serão enviados apenas pelo WhatsApp oficial{" "}
                   <strong>(21) 99307-5000</strong>.
                 </p>
-                <Button type="submit" disabled={loading} className="gap-2 bg-gradient-primary shadow-elegant">
+                <Button type="submit" disabled={loading} className="gap-2 bg-gradient-primary shadow-elegant focus-ring">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   Enviar mensagem
                 </Button>
@@ -188,23 +229,22 @@ function ContatoPage() {
           </Card>
 
           <Card className="p-6 space-y-4 h-fit">
-            <div className="text-sm font-semibold">Outros canais</div>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-md border border-border hover:border-primary/40 transition-colors">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              <div>
-                <div className="text-sm font-medium">WhatsApp</div>
-                <div className="text-xs text-muted-foreground">+55 21 99307-5000</div>
-              </div>
-            </a>
-            <a href={`mailto:${EMAIL}`} className="flex items-center gap-3 p-3 rounded-md border border-border hover:border-primary/40 transition-colors">
+            <div className="text-sm font-semibold">Canais oficiais</div>
+            <a href={`mailto:${EMAIL}`} className="flex items-center gap-3 p-3 rounded-md border border-border hover:border-primary/40 focus-ring transition-colors">
               <Mail className="w-5 h-5 text-primary" />
               <div>
                 <div className="text-sm font-medium">E-mail</div>
                 <div className="text-xs text-muted-foreground break-all">{EMAIL}</div>
               </div>
             </a>
+            <div className="rounded-md border border-dashed border-border p-3">
+              <div className="text-sm font-medium">WhatsApp oficial regulatório</div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                +55 21 99307-5000 — exclusivo para envio de documentos, comprovantes e assuntos regulatórios já em andamento. Para vendas e dúvidas, use o Impulsionito acima.
+              </div>
+            </div>
             <div className="text-xs text-muted-foreground pt-2">
-              Atendimento de segunda a sexta, 9h às 18h.
+              Atendimento humano de segunda a sexta, 9h às 18h.
             </div>
           </Card>
         </div>
