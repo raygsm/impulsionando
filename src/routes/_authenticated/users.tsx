@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +36,7 @@ function UsersPage() {
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [editing, setEditing] = useState<UserRow | null>(null);
 
-  const { data: users } = useQuery({
+  const { data: users, isLoading } = useQuery({
     queryKey: ["users-list", companyFilter],
     queryFn: async () => {
       let q = supabase.from("user_profiles")
@@ -89,7 +90,14 @@ function UsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum vínculo.</TableCell></TableRow>}
+            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={`sk-u-${i}`}>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <TableCell key={j}><Skeleton className="h-3 w-full" /></TableCell>
+                ))}
+              </TableRow>
+            ))}
+            {!isLoading && users?.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum vínculo.</TableCell></TableRow>}
             {users?.map((u) => (
               <TableRow key={u.id}>
                 <TableCell>
