@@ -103,6 +103,7 @@ function AccountsPage() {
           </Card>
         ))}
       </div>
+      )}
     </div>
   );
 }
