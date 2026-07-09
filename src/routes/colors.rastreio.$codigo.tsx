@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, PackageX } from "lucide-react";
 import { findOrderByTracking } from "@/data/colors-mock-account";
 import TrackingTimeline from "@/components/colors/account/TrackingTimeline";
