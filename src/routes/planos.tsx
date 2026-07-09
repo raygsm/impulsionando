@@ -971,12 +971,22 @@ function WhiteLabelPlansPanel() {
           ))}
         </div>
         <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-          <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" /> Falar com especialista
-            </a>
+          <Button asChild size="lg" className="gap-2 w-full sm:w-auto btn-alive focus-ring">
+            <Link to="/contratar" search={{ plano: undefined }}><ArrowRight className="w-4 h-4" /> Começar agora</Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2 w-full sm:w-auto focus-ring"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("impulsionito:open"));
+              }
+            }}
+          >
+            <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
+          </Button>
+          <Button asChild size="lg" variant="ghost" className="gap-2 w-full sm:w-auto focus-ring">
             <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
           </Button>
         </div>
