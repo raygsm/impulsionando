@@ -238,7 +238,7 @@ function AjudaPage() {
               className="focus-ring"
               onClick={() => {
                 if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "central-ajuda" } }));
                 }
               }}
             >

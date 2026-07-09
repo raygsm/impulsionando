@@ -9,7 +9,8 @@ import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { AllAreasPanel } from "@/components/app/AllAreasPanel";
 import { fetchCoreAudienceDashboard } from "@/lib/audience-dashboards.functions";
 import { fetchMarketplaceKPIs } from "@/lib/marketplace.functions";
-import { Loader2, TrendingUp, ArrowRight } from "lucide-react";
+import { TrendingUp, ArrowRight } from "lucide-react";
+import { CardSkeleton } from "@/components/feedback";
 
 function brl(c: number) {
   return (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -45,7 +46,7 @@ function CoreDashboardPage() {
       )}
 
       {isLoading || !data ? (
-        <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando KPIs do Core…</Card>
+        <CardSkeleton count={4} className="lg:grid-cols-4" />
       ) : (
         <>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">

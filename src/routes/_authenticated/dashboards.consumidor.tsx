@@ -9,6 +9,7 @@ import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchConsumidorDashboard } from "@/lib/audience-dashboards.functions";
 import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, TicketCheck, CalendarDays, Star, Lock, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { CardSkeleton } from "@/components/feedback";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboards/consumidor")({
@@ -307,9 +308,7 @@ function ConsumidorDashboardPage() {
       )}
 
       {isLoading || !data ? (
-        <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Carregando sua área pessoal…
-        </Card>
+        <CardSkeleton count={3} />
       ) : (
         <>
           <Card className="p-4 flex flex-wrap items-center justify-between gap-3">

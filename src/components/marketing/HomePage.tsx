@@ -1275,7 +1275,7 @@ export function HomePage() {
                 onClick={() => {
                   trackHeroCta("falar_impulsionito");
                   if (typeof window !== "undefined") {
-                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                    window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "home" } }));
                   }
                 }}
                 data-analytics="hero-impulsionito"

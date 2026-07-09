@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Bot, X, MessageCircle } from "lucide-react";
 import { buildOfficialWhatsAppUrl, trackWhatsAppCTA } from "@/lib/whatsapp-cta";
+import { trackImpulsionitoOpen } from "@/lib/impulsionito-tracking";
 import { getImpulsionitoContext } from "@/data/impulsionito-context";
 
 const HIDDEN_PREFIXES = [
@@ -46,10 +47,16 @@ export function ImpulsionitoFab() {
   // sem precisar exibir WhatsApp fora deste balão.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const handler = () => setOpen(true);
+    const handler = (e: Event) => {
+      setOpen(true);
+      const origin =
+        (e as CustomEvent<{ origin?: string }>).detail?.origin ?? "unknown";
+      trackImpulsionitoOpen(origin, { path: pathname, ctx: ctx.id });
+    };
     window.addEventListener("impulsionito:open", handler);
     return () => window.removeEventListener("impulsionito:open", handler);
-  }, []);
+  }, [pathname, ctx.id]);
+
 
   if (
     pathname.startsWith("/_authenticated") ||
@@ -107,10 +114,16 @@ export function ImpulsionitoFab() {
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((v) => {
+            const next = !v;
+            if (next) trackImpulsionitoOpen("fab", { path: pathname, ctx: ctx.id });
+            return next;
+          });
+        }}
         aria-expanded={open}
         aria-label="Abrir assistente Impulsionito"
-        className="inline-flex items-center gap-2 rounded-full bg-gradient-primary text-primary-foreground px-3.5 py-2.5 shadow-elegant hover:brightness-110 transition-all font-medium text-sm"
+        className="inline-flex items-center gap-2 rounded-full bg-gradient-primary text-primary-foreground px-3.5 py-2.5 shadow-elegant hover:brightness-110 transition-all font-medium text-sm focus-ring"
       >
         <Bot className="w-5 h-5" aria-hidden="true" />
         <span className="hidden sm:inline">Impulsionito</span>

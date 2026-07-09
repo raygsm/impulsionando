@@ -201,7 +201,7 @@ function NichosMenu() {
                   type="button"
                   onClick={() => {
                     if (typeof window !== "undefined") {
-                      window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                      window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "header" } }));
                     }
                   }}
                   className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary focus-ring rounded-sm"
