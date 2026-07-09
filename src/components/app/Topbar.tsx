@@ -191,7 +191,8 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
             else if (e.key === "Escape") { setOpen(false); }
           }}
           placeholder="Buscar pessoa, empresa, lead ou tela…"
-          className="pl-9 bg-background"
+          className="pl-9 bg-background focus-ring transition-shadow"
+          aria-label="Busca global"
         />
         {open && query && (
           <div className="absolute left-0 right-0 mt-2 rounded-md border border-border bg-popover shadow-lg overflow-hidden z-50">
