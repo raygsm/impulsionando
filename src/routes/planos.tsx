@@ -856,10 +856,17 @@ function PlanosPage() {
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
                 <Link to="/orcamento" search={{ origem: "planos:cta" }}>Fazer briefing <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp
-                </a>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white focus-ring"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  }
+                }}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
               </Button>
             </div>
           </div>
