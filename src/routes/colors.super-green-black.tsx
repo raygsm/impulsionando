@@ -570,18 +570,3 @@ function LegalDisclaimer() {
     </section>
   );
 }
-
-function FloatingWhats() {
-  return (
-    <a
-      href="https://wa.me/5521967862834"
-      target="_blank"
-      rel="noreferrer"
-      aria-label="Falar no WhatsApp"
-      onClick={() => colorsEvents.whatsappClick("sgb_fab")}
-      className="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-emerald-500 text-black shadow-2xl shadow-emerald-500/40 transition hover:scale-105 hover:bg-emerald-400"
-    >
-      <MessageCircle className="h-6 w-6" aria-hidden />
-    </a>
-  );
-}
