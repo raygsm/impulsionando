@@ -26,12 +26,12 @@ export function AudienceBadge({ className }: { className?: string }) {
   return (
     <Badge
       variant={VARIANTS[audience]}
-      className={`hidden md:inline-flex items-center gap-1.5 text-[11px] font-medium ${className ?? ""}`}
+      className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${className ?? ""}`}
       title={isViewingAs ? `${label} (visualizando como cliente)` : label}
     >
       <Icon className="w-3 h-3" aria-hidden />
-      <span>{label}</span>
-      {isViewingAs ? <span className="opacity-70">· view-as</span> : null}
+      <span className="hidden xs:inline sm:inline">{label}</span>
+      {isViewingAs ? <span className="opacity-70 hidden sm:inline">· view-as</span> : null}
     </Badge>
   );
 }

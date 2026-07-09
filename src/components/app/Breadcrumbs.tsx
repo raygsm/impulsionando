@@ -141,22 +141,33 @@ export function Breadcrumbs() {
   if (crumbs.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className="px-6 lg:px-8 pt-3 -mb-2">
-      <ol className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-        <li>
-          <Link to="/dashboard" className="flex items-center gap-1 hover:text-foreground transition-colors">
+    <nav aria-label="Breadcrumb" className="px-4 sm:px-6 lg:px-8 pt-3 -mb-2">
+      <ol className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap min-w-0">
+        <li className="shrink-0">
+          <Link
+            to="/dashboard"
+            aria-label="Voltar ao dashboard"
+            className="inline-flex items-center gap-1 rounded px-1 py-0.5 hover:text-foreground focus-ring transition-colors"
+          >
             <Home className="size-3.5" />
           </Link>
         </li>
         {crumbs.map((c, i) => {
           const last = i === crumbs.length - 1;
           return (
-            <li key={c.to} className="flex items-center gap-1.5">
-              <ChevronRight className="size-3 opacity-50" />
+            <li key={c.to} className="flex items-center gap-1.5 min-w-0">
+              <ChevronRight className="size-3 opacity-50 shrink-0" aria-hidden />
               {last ? (
-                <span className="text-foreground font-medium">{c.label}</span>
+                <span className="text-foreground font-medium truncate max-w-[16ch] sm:max-w-none" aria-current="page">
+                  {c.label}
+                </span>
               ) : (
-                <Link to={c.to} className="hover:text-foreground transition-colors">{c.label}</Link>
+                <Link
+                  to={c.to}
+                  className="rounded px-1 py-0.5 hover:text-foreground focus-ring transition-colors truncate max-w-[12ch] sm:max-w-none"
+                >
+                  {c.label}
+                </Link>
               )}
             </li>
           );

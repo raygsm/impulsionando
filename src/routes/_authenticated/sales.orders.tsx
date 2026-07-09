@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Receipt } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -24,7 +26,7 @@ function Page() {
   const qc = useQueryClient();
   const [status, setStatus] = useState<string>("all");
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["sales-orders", companyId, status], enabled: !!companyId,
     queryFn: async () => {
       let q = supabase.from("sales_orders")
@@ -70,7 +72,10 @@ function Page() {
       </div>
 
       <Card className="shadow-card divide-y">
-        {!data?.length && <div className="p-8 text-center text-sm text-muted-foreground">Nenhum pedido.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={5} /></div>}
+        {!isLoading && !data?.length && (
+          <EmptyStateV2 icon={Receipt} title="Nenhum pedido" description="Crie um novo pedido no PDV para começar a operar." className="border-0 shadow-none" />
+        )}
         {data?.map((o) => (
           <div key={o.id} className="p-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">

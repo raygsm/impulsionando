@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Truck } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -27,7 +29,7 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["inv-sups", companyId], enabled: !!companyId,
     queryFn: async () => (await supabase.from("inv_suppliers").select("*").eq("company_id", companyId).order("name")).data ?? [],
   });
@@ -73,7 +75,10 @@ function Page() {
           </Dialog></div>
       } />
       <Card className="shadow-card divide-y">
-        {!data?.length && <div className="p-8 text-center text-sm text-muted-foreground">Nenhum fornecedor cadastrado.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={4} /></div>}
+        {!isLoading && !data?.length && (
+          <EmptyStateV2 icon={Truck} title="Nenhum fornecedor cadastrado" description="Cadastre fornecedores para vincular produtos, compras e contas a pagar." className="border-0 shadow-none" />
+        )}
         {data?.map((s) => (
           <div key={s.id} className="p-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
