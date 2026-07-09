@@ -630,6 +630,24 @@ function PlanosPage() {
                 <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
+                {PLAN_REASON[plan.name] && (
+                  <div
+                    className={cn(
+                      "mt-3 rounded-md border p-2.5 text-[11px] leading-snug",
+                      plan.highlight
+                        ? "border-primary/30 bg-primary/5 text-primary-foreground/90"
+                        : "border-border bg-muted/40 text-muted-foreground",
+                    )}
+                  >
+                    <div className={cn("font-semibold mb-0.5", plan.highlight ? "text-primary" : "text-foreground")}>
+                      {PLAN_REASON[plan.name].title}
+                    </div>
+                    <div className={cn(plan.highlight ? "text-foreground/80" : "text-muted-foreground")}>
+                      {PLAN_REASON[plan.name].body}
+                    </div>
+                  </div>
+                )}
+
                 {PLAN_OPS[plan.name] && (
                   <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Sinais operacionais">
                     <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
