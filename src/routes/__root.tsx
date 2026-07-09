@@ -26,7 +26,7 @@ import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
 import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
-import { CoreWatermark } from "@/components/app/CoreWatermark";
+
 
 
 function TenantSubdomainRedirect() {
@@ -413,7 +413,7 @@ function RootComponent() {
       <ScrollGuidance />
       <RocketRouteLoader />
       <CoreCopyGuard />
-      <CoreWatermark />
+      
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
