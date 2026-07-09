@@ -15,7 +15,7 @@ const loadTenantHeader = createServerFn({ method: "GET" })
     const { data: company } = await context.supabase
       .from("companies")
       .select(
-        "id,name,legal_name,subdomain,domain,status,status_commercial,is_active,is_demo",
+        "id,name,legal_name,subdomain,domain,status,status_commercial,is_active,is_demo,full_courtesy_status,full_courtesy_ends_at",
       )
       .eq("subdomain", data.slug)
       .maybeSingle();
