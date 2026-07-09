@@ -107,14 +107,14 @@ function ImovelDetail() {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 py-4 text-xs text-slate-500">
-        <Link to="/garrido" className="hover:underline">Início</Link>
-        <span className="mx-1">›</span>
-        <Link to="/garrido/buscar" className="hover:underline">Imóveis</Link>
-        <span className="mx-1">›</span>
-        <span className="text-[color:var(--garrido-ink)] font-semibold">{i.bairro}, {i.cidade}</span>
-      </div>
+      <GarridoBreadcrumbs
+        items={[
+          { label: "Início", to: "/garrido" },
+          { label: "Buscar imóveis", to: "/garrido/buscar" },
+          { label: `${i.bairro}, ${i.cidade}` },
+        ]}
+      />
+
 
       {/* Galeria */}
       <section className="max-w-7xl mx-auto px-4">
@@ -234,23 +234,42 @@ function ImovelDetail() {
 
             <div className="mt-4 grid gap-2">
               <a
-                href={`https://wa.me/${i.corretor.whatsapp}?text=${encodeURIComponent(`Olá! Tenho interesse no imóvel "${i.titulo}" (${i.slug}).`)}`}
-                target="_blank" rel="noopener"
-                className="rounded-lg bg-[#25D366] text-white font-bold py-2.5 text-center inline-flex items-center justify-center gap-2 hover:brightness-110"
+                href="#agendar-visita"
+                className="rounded-lg bg-[color:var(--garrido-ink)] text-white font-bold py-3 text-center inline-flex items-center justify-center gap-2 hover:brightness-125 min-h-11"
               >
-                <MessageCircle className="h-4 w-4" /> WhatsApp com corretor
+                <Calendar className="h-4 w-4" aria-hidden /> Agendar visita
               </a>
-              <a href={`tel:+55${i.corretor.whatsapp}`} className="rounded-lg border border-[color:var(--garrido-ink)]/20 font-semibold py-2.5 text-center text-sm inline-flex items-center justify-center gap-2 hover:bg-[color:var(--garrido-cream)]">
-                <Phone className="h-4 w-4" /> Ligar agora
+              <a
+                href="#agendar-visita"
+                className="rounded-lg bg-[color:var(--garrido-gold)] text-[color:var(--garrido-ink)] font-bold py-2.5 text-center inline-flex items-center justify-center gap-2 hover:brightness-110 min-h-11"
+              >
+                <FileText className="h-4 w-4" aria-hidden /> Solicitar proposta
               </a>
-              <FormInteresse imovelSlug={i.slug} />
+              <button
+                type="button"
+                onClick={() => toggleFavorito(i.slug)}
+                className="rounded-lg border border-[color:var(--garrido-ink)]/20 font-semibold py-2.5 text-sm inline-flex items-center justify-center gap-2 hover:bg-[color:var(--garrido-cream)] min-h-11"
+                aria-label="Favoritar este imóvel na minha área"
+              >
+                <Heart className="h-4 w-4" aria-hidden /> Favoritar
+              </button>
             </div>
 
             <div className="mt-5 pt-4 border-t text-xs">
               <div className="font-semibold text-[color:var(--garrido-ink)]">{i.corretor.nome}</div>
               <div className="text-slate-500">{i.corretor.creci}</div>
+              <a
+                href={`https://wa.me/${i.corretor.whatsapp}?text=${encodeURIComponent(`Olá! Preciso de suporte sobre o imóvel "${i.titulo}" (${i.slug}).`)}`}
+                target="_blank"
+                rel="noopener"
+                className="mt-2 inline-flex items-center gap-1 text-[color:var(--garrido-ink)]/70 hover:text-[color:var(--garrido-ink)] hover:underline"
+              >
+                <MessageCircle className="h-3 w-3" aria-hidden />
+                Suporte via WhatsApp (pós-venda)
+              </a>
             </div>
           </div>
+
 
           <div className="rounded-xl bg-[color:var(--garrido-ink)] text-white p-5">
             <div className="text-xs uppercase tracking-widest text-[color:var(--garrido-gold)] font-bold">Financiamento</div>
