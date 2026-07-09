@@ -545,24 +545,31 @@ function OrderSummary({
           )}
         </div>
 
-        {/* Order bumps selecionados */}
-        {selectedBumps.size > 0 && (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
-            <div className="text-[10px] uppercase tracking-wider text-primary font-medium mb-1.5">
-              Complementos selecionados
+        {/* Complementos — interesse (não cobrados nesta contratação) */}
+        {interestedBumps.length > 0 && (
+          <div className="rounded-lg border border-dashed border-primary/40 bg-primary/[0.03] p-3">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="text-[10px] uppercase tracking-wider text-primary font-medium">
+                Interesse em incluir ({interestedBumps.length})
+              </div>
+              <span className="text-[10px] text-muted-foreground">Não cobrado agora</span>
             </div>
             <ul className="space-y-1">
-              {ORDER_BUMPS.filter((b) => selectedBumps.has(b.id)).map((b) => (
+              {interestedBumps.map((b) => (
                 <li key={b.id} className="text-xs flex items-center justify-between gap-2">
                   <span className="truncate">{b.title}</span>
-                  <span className="font-semibold text-primary shrink-0">{b.priceLabel}</span>
+                  <span className="text-muted-foreground shrink-0">Ref.: {b.priceLabel}</span>
                 </li>
               ))}
             </ul>
+            <p className="text-[10px] text-muted-foreground mt-2 leading-snug">
+              Nosso time entra em contato para incluir estes módulos quando você quiser.
+              Cobrança começa apenas após a ativação, com upgrade proporcional.
+            </p>
           </div>
         )}
 
-        {/* Totais */}
+        {/* Totais — apenas o que ENTRA na cobrança do Mercado Pago */}
         <div className="space-y-1.5 pt-1">
           {usingCart && cart!.setupCents > 0 && (
             <Row label="Setup (1ª cobrança)" value={brl(cart!.setupCents)} />
@@ -578,9 +585,6 @@ function OrderSummary({
               highlight
             />
           )}
-          {bumpsTotalCents > 0 && (
-            <Row label="Complementos/mês" value={brl(bumpsTotalCents)} />
-          )}
         </div>
 
         <div className="pt-3 border-t border-border">
@@ -589,16 +593,24 @@ function OrderSummary({
               {usingCart && cart!.billing === "annual" ? "Total do 1º ciclo (anual)" : "Cobrança agora"}
             </span>
             <span className="text-lg font-bold text-primary">
-              {brl(summaryPreview.firstChargeCents + bumpsTotalCents)}
+              {brl(summaryPreview.firstChargeCents)}
             </span>
           </div>
           {usingCart && cart!.billing !== "annual" && (
             <p className="text-[10px] text-muted-foreground mt-1 leading-snug">
               Ciclo inicial obrigatório de {summaryPreview.cycleMonths} meses.
-              Depois: <b>{brl(summaryPreview.recurringMonthlyCents + bumpsTotalCents)}/mês</b> sem fidelidade.
+              Depois: <b>{brl(summaryPreview.recurringMonthlyCents)}/mês</b> sem fidelidade.
+            </p>
+          )}
+          {interestedBumps.length > 0 && (
+            <p className="text-[10px] text-primary mt-1 leading-snug inline-flex items-start gap-1">
+              <Info className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
+              Os complementos marcados <strong>não entram nesta cobrança</strong> —
+              eles são registrados como interesse para inclusão posterior.
             </p>
           )}
         </div>
+
 
         <p className="text-[10px] text-muted-foreground flex items-center gap-1 pt-1">
           <ShieldCheck className="w-3 h-3 text-primary" aria-hidden="true" />
