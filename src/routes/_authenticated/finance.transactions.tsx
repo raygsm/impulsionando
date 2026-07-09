@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Wallet } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -55,7 +57,7 @@ function TxPage() {
     queryFn: async () => (await supabase.from("fin_payment_methods").select("id,name").eq("company_id", companyId).eq("is_active", true).order("name")).data ?? [],
   });
 
-  const { data: txs } = useQuery({
+  const { data: txs, isLoading } = useQuery({
     queryKey: ["fin-txs", companyId, tab],
     enabled: !!companyId,
     queryFn: async () => {
@@ -171,7 +173,10 @@ function TxPage() {
       </Tabs>
 
       <Card className="shadow-card divide-y">
-        {!txs?.length && <div className="p-8 text-center text-sm text-muted-foreground">Sem lançamentos.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={6} /></div>}
+        {!isLoading && !txs?.length && (
+          <EmptyStateV2 icon={Wallet} title="Sem lançamentos" description="Registre entradas e saídas para acompanhar seu fluxo de caixa." className="border-0 shadow-none" />
+        )}
         {txs?.map((t) => {
           const s = STATUS[t.status] ?? STATUS.pending;
           return (

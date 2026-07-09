@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { ClipboardCheck } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -43,7 +45,7 @@ function ActivitiesPage() {
     activity_type: "task", subject: "", content: "", due_at: "", lead_id: "__none__",
   });
 
-  const { data: activities } = useQuery({
+  const { data: activities, isLoading } = useQuery({
     queryKey: ["crm-activities", companyId, tab],
     enabled: !!companyId,
     queryFn: async () => {
@@ -117,7 +119,10 @@ function ActivitiesPage() {
         </TabsList>
         <TabsContent value={tab} className="mt-4">
           <Card className="shadow-card divide-y">
-            {!activities?.length && <div className="p-8 text-center text-sm text-muted-foreground">Sem atividades.</div>}
+            {isLoading && <div className="p-3"><ListSkeleton rows={5} /></div>}
+            {!isLoading && !activities?.length && (
+              <EmptyStateV2 icon={ClipboardCheck} title="Sem atividades" description="Nenhuma tarefa, ligação ou follow-up no filtro atual." className="border-0 shadow-none" />
+            )}
             {activities?.map((a) => {
               const Icon = ICONS[a.activity_type] ?? ClipboardList;
               const overdue = !a.done_at && a.due_at && new Date(a.due_at) < new Date();

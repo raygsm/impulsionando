@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
+import { ListSkeleton, EmptyState as EmptyStateV2 } from "@/components/feedback";
+import { Package } from "lucide-react";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
@@ -49,7 +51,7 @@ function Page() {
     queryFn: async () => (await supabase.from("inv_suppliers").select("id,name").eq("company_id", companyId).eq("is_active", true).order("name")).data ?? [],
   });
 
-  const { data: products } = useQuery({
+  const { data: products, isLoading } = useQuery({
     queryKey: ["inv-products", companyId, search], enabled: !!companyId,
     queryFn: async () => {
       let q = supabase.from("inv_products")
@@ -133,7 +135,10 @@ function Page() {
       <div className="mb-4"><Input placeholder="Buscar por nome..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" /></div>
 
       <Card className="shadow-card divide-y">
-        {!products?.length && <div className="p-8 text-center text-sm text-muted-foreground">Nenhum produto cadastrado.</div>}
+        {isLoading && <div className="p-3"><ListSkeleton rows={5} /></div>}
+        {!isLoading && !products?.length && (
+          <EmptyStateV2 icon={Package} title="Nenhum produto cadastrado" description="Cadastre produtos para controlar estoque, precificação e vendas." className="border-0 shadow-none" />
+        )}
         {products?.map((p) => {
           const low = p.track_stock && Number(p.current_stock) <= Number(p.min_stock);
           return (
