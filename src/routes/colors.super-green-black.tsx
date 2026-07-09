@@ -275,19 +275,21 @@ function ProblemSection() {
   return (
     <section className="py-20">
       <div className="container mx-auto max-w-4xl px-4 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Cansada de tentar?</p>
-        <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Você já tentou de tudo — e a balança não desce.</h2>
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Por que Super Green Black?</p>
+        <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Rotina saudável precisa de aliados de qualidade.</h2>
         <p className="mt-6 text-lg text-white/70">
-          Dietas restritivas, treinos exaustivos, promessas mirabolantes. Nada funciona porque nada ataca o problema real: <strong className="text-white">metabolismo lento e compulsão alimentar</strong>.
+          Uma boa rotina de bem-estar combina alimentação, hidratação, sono e movimento.
+          O Super Green Black entra nesse conjunto como um <strong className="text-white">suplemento alimentar premium</strong>,
+          formulado para acompanhar quem quer manter constância no dia a dia.
         </p>
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
-            { icon: TrendingDown, t: "Metabolismo travado", d: "Você come pouco e mesmo assim não emagrece." },
-            { icon: Zap, t: "Falta de energia", d: "Cansaço o dia inteiro, sem disposição pra nada." },
-            { icon: Timer, t: "Resultado que não vem", d: "Semanas e semanas sem ver diferença no espelho." },
+            { icon: TrendingDown, t: "Constância", d: "Formato em cápsulas facilita manter a rotina de uso ao longo dos dias." },
+            { icon: Zap, t: "Ativos naturais", d: "Combinação de ativos naturais selecionados pela linha Green da Colors Saúde." },
+            { icon: Timer, t: "Origem confiável", d: "Produto original, comprado apenas por canais oficiais Colors Saúde." },
           ].map(({ icon: Icon, t, d }) => (
             <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left">
-              <Icon className="h-8 w-8 text-red-400" aria-hidden />
+              <Icon className="h-8 w-8 text-emerald-400" aria-hidden />
               <p className="mt-4 font-bold">{t}</p>
               <p className="mt-2 text-sm text-white/60">{d}</p>
             </div>
@@ -303,9 +305,13 @@ function BenefitsSection() {
     <section className="border-y border-white/10 bg-gradient-to-b from-emerald-950/30 to-transparent py-20">
       <div className="container mx-auto max-w-6xl px-4">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">A solução</p>
-          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Super Green Black ataca a raiz do problema.</h2>
-          <p className="mt-4 text-lg text-white/70">Ativos premium selecionados para acelerar o metabolismo, controlar o apetite e liberar sua energia.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Características</p>
+          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">O que você encontra no Super Green Black.</h2>
+          <p className="mt-4 text-lg text-white/70">
+            Fórmula da linha Green pensada para quem busca um suplemento premium
+            e original, com origem rastreável e distribuição pelos canais
+            oficiais da Colors Saúde.
+          </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {PRODUCT.benefits.map((b) => (
@@ -322,17 +328,17 @@ function BenefitsSection() {
 
 function HowItWorksSection() {
   const steps = [
-    { n: "01", t: "Compre pelo canal oficial", d: "Escolha Maisfy, Monetizze ou Perfect Pay. Compra 100% segura." },
-    { n: "02", t: "Receba em casa", d: "Colors Log entrega rápido, com rastreamento e embalagem discreta." },
-    { n: "03", t: "Tome diariamente", d: "Siga a posologia. Resultados visíveis nos primeiros 3 dias." },
-    { n: "04", t: "Emagreça de vez", d: "Corpo dos sonhos com fórmula que respeita o seu organismo." },
+    { n: "01", t: "Compre pelo canal oficial", d: "Escolha uma das plataformas oficiais parceiras. Compra em ambiente seguro (PCI-DSS)." },
+    { n: "02", t: "Receba em casa", d: "Colors Log despacha em até 3 dias úteis, com rastreamento e embalagem discreta." },
+    { n: "03", t: "Siga a posologia", d: "Use conforme orientações no rótulo. Combine com uma rotina saudável de alimentação e sono." },
+    { n: "04", t: "Fale com o SAC", d: "Nosso suporte humano no WhatsApp acompanha dúvidas de pedido e pós-venda." },
   ];
   return (
     <section className="py-20">
       <div className="container mx-auto max-w-6xl px-4">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Como funciona</p>
-          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">4 passos pra sua transformação.</h2>
+          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">4 passos até o seu pedido.</h2>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s) => (
