@@ -15,7 +15,7 @@ import {
 type Faq = { q: string; a: string };
 type Group = { key: string; label: string; faqs: Faq[] };
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20com%20o%20Impulsionando.";
+
 
 const GROUPS: Group[] = [
   {

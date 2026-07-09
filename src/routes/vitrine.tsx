@@ -302,7 +302,7 @@ function VitrineCard({ c }: { c: VitrineCompany }) {
     .join(" · ");
 
   const CardBody = (
-    <Card className="group h-full overflow-hidden flex flex-col border-border/60 hover:border-primary/40 hover:shadow-xl transition-all duration-300">
+    <Card className="group h-full overflow-hidden flex flex-col border-border/60 hover:border-primary/40 hover:shadow-xl hover-lift transition-all duration-300">
       {/* Capa */}
       <div
         className="relative h-32 sm:h-36 overflow-hidden"
