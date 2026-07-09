@@ -185,7 +185,11 @@ import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-m
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as ColorsSuperGreenBlackKpiRouteImport } from './routes/colors.super-green-black-kpi'
 import { Route as ColorsSuperGreenBlackRouteImport } from './routes/colors.super-green-black'
+import { Route as ColorsRecuperarRouteImport } from './routes/colors.recuperar'
 import { Route as ColorsPainelRouteImport } from './routes/colors.painel'
+import { Route as ColorsMinhaContaRouteImport } from './routes/colors.minha-conta'
+import { Route as ColorsEntrarRouteImport } from './routes/colors.entrar'
+import { Route as ColorsCriarContaRouteImport } from './routes/colors.criar-conta'
 import { Route as ColorsBrandRouteImport } from './routes/colors.$brand'
 import { Route as ClubeVouchersRouteImport } from './routes/clube.vouchers'
 import { Route as ClubeServicosRouteImport } from './routes/clube.servicos'
@@ -263,6 +267,8 @@ import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/ad
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as ColorsRastreioIndexRouteImport } from './routes/colors.rastreio.index'
+import { Route as ColorsMinhaContaIndexRouteImport } from './routes/colors.minha-conta.index'
 import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSaibaMaisIndexRouteImport } from './routes/_authenticated/saiba-mais.index'
@@ -296,7 +302,10 @@ import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slu
 import { Route as GarridoImovelSlugRouteImport } from './routes/garrido.imovel.$slug'
 import { Route as FoodserviceProdutoSlugRouteImport } from './routes/foodservice.produto.$slug'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ColorsRastreioCodigoRouteImport } from './routes/colors.rastreio.$codigo'
 import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
+import { Route as ColorsMinhaContaPerfilRouteImport } from './routes/colors.minha-conta.perfil'
+import { Route as ColorsMinhaContaPedidosRouteImport } from './routes/colors.minha-conta.pedidos'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
 import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
@@ -664,6 +673,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
+import { Route as ColorsMinhaContaPedidosIdRouteImport } from './routes/colors.minha-conta.pedidos.$id'
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
 import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
@@ -1719,9 +1729,29 @@ const ColorsSuperGreenBlackRoute = ColorsSuperGreenBlackRouteImport.update({
   path: '/super-green-black',
   getParentRoute: () => ColorsRoute,
 } as any)
+const ColorsRecuperarRoute = ColorsRecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
+  getParentRoute: () => ColorsRoute,
+} as any)
 const ColorsPainelRoute = ColorsPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsMinhaContaRoute = ColorsMinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsEntrarRoute = ColorsEntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsCriarContaRoute = ColorsCriarContaRouteImport.update({
+  id: '/criar-conta',
+  path: '/criar-conta',
   getParentRoute: () => ColorsRoute,
 } as any)
 const ColorsBrandRoute = ColorsBrandRouteImport.update({
@@ -2119,6 +2149,16 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ColorsRastreioIndexRoute = ColorsRastreioIndexRouteImport.update({
+  id: '/rastreio/',
+  path: '/rastreio/',
+  getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsMinhaContaIndexRoute = ColorsMinhaContaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ColorsMinhaContaRoute,
+} as any)
 const AuthenticatedTenantsIndexRoute =
   AuthenticatedTenantsIndexRouteImport.update({
     id: '/tenants/',
@@ -2299,10 +2339,25 @@ const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   path: '/demo/nicho/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColorsRastreioCodigoRoute = ColorsRastreioCodigoRouteImport.update({
+  id: '/rastreio/$codigo',
+  path: '/rastreio/$codigo',
+  getParentRoute: () => ColorsRoute,
+} as any)
 const ColorsProdutoSlugRoute = ColorsProdutoSlugRouteImport.update({
   id: '/produto/$slug',
   path: '/produto/$slug',
   getParentRoute: () => ColorsRoute,
+} as any)
+const ColorsMinhaContaPerfilRoute = ColorsMinhaContaPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ColorsMinhaContaRoute,
+} as any)
+const ColorsMinhaContaPedidosRoute = ColorsMinhaContaPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => ColorsMinhaContaRoute,
 } as any)
 const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   id: '/api/public/version',
@@ -4471,6 +4526,12 @@ const DemoRestauranteTenantQrRoute = DemoRestauranteTenantQrRouteImport.update({
   path: '/demo/restaurante/$tenant/$qr',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColorsMinhaContaPedidosIdRoute =
+  ColorsMinhaContaPedidosIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => ColorsMinhaContaPedidosRoute,
+  } as any)
 const ApiPublicWhatsappSendRoute = ApiPublicWhatsappSendRouteImport.update({
   id: '/api/public/whatsapp/send',
   path: '/api/public/whatsapp/send',
@@ -5590,7 +5651,11 @@ export interface FileRoutesByFullPath {
   '/clube/servicos': typeof ClubeServicosRoute
   '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/criar-conta': typeof ColorsCriarContaRoute
+  '/colors/entrar': typeof ColorsEntrarRoute
+  '/colors/minha-conta': typeof ColorsMinhaContaRouteWithChildren
   '/colors/painel': typeof ColorsPainelRoute
+  '/colors/recuperar': typeof ColorsRecuperarRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -6074,7 +6139,10 @@ export interface FileRoutesByFullPath {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
+  '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
+  '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -6108,6 +6176,8 @@ export interface FileRoutesByFullPath {
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
+  '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -6217,6 +6287,7 @@ export interface FileRoutesByFullPath {
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
+  '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -6397,7 +6468,10 @@ export interface FileRoutesByTo {
   '/clube/servicos': typeof ClubeServicosRoute
   '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/criar-conta': typeof ColorsCriarContaRoute
+  '/colors/entrar': typeof ColorsEntrarRoute
   '/colors/painel': typeof ColorsPainelRoute
+  '/colors/recuperar': typeof ColorsRecuperarRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -6880,7 +6954,10 @@ export interface FileRoutesByTo {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
+  '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
+  '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -6914,6 +6991,8 @@ export interface FileRoutesByTo {
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
+  '/colors/minha-conta': typeof ColorsMinhaContaIndexRoute
+  '/colors/rastreio': typeof ColorsRastreioIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -7022,6 +7101,7 @@ export interface FileRoutesByTo {
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
+  '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -7221,7 +7301,11 @@ export interface FileRoutesById {
   '/clube/servicos': typeof ClubeServicosRoute
   '/clube/vouchers': typeof ClubeVouchersRoute
   '/colors/$brand': typeof ColorsBrandRoute
+  '/colors/criar-conta': typeof ColorsCriarContaRoute
+  '/colors/entrar': typeof ColorsEntrarRoute
+  '/colors/minha-conta': typeof ColorsMinhaContaRouteWithChildren
   '/colors/painel': typeof ColorsPainelRoute
+  '/colors/recuperar': typeof ColorsRecuperarRoute
   '/colors/super-green-black': typeof ColorsSuperGreenBlackRoute
   '/colors/super-green-black-kpi': typeof ColorsSuperGreenBlackKpiRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -7705,7 +7789,10 @@ export interface FileRoutesById {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
+  '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
+  '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -7739,6 +7826,8 @@ export interface FileRoutesById {
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
+  '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/_authenticated/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -7848,6 +7937,7 @@ export interface FileRoutesById {
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
+  '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -8047,7 +8137,11 @@ export interface FileRouteTypes {
     | '/clube/servicos'
     | '/clube/vouchers'
     | '/colors/$brand'
+    | '/colors/criar-conta'
+    | '/colors/entrar'
+    | '/colors/minha-conta'
     | '/colors/painel'
+    | '/colors/recuperar'
     | '/colors/super-green-black'
     | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
@@ -8531,7 +8625,10 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/minha-conta/pedidos'
+    | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
+    | '/colors/rastreio/$codigo'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -8565,6 +8662,8 @@ export interface FileRouteTypes {
     | '/saiba-mais/'
     | '/sales/'
     | '/tenants/'
+    | '/colors/minha-conta/'
+    | '/colors/rastreio/'
     | '/admin/auditoria/logs'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
@@ -8674,6 +8773,7 @@ export interface FileRouteTypes {
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
+    | '/colors/minha-conta/pedidos/$id'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -8854,7 +8954,10 @@ export interface FileRouteTypes {
     | '/clube/servicos'
     | '/clube/vouchers'
     | '/colors/$brand'
+    | '/colors/criar-conta'
+    | '/colors/entrar'
     | '/colors/painel'
+    | '/colors/recuperar'
     | '/colors/super-green-black'
     | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
@@ -9337,7 +9440,10 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/minha-conta/pedidos'
+    | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
+    | '/colors/rastreio/$codigo'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -9371,6 +9477,8 @@ export interface FileRouteTypes {
     | '/saiba-mais'
     | '/sales'
     | '/tenants'
+    | '/colors/minha-conta'
+    | '/colors/rastreio'
     | '/admin/auditoria/logs'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
@@ -9479,6 +9587,7 @@ export interface FileRouteTypes {
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
+    | '/colors/minha-conta/pedidos/$id'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -9677,7 +9786,11 @@ export interface FileRouteTypes {
     | '/clube/servicos'
     | '/clube/vouchers'
     | '/colors/$brand'
+    | '/colors/criar-conta'
+    | '/colors/entrar'
+    | '/colors/minha-conta'
     | '/colors/painel'
+    | '/colors/recuperar'
     | '/colors/super-green-black'
     | '/colors/super-green-black-kpi'
     | '/como-funciona/fitness'
@@ -10161,7 +10274,10 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/colors/minha-conta/pedidos'
+    | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
+    | '/colors/rastreio/$codigo'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -10195,6 +10311,8 @@ export interface FileRouteTypes {
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
     | '/_authenticated/tenants/'
+    | '/colors/minha-conta/'
+    | '/colors/rastreio/'
     | '/_authenticated/admin/auditoria/logs'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
@@ -10304,6 +10422,7 @@ export interface FileRouteTypes {
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
+    | '/colors/minha-conta/pedidos/$id'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -11821,11 +11940,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ColorsSuperGreenBlackRouteImport
       parentRoute: typeof ColorsRoute
     }
+    '/colors/recuperar': {
+      id: '/colors/recuperar'
+      path: '/recuperar'
+      fullPath: '/colors/recuperar'
+      preLoaderRoute: typeof ColorsRecuperarRouteImport
+      parentRoute: typeof ColorsRoute
+    }
     '/colors/painel': {
       id: '/colors/painel'
       path: '/painel'
       fullPath: '/colors/painel'
       preLoaderRoute: typeof ColorsPainelRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/minha-conta': {
+      id: '/colors/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/colors/minha-conta'
+      preLoaderRoute: typeof ColorsMinhaContaRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/entrar': {
+      id: '/colors/entrar'
+      path: '/entrar'
+      fullPath: '/colors/entrar'
+      preLoaderRoute: typeof ColorsEntrarRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/criar-conta': {
+      id: '/colors/criar-conta'
+      path: '/criar-conta'
+      fullPath: '/colors/criar-conta'
+      preLoaderRoute: typeof ColorsCriarContaRouteImport
       parentRoute: typeof ColorsRoute
     }
     '/colors/$brand': {
@@ -12367,6 +12514,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colors/rastreio/': {
+      id: '/colors/rastreio/'
+      path: '/rastreio'
+      fullPath: '/colors/rastreio/'
+      preLoaderRoute: typeof ColorsRastreioIndexRouteImport
+      parentRoute: typeof ColorsRoute
+    }
+    '/colors/minha-conta/': {
+      id: '/colors/minha-conta/'
+      path: '/'
+      fullPath: '/colors/minha-conta/'
+      preLoaderRoute: typeof ColorsMinhaContaIndexRouteImport
+      parentRoute: typeof ColorsMinhaContaRoute
+    }
     '/_authenticated/tenants/': {
       id: '/_authenticated/tenants/'
       path: '/tenants'
@@ -12598,12 +12759,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoNichoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colors/rastreio/$codigo': {
+      id: '/colors/rastreio/$codigo'
+      path: '/rastreio/$codigo'
+      fullPath: '/colors/rastreio/$codigo'
+      preLoaderRoute: typeof ColorsRastreioCodigoRouteImport
+      parentRoute: typeof ColorsRoute
+    }
     '/colors/produto/$slug': {
       id: '/colors/produto/$slug'
       path: '/produto/$slug'
       fullPath: '/colors/produto/$slug'
       preLoaderRoute: typeof ColorsProdutoSlugRouteImport
       parentRoute: typeof ColorsRoute
+    }
+    '/colors/minha-conta/perfil': {
+      id: '/colors/minha-conta/perfil'
+      path: '/perfil'
+      fullPath: '/colors/minha-conta/perfil'
+      preLoaderRoute: typeof ColorsMinhaContaPerfilRouteImport
+      parentRoute: typeof ColorsMinhaContaRoute
+    }
+    '/colors/minha-conta/pedidos': {
+      id: '/colors/minha-conta/pedidos'
+      path: '/pedidos'
+      fullPath: '/colors/minha-conta/pedidos'
+      preLoaderRoute: typeof ColorsMinhaContaPedidosRouteImport
+      parentRoute: typeof ColorsMinhaContaRoute
     }
     '/api/public/version': {
       id: '/api/public/version'
@@ -15173,6 +15355,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/restaurante/$tenant/$qr'
       preLoaderRoute: typeof DemoRestauranteTenantQrRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/colors/minha-conta/pedidos/$id': {
+      id: '/colors/minha-conta/pedidos/$id'
+      path: '/$id'
+      fullPath: '/colors/minha-conta/pedidos/$id'
+      preLoaderRoute: typeof ColorsMinhaContaPedidosIdRouteImport
+      parentRoute: typeof ColorsMinhaContaPedidosRoute
     }
     '/api/public/whatsapp/send': {
       id: '/api/public/whatsapp/send'
@@ -18051,22 +18240,63 @@ const ClubeRouteChildren: ClubeRouteChildren = {
 
 const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
 
+interface ColorsMinhaContaPedidosRouteChildren {
+  ColorsMinhaContaPedidosIdRoute: typeof ColorsMinhaContaPedidosIdRoute
+}
+
+const ColorsMinhaContaPedidosRouteChildren: ColorsMinhaContaPedidosRouteChildren =
+  {
+    ColorsMinhaContaPedidosIdRoute: ColorsMinhaContaPedidosIdRoute,
+  }
+
+const ColorsMinhaContaPedidosRouteWithChildren =
+  ColorsMinhaContaPedidosRoute._addFileChildren(
+    ColorsMinhaContaPedidosRouteChildren,
+  )
+
+interface ColorsMinhaContaRouteChildren {
+  ColorsMinhaContaPedidosRoute: typeof ColorsMinhaContaPedidosRouteWithChildren
+  ColorsMinhaContaPerfilRoute: typeof ColorsMinhaContaPerfilRoute
+  ColorsMinhaContaIndexRoute: typeof ColorsMinhaContaIndexRoute
+}
+
+const ColorsMinhaContaRouteChildren: ColorsMinhaContaRouteChildren = {
+  ColorsMinhaContaPedidosRoute: ColorsMinhaContaPedidosRouteWithChildren,
+  ColorsMinhaContaPerfilRoute: ColorsMinhaContaPerfilRoute,
+  ColorsMinhaContaIndexRoute: ColorsMinhaContaIndexRoute,
+}
+
+const ColorsMinhaContaRouteWithChildren =
+  ColorsMinhaContaRoute._addFileChildren(ColorsMinhaContaRouteChildren)
+
 interface ColorsRouteChildren {
   ColorsBrandRoute: typeof ColorsBrandRoute
+  ColorsCriarContaRoute: typeof ColorsCriarContaRoute
+  ColorsEntrarRoute: typeof ColorsEntrarRoute
+  ColorsMinhaContaRoute: typeof ColorsMinhaContaRouteWithChildren
   ColorsPainelRoute: typeof ColorsPainelRoute
+  ColorsRecuperarRoute: typeof ColorsRecuperarRoute
   ColorsSuperGreenBlackRoute: typeof ColorsSuperGreenBlackRoute
   ColorsSuperGreenBlackKpiRoute: typeof ColorsSuperGreenBlackKpiRoute
   ColorsIndexRoute: typeof ColorsIndexRoute
   ColorsProdutoSlugRoute: typeof ColorsProdutoSlugRoute
+  ColorsRastreioCodigoRoute: typeof ColorsRastreioCodigoRoute
+  ColorsRastreioIndexRoute: typeof ColorsRastreioIndexRoute
 }
 
 const ColorsRouteChildren: ColorsRouteChildren = {
   ColorsBrandRoute: ColorsBrandRoute,
+  ColorsCriarContaRoute: ColorsCriarContaRoute,
+  ColorsEntrarRoute: ColorsEntrarRoute,
+  ColorsMinhaContaRoute: ColorsMinhaContaRouteWithChildren,
   ColorsPainelRoute: ColorsPainelRoute,
+  ColorsRecuperarRoute: ColorsRecuperarRoute,
   ColorsSuperGreenBlackRoute: ColorsSuperGreenBlackRoute,
   ColorsSuperGreenBlackKpiRoute: ColorsSuperGreenBlackKpiRoute,
   ColorsIndexRoute: ColorsIndexRoute,
   ColorsProdutoSlugRoute: ColorsProdutoSlugRoute,
+  ColorsRastreioCodigoRoute: ColorsRastreioCodigoRoute,
+  ColorsRastreioIndexRoute: ColorsRastreioIndexRoute,
 }
 
 const ColorsRouteWithChildren =
