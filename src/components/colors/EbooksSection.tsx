@@ -31,7 +31,10 @@ export default function EbooksSection() {
               placeholder="Seu e-mail"
               className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none placeholder:text-white/70 focus:border-emerald-400"
             />
-            <button className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-bold text-black transition hover:bg-emerald-400">
+            <button
+              type="submit"
+              className="btn-alive rounded-xl bg-emerald-500 px-6 py-3 text-sm font-bold text-black shadow-md hover:bg-emerald-400"
+            >
               Receber presente
             </button>
           </form>
