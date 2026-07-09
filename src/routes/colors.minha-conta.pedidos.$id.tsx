@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, Copy, FileText, MapPin, Package, ShieldCheck, MessageCircle } from "lucide-react";
 import { AccountPageHeader, OrderStatusBadge } from "@/components/colors/account/AccountShell";
 import TrackingTimeline from "@/components/colors/account/TrackingTimeline";
-import { COLORS_MOCK_ORDERS, formatBRL, formatDatePt } from "@/data/colors-mock-account";
+import { COLORS_MOCK_ORDERS, formatBRL, formatDatePt, type ColorsOrder } from "@/data/colors-mock-account";
 
 export const Route = createFileRoute("/colors/minha-conta/pedidos/$id")({
   head: ({ loaderData }) => ({
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/colors/minha-conta/pedidos/$id")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  loader: ({ params }) => {
+  loader: ({ params }): ColorsOrder => {
     const o = COLORS_MOCK_ORDERS.find((x) => x.id === params.id);
     if (!o) throw notFound();
     return o;
