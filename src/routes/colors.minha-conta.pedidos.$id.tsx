@@ -5,9 +5,9 @@ import TrackingTimeline from "@/components/colors/account/TrackingTimeline";
 import { COLORS_MOCK_ORDERS, formatBRL, formatDatePt, type ColorsOrder } from "@/data/colors-mock-account";
 
 export const Route = createFileRoute("/colors/minha-conta/pedidos/$id")({
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
-      { title: loaderData ? `Pedido ${loaderData.number} — Colors Saúde` : "Pedido — Colors Saúde" },
+      { title: "Pedido — Colors Saúde" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -32,7 +32,7 @@ function NotFoundOrder() {
 }
 
 function PedidoDetalhe() {
-  const o = Route.useLoaderData();
+  const o = Route.useLoaderData() as ColorsOrder;
   const subtotal = o.items.reduce((sum, i) => sum + i.priceCents * i.qty, 0);
 
   return (
