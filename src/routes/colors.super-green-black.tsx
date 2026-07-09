@@ -4,6 +4,8 @@ import { ArrowRight, CheckCircle2, Flame, MessageCircle, ShieldCheck, Star, Time
 import { productBySlug } from "@/data/colors-products";
 import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
+import AntiFakePopup from "@/components/colors/AntiFakePopup";
+import ComprarOriginalFab from "@/components/colors/ComprarOriginalFab";
 
 const LazyVideo = lazy(() => import("@/components/colors/VideoShowcase"));
 const LazyJornada = lazy(() => import("@/components/colors/JornadaTransformacao"));
@@ -77,7 +79,8 @@ function SgbLanding() {
       <Suspense fallback={<SgbSectionSkeleton />}><LazyCheckoutPreview /></Suspense>
       <FaqSection />
       <FinalCTA />
-      <FloatingWhats />
+      <ComprarOriginalFab source="pdp_sgb" />
+      <AntiFakePopup />
     </div>
   );
 }
