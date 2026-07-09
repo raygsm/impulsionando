@@ -443,6 +443,8 @@ import { Route as AuthenticatedCoreMarketingLeadsRouteImport } from './routes/_a
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImportarClientesRouteImport } from './routes/_authenticated/core.importar-clientes'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
+import { Route as AuthenticatedCoreHubCobrancaRouteImport } from './routes/_authenticated/core.hub-cobranca'
+import { Route as AuthenticatedCoreHubAutomacoesRouteImport } from './routes/_authenticated/core.hub-automacoes'
 import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authenticated/core.flags'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreFinanceiroConsolidadoRouteImport } from './routes/_authenticated/core.financeiro-consolidado'
@@ -3164,6 +3166,18 @@ const AuthenticatedCoreImplantacoesRoute =
   AuthenticatedCoreImplantacoesRouteImport.update({
     id: '/implantacoes',
     path: '/implantacoes',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreHubCobrancaRoute =
+  AuthenticatedCoreHubCobrancaRouteImport.update({
+    id: '/hub-cobranca',
+    path: '/hub-cobranca',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreHubAutomacoesRoute =
+  AuthenticatedCoreHubAutomacoesRouteImport.update({
+    id: '/hub-automacoes',
+    path: '/hub-automacoes',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreFlagsRoute = AuthenticatedCoreFlagsRouteImport.update({
@@ -6203,6 +6217,8 @@ export interface FileRoutesByFullPath {
   '/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
+  '/core/hub-automacoes': typeof AuthenticatedCoreHubAutomacoesRoute
+  '/core/hub-cobranca': typeof AuthenticatedCoreHubCobrancaRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/importar-clientes': typeof AuthenticatedCoreImportarClientesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -7044,6 +7060,8 @@ export interface FileRoutesByTo {
   '/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
+  '/core/hub-automacoes': typeof AuthenticatedCoreHubAutomacoesRoute
+  '/core/hub-cobranca': typeof AuthenticatedCoreHubCobrancaRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/importar-clientes': typeof AuthenticatedCoreImportarClientesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -7905,6 +7923,8 @@ export interface FileRoutesById {
   '/_authenticated/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/flags': typeof AuthenticatedCoreFlagsRoute
+  '/_authenticated/core/hub-automacoes': typeof AuthenticatedCoreHubAutomacoesRoute
+  '/_authenticated/core/hub-cobranca': typeof AuthenticatedCoreHubCobrancaRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/importar-clientes': typeof AuthenticatedCoreImportarClientesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -8767,6 +8787,8 @@ export interface FileRouteTypes {
     | '/core/financeiro-consolidado'
     | '/core/financeiro-master'
     | '/core/flags'
+    | '/core/hub-automacoes'
+    | '/core/hub-cobranca'
     | '/core/implantacoes'
     | '/core/importar-clientes'
     | '/core/instalar-modulo'
@@ -9608,6 +9630,8 @@ export interface FileRouteTypes {
     | '/core/financeiro-consolidado'
     | '/core/financeiro-master'
     | '/core/flags'
+    | '/core/hub-automacoes'
+    | '/core/hub-cobranca'
     | '/core/implantacoes'
     | '/core/importar-clientes'
     | '/core/instalar-modulo'
@@ -10468,6 +10492,8 @@ export interface FileRouteTypes {
     | '/_authenticated/core/financeiro-consolidado'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/flags'
+    | '/_authenticated/core/hub-automacoes'
+    | '/_authenticated/core/hub-cobranca'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/importar-clientes'
     | '/_authenticated/core/instalar-modulo'
@@ -14063,6 +14089,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreImplantacoesRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/hub-cobranca': {
+      id: '/_authenticated/core/hub-cobranca'
+      path: '/hub-cobranca'
+      fullPath: '/core/hub-cobranca'
+      preLoaderRoute: typeof AuthenticatedCoreHubCobrancaRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/hub-automacoes': {
+      id: '/_authenticated/core/hub-automacoes'
+      path: '/hub-automacoes'
+      fullPath: '/core/hub-automacoes'
+      preLoaderRoute: typeof AuthenticatedCoreHubAutomacoesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/flags': {
       id: '/_authenticated/core/flags'
       path: '/flags'
@@ -17372,6 +17412,8 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreFinanceiroConsolidadoRoute: typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreFlagsRoute: typeof AuthenticatedCoreFlagsRoute
+  AuthenticatedCoreHubAutomacoesRoute: typeof AuthenticatedCoreHubAutomacoesRoute
+  AuthenticatedCoreHubCobrancaRoute: typeof AuthenticatedCoreHubCobrancaRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreImportarClientesRoute: typeof AuthenticatedCoreImportarClientesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
@@ -17437,6 +17479,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreFlagsRoute: AuthenticatedCoreFlagsRoute,
+  AuthenticatedCoreHubAutomacoesRoute: AuthenticatedCoreHubAutomacoesRoute,
+  AuthenticatedCoreHubCobrancaRoute: AuthenticatedCoreHubCobrancaRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreImportarClientesRoute:
     AuthenticatedCoreImportarClientesRoute,
