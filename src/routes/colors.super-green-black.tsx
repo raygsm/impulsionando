@@ -23,16 +23,16 @@ function SgbSectionSkeleton() {
 export const Route = createFileRoute("/colors/super-green-black")({
   head: () => ({
     meta: [
-      { title: "Super Green Black — Emagreça em 3 dias | Colors Saúde" },
-      { name: "description", content: "Super Green Black: queima de gordura acelerada, redução de apetite e mais energia. Resultados nos primeiros 3 dias. Compre pelos canais oficiais Colors Saúde." },
-      { name: "keywords", content: "super green black, emagrecedor, colors saúde, queima de gordura, emagrecer" },
-      { property: "og:title", content: "Super Green Black — O campeão do emagrecimento" },
-      { property: "og:description", content: "Resultados nos primeiros 3 dias. Fórmula premium Colors Saúde." },
+      { title: "Super Green Black — Suplemento premium | Colors Saúde" },
+      { name: "description", content: "Super Green Black: suplemento alimentar premium da linha Green. Fórmula com ativos naturais para apoiar rotina de bem-estar. Compre pelos canais oficiais Colors Saúde." },
+      { name: "keywords", content: "super green black, suplemento colors saúde, linha green, bem-estar" },
+      { property: "og:title", content: "Super Green Black — Colors Saúde" },
+      { property: "og:description", content: "Suplemento alimentar premium da linha Green. Comprado apenas pelos canais oficiais Colors Saúde." },
       { property: "og:type", content: "product" },
       { property: "og:url", content: "https://colors.impulsionando.com.br/colors/super-green-black" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Super Green Black — Emagreça em 3 dias" },
-      { name: "twitter:description", content: "Queima de gordura acelerada com fórmula premium." },
+      { name: "twitter:title", content: "Super Green Black — Colors Saúde" },
+      { name: "twitter:description", content: "Suplemento alimentar premium da linha Green." },
     ],
     links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/colors/super-green-black" }],
     scripts: [{
@@ -42,8 +42,7 @@ export const Route = createFileRoute("/colors/super-green-black")({
         "@type": "Product",
         name: "Super Green Black",
         brand: { "@type": "Brand", name: "Green" },
-        description: "Emagrecedor premium com ativos naturais. Resultados nos primeiros 3 dias.",
-        aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "25000" },
+        description: "Suplemento alimentar premium da linha Green — Colors Saúde.",
       }),
     }],
   }),
@@ -136,21 +135,27 @@ function SgbHero() {
       <div className="container relative mx-auto grid max-w-7xl gap-12 px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-300">
-            <Star className="h-3.5 w-3.5 fill-emerald-300" aria-hidden /> Mais vendido · 25.000+ transformações
+            <Star className="h-3.5 w-3.5 fill-emerald-300" aria-hidden /> Mais vendido da linha Green
           </span>
           <h1 className="mt-6 text-5xl font-black leading-[1.05] sm:text-7xl">
-            Emagreça <span className="bg-gradient-to-r from-emerald-400 to-lime-400 bg-clip-text text-transparent">nos primeiros 3 dias</span> com o Super Green Black.
+            Super Green Black.{" "}
+            <span className="bg-gradient-to-r from-emerald-400 to-lime-400 bg-clip-text text-transparent">
+              O suplemento premium
+            </span>{" "}
+            da linha Green.
           </h1>
           <p className="mt-6 text-lg text-white/80 sm:text-xl">
-            A fórmula premium que virou fenômeno nacional. Queima de gordura acelerada, controle total do apetite e energia de sobra pra viver de novo.
+            Fórmula da Colors Saúde para apoiar sua rotina de bem-estar, com
+            ativos naturais selecionados. Um dos produtos mais procurados da
+            nossa comunidade.
           </p>
 
           <ul className="mt-8 space-y-3">
             {[
-              "Queima gordura desde o 1º dia",
-              "Reduz apetite e compulsão por doce",
-              "Mais energia pra treinar, trabalhar e viver",
-              "Ativos naturais · sem receita médica",
+              "Fórmula com ativos naturais selecionados",
+              "Cápsulas de fácil ingestão",
+              "Suplemento alimentar — sem exigência de receita",
+              "Compra apenas por canais oficiais Colors Saúde",
             ].map((b) => (
               <li key={b} className="flex items-center gap-3 text-white/90">
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" aria-hidden />
@@ -167,7 +172,7 @@ function SgbHero() {
               onClick={() => colorsEvents.checkoutClick(PRODUCT.name, "hero_" + PRODUCT.links[0].label, PRODUCT.links[0].href)}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-lime-400 px-8 py-4 text-lg font-black text-black shadow-2xl shadow-emerald-500/50 transition hover:scale-[1.02]"
             >
-              🔥 QUERO EMAGRECER AGORA
+              Comprar no canal oficial
               <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
             </a>
             <a href="#oferta" className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-4 font-semibold hover:bg-white/10">
@@ -183,14 +188,14 @@ function SgbHero() {
           <div className="absolute -inset-10 rounded-[3rem] bg-gradient-to-br from-emerald-500/50 via-lime-400/25 to-transparent blur-3xl" aria-hidden />
           {/* Cartão do produto — pote renderizado em CSS */}
           <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-emerald-950 via-black to-emerald-950/60 p-6 shadow-[0_40px_120px_-20px_rgba(16,185,129,0.55)] sm:p-8">
-            {/* Selos flutuantes */}
+            {/* Selos flutuantes — apenas atributos verificáveis (sem % de desconto sem base real) */}
             <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-2">
-              <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-lg">Top #1</span>
-              <span className="rounded-full bg-yellow-400 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-lg">-40% hoje</span>
+              <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-lg">Original Colors</span>
+              <span className="rounded-full border border-emerald-400/40 bg-black/60 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200 shadow-lg backdrop-blur">Linha Green</span>
             </div>
             <div className="pointer-events-none absolute right-4 top-4 flex flex-col items-end gap-2">
               <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/90 backdrop-blur">🇧🇷 Fórmula BR</span>
-              <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-300 backdrop-blur">Frete grátis</span>
+              <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-300 backdrop-blur">Colors Log</span>
             </div>
 
             {/* Pote em CSS puro (sem asset externo, imutável no build) */}
@@ -235,8 +240,8 @@ function SgbHero() {
                 <div className="mt-1 text-xs font-semibold text-white/80">4.9 · 25.000+ avaliações</div>
               </div>
               <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3">
-                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Estoque limitado</div>
-                <div className="mt-1 text-xs font-semibold text-white/90">Últimas 128 unidades desta remessa</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Canal oficial</div>
+                <div className="mt-1 text-xs font-semibold text-white/90">Compre apenas pelas plataformas parceiras listadas abaixo</div>
               </div>
             </div>
           </div>
@@ -251,10 +256,10 @@ function SocialProofBar() {
     <div className="border-y border-white/10 bg-white/[0.02]">
       <div className="container mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-6 md:grid-cols-4">
         {[
-          { n: "25.000+", l: "Clientes transformados" },
-          { n: "4.9/5", l: "Avaliação média" },
-          { n: "3 dias", l: "Primeiros resultados" },
-          { n: "100%", l: "Ativos naturais" },
+          { n: "Milhares", l: "Clientes atendidos" },
+          { n: "4,9/5", l: "Avaliação nos canais oficiais" },
+          { n: "Green", l: "Linha premium Colors" },
+          { n: "100%", l: "Ativos naturais selecionados" },
         ].map((s) => (
           <div key={s.l} className="text-center">
             <div className="text-2xl font-black text-emerald-400 sm:text-3xl">{s.n}</div>
@@ -396,12 +401,12 @@ function OfferSection() {
 
 function ComparisonSection() {
   const rows = [
-    ["Ativos naturais premium", true, false],
-    ["Resultados em até 3 dias", true, false],
-    ["Sem receita médica", true, true],
-    ["Suporte via WhatsApp", true, false],
-    ["Frete grátis", true, false],
-    ["Fórmula testada por 25.000+ pessoas", true, false],
+    ["Ativos naturais selecionados", true, false],
+    ["Fórmula premium da linha Green", true, false],
+    ["Suplemento alimentar (sem exigência de receita)", true, true],
+    ["Suporte SAC no WhatsApp", true, false],
+    ["Entrega Colors Log com rastreio", true, false],
+    ["Compra apenas por canais oficiais", true, false],
   ] as const;
   return (
     <section className="border-y border-white/10 py-20">
@@ -416,7 +421,7 @@ function ComparisonSection() {
               <tr>
                 <th className="px-4 py-4 text-left font-semibold">Característica</th>
                 <th className="px-4 py-4 text-center font-black text-emerald-300">Super Green Black</th>
-                <th className="px-4 py-4 text-center font-semibold">Outros</th>
+                <th className="px-4 py-4 text-center font-semibold">Outros suplementos genéricos</th>
               </tr>
             </thead>
             <tbody>
@@ -436,32 +441,43 @@ function ComparisonSection() {
 }
 
 function TestimonialsSection() {
+  // Sem inventar depoimentos reais. Apresentamos temas recorrentes que a
+  // comunidade Colors nos traz, atribuídos genericamente à "linha Green".
   const items = [
-    { name: "Camila R., 34", city: "São Paulo/SP", text: "Perdi 8kg em 60 dias. Voltei a usar as roupas que amava. Melhor decisão que já tomei." },
-    { name: "Juliana M., 29", city: "Recife/PE", text: "Nos primeiros 3 dias já senti diferença. Depois de 1 mês, resultado impressionante." },
-    { name: "Fernanda S., 42", city: "Belo Horizonte/MG", text: "Cortou minha compulsão por doce. Isso mudou tudo pra mim." },
+    {
+      theme: "Bem-estar na rotina",
+      text: "Um dos comentários mais recorrentes é a sensação de bem-estar ao integrar o Super Green Black a uma rotina saudável de alimentação e hidratação.",
+    },
+    {
+      theme: "Consistência de uso",
+      text: "Clientes contam que o formato em cápsulas facilita manter a constância — algo essencial em qualquer estratégia de bem-estar.",
+    },
+    {
+      theme: "Confiança na origem",
+      text: "A garantia de produto original, comprado direto pelos canais oficiais Colors, aparece com frequência entre os motivos de recompra.",
+    },
   ];
   return (
     <section className="py-20">
       <div className="container mx-auto max-w-6xl px-4">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Quem já provou aprova</p>
-          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">25.000+ transformações reais.</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Como a comunidade fala do Super Green Black</p>
+          <h2 className="mt-3 text-4xl font-bold sm:text-5xl">Temas que ouvimos com mais frequência.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-white/70">
+            Não publicamos depoimentos individuais sem consentimento. As avaliações
+            reais ficam nas plataformas oficiais de venda listadas na oferta.
+          </p>
         </div>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {items.map((d) => (
-            <figure key={d.name} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="flex gap-1 text-yellow-400" aria-label="5 estrelas">
+            <figure key={d.theme} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <div className="flex gap-1 text-yellow-400" aria-label="Avaliação positiva">
                 {Array.from({ length: 5 }).map((_, i) => (<Star key={i} className="h-4 w-4 fill-yellow-400" />))}
               </div>
-              <blockquote className="mt-4 text-white/85">"{d.text}"</blockquote>
-              <figcaption className="mt-6 flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-lime-400 font-bold text-black" aria-hidden>{d.name.charAt(0)}</div>
-                <div>
-                  <div className="text-sm font-semibold">{d.name}</div>
-                  <div className="text-xs text-white/50">{d.city}</div>
-                </div>
-              </figcaption>
+              <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-emerald-300">
+                {d.theme}
+              </p>
+              <blockquote className="mt-2 text-white/85">{d.text}</blockquote>
             </figure>
           ))}
         </div>
@@ -472,12 +488,12 @@ function TestimonialsSection() {
 
 function FaqSection() {
   const qas = [
-    { q: "Quando começo a ver resultado?", a: "Nos primeiros 3 dias você já sente diferença. Resultado consistente aparece em 30 dias de uso contínuo." },
-    { q: "Precisa de receita médica?", a: "Não. Super Green Black é um suplemento com ativos naturais e não exige prescrição." },
-    { q: "Tem contraindicação?", a: "Gestantes, lactantes, menores de 18 e pessoas em uso contínuo de medicamentos devem consultar um profissional antes." },
+    { q: "Quando começo a perceber diferença?", a: "Cada organismo responde no seu tempo. O uso contínuo, combinado a uma rotina saudável de alimentação, hidratação e sono, tende a favorecer melhores resultados. Não prometemos prazos fixos." },
+    { q: "Precisa de receita médica?", a: "Não. Super Green Black é um suplemento alimentar com ativos naturais e não exige prescrição. Em caso de dúvida, converse com um profissional de saúde." },
+    { q: "Tem contraindicação?", a: "Gestantes, lactantes, menores de 18 anos e pessoas em uso contínuo de medicamentos devem consultar um profissional de saúde antes de iniciar o uso." },
     { q: "Como é a entrega?", a: "Feita pela Colors Log. Despacho em até 3 dias úteis; entrega entre 3 e 10 dias úteis conforme CEP." },
     { q: "Comprar em marketplaces é seguro?", a: "Não. Colors Saúde não vende em Mercado Livre ou similares. Compre apenas pelos canais oficiais listados nesta página." },
-    { q: "Posso pagar em quantas vezes?", a: "As plataformas oficiais aceitam cartão parcelado, Pix, boleto e outras formas." },
+    { q: "Posso pagar em quantas vezes?", a: "As plataformas oficiais aceitam cartão parcelado, Pix, boleto e outras formas. Consulte as condições no checkout de cada canal." },
   ];
   return (
     <section className="border-t border-white/10 py-20">
