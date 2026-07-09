@@ -242,7 +242,7 @@ function CoreLayout() {
                     <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar seção…" className="h-9 pl-7 text-sm" />
                   </div>
                 </div>
-                <div className="overflow-y-auto max-h-[calc(100vh-140px)] p-3 space-y-4">
+                <div className="overflow-y-auto scroll-contrast max-h-[calc(100vh-140px)] p-3 space-y-4">
                   {filtered.map((g) => {
                     const GIcon = g.icon;
                     return (
