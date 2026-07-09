@@ -528,8 +528,8 @@ function FinalCTA() {
     <section className="relative overflow-hidden py-24">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-lime-500" />
       <div className="container relative mx-auto max-w-4xl px-4 text-center text-black">
-        <h2 className="text-5xl font-black leading-tight sm:text-6xl">A sua nova versão começa hoje.</h2>
-        <p className="mt-6 text-xl font-medium">Não espere mais uma semana passar. Escolha a plataforma oficial e comece agora.</p>
+        <h2 className="text-5xl font-black leading-tight sm:text-6xl">Pronto para levar o original?</h2>
+        <p className="mt-6 text-xl font-medium">Escolha um dos canais oficiais parceiros da Colors Saúde e finalize sua compra em ambiente seguro.</p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {PRODUCT.links.map((l) => (
             <a
@@ -546,6 +546,24 @@ function FinalCTA() {
         </div>
         <p className="mt-6 text-sm text-black/70">
           ← <Link to="/colors" className="underline">Voltar ao Colors Saúde</Link>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function LegalDisclaimer() {
+  return (
+    <section className="border-t border-white/10 bg-black/60 py-10">
+      <div className="container mx-auto max-w-4xl px-4 text-center text-xs leading-relaxed text-white/50">
+        <p>
+          <strong className="text-white/70">Aviso legal:</strong> Super Green Black é um suplemento alimentar.
+          Suplementos alimentares <strong>não são medicamentos</strong> e não se destinam a prevenir,
+          tratar ou curar doenças. Resultados variam de pessoa para pessoa e dependem
+          de rotina, alimentação, hidratação, sono e características individuais. Em caso de
+          uso contínuo de medicamentos, condição de saúde específica, gestação ou lactação,
+          consulte um profissional de saúde antes de iniciar o uso. Colors Saúde comercializa
+          apenas pelos canais oficiais listados nesta página — desconfie de ofertas fora deles.
         </p>
       </div>
     </section>
