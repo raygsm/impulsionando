@@ -178,24 +178,157 @@ const PLAN_OPS: Record<string, { setup: string; maintenance: string; ttv: string
 
 
 
-type Row = { feature: string; values: (boolean | string)[] };
+type Row = {
+  feature: string;
+  /** Descrição curta do benefício real (aparece como tooltip/subtítulo). */
+  benefit?: string;
+  values: (boolean | string)[];
+  /** Marca recurso como diferencial competitivo. */
+  highlight?: boolean;
+};
 
-const COMPARE: Row[] = [
-  { feature: "Preço mensal", values: ["½ salário mínimo", "1 salário mínimo", "2× salário mínimo"] },
-  { feature: "Módulos principais incluídos", values: ["1", "2 (par curado)", "3 + BI"] },
-  { feature: "Módulos adicionais", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
-  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
-  { feature: "Unidades / filiais", values: ["1", "1", "Até 3"] },
-  { feature: "Financeiro", values: ["Essencial", "Completo", "Completo + DRE"] },
-  { feature: "Central de mensagens (WhatsApp + E-mail)", values: [false, true, true] },
-  { feature: "Automações entre módulos", values: [false, true, "Avançada"] },
-  { feature: "BI & Dashboards consolidados", values: [false, false, true] },
-  { feature: "API e webhooks", values: [false, true, true] },
-  { feature: "Governança LGPD + auditoria expandida", values: [false, false, true] },
-  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h"] },
-  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário + técnico"] },
-  { feature: "Contrato mínimo", values: ["90 dias", "90 dias", "90 dias"] },
+type CompareCategory = {
+  id: string;
+  label: string;
+  icon: typeof ShoppingBag;
+  rows: Row[];
+};
+
+/**
+ * Comparador categorizado por área funcional.
+ * Cada categoria agrupa recursos com foco em decisão, não em auditoria.
+ */
+const COMPARE_CATEGORIES: CompareCategory[] = [
+  {
+    id: "estrutura",
+    label: "Preço & Estrutura",
+    icon: Wallet,
+    rows: [
+      { feature: "Preço mensal", benefit: "Referência atrelada ao salário mínimo vigente.", values: ["½ SM", "1 SM", "2× SM"] },
+      { feature: "Módulos principais", benefit: "Quantos módulos você pode ativar sem custo extra.", values: ["1", "2 (par curado)", "3 + BI"], highlight: true },
+      { feature: "Módulos adicionais", benefit: "Adicione mais módulos quando quiser, R$ 497/mês cada.", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
+      { feature: "Usuários incluídos", benefit: "Time que acessa a plataforma sem custo extra.", values: ["Até 3", "Até 5", "Até 10"] },
+      { feature: "Unidades / filiais", benefit: "Multi-unidade nativo para redes e franquias.", values: ["1", "1", "Até 3"] },
+      { feature: "Contrato mínimo", benefit: "Ciclo inicial que cobre setup e onboarding.", values: ["90 dias", "90 dias", "90 dias"] },
+    ],
+  },
+  {
+    id: "comercial",
+    label: "Comercial & CRM",
+    icon: Users2,
+    rows: [
+      { feature: "CRM (leads, oportunidades)", benefit: "Pipeline visual, tarefas e follow-up automatizado.", values: ["Módulo", "Incluso no par", "Incluso"] },
+      { feature: "Vitrine / Commerce", benefit: "Loja online integrada ao estoque e ao CRM.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "PDV / Frente de caixa", benefit: "Venda presencial com baixa de estoque em tempo real.", values: ["Módulo", "Módulo", "Incluso"] },
+    ],
+  },
+  {
+    id: "atendimento",
+    label: "Atendimento & Mensagens",
+    icon: Headphones,
+    rows: [
+      { feature: "Central de mensagens (WhatsApp + E-mail)", benefit: "Um só painel para todas as conversas com clientes.", values: [false, true, true], highlight: true },
+      { feature: "Área do Cliente / Autoatendimento", benefit: "Cliente resolve sozinho e libera seu time.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Suporte", benefit: "Tempo de resposta e canais disponíveis.", values: ["E-mail", "Prioritário", "Prioritário + técnico dedicado"] },
+      { feature: "Onboarding guiado", benefit: "Quanto tempo até sua operação estar rodando.", values: ["Self-service", "1h assistido", "4h + acompanhamento"] },
+    ],
+  },
+  {
+    id: "financeiro",
+    label: "Financeiro & ERP",
+    icon: Wallet,
+    rows: [
+      { feature: "Financeiro", benefit: "Contas a pagar/receber, fluxo de caixa e conciliação.", values: ["Essencial", "Completo", "Completo + DRE"] },
+      { feature: "ERP / Estoque", benefit: "Compras, produtos e estoque multi-depósito.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Nota fiscal e conciliação bancária", benefit: "Emissão automática e conciliação com extrato.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "agenda",
+    label: "Agenda & Operação",
+    icon: CalendarDays,
+    rows: [
+      { feature: "Agenda de profissionais/serviços", benefit: "Bloqueios, confirmação automática e reagendamento.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "EHR — Prontuário eletrônico", benefit: "Registro clínico completo, LGPD-ready.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Eventos e ingressos", benefit: "Bilheteria, cortesias e portaria integradas.", values: ["Módulo", "Módulo", "Incluso"] },
+    ],
+  },
+  {
+    id: "ia-automacao",
+    label: "IA & Automação",
+    icon: Brain,
+    rows: [
+      { feature: "Impulsionito (IA de atendimento)", benefit: "Agente IA que qualifica leads e responde clientes.", values: ["Básico", "Padrão", "Avançado + custom"], highlight: true },
+      { feature: "Automações entre módulos", benefit: "Regras que disparam ações automaticamente.", values: [false, true, "Avançada + n8n"], highlight: true },
+      { feature: "Recomendação e copilots internos", benefit: "IA sugerindo próximas ações para o time.", values: [false, false, true] },
+    ],
+  },
+  {
+    id: "marketing",
+    label: "Marketing & Growth",
+    icon: Megaphone,
+    rows: [
+      { feature: "Réguas de relacionamento", benefit: "Jornadas por segmento com WhatsApp e e-mail.", values: [false, true, true] },
+      { feature: "Landing pages e captura de leads", benefit: "Formulários integrados ao CRM.", values: ["Básico", "Padrão", "Ilimitado"] },
+      { feature: "Cupons, cashback e programa de indicação", benefit: "Ferramentas de aquisição e retenção.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "Analytics & BI",
+    icon: BarChart3,
+    rows: [
+      { feature: "Dashboards operacionais", benefit: "Indicadores por módulo em tempo real.", values: ["Essencial", "Completo", "Completo + BI"] },
+      { feature: "BI consolidado (multi-módulo)", benefit: "Visão executiva unificada por unidade.", values: [false, false, true], highlight: true },
+      { feature: "Exportação e relatórios agendados", benefit: "Relatórios recorrentes por e-mail.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "integracoes",
+    label: "Integrações",
+    icon: Plug,
+    rows: [
+      { feature: "API e webhooks", benefit: "Integre com qualquer sistema que sua operação usa.", values: [false, true, true] },
+      { feature: "Integrações dedicadas", benefit: "Conectores customizados assistidos pelo time.", values: [false, false, true] },
+      { feature: "Pagamentos (Pix, cartão, boleto)", benefit: "Checkout transparente com múltiplos meios.", values: [true, true, true] },
+    ],
+  },
+  {
+    id: "white-label",
+    label: "White Label & Governança",
+    icon: Palette,
+    rows: [
+      { feature: "White Label parcial (marca do cliente)", benefit: "Sua marca em pontos-chave da plataforma.", values: [false, false, true] },
+      { feature: "Governança LGPD + auditoria expandida", benefit: "Logs, DPO e políticas prontas.", values: [false, false, true], highlight: true },
+      { feature: "Perfis e permissões avançados", benefit: "Controle granular por setor e função.", values: ["Básico", "Padrão", "Avançado"] },
+    ],
+  },
 ];
+
+/** Justificativa curta de recomendação de cada plano. */
+const PLAN_REASON: Record<string, { title: string; body: string }> = {
+  Essencial: {
+    title: "Recomendado se você está começando",
+    body: "Menor investimento inicial para provar valor rápido em um único ponto crítico da operação.",
+  },
+  Integrado: {
+    title: "Por que 8 em cada 10 clientes escolhem o Ideal",
+    body: "Melhor relação valor × capacidade: dois módulos que se conversam, automações prontas, financeiro completo e API. Cobre 90% dos casos sem exigir customização.",
+  },
+  Avançado: {
+    title: "Recomendado para operações que exigem escala",
+    body: "Multi-unidade, BI consolidado, IA avançada, governança LGPD expandida e acompanhamento técnico dedicado. Para quem já sabe o que precisa.",
+  },
+};
+
+/** Módulos complementares — order bump visual (integração automática fica para o Codex). */
+const ORDER_BUMPS = [
+  { title: "Impulsionito Avançado", desc: "IA de atendimento com base de conhecimento personalizada.", icon: Brain, price: "R$ 197/mês" },
+  { title: "Automação n8n dedicada", desc: "Fluxos entre sistemas externos (ERP, contábil, marketplaces).", icon: Zap, price: "R$ 297/mês" },
+  { title: "Módulo extra", desc: "Adicione qualquer módulo além da quota do seu plano.", icon: PackagePlus, price: "R$ 497/mês" },
+  { title: "White Label parcial", desc: "Sua marca em domínio, e-mails e área do cliente.", icon: Palette, price: "Sob consulta" },
+];
+
 
 const FAQ = [
   {
