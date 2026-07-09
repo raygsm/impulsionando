@@ -221,7 +221,19 @@ function ImovelDetail() {
               </div>
             </Bloco>
           )}
+
+          <section id="agendar-visita" className="rounded-xl bg-white p-5 md:p-6 border border-black/5 scroll-mt-28">
+            <h2 className="font-serif text-xl font-bold text-[color:var(--garrido-ink)] mb-1">
+              Agendar visita ou solicitar proposta
+            </h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Envie seus dados — um corretor Garrido confirma o horário ou apresenta a proposta em até 1 dia útil.
+              Trilha registrada na sua Área do cliente.
+            </p>
+            <FormInteresse imovelSlug={i.slug} />
+          </section>
         </article>
+
 
         {/* Sidebar CTA */}
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-4">
