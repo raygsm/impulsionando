@@ -98,7 +98,8 @@ const GROUPS: NavGroup[] = [
     label: "Automação & N8N",
     icon: Workflow,
     items: [
-      { to: "/core/automacao", label: "Automação (Hub)", icon: Workflow },
+      { to: "/core/hub-automacoes", label: "Hub Automações & N8N", icon: Workflow },
+      { to: "/core/automacao", label: "Automação (técnico)", icon: Workflow },
       { to: "/core/automacao/fluxos", label: "Fluxos", icon: Workflow },
       { to: "/core/automacao/templates", label: "Templates", icon: FileCode },
       { to: "/core/automacao/modelos-nicho", label: "Modelos por Nicho", icon: Boxes },
@@ -132,6 +133,7 @@ const GROUPS: NavGroup[] = [
     label: "Cobrança & Mercado Pago",
     icon: Wallet,
     items: [
+      { to: "/core/hub-cobranca", label: "Hub Cobrança & MP", icon: Wallet },
       { to: "/finance", label: "ERP Financeiro", icon: Wallet },
       { to: "/core/financeiro-master", label: "Financeiro Master", icon: TrendingUp },
       { to: "/core/financeiro-consolidado", label: "Financeiro Consolidado", icon: Wallet },
@@ -139,7 +141,9 @@ const GROUPS: NavGroup[] = [
       { to: "/core/repasses", label: "Repasses", icon: Banknote },
       { to: "/admin/billing-contracts", label: "Billing (Contratos)", icon: CreditCard },
       { to: "/admin/billing-policy", label: "Régua de Cobrança", icon: ScrollText },
-      { to: "/core/integracoes/mercadopago", label: "Mercado Pago", icon: CreditCard },
+      { to: "/admin/billing-health", label: "Saúde da Cobrança", icon: HeartPulse },
+      { to: "/admin/mpago-eventos", label: "Eventos Mercado Pago", icon: Activity },
+      { to: "/core/integracoes/mercadopago", label: "Mercado Pago (Integração)", icon: CreditCard },
     ],
   },
   {
