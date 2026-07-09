@@ -761,6 +761,9 @@ function PlanosPage() {
                     <p className="text-[11px] text-center text-muted-foreground">
                       Sem cartão no trial · cancele quando quiser
                     </p>
+                    <p className="text-[10px] text-center text-muted-foreground inline-flex items-center justify-center gap-1 w-full">
+                      <TrendingUp className="w-3 h-3" /> Upgrade de plano a qualquer momento
+                    </p>
                   </div>
                 ) : (
                   <Button
