@@ -116,8 +116,9 @@ function SubMenu({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className={cn(
-          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors focus-ring",
           active
             ? "text-sidebar-foreground bg-sidebar-accent/60"
             : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -126,9 +127,9 @@ function SubMenu({
         <Icon className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1 text-left">{item.label}</span>
         {open ? (
-          <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+          <ChevronDown className="w-3.5 h-3.5 opacity-60 transition-transform" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+          <ChevronRight className="w-3.5 h-3.5 opacity-60 transition-transform" />
         )}
       </button>
       {open && (
