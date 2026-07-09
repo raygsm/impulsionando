@@ -890,50 +890,166 @@ function PlanosPage() {
         </p>
       </section>
 
-      {/* COMPARE TABLE */}
+      {/* COMPARE — categorizado, com destaque na coluna do plano recomendado */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-3xl mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Comparativo completo</h2>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
+            <BarChart3 className="w-3.5 h-3.5" /> Comparador de decisão
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Compare por área da operação</h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">
-            Tudo o que está incluído em cada plano. Sem asterisco escondido.
+            Recursos agrupados por categoria e traduzidos em benefício real. A coluna do plano <strong>Ideal</strong> aparece destacada por ser a mais escolhida.
           </p>
         </div>
-        <div className="overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 font-medium w-1/3">Recurso</th>
-                {PLANS.map((p) => (
-                  <th key={p.name} className="text-center px-4 py-3 font-semibold whitespace-nowrap">
-                    {p.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARE.map((row, idx) => (
-                <tr key={row.feature} className={cn("border-b border-border last:border-0", idx % 2 === 1 && "bg-muted/20")}>
-                  <td className="px-4 py-3">{row.feature}</td>
-                  {row.values.map((v, i) => (
-                    <td key={i} className="px-4 py-3 text-center">
-                      {typeof v === "boolean" ? (
-                        v ? (
-                          <CheckCircle2 className="w-4 h-4 text-primary mx-auto" />
-                        ) : (
-                          <Minus className="w-4 h-4 text-muted-foreground/50 mx-auto" />
-                        )
-                      ) : (
-                        <span className="text-xs">{v}</span>
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          {/* Cabeçalho fixo com nomes dos planos e CTAs curtos */}
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-4 bg-muted/40 border-b border-border sticky top-16 z-10 backdrop-blur">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Recurso</div>
+            {PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={cn(
+                  "text-center",
+                  p.highlight && "rounded-md bg-primary/10 border border-primary/30 py-1.5 px-2",
+                )}
+              >
+                <div className={cn("text-sm font-semibold", p.highlight && "text-primary")}>
+                  {p.displayName ?? p.name}
+                </div>
+                {p.highlight && (
+                  <div className="text-[10px] text-primary/80 uppercase tracking-wider mt-0.5">
+                    Mais escolhido
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {COMPARE_CATEGORIES.map((cat) => {
+            const CatIcon = cat.icon;
+            return (
+              <div key={cat.id} className="border-b border-border last:border-0">
+                {/* Cabeçalho de categoria */}
+                <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-3 bg-muted/20">
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 text-primary">
+                      <CatIcon className="w-3.5 h-3.5" />
+                    </span>
+                    {cat.label}
+                  </div>
+                  <div /> <div /> <div />
+                </div>
+                {cat.rows.map((row, idx) => (
+                  <div
+                    key={row.feature}
+                    className={cn(
+                      "grid grid-cols-[1.4fr_1fr_1fr_1fr] items-start gap-2 px-4 py-3 text-sm",
+                      idx % 2 === 1 && "bg-muted/10",
+                      row.highlight && "bg-primary/[0.04]",
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("font-medium", row.highlight && "text-primary")}>{row.feature}</span>
+                        {row.benefit && (
+                          <span title={row.benefit} className="inline-flex text-muted-foreground/60 cursor-help">
+                            <Info className="w-3 h-3" />
+                          </span>
+                        )}
+                      </div>
+                      {row.benefit && (
+                        <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          {row.benefit}
+                        </div>
                       )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </div>
+                    {row.values.map((v, i) => {
+                      const isHighlighted = PLANS[i]?.highlight;
+                      return (
+                        <div
+                          key={i}
+                          className={cn(
+                            "text-center px-1 pt-1",
+                            isHighlighted && "font-medium",
+                          )}
+                        >
+                          {typeof v === "boolean" ? (
+                            v ? (
+                              <CheckCircle2 className={cn("w-4 h-4 mx-auto", isHighlighted ? "text-primary" : "text-primary/70")} />
+                            ) : (
+                              <Minus className="w-4 h-4 text-muted-foreground/40 mx-auto" />
+                            )
+                          ) : (
+                            <span className={cn("text-xs", isHighlighted && "text-primary")}>{v}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+
+          {/* Rodapé do comparador com CTAs por plano */}
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-4 bg-muted/30 border-t border-border">
+            <div className="text-xs text-muted-foreground">
+              Escolha o plano ideal para você
+            </div>
+            {PLANS.map((p) => (
+              <div key={p.name} className="text-center">
+                <Button
+                  size="sm"
+                  variant={p.highlight ? "default" : "outline"}
+                  className={cn("w-full text-xs", p.highlight && "bg-gradient-primary shadow-elegant")}
+                  onClick={() => setPicker({ open: true, plan: p })}
+                >
+                  Contratar {p.displayName ?? p.name}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground text-center mt-4 inline-flex items-center gap-1.5 w-full justify-center">
+          <TrendingUp className="w-3.5 h-3.5" /> Pode fazer upgrade a qualquer momento — sem perder dados nem histórico.
+        </p>
+      </section>
+
+      {/* ORDER BUMP — módulos complementares (estrutura visual, integração fica para o Codex) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-3xl mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent-foreground text-xs font-medium mb-3">
+            <PackagePlus className="w-3.5 h-3.5" /> Módulos complementares
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Turbine seu plano quando fizer sentido</h2>
+          <p className="text-muted-foreground mt-2 leading-relaxed">
+            Adicionais opcionais que aceleram resultados específicos. Você pode incluir agora ou depois — sem trocar de plano.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {ORDER_BUMPS.map((b) => {
+            const BIcon = b.icon;
+            return (
+              <Card key={b.title} className="p-4 flex flex-col hover:border-primary/40 transition-colors">
+                <div className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-primary/10 text-primary mb-3">
+                  <BIcon className="w-4 h-4" />
+                </div>
+                <div className="font-semibold text-sm">{b.title}</div>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed flex-1">{b.desc}</p>
+                <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                  <span className="text-xs font-semibold text-primary">{b.price}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Opcional</span>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-muted-foreground text-center mt-4">
+          Os complementares podem ser adicionados junto com a contratação ou depois, direto no painel.
+        </p>
       </section>
       </div>
+
 
       {/* GUARANTEES */}
       <section className="bg-muted/30 border-y border-border">
