@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Crown, Gift, Calendar, Settings2, Loader2, History, ShieldOff, CheckCircle2 } from "lucide-react";
 import {
   getFullCourtesy,
