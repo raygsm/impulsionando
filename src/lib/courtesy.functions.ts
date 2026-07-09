@@ -240,7 +240,7 @@ export const setDefaultCourtesyDays = createServerFn({ method: "POST" })
     await ensureStaff(context);
     const { error } = await context.supabase
       .from("core_settings")
-      .update({ value: data.days as unknown as object })
+      .update({ value: data.days })
       .eq("key", "full_courtesy_days_default");
     if (error) throw new Error(error.message);
     return { ok: true, days: data.days };
