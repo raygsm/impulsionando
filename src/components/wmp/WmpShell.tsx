@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Music2, Sparkles, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { MoreContentFab } from "@/components/impulsionando";
 
 type Crumb = { label: string; to?: string };
 
@@ -172,6 +173,9 @@ export function WmpShell({
           </span>
         </div>
       </footer>
+
+      {/* Onda 2.9 — padrão global */}
+      <MoreContentFab bg="var(--wmp-gold)" accent="var(--wmp-bg)" />
     </div>
   );
 }
