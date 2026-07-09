@@ -170,6 +170,7 @@ function ColorsSaudePage() {
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyDepoimentos /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyCheckoutPreview /></Suspense>
+        <Suspense fallback={<SectionSkeleton />}><LazyComoComprar /></Suspense>
         <Logistica />
         <Suspense fallback={<SectionSkeleton />}><LazyEcosystem /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><LazyEbooks /></Suspense>
