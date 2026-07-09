@@ -413,7 +413,7 @@ function RootComponent() {
       <ScrollGuidance />
       <RocketRouteLoader />
       <CoreCopyGuard />
-      <CoreWatermark />
+      
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
