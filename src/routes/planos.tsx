@@ -6,6 +6,8 @@ import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
   Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
+  ShoppingBag, Headphones, Wallet, Boxes, Users2, CalendarDays, Brain, Megaphone,
+  BarChart3, Zap, Palette, Plug, ShieldCheck, TrendingUp, Info, PackagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -176,24 +178,157 @@ const PLAN_OPS: Record<string, { setup: string; maintenance: string; ttv: string
 
 
 
-type Row = { feature: string; values: (boolean | string)[] };
+type Row = {
+  feature: string;
+  /** Descrição curta do benefício real (aparece como tooltip/subtítulo). */
+  benefit?: string;
+  values: (boolean | string)[];
+  /** Marca recurso como diferencial competitivo. */
+  highlight?: boolean;
+};
 
-const COMPARE: Row[] = [
-  { feature: "Preço mensal", values: ["½ salário mínimo", "1 salário mínimo", "2× salário mínimo"] },
-  { feature: "Módulos principais incluídos", values: ["1", "2 (par curado)", "3 + BI"] },
-  { feature: "Módulos adicionais", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
-  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
-  { feature: "Unidades / filiais", values: ["1", "1", "Até 3"] },
-  { feature: "Financeiro", values: ["Essencial", "Completo", "Completo + DRE"] },
-  { feature: "Central de mensagens (WhatsApp + E-mail)", values: [false, true, true] },
-  { feature: "Automações entre módulos", values: [false, true, "Avançada"] },
-  { feature: "BI & Dashboards consolidados", values: [false, false, true] },
-  { feature: "API e webhooks", values: [false, true, true] },
-  { feature: "Governança LGPD + auditoria expandida", values: [false, false, true] },
-  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h"] },
-  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário + técnico"] },
-  { feature: "Contrato mínimo", values: ["90 dias", "90 dias", "90 dias"] },
+type CompareCategory = {
+  id: string;
+  label: string;
+  icon: typeof ShoppingBag;
+  rows: Row[];
+};
+
+/**
+ * Comparador categorizado por área funcional.
+ * Cada categoria agrupa recursos com foco em decisão, não em auditoria.
+ */
+const COMPARE_CATEGORIES: CompareCategory[] = [
+  {
+    id: "estrutura",
+    label: "Preço & Estrutura",
+    icon: Wallet,
+    rows: [
+      { feature: "Preço mensal", benefit: "Referência atrelada ao salário mínimo vigente.", values: ["½ SM", "1 SM", "2× SM"] },
+      { feature: "Módulos principais", benefit: "Quantos módulos você pode ativar sem custo extra.", values: ["1", "2 (par curado)", "3 + BI"], highlight: true },
+      { feature: "Módulos adicionais", benefit: "Adicione mais módulos quando quiser, R$ 497/mês cada.", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
+      { feature: "Usuários incluídos", benefit: "Time que acessa a plataforma sem custo extra.", values: ["Até 3", "Até 5", "Até 10"] },
+      { feature: "Unidades / filiais", benefit: "Multi-unidade nativo para redes e franquias.", values: ["1", "1", "Até 3"] },
+      { feature: "Contrato mínimo", benefit: "Ciclo inicial que cobre setup e onboarding.", values: ["90 dias", "90 dias", "90 dias"] },
+    ],
+  },
+  {
+    id: "comercial",
+    label: "Comercial & CRM",
+    icon: Users2,
+    rows: [
+      { feature: "CRM (leads, oportunidades)", benefit: "Pipeline visual, tarefas e follow-up automatizado.", values: ["Módulo", "Incluso no par", "Incluso"] },
+      { feature: "Vitrine / Commerce", benefit: "Loja online integrada ao estoque e ao CRM.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "PDV / Frente de caixa", benefit: "Venda presencial com baixa de estoque em tempo real.", values: ["Módulo", "Módulo", "Incluso"] },
+    ],
+  },
+  {
+    id: "atendimento",
+    label: "Atendimento & Mensagens",
+    icon: Headphones,
+    rows: [
+      { feature: "Central de mensagens (WhatsApp + E-mail)", benefit: "Um só painel para todas as conversas com clientes.", values: [false, true, true], highlight: true },
+      { feature: "Área do Cliente / Autoatendimento", benefit: "Cliente resolve sozinho e libera seu time.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Suporte", benefit: "Tempo de resposta e canais disponíveis.", values: ["E-mail", "Prioritário", "Prioritário + técnico dedicado"] },
+      { feature: "Onboarding guiado", benefit: "Quanto tempo até sua operação estar rodando.", values: ["Self-service", "1h assistido", "4h + acompanhamento"] },
+    ],
+  },
+  {
+    id: "financeiro",
+    label: "Financeiro & ERP",
+    icon: Wallet,
+    rows: [
+      { feature: "Financeiro", benefit: "Contas a pagar/receber, fluxo de caixa e conciliação.", values: ["Essencial", "Completo", "Completo + DRE"] },
+      { feature: "ERP / Estoque", benefit: "Compras, produtos e estoque multi-depósito.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Nota fiscal e conciliação bancária", benefit: "Emissão automática e conciliação com extrato.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "agenda",
+    label: "Agenda & Operação",
+    icon: CalendarDays,
+    rows: [
+      { feature: "Agenda de profissionais/serviços", benefit: "Bloqueios, confirmação automática e reagendamento.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "EHR — Prontuário eletrônico", benefit: "Registro clínico completo, LGPD-ready.", values: ["Módulo", "Módulo", "Incluso"] },
+      { feature: "Eventos e ingressos", benefit: "Bilheteria, cortesias e portaria integradas.", values: ["Módulo", "Módulo", "Incluso"] },
+    ],
+  },
+  {
+    id: "ia-automacao",
+    label: "IA & Automação",
+    icon: Brain,
+    rows: [
+      { feature: "Impulsionito (IA de atendimento)", benefit: "Agente IA que qualifica leads e responde clientes.", values: ["Básico", "Padrão", "Avançado + custom"], highlight: true },
+      { feature: "Automações entre módulos", benefit: "Regras que disparam ações automaticamente.", values: [false, true, "Avançada + n8n"], highlight: true },
+      { feature: "Recomendação e copilots internos", benefit: "IA sugerindo próximas ações para o time.", values: [false, false, true] },
+    ],
+  },
+  {
+    id: "marketing",
+    label: "Marketing & Growth",
+    icon: Megaphone,
+    rows: [
+      { feature: "Réguas de relacionamento", benefit: "Jornadas por segmento com WhatsApp e e-mail.", values: [false, true, true] },
+      { feature: "Landing pages e captura de leads", benefit: "Formulários integrados ao CRM.", values: ["Básico", "Padrão", "Ilimitado"] },
+      { feature: "Cupons, cashback e programa de indicação", benefit: "Ferramentas de aquisição e retenção.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "Analytics & BI",
+    icon: BarChart3,
+    rows: [
+      { feature: "Dashboards operacionais", benefit: "Indicadores por módulo em tempo real.", values: ["Essencial", "Completo", "Completo + BI"] },
+      { feature: "BI consolidado (multi-módulo)", benefit: "Visão executiva unificada por unidade.", values: [false, false, true], highlight: true },
+      { feature: "Exportação e relatórios agendados", benefit: "Relatórios recorrentes por e-mail.", values: [false, true, true] },
+    ],
+  },
+  {
+    id: "integracoes",
+    label: "Integrações",
+    icon: Plug,
+    rows: [
+      { feature: "API e webhooks", benefit: "Integre com qualquer sistema que sua operação usa.", values: [false, true, true] },
+      { feature: "Integrações dedicadas", benefit: "Conectores customizados assistidos pelo time.", values: [false, false, true] },
+      { feature: "Pagamentos (Pix, cartão, boleto)", benefit: "Checkout transparente com múltiplos meios.", values: [true, true, true] },
+    ],
+  },
+  {
+    id: "white-label",
+    label: "White Label & Governança",
+    icon: Palette,
+    rows: [
+      { feature: "White Label parcial (marca do cliente)", benefit: "Sua marca em pontos-chave da plataforma.", values: [false, false, true] },
+      { feature: "Governança LGPD + auditoria expandida", benefit: "Logs, DPO e políticas prontas.", values: [false, false, true], highlight: true },
+      { feature: "Perfis e permissões avançados", benefit: "Controle granular por setor e função.", values: ["Básico", "Padrão", "Avançado"] },
+    ],
+  },
 ];
+
+/** Justificativa curta de recomendação de cada plano. */
+const PLAN_REASON: Record<string, { title: string; body: string }> = {
+  Essencial: {
+    title: "Recomendado se você está começando",
+    body: "Menor investimento inicial para provar valor rápido em um único ponto crítico da operação.",
+  },
+  Integrado: {
+    title: "Por que 8 em cada 10 clientes escolhem o Ideal",
+    body: "Melhor relação valor × capacidade: dois módulos que se conversam, automações prontas, financeiro completo e API. Cobre 90% dos casos sem exigir customização.",
+  },
+  Avançado: {
+    title: "Recomendado para operações que exigem escala",
+    body: "Multi-unidade, BI consolidado, IA avançada, governança LGPD expandida e acompanhamento técnico dedicado. Para quem já sabe o que precisa.",
+  },
+};
+
+/** Módulos complementares — order bump visual (integração automática fica para o Codex). */
+const ORDER_BUMPS = [
+  { title: "Impulsionito Avançado", desc: "IA de atendimento com base de conhecimento personalizada.", icon: Brain, price: "R$ 197/mês" },
+  { title: "Automação n8n dedicada", desc: "Fluxos entre sistemas externos (ERP, contábil, marketplaces).", icon: Zap, price: "R$ 297/mês" },
+  { title: "Módulo extra", desc: "Adicione qualquer módulo além da quota do seu plano.", icon: PackagePlus, price: "R$ 497/mês" },
+  { title: "White Label parcial", desc: "Sua marca em domínio, e-mails e área do cliente.", icon: Palette, price: "Sob consulta" },
+];
+
 
 const FAQ = [
   {
@@ -495,6 +630,24 @@ function PlanosPage() {
                 <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
+                {PLAN_REASON[plan.name] && (
+                  <div
+                    className={cn(
+                      "mt-3 rounded-md border p-2.5 text-[11px] leading-snug",
+                      plan.highlight
+                        ? "border-primary/30 bg-primary/5 text-primary-foreground/90"
+                        : "border-border bg-muted/40 text-muted-foreground",
+                    )}
+                  >
+                    <div className={cn("font-semibold mb-0.5", plan.highlight ? "text-primary" : "text-foreground")}>
+                      {PLAN_REASON[plan.name].title}
+                    </div>
+                    <div className={cn(plan.highlight ? "text-foreground/80" : "text-muted-foreground")}>
+                      {PLAN_REASON[plan.name].body}
+                    </div>
+                  </div>
+                )}
+
                 {PLAN_OPS[plan.name] && (
                   <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Sinais operacionais">
                     <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
@@ -607,6 +760,9 @@ function PlanosPage() {
                     </div>
                     <p className="text-[11px] text-center text-muted-foreground">
                       Sem cartão no trial · cancele quando quiser
+                    </p>
+                    <p className="text-[10px] text-center text-muted-foreground inline-flex items-center justify-center gap-1 w-full">
+                      <TrendingUp className="w-3 h-3" /> Upgrade de plano a qualquer momento
                     </p>
                   </div>
                 ) : (
@@ -755,69 +911,198 @@ function PlanosPage() {
         </p>
       </section>
 
-      {/* COMPARE TABLE */}
+      {/* COMPARE — categorizado, com destaque na coluna do plano recomendado */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-3xl mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Comparativo completo</h2>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
+            <BarChart3 className="w-3.5 h-3.5" /> Comparador de decisão
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Compare por área da operação</h2>
           <p className="text-muted-foreground mt-3 leading-relaxed">
-            Tudo o que está incluído em cada plano. Sem asterisco escondido.
+            Recursos agrupados por categoria e traduzidos em benefício real. A coluna do plano <strong>Ideal</strong> aparece destacada por ser a mais escolhida.
           </p>
         </div>
-        <div className="overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 font-medium w-1/3">Recurso</th>
-                {PLANS.map((p) => (
-                  <th key={p.name} className="text-center px-4 py-3 font-semibold whitespace-nowrap">
-                    {p.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARE.map((row, idx) => (
-                <tr key={row.feature} className={cn("border-b border-border last:border-0", idx % 2 === 1 && "bg-muted/20")}>
-                  <td className="px-4 py-3">{row.feature}</td>
-                  {row.values.map((v, i) => (
-                    <td key={i} className="px-4 py-3 text-center">
-                      {typeof v === "boolean" ? (
-                        v ? (
-                          <CheckCircle2 className="w-4 h-4 text-primary mx-auto" />
-                        ) : (
-                          <Minus className="w-4 h-4 text-muted-foreground/50 mx-auto" />
-                        )
-                      ) : (
-                        <span className="text-xs">{v}</span>
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          {/* Cabeçalho fixo com nomes dos planos e CTAs curtos */}
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-4 bg-muted/40 border-b border-border sticky top-16 z-10 backdrop-blur">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Recurso</div>
+            {PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={cn(
+                  "text-center",
+                  p.highlight && "rounded-md bg-primary/10 border border-primary/30 py-1.5 px-2",
+                )}
+              >
+                <div className={cn("text-sm font-semibold", p.highlight && "text-primary")}>
+                  {p.displayName ?? p.name}
+                </div>
+                {p.highlight && (
+                  <div className="text-[10px] text-primary/80 uppercase tracking-wider mt-0.5">
+                    Mais escolhido
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {COMPARE_CATEGORIES.map((cat) => {
+            const CatIcon = cat.icon;
+            return (
+              <div key={cat.id} className="border-b border-border last:border-0">
+                {/* Cabeçalho de categoria */}
+                <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-3 bg-muted/20">
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 text-primary">
+                      <CatIcon className="w-3.5 h-3.5" />
+                    </span>
+                    {cat.label}
+                  </div>
+                  <div /> <div /> <div />
+                </div>
+                {cat.rows.map((row, idx) => (
+                  <div
+                    key={row.feature}
+                    className={cn(
+                      "grid grid-cols-[1.4fr_1fr_1fr_1fr] items-start gap-2 px-4 py-3 text-sm",
+                      idx % 2 === 1 && "bg-muted/10",
+                      row.highlight && "bg-primary/[0.04]",
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("font-medium", row.highlight && "text-primary")}>{row.feature}</span>
+                        {row.benefit && (
+                          <span title={row.benefit} className="inline-flex text-muted-foreground/60 cursor-help">
+                            <Info className="w-3 h-3" />
+                          </span>
+                        )}
+                      </div>
+                      {row.benefit && (
+                        <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          {row.benefit}
+                        </div>
                       )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </div>
+                    {row.values.map((v, i) => {
+                      const isHighlighted = PLANS[i]?.highlight;
+                      return (
+                        <div
+                          key={i}
+                          className={cn(
+                            "text-center px-1 pt-1",
+                            isHighlighted && "font-medium",
+                          )}
+                        >
+                          {typeof v === "boolean" ? (
+                            v ? (
+                              <CheckCircle2 className={cn("w-4 h-4 mx-auto", isHighlighted ? "text-primary" : "text-primary/70")} />
+                            ) : (
+                              <Minus className="w-4 h-4 text-muted-foreground/40 mx-auto" />
+                            )
+                          ) : (
+                            <span className={cn("text-xs", isHighlighted && "text-primary")}>{v}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+
+          {/* Rodapé do comparador com CTAs por plano */}
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 px-4 py-4 bg-muted/30 border-t border-border">
+            <div className="text-xs text-muted-foreground">
+              Escolha o plano ideal para você
+            </div>
+            {PLANS.map((p) => (
+              <div key={p.name} className="text-center">
+                <Button
+                  size="sm"
+                  variant={p.highlight ? "default" : "outline"}
+                  className={cn("w-full text-xs", p.highlight && "bg-gradient-primary shadow-elegant")}
+                  onClick={() => setPicker({ open: true, plan: p })}
+                >
+                  Contratar {p.displayName ?? p.name}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground text-center mt-4 inline-flex items-center gap-1.5 w-full justify-center">
+          <TrendingUp className="w-3.5 h-3.5" /> Pode fazer upgrade a qualquer momento — sem perder dados nem histórico.
+        </p>
+      </section>
+
+      {/* ORDER BUMP — módulos complementares (estrutura visual, integração fica para o Codex) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-3xl mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent-foreground text-xs font-medium mb-3">
+            <PackagePlus className="w-3.5 h-3.5" /> Módulos complementares
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Turbine seu plano quando fizer sentido</h2>
+          <p className="text-muted-foreground mt-2 leading-relaxed">
+            Adicionais opcionais que aceleram resultados específicos. Você pode incluir agora ou depois — sem trocar de plano.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {ORDER_BUMPS.map((b) => {
+            const BIcon = b.icon;
+            return (
+              <Card key={b.title} className="p-4 flex flex-col hover:border-primary/40 transition-colors">
+                <div className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-primary/10 text-primary mb-3">
+                  <BIcon className="w-4 h-4" />
+                </div>
+                <div className="font-semibold text-sm">{b.title}</div>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed flex-1">{b.desc}</p>
+                <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                  <span className="text-xs font-semibold text-primary">{b.price}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Opcional</span>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-muted-foreground text-center mt-4">
+          Os complementares podem ser adicionados junto com a contratação ou depois, direto no painel.
+        </p>
       </section>
       </div>
 
-      {/* GUARANTEES */}
+
+      {/* GUARANTEES — apenas informações verificáveis */}
       <section className="bg-muted/30 border-y border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="max-w-3xl mx-auto text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
+              <ShieldCheck className="w-3.5 h-3.5" /> Compromissos verificáveis
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratação segura, sem letras miúdas</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { t: "Sem fidelidade obrigatória", d: "Cancele quando quiser no mensal. Sem multa." },
-              { t: "Dados seus, sempre", d: "Exportação completa a qualquer momento, LGPD em dia." },
-              { t: "Pagamento simples", d: "Cartão, Pix ou boleto. Nota fiscal mensal." },
-              { t: "Atualizações inclusas", d: "Novas funções e correções sem custo extra." },
-            ].map((g) => (
-              <div key={g.t} className="p-5 rounded-lg border border-border bg-card">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  <div className="font-semibold text-sm">{g.t}</div>
+              { icon: ShieldCheck, t: "Contratação 100% online", d: "Cartão, Pix ou boleto no checkout transparente. Sem burocracia offline." },
+              { icon: ShieldCheck, t: "Ambiente seguro", d: "HTTPS obrigatório, tokens rotativos, backups automáticos e logs de auditoria." },
+              { icon: ShieldCheck, t: "Conformidade LGPD", d: "Exportação de dados a qualquer momento, DPO nomeado e política pública." },
+              { icon: Headphones, t: "Suporte responsivo", d: "E-mail no Essencial, prioritário no Ideal, técnico dedicado no Full." },
+              { icon: Zap, t: "Atualizações contínuas", d: "Novos módulos, correções e melhorias sem custo adicional." },
+              { icon: TrendingUp, t: "Upgrade a qualquer momento", d: "Suba de plano sem perder dados, histórico ou automações configuradas." },
+            ].map((g) => {
+              const GIcon = g.icon;
+              return (
+                <div key={g.t} className="p-5 rounded-lg border border-border bg-card">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-primary/10 text-primary">
+                      <GIcon className="w-4 h-4" />
+                    </span>
+                    <div className="font-semibold text-sm">{g.t}</div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{g.d}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{g.d}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
