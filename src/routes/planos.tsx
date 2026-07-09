@@ -6,6 +6,8 @@ import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
   Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
+  ShoppingBag, Headphones, Wallet, Boxes, Users2, CalendarDays, Brain, Megaphone,
+  BarChart3, Zap, Palette, Plug, ShieldCheck, TrendingUp, Info, PackagePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
