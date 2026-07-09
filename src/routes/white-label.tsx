@@ -36,9 +36,7 @@ import {
   type FaqItem,
 } from "@/components/impulsionando";
 import { WhiteLabelSimulator } from "@/components/whitelabel/WhiteLabelSimulator";
-
-const WHATSAPP_URL =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 /* --------------------------------- Dados --------------------------------- */
 
