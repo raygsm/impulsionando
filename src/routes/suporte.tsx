@@ -93,7 +93,11 @@ function SuportePage() {
                       <h2 className="text-base font-semibold text-foreground">{c.title}</h2>
                       <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{c.description}</p>
                       <div className="mt-4">
-                        {"external" in c && c.external ? (
+                        {c.onClick ? (
+                          <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={c.onClick}>
+                            {c.cta} <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : "external" in c && c.external ? (
                           <Button asChild size="sm" variant="outline" className="gap-1.5">
                             <a href={c.href} target="_blank" rel="noopener noreferrer">
                               {c.cta} <ArrowRight className="h-3.5 w-3.5" />
