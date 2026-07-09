@@ -64,22 +64,22 @@ function RiomedHome() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
-                to="/riomed/productos"
+                to="/riomed/cotizar"
                 className="inline-flex items-center gap-2 rounded-full bg-[color:var(--riomed-accent)] hover:bg-[color:var(--riomed-accent)]/90 text-white font-semibold px-6 py-3 min-h-11 shadow-lg transition"
               >
-                <ShoppingCart className="h-5 w-5" /> Ver productos
+                <ShoppingCart className="h-5 w-5" /> Solicitar cotización
               </Link>
               <Link
-                to="/riomed/cotizar"
+                to="/riomed/hospital/portal"
                 className="inline-flex items-center gap-2 rounded-full bg-white text-[color:var(--riomed-deep)] hover:bg-white/90 font-semibold px-6 py-3 min-h-11 shadow-lg transition"
               >
-                Solicitar cotización <ArrowRight className="h-4 w-4" />
+                Portal hospitalario <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/riomed/soporte"
                 className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/30 hover:bg-white/20 text-white font-semibold px-6 py-3 min-h-11 backdrop-blur transition"
               >
-                <Headphones className="h-5 w-5" /> Hablar con soporte
+                <Headphones className="h-5 w-5" /> Soporte técnico
               </Link>
             </div>
 
@@ -144,8 +144,8 @@ function RiomedHome() {
               icon: ShoppingCart,
               title: "Venta de equipos",
               desc: "Catálogo B2B con monitores, ventiladores, bombas, camas, ultrasonido e insumos hospitalarios.",
-              cta: "Ver productos",
-              to: "/riomed/productos" as const,
+              cta: "Solicitar cotización",
+              to: "/riomed/cotizar" as const,
             },
             {
               icon: HeartPulse,
@@ -232,10 +232,10 @@ function RiomedHome() {
       >
         <div className="max-w-5xl mx-auto px-4 py-14 md:py-16 text-center text-white space-y-5">
           <h2 className="text-3xl md:text-4xl font-bold">
-            ¿Necesitas un equipo hoy o un contrato de mantenimiento?
+            ¿Necesitás un equipo hoy o un contrato de mantenimiento?
           </h2>
           <p className="text-white/85 text-lg max-w-2xl mx-auto">
-            Contanos qué necesitás y en horas hábiles nuestro equipo comercial te responde por WhatsApp con propuesta y disponibilidad.
+            Enviá tu solicitud por el portal hospitalario o pedí cotización — en horas hábiles un especialista responde con propuesta, disponibilidad y plazo.
           </p>
           <div className="flex flex-wrap gap-3 justify-center pt-2">
             <Link
@@ -245,10 +245,16 @@ function RiomedHome() {
               Solicitar cotización <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
+              to="/riomed/hospital/portal"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-[color:var(--riomed-deep)] hover:bg-white/90 font-semibold px-6 py-3 min-h-11 shadow-lg transition"
+            >
+              Portal hospitalario <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
               to="/riomed/soporte"
               className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/30 hover:bg-white/20 text-white font-semibold px-6 py-3 min-h-11 backdrop-blur transition"
             >
-              <MessageCircle className="h-5 w-5" /> Hablar con soporte
+              <MessageCircle className="h-5 w-5" /> Soporte técnico
             </Link>
           </div>
         </div>

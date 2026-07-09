@@ -27,7 +27,7 @@ function HospitalesPage() {
         ))}
       </div>
       <div className="flex gap-3 flex-wrap">
-        <Link to="/riomed/cotizar" className="inline-flex rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0E7C66)" }}>Solicitar propuesta institucional</Link>
+        <Link to="/riomed/cotizar" className="inline-flex rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Solicitar propuesta institucional</Link>
         <Link to="/riomed/hospital/portal" className="inline-flex rounded-full px-6 py-3 border font-semibold">Portal del cliente institucional</Link>
       </div>
     </div>

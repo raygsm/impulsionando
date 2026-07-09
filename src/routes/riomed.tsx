@@ -42,10 +42,10 @@ export const Route = createFileRoute("/riomed")({
 type NavItem = { to: string; label: string; mega?: "catalog" | "rental" | "services" };
 const MAIN_NAV: NavItem[] = [
   { to: "/riomed", label: "Início" },
-  { to: "/riomed/cotizar", label: "Catálogo", mega: "catalog" },
-  { to: "/riomed/alquiler", label: "Locações", mega: "rental" },
-  { to: "/riomed/servicio-tecnico", label: "Serviços", mega: "services" },
-  { to: "/riomed/cotizar", label: "Comprar" },
+  { to: "/riomed/cotizar", label: "Catálogo · Cotizar", mega: "catalog" },
+  { to: "/riomed/alquiler", label: "Alquiler", mega: "rental" },
+  { to: "/riomed/servicio-tecnico", label: "Servicios", mega: "services" },
+  { to: "/riomed/hospital/portal", label: "Portal hospitalario" },
 ];
 
 function RiomedLayout() {

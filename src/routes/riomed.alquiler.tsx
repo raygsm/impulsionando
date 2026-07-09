@@ -33,31 +33,36 @@ function AlquilerPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 space-y-14">
       <header>
-        <div className="text-sm text-slate-500 mb-2">Locação mensal médica e hospitalar</div>
+        <nav aria-label="Migas de pan" className="text-xs text-slate-500 mb-3">
+          <Link to="/riomed" className="hover:text-slate-800">RioMed</Link>
+          <span className="mx-1.5">/</span>
+          <span className="text-slate-700 font-medium">Alquiler</span>
+        </nav>
+        <div className="text-sm text-slate-500 mb-2">Alquiler mensual médico y hospitalario</div>
         <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Alquiler de equipamiento médico</h1>
         <p className="text-muted-foreground max-w-2xl text-lg">Solución rápida y económica para hospitales, clínicas, ambulancias y home care. Entrega, instalación y servicio técnico incluidos. Sin CapEx, plan mensual previsible.</p>
         <div className="flex flex-wrap gap-3 mt-5">
-          <Link to="/riomed/vendedor" className="rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Falar com vendedor</Link>
+          <Link to="/riomed/vendedor" className="rounded-full px-6 py-3 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Hablar con vendedor</Link>
           <Link to="/riomed/cotizar" className="rounded-full px-6 py-3 border font-semibold">Solicitar cotización</Link>
         </div>
       </header>
 
       <section>
-        <h2 className="text-2xl font-bold mb-5">Locação por perfil</h2>
+        <h2 className="text-2xl font-bold mb-5">Alquiler por perfil</h2>
         <div className="grid md:grid-cols-3 gap-4">
           {NICHES.map((n) => (
             <div key={n.t} id={n.anchor} className="rounded-2xl border bg-white p-5 hover:shadow-md transition">
               <n.icon className="mb-3" style={{ color: "var(--riomed-primary, #0B3D74)" }} />
               <div className="font-semibold text-lg mb-1">{n.t}</div>
               <p className="text-sm text-muted-foreground mb-4">{n.d}</p>
-              <Link to="/riomed/vendedor" className="text-sm font-semibold" style={{ color: "var(--riomed-accent, #0AB1A0)" }}>Falar com especialista →</Link>
+              <Link to="/riomed/vendedor" className="text-sm font-semibold" style={{ color: "var(--riomed-accent, #0AB1A0)" }}>Hablar con un especialista →</Link>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="text-2xl font-bold mb-5">Catálogo de locação</h2>
+        <h2 className="text-2xl font-bold mb-5">Catálogo de alquiler</h2>
         <div className="grid md:grid-cols-4 gap-4">
           {ITEMS.map((i) => (
             <div key={i.t} className="rounded-xl border p-5 bg-white">
@@ -69,10 +74,10 @@ function AlquilerPage() {
       </section>
 
       <section className="rounded-2xl p-8 text-white" style={{ background: "linear-gradient(135deg, var(--riomed-primary,#0B3D74), var(--riomed-accent,#0AB1A0))" }}>
-        <h3 className="text-2xl font-bold mb-2">Plano mensal sem dor de cabeça</h3>
-        <p className="opacity-90 mb-5 max-w-xl">Manutenção, calibração e troca de equipamento incluídos. Apenas use; nós cuidamos do resto.</p>
+        <h3 className="text-2xl font-bold mb-2">Plan mensual sin dolores de cabeza</h3>
+        <p className="opacity-90 mb-5 max-w-xl">Mantenimiento, calibración y recambio de equipo incluidos. Vos usás; nosotros nos ocupamos del resto.</p>
         <div className="flex gap-3 flex-wrap">
-          <Link to="/riomed/vendedor" className="rounded-full px-6 py-3 bg-white text-slate-900 font-semibold">Falar com vendedor</Link>
+          <Link to="/riomed/vendedor" className="rounded-full px-6 py-3 bg-white text-slate-900 font-semibold">Hablar con vendedor</Link>
           <Link to="/riomed/soporte" className="rounded-full px-6 py-3 border border-white/40 font-semibold">Soporte técnico</Link>
         </div>
       </section>
