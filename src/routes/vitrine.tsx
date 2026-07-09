@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { CardSkeleton, EmptyState } from "@/components/feedback";
 import { getPublicVitrine } from "@/lib/consumer.functions";
 import {
   MapPin, Sparkles, Crown, ArrowRight, Building2, Star, Search,
-  Globe, Instagram, MessageCircle,
+  Globe, Instagram, MessageCircle, SearchX,
 } from "lucide-react";
 
 type VitrineCompany = {
