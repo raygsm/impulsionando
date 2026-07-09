@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Loader2, Mail, MessageCircle, Send } from "lucide-react";
+import { Loader2, Mail, Send, Sparkles, Layers, Rocket, LifeBuoy } from "lucide-react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
