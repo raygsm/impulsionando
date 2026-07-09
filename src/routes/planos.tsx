@@ -861,7 +861,7 @@ function PlanosPage() {
                 className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white focus-ring"
                 onClick={() => {
                   if (typeof window !== "undefined") {
-                    window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                    window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "planos" } }));
                   }
                 }}
               >
@@ -961,7 +961,7 @@ function WhiteLabelPlansPanel() {
               className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto focus-ring"
               onClick={() => {
                 if (typeof window !== "undefined") {
-                  window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                  window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "planos" } }));
                 }
               }}
             >
@@ -993,7 +993,7 @@ function WhiteLabelPlansPanel() {
             className="gap-2 w-full sm:w-auto focus-ring"
             onClick={() => {
               if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("impulsionito:open"));
+                window.dispatchEvent(new CustomEvent("impulsionito:open", { detail: { origin: "planos" } }));
               }
             }}
           >
