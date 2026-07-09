@@ -34,9 +34,11 @@ const brl = (v: number) =>
 
 interface Props {
   ctaHref?: string;
+  onCtaClick?: () => void;
+  ctaLabel?: string;
 }
 
-export function WhiteLabelSimulator({ ctaHref }: Props) {
+export function WhiteLabelSimulator({ ctaHref, onCtaClick, ctaLabel }: Props) {
   const [qty, setQty] = useState(25);
   const domains = Math.max(MIN_DOMAINS, Math.min(500, Math.round(qty || MIN_DOMAINS)));
 
