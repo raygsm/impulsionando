@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
  * AccountShell — layout da área do cliente Colors (mock).
  * O submenu abre em cada rota filha. Logout apenas visual (sem Supabase).
  */
-const NAV = [
+const NAV: ReadonlyArray<{ to: string; label: string; icon: React.ComponentType<{ className?: string }>; exact?: boolean }> = [
   { to: "/colors/minha-conta", label: "Painel", icon: LayoutDashboard, exact: true },
   { to: "/colors/minha-conta/pedidos", label: "Meus pedidos", icon: Package },
   { to: "/colors/minha-conta/perfil", label: "Perfil e endereços", icon: User },
-] as const;
+];
 
 export default function AccountShell({ children }: { children?: ReactNode }) {
   const { pathname } = useLocation();
