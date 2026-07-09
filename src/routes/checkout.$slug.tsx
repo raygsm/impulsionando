@@ -197,15 +197,16 @@ function CheckoutPlanPage() {
       }
     >
       <div className="space-y-6">
-        {/* Order bump — módulos complementares */}
+        {/* Complementos — pré-seleção visual (NÃO ENTRA na cobrança de agora) */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <PackagePlus className="w-4 h-4 text-primary" />
-              Turbine seu plano (opcional)
+              Interesse em complementos (opcional)
             </CardTitle>
             <CardDescription>
-              Selecione módulos complementares para incluir junto com a contratação. Você pode adicionar ou remover depois no painel.
+              Marque os módulos que você quer avaliar depois. Nesta etapa <strong>eles não são cobrados</strong> —
+              nosso time entra em contato para incluir no seu plano quando você quiser.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid sm:grid-cols-2 gap-2">
@@ -237,17 +238,24 @@ function CheckoutPlanPage() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
                       <span className="font-semibold text-sm truncate">{b.title}</span>
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
-                        {active ? "Selecionado" : "Adicionar"}
+                      <span
+                        className={cn(
+                          "text-[10px] uppercase tracking-wider shrink-0",
+                          active ? "text-primary font-semibold" : "text-muted-foreground",
+                        )}
+                      >
+                        {active ? "Marcado" : "Solicitar inclusão"}
                       </span>
                     </span>
                     <span className="block text-xs text-muted-foreground mt-0.5 leading-snug">
                       {b.desc}
                     </span>
-                    <span className={cn("block text-xs font-semibold mt-1", active ? "text-primary" : "text-foreground")}>
-                      {b.priceLabel}
+                    <span className="block text-[11px] mt-1 text-muted-foreground">
+                      Referência: <span className="font-medium text-foreground">{b.priceLabel}</span>
+                      <span className="text-muted-foreground/70"> · cobrado só após inclusão</span>
                     </span>
                   </span>
+
                 </button>
               );
             })}
