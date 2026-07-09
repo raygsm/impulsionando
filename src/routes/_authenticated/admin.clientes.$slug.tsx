@@ -91,6 +91,18 @@ function TenantWorkspaceLayout() {
               {company && !company.is_active ? (
                 <Badge variant="destructive" className="text-[10px]">inativo</Badge>
               ) : null}
+              {company?.full_courtesy_status === "active" ? (
+                <Badge variant="default" className="text-[10px]">
+                  Cortesia Full{(() => {
+                    const end = company.full_courtesy_ends_at
+                      ? new Date(company.full_courtesy_ends_at).getTime()
+                      : null;
+                    if (!end) return "";
+                    const d = Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
+                    return ` · ${d}d`;
+                  })()}
+                </Badge>
+              ) : null}
             </h1>
             {company ? (
               <p className="text-xs text-muted-foreground mt-1">
