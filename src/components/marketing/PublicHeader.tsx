@@ -241,7 +241,7 @@ export function PublicHeader() {
           <Button
             asChild
             size="sm"
-            className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant hover:shadow-lg hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring transition-all"
+            className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant btn-alive"
           >
             <Link to="/checkout">
               <ShoppingCart className="w-4 h-4" /> Contratar Agora
