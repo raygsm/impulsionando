@@ -1,10 +1,17 @@
-// FAB de ajuda Marocas food service. WhatsApp aparece apenas como SAC/pós-venda.
-// Pedidos e reservas devem ser feitos pelos fluxos internos (cardápio/reservas).
+// Maroquito — FAB único da Marocas.
+// Une ajuda + assistente IA em um só balão (unificação solicitada).
+// WhatsApp aparece apenas como SAC/suporte pós-venda.
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LifeBuoy, MessageCircle, HelpCircle, ClipboardList, X } from "lucide-react";
-
-const WHATSAPP_URL = "https://wa.me/5521999999999?text=Ol%C3%A1%20Marocas%2C%20preciso%20de%20SAC";
+import {
+  Sparkles,
+  MessageCircle,
+  HelpCircle,
+  Home,
+  Wrench,
+  X,
+} from "lucide-react";
+import { marocasWhatsAppUrl } from "./marocasContent";
 
 interface HelpOption {
   icon: React.ReactNode;
@@ -16,45 +23,55 @@ interface HelpOption {
 
 const options: HelpOption[] = [
   {
-    icon: <ClipboardList className="h-4 w-4" />,
-    label: "Meus pedidos",
-    description: "Rastreio, status e histórico",
-    href: "/marocas/pedidos",
+    icon: <Home className="h-4 w-4" />,
+    label: "Cadastrar meu imóvel",
+    description: "Diagnóstico gratuito para anfitriões",
+    href: "/marocas/cadastrar-imovel",
+  },
+  {
+    icon: <Wrench className="h-4 w-4" />,
+    label: "Solicitar manutenção",
+    description: "Hóspede aciona um prestador homologado",
+    href: "/marocas/hospedes",
   },
   {
     icon: <HelpCircle className="h-4 w-4" />,
     label: "Dúvidas frequentes",
-    description: "Delivery, retirada, reservas, pagamento",
+    description: "Anfitrião, hóspede e prestador",
     href: "/marocas/faq",
   },
   {
-    icon: <LifeBuoy className="h-4 w-4" />,
-    label: "Assistente Marocas",
-    description: "Respostas guiadas 24h",
-    href: "/marocas/assistente",
-  },
-  {
     icon: <MessageCircle className="h-4 w-4" />,
-    label: "WhatsApp SAC",
-    description: "Somente pós-venda em horário comercial",
-    href: WHATSAPP_URL,
+    label: "WhatsApp de suporte",
+    description: "Somente SAC — 08h às 20h",
+    href: marocasWhatsAppUrl("Olá Maroquito, preciso de suporte."),
     external: true,
   },
 ];
 
-export function MarocasHelpFab() {
+/** FAB unificado: “Maroquito” — ajuda + assistente IA em um só balão. */
+export function MaroquitoFab() {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="fixed bottom-6 right-6 z-40">
       {open && (
         <div className="mb-3 w-80 max-w-[calc(100vw-3rem)] rounded-2xl bg-card border shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center justify-between p-4 border-b bg-muted/40">
-            <div>
-              <div className="font-semibold">Precisa de ajuda?</div>
-              <div className="text-xs text-muted-foreground">Atendimento Marocas</div>
+          <div className="flex items-center justify-between p-4 border-b bg-gradient-to-br from-primary/10 to-transparent">
+            <div className="flex items-center gap-2">
+              <span className="grid place-items-center h-9 w-9 rounded-full bg-primary text-primary-foreground shadow-sm">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div>
+                <div className="font-semibold">Oi, sou o Maroquito</div>
+                <div className="text-xs text-muted-foreground">Assistente da Marocas · ajuda + IA</div>
+              </div>
             </div>
-            <button onClick={() => setOpen(false)} className="p-1 hover:bg-muted rounded" aria-label="Fechar">
+            <button
+              onClick={() => setOpen(false)}
+              className="p-1 hover:bg-muted rounded"
+              aria-label="Fechar"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -85,7 +102,7 @@ export function MarocasHelpFab() {
             })}
           </ul>
           <div className="p-3 text-[11px] text-muted-foreground bg-muted/30 border-t">
-            WhatsApp Marocas é somente para SAC e pós-venda. Para pedir, use o cardápio.
+            O Maroquito responde 24h por texto e escala para atendente humano em horário comercial.
           </div>
         </div>
       )}
@@ -94,11 +111,14 @@ export function MarocasHelpFab() {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-3 font-semibold shadow-xl hover:shadow-2xl transition"
         aria-expanded={open}
-        aria-label="Ajuda e SAC Marocas"
+        aria-label="Falar com Maroquito"
       >
-        <LifeBuoy className="h-5 w-5" />
-        Ajuda
+        <Sparkles className="h-5 w-5" />
+        Maroquito
       </button>
     </div>
   );
 }
+
+// Compatibilidade com imports antigos (nenhum ativo hoje, mas seguro).
+export const MarocasHelpFab = MaroquitoFab;
