@@ -144,11 +144,15 @@ import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSuporteInteligenteRouteImport } from './routes/modulos.suporte-inteligente'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
+import { Route as MarocasSobreRouteImport } from './routes/marocas.sobre'
 import { Route as MarocasReservasRouteImport } from './routes/marocas.reservas'
 import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
 import { Route as MarocasPedidosRouteImport } from './routes/marocas.pedidos'
 import { Route as MarocasLoginRouteImport } from './routes/marocas.login'
 import { Route as MarocasFaqRouteImport } from './routes/marocas.faq'
+import { Route as MarocasEventosRouteImport } from './routes/marocas.eventos'
+import { Route as MarocasDeliveryRouteImport } from './routes/marocas.delivery'
+import { Route as MarocasContatoRouteImport } from './routes/marocas.contato'
 import { Route as MarocasCheckoutRouteImport } from './routes/marocas.checkout'
 import { Route as MarocasCarrinhoRouteImport } from './routes/marocas.carrinho'
 import { Route as MarocasCardapioRouteImport } from './routes/marocas.cardapio'
@@ -1551,6 +1555,11 @@ const MesaTokenRoute = MesaTokenRouteImport.update({
   path: '/mesa/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarocasSobreRoute = MarocasSobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => MarocasRoute,
+} as any)
 const MarocasReservasRoute = MarocasReservasRouteImport.update({
   id: '/reservas',
   path: '/reservas',
@@ -1574,6 +1583,21 @@ const MarocasLoginRoute = MarocasLoginRouteImport.update({
 const MarocasFaqRoute = MarocasFaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasEventosRoute = MarocasEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasDeliveryRoute = MarocasDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasContatoRoute = MarocasContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => MarocasRoute,
 } as any)
 const MarocasCheckoutRoute = MarocasCheckoutRouteImport.update({
@@ -5886,11 +5910,15 @@ export interface FileRoutesByFullPath {
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
   '/marocas/carrinho': typeof MarocasCarrinhoRoute
   '/marocas/checkout': typeof MarocasCheckoutRoute
+  '/marocas/contato': typeof MarocasContatoRoute
+  '/marocas/delivery': typeof MarocasDeliveryRoute
+  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
   '/marocas/reservas': typeof MarocasReservasRoute
+  '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
@@ -6730,11 +6758,15 @@ export interface FileRoutesByTo {
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
   '/marocas/carrinho': typeof MarocasCarrinhoRoute
   '/marocas/checkout': typeof MarocasCheckoutRoute
+  '/marocas/contato': typeof MarocasContatoRoute
+  '/marocas/delivery': typeof MarocasDeliveryRoute
+  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
   '/marocas/reservas': typeof MarocasReservasRoute
+  '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
@@ -7592,11 +7624,15 @@ export interface FileRoutesById {
   '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
   '/marocas/carrinho': typeof MarocasCarrinhoRoute
   '/marocas/checkout': typeof MarocasCheckoutRoute
+  '/marocas/contato': typeof MarocasContatoRoute
+  '/marocas/delivery': typeof MarocasDeliveryRoute
+  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
   '/marocas/reservas': typeof MarocasReservasRoute
+  '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
@@ -8456,11 +8492,15 @@ export interface FileRouteTypes {
     | '/marocas/cardapio'
     | '/marocas/carrinho'
     | '/marocas/checkout'
+    | '/marocas/contato'
+    | '/marocas/delivery'
+    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
     | '/marocas/pedidos'
     | '/marocas/planos'
     | '/marocas/reservas'
+    | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/modulos/suporte-inteligente'
@@ -9300,11 +9340,15 @@ export interface FileRouteTypes {
     | '/marocas/cardapio'
     | '/marocas/carrinho'
     | '/marocas/checkout'
+    | '/marocas/contato'
+    | '/marocas/delivery'
+    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
     | '/marocas/pedidos'
     | '/marocas/planos'
     | '/marocas/reservas'
+    | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/modulos/suporte-inteligente'
@@ -10161,11 +10205,15 @@ export interface FileRouteTypes {
     | '/marocas/cardapio'
     | '/marocas/carrinho'
     | '/marocas/checkout'
+    | '/marocas/contato'
+    | '/marocas/delivery'
+    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
     | '/marocas/pedidos'
     | '/marocas/planos'
     | '/marocas/reservas'
+    | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/modulos/suporte-inteligente'
@@ -11996,6 +12044,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesaTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marocas/sobre': {
+      id: '/marocas/sobre'
+      path: '/sobre'
+      fullPath: '/marocas/sobre'
+      preLoaderRoute: typeof MarocasSobreRouteImport
+      parentRoute: typeof MarocasRoute
+    }
     '/marocas/reservas': {
       id: '/marocas/reservas'
       path: '/reservas'
@@ -12029,6 +12084,27 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/marocas/faq'
       preLoaderRoute: typeof MarocasFaqRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/eventos': {
+      id: '/marocas/eventos'
+      path: '/eventos'
+      fullPath: '/marocas/eventos'
+      preLoaderRoute: typeof MarocasEventosRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/delivery': {
+      id: '/marocas/delivery'
+      path: '/delivery'
+      fullPath: '/marocas/delivery'
+      preLoaderRoute: typeof MarocasDeliveryRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/contato': {
+      id: '/marocas/contato'
+      path: '/contato'
+      fullPath: '/marocas/contato'
+      preLoaderRoute: typeof MarocasContatoRouteImport
       parentRoute: typeof MarocasRoute
     }
     '/marocas/checkout': {
@@ -18980,11 +19056,15 @@ interface MarocasRouteChildren {
   MarocasCardapioRoute: typeof MarocasCardapioRouteWithChildren
   MarocasCarrinhoRoute: typeof MarocasCarrinhoRoute
   MarocasCheckoutRoute: typeof MarocasCheckoutRoute
+  MarocasContatoRoute: typeof MarocasContatoRoute
+  MarocasDeliveryRoute: typeof MarocasDeliveryRoute
+  MarocasEventosRoute: typeof MarocasEventosRoute
   MarocasFaqRoute: typeof MarocasFaqRoute
   MarocasLoginRoute: typeof MarocasLoginRoute
   MarocasPedidosRoute: typeof MarocasPedidosRouteWithChildren
   MarocasPlanosRoute: typeof MarocasPlanosRoute
   MarocasReservasRoute: typeof MarocasReservasRoute
+  MarocasSobreRoute: typeof MarocasSobreRoute
   MarocasContratarPlanoRoute: typeof MarocasContratarPlanoRoute
 }
 
@@ -18993,11 +19073,15 @@ const MarocasRouteChildren: MarocasRouteChildren = {
   MarocasCardapioRoute: MarocasCardapioRouteWithChildren,
   MarocasCarrinhoRoute: MarocasCarrinhoRoute,
   MarocasCheckoutRoute: MarocasCheckoutRoute,
+  MarocasContatoRoute: MarocasContatoRoute,
+  MarocasDeliveryRoute: MarocasDeliveryRoute,
+  MarocasEventosRoute: MarocasEventosRoute,
   MarocasFaqRoute: MarocasFaqRoute,
   MarocasLoginRoute: MarocasLoginRoute,
   MarocasPedidosRoute: MarocasPedidosRouteWithChildren,
   MarocasPlanosRoute: MarocasPlanosRoute,
   MarocasReservasRoute: MarocasReservasRoute,
+  MarocasSobreRoute: MarocasSobreRoute,
   MarocasContratarPlanoRoute: MarocasContratarPlanoRoute,
 }
 
