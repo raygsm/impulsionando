@@ -37,7 +37,16 @@ type AuthMode = "signin" | "signup";
 interface AuthSearch {
   persona?: AuthPersona;
   mode?: AuthMode;
+  next?: string;
 }
+
+/** Sanitiza o `next` como caminho relativo mesma origem. */
+function safeNext(next: string | undefined): string | null {
+  if (!next || typeof next !== "string") return null;
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 
 const PERSONA_COPY: Record<AuthPersona, { headline: string; sub: string; rightTitle: string; rightSub: string }> = {
   core: {
