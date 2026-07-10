@@ -24,10 +24,9 @@ export const Route = createFileRoute("/_authenticated/admin/executivo")({
   component: ExecutivoPage,
 });
 
-const fmtBRL = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })
-    .format((cents ?? 0) / 100);
-const fmtNum = (v: number) => new Intl.NumberFormat("pt-BR").format(v ?? 0);
+import { formatBRL, formatInt } from "@/lib/format";
+const fmtBRL = (cents: number) => formatBRL((cents ?? 0) / 100);
+const fmtNum = (v: number) => formatInt(v ?? 0);
 
 function ExecutivoPage() {
   const fn = useServerFn(fetchMacroDashboard);
@@ -63,7 +62,7 @@ function ExecutivoPage() {
             <div>
               <Badge variant="outline" className="mb-2">Cockpit-mestre · últimos 30 dias</Badge>
               <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Sparkles className="h-7 w-7 text-primary" /> Dashboard Executivo Impulsionando
+                <Sparkles className="h-7 w-7 text-primary" aria-hidden="true" /> Dashboard Executivo Impulsionando
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
                 Visão consolidada de receita, base de clientes, conversão e saúde operacional do ecossistema.
@@ -81,26 +80,26 @@ function ExecutivoPage() {
         {/* KPIs principais */}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <KpiCard icon={<Wallet className="h-5 w-5" />} label="Receita (30d)" value={fmtBRL(t.revenueCents)}
-            sub={`${t.invoicesPaid} faturas pagas · ${t.invoicesOverdue} vencidas`} accent="text-emerald-600" />
-          <KpiCard icon={<Building2 className="h-5 w-5" />} label="Tenants ativos" value={fmtNum(t.companies)}
-            sub={`${t.activeSubs} assinaturas ativas`} accent="text-blue-600" />
+            sub={`${fmtNum(t.invoicesPaid)} faturas pagas · ${fmtNum(t.invoicesOverdue)} vencidas`} accent="text-primary" />
+          <KpiCard icon={<Building2 className="h-5 w-5" />} label="Clientes ativos" value={fmtNum(t.companies)}
+            sub={`${fmtNum(t.activeSubs)} assinaturas ativas`} accent="text-primary" />
           <KpiCard icon={<Target className="h-5 w-5" />} label="Trials → Conv." value={`${t.trialConvRate}%`}
-            sub={`${t.trialsConverted}/${t.trialsStarted} convertidos`} accent="text-violet-600" />
+            sub={`${fmtNum(t.trialsConverted)}/${fmtNum(t.trialsStarted)} convertidos`} accent="text-primary" />
           <KpiCard icon={<Users className="h-5 w-5" />} label="Leads (30d)" value={fmtNum(t.leads)}
-            sub={`${t.trialsLost} trials perdidos`} accent="text-pink-600" />
+            sub={`${fmtNum(t.trialsLost)} trials perdidos`} accent="text-primary" />
           <KpiCard icon={<TrendingUp className="h-5 w-5" />} label="Churn" value={`${t.churnRate}%`}
-            sub={`${t.cancelledSubs} cancelamentos`} accent="text-amber-600"
+            sub={`${fmtNum(t.cancelledSubs)} cancelamentos`} accent="text-amber-600 dark:text-amber-400"
             alert={t.churnRate > 5} />
           <KpiCard icon={<Workflow className="h-5 w-5" />} label="N8N execuções" value={fmtNum(t.n8nEvents)}
-            sub={`${t.n8nFailures} falhas`} accent="text-indigo-600"
+            sub={`${fmtNum(t.n8nFailures)} falhas`} accent="text-primary"
             alert={t.n8nFailures > 0} />
           <KpiCard icon={<AlertTriangle className="h-5 w-5" />} label="Faturas abertas" value={fmtNum(t.invoicesOpen)}
-            sub={`${t.invoicesOverdue} vencidas`} accent="text-orange-600"
+            sub={`${fmtNum(t.invoicesOverdue)} vencidas`} accent="text-amber-600 dark:text-amber-400"
             alert={t.invoicesOverdue > 0} />
           <KpiCard icon={<Activity className="h-5 w-5" />} label="Saúde geral" value={
             t.n8nFailures === 0 && t.invoicesOverdue === 0 ? "Verde" :
             t.n8nFailures > 10 || t.invoicesOverdue > 5 ? "Vermelho" : "Amarelo"
-          } sub="Heurística cross-módulo" accent="text-cyan-600" />
+          } sub="Heurística cross-módulo" accent="text-primary" />
         </div>
 
         {/* Top tenants + nichos */}
@@ -108,7 +107,7 @@ function ExecutivoPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="h-4 w-4" /> Top tenants por receita (30d)
+                <Building2 className="h-4 w-4" aria-hidden="true" /> Top clientes por receita (30d)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
@@ -120,12 +119,12 @@ function ExecutivoPage() {
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="truncate text-sm font-medium">{c.companyName}</span>
                     {c.n8nFailed > 0 && (
-                      <Badge variant="destructive" className="text-[10px] h-4">{c.n8nFailed} N8N err</Badge>
+                      <Badge variant="destructive" className="text-[10px] h-4">{formatInt(c.n8nFailed)} N8N err</Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm font-semibold">{fmtBRL(c.revenueCents)}</span>
-                    <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-sm font-semibold tabular-nums">{fmtBRL(c.revenueCents)}</span>
+                    <ArrowUpRight className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
                 </div>
               ))}
@@ -164,7 +163,7 @@ function ExecutivoPage() {
             <CardTitle className="text-base">Cockpits profundos</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            <ShortcutLink to="/admin/cockpit-tenants" label="Cockpit de Tenants" desc="Saúde por cliente" />
+            <ShortcutLink to="/admin/cockpit-tenants" label="Cockpit de Clientes" desc="Saúde por cliente" />
             <ShortcutLink to="/admin/churn-radar" label="Churn Radar" desc="Risco e cancelamentos" />
             <ShortcutLink to="/admin/billing" label="Financeiro Global" desc="Faturas e assinaturas" />
             <ShortcutLink to="/admin/comunicacao" label="Comunicação" desc="Outbox unificado" />

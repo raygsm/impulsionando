@@ -144,8 +144,8 @@ function AdminNichePlansPage() {
                     >
                       <span>{m.nome}</span>
                       {!hasAny && (
-                        <Badge variant="outline" className="text-[10px]">
-                          Em breve
+                        <Badge variant="outline" className="text-[10px]" title="Nenhum plano configurado ainda">
+                          Não configurado
                         </Badge>
                       )}
                     </button>
