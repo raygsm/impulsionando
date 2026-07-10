@@ -21,6 +21,7 @@ import { MODULE_DETAILS } from "./moduleDetails";
 import { ctaWaUrl, type NichoDetail } from "./nichoDetails";
 import { NICHO_EXTRAS } from "./nichoExtras";
 import { AGENDA_BASE, NICHO_AGENDA } from "./nichoAgenda";
+import { NICHE_MODULE_SLUGS } from "@/data/nicheRecommendations";
 
 
 interface Props {
@@ -31,6 +32,25 @@ export function NichoPage({ nicho }: Props) {
   const Icon = nicho.icon;
   const wa = ctaWaUrl(nicho.ctaPrimary.whatsappMsg);
   const recommendedModules = MODULE_DETAILS.filter((m) => nicho.modules.includes(m.id));
+
+  // Evita loop: se o CTA secundário aponta para /demo/escolher-nicho e este nicho já tem
+  // planos mapeados, envia direto para o cadastro pré-preenchido no plano Full.
+  const hasPlans = Boolean(NICHE_MODULE_SLUGS[nicho.slug]);
+  const secondaryIsPicker = nicho.ctaSecondary.href === "/demo/escolher-nicho";
+  const SecondaryCta = ({ children, className }: { children: React.ReactNode; className?: string }) =>
+    secondaryIsPicker && hasPlans ? (
+      <Link
+        to="/demo/cadastro"
+        search={{ niche: nicho.slug, plan: "full" as const }}
+        className={className}
+      >
+        {children}
+      </Link>
+    ) : (
+      <Link to={nicho.ctaSecondary.href} className={className}>
+        {children}
+      </Link>
+    );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -76,9 +96,9 @@ export function NichoPage({ nicho }: Props) {
               variant="outline"
               className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
             >
-              <Link to={nicho.ctaSecondary.href}>
+              <SecondaryCta>
                 {nicho.ctaSecondary.label} <ArrowRight className="w-4 h-4" />
-              </Link>
+              </SecondaryCta>
             </Button>
             <Button
               asChild
@@ -552,7 +572,7 @@ export function NichoPage({ nicho }: Props) {
                 variant="outline"
                 className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
               >
-                <Link to={nicho.ctaSecondary.href}>{nicho.ctaSecondary.label}</Link>
+                <SecondaryCta>{nicho.ctaSecondary.label}</SecondaryCta>
               </Button>
               <Button
                 asChild
@@ -587,7 +607,7 @@ export function NichoPage({ nicho }: Props) {
             </div>
           </div>
           <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
-            <Link to={nicho.ctaSecondary.href}>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</Link>
+            <SecondaryCta>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</SecondaryCta>
           </Button>
           <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial">
             <Link to="/orcamento">
