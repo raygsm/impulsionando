@@ -5,89 +5,457 @@ import { useState } from "react";
 import { getIntegrationsAutomationHealth } from "@/lib/integrations-automation-health.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Workflow, RefreshCw, Zap, MessageSquare, AlertTriangle, CreditCard } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Workflow,
+  RefreshCw,
+  Zap,
+  MessageSquare,
+  AlertTriangle,
+  CreditCard,
+} from "lucide-react";
+import {
+  PageHeader,
+  KpiGrid,
+  MetricCard,
+  CoreSection,
+  LoadingState,
+  ErrorState,
+  KeyCountTable,
+} from "@/components/impulsionando";
+import { formatInt, formatDateTime } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/admin/integrations-automation-health")({
+export const Route = createFileRoute(
+  "/_authenticated/admin/integrations-automation-health",
+)({
   component: Page,
-  errorComponent: ({ error, reset }) => { const router = useRouter(); return (<div className="p-6"><Card><CardHeader><CardTitle className="text-destructive">Erro</CardTitle></CardHeader><CardContent><p className="text-sm">{error.message}</p><Button size="sm" onClick={()=>{reset();router.invalidate();}}>Tentar novamente</Button></CardContent></Card></div>); },
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter();
+    return (
+      <div className="p-6">
+        <ErrorState
+          title="Não foi possível carregar Integrações & Automação"
+          description={error.message}
+          action={
+            <Button
+              size="sm"
+              onClick={() => {
+                reset();
+                router.invalidate();
+              }}
+            >
+              Tentar novamente
+            </Button>
+          }
+        />
+      </div>
+    );
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 });
-
-const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 
 function Page() {
   const fn = useServerFn(getIntegrationsAutomationHealth);
   const [days, setDays] = useState(30);
-  const { data, isLoading, refetch, isFetching } = useQuery({ queryKey: ["admin","integrations-auto-health",days], queryFn: () => fn({data:{days}}) });
-  if (isLoading) return <div className="p-6"><Skeleton className="h-8 w-72 mb-4"/><div className="grid grid-cols-4 gap-3">{Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-24"/>)}</div></div>;
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["admin", "integrations-auto-health", days],
+    queryFn: () => fn({ data: { days } }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <LoadingState label="Carregando integrações e automações…" />
+      </div>
+    );
+  }
   if (!data) return null;
+
+  const integrationsErrorTone: "critical" | "warning" | "positive" =
+    data.integrations.withError > 0
+      ? data.integrations.withError >= 5
+        ? "critical"
+        : "warning"
+      : "positive";
+  const webhooksTone: "critical" | "warning" | "positive" =
+    data.webhooks.failed > 0
+      ? data.webhooks.failed >= 10
+        ? "critical"
+        : "warning"
+      : "positive";
+  const mpTone: "critical" | "warning" | "positive" =
+    data.mercadoPago.invalidSignatures > 0 || data.mercadoPago.errors > 0
+      ? "warning"
+      : "positive";
+  const runtimeTone: "critical" | "warning" | "positive" =
+    data.runtime.errors > 0
+      ? data.runtime.errors >= 20
+        ? "critical"
+        : "warning"
+      : "positive";
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><Workflow className="h-6 w-6 text-primary"/>Webhooks, Integrations & Automation</h1>
-          <p className="text-sm text-muted-foreground">Integrações cadastradas, webhooks, Mercado Pago, N8N, WhatsApp e runtime events.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={String(days)} onValueChange={(v)=>setDays(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue/></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 dias</SelectItem>
-              <SelectItem value="30">30 dias</SelectItem>
-              <SelectItem value="60">60 dias</SelectItem>
-              <SelectItem value="90">90 dias</SelectItem>
-              <SelectItem value="180">180 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw className={`h-4 w-4 mr-2 ${isFetching?"animate-spin":""}`}/>Atualizar</Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Saúde do ecossistema"
+        title="Integrações, Webhooks & Automação"
+        description="Integrações conectadas ao Core, webhooks recebidos, Mercado Pago, N8N e eventos de runtime."
+        actions={
+          <>
+            <Select
+              value={String(days)}
+              onValueChange={(v) => setDays(Number(v))}
+            >
+              <SelectTrigger className="w-32" aria-label="Janela de análise">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="60">60 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="180">180 dias</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Atualizar dados"
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              Atualizar
+            </Button>
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Integrações Ativas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.integrations.active)}<span className="text-sm text-muted-foreground">/{fmt(data.integrations.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.integrations.withError)} c/ erro</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Webhooks (Runs)</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.webhooks.success)}<span className="text-sm text-muted-foreground">/{fmt(data.webhooks.runs)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.webhooks.failed)} falhas · {fmt(data.webhooks.retried)} retries</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><CreditCard className="h-4 w-4"/>Mercado Pago</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.mercadoPago.processed)}<span className="text-sm text-muted-foreground">/{fmt(data.mercadoPago.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.mercadoPago.invalidSignatures)} sig inválidas · {fmt(data.mercadoPago.errors)} erros</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Zap className="h-4 w-4"/>N8N Runs</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.n8n.success)}<span className="text-sm text-muted-foreground">/{fmt(data.n8n.runs)}</span></div><p className="text-xs text-muted-foreground">{Math.round(data.n8n.avgLatencyMs)}ms · {fmt(data.n8n.failed)} falhas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Logs de Integração</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.integrationLogs.success)}<span className="text-sm text-muted-foreground">/{fmt(data.integrationLogs.total)}</span></div><p className="text-xs text-muted-foreground">{Math.round(data.integrationLogs.avgMs)}ms médio</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Event Log</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.webhooks.eventsProcessed)}<span className="text-sm text-muted-foreground">/{fmt(data.webhooks.events)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.webhooks.eventsReplayed)} replays</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><MessageSquare className="h-4 w-4"/>WhatsApp Events</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.whatsapp.events)}</div><p className="text-xs text-muted-foreground">{fmt(data.whatsapp.errors)} com erro</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4"/>Runtime Errors</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-600">{fmt(data.runtime.errors)}</div><p className="text-xs text-muted-foreground">de {fmt(data.runtime.events)} eventos</p></CardContent></Card>
+      <CoreSection
+        title="Indicadores do período"
+        description={`Janela de ${data.window.days} dias.`}
+      >
+        <KpiGrid columns={4}>
+          <MetricCard
+            icon={<Workflow className="h-4 w-4" aria-hidden="true" />}
+            label="Integrações ativas"
+            tone={integrationsErrorTone}
+            value={
+              <>
+                {formatInt(data.integrations.active)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.integrations.total)}
+                </span>
+              </>
+            }
+            hint={`${formatInt(data.integrations.withError)} com falha`}
+          />
+          <MetricCard
+            label="Webhooks — execuções"
+            tone={webhooksTone}
+            value={
+              <>
+                {formatInt(data.webhooks.success)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.webhooks.runs)}
+                </span>
+              </>
+            }
+            hint={`${formatInt(data.webhooks.failed)} falhas · ${formatInt(data.webhooks.retried)} reprocessamentos`}
+          />
+          <MetricCard
+            icon={<CreditCard className="h-4 w-4" aria-hidden="true" />}
+            label="Mercado Pago"
+            tone={mpTone}
+            value={
+              <>
+                {formatInt(data.mercadoPago.processed)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.mercadoPago.total)}
+                </span>
+              </>
+            }
+            hint={`${formatInt(data.mercadoPago.invalidSignatures)} assinaturas inválidas · ${formatInt(data.mercadoPago.errors)} erros`}
+          />
+          <MetricCard
+            icon={<Zap className="h-4 w-4" aria-hidden="true" />}
+            label="N8N — execuções"
+            value={
+              <>
+                {formatInt(data.n8n.success)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.n8n.runs)}
+                </span>
+              </>
+            }
+            hint={`${Math.round(data.n8n.avgLatencyMs)}ms médio · ${formatInt(data.n8n.failed)} falhas`}
+          />
+          <MetricCard
+            label="Logs de integração"
+            value={
+              <>
+                {formatInt(data.integrationLogs.success)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.integrationLogs.total)}
+                </span>
+              </>
+            }
+            hint={`${Math.round(data.integrationLogs.avgMs)}ms médio`}
+          />
+          <MetricCard
+            label="Eventos processados"
+            value={
+              <>
+                {formatInt(data.webhooks.eventsProcessed)}
+                <span className="text-sm text-muted-foreground">
+                  /{formatInt(data.webhooks.events)}
+                </span>
+              </>
+            }
+            hint={`${formatInt(data.webhooks.eventsReplayed)} reprocessamentos`}
+          />
+          <MetricCard
+            icon={<MessageSquare className="h-4 w-4" aria-hidden="true" />}
+            label="WhatsApp — eventos"
+            tone={data.whatsapp.errors > 0 ? "warning" : "default"}
+            value={formatInt(data.whatsapp.events)}
+            hint={`${formatInt(data.whatsapp.errors)} com falha`}
+          />
+          <MetricCard
+            icon={<AlertTriangle className="h-4 w-4" aria-hidden="true" />}
+            label="Erros de runtime"
+            tone={runtimeTone}
+            value={formatInt(data.runtime.errors)}
+            hint={`de ${formatInt(data.runtime.events)} eventos`}
+          />
+        </KpiGrid>
+      </CoreSection>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Integrações — chamadas por origem
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b">
+                  <tr>
+                    <th scope="col" className="text-left py-2 font-medium">
+                      Integração
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Execuções
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Falhas
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.integrationLogs.topIntegrations.map((i, idx) => (
+                    <tr key={idx} className="border-b last:border-0">
+                      <td className="py-2 break-words">{i.slug}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatInt(i.total)}
+                      </td>
+                      <td
+                        className={`py-2 text-right tabular-nums ${
+                          i.failed > 0 ? "text-destructive" : ""
+                        }`}
+                      >
+                        {formatInt(i.failed)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Webhooks — automações mais executadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b">
+                  <tr>
+                    <th scope="col" className="text-left py-2 font-medium">
+                      Automação
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Execuções
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Falhas
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.webhooks.topWorkflows.map((w, idx) => (
+                    <tr key={idx} className="border-b last:border-0">
+                      <td className="py-2 break-words">{w.workflow}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatInt(w.total)}
+                      </td>
+                      <td
+                        className={`py-2 text-right tabular-nums ${
+                          w.failed > 0 ? "text-destructive" : ""
+                        }`}
+                      >
+                        {formatInt(w.failed)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Top Integrações (chamadas)</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><thead className="text-xs text-muted-foreground border-b"><tr><th className="text-left py-2">Slug</th><th className="text-right">Total</th><th className="text-right">Falhas</th></tr></thead><tbody>
-          {data.integrationLogs.topIntegrations.map((i,idx)=>(<tr key={idx} className="border-b last:border-0"><td className="py-2">{i.slug}</td><td className="text-right">{fmt(i.total)}</td><td className="text-right text-red-600">{fmt(i.failed)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Top Webhook Workflows</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><thead className="text-xs text-muted-foreground border-b"><tr><th className="text-left py-2">Workflow</th><th className="text-right">Total</th><th className="text-right">Falhas</th></tr></thead><tbody>
-          {data.webhooks.topWorkflows.map((w,idx)=>(<tr key={idx} className="border-b last:border-0"><td className="py-2">{w.workflow}</td><td className="text-right">{fmt(w.total)}</td><td className="text-right text-red-600">{fmt(w.failed)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Top Réguas N8N</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><thead className="text-xs text-muted-foreground border-b"><tr><th className="text-left py-2">Régua</th><th className="text-right">Runs</th><th className="text-right">Falhas</th></tr></thead><tbody>
-          {data.n8n.topReguas.map((r,idx)=>(<tr key={idx} className="border-b last:border-0"><td className="py-2">{r.regua}</td><td className="text-right">{fmt(r.total)}</td><td className="text-right text-red-600">{fmt(r.failed)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Canais N8N</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.n8n.channels.map((c,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2 capitalize">{c.channel}</td><td className="text-right">{fmt(c.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              N8N — réguas mais acionadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b">
+                  <tr>
+                    <th scope="col" className="text-left py-2 font-medium">
+                      Régua
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Execuções
+                    </th>
+                    <th scope="col" className="text-right py-2 font-medium">
+                      Falhas
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.n8n.topReguas.map((r, idx) => (
+                    <tr key={idx} className="border-b last:border-0">
+                      <td className="py-2 break-words">{r.regua}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatInt(r.total)}
+                      </td>
+                      <td
+                        className={`py-2 text-right tabular-nums ${
+                          r.failed > 0 ? "text-destructive" : ""
+                        }`}
+                      >
+                        {formatInt(r.failed)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">N8N — canais</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <KeyCountTable
+              keyLabel="Canal"
+              countLabel="Execuções"
+              rows={data.n8n.channels.map((c) => ({
+                k: c.channel,
+                count: c.count,
+              }))}
+              ariaLabel="Distribuição de execuções N8N por canal"
+              emptyTitle="Nenhum canal com execuções nesta janela."
+            />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Tipos de Evento MP</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.mercadoPago.eventTypes.map((m,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{m.type}</td><td className="text-right">{fmt(m.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">WhatsApp por Status</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.whatsapp.statuses.map((w,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2 capitalize">{w.status}</td><td className="text-right">{fmt(w.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Runtime por Nível</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.runtime.levels.map((r,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2 capitalize">{r.level}</td><td className="text-right">{fmt(r.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Mercado Pago — tipos de evento
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <KeyCountTable
+              keyLabel="Evento"
+              countLabel="Total"
+              rows={data.mercadoPago.eventTypes.map((m) => ({
+                k: m.type,
+                count: m.count,
+              }))}
+              ariaLabel="Distribuição de eventos Mercado Pago"
+              emptyTitle="Sem eventos Mercado Pago nesta janela."
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              WhatsApp — status dos eventos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <KeyCountTable
+              keyLabel="Status"
+              countLabel="Total"
+              rows={data.whatsapp.statuses.map((w) => ({
+                k: w.status,
+                count: w.count,
+              }))}
+              ariaLabel="Distribuição de status de eventos WhatsApp"
+              emptyTitle="Sem eventos WhatsApp nesta janela."
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Runtime — eventos por nível
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <KeyCountTable
+              keyLabel="Nível"
+              countLabel="Total"
+              rows={data.runtime.levels.map((r) => ({
+                k: r.level,
+                count: r.count,
+              }))}
+              ariaLabel="Distribuição de eventos de runtime por nível"
+              emptyTitle="Sem eventos de runtime nesta janela."
+            />
+          </CardContent>
+        </Card>
       </div>
 
-      <p className="text-xs text-muted-foreground">Janela: últimos {data.window.days} dias • Atualizado em {new Date(data.generatedAt).toLocaleString("pt-BR")}</p>
+      <p className="text-xs text-muted-foreground">
+        Janela: últimos {data.window.days} dias • Atualizado em{" "}
+        {formatDateTime(data.generatedAt)}
+      </p>
     </div>
   );
 }

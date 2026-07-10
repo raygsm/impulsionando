@@ -152,3 +152,142 @@ Nenhuma pendência de backend. Toda a fase é UX / Design System.
 - `src/routes/_authenticated/busca.tsx` (copy)
 - `src/routes/_authenticated/area-clube.tsx` (copy)
 - `docs/CORE_HOMOLOGACAO_P6.md` (este documento)
+
+---
+
+## Subonda P6.5 — Integrações, Comunicação e Confiabilidade Operacional
+
+Aprovada como continuação natural da P6.4. Foco em Integrações,
+Automação, Comunicação, Entregabilidade e Confiabilidade.
+
+### Arquivos migrados (4)
+
+- `src/routes/_authenticated/admin.integrations-automation-health.tsx`
+- `src/routes/_authenticated/admin.comms-health.tsx`
+- `src/routes/_authenticated/admin.notification-deliverability-health.tsx`
+- `src/routes/_authenticated/admin.jobs-queues-reliability-health.tsx`
+
+### Componentes adotados
+
+`PageHeader`, `KpiGrid`, `MetricCard` (com `tone` semântico +
+`tabular-nums`), `CoreSection`, `LoadingState`, `EmptyState`,
+`ErrorState`, `KeyCountTable` (novo primitivo — ver abaixo).
+
+### Novo primitivo compartilhado — `KeyCountTable`
+
+Promovido a partir do padrão local `Tab`/`SimpleTable` que reaparecia em
+todos os 4 arquivos deste lote (>25 tabelas `k/count` só em
+`comms-health`). Arquivo: `src/components/impulsionando/KeyCountTable.tsx`.
+
+Contrato mínimo e reutilizável:
+
+```tsx
+<KeyCountTable
+  keyLabel="Canal"
+  countLabel="Total"
+  rows={[{ k: "email", count: 120 }]}
+  ariaLabel="Distribuição por canal"
+  emptyTitle="Nenhum envio nesta janela."
+/>
+```
+
+- Cabeçalhos `<th scope="col">` explícitos.
+- `caption` acessível via `ariaLabel` (visualmente oculto).
+- Coluna de contagem com `tabular-nums`.
+- `EmptyState` compacto interno quando `rows` vazio.
+- API estável para futura reutilização (não abstrai além do necessário).
+
+Exportado em `src/components/impulsionando/index.ts`.
+
+### Duplicações removidas
+
+- Helpers locais `fmt`, `pct`, `sec` eliminados (substituídos por
+  `formatInt` / `formatPct` de `@/lib/format`; `sec` mantido só em
+  `jobs-queues-reliability-health` porque é uma formatação específica
+  de latência).
+- Componente `Tab` local em `comms-health.tsx` — removido.
+- `Skeleton` manual em quatro rotas — substituído por `LoadingState`.
+- Blocos `errorComponent` inline com `<Card>` — substituídos por
+  `ErrorState`.
+- Mensagens “Sem dados.” / “—” genéricas — substituídas por
+  `KeyCountTable` com `emptyTitle` específico ou copy explícita.
+
+### Formatadores centralizados
+
+`formatInt`, `formatPct`, `formatDateTime` — todos de `@/lib/format`.
+
+### Melhorias de acessibilidade
+
+- H1 único via `PageHeader` em cada rota.
+- Selects com `aria-label="Janela de análise"`.
+- Botão “Atualizar” com `aria-label` e ícone `aria-hidden`.
+- Tabelas com `<thead>` + `<th scope="col">` explícito em todas as
+  tabelas restantes (SLO, credenciais WhatsApp, view de fila,
+  webhooks, integrações).
+- Checkmarks (`✓`/`—`) receberam `<span class="sr-only">Sim/Não</span>`
+  para não depender apenas de glifo visual.
+- Estados de health / throttle expressos por `Badge` semântico +
+  rótulo textual, nunca só por cor.
+- `EmptyState` mantém `role="status"`.
+
+### Melhorias mobile
+
+- `KeyCountTable` envolvido em `overflow-x-auto` e usa `break-words`
+  nas células-chave (para IDs de integração, nomes de mailbox, etc.).
+- Tabelas ricas (WhatsApp credenciais, SLO, fila do funil) mantidas
+  em `overflow-x-auto` com quebras seguras nas colunas de texto.
+- `KpiGrid columns={4}` responde: 1 col mobile → 2 sm → 4 lg.
+- Badges longos (health, status de cron) usam `flex-wrap` no cabeçalho
+  da linha para não estourar em telas estreitas.
+
+### Tons semânticos aplicados
+
+- Entregabilidade (outbox, tentativas, WhatsApp, e-mail, webhooks):
+  helper `deliveryTone(rate, base)` — `positive ≥95%`, `warning ≥80%`,
+  `critical <80%`, `default` quando base insuficiente.
+- Integrações com erro / webhooks falhos / runtime errors — `warning`
+  com escalonamento para `critical` conforme volume.
+- Throttle de e-mail — `critical` quando ativo, `positive` quando livre.
+- WhatsApp credenciais unhealthy — `critical`; healthy/ok — `positive`.
+- Fila do funil, cron jobs, tarefas operacionais, incidentes — tons
+  escalonados por volume de falhas/atrasos.
+- Cobrança da diretriz: rótulo textual sempre presente ao lado do tom.
+
+### Copy padronizada
+
+- “tenant” removido dos textos visíveis nas 4 rotas.
+- Substituições: “Webhooks recebidos”, “clientes conectados ao Core”,
+  “automação”, “reprocessamentos”, “falhas”, “ação necessária” (nos
+  estados vazios), “assinaturas inválidas” (MP), “descadastros”
+  (e-mail).
+
+### Regras respeitadas
+
+Nenhuma alteração de backend, queries, contratos de servidor, RLS,
+migrations, integrações ou dados. Comportamento funcional preservado
+(filtro de janela, refetch, dados renderizados).
+
+### Riscos / pendências
+
+Nenhum bloqueante. `KeyCountTable` já pronto para adoção nas próximas
+subondas — deve ser o vetor principal de consolidação nos ~50
+dashboards `admin.*-health.tsx` restantes.
+
+### Typecheck
+
+`bunx tsgo --noEmit` — sem erros.
+
+### Padronização estimada
+
+| Área                                    | Pós-P6.4 | Pós-P6.5 |
+| --------------------------------------- | -------: | -------: |
+| Biblioteca compartilhada disponível     |     95% |    **97%** (KeyCountTable) |
+| Rotas administrativas críticas migradas |     70% |     **78%** |
+| Formatadores canônicos                  |     55% |     **62%** |
+| KPI cards padronizados                  |     58% |     **68%** |
+| Copy “tenant → cliente”                 |     72% |     **80%** |
+| **Padronização global**                 | **~72%** | **~80%** |
+
+Próxima subonda sugerida (P6.6): Domínios/DNS/SSL de tenants,
+Publicação/Deploy e Segurança/Auditoria — famílias irmãs às health
+dashboards, com forte candidato de reuso para `KeyCountTable`.
