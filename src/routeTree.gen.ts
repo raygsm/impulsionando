@@ -229,10 +229,14 @@ import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ClubeBuscarRouteImport } from './routes/clube.buscar'
 import { Route as ClubeAvaliacoesRouteImport } from './routes/clube.avaliacoes'
 import { Route as ChrismedTeleconsultaRouteImport } from './routes/chrismed.teleconsulta'
+import { Route as ChrismedPrivacidadeRouteImport } from './routes/chrismed.privacidade'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as ChrismedOcupacionalRouteImport } from './routes/chrismed.ocupacional'
 import { Route as ChrismedMedicosRouteImport } from './routes/chrismed.medicos'
 import { Route as ChrismedInternacionalRouteImport } from './routes/chrismed.internacional'
+import { Route as ChrismedFaqRouteImport } from './routes/chrismed.faq'
+import { Route as ChrismedExamesRouteImport } from './routes/chrismed.exames'
+import { Route as ChrismedEspecialidadesRouteImport } from './routes/chrismed.especialidades'
 import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-cristiane'
 import { Route as ChrismedDomiciliarRouteImport } from './routes/chrismed.domiciliar'
 import { Route as ChrismedContatoRouteImport } from './routes/chrismed.contato'
@@ -2012,6 +2016,11 @@ const ChrismedTeleconsultaRoute = ChrismedTeleconsultaRouteImport.update({
   path: '/teleconsulta',
   getParentRoute: () => ChrismedRoute,
 } as any)
+const ChrismedPrivacidadeRoute = ChrismedPrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => ChrismedRoute,
+} as any)
 const ChrismedOfertasRoute = ChrismedOfertasRouteImport.update({
   id: '/ofertas',
   path: '/ofertas',
@@ -2030,6 +2039,21 @@ const ChrismedMedicosRoute = ChrismedMedicosRouteImport.update({
 const ChrismedInternacionalRoute = ChrismedInternacionalRouteImport.update({
   id: '/internacional',
   path: '/internacional',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedFaqRoute = ChrismedFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedExamesRoute = ChrismedExamesRouteImport.update({
+  id: '/exames',
+  path: '/exames',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedEspecialidadesRoute = ChrismedEspecialidadesRouteImport.update({
+  id: '/especialidades',
+  path: '/especialidades',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ChrismedDraCristianeRoute = ChrismedDraCristianeRouteImport.update({
@@ -6036,10 +6060,14 @@ export interface FileRoutesByFullPath {
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/exames': typeof ChrismedExamesRoute
+  '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
+  '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
@@ -6915,10 +6943,14 @@ export interface FileRoutesByTo {
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/exames': typeof ChrismedExamesRoute
+  '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
+  '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
@@ -7806,10 +7838,14 @@ export interface FileRoutesById {
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/exames': typeof ChrismedExamesRoute
+  '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
+  '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
@@ -8704,10 +8740,14 @@ export interface FileRouteTypes {
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/especialidades'
+    | '/chrismed/exames'
+    | '/chrismed/faq'
     | '/chrismed/internacional'
     | '/chrismed/medicos'
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
+    | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
     | '/clube/avaliacoes'
     | '/clube/buscar'
@@ -9583,10 +9623,14 @@ export interface FileRouteTypes {
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/especialidades'
+    | '/chrismed/exames'
+    | '/chrismed/faq'
     | '/chrismed/internacional'
     | '/chrismed/medicos'
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
+    | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
     | '/clube/avaliacoes'
     | '/clube/buscar'
@@ -10473,10 +10517,14 @@ export interface FileRouteTypes {
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/especialidades'
+    | '/chrismed/exames'
+    | '/chrismed/faq'
     | '/chrismed/internacional'
     | '/chrismed/medicos'
     | '/chrismed/ocupacional'
     | '/chrismed/ofertas'
+    | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
     | '/clube/avaliacoes'
     | '/clube/buscar'
@@ -13020,6 +13068,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChrismedTeleconsultaRouteImport
       parentRoute: typeof ChrismedRoute
     }
+    '/chrismed/privacidade': {
+      id: '/chrismed/privacidade'
+      path: '/privacidade'
+      fullPath: '/chrismed/privacidade'
+      preLoaderRoute: typeof ChrismedPrivacidadeRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
     '/chrismed/ofertas': {
       id: '/chrismed/ofertas'
       path: '/ofertas'
@@ -13046,6 +13101,27 @@ declare module '@tanstack/react-router' {
       path: '/internacional'
       fullPath: '/chrismed/internacional'
       preLoaderRoute: typeof ChrismedInternacionalRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/faq': {
+      id: '/chrismed/faq'
+      path: '/faq'
+      fullPath: '/chrismed/faq'
+      preLoaderRoute: typeof ChrismedFaqRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/exames': {
+      id: '/chrismed/exames'
+      path: '/exames'
+      fullPath: '/chrismed/exames'
+      preLoaderRoute: typeof ChrismedExamesRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/especialidades': {
+      id: '/chrismed/especialidades'
+      path: '/especialidades'
+      fullPath: '/chrismed/especialidades'
+      preLoaderRoute: typeof ChrismedEspecialidadesRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/chrismed/dra-cristiane': {
@@ -19396,10 +19472,14 @@ interface ChrismedRouteChildren {
   ChrismedContatoRoute: typeof ChrismedContatoRoute
   ChrismedDomiciliarRoute: typeof ChrismedDomiciliarRoute
   ChrismedDraCristianeRoute: typeof ChrismedDraCristianeRoute
+  ChrismedEspecialidadesRoute: typeof ChrismedEspecialidadesRoute
+  ChrismedExamesRoute: typeof ChrismedExamesRoute
+  ChrismedFaqRoute: typeof ChrismedFaqRoute
   ChrismedInternacionalRoute: typeof ChrismedInternacionalRoute
   ChrismedMedicosRoute: typeof ChrismedMedicosRoute
   ChrismedOcupacionalRoute: typeof ChrismedOcupacionalRoute
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
+  ChrismedPrivacidadeRoute: typeof ChrismedPrivacidadeRoute
   ChrismedTeleconsultaRoute: typeof ChrismedTeleconsultaRoute
 }
 
@@ -19410,10 +19490,14 @@ const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedContatoRoute: ChrismedContatoRoute,
   ChrismedDomiciliarRoute: ChrismedDomiciliarRoute,
   ChrismedDraCristianeRoute: ChrismedDraCristianeRoute,
+  ChrismedEspecialidadesRoute: ChrismedEspecialidadesRoute,
+  ChrismedExamesRoute: ChrismedExamesRoute,
+  ChrismedFaqRoute: ChrismedFaqRoute,
   ChrismedInternacionalRoute: ChrismedInternacionalRoute,
   ChrismedMedicosRoute: ChrismedMedicosRoute,
   ChrismedOcupacionalRoute: ChrismedOcupacionalRoute,
   ChrismedOfertasRoute: ChrismedOfertasRoute,
+  ChrismedPrivacidadeRoute: ChrismedPrivacidadeRoute,
   ChrismedTeleconsultaRoute: ChrismedTeleconsultaRoute,
 }
 
