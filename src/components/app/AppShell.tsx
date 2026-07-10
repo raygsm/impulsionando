@@ -104,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="min-h-dvh flex items-center justify-center bg-background p-6">
         <div className="max-w-sm text-center space-y-4">
           <h2 className="text-lg font-semibold">Não foi possível carregar seu perfil</h2>
           <p className="text-sm text-muted-foreground">
@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
