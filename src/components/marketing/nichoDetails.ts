@@ -79,6 +79,7 @@ export const NICHO_DETAILS: NichoDetail[] = [
     ],
     solution: [
       "Cadastro de pacientes",
+      "Prontuário eletrônico (histórico clínico, anamnese, evolução, prescrição, atestados e exames anexados)",
       "Agenda online",
       "Escolha de médico, serviço e horário",
       "Pagamento online antes da confirmação",
