@@ -145,18 +145,10 @@ import { Route as ModulosSuporteInteligenteRouteImport } from './routes/modulos.
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as MarocasSobreRouteImport } from './routes/marocas.sobre'
-import { Route as MarocasReservasRouteImport } from './routes/marocas.reservas'
 import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
-import { Route as MarocasPedidosRouteImport } from './routes/marocas.pedidos'
 import { Route as MarocasLoginRouteImport } from './routes/marocas.login'
 import { Route as MarocasFaqRouteImport } from './routes/marocas.faq'
-import { Route as MarocasEventosRouteImport } from './routes/marocas.eventos'
-import { Route as MarocasDeliveryRouteImport } from './routes/marocas.delivery'
 import { Route as MarocasContatoRouteImport } from './routes/marocas.contato'
-import { Route as MarocasCheckoutRouteImport } from './routes/marocas.checkout'
-import { Route as MarocasCarrinhoRouteImport } from './routes/marocas.carrinho'
-import { Route as MarocasCardapioRouteImport } from './routes/marocas.cardapio'
-import { Route as MarocasAssistenteRouteImport } from './routes/marocas.assistente'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as GarridoTemporadaRouteImport } from './routes/garrido.temporada'
 import { Route as GarridoRuralRouteImport } from './routes/garrido.rural'
@@ -319,9 +311,6 @@ import { Route as RiomedFornecedorCadastroRouteImport } from './routes/riomed.fo
 import { Route as RiomedCotizacionTokenRouteImport } from './routes/riomed.cotizacion.$token'
 import { Route as PortalProprietarioTokenRouteImport } from './routes/portal.proprietario.$token'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
-import { Route as MarocasPedidosIdRouteImport } from './routes/marocas.pedidos.$id'
-import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
-import { Route as MarocasCardapioSlugRouteImport } from './routes/marocas.cardapio.$slug'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as GarridoImovelSlugRouteImport } from './routes/garrido.imovel.$slug'
@@ -1560,19 +1549,9 @@ const MarocasSobreRoute = MarocasSobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => MarocasRoute,
 } as any)
-const MarocasReservasRoute = MarocasReservasRouteImport.update({
-  id: '/reservas',
-  path: '/reservas',
-  getParentRoute: () => MarocasRoute,
-} as any)
 const MarocasPlanosRoute = MarocasPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasPedidosRoute = MarocasPedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
   getParentRoute: () => MarocasRoute,
 } as any)
 const MarocasLoginRoute = MarocasLoginRouteImport.update({
@@ -1585,39 +1564,9 @@ const MarocasFaqRoute = MarocasFaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => MarocasRoute,
 } as any)
-const MarocasEventosRoute = MarocasEventosRouteImport.update({
-  id: '/eventos',
-  path: '/eventos',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasDeliveryRoute = MarocasDeliveryRouteImport.update({
-  id: '/delivery',
-  path: '/delivery',
-  getParentRoute: () => MarocasRoute,
-} as any)
 const MarocasContatoRoute = MarocasContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasCheckoutRoute = MarocasCheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasCarrinhoRoute = MarocasCarrinhoRouteImport.update({
-  id: '/carrinho',
-  path: '/carrinho',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasCardapioRoute = MarocasCardapioRouteImport.update({
-  id: '/cardapio',
-  path: '/cardapio',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasAssistenteRoute = MarocasAssistenteRouteImport.update({
-  id: '/assistente',
-  path: '/assistente',
   getParentRoute: () => MarocasRoute,
 } as any)
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
@@ -2456,21 +2405,6 @@ const PortalContabilidadeTokenRoute =
     path: '/portal/contabilidade/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MarocasPedidosIdRoute = MarocasPedidosIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => MarocasPedidosRoute,
-} as any)
-const MarocasContratarPlanoRoute = MarocasContratarPlanoRouteImport.update({
-  id: '/contratar/$plano',
-  path: '/contratar/$plano',
-  getParentRoute: () => MarocasRoute,
-} as any)
-const MarocasCardapioSlugRoute = MarocasCardapioSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => MarocasCardapioRoute,
-} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -5906,18 +5840,10 @@ export interface FileRoutesByFullPath {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
-  '/marocas/assistente': typeof MarocasAssistenteRoute
-  '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
-  '/marocas/carrinho': typeof MarocasCarrinhoRoute
-  '/marocas/checkout': typeof MarocasCheckoutRoute
   '/marocas/contato': typeof MarocasContatoRoute
-  '/marocas/delivery': typeof MarocasDeliveryRoute
-  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
-  '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
-  '/marocas/reservas': typeof MarocasReservasRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -6372,9 +6298,6 @@ export interface FileRoutesByFullPath {
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/marocas/cardapio/$slug': typeof MarocasCardapioSlugRoute
-  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
-  '/marocas/pedidos/$id': typeof MarocasPedidosIdRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
@@ -6754,18 +6677,10 @@ export interface FileRoutesByTo {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
-  '/marocas/assistente': typeof MarocasAssistenteRoute
-  '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
-  '/marocas/carrinho': typeof MarocasCarrinhoRoute
-  '/marocas/checkout': typeof MarocasCheckoutRoute
   '/marocas/contato': typeof MarocasContatoRoute
-  '/marocas/delivery': typeof MarocasDeliveryRoute
-  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
-  '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
-  '/marocas/reservas': typeof MarocasReservasRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -7219,9 +7134,6 @@ export interface FileRoutesByTo {
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/marocas/cardapio/$slug': typeof MarocasCardapioSlugRoute
-  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
-  '/marocas/pedidos/$id': typeof MarocasPedidosIdRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
@@ -7620,18 +7532,10 @@ export interface FileRoutesById {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
-  '/marocas/assistente': typeof MarocasAssistenteRoute
-  '/marocas/cardapio': typeof MarocasCardapioRouteWithChildren
-  '/marocas/carrinho': typeof MarocasCarrinhoRoute
-  '/marocas/checkout': typeof MarocasCheckoutRoute
   '/marocas/contato': typeof MarocasContatoRoute
-  '/marocas/delivery': typeof MarocasDeliveryRoute
-  '/marocas/eventos': typeof MarocasEventosRoute
   '/marocas/faq': typeof MarocasFaqRoute
   '/marocas/login': typeof MarocasLoginRoute
-  '/marocas/pedidos': typeof MarocasPedidosRouteWithChildren
   '/marocas/planos': typeof MarocasPlanosRoute
-  '/marocas/reservas': typeof MarocasReservasRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -8086,9 +7990,6 @@ export interface FileRoutesById {
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/marocas/cardapio/$slug': typeof MarocasCardapioSlugRoute
-  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
-  '/marocas/pedidos/$id': typeof MarocasPedidosIdRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
@@ -8488,18 +8389,10 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
-    | '/marocas/assistente'
-    | '/marocas/cardapio'
-    | '/marocas/carrinho'
-    | '/marocas/checkout'
     | '/marocas/contato'
-    | '/marocas/delivery'
-    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
-    | '/marocas/pedidos'
     | '/marocas/planos'
-    | '/marocas/reservas'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -8954,9 +8847,6 @@ export interface FileRouteTypes {
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/marocas/cardapio/$slug'
-    | '/marocas/contratar/$plano'
-    | '/marocas/pedidos/$id'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
     | '/riomed/cotizacion/$token'
@@ -9336,18 +9226,10 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
-    | '/marocas/assistente'
-    | '/marocas/cardapio'
-    | '/marocas/carrinho'
-    | '/marocas/checkout'
     | '/marocas/contato'
-    | '/marocas/delivery'
-    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
-    | '/marocas/pedidos'
     | '/marocas/planos'
-    | '/marocas/reservas'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -9801,9 +9683,6 @@ export interface FileRouteTypes {
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/marocas/cardapio/$slug'
-    | '/marocas/contratar/$plano'
-    | '/marocas/pedidos/$id'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
     | '/riomed/cotizacion/$token'
@@ -10201,18 +10080,10 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
-    | '/marocas/assistente'
-    | '/marocas/cardapio'
-    | '/marocas/carrinho'
-    | '/marocas/checkout'
     | '/marocas/contato'
-    | '/marocas/delivery'
-    | '/marocas/eventos'
     | '/marocas/faq'
     | '/marocas/login'
-    | '/marocas/pedidos'
     | '/marocas/planos'
-    | '/marocas/reservas'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -10667,9 +10538,6 @@ export interface FileRouteTypes {
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/marocas/cardapio/$slug'
-    | '/marocas/contratar/$plano'
-    | '/marocas/pedidos/$id'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
     | '/riomed/cotizacion/$token'
@@ -12051,25 +11919,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarocasSobreRouteImport
       parentRoute: typeof MarocasRoute
     }
-    '/marocas/reservas': {
-      id: '/marocas/reservas'
-      path: '/reservas'
-      fullPath: '/marocas/reservas'
-      preLoaderRoute: typeof MarocasReservasRouteImport
-      parentRoute: typeof MarocasRoute
-    }
     '/marocas/planos': {
       id: '/marocas/planos'
       path: '/planos'
       fullPath: '/marocas/planos'
       preLoaderRoute: typeof MarocasPlanosRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/pedidos': {
-      id: '/marocas/pedidos'
-      path: '/pedidos'
-      fullPath: '/marocas/pedidos'
-      preLoaderRoute: typeof MarocasPedidosRouteImport
       parentRoute: typeof MarocasRoute
     }
     '/marocas/login': {
@@ -12086,53 +11940,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarocasFaqRouteImport
       parentRoute: typeof MarocasRoute
     }
-    '/marocas/eventos': {
-      id: '/marocas/eventos'
-      path: '/eventos'
-      fullPath: '/marocas/eventos'
-      preLoaderRoute: typeof MarocasEventosRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/delivery': {
-      id: '/marocas/delivery'
-      path: '/delivery'
-      fullPath: '/marocas/delivery'
-      preLoaderRoute: typeof MarocasDeliveryRouteImport
-      parentRoute: typeof MarocasRoute
-    }
     '/marocas/contato': {
       id: '/marocas/contato'
       path: '/contato'
       fullPath: '/marocas/contato'
       preLoaderRoute: typeof MarocasContatoRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/checkout': {
-      id: '/marocas/checkout'
-      path: '/checkout'
-      fullPath: '/marocas/checkout'
-      preLoaderRoute: typeof MarocasCheckoutRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/carrinho': {
-      id: '/marocas/carrinho'
-      path: '/carrinho'
-      fullPath: '/marocas/carrinho'
-      preLoaderRoute: typeof MarocasCarrinhoRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/cardapio': {
-      id: '/marocas/cardapio'
-      path: '/cardapio'
-      fullPath: '/marocas/cardapio'
-      preLoaderRoute: typeof MarocasCardapioRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/assistente': {
-      id: '/marocas/assistente'
-      path: '/assistente'
-      fullPath: '/marocas/assistente'
-      preLoaderRoute: typeof MarocasAssistenteRouteImport
       parentRoute: typeof MarocasRoute
     }
     '/imoveis/$slug': {
@@ -13268,27 +13080,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/contabilidade/$token'
       preLoaderRoute: typeof PortalContabilidadeTokenRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/marocas/pedidos/$id': {
-      id: '/marocas/pedidos/$id'
-      path: '/$id'
-      fullPath: '/marocas/pedidos/$id'
-      preLoaderRoute: typeof MarocasPedidosIdRouteImport
-      parentRoute: typeof MarocasPedidosRoute
-    }
-    '/marocas/contratar/$plano': {
-      id: '/marocas/contratar/$plano'
-      path: '/contratar/$plano'
-      fullPath: '/marocas/contratar/$plano'
-      preLoaderRoute: typeof MarocasContratarPlanoRouteImport
-      parentRoute: typeof MarocasRoute
-    }
-    '/marocas/cardapio/$slug': {
-      id: '/marocas/cardapio/$slug'
-      path: '/$slug'
-      fullPath: '/marocas/cardapio/$slug'
-      preLoaderRoute: typeof MarocasCardapioSlugRouteImport
-      parentRoute: typeof MarocasCardapioRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -19027,62 +18818,20 @@ const GarridoRouteChildren: GarridoRouteChildren = {
 const GarridoRouteWithChildren =
   GarridoRoute._addFileChildren(GarridoRouteChildren)
 
-interface MarocasCardapioRouteChildren {
-  MarocasCardapioSlugRoute: typeof MarocasCardapioSlugRoute
-}
-
-const MarocasCardapioRouteChildren: MarocasCardapioRouteChildren = {
-  MarocasCardapioSlugRoute: MarocasCardapioSlugRoute,
-}
-
-const MarocasCardapioRouteWithChildren = MarocasCardapioRoute._addFileChildren(
-  MarocasCardapioRouteChildren,
-)
-
-interface MarocasPedidosRouteChildren {
-  MarocasPedidosIdRoute: typeof MarocasPedidosIdRoute
-}
-
-const MarocasPedidosRouteChildren: MarocasPedidosRouteChildren = {
-  MarocasPedidosIdRoute: MarocasPedidosIdRoute,
-}
-
-const MarocasPedidosRouteWithChildren = MarocasPedidosRoute._addFileChildren(
-  MarocasPedidosRouteChildren,
-)
-
 interface MarocasRouteChildren {
-  MarocasAssistenteRoute: typeof MarocasAssistenteRoute
-  MarocasCardapioRoute: typeof MarocasCardapioRouteWithChildren
-  MarocasCarrinhoRoute: typeof MarocasCarrinhoRoute
-  MarocasCheckoutRoute: typeof MarocasCheckoutRoute
   MarocasContatoRoute: typeof MarocasContatoRoute
-  MarocasDeliveryRoute: typeof MarocasDeliveryRoute
-  MarocasEventosRoute: typeof MarocasEventosRoute
   MarocasFaqRoute: typeof MarocasFaqRoute
   MarocasLoginRoute: typeof MarocasLoginRoute
-  MarocasPedidosRoute: typeof MarocasPedidosRouteWithChildren
   MarocasPlanosRoute: typeof MarocasPlanosRoute
-  MarocasReservasRoute: typeof MarocasReservasRoute
   MarocasSobreRoute: typeof MarocasSobreRoute
-  MarocasContratarPlanoRoute: typeof MarocasContratarPlanoRoute
 }
 
 const MarocasRouteChildren: MarocasRouteChildren = {
-  MarocasAssistenteRoute: MarocasAssistenteRoute,
-  MarocasCardapioRoute: MarocasCardapioRouteWithChildren,
-  MarocasCarrinhoRoute: MarocasCarrinhoRoute,
-  MarocasCheckoutRoute: MarocasCheckoutRoute,
   MarocasContatoRoute: MarocasContatoRoute,
-  MarocasDeliveryRoute: MarocasDeliveryRoute,
-  MarocasEventosRoute: MarocasEventosRoute,
   MarocasFaqRoute: MarocasFaqRoute,
   MarocasLoginRoute: MarocasLoginRoute,
-  MarocasPedidosRoute: MarocasPedidosRouteWithChildren,
   MarocasPlanosRoute: MarocasPlanosRoute,
-  MarocasReservasRoute: MarocasReservasRoute,
   MarocasSobreRoute: MarocasSobreRoute,
-  MarocasContratarPlanoRoute: MarocasContratarPlanoRoute,
 }
 
 const MarocasRouteWithChildren =
