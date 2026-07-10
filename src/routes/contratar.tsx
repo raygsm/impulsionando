@@ -42,7 +42,7 @@ export const Route = createFileRoute('/contratar')({
   head: () => ({
     meta: [
       { title: 'Contratar — Impulsionando Tecnologia' },
-      { name: 'description', content: 'Escolha seu plano e comece com 3 dias de teste grátis. Essencial, Completo ou Sob Medida.' },
+      { name: 'description', content: 'Contrate agora ou experimente 7 dias grátis (opcional). Essencial, Ideal, Full ou Sob Medida.' },
     ],
   }),
 })
@@ -108,11 +108,11 @@ function ContratarPage() {
       <div className="container max-w-6xl mx-auto">
         <header className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">
-            <Sparkles className="w-3 h-3 mr-1" /> 3 dias grátis em qualquer plano empresarial
+            <Sparkles className="w-3 h-3 mr-1" /> Trial de 7 dias grátis é opcional
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Escolha seu plano</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comece com trial de 3 dias. Sem cartão. Setup + 1ª mensalidade só ao ativar.
+            Contrate agora e comece a usar imediatamente, ou experimente 7 dias grátis antes — sem cartão.
           </p>
           <p className="text-xs text-muted-foreground mt-2">
             Preços atrelados ao salário mínimo vigente ({formatBRL(wage)}).
@@ -179,11 +179,23 @@ function ContratarPage() {
                     <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Setup: {formatBRL(p.setup)}</li>
                     <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />{p.modules}</li>
                     <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Contrato mínimo {p.minDays} dias</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Trial 3 dias grátis</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />Trial 7 dias grátis (opcional)</li>
                   </ul>
-                  <Button className="w-full" size="lg" onClick={() => openTrial(p.code)}>
-                    Começar trial grátis
-                  </Button>
+                  <div className="space-y-2">
+                    <Button asChild className="w-full" size="lg">
+                      <Link to="/checkout/$plan" params={{ plan: p.code }}>
+                        Contratar agora
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      size="sm"
+                      onClick={() => openTrial(p.code)}
+                    >
+                      Ou testar 7 dias grátis
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -255,8 +267,8 @@ function ContratarPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Começar trial de 3 dias</DialogTitle>
-            <DialogDescription>Crie sua conta para acessar o ambiente. Sem cartão.</DialogDescription>
+            <DialogTitle>Começar trial de 7 dias</DialogTitle>
+            <DialogDescription>Crie sua conta para acessar o ambiente por 7 dias. Sem cartão.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <OfficialChannelNotice origin="contratar" />
@@ -290,7 +302,7 @@ function ContratarPage() {
             </div>
             <DialogFooter>
               <Button type="submit" disabled={submitting || !form.accept_terms} className="w-full">
-                {submitting ? 'Criando…' : 'Iniciar trial grátis'}
+                {submitting ? 'Criando…' : 'Iniciar trial de 7 dias'}
               </Button>
             </DialogFooter>
           </form>

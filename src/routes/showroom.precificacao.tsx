@@ -270,8 +270,13 @@ function ShowroomPrecificacao() {
                   className="mt-5 w-full"
                   variant={p.highlight ? "default" : "outline"}
                 >
-                  {p.key === "scale" ? "Falar com vendas" : "Começar 14 dias grátis"}
+                  {p.key === "scale" ? "Falar com vendas" : "Contratar agora"}
                 </Button>
+                {p.key !== "scale" && (
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                    Trial de 7 dias grátis é opcional
+                  </p>
+                )}
               </Card>
             );
           })}
@@ -393,8 +398,11 @@ function ShowroomPrecificacao() {
               </div>
 
               <Button className="mt-5 w-full">
-                Começar 14 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                Contratar agora <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                Trial de 7 dias grátis é opcional
+              </p>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">
                 Simulação com premissas conservadoras. Resultados variam por nicho e operação.
               </p>
