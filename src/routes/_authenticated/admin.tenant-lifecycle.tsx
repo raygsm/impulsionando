@@ -111,7 +111,7 @@ function Page() {
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4"/> Trials expirando em 7 dias</CardTitle></CardHeader>
           <CardContent>
-            {d.trialsExpiringSoon.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum trial expirando em breve.</p> : (
+            {d.trialsExpiringSoon.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum trial com expiração nos próximos 7 dias.</p> : (
               <table className="w-full text-sm">
                 <thead className="text-left text-xs text-muted-foreground border-b">
                   <tr><th className="py-2">Tenant</th><th>Plano</th><th>Termina em</th><th className="text-right">Dias</th></tr>

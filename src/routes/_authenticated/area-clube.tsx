@@ -357,7 +357,7 @@ function PollsCard({ polls, onVote }: { polls: any[]; onVote: (pollId: string, o
     <Card className="p-5">
       <h2 className="font-semibold flex items-center gap-2 mb-3"><Sparkles className="w-4 h-4" /> Sua opinião conta</h2>
       {polls.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma enquete ativa no momento. Os parceiros vão te chamar pra votar em bandas, pratos e eventos em breve.</p>
+        <p className="text-sm text-muted-foreground">Nenhuma enquete ativa no momento. Assim que os parceiros abrirem novas votações — bandas, pratos e eventos — elas aparecerão aqui.</p>
       ) : (
         <ul className="space-y-3">
           {polls.map((p) => (
