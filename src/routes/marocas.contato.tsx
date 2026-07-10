@@ -1,223 +1,107 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
-  Instagram,
-  MessageCircle,
-  CalendarDays,
-  Sparkles,
-} from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { MapPin, Phone, Mail, Instagram, Clock } from "lucide-react";
 import { MarocasShell } from "@/components/marocas/MarocasShell";
 import {
   MAROCAS_CONTATO,
-  MAROCAS_HORARIOS,
-  MAROCAS_IMAGENS,
+  MAROCAS_HORARIOS_SUPORTE,
   marocasWhatsAppUrl,
 } from "@/components/marocas/marocasContent";
 
-const CANONICAL = "https://impulsionando.com.br/marocas/contato";
+const CANONICAL = "/marocas/contato";
 
 export const Route = createFileRoute("/marocas/contato")({
   head: () => ({
     meta: [
-      { title: "Contato & mapa — Marocas Copacabana" },
-      {
-        name: "description",
-        content:
-          "Endereço em Copacabana, WhatsApp, e-mail e horários. Reservas, eventos, SAC e imprensa em canais separados.",
-      },
-      { property: "og:title", content: "Contato — Marocas Copacabana" },
+      { title: "Contato — Marocas" },
+      { name: "description", content: "Fale com a Marocas: anfitriões, hóspedes, prestadores e suporte. Endereço, WhatsApp e canais oficiais." },
+      { property: "og:title", content: "Contato Marocas" },
+      { property: "og:description", content: "Canais oficiais para anfitriões, hóspedes e prestadores." },
       { property: "og:url", content: CANONICAL },
-      { property: "og:image", content: MAROCAS_IMAGENS.bairro },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
   }),
   component: ContatoPage,
 });
 
-const CANAIS = [
-  {
-    icon: <MessageCircle className="h-5 w-5" />,
-    titulo: "WhatsApp da casa",
-    resumo: "Reservas, delivery, dúvidas e SAC.",
-    href: () => marocasWhatsAppUrl("Olá! Vim do site da Marocas."),
-    label: MAROCAS_CONTATO.whatsappHumanizado,
-    primary: true,
-  },
-  {
-    icon: <CalendarDays className="h-5 w-5" />,
-    titulo: "Reservas de mesa",
-    resumo: "Reserve online em 2 cliques.",
-    href: () => "/marocas/reservas",
-    label: "Reservar agora",
-    internal: true,
-  },
-  {
-    icon: <Sparkles className="h-5 w-5" />,
-    titulo: "Eventos privados",
-    resumo: "Aniversários, corporativos, casamentos.",
-    href: () => `mailto:${MAROCAS_CONTATO.eventosEmail}`,
-    label: MAROCAS_CONTATO.eventosEmail,
-  },
-  {
-    icon: <Mail className="h-5 w-5" />,
-    titulo: "Imprensa & parcerias",
-    resumo: "Pautas, colabs e institucional.",
-    href: () => `mailto:${MAROCAS_CONTATO.email}`,
-    label: MAROCAS_CONTATO.email,
-  },
+const CHANNELS = [
+  { label: "Anfitriões / proprietários", email: MAROCAS_CONTATO.emailAnfitrioes, cta: "Cadastrar meu imóvel", href: "/marocas/cadastrar-imovel" },
+  { label: "Hóspedes", email: MAROCAS_CONTATO.emailHospedes, cta: "Área do hóspede", href: "/marocas/hospedes" },
+  { label: "Prestadores de serviço", email: MAROCAS_CONTATO.emailPrestadores, cta: "Cadastrar prestador", href: "/marocas/prestadores" },
+  { label: "Suporte geral", email: MAROCAS_CONTATO.emailSuporte, cta: "Ver dúvidas frequentes", href: "/marocas/faq" },
 ];
 
 function ContatoPage() {
   return (
-    <MarocasShell
-      breadcrumbs={[
-        { label: "Marocas", to: "/marocas" },
-        { label: "Contato" },
-      ]}
-    >
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img
-            src={MAROCAS_IMAGENS.bairro}
-            alt="Copacabana vista da orla"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-        </div>
-        <div className="container mx-auto px-4 md:px-6 py-24 text-white max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-300">
-            Fale com a gente
-          </p>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold mt-4 leading-[1.05]">
-            Estamos em Copacabana, a duas quadras da praia.
-          </h1>
-          <p className="mt-5 text-lg text-white/85">
-            Escolha o canal certo — respondemos rápido no que é operacional e com
-            calma no que é estratégico.
-          </p>
-        </div>
+    <MarocasShell breadcrumbs={[{ label: "Marocas", to: "/marocas" }, { label: "Contato" }]}>
+      <section className="container mx-auto px-4 md:px-6 py-16 text-center max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Fale com a Marocas</p>
+        <h1 className="text-4xl md:text-5xl font-bold mt-3">Canais oficiais</h1>
+        <p className="mt-4 text-muted-foreground">
+          Escolha o canal certo. WhatsApp é usado apenas para suporte e pós-venda — para cadastrar imóvel ou fazer parte da rede, use os formulários.
+        </p>
       </section>
 
-      {/* CANAIS */}
-      <section className="container mx-auto px-4 md:px-6 py-16">
-        <div className="grid md:grid-cols-2 gap-4">
-          {CANAIS.map((c) => {
-            const href = c.href();
-            const inner = (
-              <>
-                <div
-                  className={`grid place-items-center h-12 w-12 rounded-2xl ${c.primary ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}
-                >
-                  {c.icon}
-                </div>
-                <div className="mt-4">
-                  <div className="font-serif font-bold text-xl">{c.titulo}</div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {c.resumo}
-                  </p>
-                  <div className="mt-3 text-primary font-semibold text-sm">
-                    {c.label} →
-                  </div>
-                </div>
-              </>
-            );
-            return c.internal ? (
-              <Link
-                key={c.titulo}
-                to={href}
-                className="rounded-3xl border p-6 hover:border-primary hover:shadow-lg transition bg-card"
-              >
-                {inner}
-              </Link>
-            ) : (
-              <a
-                key={c.titulo}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="rounded-3xl border p-6 hover:border-primary hover:shadow-lg transition bg-card"
-              >
-                {inner}
-              </a>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* MAPA + INFO */}
-      <section className="bg-muted/30 py-16">
-        <div className="container mx-auto px-4 md:px-6 grid md:grid-cols-2 gap-8">
-          <div className="rounded-3xl overflow-hidden border aspect-[4/3] bg-card">
-            <iframe
-              title="Marocas em Copacabana"
-              src="https://www.google.com/maps?q=Rua+Barata+Ribeiro+500+Copacabana+Rio+de+Janeiro&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-            />
+      <section className="container mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4">
+        {CHANNELS.map((c) => (
+          <div key={c.label} className="rounded-2xl border bg-card p-6">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{c.label}</div>
+            <a href={`mailto:${c.email}`} className="mt-2 flex items-center gap-2 text-lg font-semibold text-primary hover:underline">
+              <Mail className="h-5 w-5" /> {c.email}
+            </a>
+            <a href={c.href} className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold underline">
+              {c.cta} →
+            </a>
           </div>
-          <div className="space-y-6">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5" /> Endereço
+        ))}
+      </section>
+
+      <section className="bg-muted/30 py-16">
+        <div className="container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-10 items-start">
+          <div>
+            <h2 className="text-2xl font-bold">Endereço & atendimento</h2>
+            <address className="not-italic mt-6 space-y-4 text-sm">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-medium">{MAROCAS_CONTATO.enderecoLinha1}</div>
+                  <div className="text-muted-foreground">{MAROCAS_CONTATO.enderecoLinha2}</div>
+                  <div className="text-muted-foreground">CEP {MAROCAS_CONTATO.cep}</div>
+                </div>
               </div>
-              <p className="mt-2 font-serif text-2xl font-bold">
-                {MAROCAS_CONTATO.enderecoLinha1}
-              </p>
-              <p className="text-muted-foreground">
-                {MAROCAS_CONTATO.enderecoLinha2}
-              </p>
-              <a
-                href={MAROCAS_CONTATO.mapaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-primary hover:underline mt-2 inline-block"
-              >
-                Abrir no Google Maps →
-              </a>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5" /> Horário de funcionamento
+              <div className="flex items-start gap-3">
+                <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <a href={marocasWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
+                    {MAROCAS_CONTATO.whatsappHumanizado}
+                  </a>
+                  <div className="text-muted-foreground">WhatsApp de suporte (SAC)</div>
+                </div>
               </div>
-              <ul className="mt-2 text-sm space-y-1.5">
-                {MAROCAS_HORARIOS.map((h) => (
-                  <li
-                    key={h.dia}
-                    className={`flex justify-between max-w-sm ${h.fechado ? "text-muted-foreground" : ""}`}
-                  >
-                    <span>{h.dia}</span>
-                    <span className="font-medium">{h.horario}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5" /> Telefone fixo
+              <div className="flex items-start gap-3">
+                <Instagram className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <a href={MAROCAS_CONTATO.instagramUrl + MAROCAS_CONTATO.instagram} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  @{MAROCAS_CONTATO.instagram}
+                </a>
               </div>
-              <p className="mt-2 text-sm">{MAROCAS_CONTATO.telefone}</p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
-                <Instagram className="h-3.5 w-3.5" /> Redes
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <ul className="space-y-0.5">
+                  {MAROCAS_HORARIOS_SUPORTE.map((h) => (
+                    <li key={h.dia}>
+                      <span className="font-medium">{h.dia}:</span> <span className="text-muted-foreground">{h.horario}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <a
-                href={MAROCAS_CONTATO.instagramUrl + MAROCAS_CONTATO.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-2 text-primary font-semibold"
-              >
-                @{MAROCAS_CONTATO.instagram}
-              </a>
-            </div>
+            </address>
+          </div>
+          <div className="rounded-2xl overflow-hidden border shadow aspect-video">
+            <iframe
+              title="Mapa Marocas"
+              src="https://www.google.com/maps?q=Rua+Barata+Ribeiro+500+Copacabana+Rio+de+Janeiro&output=embed"
+              className="w-full h-full"
+              loading="lazy"
+            />
           </div>
         </div>
       </section>

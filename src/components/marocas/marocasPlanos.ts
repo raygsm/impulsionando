@@ -1,8 +1,8 @@
-// Planos Marocas — food service (bares, restaurantes, cafeterias, hamburguerias,
-// pizzarias, delivery, dark kitchens, franquias). Reutilizável por futuros
-// clientes do nicho de alimentação dentro do ecossistema Impulsionando.
+// Planos Marocas — gestão de locação por temporada para anfitriões e
+// proprietários de imóveis. Reutilizável por futuros clientes do nicho
+// dentro do ecossistema Impulsionando.
 
-export type MarocasPlanoId = "balcao" | "salao" | "rede";
+export type MarocasPlanoId = "essencial" | "gestao" | "full";
 
 export interface MarocasPlano {
   id: MarocasPlanoId;
@@ -22,93 +22,104 @@ export interface MarocasPlano {
 
 export const marocasPlanos: MarocasPlano[] = [
   {
-    id: "balcao",
-    nome: "Balcão Marocas",
-    tagline: "Cardápio digital + pedido rápido",
+    id: "essencial",
+    nome: "Essencial",
+    tagline: "Comunicação automatizada + agenda",
     resumo:
-      "Ideal para cafeterias, lanchonetes e dark kitchens que querem digitalizar o cardápio e receber pedidos por QR Code, sem investir em POS complexo.",
-    preco: "A partir de R$ 149/mês",
-    precoNota: "Setup incluso. Sem taxas sobre vendas.",
-    publico: "Operações enxutas com foco em balcão, retirada e delivery próprio.",
+      "Para anfitriões que já cuidam da operação e querem profissionalizar a comunicação com o hóspede e centralizar a agenda do imóvel.",
+    preco: "R$ 149/mês por imóvel",
+    precoNota: "Sem taxa por reserva.",
+    publico:
+      "Proprietários de 1 a 2 imóveis que fazem a operação por conta própria.",
     inclui: [
-      "Cardápio digital ilimitado com fotos, categorias e adicionais",
-      "QR Code por mesa e por bandeja de retirada",
-      "Pedidos por link e por WhatsApp com carrinho integrado",
-      "Impressão em cozinha (via ESC/POS)",
-      "Painel operacional com status do pedido",
-      "Área do cliente com histórico e repetir pedido",
+      "Cadastro completo do imóvel (regras, capacidade, horários)",
+      "Agenda unificada de reservas, limpezas e bloqueios",
+      "Comunicação automatizada com o hóspede (boas-vindas, senha, regras, check-out)",
+      "Cadastro de hóspedes com perfil e histórico",
+      "Painel do anfitrião com KPIs básicos",
+      "Suporte por e-mail em horário comercial",
     ],
-    naoInclui: ["Módulo de reservas", "Roteirização de entregadores"],
+    naoInclui: [
+      "Execução de limpeza e manutenção",
+      "Rede de prestadores homologados",
+    ],
     diferenciais: [
-      { titulo: "Ativação em 24h", descricao: "Time da Marocas cadastra o cardápio a partir de um PDF ou planilha." },
-      { titulo: "Sem taxa por pedido", descricao: "Você fica com 100% do ticket. Sem comissão sobre venda." },
-      { titulo: "Preparado para pulseiras", descricao: "Compatível com comandas numeradas quando o módulo for ativado." },
+      { titulo: "Comunicação sem esforço", descricao: "Réguas de WhatsApp e e-mail já configuradas para cada etapa da estadia." },
+      { titulo: "Um só calendário", descricao: "Reservas, bloqueios e serviços do imóvel em uma única visão." },
+      { titulo: "Sem taxa por reserva", descricao: "Você fica com 100% do valor recebido do hóspede." },
     ],
     faq: [
-      { q: "Preciso de POS ou impressora especial?", a: "Não. Funciona em qualquer tablet ou celular. Impressora ESC/POS é opcional." },
-      { q: "Aceita pagamento no app?", a: "Sim, via PIX Copia e Cola e link de cartão. Também aceita 'pagar na retirada'." },
+      { q: "Preciso integrar com Airbnb/Booking?", a: "Sim. A agenda importa reservas por iCal ou API assim que as credenciais forem configuradas." },
+      { q: "Consigo migrar depois para Gestão ou Full?", a: "Sim, sem taxa de migração. O histórico do imóvel é preservado." },
     ],
-    ctaLabel: "Começar com Balcão",
+    ctaLabel: "Começar com Essencial",
   },
   {
-    id: "salao",
-    nome: "Salão Marocas",
-    tagline: "Operação completa: salão, delivery e reservas",
+    id: "gestao",
+    nome: "Gestão",
+    tagline: "Operação executada pela Marocas",
     resumo:
-      "Para bares, restaurantes, hamburguerias e pizzarias que operam salão + delivery + retirada, com reservas e integração com comandas numeradas.",
-    preco: "A partir de R$ 349/mês",
-    precoNota: "Suporte prioritário. Ativação assistida.",
+      "Marocas executa limpeza, reposição, manutenção e comunicação com o hóspede. Você acompanha tudo em tempo real pelo painel do proprietário.",
+    preco: "A partir de R$ 349/mês + serviços",
+    precoNota:
+      "Fee mensal por imóvel + preço por serviço executado (limpeza, manutenção).",
     destaque: true,
-    publico: "Casas com atendimento presencial, delivery próprio e agenda de reservas.",
+    publico:
+      "Proprietários que querem terceirizar a operação do imóvel com padrão de qualidade auditado.",
     inclui: [
-      "Tudo do Balcão Marocas",
-      "Mapa de mesas e comandas por mesa",
-      "Reservas com confirmação, remarcação e cancelamento",
-      "Delivery com taxa por bairro e tempo estimado",
-      "Rastreio do pedido para o cliente (recebido → preparando → saiu → entregue)",
-      "Módulo de garçom (KDS + comandas)",
-      "Integração pronta para pulseiras numeradas (comandas pré-pagas)",
+      "Tudo do Essencial",
+      "Equipe de limpeza homologada com checklist fotográfico",
+      "Reposição de enxoval, amenities, café e água",
+      "Rede de prestadores para manutenção (elétrica, hidráulica, ar-condicionado)",
+      "Vistoria antes e depois de cada estadia",
+      "Painel do proprietário com relatórios financeiros mensais",
+      "Suporte ao hóspede 8h—20h + plantão de emergências",
     ],
-    naoInclui: ["Franqueadora multiunidade", "White label completo"],
+    naoInclui: [
+      "Anúncios pagos em portais",
+      "Marketing e captação de hóspedes premium",
+    ],
     diferenciais: [
-      { titulo: "Comandas por pulseira", descricao: "Fluxo pronto para pulseiras numeradas quando o hardware chegar." },
-      { titulo: "Reservas sem no-show", descricao: "Confirmação em 2 cliques com lembrete automático." },
-      { titulo: "Cardápio inteligente", descricao: "Itens somem quando esgotam. Voltam sozinhos ao repor estoque." },
+      { titulo: "Operação com padrão auditado", descricao: "Checklist fotográfico obrigatório em toda limpeza e vistoria." },
+      { titulo: "Prestadores substituíveis", descricao: "Se algum profissional cancela, a fila reprograma automaticamente." },
+      { titulo: "Transparência total", descricao: "Cada custo, cada serviço, cada foto — visível no painel do proprietário." },
     ],
     faq: [
-      { q: "Como funciona a pulseira numerada?", a: "Cliente recebe uma pulseira ao entrar. Pedidos ficam vinculados ao número. Fechamento por pulseira ou por CPF." },
-      { q: "Consigo integrar meu delivery próprio?", a: "Sim. O painel calcula taxa por bairro, tempo estimado e mostra rastreio para o cliente." },
+      { q: "Quem é responsável pela contratação dos prestadores?", a: "A Marocas contrata, homologa, treina e substitui. Você não lida com prestador individualmente." },
+      { q: "Como funciona o repasse financeiro?", a: "Mensal, com demonstrativo detalhado. Custos são debitados da receita do imóvel." },
     ],
-    ctaLabel: "Falar com consultor",
+    ctaLabel: "Solicitar diagnóstico",
   },
   {
-    id: "rede",
-    nome: "Rede Marocas",
-    tagline: "Franquias, dark kitchens e multiunidades",
+    id: "full",
+    nome: "Full",
+    tagline: "Gestão completa + captação + IA",
     resumo:
-      "Para redes que precisam padronizar cardápio, precificação e operação entre unidades, com dashboard consolidado e governança central.",
+      "Operação Marocas de ponta a ponta: captação de hóspedes, precificação dinâmica, gestão de anúncios em portais e Cérebro IA por imóvel.",
     preco: "Sob consulta",
-    precoNota: "Contrato por unidade ativa + fee de plataforma.",
-    publico: "Franqueadoras, redes próprias e operadores de dark kitchens multi-marca.",
+    precoNota: "Fee mensal + percentual sobre receita bruta.",
+    publico:
+      "Proprietários com múltiplos imóveis, investidores e pequenas administradoras.",
     inclui: [
-      "Tudo do Salão Marocas em cada unidade",
-      "Cardápio-mãe replicável para unidades",
-      "Precificação regional e promoções centralizadas",
-      "Dashboard consolidado (vendas, ticket médio, ocupação)",
-      "Governança de marca (logo, cores, política de descontos)",
-      "Papel de franqueado e franqueadora com permissões",
-      "Suporte dedicado e SLA de plataforma",
+      "Tudo do Gestão",
+      "Fotografia profissional e criação de anúncios",
+      "Gestão de anúncios em Airbnb, Booking e portais parceiros",
+      "Precificação dinâmica por temporada e evento",
+      "Cérebro IA por imóvel (respostas automáticas ao hóspede + sugestões de melhoria)",
+      "CRM de proprietários e hóspedes recorrentes",
+      "Dashboard consolidado multi-imóvel",
+      "Gerente de conta dedicado + SLA de plataforma",
     ],
     diferenciais: [
-      { titulo: "Multi-marca em uma cozinha", descricao: "Dark kitchen roda várias marcas na mesma operação, com KDS separado por marca." },
-      { titulo: "Governança central", descricao: "Franqueadora aprova mudanças de cardápio e preço antes de irem ao ar." },
-      { titulo: "BI da rede", descricao: "Compare unidades por hora, dia, categoria e canal (salão, delivery, retirada)." },
+      { titulo: "Portfólio como ativo", descricao: "Múltiplos imóveis operados como um portfólio, com meta de ocupação por unidade." },
+      { titulo: "IA que responde por você", descricao: "Cérebro IA treinado com as regras do seu imóvel responde 90% das dúvidas do hóspede." },
+      { titulo: "Precificação inteligente", descricao: "Preços ajustados por temporada, feriados e demanda em tempo real." },
     ],
     faq: [
-      { q: "Tenho quantas unidades no mínimo?", a: "A partir de 2 unidades já faz sentido. Redes com 10+ ganham dashboard consolidado avançado." },
-      { q: "Consigo cobrar royalties automaticamente?", a: "Sim. Fica configurado como percentual sobre venda ou fee fixo mensal por unidade." },
+      { q: "Tenho quantos imóveis no mínimo?", a: "A partir de 3 unidades já compensa. Investidores com 10+ ganham painel consolidado avançado." },
+      { q: "A Marocas assume contratos como intermediária?", a: "Sim, mediante contrato de administração. Repasses são mensais." },
     ],
-    ctaLabel: "Solicitar diagnóstico da rede",
+    ctaLabel: "Falar com consultor Full",
   },
 ];
 

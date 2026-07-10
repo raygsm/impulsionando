@@ -1,11 +1,10 @@
-// Shell público da Marocas — Fase A (vitrine premium Copacabana).
-// Header glass sticky, wrapper com data-tenant="marocas" ativando tokens,
-// navegação estendida (Cardápio, Reservas, Eventos, Sobre, Contato),
-// footer editorial com bairros, contato oficial e Instagram/WhatsApp.
+// Shell público da Marocas — vitrine premium para gestão de locação
+// por temporada. Header glass sticky, wrapper com data-tenant="marocas"
+// ativando tokens, navegação para anfitriões/hóspedes/prestadores, footer
+// editorial com serviços, contato oficial e Instagram.
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  ShoppingBag,
   Menu as MenuIcon,
   X,
   ChevronRight,
@@ -13,15 +12,14 @@ import {
   MapPin,
   Phone,
   Clock,
+  LogIn,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMarocasCart } from "./useMarocasCart";
-import { MarocasHelpFab } from "./MarocasHelpFab";
-import { MoreContentFab } from "@/components/impulsionando";
+import { MaroquitoFab } from "./MarocasHelpFab";
 import {
   MAROCAS_BRAND,
   MAROCAS_CONTATO,
-  MAROCAS_HORARIOS,
+  MAROCAS_HORARIOS_SUPORTE,
   marocasWhatsAppUrl,
 } from "./marocasContent";
 import marocasLogo from "@/assets/marocas-logo.png.asset.json";
@@ -34,26 +32,23 @@ export interface Crumb {
 interface Props {
   breadcrumbs?: Crumb[];
   children: ReactNode;
-  hideCartBadge?: boolean;
   transparentHeader?: boolean;
 }
 
 const NAV = [
-  { label: "Cardápio", to: "/marocas/cardapio" },
-  { label: "Delivery", to: "/marocas/delivery" },
-  { label: "Reservas", to: "/marocas/reservas" },
-  { label: "Eventos", to: "/marocas/eventos" },
-  { label: "Sobre", to: "/marocas/sobre" },
+  { label: "Para anfitriões", to: "/marocas/cadastrar-imovel" },
+  { label: "Para hóspedes", to: "/marocas/hospedes" },
+  { label: "Prestadores", to: "/marocas/prestadores" },
+  { label: "Limpeza & manutenção", to: "/marocas/limpeza-manutencao" },
+  { label: "Planos", to: "/marocas/planos" },
   { label: "Contato", to: "/marocas/contato" },
 ];
 
 export function MarocasShell({
   breadcrumbs,
   children,
-  hideCartBadge,
   transparentHeader,
 }: Props) {
-  const { totalItens } = useMarocasCart();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -79,8 +74,7 @@ export function MarocasShell({
       data-tenant="marocas"
       className="min-h-dvh bg-background flex flex-col"
       style={{
-        // Copacabana Sunset — camada quente por cima do verde marocas
-        ["--marocas-coral" as any]: "oklch(0.68 0.18 32)",
+        ["--marocas-coral" as any]: "oklch(0.68 0.14 32)",
         ["--marocas-sand" as any]: "oklch(0.94 0.03 80)",
       }}
     >
@@ -98,7 +92,7 @@ export function MarocasShell({
           <Link
             to="/marocas"
             className="flex items-center gap-2.5 font-bold shrink-0 group"
-            aria-label="Marocas — Copacabana"
+            aria-label="Marocas — gestão de locação por temporada"
           >
             <span className="grid place-items-center h-9 w-9 rounded-full bg-white shadow-sm overflow-hidden ring-1 ring-black/5">
               <img
@@ -110,12 +104,12 @@ export function MarocasShell({
             <span className="hidden sm:flex flex-col leading-tight">
               <span className="text-base tracking-tight">Marocas</span>
               <span className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-70">
-                Copacabana · RJ
+                Gestão · Temporada
               </span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-7 text-sm">
+          <nav className="hidden lg:flex items-center gap-6 text-sm">
             {NAV.map((n) => (
               <Link
                 key={n.to}
@@ -132,30 +126,16 @@ export function MarocasShell({
 
           <div className="flex items-center gap-2">
             <Link
-              to="/marocas/reservas"
-              className="hidden md:inline-flex items-center rounded-full border border-current/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest hover:bg-white/10 transition"
+              to="/marocas/cadastrar-imovel"
+              className="hidden md:inline-flex items-center rounded-full bg-primary text-primary-foreground px-4 py-1.5 text-xs font-semibold uppercase tracking-widest hover:opacity-90 transition"
             >
-              Reservar mesa
+              Cadastrar meu imóvel
             </Link>
-            {!hideCartBadge && (
-              <Link
-                to="/marocas/carrinho"
-                className="relative rounded-full p-2 hover:bg-white/10 transition"
-                aria-label={`Carrinho com ${totalItens} ${totalItens === 1 ? "item" : "itens"}`}
-              >
-                <ShoppingBag className="h-5 w-5" />
-                {totalItens > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                    {totalItens}
-                  </span>
-                )}
-              </Link>
-            )}
             <Link
               to="/marocas/login"
-              className="hidden md:inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium hover:bg-white/10 transition"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-white/10 transition"
             >
-              Entrar
+              <LogIn className="h-4 w-4" /> Acessar painel
             </Link>
             <button
               className="lg:hidden rounded-md p-2 hover:bg-white/10 transition min-h-11 min-w-11 grid place-items-center"
@@ -189,7 +169,7 @@ export function MarocasShell({
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-background lg:hidden animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-background lg:hidden animate-fade-in overflow-y-auto">
           <div className="flex items-center justify-between p-4 border-b">
             <Link
               to="/marocas"
@@ -221,11 +201,11 @@ export function MarocasShell({
             ))}
             <li className="pt-2 border-t">
               <Link
-                to="/marocas/pedidos"
+                to="/marocas/faq"
                 onClick={() => setOpen(false)}
                 className="block px-3 py-3 rounded-md hover:bg-muted"
               >
-                Meus pedidos
+                Dúvidas frequentes
               </Link>
             </li>
             <li>
@@ -234,16 +214,16 @@ export function MarocasShell({
                 onClick={() => setOpen(false)}
                 className="block px-3 py-3 rounded-md hover:bg-muted"
               >
-                Entrar
+                Acessar painel
               </Link>
             </li>
-            <li>
+            <li className="pt-2">
               <Link
-                to="/marocas/planos"
+                to="/marocas/cadastrar-imovel"
                 onClick={() => setOpen(false)}
-                className="block px-3 py-3 rounded-md hover:bg-muted text-sm text-muted-foreground"
+                className="block text-center px-3 py-3 rounded-md bg-primary text-primary-foreground font-semibold"
               >
-                Sou dono de restaurante · Ver planos
+                Cadastrar meu imóvel
               </Link>
             </li>
           </ul>
@@ -286,8 +266,7 @@ export function MarocasShell({
               {MAROCAS_BRAND.nome}
             </div>
             <p className="text-white/70 mt-3 leading-relaxed">
-              {MAROCAS_BRAND.assinatura}. Desde {MAROCAS_BRAND.fundacao} servindo o
-              bairro mais cosmopolita do Brasil.
+              {MAROCAS_BRAND.slogan} Desde {MAROCAS_BRAND.fundacao}, cuidando de imóveis de temporada com padrão auditado.
             </p>
             <a
               href={MAROCAS_CONTATO.instagramUrl + MAROCAS_CONTATO.instagram}
@@ -301,62 +280,25 @@ export function MarocasShell({
 
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
-              Pedir & reservar
+              Anfitriões
             </div>
             <ul className="space-y-2 text-white/85">
-              <li>
-                <Link to="/marocas/cardapio" className="hover:text-primary">
-                  Cardápio completo
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/delivery" className="hover:text-primary">
-                  Delivery na Zona Sul
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/reservas" className="hover:text-primary">
-                  Reservar mesa
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/eventos" className="hover:text-primary">
-                  Eventos privados
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/pedidos" className="hover:text-primary">
-                  Meus pedidos
-                </Link>
-              </li>
+              <li><Link to="/marocas/cadastrar-imovel" className="hover:text-primary">Cadastrar meu imóvel</Link></li>
+              <li><Link to="/marocas/planos" className="hover:text-primary">Planos e preços</Link></li>
+              <li><Link to="/marocas/limpeza-manutencao" className="hover:text-primary">Limpeza & manutenção</Link></li>
+              <li><Link to="/marocas/login" className="hover:text-primary">Painel do proprietário</Link></li>
             </ul>
           </div>
 
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
-              A casa
+              Hóspedes & prestadores
             </div>
             <ul className="space-y-2 text-white/85">
-              <li>
-                <Link to="/marocas/sobre" className="hover:text-primary">
-                  Nossa história
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/contato" className="hover:text-primary">
-                  Contato & mapa
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/faq" className="hover:text-primary">
-                  Dúvidas frequentes
-                </Link>
-              </li>
-              <li>
-                <Link to="/marocas/planos" className="hover:text-primary">
-                  Sou dono · plataforma
-                </Link>
-              </li>
+              <li><Link to="/marocas/hospedes" className="hover:text-primary">Área do hóspede</Link></li>
+              <li><Link to="/marocas/prestadores" className="hover:text-primary">Cadastro de prestador</Link></li>
+              <li><Link to="/marocas/faq" className="hover:text-primary">Dúvidas frequentes</Link></li>
+              <li><Link to="/marocas/contato" className="hover:text-primary">Contato & suporte</Link></li>
             </ul>
           </div>
 
@@ -387,11 +329,8 @@ export function MarocasShell({
               <div className="flex items-start gap-2">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0" />
                 <ul className="space-y-0.5 text-xs">
-                  {MAROCAS_HORARIOS.map((h) => (
-                    <li
-                      key={h.dia}
-                      className={h.fechado ? "text-white/50" : ""}
-                    >
+                  {MAROCAS_HORARIOS_SUPORTE.map((h) => (
+                    <li key={h.dia}>
                       <span className="font-medium">{h.dia}:</span> {h.horario}
                     </li>
                   ))}
@@ -403,8 +342,7 @@ export function MarocasShell({
         <div className="border-t border-white/10">
           <div className="container mx-auto px-4 md:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
             <span>
-              © {new Date().getFullYear()} {MAROCAS_BRAND.nome} · Copacabana ·
-              CNPJ sob demanda
+              © {new Date().getFullYear()} {MAROCAS_BRAND.nome} · {MAROCAS_BRAND.vertical} · CNPJ sob demanda
             </span>
             <span>
               Operado sobre o core{" "}
@@ -419,8 +357,7 @@ export function MarocasShell({
         </div>
       </footer>
 
-      <MarocasHelpFab />
-      <MoreContentFab offsetBottom={92} />
+      <MaroquitoFab />
     </div>
   );
 }

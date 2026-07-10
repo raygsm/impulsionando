@@ -1,69 +1,86 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { UtensilsCrossed, ClipboardList, Eye, EyeOff, LifeBuoy } from "lucide-react";
+import { Home as HomeIcon, LayoutDashboard, Eye, EyeOff } from "lucide-react";
+import { MAROCAS_IMAGENS } from "@/components/marocas/marocasContent";
 
 export const Route = createFileRoute("/marocas/login")({
   head: () => ({
     meta: [
-      { title: "Entrar — Marocas" },
-      { name: "description", content: "Acesse sua conta Marocas para acompanhar pedidos, reservas e repetir favoritos em 1 clique." },
+      { title: "Acessar painel — Marocas" },
+      { name: "description", content: "Entre no painel Marocas: anfitrião, proprietário, hóspede ou prestador." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: MarocasLoginPage,
 });
 
-const BACKGROUND_IMG = "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&auto=format&fit=crop";
-
 function MarocasLoginPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [perfil, setPerfil] = useState<"anfitriao" | "hospede" | "prestador">("anfitriao");
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO Codex: integrar com Supabase auth.
+    // TODO Codex: integrar com auth do core Impulsionando (Supabase).
   };
 
   return (
     <main className="relative min-h-dvh overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <img src={BACKGROUND_IMG} alt="Ambiente Marocas" className="h-full w-full object-cover" />
+        <img src={MAROCAS_IMAGENS.heroApto} alt="Ambiente Marocas" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-slate-900/65 to-slate-900/45" />
       </div>
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 text-white">
         <Link to="/marocas" className="flex items-center gap-2 font-bold text-xl">
-          <UtensilsCrossed className="h-6 w-6" /> Marocas
+          <HomeIcon className="h-6 w-6" /> Marocas
         </Link>
         <nav className="flex items-center gap-4 text-sm">
-          <Link to="/marocas/cardapio" className="hover:underline">Cardápio</Link>
-          <Link to="/marocas/reservas" className="hover:underline">Reservas</Link>
+          <Link to="/marocas/cadastrar-imovel" className="hover:underline">Cadastrar imóvel</Link>
+          <Link to="/marocas/planos" className="hover:underline">Planos</Link>
         </nav>
       </header>
 
       <section className="relative z-10 container mx-auto px-6 py-8 grid lg:grid-cols-2 gap-10 items-center min-h-[calc(100dvh-96px)]">
         <div className="text-white max-w-lg">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">Área do cliente</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">Painel Marocas</p>
           <h1 className="text-4xl md:text-5xl font-bold mt-3 leading-tight">
-            Sua mesa. Seu pedido.<br />Sua história com a Marocas.
+            Seu imóvel.<br />Sua operação.<br />Sob controle.
           </h1>
           <p className="mt-4 text-white/85 text-lg">
-            Repita favoritos com 1 clique, acompanhe entregas em tempo real, controle suas reservas e ganhe benefícios exclusivos de cliente recorrente.
+            Painel unificado para anfitriões, hóspedes e prestadores. Reservas, limpezas, manutenções, financeiro e comunicação em um só lugar.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-3 max-w-md">
-            <Link to="/marocas/pedidos" className="flex items-center justify-center gap-2 rounded-lg bg-white/10 backdrop-blur border border-white/20 px-4 py-3 text-sm font-medium hover:bg-white/20 transition">
-              <ClipboardList className="h-4 w-4" /> Meus pedidos
-            </Link>
-            <Link to="/marocas/assistente" className="flex items-center justify-center gap-2 rounded-lg bg-white/10 backdrop-blur border border-white/20 px-4 py-3 text-sm font-medium hover:bg-white/20 transition">
-              <LifeBuoy className="h-4 w-4" /> Assistente
-            </Link>
+          <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
+            {[
+              { id: "anfitriao", label: "Anfitrião" },
+              { id: "hospede", label: "Hóspede" },
+              { id: "prestador", label: "Prestador" },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setPerfil(p.id as any)}
+                className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+                  perfil === p.id
+                    ? "bg-white text-slate-900 border-white"
+                    : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="w-full max-w-md mx-auto rounded-2xl bg-white/95 backdrop-blur shadow-2xl border p-8">
-          <h2 className="font-bold text-xl">Entrar</h2>
-          <p className="text-sm text-muted-foreground mt-1">Use o e-mail do seu último pedido.</p>
+          <div className="flex items-center gap-2 text-primary text-sm font-semibold">
+            <LayoutDashboard className="h-4 w-4" /> Acessar como {perfil}
+          </div>
+          <h2 className="font-bold text-xl mt-1">Entrar no painel</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Use o e-mail cadastrado no seu contrato ou reserva.
+          </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <label className="block">
@@ -116,9 +133,9 @@ function MarocasLoginPage() {
           </form>
 
           <div className="mt-6 pt-6 border-t text-center text-sm">
-            <span className="text-muted-foreground">Ainda não tem conta? </span>
-            <Link to="/marocas/cardapio" className="text-primary font-semibold hover:underline">
-              Fazer pedido como visitante
+            <span className="text-muted-foreground">Ainda não é cliente Marocas? </span>
+            <Link to="/marocas/cadastrar-imovel" className="text-primary font-semibold hover:underline">
+              Cadastrar meu imóvel
             </Link>
           </div>
         </div>

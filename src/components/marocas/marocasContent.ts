@@ -1,175 +1,238 @@
-// Fonte única de conteúdo público da Marocas — Fase A (vitrine premium).
-// Usado por home, sobre, contato, eventos, delivery, reservas e FAQ.
+// Fonte única de conteúdo da Marocas — reposicionada como gestão de imóveis
+// de locação por temporada (anfitriões, hóspedes, prestadores, operação).
 // Placeholders explícitos onde credenciais/dados reais são necessários.
-// NÃO inventar depoimentos com nomes reais. Prova social apenas por métricas
-// e badges genéricos até validação com o cliente.
 
 export const MAROCAS_BRAND = {
   nome: "Marocas",
-  bairro: "Copacabana",
+  vertical: "Gestão de locação por temporada",
   cidade: "Rio de Janeiro",
-  assinatura: "Cozinha da casa em Copacabana",
-  fundacao: 2012,
-  slogan: "Copacabana à mesa, o Rio no prato.",
+  bairroBase: "Copacabana",
+  fundacao: 2018,
+  slogan: "A Marocas cuida da operação do seu imóvel de temporada.",
   descricaoCurta:
-    "Cozinha da casa no coração de Copacabana. Delivery próprio na Zona Sul, reservas em 2 cliques e comandas por pulseira numerada no salão.",
+    "Limpeza, reposição, manutenção, comunicação com hóspedes e agenda operacional — em uma só plataforma para anfitriões e proprietários.",
+  promessa:
+    "Anfitriões profissionalizam a locação sem cuidar da operação todos os dias. Hóspedes recebem uma experiência premium do check-in ao check-out.",
 };
 
 export const MAROCAS_CONTATO = {
-  enderecoLinha1: "Rua Barata Ribeiro, 500",
+  enderecoLinha1: "Rua Barata Ribeiro, 500 · sala 902",
   enderecoLinha2: "Copacabana · Rio de Janeiro · RJ",
   cep: "22040-002",
-  // Placeholders — trocar pelo canal oficial da Marocas quando validado.
+  // Placeholders — trocar quando validado com o cliente.
   whatsapp: "5521993075000",
   whatsappHumanizado: "(21) 99307-5000",
   telefone: "(21) 2547-0000",
-  email: "ola@marocas.com.br",
-  reservasEmail: "reservas@marocas.com.br",
-  eventosEmail: "eventos@marocas.com.br",
-  instagram: "marocascopacabana",
+  emailAnfitrioes: "anfitrioes@marocas.com.br",
+  emailHospedes: "hospedes@marocas.com.br",
+  emailPrestadores: "prestadores@marocas.com.br",
+  emailSuporte: "suporte@marocas.com.br",
+  instagram: "marocasgestao",
   instagramUrl: "https://instagram.com/",
   mapaUrl:
     "https://www.google.com/maps/search/?api=1&query=Rua+Barata+Ribeiro+500+Copacabana+Rio+de+Janeiro",
 };
 
-export const MAROCAS_HORARIOS = [
-  { dia: "Segunda", horario: "Fechado", fechado: true },
-  { dia: "Terça a Quinta", horario: "18h — 23h" },
-  { dia: "Sexta e Sábado", horario: "12h — 00h" },
-  { dia: "Domingo", horario: "12h — 22h" },
+export const MAROCAS_HORARIOS_SUPORTE = [
+  { dia: "Segunda a Sexta", horario: "08h — 20h" },
+  { dia: "Sábado", horario: "09h — 18h" },
+  { dia: "Domingo e feriados", horario: "Plantão de emergências 24h" },
 ];
 
-export const MAROCAS_BAIRROS_DELIVERY = [
-  { nome: "Copacabana", taxa: 0, prazo: "20–30 min", destaque: true },
-  { nome: "Leme", taxa: 6, prazo: "25–35 min" },
-  { nome: "Ipanema", taxa: 8, prazo: "30–40 min" },
-  { nome: "Arpoador", taxa: 8, prazo: "30–40 min" },
-  { nome: "Leblon", taxa: 10, prazo: "35–45 min" },
-  { nome: "Botafogo", taxa: 10, prazo: "35–45 min" },
-  { nome: "Humaitá", taxa: 12, prazo: "35–45 min" },
-  { nome: "Flamengo", taxa: 12, prazo: "40–50 min" },
-  { nome: "Urca", taxa: 14, prazo: "40–50 min" },
-  { nome: "Lagoa", taxa: 14, prazo: "40–50 min" },
-  { nome: "Jardim Botânico", taxa: 16, prazo: "45–55 min" },
-  { nome: "Gávea", taxa: 16, prazo: "45–55 min" },
+// Serviços operacionais que a Marocas executa no imóvel do anfitrião.
+export const MAROCAS_SERVICOS = [
+  {
+    id: "limpeza",
+    emoji: "🧼",
+    titulo: "Limpeza profissional",
+    resumo:
+      "Equipe treinada, checklist fotográfico e produtos padronizados a cada check-out.",
+  },
+  {
+    id: "reposicao",
+    emoji: "🧺",
+    titulo: "Reposição de enxoval e amenities",
+    resumo:
+      "Roupa de cama, toalhas, produtos de higiene, café, água. Estoque controlado por imóvel.",
+  },
+  {
+    id: "manutencao",
+    emoji: "🛠️",
+    titulo: "Manutenção preventiva e corretiva",
+    resumo:
+      "Rede de prestadores homologados: elétrica, hidráulica, ar-condicionado, pintura, gesso, marcenaria.",
+  },
+  {
+    id: "comunicacao",
+    emoji: "💬",
+    titulo: "Comunicação automatizada",
+    resumo:
+      "Boas-vindas, senha da porta, regras, lembretes e pós-estadia disparados no tempo certo.",
+  },
+  {
+    id: "checkin",
+    emoji: "🔑",
+    titulo: "Check-in e check-out digital",
+    resumo:
+      "Instruções por WhatsApp/e-mail, fechadura eletrônica ou porteiro cadastrado.",
+  },
+  {
+    id: "vistoria",
+    emoji: "📋",
+    titulo: "Vistoria e laudo fotográfico",
+    resumo:
+      "Antes e depois de cada estadia. Histórico completo por imóvel para o proprietário.",
+  },
+  {
+    id: "agenda",
+    emoji: "📅",
+    titulo: "Agenda operacional integrada",
+    resumo:
+      "Bloqueios, limpezas, manutenções e reservas em um único calendário por unidade.",
+  },
+  {
+    id: "financeiro",
+    emoji: "💳",
+    titulo: "Relatório financeiro do imóvel",
+    resumo:
+      "Receita, taxas, custos por serviço, repasses e demonstrativo mensal ao proprietário.",
+  },
 ];
 
-export const MAROCAS_HISTORIA = [
+// Etapas da jornada do anfitrião — usadas na home e no fluxo de cadastro.
+export const MAROCAS_JORNADA_ANFITRIAO = [
   {
-    ano: "2012",
-    titulo: "Um balcão em Copacabana",
+    passo: "01",
+    titulo: "Cadastre seu imóvel",
     texto:
-      "A Marocas começa como um balcão de bolinhos de bacalhau na Barata Ribeiro. Fila na calçada no primeiro fim de semana.",
+      "Endereço, capacidade, regras da casa, horários de check-in/check-out e serviços desejados.",
   },
   {
-    ano: "2016",
-    titulo: "Cozinha própria, entrega própria",
+    passo: "02",
+    titulo: "Diagnóstico gratuito",
     texto:
-      "Assumimos a entrega em toda Copacabana com moto própria, sem intermediário. Cardápio ganha hambúrgueres, pizzas de fermentação natural e pratos da casa.",
+      "Nossa equipe avalia o imóvel e sugere plano, precificação e checklist inicial.",
   },
   {
-    ano: "2020",
-    titulo: "Mesa que vira sala de estar",
+    passo: "03",
+    titulo: "Onboarding em 7 dias",
     texto:
-      "Reformamos o salão para receber famílias, casais e eventos privados. Comandas por pulseira numerada agilizam o atendimento no salão.",
+      "Fotos profissionais, criação de anúncios, senha da porta, kit de boas-vindas.",
   },
   {
-    ano: "2024",
-    titulo: "Referência Impulsionando Food Service",
+    passo: "04",
+    titulo: "Operação no piloto automático",
     texto:
-      "A Marocas passa a rodar sobre o core Impulsionando — cardápio digital, delivery próprio, reservas, KDS e cockpit em um só lugar.",
+      "Marocas cuida de reservas, limpeza, manutenção e comunicação. Você recebe relatório mensal.",
   },
 ];
 
-export const MAROCAS_EVENTOS = [
+// Etapas da jornada do hóspede.
+export const MAROCAS_JORNADA_HOSPEDE = [
   {
-    id: "aniversarios",
-    emoji: "🎉",
-    titulo: "Aniversários",
-    resumo: "Do bolo à decoração, sem taxa de rolha. Menu fechado ou à la carte.",
-    capacidade: "10–60 pessoas",
-    duracao: "3h no salão",
+    passo: "01",
+    titulo: "Reserva confirmada",
+    texto:
+      "Você recebe boas-vindas, dados do imóvel e canais de suporte 24h.",
   },
   {
-    id: "corporativos",
-    emoji: "🤝",
-    titulo: "Almoços & jantares corporativos",
-    resumo: "Reserva de área privativa com Wi-Fi, projeção e menu personalizado.",
-    capacidade: "8–40 pessoas",
-    duracao: "2–4h",
+    passo: "02",
+    titulo: "48h antes do check-in",
+    texto:
+      "Senha da porta, endereço detalhado, dicas do bairro e regras do imóvel.",
   },
   {
-    id: "confraternizacoes",
-    emoji: "🥂",
-    titulo: "Confraternizações",
-    resumo: "Fim de expediente, festa de equipe, réveillon de amigos. Open bar opcional.",
-    capacidade: "20–80 pessoas",
-    duracao: "4h",
+    passo: "03",
+    titulo: "Durante a estadia",
+    texto:
+      "Suporte por WhatsApp, solicitação de manutenção em 1 clique, roteiros personalizados.",
   },
   {
-    id: "casamentos",
-    emoji: "💍",
-    titulo: "Mini weddings & bodas",
-    resumo: "Casamentos íntimos em Copacabana com cerimônia + jantar assinado pela casa.",
-    capacidade: "20–50 pessoas",
-    duracao: "5–6h",
+    passo: "04",
+    titulo: "Check-out sem burocracia",
+    texto:
+      "Lembrete no dia, orientações de saída e pesquisa de satisfação.",
   },
-  {
-    id: "chef-em-casa",
-    emoji: "👨‍🍳",
-    titulo: "Chef em casa",
-    resumo: "Nossa equipe vai até você na Zona Sul. Menu degustação de 4 tempos.",
-    capacidade: "6–20 pessoas",
-    duracao: "3h",
-  },
-  {
-    id: "workshops",
-    emoji: "🍕",
-    titulo: "Workshops de cozinha",
-    resumo: "Aulas temáticas: pizza artesanal, drinks da casa, cozinha carioca.",
-    capacidade: "8–16 pessoas",
-    duracao: "3h",
-  },
+];
+
+// Categorias de prestadores homologados.
+export const MAROCAS_PRESTADORES_CATEGORIAS = [
+  { id: "limpeza", emoji: "🧽", titulo: "Camareiras & limpeza" },
+  { id: "lavanderia", emoji: "🧺", titulo: "Lavanderia industrial" },
+  { id: "eletrica", emoji: "⚡", titulo: "Eletricistas" },
+  { id: "hidraulica", emoji: "🚿", titulo: "Encanadores" },
+  { id: "ar", emoji: "❄️", titulo: "Ar-condicionado" },
+  { id: "gesso", emoji: "🏗️", titulo: "Gesseiros" },
+  { id: "pintura", emoji: "🎨", titulo: "Pintores" },
+  { id: "marcenaria", emoji: "🪚", titulo: "Marceneiros" },
+  { id: "vistoria", emoji: "📷", titulo: "Vistoriadores" },
+  { id: "reposicao", emoji: "🛒", titulo: "Reposição de amenities" },
+];
+
+// Perfis de hóspede — usados para roteiros personalizados.
+export const MAROCAS_PERFIS_HOSPEDE = [
+  "Família",
+  "Casal",
+  "Trabalho remoto",
+  "Lazer & praia",
+  "Vida noturna",
+  "Roteiros gastronômicos",
+  "Compras",
+  "Passeios ao ar livre",
+  "Roteiro econômico",
+  "Experiência premium",
+];
+
+// Fluxos de comunicação automatizada (referência para o N8N — nenhum
+// disparo real acontece sem credenciais reais configuradas pelo Codex).
+export const MAROCAS_FLUXOS_N8N = [
+  { evento: "reserva_confirmada", canal: "WhatsApp + e-mail", descricao: "Boas-vindas e dados do imóvel" },
+  { evento: "checkin_menos_48h", canal: "WhatsApp", descricao: "Senha da porta, regras e dicas do bairro" },
+  { evento: "checkin_dia", canal: "WhatsApp", descricao: "Mensagem de recepção e canal de suporte" },
+  { evento: "durante_estadia", canal: "WhatsApp", descricao: "Check-in de satisfação no meio da estadia" },
+  { evento: "checkout_menos_24h", canal: "WhatsApp", descricao: "Lembrete e orientações de saída" },
+  { evento: "pos_estadia", canal: "E-mail", descricao: "Pesquisa NPS e agradecimento" },
+  { evento: "limpeza_agendada", canal: "Interno", descricao: "Notifica camareira e proprietário" },
+  { evento: "manutencao_solicitada", canal: "Interno + WhatsApp prestador", descricao: "Aciona prestador homologado" },
+  { evento: "prestador_cancelou", canal: "Interno", descricao: "Devolve serviço à fila e busca substituto" },
+  { evento: "servico_concluido", canal: "Interno + proprietário", descricao: "Fecha OS, atualiza histórico e financeiro" },
 ];
 
 export const MAROCAS_PROVA_SOCIAL = [
-  { valor: "12 anos", label: "servindo Copacabana desde 2012" },
-  { valor: "200k+", label: "pedidos entregues na Zona Sul" },
-  { valor: "4,8/5", label: "avaliação média (Google Meu Negócio)" },
-  { valor: "0%", label: "taxa de reserva — sempre grátis" },
+  { valor: "+180", label: "imóveis geridos na Zona Sul do Rio" },
+  { valor: "4,9/5", label: "avaliação média dos hóspedes" },
+  { valor: "< 4h", label: "tempo médio de resposta ao hóspede" },
+  { valor: "97%", label: "taxa de check-in sem atrito" },
 ];
 
-export const MAROCAS_IMPRENSA = [
-  "Guia da Semana",
-  "Veja Rio",
-  "Time Out Rio",
-  "O Globo · Rio Show",
-  "Diário do Rio",
-];
-
-// Imagens ultrarrealistas — placeholders Unsplash. Trocar pelas fotos
-// oficiais da Marocas quando o cliente entregar o kit.
+// Imagens ultrarrealistas — placeholders Unsplash focadas em hospedagem
+// e ambientes de apartamentos. Trocar pelas fotos oficiais quando o
+// cliente entregar o kit.
 export const MAROCAS_IMAGENS = {
+  heroApto:
+    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&auto=format&fit=crop&q=85",
   heroCopacabana:
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=1920&auto=format&fit=crop&q=85",
-  heroSalao:
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&auto=format&fit=crop&q=85",
-  calcadao:
-    "https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?w=1600&auto=format&fit=crop&q=85",
-  praia:
-    "https://images.unsplash.com/photo-1544989164-31dc3c645987?w=1600&auto=format&fit=crop&q=85",
-  cozinha:
-    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&auto=format&fit=crop&q=85",
-  chef:
-    "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=1200&auto=format&fit=crop&q=85",
-  mesa:
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1600&auto=format&fit=crop&q=85",
-  drink:
-    "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200&auto=format&fit=crop&q=85",
+  sala:
+    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&auto=format&fit=crop&q=85",
+  quarto:
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1600&auto=format&fit=crop&q=85",
+  cozinhaApto:
+    "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1600&auto=format&fit=crop&q=85",
+  varanda:
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1600&auto=format&fit=crop&q=85",
+  limpeza:
+    "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1600&auto=format&fit=crop&q=85",
+  chave:
+    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600&auto=format&fit=crop&q=85",
+  hospede:
+    "https://images.unsplash.com/photo-1519449556851-5720b33024e7?w=1200&auto=format&fit=crop&q=85",
+  prestador:
+    "https://images.unsplash.com/photo-1581091012184-7d5f0f6f0f14?w=1200&auto=format&fit=crop&q=85",
+  operacao:
+    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&auto=format&fit=crop&q=85",
   bairro:
     "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?w=1600&auto=format&fit=crop&q=85",
-  eventos:
-    "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1600&auto=format&fit=crop&q=85",
 };
 
 export function marocasWhatsAppUrl(msg?: string) {

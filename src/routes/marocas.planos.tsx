@@ -8,10 +8,10 @@ const CANONICAL = "/marocas/planos";
 export const Route = createFileRoute("/marocas/planos")({
   head: () => ({
     meta: [
-      { title: "Planos para bares, restaurantes e delivery — Marocas" },
-      { name: "description", content: "Compare os planos Marocas para food service: Balcão (cardápio digital), Salão (operação completa) e Rede (franquias e dark kitchens)." },
-      { property: "og:title", content: "Planos Marocas — Balcão, Salão e Rede" },
-      { property: "og:description", content: "Do cardápio digital ao dashboard consolidado para redes de restaurantes." },
+      { title: "Planos Marocas — gestão de locação por temporada" },
+      { name: "description", content: "Compare os planos Marocas para anfitriões e proprietários: Essencial (comunicação + agenda), Gestão (operação executada) e Full (gestão completa + captação + IA)." },
+      { property: "og:title", content: "Planos Marocas — Essencial, Gestão e Full" },
+      { property: "og:description", content: "Do plano com comunicação automatizada à gestão completa do seu portfólio de imóveis." },
       { property: "og:url", content: CANONICAL },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
@@ -23,11 +23,10 @@ function PlanosPage() {
   return (
     <MarocasShell breadcrumbs={[{ label: "Marocas", to: "/marocas" }, { label: "Planos" }]}>
       <section className="container mx-auto px-4 md:px-6 py-12 text-center max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Planos Marocas</p>
-        <h1 className="text-4xl md:text-5xl font-bold mt-2">Sua operação de food service, do balcão à rede</h1>
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Planos e preços</p>
+        <h1 className="text-4xl md:text-5xl font-bold mt-2">Escolha até onde vai a nossa operação</h1>
         <p className="text-muted-foreground mt-4">
-          Três níveis para bares, restaurantes, cafeterias, hamburguerias, pizzarias, delivery e dark kitchens.
-          Sem taxa por pedido, sem intermediário, preparado para comandas por pulseira numerada.
+          Três níveis para anfitriões e proprietários. Sem taxa por reserva no Essencial. Sem fidelidade em nenhum plano.
         </p>
       </section>
 
@@ -82,8 +81,7 @@ function PlanosPage() {
               </div>
 
               <Link
-                to="/marocas/contratar/$plano"
-                params={{ plano: plano.id }}
+                to="/marocas/cadastrar-imovel"
                 className={`block text-center mt-6 rounded-md px-4 py-3 font-semibold transition ${
                   plano.destaque
                     ? "bg-primary text-primary-foreground hover:opacity-90"
