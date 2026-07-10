@@ -28,24 +28,24 @@ const loadTenantHeader = createServerFn({ method: "GET" })
       .eq("subdomain", data.slug)
       .maybeSingle();
 
-    let niche: { code?: string | null; name?: string | null } | null = null;
+    let niche: { slug: string | null; name: string | null } | null = null;
     if (company?.niche_id) {
       const { data: n } = await context.supabase
         .from("niches")
-        .select("code,name")
+        .select("slug,name")
         .eq("id", company.niche_id)
         .maybeSingle();
-      niche = n ?? null;
+      niche = n ? { slug: n.slug ?? null, name: n.name ?? null } : null;
     }
 
     let brainStatus: string | null = null;
     if (company?.id) {
       const { data: brain } = await context.supabase
-        .from("ai_brains")
+        .from("core_ai_brains")
         .select("status")
         .eq("company_id", company.id)
         .maybeSingle();
-      brainStatus = brain?.status ?? null;
+      brainStatus = (brain as { status?: string | null } | null)?.status ?? null;
     }
 
     return { company, niche, brainStatus };
