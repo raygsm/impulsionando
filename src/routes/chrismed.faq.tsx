@@ -34,7 +34,7 @@ function FaqPage() {
       </section>
 
       <section className="container py-16 max-w-3xl">
-        <FaqAccordion faqs={t.faqs.map((f, i) => ({ id: `faq-${i}`, question: f.q, answer: f.a }))} />
+        <FaqAccordion faqs={t.faqs.map((f) => ({ question: f.q, answer: f.a }))} />
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
             <Link to="/chrismed/agendar">{t.ctaBook}</Link>
