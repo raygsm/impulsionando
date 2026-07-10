@@ -86,7 +86,9 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): AuthSearch => ({
     persona: (s.persona as AuthPersona) || undefined,
     mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
+    next: typeof s.next === "string" ? s.next : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Acessar — Impulsionando Tecnologia" },
