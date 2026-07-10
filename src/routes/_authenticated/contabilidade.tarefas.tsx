@@ -29,7 +29,7 @@ interface Task {
 interface Client { id: string; legal_name: string; trade_name: string | null; }
 
 const PRIORITY = [
-  { v: "low", l: "Baixa", c: "bg-gray-500/15 text-gray-700" },
+  { v: "low", l: "Baixa", c: "bg-muted text-muted-foreground" },
   { v: "medium", l: "Média", c: "bg-blue-500/15 text-blue-700" },
   { v: "high", l: "Alta", c: "bg-amber-500/15 text-amber-700" },
   { v: "urgent", l: "Urgente", c: "bg-red-500/15 text-red-700" },

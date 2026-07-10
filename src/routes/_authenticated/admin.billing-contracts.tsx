@@ -31,7 +31,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_COLOR: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700",
   suspended: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-100 text-gray-700",
+  cancelled: "bg-muted text-muted-foreground",
 };
 
 interface InvoiceRow {

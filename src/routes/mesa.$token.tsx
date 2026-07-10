@@ -454,9 +454,9 @@ function InvoiceStatusBadge({ status }: { status: string }) {
     open: { bg: "bg-amber-100 text-amber-700", label: "Aberta" },
     failed: { bg: "bg-red-100 text-red-700", label: "Falhou" },
     expired: { bg: "bg-red-100 text-red-700", label: "Expirada" },
-    cancelled: { bg: "bg-gray-100 text-gray-600", label: "Cancelada" },
+    cancelled: { bg: "bg-muted text-muted-foreground", label: "Cancelada" },
   };
-  const cfg = map[status] ?? { bg: "bg-gray-100 text-gray-600", label: status };
+  const cfg = map[status] ?? { bg: "bg-muted text-muted-foreground", label: status };
   return <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${cfg.bg}`}>{cfg.label}</span>;
 }
 

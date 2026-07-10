@@ -48,7 +48,7 @@ const REGIMES = [
 const STATUS = [
   { v: "active", l: "Ativo", c: "bg-green-500/15 text-green-700 dark:text-green-300" },
   { v: "onboarding", l: "Onboarding", c: "bg-blue-500/15 text-blue-700 dark:text-blue-300" },
-  { v: "inactive", l: "Inativo", c: "bg-gray-500/15 text-gray-600" },
+  { v: "inactive", l: "Inativo", c: "bg-muted text-muted-foreground" },
   { v: "suspended", l: "Suspenso", c: "bg-amber-500/15 text-amber-700" },
   { v: "churned", l: "Cancelado", c: "bg-red-500/15 text-red-700" },
 ];
