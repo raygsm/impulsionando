@@ -11,7 +11,11 @@ export const Route = createFileRoute("/wmp/")({
       { property: "og:title", content: "WMP — Plataforma completa para eventos" },
       { property: "og:description", content: "Do briefing à execução: pré-diagnóstico acústico, estrutura, coordenação e experiência. Um único interlocutor, sem improviso." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "WMP" },
+      { property: "og:url", content: "https://impulsionando.com.br/wmp" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "WMP — Produção e gestão de eventos" },
+      { name: "twitter:description", content: "Som, luz, palco, telão e coordenação técnica com um único interlocutor." },
     ],
     links: [{ rel: "canonical", href: "/wmp" }],
     scripts: [
