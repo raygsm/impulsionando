@@ -3,35 +3,56 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getEventsHealth } from "@/lib/events-health.functions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Ticket, RefreshCw, Calendar, TrendingUp, Repeat, DoorOpen } from "lucide-react";
+import {
+  PageHeader,
+  KpiGrid,
+  MetricCard,
+  CoreSection,
+  LoadingState,
+  EmptyState,
+  ErrorState,
+  KeyCountTable,
+} from "@/components/impulsionando";
+import { formatBRL, formatInt, formatPct, formatDateTime } from "@/lib/format";
+import type { MetricTone } from "@/components/impulsionando";
 
 export const Route = createFileRoute("/_authenticated/admin/events-health")({
+  head: () => ({
+    meta: [
+      { title: "Eventos & Ticketing — Impulsionando" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: Page,
   errorComponent: ({ error, reset }) => {
     const router = useRouter();
     return (
       <div className="p-6">
-        <Card>
-          <CardHeader><CardTitle className="text-destructive">Erro</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">{error.message}</p>
-            <Button size="sm" onClick={() => { reset(); router.invalidate(); }}>Tentar novamente</Button>
-          </CardContent>
-        </Card>
+        <ErrorState
+          title="Erro ao carregar eventos"
+          description="Não foi possível consultar os dados de vendas e check-in nesta janela."
+          detail={error.message}
+          action={
+            <Button size="sm" onClick={() => { reset(); router.invalidate(); }}>
+              Tentar novamente
+            </Button>
+          }
+        />
       </div>
     );
   },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 });
 
-const brl = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
-const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-const pct = (n: number) => `${n.toFixed(1)}%`;
+function rateTone(p: number): MetricTone {
+  if (p >= 80) return "positive";
+  if (p >= 50) return "warning";
+  return "critical";
+}
 
 function rateVariant(p: number): "default" | "secondary" | "destructive" {
   if (p >= 80) return "default";
@@ -49,12 +70,8 @@ function Page() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
-        <Skeleton className="h-8 w-72" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
-        </div>
-        <Skeleton className="h-80" />
+      <div className="p-6">
+        <LoadingState label="Consultando saúde de eventos…" />
       </div>
     );
   }
@@ -62,178 +79,207 @@ function Page() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <Ticket className="h-6 w-6 text-primary" />
-            Eventos & Ticketing Cockpit
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Vendas, sell-through, check-in rate, transferências e receita por evento.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 dias</SelectItem>
-              <SelectItem value="30">30 dias</SelectItem>
-              <SelectItem value="60">60 dias</SelectItem>
-              <SelectItem value="90">90 dias</SelectItem>
-              <SelectItem value="180">180 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />Atualizar
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Eventos & ticketing"
+        title="Cockpit de eventos"
+        description="Vendas, sell-through, check-in, transferências e receita por evento."
+        actions={
+          <div className="flex items-center gap-2">
+            <Ticket className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <label htmlFor="ev-window" className="sr-only">Janela de análise</label>
+            <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+              <SelectTrigger id="ev-window" className="w-32" aria-label="Janela de análise">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="60">60 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="180">180 dias</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Atualizar dados de eventos"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Atualizar
+            </Button>
+          </div>
+        }
+      />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Calendar className="h-4 w-4" />Eventos</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{fmt(data.events.total)}</div>
-            <p className="text-xs text-muted-foreground">{fmt(data.events.published)} publicados · {fmt(data.events.upcoming)} futuros</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">GMV Total</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{brl(data.sales.gmv)}</div>
-            <p className="text-xs text-muted-foreground">Janela: {brl(data.sales.gmvWindow)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Ingressos Válidos</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{fmt(data.sales.ticketsValid)}<span className="text-sm text-muted-foreground">/{fmt(data.sales.ticketsTotal)}</span></div>
-            <p className="text-xs text-muted-foreground">{fmt(data.sales.ticketsCancelled)} cancelados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Ticket Médio</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{brl(data.sales.avgTicket)}</div>
-            <p className="text-xs text-muted-foreground">Reembolso: {brl(data.sales.refundedRevenue)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4" />Sell-Through</CardTitle></CardHeader>
-          <CardContent>
-            <Badge variant={rateVariant(data.sales.sellThrough)} className="text-base">{pct(data.sales.sellThrough)}</Badge>
-            <p className="text-xs text-muted-foreground mt-1">{fmt(data.sales.totalSold)}/{fmt(data.sales.totalOffered)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><DoorOpen className="h-4 w-4" />Check-in Rate</CardTitle></CardHeader>
-          <CardContent>
-            <Badge variant={rateVariant(data.sales.checkinRate)} className="text-base">{pct(data.sales.checkinRate)}</Badge>
-            <p className="text-xs text-muted-foreground mt-1">{fmt(data.sales.ticketsUsed)} usados · {fmt(data.sales.checkinsWindow)} na janela</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Repeat className="h-4 w-4" />Transferências</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{fmt(data.transfers.total)}</div>
-            <p className="text-xs text-muted-foreground">{fmt(data.transfers.approved)} ok · {fmt(data.transfers.pending)} pendentes · {fmt(data.transfers.rejected)} negadas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Receita Transferências</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">{brl(data.transfers.feeRevenue)}</div>
-            <p className="text-xs text-muted-foreground">Taxas cobradas</p>
-          </CardContent>
-        </Card>
-      </div>
+      <KpiGrid columns={4}>
+        <MetricCard
+          icon={<Calendar className="h-4 w-4" aria-hidden="true" />}
+          label="Eventos"
+          value={formatInt(data.events.total)}
+          hint={`${formatInt(data.events.published)} publicados · ${formatInt(data.events.upcoming)} futuros`}
+        />
+        <MetricCard
+          label="GMV total"
+          value={formatBRL(data.sales.gmv)}
+          hint={`Na janela: ${formatBRL(data.sales.gmvWindow)}`}
+        />
+        <MetricCard
+          label="Ingressos válidos"
+          value={`${formatInt(data.sales.ticketsValid)} / ${formatInt(data.sales.ticketsTotal)}`}
+          hint={`${formatInt(data.sales.ticketsCancelled)} cancelados`}
+        />
+        <MetricCard
+          label="Ticket médio"
+          value={formatBRL(data.sales.avgTicket)}
+          hint={`Reembolso: ${formatBRL(data.sales.refundedRevenue)}`}
+        />
+        <MetricCard
+          icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
+          label="Sell-through"
+          value={formatPct(data.sales.sellThrough, { basis100: true })}
+          tone={rateTone(data.sales.sellThrough)}
+          hint={`${formatInt(data.sales.totalSold)} vendidos / ${formatInt(data.sales.totalOffered)} ofertados`}
+        />
+        <MetricCard
+          icon={<DoorOpen className="h-4 w-4" aria-hidden="true" />}
+          label="Check-in rate"
+          value={formatPct(data.sales.checkinRate, { basis100: true })}
+          tone={rateTone(data.sales.checkinRate)}
+          hint={`${formatInt(data.sales.ticketsUsed)} usados · ${formatInt(data.sales.checkinsWindow)} na janela`}
+        />
+        <MetricCard
+          icon={<Repeat className="h-4 w-4" aria-hidden="true" />}
+          label="Transferências"
+          value={formatInt(data.transfers.total)}
+          hint={`${formatInt(data.transfers.approved)} aprovadas · ${formatInt(data.transfers.pending)} pendentes · ${formatInt(data.transfers.rejected)} negadas`}
+        />
+        <MetricCard
+          label="Receita de transferências"
+          value={formatBRL(data.transfers.feeRevenue)}
+          tone="positive"
+          hint="Taxas cobradas na janela"
+        />
+      </KpiGrid>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Ranking de Eventos (Top 20)</CardTitle></CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+      <CoreSection
+        title="Ranking de eventos (top 20)"
+        description="Ordenado por receita bruta na janela."
+      >
+        {data.eventsRanking.length === 0 ? (
+          <EmptyState
+            title="Sem eventos na janela"
+            description="Nenhum evento com vendas ou check-ins foi registrado no período selecionado."
+          />
+        ) : (
+          <div className="overflow-x-auto rounded-xl border bg-card">
             <table className="w-full text-sm">
+              <caption className="sr-only">Top eventos por receita, ocupação e check-in</caption>
               <thead className="text-xs text-muted-foreground border-b">
                 <tr>
-                  <th className="text-left py-2">Evento</th>
-                  <th className="text-left">Cidade/UF</th>
-                  <th className="text-right">Capacidade</th>
-                  <th className="text-right">Vendidos</th>
-                  <th className="text-right">Ocupação</th>
-                  <th className="text-right">Check-in</th>
-                  <th className="text-right">Receita</th>
+                  <th scope="col" className="text-left py-2 px-3 font-medium">Evento</th>
+                  <th scope="col" className="text-left py-2 px-3 font-medium">Cidade/UF</th>
+                  <th scope="col" className="text-right py-2 px-3 font-medium">Capacidade</th>
+                  <th scope="col" className="text-right py-2 px-3 font-medium">Vendidos</th>
+                  <th scope="col" className="text-right py-2 px-3 font-medium">Ocupação</th>
+                  <th scope="col" className="text-right py-2 px-3 font-medium">Check-in</th>
+                  <th scope="col" className="text-right py-2 px-3 font-medium">Receita</th>
                 </tr>
               </thead>
               <tbody>
                 {data.eventsRanking.map((e) => (
                   <tr key={e.id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{e.title}</td>
-                    <td className="text-xs">{e.city}</td>
-                    <td className="text-right">{fmt(e.capacity)}</td>
-                    <td className="text-right">{fmt(e.sold)}</td>
-                    <td className="text-right">
-                      {e.capacity > 0 ? <Badge variant={rateVariant(e.occupancy)}>{pct(e.occupancy)}</Badge> : <span className="text-muted-foreground">—</span>}
+                    <td className="py-2 px-3 font-medium">{e.title}</td>
+                    <td className="py-2 px-3 text-xs text-muted-foreground">{e.city}</td>
+                    <td className="py-2 px-3 text-right tabular-nums">{formatInt(e.capacity)}</td>
+                    <td className="py-2 px-3 text-right tabular-nums">{formatInt(e.sold)}</td>
+                    <td className="py-2 px-3 text-right">
+                      {e.capacity > 0 ? (
+                        <Badge variant={rateVariant(e.occupancy)}>
+                          {formatPct(e.occupancy, { basis100: true })}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </td>
-                    <td className="text-right">
-                      {e.sold > 0 ? <Badge variant={rateVariant(e.checkinRate)}>{pct(e.checkinRate)}</Badge> : <span className="text-muted-foreground">—</span>}
+                    <td className="py-2 px-3 text-right">
+                      {e.sold > 0 ? (
+                        <Badge variant={rateVariant(e.checkinRate)}>
+                          {formatPct(e.checkinRate, { basis100: true })}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </td>
-                    <td className="text-right font-medium">{brl(e.revenue)}</td>
+                    <td className="py-2 px-3 text-right tabular-nums font-medium">
+                      {formatBRL(e.revenue)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </CoreSection>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Top Tipos de Ingresso (Receita)</CardTitle></CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CoreSection
+          title="Top tipos de ingresso"
+          description="Ranking por receita bruta na janela."
+        >
+          {data.topTypes.length === 0 ? (
+            <EmptyState
+              variant="compact"
+              title="Sem tipos vendidos"
+              description="Nenhum tipo de ingresso registrou vendas nesta janela."
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-xl border bg-card">
               <table className="w-full text-sm">
+                <caption className="sr-only">Tipos de ingresso por receita</caption>
                 <thead className="text-xs text-muted-foreground border-b">
                   <tr>
-                    <th className="text-left py-2">Tipo</th>
-                    <th className="text-right">Preço</th>
-                    <th className="text-right">Vendidos</th>
-                    <th className="text-right">Receita</th>
+                    <th scope="col" className="text-left py-2 px-3 font-medium">Tipo</th>
+                    <th scope="col" className="text-right py-2 px-3 font-medium">Preço</th>
+                    <th scope="col" className="text-right py-2 px-3 font-medium">Vendidos</th>
+                    <th scope="col" className="text-right py-2 px-3 font-medium">Receita</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.topTypes.map((t, i) => (
                     <tr key={i} className="border-b last:border-0">
-                      <td className="py-2 font-medium">{t.name}</td>
-                      <td className="text-right">{brl(t.price)}</td>
-                      <td className="text-right">{fmt(t.sold)}<span className="text-xs text-muted-foreground">/{fmt(t.offered)}</span></td>
-                      <td className="text-right font-medium">{brl(t.revenue)}</td>
+                      <td className="py-2 px-3 font-medium">{t.name}</td>
+                      <td className="py-2 px-3 text-right tabular-nums">{formatBRL(t.price)}</td>
+                      <td className="py-2 px-3 text-right tabular-nums">
+                        {formatInt(t.sold)}
+                        <span className="text-xs text-muted-foreground"> / {formatInt(t.offered)}</span>
+                      </td>
+                      <td className="py-2 px-3 text-right tabular-nums font-medium">
+                        {formatBRL(t.revenue)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Check-ins por Gate (janela)</CardTitle></CardHeader>
-          <CardContent>
-            <table className="w-full text-sm">
-              <tbody>
-                {data.gates.map((g) => (
-                  <tr key={g.gate} className="border-b last:border-0">
-                    <td className="py-2">{g.gate}</td>
-                    <td className="text-right">{fmt(g.count)}</td>
-                  </tr>
-                ))}
-                {data.gates.length === 0 && <tr><td className="py-2 text-muted-foreground text-center">Sem check-ins na janela</td></tr>}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+          )}
+        </CoreSection>
+
+        <CoreSection title="Check-ins por portaria" description="Volume de acessos por gate na janela.">
+          <KeyCountTable
+            keyLabel="Gate"
+            countLabel="Check-ins"
+            ariaLabel="Check-ins por gate"
+            rows={data.gates.map((g) => ({ k: g.gate, count: g.count }))}
+            emptyTitle="Sem check-ins na janela"
+            emptyDescription="Nenhuma portaria registrou acessos no período selecionado."
+          />
+        </CoreSection>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Janela: últimos {data.window.days} dias • Atualizado em {new Date(data.generatedAt).toLocaleString("pt-BR")}
+        Janela: últimos {data.window.days} dias • Atualizado em {formatDateTime(data.generatedAt)}
       </p>
     </div>
   );
