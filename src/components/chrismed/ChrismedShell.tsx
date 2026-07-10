@@ -62,14 +62,17 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-full border border-amber-300/70 bg-gradient-to-br from-emerald-900 to-emerald-800 text-amber-100 flex items-center justify-center font-serif text-lg shadow-sm">
-            C
-          </div>
-          <div className="leading-tight">
-            <div className="font-serif text-lg text-emerald-950">CrisMed</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/90">Dra. Cristiane Alencar</div>
-          </div>
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Cristiane Alencar">
+          <img
+            src={chrismedLogo.url}
+            alt="CrisMed"
+            className="h-11 w-auto object-contain"
+            width={190}
+            height={44}
+            loading="eager"
+            decoding="async"
+          />
+          <span className="sr-only">CrisMed · Dra. Cristiane Alencar</span>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
