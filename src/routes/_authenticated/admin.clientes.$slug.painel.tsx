@@ -1,5 +1,5 @@
 // Painel Impulsionando — dashboard universal módulo-aware (padrão pós-instalação).
-// Renderiza KPIs SOMENTE dos módulos contratados pelo tenant. Mesma rota serve
+// Renderiza KPIs SOMENTE dos módulos contratados pelo cliente. Mesma rota serve
 // CHRISMED, RioMed e qualquer cliente novo do core Impulsionando.
 // IDENTIDADE: somente Impulsionando (logo + cores + slogan "Seu Dashboard").
 import { createFileRoute, Link } from "@tanstack/react-router";
