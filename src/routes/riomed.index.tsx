@@ -29,12 +29,31 @@ export const Route = createFileRoute("/riomed/")({
       {
         property: "og:description",
         content:
-          "Venta, alquiler y mantenimiento de equipamiento médico. Cobertura nacional, soporte técnico especializado y cotización rápida por WhatsApp.",
+          "Venta, alquiler y mantenimiento de equipamiento médico. Cobertura nacional, soporte técnico especializado y cotización rápida.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://impulsionando.com.br/riomed" },
+      { property: "og:site_name", content: "RioMed" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "RioMed — Equipos médicos en Bolivia" },
+      { name: "twitter:description", content: "Venta, alquiler y servicio técnico de equipamiento médico-hospitalario." },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/riomed" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MedicalBusiness",
+          name: "RioMed",
+          description: "Importación, venta, alquiler y servicio técnico de equipamiento médico-hospitalario en Bolivia.",
+          areaServed: "BO",
+          address: { "@type": "PostalAddress", addressCountry: "BO" },
+          url: "https://riomed.impulsionando.com.br",
+          knowsLanguage: ["es", "pt"],
+        }),
+      },
+    ],
   }),
   component: RiomedHome,
 });
