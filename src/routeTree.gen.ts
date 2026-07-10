@@ -686,6 +686,7 @@ import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as MarocasAppHospedeIndexRouteImport } from './routes/marocas.app.hospede.index'
 import { Route as MarocasAppAnfitriaoIndexRouteImport } from './routes/marocas.app.anfitriao.index'
 import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_authenticated/core.tenants.index'
 import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
@@ -693,6 +694,13 @@ import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './route
 import { Route as AuthenticatedCoreComercialIndexRouteImport } from './routes/_authenticated/core.comercial.index'
 import { Route as AuthenticatedCoreAutomacaoIndexRouteImport } from './routes/_authenticated/core.automacao.index'
 import { Route as AuthenticatedCoreAdministracaoIndexRouteImport } from './routes/_authenticated/core.administracao.index'
+import { Route as MarocasAppHospedeSuporteRouteImport } from './routes/marocas.app.hospede.suporte'
+import { Route as MarocasAppHospedeRoteirosRouteImport } from './routes/marocas.app.hospede.roteiros'
+import { Route as MarocasAppHospedeRegrasRouteImport } from './routes/marocas.app.hospede.regras'
+import { Route as MarocasAppHospedeImovelRouteImport } from './routes/marocas.app.hospede.imovel'
+import { Route as MarocasAppHospedeHistoricoRouteImport } from './routes/marocas.app.hospede.historico'
+import { Route as MarocasAppHospedeAvaliacaoRouteImport } from './routes/marocas.app.hospede.avaliacao'
+import { Route as MarocasAppHospedeAcessoRouteImport } from './routes/marocas.app.hospede.acesso'
 import { Route as MarocasAppAnfitriaoReservasRouteImport } from './routes/marocas.app.anfitriao.reservas'
 import { Route as MarocasAppAnfitriaoReposicoesRouteImport } from './routes/marocas.app.anfitriao.reposicoes'
 import { Route as MarocasAppAnfitriaoRelatoriosRouteImport } from './routes/marocas.app.anfitriao.relatorios'
@@ -4629,6 +4637,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MarocasAppHospedeIndexRoute = MarocasAppHospedeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MarocasAppHospedeRoute,
+} as any)
 const MarocasAppAnfitriaoIndexRoute =
   MarocasAppAnfitriaoIndexRouteImport.update({
     id: '/',
@@ -4671,6 +4684,45 @@ const AuthenticatedCoreAdministracaoIndexRoute =
     path: '/administracao/',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const MarocasAppHospedeSuporteRoute =
+  MarocasAppHospedeSuporteRouteImport.update({
+    id: '/suporte',
+    path: '/suporte',
+    getParentRoute: () => MarocasAppHospedeRoute,
+  } as any)
+const MarocasAppHospedeRoteirosRoute =
+  MarocasAppHospedeRoteirosRouteImport.update({
+    id: '/roteiros',
+    path: '/roteiros',
+    getParentRoute: () => MarocasAppHospedeRoute,
+  } as any)
+const MarocasAppHospedeRegrasRoute = MarocasAppHospedeRegrasRouteImport.update({
+  id: '/regras',
+  path: '/regras',
+  getParentRoute: () => MarocasAppHospedeRoute,
+} as any)
+const MarocasAppHospedeImovelRoute = MarocasAppHospedeImovelRouteImport.update({
+  id: '/imovel',
+  path: '/imovel',
+  getParentRoute: () => MarocasAppHospedeRoute,
+} as any)
+const MarocasAppHospedeHistoricoRoute =
+  MarocasAppHospedeHistoricoRouteImport.update({
+    id: '/historico',
+    path: '/historico',
+    getParentRoute: () => MarocasAppHospedeRoute,
+  } as any)
+const MarocasAppHospedeAvaliacaoRoute =
+  MarocasAppHospedeAvaliacaoRouteImport.update({
+    id: '/avaliacao',
+    path: '/avaliacao',
+    getParentRoute: () => MarocasAppHospedeRoute,
+  } as any)
+const MarocasAppHospedeAcessoRoute = MarocasAppHospedeAcessoRouteImport.update({
+  id: '/acesso',
+  path: '/acesso',
+  getParentRoute: () => MarocasAppHospedeRoute,
+} as any)
 const MarocasAppAnfitriaoReservasRoute =
   MarocasAppAnfitriaoReservasRouteImport.update({
     id: '/reservas',
@@ -6457,7 +6509,7 @@ export interface FileRoutesByFullPath {
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/app/anfitriao': typeof MarocasAppAnfitriaoRouteWithChildren
-  '/marocas/app/hospede': typeof MarocasAppHospedeRoute
+  '/marocas/app/hospede': typeof MarocasAppHospedeRouteWithChildren
   '/marocas/app/prestador': typeof MarocasAppPrestadorRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
@@ -6618,6 +6670,13 @@ export interface FileRoutesByFullPath {
   '/marocas/app/anfitriao/relatorios': typeof MarocasAppAnfitriaoRelatoriosRoute
   '/marocas/app/anfitriao/reposicoes': typeof MarocasAppAnfitriaoReposicoesRoute
   '/marocas/app/anfitriao/reservas': typeof MarocasAppAnfitriaoReservasRoute
+  '/marocas/app/hospede/acesso': typeof MarocasAppHospedeAcessoRoute
+  '/marocas/app/hospede/avaliacao': typeof MarocasAppHospedeAvaliacaoRoute
+  '/marocas/app/hospede/historico': typeof MarocasAppHospedeHistoricoRoute
+  '/marocas/app/hospede/imovel': typeof MarocasAppHospedeImovelRoute
+  '/marocas/app/hospede/regras': typeof MarocasAppHospedeRegrasRoute
+  '/marocas/app/hospede/roteiros': typeof MarocasAppHospedeRoteirosRoute
+  '/marocas/app/hospede/suporte': typeof MarocasAppHospedeSuporteRoute
   '/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
@@ -6625,6 +6684,7 @@ export interface FileRoutesByFullPath {
   '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
+  '/marocas/app/hospede/': typeof MarocasAppHospedeIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -7314,7 +7374,6 @@ export interface FileRoutesByTo {
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/marocas/app/hospede': typeof MarocasAppHospedeRoute
   '/marocas/app/prestador': typeof MarocasAppPrestadorRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
@@ -7474,6 +7533,13 @@ export interface FileRoutesByTo {
   '/marocas/app/anfitriao/relatorios': typeof MarocasAppAnfitriaoRelatoriosRoute
   '/marocas/app/anfitriao/reposicoes': typeof MarocasAppAnfitriaoReposicoesRoute
   '/marocas/app/anfitriao/reservas': typeof MarocasAppAnfitriaoReservasRoute
+  '/marocas/app/hospede/acesso': typeof MarocasAppHospedeAcessoRoute
+  '/marocas/app/hospede/avaliacao': typeof MarocasAppHospedeAvaliacaoRoute
+  '/marocas/app/hospede/historico': typeof MarocasAppHospedeHistoricoRoute
+  '/marocas/app/hospede/imovel': typeof MarocasAppHospedeImovelRoute
+  '/marocas/app/hospede/regras': typeof MarocasAppHospedeRegrasRoute
+  '/marocas/app/hospede/roteiros': typeof MarocasAppHospedeRoteirosRoute
+  '/marocas/app/hospede/suporte': typeof MarocasAppHospedeSuporteRoute
   '/core/administracao': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/core/automacao': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial': typeof AuthenticatedCoreComercialIndexRoute
@@ -7481,6 +7547,7 @@ export interface FileRoutesByTo {
   '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao': typeof MarocasAppAnfitriaoIndexRoute
+  '/marocas/app/hospede': typeof MarocasAppHospedeIndexRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -8193,7 +8260,7 @@ export interface FileRoutesById {
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/app/anfitriao': typeof MarocasAppAnfitriaoRouteWithChildren
-  '/marocas/app/hospede': typeof MarocasAppHospedeRoute
+  '/marocas/app/hospede': typeof MarocasAppHospedeRouteWithChildren
   '/marocas/app/prestador': typeof MarocasAppPrestadorRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
@@ -8354,6 +8421,13 @@ export interface FileRoutesById {
   '/marocas/app/anfitriao/relatorios': typeof MarocasAppAnfitriaoRelatoriosRoute
   '/marocas/app/anfitriao/reposicoes': typeof MarocasAppAnfitriaoReposicoesRoute
   '/marocas/app/anfitriao/reservas': typeof MarocasAppAnfitriaoReservasRoute
+  '/marocas/app/hospede/acesso': typeof MarocasAppHospedeAcessoRoute
+  '/marocas/app/hospede/avaliacao': typeof MarocasAppHospedeAvaliacaoRoute
+  '/marocas/app/hospede/historico': typeof MarocasAppHospedeHistoricoRoute
+  '/marocas/app/hospede/imovel': typeof MarocasAppHospedeImovelRoute
+  '/marocas/app/hospede/regras': typeof MarocasAppHospedeRegrasRoute
+  '/marocas/app/hospede/roteiros': typeof MarocasAppHospedeRoteirosRoute
+  '/marocas/app/hospede/suporte': typeof MarocasAppHospedeSuporteRoute
   '/_authenticated/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/_authenticated/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/_authenticated/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
@@ -8361,6 +8435,7 @@ export interface FileRoutesById {
   '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/_authenticated/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
+  '/marocas/app/hospede/': typeof MarocasAppHospedeIndexRoute
   '/_authenticated/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/_authenticated/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/_authenticated/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -9234,6 +9309,13 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao/relatorios'
     | '/marocas/app/anfitriao/reposicoes'
     | '/marocas/app/anfitriao/reservas'
+    | '/marocas/app/hospede/acesso'
+    | '/marocas/app/hospede/avaliacao'
+    | '/marocas/app/hospede/historico'
+    | '/marocas/app/hospede/imovel'
+    | '/marocas/app/hospede/regras'
+    | '/marocas/app/hospede/roteiros'
+    | '/marocas/app/hospede/suporte'
     | '/core/administracao/'
     | '/core/automacao/'
     | '/core/comercial/'
@@ -9241,6 +9323,7 @@ export interface FileRouteTypes {
     | '/core/nichos/'
     | '/core/tenants/'
     | '/marocas/app/anfitriao/'
+    | '/marocas/app/hospede/'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
@@ -9930,7 +10013,6 @@ export interface FileRouteTypes {
     | '/garrido/imovel/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/marocas/app/hospede'
     | '/marocas/app/prestador'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
@@ -10090,6 +10172,13 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao/relatorios'
     | '/marocas/app/anfitriao/reposicoes'
     | '/marocas/app/anfitriao/reservas'
+    | '/marocas/app/hospede/acesso'
+    | '/marocas/app/hospede/avaliacao'
+    | '/marocas/app/hospede/historico'
+    | '/marocas/app/hospede/imovel'
+    | '/marocas/app/hospede/regras'
+    | '/marocas/app/hospede/roteiros'
+    | '/marocas/app/hospede/suporte'
     | '/core/administracao'
     | '/core/automacao'
     | '/core/comercial'
@@ -10097,6 +10186,7 @@ export interface FileRouteTypes {
     | '/core/nichos'
     | '/core/tenants'
     | '/marocas/app/anfitriao'
+    | '/marocas/app/hospede'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
@@ -10969,6 +11059,13 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao/relatorios'
     | '/marocas/app/anfitriao/reposicoes'
     | '/marocas/app/anfitriao/reservas'
+    | '/marocas/app/hospede/acesso'
+    | '/marocas/app/hospede/avaliacao'
+    | '/marocas/app/hospede/historico'
+    | '/marocas/app/hospede/imovel'
+    | '/marocas/app/hospede/regras'
+    | '/marocas/app/hospede/roteiros'
+    | '/marocas/app/hospede/suporte'
     | '/_authenticated/core/administracao/'
     | '/_authenticated/core/automacao/'
     | '/_authenticated/core/comercial/'
@@ -10976,6 +11073,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/nichos/'
     | '/_authenticated/core/tenants/'
     | '/marocas/app/anfitriao/'
+    | '/marocas/app/hospede/'
     | '/_authenticated/admin/clientes/$slug/automacoes'
     | '/_authenticated/admin/clientes/$slug/cerebro-ia'
     | '/_authenticated/admin/clientes/$slug/configuracoes'
@@ -15993,6 +16091,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marocas/app/hospede/': {
+      id: '/marocas/app/hospede/'
+      path: '/'
+      fullPath: '/marocas/app/hospede/'
+      preLoaderRoute: typeof MarocasAppHospedeIndexRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
     '/marocas/app/anfitriao/': {
       id: '/marocas/app/anfitriao/'
       path: '/'
@@ -16041,6 +16146,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/administracao/'
       preLoaderRoute: typeof AuthenticatedCoreAdministracaoIndexRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/marocas/app/hospede/suporte': {
+      id: '/marocas/app/hospede/suporte'
+      path: '/suporte'
+      fullPath: '/marocas/app/hospede/suporte'
+      preLoaderRoute: typeof MarocasAppHospedeSuporteRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/roteiros': {
+      id: '/marocas/app/hospede/roteiros'
+      path: '/roteiros'
+      fullPath: '/marocas/app/hospede/roteiros'
+      preLoaderRoute: typeof MarocasAppHospedeRoteirosRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/regras': {
+      id: '/marocas/app/hospede/regras'
+      path: '/regras'
+      fullPath: '/marocas/app/hospede/regras'
+      preLoaderRoute: typeof MarocasAppHospedeRegrasRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/imovel': {
+      id: '/marocas/app/hospede/imovel'
+      path: '/imovel'
+      fullPath: '/marocas/app/hospede/imovel'
+      preLoaderRoute: typeof MarocasAppHospedeImovelRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/historico': {
+      id: '/marocas/app/hospede/historico'
+      path: '/historico'
+      fullPath: '/marocas/app/hospede/historico'
+      preLoaderRoute: typeof MarocasAppHospedeHistoricoRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/avaliacao': {
+      id: '/marocas/app/hospede/avaliacao'
+      path: '/avaliacao'
+      fullPath: '/marocas/app/hospede/avaliacao'
+      preLoaderRoute: typeof MarocasAppHospedeAvaliacaoRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
+    }
+    '/marocas/app/hospede/acesso': {
+      id: '/marocas/app/hospede/acesso'
+      path: '/acesso'
+      fullPath: '/marocas/app/hospede/acesso'
+      preLoaderRoute: typeof MarocasAppHospedeAcessoRouteImport
+      parentRoute: typeof MarocasAppHospedeRoute
     }
     '/marocas/app/anfitriao/reservas': {
       id: '/marocas/app/anfitriao/reservas'
@@ -19303,16 +19457,41 @@ const MarocasAppAnfitriaoRouteChildren: MarocasAppAnfitriaoRouteChildren = {
 const MarocasAppAnfitriaoRouteWithChildren =
   MarocasAppAnfitriaoRoute._addFileChildren(MarocasAppAnfitriaoRouteChildren)
 
+interface MarocasAppHospedeRouteChildren {
+  MarocasAppHospedeAcessoRoute: typeof MarocasAppHospedeAcessoRoute
+  MarocasAppHospedeAvaliacaoRoute: typeof MarocasAppHospedeAvaliacaoRoute
+  MarocasAppHospedeHistoricoRoute: typeof MarocasAppHospedeHistoricoRoute
+  MarocasAppHospedeImovelRoute: typeof MarocasAppHospedeImovelRoute
+  MarocasAppHospedeRegrasRoute: typeof MarocasAppHospedeRegrasRoute
+  MarocasAppHospedeRoteirosRoute: typeof MarocasAppHospedeRoteirosRoute
+  MarocasAppHospedeSuporteRoute: typeof MarocasAppHospedeSuporteRoute
+  MarocasAppHospedeIndexRoute: typeof MarocasAppHospedeIndexRoute
+}
+
+const MarocasAppHospedeRouteChildren: MarocasAppHospedeRouteChildren = {
+  MarocasAppHospedeAcessoRoute: MarocasAppHospedeAcessoRoute,
+  MarocasAppHospedeAvaliacaoRoute: MarocasAppHospedeAvaliacaoRoute,
+  MarocasAppHospedeHistoricoRoute: MarocasAppHospedeHistoricoRoute,
+  MarocasAppHospedeImovelRoute: MarocasAppHospedeImovelRoute,
+  MarocasAppHospedeRegrasRoute: MarocasAppHospedeRegrasRoute,
+  MarocasAppHospedeRoteirosRoute: MarocasAppHospedeRoteirosRoute,
+  MarocasAppHospedeSuporteRoute: MarocasAppHospedeSuporteRoute,
+  MarocasAppHospedeIndexRoute: MarocasAppHospedeIndexRoute,
+}
+
+const MarocasAppHospedeRouteWithChildren =
+  MarocasAppHospedeRoute._addFileChildren(MarocasAppHospedeRouteChildren)
+
 interface MarocasAppRouteChildren {
   MarocasAppAnfitriaoRoute: typeof MarocasAppAnfitriaoRouteWithChildren
-  MarocasAppHospedeRoute: typeof MarocasAppHospedeRoute
+  MarocasAppHospedeRoute: typeof MarocasAppHospedeRouteWithChildren
   MarocasAppPrestadorRoute: typeof MarocasAppPrestadorRoute
   MarocasAppIndexRoute: typeof MarocasAppIndexRoute
 }
 
 const MarocasAppRouteChildren: MarocasAppRouteChildren = {
   MarocasAppAnfitriaoRoute: MarocasAppAnfitriaoRouteWithChildren,
-  MarocasAppHospedeRoute: MarocasAppHospedeRoute,
+  MarocasAppHospedeRoute: MarocasAppHospedeRouteWithChildren,
   MarocasAppPrestadorRoute: MarocasAppPrestadorRoute,
   MarocasAppIndexRoute: MarocasAppIndexRoute,
 }
@@ -19776,3 +19955,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
