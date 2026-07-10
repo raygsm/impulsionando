@@ -183,7 +183,7 @@ function ContratarPage() {
                   </ul>
                   <div className="space-y-2">
                     <Button asChild className="w-full" size="lg">
-                      <Link to="/checkout/$plan" params={{ plan: p.code }}>
+                      <Link to="/checkout/$slug" params={{ slug: p.code }}>
                         Contratar agora
                       </Link>
                     </Button>
