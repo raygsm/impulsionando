@@ -4,6 +4,9 @@ import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { openImpulsionito } from "@/lib/impulsionito-tracking";
+import { buildOfficialWhatsAppUrl, trackWhatsAppCTA } from "@/lib/whatsapp-cta";
+
+const SUPPORT_EMAIL = "sac@impulsionando.com.br";
 
 export const Route = createFileRoute("/suporte")({
   head: () => ({
@@ -28,13 +31,23 @@ type Channel = {
   onClick?: () => void;
 };
 
+function openImpulsionitoChat() {
+  openImpulsionito("suporte-central");
+  const url = buildOfficialWhatsAppUrl(
+    "Olá! Vim da Central de Suporte e quero falar com o Impulsionito.",
+    { source: "suporte", medium: "whatsapp" },
+  );
+  trackWhatsAppCTA("whatsapp_cta_click", { surface: "suporte-impulsionito" });
+  if (typeof window !== "undefined") window.open(url, "_blank", "noopener,noreferrer");
+}
+
 const CHANNELS: Channel[] = [
   {
     icon: MessageCircle,
     title: "Impulsionito — Assistente Impulsionando",
     description: "Atendimento humano + IA, das 8h às 22h (BRT). Resposta em até 5 min em horário comercial.",
     cta: "Falar agora",
-    onClick: () => openImpulsionito("suporte-central"),
+    onClick: openImpulsionitoChat,
   },
   {
     icon: Ticket,
@@ -46,17 +59,17 @@ const CHANNELS: Channel[] = [
   {
     icon: Mail,
     title: "E-mail",
-    description: "suporte@impulsionando.com.br — resposta em até 1 dia útil.",
+    description: `${SUPPORT_EMAIL} — resposta em até 1 dia útil.`,
     cta: "Enviar e-mail",
-    href: "mailto:suporte@impulsionando.com.br",
+    href: `mailto:${SUPPORT_EMAIL}`,
     external: true,
   },
   {
     icon: BookOpen,
     title: "Base de conhecimento",
-    description: "Tutoriais, vídeos e guias por nicho. Resolva sozinho em minutos.",
-    cta: "Explorar",
-    to: "/nichos",
+    description: "Tutoriais, vídeos e guias da Central de Ajuda Impulsionando. Resolva sozinho em minutos.",
+    cta: "Abrir Central de Ajuda",
+    to: "/central-de-ajuda",
   },
 ];
 
