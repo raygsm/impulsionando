@@ -32,7 +32,7 @@ function PrivacidadePage() {
       </section>
 
       <section className="container py-16 max-w-3xl prose prose-emerald prose-headings:font-serif prose-headings:text-emerald-950 prose-p:text-emerald-900/80">
-        {t.sections.map((s) => (
+        {(t.sections as ReadonlyArray<{ title: string; paragraphs: readonly string[]; list?: readonly string[] }>).map((s) => (
           <div key={s.title} className="mb-10">
             <h2 className="text-2xl">{s.title}</h2>
             {s.paragraphs.map((p, i) => (
