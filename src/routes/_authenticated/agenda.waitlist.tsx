@@ -33,7 +33,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 const STATUS_COLOR: Record<string, string> = {
   waiting: "bg-amber-100 text-amber-700", contacted: "bg-blue-100 text-blue-700",
-  converted: "bg-emerald-100 text-emerald-700", expired: "bg-gray-100 text-gray-700", cancelled: "bg-red-100 text-red-700",
+  converted: "bg-emerald-100 text-emerald-700", expired: "bg-muted text-muted-foreground", cancelled: "bg-red-100 text-red-700",
 };
 
 function WaitlistPage() {

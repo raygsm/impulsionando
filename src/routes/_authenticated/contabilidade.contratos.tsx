@@ -33,7 +33,7 @@ interface Onb {
 interface Client { id: string; legal_name: string; trade_name: string | null; }
 
 const STATUS = [
-  { v: "rascunho", l: "Rascunho", c: "bg-gray-500/15 text-gray-700" },
+  { v: "rascunho", l: "Rascunho", c: "bg-muted text-muted-foreground" },
   { v: "enviado", l: "Enviado", c: "bg-blue-500/15 text-blue-700" },
   { v: "assinado", l: "Assinado", c: "bg-emerald-500/15 text-emerald-700" },
   { v: "cancelado", l: "Cancelado", c: "bg-red-500/15 text-red-700" },

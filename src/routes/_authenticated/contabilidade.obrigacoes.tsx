@@ -47,8 +47,8 @@ const STATUS = [
   { v: "sent", l: "Enviada", c: "bg-purple-500/15 text-purple-700" },
   { v: "paid", l: "Paga", c: "bg-green-500/15 text-green-700" },
   { v: "overdue", l: "Atrasada", c: "bg-red-500/15 text-red-700" },
-  { v: "cancelled", l: "Cancelada", c: "bg-gray-500/15 text-gray-600" },
-  { v: "exempt", l: "Isenta", c: "bg-gray-500/15 text-gray-600" },
+  { v: "cancelled", l: "Cancelada", c: "bg-muted text-muted-foreground" },
+  { v: "exempt", l: "Isenta", c: "bg-muted text-muted-foreground" },
 ];
 
 const today = new Date().toISOString().slice(0, 10);

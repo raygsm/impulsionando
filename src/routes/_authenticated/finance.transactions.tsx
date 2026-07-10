@@ -29,7 +29,7 @@ const STATUS: Record<string, { l: string; c: string }> = {
   pending: { l: "Pendente", c: "bg-amber-100 text-amber-700" },
   paid: { l: "Pago", c: "bg-emerald-100 text-emerald-700" },
   overdue: { l: "Vencido", c: "bg-red-100 text-red-700" },
-  canceled: { l: "Cancelado", c: "bg-gray-100 text-gray-700" },
+  canceled: { l: "Cancelado", c: "bg-muted text-muted-foreground" },
   refunded: { l: "Estornado", c: "bg-violet-100 text-violet-700" },
 };
 

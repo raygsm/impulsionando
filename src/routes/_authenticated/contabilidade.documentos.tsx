@@ -43,7 +43,7 @@ const STATUS = [
   { v: "received", l: "Recebido", c: "bg-blue-500/15 text-blue-700" },
   { v: "processed", l: "Processado", c: "bg-green-500/15 text-green-700" },
   { v: "rejected", l: "Rejeitado", c: "bg-red-500/15 text-red-700" },
-  { v: "archived", l: "Arquivado", c: "bg-gray-500/15 text-gray-600" },
+  { v: "archived", l: "Arquivado", c: "bg-muted text-muted-foreground" },
 ];
 
 function fmtSize(b: number | null) {

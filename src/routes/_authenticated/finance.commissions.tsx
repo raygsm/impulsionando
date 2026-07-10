@@ -20,7 +20,7 @@ const STATUS: Record<string, { l: string; c: string }> = {
   pending: { l: "Pendente", c: "bg-amber-100 text-amber-700" },
   approved: { l: "Aprovada", c: "bg-blue-100 text-blue-700" },
   paid: { l: "Paga", c: "bg-emerald-100 text-emerald-700" },
-  canceled: { l: "Cancelada", c: "bg-gray-100 text-gray-700" },
+  canceled: { l: "Cancelada", c: "bg-muted text-muted-foreground" },
 };
 
 function CommPage() {
