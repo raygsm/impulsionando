@@ -33,6 +33,25 @@ export function NichoPage({ nicho }: Props) {
   const wa = ctaWaUrl(nicho.ctaPrimary.whatsappMsg);
   const recommendedModules = MODULE_DETAILS.filter((m) => nicho.modules.includes(m.id));
 
+  // Evita loop: se o CTA secundário aponta para /demo/escolher-nicho e este nicho já tem
+  // planos mapeados, envia direto para o cadastro pré-preenchido no plano Full.
+  const hasPlans = Boolean(NICHE_MODULE_SLUGS[nicho.slug]);
+  const secondaryIsPicker = nicho.ctaSecondary.href === "/demo/escolher-nicho";
+  const SecondaryCta = ({ children, className }: { children: React.ReactNode; className?: string }) =>
+    secondaryIsPicker && hasPlans ? (
+      <Link
+        to="/demo/cadastro"
+        search={{ niche: nicho.slug, plan: "full" as const }}
+        className={className}
+      >
+        {children}
+      </Link>
+    ) : (
+      <Link to={nicho.ctaSecondary.href} className={className}>
+        {children}
+      </Link>
+    );
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PublicHeader />
