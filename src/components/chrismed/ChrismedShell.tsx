@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MoreContentFab } from '@/components/impulsionando';
+import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 export type Lang = 'pt' | 'en' | 'es';
 
