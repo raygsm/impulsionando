@@ -164,8 +164,16 @@ export function ChrismedFooter() {
     <footer className="border-t border-emerald-900/10 bg-[#f7f4ed] mt-20 py-10">
       <div className="container grid gap-6 md:grid-cols-3 text-sm text-emerald-900/80">
         <div>
-          <div className="font-serif text-emerald-950 text-lg">CrisMed</div>
-          <p className="mt-2 text-emerald-900/70">{copy[lang]}</p>
+          <img
+            src={chrismedLogo.url}
+            alt="CrisMed"
+            className="h-10 w-auto object-contain"
+            width={170}
+            height={40}
+            loading="lazy"
+            decoding="async"
+          />
+          <p className="mt-3 text-emerald-900/70">{copy[lang]}</p>
         </div>
         <div>
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Atendimento</div>
