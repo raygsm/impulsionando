@@ -6,7 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Calculator, FileText, ClipboardList, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/portal/contabilidade/$token")({
-  head: () => ({ meta: [{ title: "Portal do Cliente — Contabilidade" }] }),
+  head: () => ({
+    meta: [
+      { title: "Portal do Cliente — Contabilidade" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: PortalCliente,
 });
 
