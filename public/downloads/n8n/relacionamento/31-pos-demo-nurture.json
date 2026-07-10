@@ -1,0 +1,161 @@
+{
+  "name": "31 — Pós-demo Nurture (P6.8-E)",
+  "meta": {
+    "wave": "P6.8-E",
+    "descricao": "Jornada automática iniciada quando um lead conclui uma demo em qualquer nicho. Move o lead pelo funil Impulsionando (captar → converter → relacionar → reter → expandir) com réguas por nicho.",
+    "trigger_event": "demo.completed",
+    "channels": ["email", "whatsapp", "inapp"],
+    "test_stamp": "TESTE IMPULSIONANDO",
+    "governance": "docs/CORE_GROWTH_GOVERNANCE.md"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "path": "impulsionando/demo-completed",
+        "options": { "responseMode": "onReceived" }
+      },
+      "name": "Webhook: demo.completed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Normaliza payload do lead pós-demo.\nconst p = items[0].json;\nreturn [{\n  json: {\n    lead_id: p.lead_id,\n    email: (p.email || '').toLowerCase().trim(),\n    whatsapp: p.whatsapp || null,\n    niche_code: p.niche_code || 'generico',\n    demo_module: p.demo_module || null,\n    tenant_hint: p.tenant_hint || null,\n    is_test_account: ['raygs@hotmail.com','raygsmonnerat@gmail.com'].includes((p.email||'').toLowerCase().trim()),\n    started_at: new Date().toISOString(),\n    stamp: '[TESTE IMPULSIONANDO]'\n  }\n}];"
+      },
+      "name": "Normalize + stamp",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [{ "value1": "={{$json.is_test_account}}", "value2": true }]
+        }
+      },
+      "name": "Bypass contas master?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.CORE_API_URL}}/api/public/crm/opportunities",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"source\": \"demo_completed\",\n  \"lead_id\": \"{{$json.lead_id}}\",\n  \"niche_code\": \"{{$json.niche_code}}\",\n  \"stage\": \"converter\",\n  \"value_stage\": \"pos_demo\"\n}"
+      },
+      "name": "CRM: cria oportunidade",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [860, 380]
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "minutes"
+      },
+      "name": "Espera 15min",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1080, 380]
+    },
+    {
+      "parameters": {
+        "fromEmail": "impulsionito@impulsionando.com.br",
+        "toEmail": "={{$json.email}}",
+        "subject": "[TESTE IMPULSIONANDO] Como foi seu teste? Vamos ativar de verdade?",
+        "text": "[TESTE IMPULSIONANDO] Olá!\n\nVi que você concluiu a demonstração do módulo {{$json.demo_module || 'Impulsionando'}} para o nicho {{$json.niche_code}}.\n\nEm até 24h um especialista humano vai te chamar no WhatsApp. Se quiser adiantar, responda este email com o melhor horário.\n\n— Esta é uma comunicação do ambiente de TESTE IMPULSIONANDO. Você não é cobrado por esta interação."
+      },
+      "name": "Email D0 (pós-demo)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1300, 380]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "days"
+      },
+      "name": "Espera 24h",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1520, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.ZAPI_URL}}/send-text",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"phone\": \"{{$json.whatsapp}}\",\n  \"message\": \"[TESTE IMPULSIONANDO] Oi! Aqui é o Impulsionito. Vi seu teste no módulo {{$json.demo_module}}. Quer eu te mostrar como isso roda de verdade na sua operação? Responda 1-SIM, 2-DEPOIS ou 3-NÃO. _Mensagem de ambiente de teste — sem cobrança._\"\n}"
+      },
+      "name": "WhatsApp D1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1740, 380]
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "days"
+      },
+      "name": "Espera 3 dias",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1960, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.CORE_API_URL}}/api/public/funnel/rules/apply",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"lead_id\": \"{{$json.lead_id}}\",\n  \"niche_code\": \"{{$json.niche_code}}\",\n  \"stage\": \"relacionar\",\n  \"rule_bucket\": \"pos_demo_d3\"\n}"
+      },
+      "name": "Régua por nicho (D3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2180, 380]
+    },
+    {
+      "parameters": {
+        "amount": 7,
+        "unit": "days"
+      },
+      "name": "Espera 7 dias",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [2400, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.CORE_API_URL}}/api/public/crm/opportunities/close-or-nurture",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"lead_id\": \"{{$json.lead_id}}\",\n  \"decision\": \"auto\"\n}"
+      },
+      "name": "Fecha ou joga em winback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2620, 380]
+    }
+  ],
+  "connections": {
+    "Webhook: demo.completed": { "main": [[{ "node": "Normalize + stamp", "type": "main", "index": 0 }]] },
+    "Normalize + stamp": { "main": [[{ "node": "Bypass contas master?", "type": "main", "index": 0 }]] },
+    "Bypass contas master?": {
+      "main": [
+        [],
+        [{ "node": "CRM: cria oportunidade", "type": "main", "index": 0 }]
+      ]
+    },
+    "CRM: cria oportunidade": { "main": [[{ "node": "Espera 15min", "type": "main", "index": 0 }]] },
+    "Espera 15min": { "main": [[{ "node": "Email D0 (pós-demo)", "type": "main", "index": 0 }]] },
+    "Email D0 (pós-demo)": { "main": [[{ "node": "Espera 24h", "type": "main", "index": 0 }]] },
+    "Espera 24h": { "main": [[{ "node": "WhatsApp D1", "type": "main", "index": 0 }]] },
+    "WhatsApp D1": { "main": [[{ "node": "Espera 3 dias", "type": "main", "index": 0 }]] },
+    "Espera 3 dias": { "main": [[{ "node": "Régua por nicho (D3)", "type": "main", "index": 0 }]] },
+    "Régua por nicho (D3)": { "main": [[{ "node": "Espera 7 dias", "type": "main", "index": 0 }]] },
+    "Espera 7 dias": { "main": [[{ "node": "Fecha ou joga em winback", "type": "main", "index": 0 }]] }
+  }
+}
