@@ -40,10 +40,17 @@ export const Route = createFileRoute("/_authenticated/admin/crm-health")({
         <ErrorState
           title="Não foi possível carregar CRM & Pipeline"
           description={error.message}
-          onRetry={() => {
-            reset();
-            router.invalidate();
-          }}
+          action={
+            <Button
+              size="sm"
+              onClick={() => {
+                reset();
+                router.invalidate();
+              }}
+            >
+              Tentar novamente
+            </Button>
+          }
         />
       </div>
     );
