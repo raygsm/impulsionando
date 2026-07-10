@@ -37,7 +37,16 @@ type AuthMode = "signin" | "signup";
 interface AuthSearch {
   persona?: AuthPersona;
   mode?: AuthMode;
+  next?: string;
 }
+
+/** Sanitiza o `next` como caminho relativo mesma origem. */
+function safeNext(next: string | undefined): string | null {
+  if (!next || typeof next !== "string") return null;
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 
 const PERSONA_COPY: Record<AuthPersona, { headline: string; sub: string; rightTitle: string; rightSub: string }> = {
   core: {
@@ -77,7 +86,9 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): AuthSearch => ({
     persona: (s.persona as AuthPersona) || undefined,
     mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
+    next: typeof s.next === "string" ? s.next : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Acessar — Impulsionando Tecnologia" },
@@ -93,6 +104,7 @@ function AuthPage() {
   const search = Route.useSearch();
   const persona: AuthPersona = search.persona ?? "core";
   const mode = search.mode;
+  const nextPath = safeNext(search.next);
   const copy = PERSONA_COPY[persona];
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -103,6 +115,14 @@ function AuthPage() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
+  function goPostAuth() {
+    if (nextPath) {
+      window.location.assign(nextPath);
+    } else {
+      navigate({ to: "/dashboard" });
+    }
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -110,7 +130,7 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(traduzirErroAuth(error.message));
     toast.success("Bem-vindo!");
-    navigate({ to: "/dashboard" });
+    goPostAuth();
   }
 
 
@@ -118,7 +138,9 @@ function AuthPage() {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: nextPath
+          ? `${window.location.origin}/auth?next=${encodeURIComponent(nextPath)}`
+          : window.location.origin,
       });
       if (result.error) {
         toast.error("Falha no login com Google. Tente novamente.");
@@ -128,7 +150,7 @@ function AuthPage() {
       if (result.redirected) return; // browser redireciona para Google
       // Token recebido e sessão setada
       toast.success("Bem-vindo!");
-      navigate({ to: "/dashboard" });
+      goPostAuth();
     } catch {
       toast.error("Erro de conexão. Tente novamente.");
     } finally {
@@ -143,12 +165,15 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: nextPath
+          ? `${window.location.origin}${nextPath}`
+          : `${window.location.origin}/dashboard`,
         data: { display_name: displayName || email.split("@")[0] },
       },
     });
     setLoading(false);
     if (error) return toast.error(traduzirErroAuth(error.message));
+
     // Funil Impulsionando: registra lead self-signup (best-effort)
     try {
       const { captureSelfSignupLead } = await import("@/lib/self-signup-lead.functions");
