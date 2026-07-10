@@ -1,6 +1,21 @@
 # P6 — Consolidação Global do Ecossistema Impulsionando
 
-Status: **Fase P6 em execução — onda 1 concluída**
+Status: **Onda 1 (biblioteca) + Onda 2 piloto (CRM Health) concluídas**
+
+## Onda 2 — Piloto de adoção
+
+`admin.crm-health.tsx` reescrita como referência de padrão para os
+demais health-dashboards: `PageHeader`, `CoreSection`, `KpiGrid` (4 col),
+`MetricCard` com tons semânticos (win rate positive/warning/critical,
+receita ganha positive), `LoadingState`, `ErrorState` no
+`errorComponent` do route, e todos os formatadores locais
+(`brl`/`fmt`/`pct`) substituídos por `formatBRL`/`formatInt`/`formatPct`/
+`formatDateTime`. Botão de refresh e select com `aria-label`, ícones
+decorativos com `aria-hidden`. Zero mudança de contrato de dados.
+
+Esse arquivo passa a ser o **template de referência** para migrar os
+demais `admin.*-health.tsx` nas próximas iterações da Onda 2.
+
 
 ## Contexto
 
