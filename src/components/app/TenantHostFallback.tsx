@@ -81,7 +81,7 @@ export function TenantHostFallback() {
             <Home className="h-4 w-4" /> Ir para Impulsionando
           </a>
           <a
-            href="mailto:suporte@impulsionando.com.br?subject=Domínio%20não%20reconhecido"
+            href="mailto:sac@impulsionando.com.br?subject=Domínio%20não%20reconhecido"
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-border text-sm font-medium py-2.5 hover:bg-muted transition-colors"
           >
             <LifeBuoy className="h-4 w-4" /> Falar com suporte
