@@ -582,16 +582,6 @@ export function NichoPage({ nicho }: Props) {
               >
                 <Link to="/contato">Falar com consultor</Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="ghost"
-                className="gap-2 text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="Tirar dúvida no WhatsApp">
-                  <MessageCircle className="w-4 h-4" /> Dúvida no WhatsApp
-                </a>
-              </Button>
             </div>
           </div>
         </Card>
@@ -607,7 +597,7 @@ export function NichoPage({ nicho }: Props) {
             </div>
           </div>
           <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
-            <SecondaryCta>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</SecondaryCta>
+            <SecondaryCta>{nicho.demoRoute ? "Ver demo" : "Ver detalhes"}</SecondaryCta>
           </Button>
           <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial">
             <Link to="/orcamento">

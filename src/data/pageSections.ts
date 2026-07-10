@@ -30,7 +30,7 @@ export interface PageSectionDef {
 }
 
 export const PAGE_SECTIONS: PageSectionDef[] = [
-  { key: "hero", label: "Hero principal", description: "Destaque do topo da página", defaults: { title: "{{nome_cliente}}", subtitle: "{{cta_principal}}", cta: "Falar no WhatsApp" } },
+  { key: "hero", label: "Hero principal", description: "Destaque do topo da página", defaults: { title: "{{nome_cliente}}", subtitle: "{{cta_principal}}", cta: "Falar com atendimento" } },
   { key: "dor", label: "Problema / Dor", description: "Identifica a dor do cliente", defaults: { title: "Você sente que..." } },
   { key: "solucao", label: "Solução", description: "Apresenta a solução", defaults: { title: "Nossa solução" } },
   { key: "beneficios", label: "Benefícios", description: "Lista de benefícios", defaults: { title: "Benefícios", body: "{{beneficios}}" } },
@@ -40,7 +40,7 @@ export const PAGE_SECTIONS: PageSectionDef[] = [
   { key: "depoimentos", label: "Depoimentos", description: "Provas sociais", defaults: { title: "Quem usa recomenda" } },
   { key: "planos", label: "Planos", description: "Tabela de planos", defaults: { title: "Planos e preços" } },
   { key: "faq", label: "FAQ", description: "Dúvidas frequentes", defaults: { title: "Perguntas frequentes" } },
-  { key: "cta_whatsapp", label: "CTA WhatsApp", description: "Botão para WhatsApp", defaults: { cta: "Falar no WhatsApp", body: "{{whatsapp}}" } },
+  { key: "cta_whatsapp", label: "CTA Atendimento oficial", description: "Botão para o canal oficial da empresa", defaults: { cta: "Falar com atendimento oficial", body: "{{whatsapp}}" } },
   { key: "cta_contratar", label: "CTA Contratar", description: "Botão de conversão", defaults: { cta: "Contratar agora" } },
   { key: "rodape", label: "Rodapé", description: "Rodapé padrão", defaults: { body: "© {{nome_cliente}} — Todos os direitos reservados." } },
   { key: "lgpd", label: "LGPD", description: "Aviso LGPD", defaults: { title: "Privacidade e LGPD" } },
