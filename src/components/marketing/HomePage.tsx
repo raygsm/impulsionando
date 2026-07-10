@@ -1241,26 +1241,21 @@ const PROVA_SEGMENTOS = [
   "Serviços", "Varejo", "Fornecedores", "White Label",
 ];
 
-// Placeholders identificados — trocar por depoimentos reais quando o time de
-// customer success liberar. Não usar como prova pública sem consentimento.
-const PROVA_DEPOIMENTOS = [
+const PROVA_OPERACIONAL = [
   {
-    autor: "Cliente Impulsionando",
-    cargo: "Diretor · Clínica multiespecialidade",
-    texto: "Substituímos 4 sistemas por um só. A agenda, o WhatsApp e a cobrança agora conversam sem retrabalho.",
-    placeholder: true,
+    segmento: "Clínicas e consultórios",
+    resultado: "Agenda, confirmação, cobrança e área do paciente no mesmo fluxo.",
+    modulos: ["Agenda", "WhatsApp", "Pagamentos", "Paciente"],
   },
   {
-    autor: "Cliente Impulsionando",
-    cargo: "Proprietária · Bar e cervejaria",
-    texto: "O time do salão para de digitar a mesma coisa 3 vezes. O gerente vê o dia inteiro em uma tela.",
-    placeholder: true,
+    segmento: "Bares, restaurantes e varejo",
+    resultado: "PDV, estoque, relacionamento e indicadores conectados à rotina da loja.",
+    modulos: ["PDV", "Estoque", "CRM", "BI"],
   },
   {
-    autor: "Cliente Impulsionando",
-    cargo: "Gestor comercial · Imobiliária",
-    texto: "Cada corretor tem visão do funil, do lead e do imóvel — sem planilha, sem grupo de WhatsApp perdido.",
-    placeholder: true,
+    segmento: "Imobiliárias e serviços",
+    resultado: "Leads, propostas, funil comercial e documentos acompanhados por etapa.",
+    modulos: ["CRM", "Funil", "Propostas", "Documentos"],
   },
 ];
 
@@ -1271,8 +1266,11 @@ function ProvaSocial() {
         <div className="text-center max-w-2xl mx-auto mb-10">
           <Badge variant="outline" className="mb-3 border-primary/30 text-primary">Quem já opera com a Impulsionando</Badge>
           <h2 id="prova-social-title" className="text-2xl sm:text-4xl font-bold tracking-tight">
-            Empresas de diferentes segmentos, operando na mesma plataforma
+            Operações diferentes, conectadas pelo mesmo core Impulsionando
           </h2>
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Sem depoimentos fictícios: a vitrine mostra cenários reais de operação que a plataforma já suporta por nicho.
+          </p>
         </div>
 
         <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
@@ -1293,17 +1291,23 @@ function ProvaSocial() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {PROVA_DEPOIMENTOS.map((d) => (
-            <Card key={d.autor + d.cargo} className="p-5 relative">
-              {d.placeholder && (
-                <Badge variant="outline" className="absolute top-3 right-3 text-[10px] border-dashed">
-                  Placeholder
-                </Badge>
-              )}
-              <p className="text-sm leading-relaxed">"{d.texto}"</p>
-              <div className="mt-4 pt-4 border-t">
-                <div className="text-sm font-semibold">{d.autor}</div>
-                <div className="text-xs text-muted-foreground">{d.cargo}</div>
+          {PROVA_OPERACIONAL.map((item) => (
+            <Card key={item.segmento} className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <Layers className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold leading-tight">{item.segmento}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.resultado}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-1.5 border-t pt-4">
+                {item.modulos.map((modulo) => (
+                  <Badge key={modulo} variant="secondary" className="text-[10px]">
+                    {modulo}
+                  </Badge>
+                ))}
               </div>
             </Card>
           ))}
