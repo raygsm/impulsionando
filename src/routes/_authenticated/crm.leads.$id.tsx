@@ -31,7 +31,7 @@ const ACT_ICON: Record<string, string> = {
 
 const STATUS_COLOR: Record<string, string> = {
   new: "bg-blue-500", working: "bg-amber-500", qualified: "bg-emerald-500",
-  disqualified: "bg-gray-400", converted: "bg-violet-500",
+  disqualified: "bg-muted-foreground", converted: "bg-violet-500",
 };
 
 const BRL = (v: number) =>
