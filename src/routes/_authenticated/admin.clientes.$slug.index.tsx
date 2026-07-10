@@ -24,6 +24,7 @@ import {
   TENANT_LOCALE_PROFILES,
   type CountryCode,
 } from "@/lib/tenant-locale";
+import { LoadingState, EmptyState } from "@/components/impulsionando";
 
 
 /**
@@ -125,21 +126,23 @@ function TenantOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 text-sm text-muted-foreground">
-        Carregando card do cliente…
+      <div className="p-6">
+        <LoadingState label="Carregando card do cliente…" />
       </div>
     );
   }
   if (!data?.company) {
     return (
-      <div className="p-6 space-y-2">
-        <h1 className="text-lg font-semibold">Cliente não encontrado</h1>
-        <p className="text-sm text-muted-foreground">
-          Nenhum tenant ativo com slug <code>{slug}</code>.
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <a href="/companies">← Voltar à lista de tenants</a>
-        </Button>
+      <div className="p-6">
+        <EmptyState
+          title="Cliente não encontrado"
+          description={`Nenhum cliente ativo com identificador ${slug}. Verifique se o cliente está publicado no Core Impulsionando ou volte para a lista.`}
+          action={
+            <Button asChild variant="outline" size="sm">
+              <a href="/companies">Voltar à lista de clientes</a>
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -220,7 +223,7 @@ function TenantOverviewPage() {
         />
         <ActionCard
           icon={<Boxes className="h-5 w-5" />}
-          title="Módulos do tenant"
+          title="Módulos do cliente"
           description="Catálogo, instalação e configuração por nicho."
           to="/modules"
         />
@@ -245,7 +248,7 @@ function TenantOverviewPage() {
         <ActionCard
           icon={<ShieldCheck className="h-5 w-5" />}
           title="Governança & Auditoria"
-          description="LGPD, audit trail, compliance do tenant."
+          description="LGPD, audit trail, compliance do cliente."
           to="/admin/governance-lgpd-health"
         />
       </section>

@@ -25,9 +25,12 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/$slug/paine
 });
 
 
+import { formatBRL, formatInt } from "@/lib/format";
 const fmtMoney = (v: number, c: string = "BRL") =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(v ?? 0);
-const fmtNum = (v: number) => new Intl.NumberFormat("pt-BR").format(v ?? 0);
+  c === "BRL"
+    ? formatBRL(v ?? 0)
+    : new Intl.NumberFormat("pt-BR", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(v ?? 0);
+const fmtNum = (v: number) => formatInt(v ?? 0);
 
 function PainelPage() {
   const { slug } = Route.useParams();
