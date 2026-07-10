@@ -14,6 +14,7 @@ export const Route = createFileRoute("/reset-password")({
     meta: [
       { title: "Redefinir senha — Impulsionando Sistemas" },
       { name: "description", content: "Defina uma nova senha para sua conta." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: ResetPasswordPage,

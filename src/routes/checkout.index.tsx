@@ -17,6 +17,7 @@ export const Route = createFileRoute("/checkout/")({
         content:
           "Planos atrelados ao salário mínimo: Essencial (½ SM), Ideal (1 SM) e Full (2 SM). Pagamento via Pix, cartão ou boleto sem sair da plataforma.",
       },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });
