@@ -21,6 +21,7 @@ import { MODULE_DETAILS } from "./moduleDetails";
 import { ctaWaUrl, type NichoDetail } from "./nichoDetails";
 import { NICHO_EXTRAS } from "./nichoExtras";
 import { AGENDA_BASE, NICHO_AGENDA } from "./nichoAgenda";
+import { NICHE_MODULE_SLUGS } from "@/data/nicheRecommendations";
 
 
 interface Props {
