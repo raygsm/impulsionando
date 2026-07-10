@@ -27,6 +27,7 @@ import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
 import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
 import { openImpulsionito } from "@/lib/impulsionito-tracking";
+import { SkipLink } from "@/components/impulsionando/SkipLink";
 
 
 
@@ -401,6 +402,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <SkipLink />
       <AuthSync />
       <AnalyticsTracker />
       <MaintenanceGate />
