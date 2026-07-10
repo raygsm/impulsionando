@@ -6,7 +6,7 @@ import { FaqAccordion, buildFaqJsonLd } from '@/components/impulsionando';
 
 export const Route = createFileRoute('/chrismed/faq')({
   head: () => {
-    const jsonLd = buildFaqJsonLd(COPY.pt.faqs.map((f) => ({ q: f.q, a: f.a })));
+    const jsonLd = buildFaqJsonLd(COPY.pt.faqs.map((f) => ({ question: f.q, answer: f.a })));
     return {
       meta: [
         { title: 'Perguntas frequentes — CrisMed' },
