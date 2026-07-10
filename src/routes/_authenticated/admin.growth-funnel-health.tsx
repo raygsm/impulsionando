@@ -3,127 +3,326 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getGrowthFunnelHealth } from "@/lib/growth-funnel-health.functions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter, RefreshCw, TrendingUp, Megaphone, Workflow, FlaskConical } from "lucide-react";
+import {
+  PageHeader,
+  KpiGrid,
+  MetricCard,
+  CoreSection,
+  LoadingState,
+  ErrorState,
+  KeyCountTable,
+} from "@/components/impulsionando";
+import { formatBRL, formatInt, formatPct, formatDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/growth-funnel-health")({
+  head: () => ({
+    meta: [
+      { title: "Funil de crescimento — Impulsionando" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: Page,
-  errorComponent: ({ error, reset }) => { const router = useRouter(); return (<div className="p-6"><Card><CardHeader><CardTitle className="text-destructive">Erro</CardTitle></CardHeader><CardContent><p className="text-sm">{error.message}</p><Button size="sm" onClick={()=>{reset();router.invalidate();}}>Tentar novamente</Button></CardContent></Card></div>); },
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter();
+    return (
+      <div className="p-6">
+        <ErrorState
+          title="Erro ao carregar funil de crescimento"
+          description="Não foi possível consultar as etapas do funil nesta janela."
+          detail={error.message}
+          action={
+            <Button size="sm" onClick={() => { reset(); router.invalidate(); }}>
+              Tentar novamente
+            </Button>
+          }
+        />
+      </div>
+    );
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 });
-
-const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-const brl = (n: number) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
 function Page() {
   const fn = useServerFn(getGrowthFunnelHealth);
   const [days, setDays] = useState(30);
-  const { data, isLoading, refetch, isFetching } = useQuery({ queryKey: ["admin","growth-funnel-health",days], queryFn: () => fn({data:{days}}) });
-  if (isLoading) return <div className="p-6"><Skeleton className="h-8 w-72 mb-4"/><div className="grid grid-cols-4 gap-3">{Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-24"/>)}</div></div>;
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["admin", "growth-funnel-health", days],
+    queryFn: () => fn({ data: { days } }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <LoadingState label="Consultando funil de crescimento…" />
+      </div>
+    );
+  }
   if (!data) return null;
+
   const f = data.funnel;
+
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><Filter className="h-6 w-6 text-primary"/>Growth Funnel</h1>
-          <p className="text-sm text-muted-foreground">Funil Impulsionando: captar → converter → relacionar → reter → expandir.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={String(days)} onValueChange={(v)=>setDays(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue/></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 dias</SelectItem>
-              <SelectItem value="30">30 dias</SelectItem>
-              <SelectItem value="60">60 dias</SelectItem>
-              <SelectItem value="90">90 dias</SelectItem>
-              <SelectItem value="180">180 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw className={`h-4 w-4 mr-2 ${isFetching?"animate-spin":""}`}/>Atualizar</Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Growth"
+        title="Funil de crescimento"
+        description="Funil Impulsionando: captar → converter → relacionar → reter → expandir."
+        actions={
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <label htmlFor="gf-window" className="sr-only">Janela de análise</label>
+            <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+              <SelectTrigger id="gf-window" className="w-32" aria-label="Janela de análise">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="60">60 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="180">180 dias</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Atualizar funil"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Atualizar
+            </Button>
+          </div>
+        }
+      />
 
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4"/>Funil Consolidado</CardTitle></CardHeader>
-        <CardContent>
+      <CoreSection
+        title="Funil consolidado"
+        description="Etapas do funil de vendas na janela selecionada."
+        actions={<TrendingUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+      >
+        <div className="rounded-xl border bg-card p-4 space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-            <div className="p-3 rounded bg-muted/40"><div className="text-xs text-muted-foreground">Captação</div><div className="text-xl font-bold">{fmt(f.captacaoTotal)}</div><div className="text-[10px] text-muted-foreground">marketing + demo</div></div>
-            <div className="p-3 rounded bg-muted/40"><div className="text-xs text-muted-foreground">CRM Leads</div><div className="text-xl font-bold">{fmt(f.crmLeads)}</div></div>
-            <div className="p-3 rounded bg-muted/40"><div className="text-xs text-muted-foreground">Oportunidades</div><div className="text-xl font-bold">{fmt(f.opportunities)}</div></div>
-            <div className="p-3 rounded bg-muted/40"><div className="text-xs text-muted-foreground">Ganhas</div><div className="text-xl font-bold text-green-600">{fmt(f.won)}</div></div>
-            <div className="p-3 rounded bg-muted/40"><div className="text-xs text-muted-foreground">Perdidas</div><div className="text-xl font-bold text-red-600">{fmt(f.lost)}</div></div>
+            <FunnelStep label="Captação" value={formatInt(f.captacaoTotal)} hint="marketing + demo" />
+            <FunnelStep label="CRM leads" value={formatInt(f.crmLeads)} />
+            <FunnelStep label="Oportunidades" value={formatInt(f.opportunities)} />
+            <FunnelStep label="Ganhas" value={formatInt(f.won)} tone="positive" />
+            <FunnelStep label="Perdidas" value={formatInt(f.lost)} tone="critical" />
           </div>
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
-            <div className="p-2 rounded border"><div className="text-xs text-muted-foreground">Visit → Lead</div><div className="font-bold">{pct(f.convVisitToLead)}</div></div>
-            <div className="p-2 rounded border"><div className="text-xs text-muted-foreground">Lead → Oportunidade</div><div className="font-bold">{pct(f.convLeadToOpp)}</div></div>
-            <div className="p-2 rounded border"><div className="text-xs text-muted-foreground">Win Rate</div><div className="font-bold">{pct(f.winRate)}</div></div>
-            <div className="p-2 rounded border"><div className="text-xs text-muted-foreground">GMV (won/aberto)</div><div className="font-bold">{brl(f.gmvWon)}<span className="text-xs text-muted-foreground"> · {brl(f.gmvOpen)}</span></div></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+            <ConvChip label="Visitante → Lead" value={formatPct(f.convVisitToLead)} />
+            <ConvChip label="Lead → Oportunidade" value={formatPct(f.convLeadToOpp)} />
+            <ConvChip label="Win rate" value={formatPct(f.winRate)} />
+            <ConvChip
+              label="GMV (ganhas / abertas)"
+              value={`${formatBRL(f.gmvWon)} · ${formatBRL(f.gmvOpen)}`}
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CoreSection>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Megaphone className="h-4 w-4"/>Marketing Leads</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.marketing.total)}</div><p className="text-xs text-muted-foreground">{fmt(data.marketing.assigned)} atribuídos</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">CRM Leads</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.crm.leads)}</div><p className="text-xs text-muted-foreground">score médio {data.crm.avgScore.toFixed(1)} · {fmt(data.crm.owned)} c/ owner</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Pipelines</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.crm.activePipelines)}<span className="text-sm text-muted-foreground">/{fmt(data.crm.pipelines)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.crm.stages)} stages</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Atividades CRM</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.activities.done)}<span className="text-sm text-muted-foreground">/{fmt(data.activities.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.activities.pending)} pendentes</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Workflow className="h-4 w-4"/>Regras de Funil</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.funnelRules.active)}<span className="text-sm text-muted-foreground">/{fmt(data.funnelRules.total)}</span></div><p className="text-xs text-muted-foreground">ativas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Dispatch Queue</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.funnelQueue.sent)}<span className="text-sm text-muted-foreground">/{fmt(data.funnelQueue.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.funnelQueue.pending)} pendentes · {fmt(data.funnelQueue.failed)} falhas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><FlaskConical className="h-4 w-4"/>Demo Visits</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.demo.visits)}</div><p className="text-xs text-muted-foreground">{fmt(data.demo.converted)} convertidos · {fmt(data.demo.abandoned)} abandono</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Demo Sessions</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.demo.sessions)}</div><p className="text-xs text-muted-foreground">score {data.demo.avgScore.toFixed(1)} · {Math.round(data.demo.avgSessionSec)}s</p></CardContent></Card>
+      <KpiGrid columns={4}>
+        <MetricCard
+          icon={<Megaphone className="h-4 w-4" aria-hidden="true" />}
+          label="Marketing leads"
+          value={formatInt(data.marketing.total)}
+          hint={`${formatInt(data.marketing.assigned)} atribuídos`}
+        />
+        <MetricCard
+          label="CRM leads"
+          value={formatInt(data.crm.leads)}
+          hint={`score médio ${data.crm.avgScore.toFixed(1)} · ${formatInt(data.crm.owned)} com owner`}
+        />
+        <MetricCard
+          label="Pipelines"
+          value={`${formatInt(data.crm.activePipelines)} / ${formatInt(data.crm.pipelines)}`}
+          hint={`${formatInt(data.crm.stages)} stages`}
+        />
+        <MetricCard
+          label="Atividades CRM"
+          value={`${formatInt(data.activities.done)} / ${formatInt(data.activities.total)}`}
+          hint={`${formatInt(data.activities.pending)} pendentes`}
+        />
+        <MetricCard
+          icon={<Workflow className="h-4 w-4" aria-hidden="true" />}
+          label="Regras de funil"
+          value={`${formatInt(data.funnelRules.active)} / ${formatInt(data.funnelRules.total)}`}
+          hint="Regras ativas na janela"
+        />
+        <MetricCard
+          label="Fila de disparo"
+          value={`${formatInt(data.funnelQueue.sent)} / ${formatInt(data.funnelQueue.total)}`}
+          tone={data.funnelQueue.failed > 0 ? "warning" : "default"}
+          hint={`${formatInt(data.funnelQueue.pending)} pendentes · ${formatInt(data.funnelQueue.failed)} falhas`}
+        />
+        <MetricCard
+          icon={<FlaskConical className="h-4 w-4" aria-hidden="true" />}
+          label="Visitas de demo"
+          value={formatInt(data.demo.visits)}
+          hint={`${formatInt(data.demo.converted)} convertidas · ${formatInt(data.demo.abandoned)} abandono`}
+        />
+        <MetricCard
+          label="Sessões de demo"
+          value={formatInt(data.demo.sessions)}
+          hint={`score ${data.demo.avgScore.toFixed(1)} · ${Math.round(data.demo.avgSessionSec)}s médios`}
+        />
+      </KpiGrid>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CoreSection title="Marketing leads por status">
+          <KeyCountTable
+            keyLabel="Status"
+            countLabel="Leads"
+            ariaLabel="Marketing leads por status"
+            rows={data.marketing.statuses}
+            emptyTitle="Sem leads na janela"
+          />
+        </CoreSection>
+        <CoreSection title="Origens (source / UTM source)">
+          <div className="grid grid-cols-2 gap-3">
+            <KeyCountTable
+              keyLabel="Source"
+              countLabel="Leads"
+              ariaLabel="Origem por source"
+              rows={data.marketing.sources}
+              emptyTitle="Sem origens"
+            />
+            <KeyCountTable
+              keyLabel="UTM source"
+              countLabel="Leads"
+              ariaLabel="Origem por UTM source"
+              rows={data.marketing.utmSources}
+              emptyTitle="Sem UTM"
+            />
+          </div>
+        </CoreSection>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Marketing Leads por Status</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.marketing.statuses.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Origens (source / UTM source)</CardTitle></CardHeader><CardContent><div className="grid grid-cols-2 gap-3 text-sm">
-          <div><div className="text-xs text-muted-foreground mb-1">Source</div><table className="w-full"><tbody>{data.marketing.sources.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-1">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}</tbody></table></div>
-          <div><div className="text-xs text-muted-foreground mb-1">UTM source</div><table className="w-full"><tbody>{data.marketing.utmSources.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-1">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}</tbody></table></div>
-        </div></CardContent></Card>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <CoreSection title="CRM — status de leads">
+          <KeyCountTable
+            keyLabel="Status"
+            countLabel="Leads"
+            ariaLabel="CRM leads por status"
+            rows={data.crm.leadStatuses}
+            emptyTitle="Sem leads"
+          />
+        </CoreSection>
+        <CoreSection title="CRM — status de oportunidades">
+          <KeyCountTable
+            keyLabel="Status"
+            countLabel="Oportunidades"
+            ariaLabel="CRM oportunidades por status"
+            rows={data.crm.opportunityStatuses}
+            emptyTitle="Sem oportunidades"
+          />
+        </CoreSection>
+        <CoreSection title="Motivos de perda">
+          <KeyCountTable
+            keyLabel="Motivo"
+            countLabel="Ocorrências"
+            ariaLabel="Motivos de perda"
+            rows={data.crm.lostReasons}
+            emptyTitle="Nenhuma perda registrada"
+            emptyDescription="Não há motivos de perda registrados no CRM nesta janela."
+          />
+        </CoreSection>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">CRM — Status de Leads</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.crm.leadStatuses.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">CRM — Status de Oportunidades</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.crm.opportunityStatuses.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Motivos de Perda</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.crm.lostReasons.length===0 && <tr><td className="py-2 text-muted-foreground">—</td></tr>}
-          {data.crm.lostReasons.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <CoreSection title="Regras de funil por stage">
+          <KeyCountTable
+            keyLabel="Stage"
+            countLabel="Regras"
+            ariaLabel="Regras de funil por stage"
+            rows={data.funnelRules.byStage}
+            emptyTitle="Sem regras cadastradas"
+          />
+        </CoreSection>
+        <CoreSection title="Fila de disparo por status">
+          <KeyCountTable
+            keyLabel="Status"
+            countLabel="Itens"
+            ariaLabel="Fila de disparo por status"
+            rows={data.funnelQueue.byStatus}
+            emptyTitle="Fila vazia"
+          />
+        </CoreSection>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Regras de Funil por Stage</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.funnelRules.byStage.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2 capitalize">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Dispatch Queue por Status</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.funnelQueue.byStatus.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <CoreSection title="Visitas de demo por nicho">
+          <KeyCountTable
+            keyLabel="Nicho"
+            countLabel="Visitas"
+            ariaLabel="Visitas por nicho"
+            rows={data.demo.byNiche}
+            emptyTitle="Sem visitas na janela"
+          />
+        </CoreSection>
+        <CoreSection title="Ações de demo por módulo">
+          <KeyCountTable
+            keyLabel="Módulo"
+            countLabel="Ações"
+            ariaLabel="Ações por módulo"
+            rows={data.demo.actionsByModule}
+            emptyTitle="Sem interações"
+          />
+        </CoreSection>
+        <CoreSection title="Interesse de plano (survey)">
+          <KeyCountTable
+            keyLabel="Plano"
+            countLabel="Respostas"
+            ariaLabel="Interesse de plano"
+            rows={data.demo.surveyByPlan}
+            emptyTitle="Sem respostas"
+            emptyDescription="Nenhuma survey de interesse foi respondida na janela."
+          />
+        </CoreSection>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card><CardHeader><CardTitle className="text-base">Demo Visits por Nicho</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.demo.byNiche.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Demo Actions por Módulo</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.demo.actionsByModule.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-base">Survey — Interesse de Plano</CardTitle></CardHeader><CardContent><table className="w-full text-sm"><tbody>
-          {data.demo.surveyByPlan.length===0 && <tr><td className="py-2 text-muted-foreground">—</td></tr>}
-          {data.demo.surveyByPlan.map((s,i)=>(<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{fmt(s.count)}</td></tr>))}
-        </tbody></table></CardContent></Card>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        Janela: últimos {data.window.days} dias • Atualizado em {formatDateTime(data.generatedAt)}
+      </p>
+    </div>
+  );
+}
 
-      <p className="text-xs text-muted-foreground">Janela: últimos {data.window.days} dias • Atualizado em {new Date(data.generatedAt).toLocaleString("pt-BR")}</p>
+function FunnelStep({
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "positive" | "critical";
+}) {
+  const toneCls =
+    tone === "positive"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : tone === "critical"
+        ? "text-destructive"
+        : "text-foreground";
+  return (
+    <div className="p-3 rounded bg-muted/40">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`text-xl font-semibold tabular-nums ${toneCls}`}>{value}</div>
+      {hint && <div className="text-[10px] text-muted-foreground">{hint}</div>}
+    </div>
+  );
+}
+
+function ConvChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-2 rounded border">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="font-semibold tabular-nums">{value}</div>
     </div>
   );
 }
