@@ -84,7 +84,7 @@ function NotificationsErrorBoundary({ error, reset }: { error: Error; reset: () 
         (error?.stack ?? "").slice(0, 2000),
       ].join("\n"),
     );
-    return `mailto:suporte@impulsionando.com.br?subject=${subject}&body=${body}`;
+    return `mailto:sac@impulsionando.com.br?subject=${subject}&body=${body}`;
   }, [error, apiStatus, apiLatency, attempt, traceId]);
 
   const statusLabel =
