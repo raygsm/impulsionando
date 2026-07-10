@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MoreContentFab } from '@/components/impulsionando';
+import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 export type Lang = 'pt' | 'en' | 'es';
 
@@ -61,14 +62,17 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-full border border-amber-300/70 bg-gradient-to-br from-emerald-900 to-emerald-800 text-amber-100 flex items-center justify-center font-serif text-lg shadow-sm">
-            C
-          </div>
-          <div className="leading-tight">
-            <div className="font-serif text-lg text-emerald-950">CrisMed</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/90">Dra. Cristiane Alencar</div>
-          </div>
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Cristiane Alencar">
+          <img
+            src={chrismedLogo.url}
+            alt="CrisMed"
+            className="h-11 w-auto object-contain"
+            width={190}
+            height={44}
+            loading="eager"
+            decoding="async"
+          />
+          <span className="sr-only">CrisMed · Dra. Cristiane Alencar</span>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
@@ -160,8 +164,16 @@ export function ChrismedFooter() {
     <footer className="border-t border-emerald-900/10 bg-[#f7f4ed] mt-20 py-10">
       <div className="container grid gap-6 md:grid-cols-3 text-sm text-emerald-900/80">
         <div>
-          <div className="font-serif text-emerald-950 text-lg">CrisMed</div>
-          <p className="mt-2 text-emerald-900/70">{copy[lang]}</p>
+          <img
+            src={chrismedLogo.url}
+            alt="CrisMed"
+            className="h-10 w-auto object-contain"
+            width={170}
+            height={40}
+            loading="lazy"
+            decoding="async"
+          />
+          <p className="mt-3 text-emerald-900/70">{copy[lang]}</p>
         </div>
         <div>
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Atendimento</div>
