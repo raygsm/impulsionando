@@ -5,61 +5,218 @@ import { useState } from "react";
 import { getMercadoPagoBillingHealth } from "@/lib/mercadopago-billing-health.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreditCard, RefreshCw, Banknote, Receipt } from "lucide-react";
+import {
+  PageHeader,
+  KpiGrid,
+  MetricCard,
+  CoreSection,
+  LoadingState,
+  EmptyState,
+  ErrorState,
+} from "@/components/impulsionando";
+import { formatBRL, formatInt, formatPct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/mercadopago-billing-health")({
   component: Page,
-  errorComponent: ({ error, reset }) => { const router = useRouter(); return (<div className="p-6"><Card><CardHeader><CardTitle className="text-destructive">Erro</CardTitle></CardHeader><CardContent><p className="text-sm">{error.message}</p><Button size="sm" onClick={()=>{reset();router.invalidate();}}>Tentar novamente</Button></CardContent></Card></div>); },
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter();
+    return (
+      <div className="p-6">
+        <ErrorState
+          title="Não foi possível carregar Mercado Pago & Billing"
+          description={error.message}
+          action={
+            <Button size="sm" onClick={() => { reset(); router.invalidate(); }}>
+              Tentar novamente
+            </Button>
+          }
+        />
+      </div>
+    );
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 });
-
-const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-const brl = (n: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
-const pct = (n: number) => `${n.toFixed(1)}%`;
 
 function Page() {
   const fn = useServerFn(getMercadoPagoBillingHealth);
   const [days, setDays] = useState(30);
-  const { data, isLoading, refetch, isFetching } = useQuery({ queryKey: ["admin","mp-bill",days], queryFn: () => fn({data:{days}}) });
-  if (isLoading) return <div className="p-6"><Skeleton className="h-8 w-72 mb-4"/><div className="grid grid-cols-4 gap-3">{Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-24"/>)}</div></div>;
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["admin", "mp-bill", days],
+    queryFn: () => fn({ data: { days } }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <LoadingState label="Carregando Mercado Pago & Billing…" />
+      </div>
+    );
+  }
   if (!data) return null;
+
+  const approvalTone: "positive" | "warning" | "critical" =
+    data.payments.approvalRate >= 90 ? "positive" : data.payments.approvalRate >= 75 ? "warning" : "critical";
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div><h1 className="text-2xl font-semibold flex items-center gap-2"><CreditCard className="h-6 w-6 text-primary"/>MercadoPago & Billing</h1>
-          <p className="text-sm text-muted-foreground">Credenciais, pagamentos, assinaturas, faturas, dunning, Pix e contratos.</p></div>
-        <div className="flex items-center gap-2">
-          <Select value={String(days)} onValueChange={(v)=>setDays(Number(v))}><SelectTrigger className="w-32"><SelectValue/></SelectTrigger>
-            <SelectContent><SelectItem value="7">7 dias</SelectItem><SelectItem value="30">30 dias</SelectItem><SelectItem value="60">60 dias</SelectItem><SelectItem value="90">90 dias</SelectItem><SelectItem value="180">180 dias</SelectItem></SelectContent></Select>
-          <Button size="sm" variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw className={`h-4 w-4 mr-2 ${isFetching?"animate-spin":""}`}/>Atualizar</Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Saúde do ecossistema"
+        title="Mercado Pago & Billing"
+        description="Credenciais, pagamentos, assinaturas, faturas, dunning, PIX e contratos do cliente conectado ao Core."
+        actions={
+          <>
+            <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+              <SelectTrigger className="w-32" aria-label="Janela de análise">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="60">60 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="180">180 dias</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Atualizar dados"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Atualizar
+            </Button>
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Credenciais MP</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.credentials.active)}<span className="text-sm text-muted-foreground">/{fmt(data.credentials.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.credentials.production)} em produção</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Banknote className="h-4 w-4"/>Pagamentos MP</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(data.payments.amount)}</div><p className="text-xs text-muted-foreground">{fmt(data.payments.approved)}/{fmt(data.payments.total)} aprovados ({pct(data.payments.approvalRate)})</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Refunds</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(data.refunds.amount)}</div><p className="text-xs text-muted-foreground">{fmt(data.refunds.total)} estornos</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Assinaturas MP</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.subscriptions.active)}<span className="text-sm text-muted-foreground">/{fmt(data.subscriptions.total)}</span></div><p className="text-xs text-muted-foreground">{fmt(data.subscriptions.cancelled)} canceladas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Webhooks MP</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.webhooks.processed)}<span className="text-sm text-muted-foreground">/{fmt(data.webhooks.total)}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Receipt className="h-4 w-4"/>Faturas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(data.invoices.revenue)}</div><p className="text-xs text-muted-foreground">{fmt(data.invoices.paid)} pagas · {fmt(data.invoices.open)} abertas · {fmt(data.invoices.overdue)} vencidas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Planos</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.plans.active)}<span className="text-sm text-muted-foreground">/{fmt(data.plans.total)}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Dunning Ativo</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.dunning.active)}</div><p className="text-xs text-muted-foreground">{fmt(data.dunning.failed)} falhas · {fmt(data.dunning.total)} total</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Suspensões</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.suspensions.active)}<span className="text-sm text-muted-foreground">/{fmt(data.suspensions.total)}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Contratos</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(data.contracts.active)}<span className="text-sm text-muted-foreground">/{fmt(data.contracts.total)}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Pix</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(data.pix.amount)}</div><p className="text-xs text-muted-foreground">{fmt(data.pix.approved)} aprovados · {fmt(data.pix.pending)} pendentes</p></CardContent></Card>
-      </div>
+      <CoreSection title="Indicadores do período">
+        <KpiGrid columns={4}>
+          <MetricCard
+            label="Credenciais MP"
+            value={<>{formatInt(data.credentials.active)}<span className="text-sm text-muted-foreground">/{formatInt(data.credentials.total)}</span></>}
+            hint={`${formatInt(data.credentials.production)} em produção`}
+          />
+          <MetricCard
+            icon={<Banknote className="h-4 w-4" />}
+            label="Pagamentos MP"
+            tone={approvalTone}
+            value={formatBRL(data.payments.amount)}
+            hint={`${formatInt(data.payments.approved)}/${formatInt(data.payments.total)} aprovados (${formatPct(data.payments.approvalRate, { basis100: true })})`}
+          />
+          <MetricCard
+            label="Refunds"
+            value={formatBRL(data.refunds.amount)}
+            hint={`${formatInt(data.refunds.total)} estornos`}
+          />
+          <MetricCard
+            label="Assinaturas MP"
+            value={<>{formatInt(data.subscriptions.active)}<span className="text-sm text-muted-foreground">/{formatInt(data.subscriptions.total)}</span></>}
+            hint={`${formatInt(data.subscriptions.cancelled)} canceladas`}
+          />
+          <MetricCard
+            label="Webhooks MP"
+            value={<>{formatInt(data.webhooks.processed)}<span className="text-sm text-muted-foreground">/{formatInt(data.webhooks.total)}</span></>}
+            hint="processados / recebidos"
+          />
+          <MetricCard
+            icon={<Receipt className="h-4 w-4" />}
+            label="Faturas"
+            value={formatBRL(data.invoices.revenue)}
+            hint={`${formatInt(data.invoices.paid)} pagas · ${formatInt(data.invoices.open)} abertas · ${formatInt(data.invoices.overdue)} vencidas`}
+          />
+          <MetricCard
+            label="Planos"
+            value={<>{formatInt(data.plans.active)}<span className="text-sm text-muted-foreground">/{formatInt(data.plans.total)}</span></>}
+          />
+          <MetricCard
+            label="Dunning ativo"
+            tone={data.dunning.failed > 0 ? "warning" : "default"}
+            value={formatInt(data.dunning.active)}
+            hint={`${formatInt(data.dunning.failed)} falhas · ${formatInt(data.dunning.total)} total`}
+          />
+          <MetricCard
+            label="Suspensões"
+            tone={data.suspensions.active > 0 ? "critical" : "default"}
+            value={<>{formatInt(data.suspensions.active)}<span className="text-sm text-muted-foreground">/{formatInt(data.suspensions.total)}</span></>}
+          />
+          <MetricCard
+            label="Contratos"
+            value={<>{formatInt(data.contracts.active)}<span className="text-sm text-muted-foreground">/{formatInt(data.contracts.total)}</span></>}
+          />
+          <MetricCard
+            icon={<CreditCard className="h-4 w-4" />}
+            label="PIX"
+            value={formatBRL(data.pix.amount)}
+            hint={`${formatInt(data.pix.approved)} aprovados · ${formatInt(data.pix.pending)} pendentes`}
+          />
+        </KpiGrid>
+      </CoreSection>
 
-      <Card><CardHeader><CardTitle className="text-sm">Provedores de Pagamento</CardTitle></CardHeader><CardContent>
-        <table className="w-full text-sm"><thead><tr className="text-left text-muted-foreground"><th className="py-1">Provider</th><th>Total</th><th>OK</th><th>Aprovação</th><th>Receita</th></tr></thead>
-        <tbody>{data.providers.map((r:any)=>(<tr key={r.provider} className="border-t"><td className="py-1">{r.provider}</td><td>{fmt(r.total)}</td><td className="text-green-600">{fmt(r.ok)}</td><td>{pct(r.approvalRate)}</td><td>{brl(r.amount)}</td></tr>))}</tbody></table>
-      </CardContent></Card>
+      <CoreSection title="Provedores de pagamento">
+        <Card>
+          <CardContent className="pt-6">
+            {data.providers.length === 0 ? (
+              <EmptyState
+                variant="compact"
+                title="Nenhum provedor com movimentação no período"
+                description="Assim que houver transações, esta tabela será preenchida automaticamente."
+              />
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th scope="col" className="py-2 font-medium">Provider</th>
+                    <th scope="col" className="text-right font-medium">Total</th>
+                    <th scope="col" className="text-right font-medium">OK</th>
+                    <th scope="col" className="text-right font-medium">Aprovação</th>
+                    <th scope="col" className="text-right font-medium">Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.providers.map((r: { provider: string; total: number; ok: number; approvalRate: number; amount: number }) => (
+                    <tr key={r.provider} className="border-b last:border-0">
+                      <td className="py-2">{r.provider}</td>
+                      <td className="text-right tabular-nums">{formatInt(r.total)}</td>
+                      <td className="text-right tabular-nums text-emerald-600 dark:text-emerald-400">{formatInt(r.ok)}</td>
+                      <td className="text-right tabular-nums">{formatPct(r.approvalRate, { basis100: true })}</td>
+                      <td className="text-right tabular-nums">{formatBRL(r.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
+      </CoreSection>
 
-      <Card><CardHeader><CardTitle className="text-sm">Top Eventos de Webhook MP</CardTitle></CardHeader><CardContent>
-        <table className="w-full text-sm"><tbody>{data.webhooks.topTypes.map((r:any)=>(<tr key={r.type} className="border-t"><td className="py-1">{r.type}</td><td className="text-right">{fmt(r.count)}</td></tr>))}</tbody></table>
-      </CardContent></Card>
+      <CoreSection title="Top eventos de webhook MP">
+        <Card>
+          <CardContent className="pt-6">
+            {data.webhooks.topTypes.length === 0 ? (
+              <EmptyState
+                variant="compact"
+                title="Sem webhooks no período"
+                description="Assim que os eventos chegarem, o ranking será preenchido automaticamente."
+              />
+            ) : (
+              <table className="w-full text-sm">
+                <tbody>
+                  {data.webhooks.topTypes.map((r: { type: string; count: number }) => (
+                    <tr key={r.type} className="border-b last:border-0">
+                      <td className="py-2">{r.type}</td>
+                      <td className="text-right tabular-nums">{formatInt(r.count)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
+      </CoreSection>
     </div>
   );
 }

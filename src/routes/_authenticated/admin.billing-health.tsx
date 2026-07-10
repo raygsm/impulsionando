@@ -5,90 +5,235 @@ import { useState } from "react";
 import { getBillingHealth } from "@/lib/billing-health.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreditCard, RefreshCw, FileText, AlertTriangle, Banknote, ShieldOff, Repeat, QrCode, BadgeDollarSign, Layers } from "lucide-react";
+import {
+  CreditCard,
+  RefreshCw,
+  FileText,
+  AlertTriangle,
+  Banknote,
+  ShieldOff,
+  Repeat,
+  QrCode,
+  BadgeDollarSign,
+  Layers,
+} from "lucide-react";
+import {
+  PageHeader,
+  KpiGrid,
+  MetricCard,
+  CoreSection,
+  LoadingState,
+  EmptyState,
+  ErrorState,
+} from "@/components/impulsionando";
+import { formatBRL, formatInt, formatPct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/billing-health")({
   component: Page,
-  errorComponent: ({ error, reset }) => { const router = useRouter(); return (<div className="p-6"><Card><CardHeader><CardTitle className="text-destructive">Erro</CardTitle></CardHeader><CardContent><p className="text-sm">{error.message}</p><Button size="sm" onClick={()=>{reset();router.invalidate();}}>Tentar novamente</Button></CardContent></Card></div>); },
+  errorComponent: ({ error, reset }) => {
+    const router = useRouter();
+    return (
+      <div className="p-6">
+        <ErrorState
+          title="Não foi possível carregar Billing & Assinaturas"
+          description={error.message}
+          action={
+            <Button size="sm" onClick={() => { reset(); router.invalidate(); }}>
+              Tentar novamente
+            </Button>
+          }
+        />
+      </div>
+    );
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 });
 
-const fmt = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-const brl = (n: number) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(n);
-const pct = (n: number) => `${n.toFixed(1)}%`;
-
 function Tab({ title, rows, unit }: { title: string; rows: { k: string; count: number }[]; unit?: "brl" | "n" }) {
-  const f = unit === "brl" ? brl : fmt;
+  const f = unit === "brl" ? (n: number) => formatBRL(n) : (n: number) => formatInt(n);
   return (
-    <Card><CardHeader><CardTitle className="text-base">{title}</CardTitle></CardHeader><CardContent>
-      {rows.length === 0 ? <p className="text-sm text-muted-foreground">Sem dados.</p> : (
-        <table className="w-full text-sm"><tbody>
-          {rows.map((s, i) => (<tr key={i} className="border-b last:border-0"><td className="py-2">{s.k}</td><td className="text-right">{f(s.count)}</td></tr>))}
-        </tbody></table>
-      )}
-    </CardContent></Card>
+    <Card>
+      <CardHeader><CardTitle className="text-base">{title}</CardTitle></CardHeader>
+      <CardContent>
+        {rows.length === 0 ? (
+          <EmptyState
+            variant="compact"
+            title="Sem dados no período"
+            description="Assim que houver registros correspondentes, esta visão será preenchida automaticamente."
+          />
+        ) : (
+          <table className="w-full text-sm">
+            <tbody>
+              {rows.map((s, i) => (
+                <tr key={i} className="border-b last:border-0">
+                  <td className="py-2">{s.k}</td>
+                  <td className="text-right tabular-nums">{f(s.count)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
 function Page() {
   const fn = useServerFn(getBillingHealth);
   const [days, setDays] = useState(30);
-  const { data, isLoading, refetch, isFetching } = useQuery({ queryKey: ["admin","billing-health",days], queryFn: () => fn({data:{days}}) });
-  if (isLoading) return <div className="p-6"><Skeleton className="h-8 w-72 mb-4"/><div className="grid grid-cols-4 gap-3">{Array.from({length:8}).map((_,i)=><Skeleton key={i} className="h-24"/>)}</div></div>;
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["admin", "billing-health", days],
+    queryFn: () => fn({ data: { days } }),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <LoadingState label="Carregando Billing & Assinaturas…" />
+      </div>
+    );
+  }
   if (!data) return null;
   const pl = data.plans, ct = data.contracts, inv = data.invoices, px = data.pix, du = data.dunning, su = data.suspensions, sb = data.subscriptions, mp = data.mpago;
 
+  const payRateTone: "positive" | "warning" | "critical" =
+    inv.payRate >= 90 ? "positive" : inv.payRate >= 70 ? "warning" : "critical";
+  const churnTone: "positive" | "warning" | "critical" =
+    sb.churnRate <= 3 ? "positive" : sb.churnRate <= 7 ? "warning" : "critical";
+  const mpApprovalTone: "positive" | "warning" | "critical" =
+    mp.approvalRate >= 90 ? "positive" : mp.approvalRate >= 75 ? "warning" : "critical";
+
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><CreditCard className="h-6 w-6 text-primary"/>Billing & Assinaturas — Cockpit</h1>
-          <p className="text-sm text-muted-foreground">Planos, contratos, faturas, PIX, dunning, suspensões, assinaturas e Mercado Pago.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={String(days)} onValueChange={(v)=>setDays(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue/></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 dias</SelectItem><SelectItem value="30">30 dias</SelectItem><SelectItem value="60">60 dias</SelectItem><SelectItem value="90">90 dias</SelectItem><SelectItem value="180">180 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw className={`h-4 w-4 mr-2 ${isFetching?"animate-spin":""}`}/>Atualizar</Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Saúde do ecossistema"
+        title="Billing & Assinaturas"
+        description="Planos, contratos, faturas, PIX, dunning, suspensões, assinaturas e Mercado Pago do cliente conectado ao Core."
+        actions={
+          <>
+            <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+              <SelectTrigger className="w-32" aria-label="Janela de análise">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 dias</SelectItem>
+                <SelectItem value="30">30 dias</SelectItem>
+                <SelectItem value="60">60 dias</SelectItem>
+                <SelectItem value="90">90 dias</SelectItem>
+                <SelectItem value="180">180 dias</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Atualizar dados"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Atualizar
+            </Button>
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Layers className="h-4 w-4"/>Planos ativos</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(pl.active)}/{fmt(pl.total)}</div><p className="text-xs text-muted-foreground">cadastrados</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4"/>Contratos</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(ct.active)}/{fmt(ct.total)}</div><p className="text-xs text-muted-foreground">{fmt(ct.canceled)} cancelados</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Repeat className="h-4 w-4"/>Assinaturas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(sb.active)}/{fmt(sb.total)}</div><p className="text-xs text-muted-foreground">churn {pct(sb.churnRate)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Banknote className="h-4 w-4"/>Faturas pagas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(inv.paidBRL)}</div><p className="text-xs text-muted-foreground">{fmt(inv.paidCount)}/{fmt(inv.total)} · {pct(inv.payRate)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-500"/>Em aberto</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(inv.openBRL)}</div><p className="text-xs text-muted-foreground">{fmt(inv.openCount)} faturas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-rose-500"/>Vencidas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{brl(inv.overdueBRL)}</div><p className="text-xs text-muted-foreground">{fmt(inv.overdueCount)} faturas</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><QrCode className="h-4 w-4"/>PIX</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{pct(px.payRate)}</div><p className="text-xs text-muted-foreground">{fmt(px.paid)}/{fmt(px.total)} · {brl(px.paidBRL)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Repeat className="h-4 w-4"/>Dunning</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(du.total)}</div><p className="text-xs text-muted-foreground">execuções no período</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><ShieldOff className="h-4 w-4 text-rose-500"/>Suspensões</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(su.active)}/{fmt(su.total)}</div><p className="text-xs text-muted-foreground">ativas / total</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><BadgeDollarSign className="h-4 w-4"/>Mercado Pago</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{pct(mp.approvalRate)}</div><p className="text-xs text-muted-foreground">{fmt(mp.approved)}/{fmt(mp.total)} · {brl(mp.approvedBRL)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Repeat className="h-4 w-4"/>Assinat. MP</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{fmt(mp.subActive)}/{fmt(mp.subTotal)}</div><p className="text-xs text-muted-foreground">autorizadas / total</p></CardContent></Card>
-      </div>
+      <CoreSection title="Indicadores do período">
+        <KpiGrid columns={4}>
+          <MetricCard
+            icon={<Layers className="h-4 w-4" />}
+            label="Planos ativos"
+            value={<>{formatInt(pl.active)}<span className="text-sm text-muted-foreground">/{formatInt(pl.total)}</span></>}
+            hint="cadastrados"
+          />
+          <MetricCard
+            icon={<FileText className="h-4 w-4" />}
+            label="Contratos"
+            value={<>{formatInt(ct.active)}<span className="text-sm text-muted-foreground">/{formatInt(ct.total)}</span></>}
+            hint={`${formatInt(ct.canceled)} cancelados`}
+          />
+          <MetricCard
+            icon={<Repeat className="h-4 w-4" />}
+            label="Assinaturas"
+            tone={churnTone}
+            value={<>{formatInt(sb.active)}<span className="text-sm text-muted-foreground">/{formatInt(sb.total)}</span></>}
+            hint={`Churn ${formatPct(sb.churnRate, { basis100: true })}`}
+          />
+          <MetricCard
+            icon={<Banknote className="h-4 w-4" />}
+            label="Faturas pagas"
+            tone={payRateTone}
+            value={formatBRL(inv.paidBRL)}
+            hint={`${formatInt(inv.paidCount)}/${formatInt(inv.total)} · ${formatPct(inv.payRate, { basis100: true })}`}
+          />
+          <MetricCard
+            icon={<AlertTriangle className="h-4 w-4" />}
+            label="Em aberto"
+            tone="warning"
+            value={formatBRL(inv.openBRL)}
+            hint={`${formatInt(inv.openCount)} faturas`}
+          />
+          <MetricCard
+            icon={<AlertTriangle className="h-4 w-4" />}
+            label="Vencidas"
+            tone="critical"
+            value={formatBRL(inv.overdueBRL)}
+            hint={`${formatInt(inv.overdueCount)} faturas`}
+          />
+          <MetricCard
+            icon={<QrCode className="h-4 w-4" />}
+            label="PIX"
+            value={formatPct(px.payRate, { basis100: true })}
+            hint={`${formatInt(px.paid)}/${formatInt(px.total)} · ${formatBRL(px.paidBRL)}`}
+          />
+          <MetricCard
+            icon={<Repeat className="h-4 w-4" />}
+            label="Dunning"
+            value={formatInt(du.total)}
+            hint="execuções no período"
+          />
+          <MetricCard
+            icon={<ShieldOff className="h-4 w-4" />}
+            label="Suspensões"
+            tone={su.active > 0 ? "critical" : "default"}
+            value={<>{formatInt(su.active)}<span className="text-sm text-muted-foreground">/{formatInt(su.total)}</span></>}
+            hint="ativas / total"
+          />
+          <MetricCard
+            icon={<BadgeDollarSign className="h-4 w-4" />}
+            label="Mercado Pago"
+            tone={mpApprovalTone}
+            value={formatPct(mp.approvalRate, { basis100: true })}
+            hint={`${formatInt(mp.approved)}/${formatInt(mp.total)} · ${formatBRL(mp.approvedBRL)}`}
+          />
+          <MetricCard
+            icon={<Repeat className="h-4 w-4" />}
+            label="Assinat. MP"
+            value={<>{formatInt(mp.subActive)}<span className="text-sm text-muted-foreground">/{formatInt(mp.subTotal)}</span></>}
+            hint="autorizadas / total"
+          />
+        </KpiGrid>
+      </CoreSection>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Tab title="Planos por tier" rows={pl.byTier} />
-        <Tab title="Planos por intervalo" rows={pl.byInterval} />
-        <Tab title="Contratos por status" rows={ct.byStatus} />
-        <Tab title="Contratos por plano" rows={ct.byPlan} />
-        <Tab title="Faturas por status" rows={inv.byStatus} />
-        <Tab title="PIX por status" rows={px.byStatus} />
-        <Tab title="Dunning por status" rows={du.byStatus} />
-        <Tab title="Dunning por tentativa" rows={du.byAttempt} />
-        <Tab title="Suspensões por motivo" rows={su.byReason} />
-        <Tab title="Suspensões por status" rows={su.byStatus} />
-        <Tab title="Assinaturas por status" rows={sb.byStatus} />
-        <Tab title="Assinaturas por plano" rows={sb.byPlan} />
-        <Tab title="MP por status" rows={mp.byStatus} />
-        <Tab title="MP por método" rows={mp.byMethod} unit="brl" />
-        <Tab title="MP Assinaturas por status" rows={mp.subByStatus} />
-      </div>
+      <CoreSection title="Detalhamento">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Tab title="Planos por tier" rows={pl.byTier} />
+          <Tab title="Planos por intervalo" rows={pl.byInterval} />
+          <Tab title="Contratos por status" rows={ct.byStatus} />
+          <Tab title="Contratos por plano" rows={ct.byPlan} />
+          <Tab title="Faturas por status" rows={inv.byStatus} />
+          <Tab title="PIX por status" rows={px.byStatus} />
+          <Tab title="Dunning por status" rows={du.byStatus} />
+          <Tab title="Dunning por tentativa" rows={du.byAttempt} />
+          <Tab title="Suspensões por motivo" rows={su.byReason} />
+          <Tab title="Suspensões por status" rows={su.byStatus} />
+          <Tab title="Assinaturas por status" rows={sb.byStatus} />
+          <Tab title="Assinaturas por plano" rows={sb.byPlan} />
+          <Tab title="MP por status" rows={mp.byStatus} />
+          <Tab title="MP por método" rows={mp.byMethod} unit="brl" />
+          <Tab title="MP Assinaturas por status" rows={mp.subByStatus} />
+        </div>
+      </CoreSection>
     </div>
   );
 }
