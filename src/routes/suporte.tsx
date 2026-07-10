@@ -37,7 +37,7 @@ function openImpulsionitoChat() {
     "Olá! Vim da Central de Suporte e quero falar com o Impulsionito.",
     { source: "suporte", medium: "whatsapp" },
   );
-  trackWhatsAppCTA("whatsapp_cta_click", { surface: "suporte-impulsionito" });
+  trackWhatsAppCTA("whatsapp_cta_click", { origin: "suporte", surface: "suporte-impulsionito" });
   if (typeof window !== "undefined") window.open(url, "_blank", "noopener,noreferrer");
 }
 
