@@ -607,7 +607,7 @@ export function NichoPage({ nicho }: Props) {
             </div>
           </div>
           <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
-            <Link to={nicho.ctaSecondary.href}>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</Link>
+            <SecondaryCta>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</SecondaryCta>
           </Button>
           <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial">
             <Link to="/orcamento">
