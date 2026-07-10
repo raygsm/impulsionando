@@ -61,14 +61,14 @@ export default function AccountShell({ children }: { children?: ReactNode }) {
 
           <div className="mt-6 hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:block">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-300">Precisa de ajuda?</p>
-            <p className="mt-2 text-sm text-white/70">Nosso suporte humano responde em minutos.</p>
-            <a
-              href="https://wa.me/5521967862834"
-              target="_blank" rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#20bd5a]"
+            <p className="mt-2 text-sm text-white/70">Fale com o Impulsionito ou nosso time humano.</p>
+            <Link
+              to="/colors"
+              hash="contato"
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-black hover:bg-emerald-400"
             >
-              <MessageCircle className="h-3.5 w-3.5" /> Falar no WhatsApp
-            </a>
+              <MessageCircle className="h-3.5 w-3.5" /> Central de atendimento
+            </Link>
           </div>
         </aside>
 

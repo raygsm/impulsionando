@@ -14,7 +14,13 @@ export const Route = createFileRoute("/garrido/")({
       { property: "og:title", content: "Imobiliária Garrido — Referência imobiliária no Rio de Janeiro" },
       { property: "og:description", content: "Milhares de imóveis para comprar, alugar ou temporada com curadoria Garrido." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://imobiliaria.garrido.impulsionando.com.br/garrido" },
+      { property: "og:site_name", content: "Imobiliária Garrido" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Imobiliária Garrido — Rio de Janeiro" },
+      { name: "twitter:description", content: "Compra, venda, locação e temporada com curadoria Garrido." },
     ],
+    links: [{ rel: "canonical", href: "https://imobiliaria.garrido.impulsionando.com.br/garrido" }],
     scripts: [{
       type: "application/ld+json",
       children: JSON.stringify({
