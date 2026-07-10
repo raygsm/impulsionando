@@ -1,24 +1,25 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { colorsEvents } from "@/lib/colors-analytics";
 
 /**
- * Floating CTAs — "Comprar Original" + WhatsApp.
- * Mobile-safe: respeita safe-area, empilha vertical no mobile.
- * Colocar no fim da árvore (após o footer).
+ * Floating CTA — "Comprar Original".
+ *
+ * Onda 1 (front-end): removido o botão "Suporte" no WhatsApp deste FAB.
+ * O atendimento conversacional passa a ser centralizado no Impulsionito
+ * (bottom-left, montado no __root). O WhatsApp permanece disponível nas
+ * páginas onde é canal oficial documentado (rastreio, minha-conta),
+ * como link inline — nunca como FAB flutuante.
  */
 interface Props {
   /** Rota interna do CTA principal. Default: PDP Super Green Black. */
   buyTo?: "/colors/super-green-black" | "/colors";
-  /** URL do WhatsApp oficial. */
-  whatsappHref?: string;
   /** Rótulo de origem enviado ao analytics. */
   source?: string;
 }
 
 export default function ComprarOriginalFab({
   buyTo = "/colors/super-green-black",
-  whatsappHref = "https://wa.me/5521967862834",
   source = "fab",
 }: Props) {
   return (
@@ -26,20 +27,7 @@ export default function ComprarOriginalFab({
       className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-end px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5"
       aria-label="Ações rápidas"
     >
-      <div className="pointer-events-auto flex flex-col items-end gap-2.5 sm:flex-row sm:items-center sm:gap-3">
-        <a
-          href={whatsappHref}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => colorsEvents.whatsappClick(source)}
-          aria-label="Suporte Colors no WhatsApp (SAC e pós-venda)"
-          title="Suporte SAC · pós-venda e dúvidas de pedido"
-          className="group inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,0.7)] transition hover:scale-[1.03] hover:bg-[#20bd5a]"
-        >
-          <MessageCircle className="h-5 w-5" aria-hidden />
-          <span className="hidden sm:inline">Suporte</span>
-        </a>
-
+      <div className="pointer-events-auto">
         <Link
           to={buyTo}
           onClick={() => colorsEvents.ctaClick("fab_comprar_original", buyTo)}
