@@ -162,7 +162,7 @@ export function ChrismedFooter() {
   } as const;
   return (
     <footer className="border-t border-emerald-900/10 bg-[#f7f4ed] mt-20 py-10">
-      <div className="container grid gap-6 md:grid-cols-3 text-sm text-emerald-900/80">
+      <div className="container grid gap-6 md:grid-cols-4 text-sm text-emerald-900/80">
         <div>
           <img
             src={chrismedLogo.url}
@@ -188,10 +188,23 @@ export function ChrismedFooter() {
         </div>
 
         <div>
+          <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Clínica</div>
+          <ul className="space-y-1">
+            <li><Link to="/chrismed/especialidades" className="hover:text-emerald-950">Especialidades</Link></li>
+            <li><Link to="/chrismed/exames" className="hover:text-emerald-950">Exames e preparo</Link></li>
+            <li><Link to="/chrismed/ofertas" className="hover:text-emerald-950">Modalidades e preços</Link></li>
+            <li><Link to="/chrismed/internacional" className="hover:text-emerald-950">Atendimento internacional</Link></li>
+            <li><Link to="/chrismed/faq" className="hover:text-emerald-950">Perguntas frequentes</Link></li>
+            <li><Link to="/chrismed/privacidade" className="hover:text-emerald-950">Privacidade · LGPD</Link></li>
+          </ul>
+        </div>
+
+        <div>
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Contato</div>
           <ul className="space-y-1">
             <li>Copacabana · Rio de Janeiro</li>
             <li>Teleconsulta global · PT · EN · ES</li>
+            <li><Link to="/chrismed/contato" className="hover:text-emerald-950">Fale conosco</Link></li>
             <li className="text-emerald-900/60">Tecnologia Impulsionando</li>
           </ul>
         </div>
