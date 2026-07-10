@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { FloatingWhatsApp } from "@/components/riomed/FloatingWhatsApp";
+// FloatingWhatsApp removido (Onda 1 — WhatsApp externo só dentro do Impulsionito).
 import { getRiomedSiteSettings } from "@/lib/riomed-public.functions";
 import { getCart } from "@/lib/riomed-portal.functions";
 import { useEffect, useState } from "react";
@@ -248,7 +248,7 @@ function RiomedLayout() {
         </div>
       </footer>
 
-      <FloatingWhatsApp />
+      {/* FAB de WhatsApp removido — atendimento passa pelo Impulsionito (bottom-left). */}
     </div>
   );
 }
