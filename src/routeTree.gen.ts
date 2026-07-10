@@ -690,6 +690,7 @@ import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as MarocasAppPrestadorIndexRouteImport } from './routes/marocas.app.prestador.index'
 import { Route as MarocasAppHospedeIndexRouteImport } from './routes/marocas.app.hospede.index'
 import { Route as MarocasAppAnfitriaoIndexRouteImport } from './routes/marocas.app.anfitriao.index'
@@ -4671,6 +4672,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarocasAppPrestadorIndexRoute =
   MarocasAppPrestadorIndexRouteImport.update({
     id: '/',
@@ -6240,6 +6246,7 @@ export interface FileRoutesByFullPath {
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
@@ -7121,6 +7128,7 @@ export interface FileRoutesByTo {
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/wmp': typeof WmpIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
@@ -8018,6 +8026,7 @@ export interface FileRoutesById {
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/wmp/': typeof WmpIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
@@ -8920,6 +8929,7 @@ export interface FileRouteTypes {
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/access-profiles/matrix'
     | '/adm/agentes'
@@ -9801,6 +9811,7 @@ export interface FileRouteTypes {
     | '/showroom'
     | '/trabalhe-conosco'
     | '/wmp'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/access-profiles/matrix'
     | '/adm/agentes'
@@ -10697,6 +10708,7 @@ export interface FileRouteTypes {
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/wmp/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
@@ -11447,6 +11459,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiImpulsionitoChatRoute: typeof ApiImpulsionitoChatRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
@@ -16295,6 +16308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marocas/app/prestador/': {
       id: '/marocas/app/prestador/'
       path: '/'
@@ -20176,6 +20196,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiImpulsionitoChatRoute: ApiImpulsionitoChatRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
