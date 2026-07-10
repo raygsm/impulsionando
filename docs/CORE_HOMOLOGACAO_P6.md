@@ -402,12 +402,89 @@ criado. Nenhum botão de exportação sem ação foi adicionado.
 
 ### Padronização estimada
 
-| Área                                    | Pós-P6.5 | Pós-P6.6 |
-| --------------------------------------- | -------: | -------: |
-| Biblioteca compartilhada disponível     |     97% |    **97%** |
-| Rotas administrativas críticas migradas |     78% |     **83%** |
-| Formatadores canônicos                  |     62% |     **68%** |
-| KPI cards padronizados                  |     68% |     **75%** |
-| Tabelas chave/contagem padronizadas     |     40% |     **62%** (via `KeyCountTable`) |
-| Copy “tenant → cliente”                 |     80% |     **84%** |
-| **Padronização global**                 | **~80%** | **~85%** |
+| Área                                    | Pós-P6.5 | Pós-P6.6 | Pós-P6.7-A |
+| --------------------------------------- | -------: | -------: | ---------: |
+| Biblioteca compartilhada disponível     |     97% |    97% |     **97%** |
+| Rotas administrativas críticas migradas |     78% |     83% |     **86%** |
+| Formatadores canônicos                  |     62% |     68% |     **72%** |
+| KPI cards padronizados                  |     68% |     75% |     **78%** |
+| Tabelas chave/contagem padronizadas     |     40% |     62% |     **72%** |
+| Copy “tenant → cliente”                 |     80% |     84% |     **86%** |
+| **Padronização global**                 | **~80%** | **~85%** | **~87%** |
+
+## Subonda P6.7-A — Funil analítico & réguas
+
+Arquivos migrados:
+
+- `admin.crm-funnel-health.tsx`
+- `admin.funil-360.tsx`
+- `admin.funil-reguas.tsx`
+- `admin.conversion-funnel.tsx`
+
+Componentes adotados: `PageHeader`, `KpiGrid`, `MetricCard`, `CoreSection`,
+`KeyCountTable`, `LoadingState`, `ErrorState`, `EmptyState`, `StatusBanner`.
+
+Duplicações removidas:
+
+- 4 `errorComponent` manuais (Card + Skeleton) → `ErrorState` inline com
+  retry via `router.invalidate()` + `reset()`.
+- 4 spinners `Loader2` manuais → `LoadingState` com `aria-live="polite"`.
+- Header `<h1><Icon/>...</h1>` + botão de refresh → `PageHeader` com
+  `eyebrow`, `actions` e wrap responsivo.
+- 15 mini-tabelas `<table>` artesanais em `crm-funnel-health` →
+  `KeyCountTable` compartilhado (colunas semânticas, `<th scope>`,
+  `<caption>` sr-only, empty state uniforme).
+- KPI cards manuais no crm-funnel-health (8 blocos `Card + text-2xl
+  font-bold`) → `MetricCard` com tons semânticos (`positive` para valor
+  ganho, `warning`/`critical`/`positive` para win-rate, `warning` quando
+  há atividades atrasadas).
+- Alertas amarelos artesanais em `conversion-funnel` e header de aviso
+  de `funil-reguas` → `StatusBanner` (tom `warning`).
+
+Formatadores eliminados:
+
+- `crm-funnel-health`: `fmt`, `brl`, `pct` locais → `formatInt`,
+  `formatBRL`, `formatPct({ basis100: true })`.
+- `funil-360`: `fmt` (Intl BRL) e `pct` locais → `formatBRL`,
+  `formatPct`, `formatInt`.
+- `funil-reguas`: contagens do filtro passam por `formatInt`.
+- `conversion-funnel`: `toLocaleString("pt-BR")` e `${v}%` inline →
+  `formatInt` / `formatPct`; `new Date(...).toLocaleString` →
+  `formatDateTime`.
+
+Acessibilidade:
+
+- Ícones decorativos com `aria-hidden="true"` em todos os arquivos.
+- Botões de janela (7d/30d/60d/90d) com `aria-pressed`.
+- `Select` de janela em crm-funnel-health com `aria-label`.
+- Botão "Atualizar" com `aria-label` e ícone decorativo.
+- Barras de progresso do `conversion-funnel` ganharam `role="progressbar"`
+  com `aria-valuemin/max/now` e `aria-label` legível.
+- Toggle switch de régua com `aria-label` dinâmico (Ativar/Desativar).
+- Botão de expansão da régua com `aria-expanded`.
+- `KeyCountTable` já traz `<th scope="col">` e caption acessível.
+
+Mobile:
+
+- `PageHeader` colapsa filtros/refresh em wrap correto.
+- Funil visual do `funil-360` agora quebra em 2 col (mobile) → 3 col
+  (tablet) → 5 col (desktop) em vez de espremer 5 col no mobile.
+- Grid `KpiGrid columns={4}` respeita 1 → 2 → 4 col.
+- `funil-reguas`: filtro + contador empilham em `flex-col sm:flex-row`.
+- `conversion-funnel`: KPIs finais `grid-cols-1 sm:grid-cols-3`.
+- Cabeçalho de régua em `flex-col sm:flex-row` permite leitura natural.
+
+Riscos: nenhum bloqueante. Sem mudança de contrato de dados, de queries,
+de RLS ou de comportamento das automações N8N. Nenhum disparo real
+adicionado. Nenhum botão de exportação sem ação foi introduzido.
+
+Pendências:
+
+- `admin.funnel-fallbacks.tsx` (~380 linhas), `admin.catalog-analytics.tsx`
+  (~776 linhas) e `admin.whatsapp-metrics.tsx` (~1.463 linhas) permanecem
+  para **P6.7-B** e **P6.7-C**, seguindo o mesmo padrão canônico.
+- Dashboards `bi.*` continuam candidatos a subondas subsequentes.
+
+### Typecheck
+
+`bunx tsgo --noEmit` — sem erros.
