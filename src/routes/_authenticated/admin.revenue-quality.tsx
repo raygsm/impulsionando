@@ -70,7 +70,6 @@ function RevenueQualityPage() {
             <StatusBanner
               key={i}
               tone={ALERT_TONE[a.severity] ?? "info"}
-              icon={<AlertTriangle className="h-4 w-4" aria-hidden="true" />}
               title={a.message}
             />
           ))}
