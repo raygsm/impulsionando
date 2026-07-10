@@ -145,10 +145,14 @@ import { Route as ModulosSuporteInteligenteRouteImport } from './routes/modulos.
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as MarocasSobreRouteImport } from './routes/marocas.sobre'
+import { Route as MarocasPrestadoresRouteImport } from './routes/marocas.prestadores'
 import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
 import { Route as MarocasLoginRouteImport } from './routes/marocas.login'
+import { Route as MarocasLimpezaManutencaoRouteImport } from './routes/marocas.limpeza-manutencao'
+import { Route as MarocasHospedesRouteImport } from './routes/marocas.hospedes'
 import { Route as MarocasFaqRouteImport } from './routes/marocas.faq'
 import { Route as MarocasContatoRouteImport } from './routes/marocas.contato'
+import { Route as MarocasCadastrarImovelRouteImport } from './routes/marocas.cadastrar-imovel'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as GarridoTemporadaRouteImport } from './routes/garrido.temporada'
 import { Route as GarridoRuralRouteImport } from './routes/garrido.rural'
@@ -1549,6 +1553,11 @@ const MarocasSobreRoute = MarocasSobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => MarocasRoute,
 } as any)
+const MarocasPrestadoresRoute = MarocasPrestadoresRouteImport.update({
+  id: '/prestadores',
+  path: '/prestadores',
+  getParentRoute: () => MarocasRoute,
+} as any)
 const MarocasPlanosRoute = MarocasPlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
@@ -1559,6 +1568,17 @@ const MarocasLoginRoute = MarocasLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => MarocasRoute,
 } as any)
+const MarocasLimpezaManutencaoRoute =
+  MarocasLimpezaManutencaoRouteImport.update({
+    id: '/limpeza-manutencao',
+    path: '/limpeza-manutencao',
+    getParentRoute: () => MarocasRoute,
+  } as any)
+const MarocasHospedesRoute = MarocasHospedesRouteImport.update({
+  id: '/hospedes',
+  path: '/hospedes',
+  getParentRoute: () => MarocasRoute,
+} as any)
 const MarocasFaqRoute = MarocasFaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -1567,6 +1587,11 @@ const MarocasFaqRoute = MarocasFaqRouteImport.update({
 const MarocasContatoRoute = MarocasContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasCadastrarImovelRoute = MarocasCadastrarImovelRouteImport.update({
+  id: '/cadastrar-imovel',
+  path: '/cadastrar-imovel',
   getParentRoute: () => MarocasRoute,
 } as any)
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
@@ -5840,10 +5865,14 @@ export interface FileRoutesByFullPath {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/cadastrar-imovel': typeof MarocasCadastrarImovelRoute
   '/marocas/contato': typeof MarocasContatoRoute
   '/marocas/faq': typeof MarocasFaqRoute
+  '/marocas/hospedes': typeof MarocasHospedesRoute
+  '/marocas/limpeza-manutencao': typeof MarocasLimpezaManutencaoRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/planos': typeof MarocasPlanosRoute
+  '/marocas/prestadores': typeof MarocasPrestadoresRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -6677,10 +6706,14 @@ export interface FileRoutesByTo {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/cadastrar-imovel': typeof MarocasCadastrarImovelRoute
   '/marocas/contato': typeof MarocasContatoRoute
   '/marocas/faq': typeof MarocasFaqRoute
+  '/marocas/hospedes': typeof MarocasHospedesRoute
+  '/marocas/limpeza-manutencao': typeof MarocasLimpezaManutencaoRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/planos': typeof MarocasPlanosRoute
+  '/marocas/prestadores': typeof MarocasPrestadoresRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -7532,10 +7565,14 @@ export interface FileRoutesById {
   '/garrido/rural': typeof GarridoRuralRoute
   '/garrido/temporada': typeof GarridoTemporadaRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/cadastrar-imovel': typeof MarocasCadastrarImovelRoute
   '/marocas/contato': typeof MarocasContatoRoute
   '/marocas/faq': typeof MarocasFaqRoute
+  '/marocas/hospedes': typeof MarocasHospedesRoute
+  '/marocas/limpeza-manutencao': typeof MarocasLimpezaManutencaoRoute
   '/marocas/login': typeof MarocasLoginRoute
   '/marocas/planos': typeof MarocasPlanosRoute
+  '/marocas/prestadores': typeof MarocasPrestadoresRoute
   '/marocas/sobre': typeof MarocasSobreRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -8389,10 +8426,14 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
+    | '/marocas/cadastrar-imovel'
     | '/marocas/contato'
     | '/marocas/faq'
+    | '/marocas/hospedes'
+    | '/marocas/limpeza-manutencao'
     | '/marocas/login'
     | '/marocas/planos'
+    | '/marocas/prestadores'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -9226,10 +9267,14 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
+    | '/marocas/cadastrar-imovel'
     | '/marocas/contato'
     | '/marocas/faq'
+    | '/marocas/hospedes'
+    | '/marocas/limpeza-manutencao'
     | '/marocas/login'
     | '/marocas/planos'
+    | '/marocas/prestadores'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -10080,10 +10125,14 @@ export interface FileRouteTypes {
     | '/garrido/rural'
     | '/garrido/temporada'
     | '/imoveis/$slug'
+    | '/marocas/cadastrar-imovel'
     | '/marocas/contato'
     | '/marocas/faq'
+    | '/marocas/hospedes'
+    | '/marocas/limpeza-manutencao'
     | '/marocas/login'
     | '/marocas/planos'
+    | '/marocas/prestadores'
     | '/marocas/sobre'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -11919,6 +11968,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarocasSobreRouteImport
       parentRoute: typeof MarocasRoute
     }
+    '/marocas/prestadores': {
+      id: '/marocas/prestadores'
+      path: '/prestadores'
+      fullPath: '/marocas/prestadores'
+      preLoaderRoute: typeof MarocasPrestadoresRouteImport
+      parentRoute: typeof MarocasRoute
+    }
     '/marocas/planos': {
       id: '/marocas/planos'
       path: '/planos'
@@ -11933,6 +11989,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarocasLoginRouteImport
       parentRoute: typeof MarocasRoute
     }
+    '/marocas/limpeza-manutencao': {
+      id: '/marocas/limpeza-manutencao'
+      path: '/limpeza-manutencao'
+      fullPath: '/marocas/limpeza-manutencao'
+      preLoaderRoute: typeof MarocasLimpezaManutencaoRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/hospedes': {
+      id: '/marocas/hospedes'
+      path: '/hospedes'
+      fullPath: '/marocas/hospedes'
+      preLoaderRoute: typeof MarocasHospedesRouteImport
+      parentRoute: typeof MarocasRoute
+    }
     '/marocas/faq': {
       id: '/marocas/faq'
       path: '/faq'
@@ -11945,6 +12015,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/marocas/contato'
       preLoaderRoute: typeof MarocasContatoRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/cadastrar-imovel': {
+      id: '/marocas/cadastrar-imovel'
+      path: '/cadastrar-imovel'
+      fullPath: '/marocas/cadastrar-imovel'
+      preLoaderRoute: typeof MarocasCadastrarImovelRouteImport
       parentRoute: typeof MarocasRoute
     }
     '/imoveis/$slug': {
@@ -18819,18 +18896,26 @@ const GarridoRouteWithChildren =
   GarridoRoute._addFileChildren(GarridoRouteChildren)
 
 interface MarocasRouteChildren {
+  MarocasCadastrarImovelRoute: typeof MarocasCadastrarImovelRoute
   MarocasContatoRoute: typeof MarocasContatoRoute
   MarocasFaqRoute: typeof MarocasFaqRoute
+  MarocasHospedesRoute: typeof MarocasHospedesRoute
+  MarocasLimpezaManutencaoRoute: typeof MarocasLimpezaManutencaoRoute
   MarocasLoginRoute: typeof MarocasLoginRoute
   MarocasPlanosRoute: typeof MarocasPlanosRoute
+  MarocasPrestadoresRoute: typeof MarocasPrestadoresRoute
   MarocasSobreRoute: typeof MarocasSobreRoute
 }
 
 const MarocasRouteChildren: MarocasRouteChildren = {
+  MarocasCadastrarImovelRoute: MarocasCadastrarImovelRoute,
   MarocasContatoRoute: MarocasContatoRoute,
   MarocasFaqRoute: MarocasFaqRoute,
+  MarocasHospedesRoute: MarocasHospedesRoute,
+  MarocasLimpezaManutencaoRoute: MarocasLimpezaManutencaoRoute,
   MarocasLoginRoute: MarocasLoginRoute,
   MarocasPlanosRoute: MarocasPlanosRoute,
+  MarocasPrestadoresRoute: MarocasPrestadoresRoute,
   MarocasSobreRoute: MarocasSobreRoute,
 }
 
