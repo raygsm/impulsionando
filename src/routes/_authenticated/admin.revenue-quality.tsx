@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRevenueQuality } from "@/lib/revenue-quality.functions";
 import { Badge } from "@/components/ui/badge";
-import { Gauge, AlertTriangle, DollarSign, Users, Layers, TrendingUp } from "lucide-react";
+import { Gauge, DollarSign, Users, Layers, TrendingUp } from "lucide-react";
 import {
   PageHeader,
   KpiGrid,
