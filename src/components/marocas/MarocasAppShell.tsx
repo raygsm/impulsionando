@@ -261,14 +261,15 @@ function NavList({ nav, pathname, onNavigate }: { nav: NavItem[]; pathname: stri
 function SidebarFooter({ profile, setProfile }: { profile: MarocasProfile; setProfile: (p: MarocasProfile) => void }) {
   return (
     <div className="border-t p-3 space-y-2 bg-muted/30">
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground px-1">Perfil (mock)</div>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground px-1">Visualizar como</div>
+      <div className="grid grid-cols-3 gap-1" role="group" aria-label="Trocar perfil de visualização">
         {(["anfitriao", "hospede", "prestador"] as const).map((p) => (
           <button
             key={p}
             type="button"
             onClick={() => setProfile(p)}
-            className={`px-2 py-1.5 rounded-md text-[11px] font-medium border transition ${
+            aria-pressed={profile === p}
+            className={`px-2 py-1.5 rounded-md text-[11px] font-medium border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               profile === p
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background hover:bg-muted"
@@ -282,10 +283,10 @@ function SidebarFooter({ profile, setProfile }: { profile: MarocasProfile; setPr
         to="/marocas/login"
         className="mt-2 flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-background transition"
       >
-        <LogOut className="h-3.5 w-3.5" /> Sair (mock)
+        <LogOut className="h-3.5 w-3.5" /> Sair
       </Link>
       <p className="text-[10px] text-muted-foreground leading-relaxed px-1">
-        Perfil apenas visual. Autenticação real e permissões serão conectadas pelo Codex.
+        A troca de perfil é apenas para visualização. Permissões reais aplicam-se automaticamente após o login.
       </p>
     </div>
   );
