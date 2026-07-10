@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck, Star, Truck, HelpCircle, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, Star, Truck, HelpCircle, Sparkles } from "lucide-react";
 import { COLORS_BRANDS, productBySlug, productsByBrand } from "@/data/colors-products";
 import { colorsEvents } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
