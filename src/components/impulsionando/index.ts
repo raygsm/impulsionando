@@ -46,6 +46,7 @@ export { PageHeader } from "./PageHeader";
 export { MetricCard } from "./MetricCard";
 export { KpiGrid } from "./KpiGrid";
 export { StatusBanner } from "./StatusBanner";
+export { KeyCountTable } from "./KeyCountTable";
 
 export type { TenantHeroProps } from "./TenantHero";
 export type { StatItem } from "./StatGrid";
@@ -65,3 +66,4 @@ export type { PageHeaderProps } from "./PageHeader";
 export type { MetricCardProps, MetricTone } from "./MetricCard";
 export type { KpiGridProps } from "./KpiGrid";
 export type { StatusBannerProps, BannerTone } from "./StatusBanner";
+export type { KeyCountTableProps, KeyCountRow } from "./KeyCountTable";
