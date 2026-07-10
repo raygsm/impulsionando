@@ -42,6 +42,10 @@ export { LoadingState } from "./LoadingState";
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
 export { SkipLink } from "./SkipLink";
+export { PageHeader } from "./PageHeader";
+export { MetricCard } from "./MetricCard";
+export { KpiGrid } from "./KpiGrid";
+export { StatusBanner } from "./StatusBanner";
 
 export type { TenantHeroProps } from "./TenantHero";
 export type { StatItem } from "./StatGrid";
@@ -57,3 +61,7 @@ export type { CoreSectionProps } from "./CoreSection";
 export type { LoadingStateProps } from "./LoadingState";
 export type { EmptyStateProps } from "./EmptyState";
 export type { ErrorStateProps } from "./ErrorState";
+export type { PageHeaderProps } from "./PageHeader";
+export type { MetricCardProps, MetricTone } from "./MetricCard";
+export type { KpiGridProps } from "./KpiGrid";
+export type { StatusBannerProps, BannerTone } from "./StatusBanner";
