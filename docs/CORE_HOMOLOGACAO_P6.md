@@ -291,3 +291,123 @@ dashboards `admin.*-health.tsx` restantes.
 Próxima subonda sugerida (P6.6): Domínios/DNS/SSL de tenants,
 Publicação/Deploy e Segurança/Auditoria — famílias irmãs às health
 dashboards, com forte candidato de reuso para `KeyCountTable`.
+
+## Subonda P6.6 — Dados, Analytics, Relatórios e Observabilidade
+
+Migração de 4 dashboards analíticos e de qualidade de dados, usando o
+`admin.crm-health.tsx` (P6.2) como referência canônica e reaproveitando
+o `KeyCountTable` promovido na P6.5.
+
+Observação de escopo: os arquivos-alvo indicados no plano
+(`admin.analytics-health.tsx`, `admin.data-quality-health.tsx`,
+`admin.events-tracking-health.tsx`, `admin.observability-health.tsx`)
+não existem na base atual. Foram substituídos pelos equivalentes reais
+mais próximos:
+
+| Alvo do plano                        | Arquivo real migrado                 |
+| ------------------------------------ | ------------------------------------ |
+| Analytics / funil                    | `admin.growth-funnel-health.tsx`     |
+| Data quality                         | `admin.data-quality.tsx`             |
+| Events / tracking                    | `admin.events-health.tsx`            |
+| Observability / qualidade de dados   | `admin.revenue-quality.tsx`          |
+
+### Arquivos migrados
+
+- `src/routes/_authenticated/admin.data-quality.tsx`
+- `src/routes/_authenticated/admin.events-health.tsx`
+- `src/routes/_authenticated/admin.growth-funnel-health.tsx`
+- `src/routes/_authenticated/admin.revenue-quality.tsx`
+
+### Componentes compartilhados adotados
+
+`PageHeader`, `KpiGrid`, `MetricCard` (com `tone` semântico e
+`tabular-nums`), `CoreSection`, `LoadingState`, `EmptyState`,
+`ErrorState`, `KeyCountTable`, `StatusBanner`.
+
+### Uso do `KeyCountTable`
+
+O componente foi adotado extensivamente: substituiu **17 tabelas
+locais** de chave/contagem (7 em growth-funnel, 2 em data-quality,
+1 em events-health + 7 tabelas simples adicionais em growth-funnel
+para status, origens, motivos, stages, nichos, módulos e survey).
+
+### Formatadores locais eliminados
+
+Removidos `fmt`, `fmtNum`, `brl`, `pct`, `fmtPct` locais em favor de
+`formatBRL`, `formatInt`, `formatPct`, `formatDateTime` de
+`@/lib/format`.
+
+### Melhorias de acessibilidade
+
+- Todos os `Select` com `<label htmlFor>` sr-only + `aria-label`.
+- Botões de refresh com `aria-label` explícito.
+- Ícones decorativos com `aria-hidden="true"`.
+- Tabelas com `<th scope="col">` e `<caption class="sr-only">`.
+- Barra de progresso Top 10 recebeu `role="img"` + `aria-label`
+  descritivo (participação relativa não depende apenas de cor).
+- Tons semânticos (`positive` / `warning` / `critical`) reforçam
+  significado além da cor.
+- `ErrorState` com `role="alert"` (já embutido) substituiu Cards de
+  erro manuais.
+
+### Melhorias mobile
+
+- `KpiGrid columns={3|4}` responsivo padrão (1 → 2 → 3/4).
+- Tabelas agora envelopadas em `rounded-xl border bg-card` com
+  `overflow-x-auto` consistente.
+- Grid de funil consolidado quebra 2 col (mobile) → 5 col (desktop).
+- Header com filtros/refresh empilha corretamente no mobile via
+  `PageHeader.actions` (flex-wrap + shrink-0).
+
+### Duplicações removidas
+
+- 4 blocos `errorComponent` manuais (Card + Skeleton + Button)
+  substituídos por `ErrorState` inline.
+- 4 skeletons de loading manual substituídos por `LoadingState`.
+- 4 headers `<h1><Icon/>...</h1>` inconsistentes unificados em
+  `PageHeader` com `eyebrow` + `description` + `actions`.
+- KPI cards manuais (`Card + CardContent + text-2xl font-bold`)
+  substituídos por `MetricCard` (5 em events-health, 8 em
+  growth-funnel, 6 em revenue-quality, 8 em data-quality).
+- Alerts manuais em `admin.revenue-quality.tsx` migrados para
+  `StatusBanner` com tom semântico.
+
+### Copy
+
+Padronizada para “cliente / clientes”, “grupos duplicados”, “fonte”,
+“janela”, “ação necessária”, “atualização”. Removidas menções a
+“tenant” nas superfícies visíveis.
+
+### Riscos
+
+Nenhum bloqueante. Sem alterações em queries, contratos de dados,
+RLS, migrations, mocks ou funções server-side. Nenhum evento novo
+criado. Nenhum botão de exportação sem ação foi adicionado.
+
+### Pendências
+
+- `admin.analytics-health.tsx`, `admin.data-quality-health.tsx`,
+  `admin.events-tracking-health.tsx`, `admin.observability-health.tsx`
+  não existem — se forem criados no futuro, herdar o padrão desta
+  subonda.
+- Restam dashboards analíticos secundários (`admin.conversion-funnel`,
+  `admin.crm-funnel-health`, `admin.funil-360`, `admin.funil-reguas`,
+  `admin.funnel-fallbacks`, `admin.catalog-analytics`,
+  `admin.whatsapp-metrics`, `bi.*`) como candidatos naturais para
+  subonda P6.7.
+
+### Typecheck
+
+`bunx tsgo --noEmit` — sem erros.
+
+### Padronização estimada
+
+| Área                                    | Pós-P6.5 | Pós-P6.6 |
+| --------------------------------------- | -------: | -------: |
+| Biblioteca compartilhada disponível     |     97% |    **97%** |
+| Rotas administrativas críticas migradas |     78% |     **83%** |
+| Formatadores canônicos                  |     62% |     **68%** |
+| KPI cards padronizados                  |     68% |     **75%** |
+| Tabelas chave/contagem padronizadas     |     40% |     **62%** (via `KeyCountTable`) |
+| Copy “tenant → cliente”                 |     80% |     **84%** |
+| **Padronização global**                 | **~80%** | **~85%** |
