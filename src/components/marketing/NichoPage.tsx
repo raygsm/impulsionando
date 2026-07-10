@@ -96,9 +96,9 @@ export function NichoPage({ nicho }: Props) {
               variant="outline"
               className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
             >
-              <Link to={nicho.ctaSecondary.href}>
+              <SecondaryCta>
                 {nicho.ctaSecondary.label} <ArrowRight className="w-4 h-4" />
-              </Link>
+              </SecondaryCta>
             </Button>
             <Button
               asChild
