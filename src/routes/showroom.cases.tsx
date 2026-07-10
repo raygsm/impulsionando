@@ -449,7 +449,7 @@ function ShowroomCases() {
                 <Sparkles className="h-3 w-3" /> Próximo case pode ser o seu
               </Badge>
               <h3 className="text-2xl font-bold tracking-tight">
-                Comece com 14 dias grátis — sem cartão
+                Contrate agora ou teste 7 dias grátis — sem cartão
               </h3>
               <p className="mt-2 text-muted-foreground">
                 Onboarding guiado, migração padrão inclusa e Customer Success acompanhando os

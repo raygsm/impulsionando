@@ -83,7 +83,7 @@ const MODULE_DEMOS: ModuleDemo[] = [
   { icon: Users, title: "CRM e funil", desc: "Leads, clientes, follow-ups, oportunidades e histórico unificado.", to: "/demo/crm", status: "Ativo" },
   { icon: ShoppingCart, title: "Checkout e pagamentos", desc: "Pix, cartão, link de pagamento e recuperação automática.", to: "/demo/checkout", status: "Ativo" },
   { icon: MessageSquare, title: "WhatsApp inteligente", desc: "Atendimento, templates, multi-atendente e automações.", to: "/demo/whatsapp", status: "Ativo" },
-  { icon: Sparkles, title: "Trial guiado de 14 dias", desc: "Onboarding interativo com missões e dashboards.", to: "/demo/trial", status: "Ativo" },
+  { icon: Sparkles, title: "Trial guiado de 7 dias", desc: "Onboarding interativo com missões e dashboards.", to: "/demo/trial", status: "Ativo" },
   { icon: Handshake, title: "Afiliados e parceiros", desc: "Links, cupons, comissões, upsell, bumps e relatórios.", to: "/demo/afiliados", status: "Ativo" },
   { icon: Ticket, title: "Eventos e ingressos", desc: "Lotes, QR code, check-in e BI por evento.", to: "/demo/eventos", status: "Ativo" },
   { icon: Briefcase, title: "Operação para advogados", desc: "Processos, prazos, clientes e financeiro.", to: "/demo/advogados", status: "Beta" },

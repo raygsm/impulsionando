@@ -26,7 +26,7 @@ export const startTrial = createServerFn({ method: 'POST' })
       _source: 'site_contratar',
     })
 
-    // Registra evento de auditoria (billing) para trial de 3 dias sem cartão.
+    // Registra evento de auditoria (billing) para trial de 7 dias sem cartão.
     try {
       await supabaseAdmin.rpc('log_admin_action', {
         _action: error ? 'billing.trial_failed' : 'billing.trial_started',
@@ -34,7 +34,7 @@ export const startTrial = createServerFn({ method: 'POST' })
         _entity_id: (trialId as string | null) ?? undefined,
         _after: {
           plan_code: data.plan_code,
-          trial_days: 3,
+          trial_days: 7,
           requires_card: false,
           setup_and_first_month_on_activation: true,
           contact_email: data.contact_email.toLowerCase(),
@@ -98,7 +98,7 @@ export const getContratarPricing = createServerFn({ method: 'GET' }).handler(asy
       year: value.year ?? null,
       source: value.source ?? null,
     },
-    trial: { days: 3, requires_card: false, charge_on_activation: 'setup + first_month' },
+    trial: { days: 7, requires_card: false, charge_on_activation: 'setup + first_month', optional: true },
     computed,
     plans_in_db: plansRows ?? [],
   }
