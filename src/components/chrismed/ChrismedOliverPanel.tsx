@@ -56,10 +56,19 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
 ];
 
+type OliverLang = 'pt' | 'en' | 'es';
+
 export function ChrismedOliverPanel() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchLang = useRouterState({ select: (s) => (s.location.search as { lang?: OliverLang })?.lang }) ?? 'pt';
   const navigate = useNavigate();
   const { open, context, info } = useChrismedOliverState();
+
+  const switchLang = (l: OliverLang) => {
+    navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never });
+  };
+
+
 
   const ctx: OliverContext = resolveOliverContextOverride(pathname, context);
 
@@ -99,10 +108,41 @@ export function ChrismedOliverPanel() {
           onCloseAutoFocus={(event) => { event.preventDefault(); focusChrismedOliverTrigger(); }}
           className="fixed inset-y-0 right-0 z-[91] flex h-dvh w-full max-w-[min(100vw,28rem)] flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] shadow-[0_24px_80px_-24px_rgba(15,15,15,0.55)] outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none"
         >
+          {/* Barra de idiomas — bandeiras UK / ES sempre no topo do balão Oliver.
+              Ao clicar, o idioma do site inteiro (inclusive contexto do Oliver) é alterado. */}
+          <div className="flex items-center justify-between gap-3 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/60 px-6 py-2.5">
+            <span className="chrismed-sans text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
+              Translate · Traducir
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => switchLang('en')}
+                aria-label="Translate everything to English"
+                aria-pressed={searchLang === 'en'}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)] ${searchLang === 'en' ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}
+              >
+                <span aria-hidden className="text-base leading-none">🇬🇧</span>
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => switchLang('es')}
+                aria-label="Traducir todo al español"
+                aria-pressed={searchLang === 'es'}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)] ${searchLang === 'es' ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}
+              >
+                <span aria-hidden className="text-base leading-none">🇪🇸</span>
+                ES
+              </button>
+            </div>
+          </div>
+
           {/* Header — identidade Oliver como membro da equipe */}
           <div className="border-b border-[var(--chrismed-sand)] px-6 pt-5 pb-4">
             <div className="flex items-start gap-3">
               <div
+
                 aria-hidden
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] chrismed-serif text-xl font-light shadow-md"
               >
