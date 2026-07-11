@@ -194,6 +194,28 @@
   background: linear-gradient(90deg, transparent, var(--chrismed-sand) 20%, var(--chrismed-sand) 80%, transparent);
 }
 
-
-
+/* Botão inverso CHRISMED (mesmo conceito do balão Oliver):
+   fundo verde profundo, texto amarelo (amber) com detalhe branco,
+   hover eleva o brilho. Uso: className="chrismed-cta". */
+[data-tenant="chrismed"] .chrismed-cta {
+  background: var(--chrismed-forest-deep);
+  color: var(--chrismed-amber);
+  border: 1px solid var(--chrismed-forest);
+  box-shadow: var(--chrismed-shadow-md);
+  transition: all 200ms ease;
+}
+[data-tenant="chrismed"] .chrismed-cta > .chrismed-cta-lead { color: var(--chrismed-ivory); }
+[data-tenant="chrismed"] .chrismed-cta:hover {
+  background: var(--chrismed-forest);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+[data-tenant="chrismed"] .chrismed-cta-ghost {
+  background: transparent;
+  color: var(--chrismed-forest-deep);
+  border: 1px solid var(--chrismed-forest);
+}
+[data-tenant="chrismed"] .chrismed-cta-ghost:hover {
+  background: var(--chrismed-forest-mist);
+}
 
