@@ -93,17 +93,9 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Christiane Alencar">
-          <img
-            src={chrismedLogo.url}
-            alt="CrisMed"
-            className="h-11 w-auto object-contain"
-            width={190}
-            height={44}
-            loading="eager"
-            decoding="async"
-          />
-          <span className="sr-only">CrisMed · Dra. Christiane Alencar</span>
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CHRISMED — Dra. Christiane Alencar">
+          <ChrismedWordmark />
+          <span className="sr-only">CHRISMED · Dra. Christiane Alencar</span>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
@@ -195,15 +187,7 @@ export function ChrismedFooter() {
     <footer className="border-t border-emerald-900/10 bg-[#f7f4ed] mt-20 py-10">
       <div className="container grid gap-6 md:grid-cols-4 text-sm text-emerald-900/80">
         <div>
-          <img
-            src={chrismedLogo.url}
-            alt="CrisMed"
-            className="h-10 w-auto object-contain"
-            width={170}
-            height={40}
-            loading="lazy"
-            decoding="async"
-          />
+          <ChrismedWordmark size="sm" />
           <p className="mt-3 text-emerald-900/70">{copy[lang]}</p>
         </div>
         <div>
@@ -246,13 +230,24 @@ export function ChrismedFooter() {
 
 export function ChrismedShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="chrismed-brand min-h-screen bg-[#fbf9f4] text-emerald-950">
+    <div
+      data-tenant="chrismed"
+      className="chrismed-brand min-h-screen bg-[#fbf9f4] text-emerald-950"
+    >
+      <a
+        href="#chrismed-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded focus:bg-[var(--chrismed-ink)] focus:px-4 focus:py-2 focus:text-[var(--chrismed-ivory)]"
+      >
+        Pular para o conteúdo principal
+      </a>
       <ChrismedHeader />
-      <main>{children}</main>
+      {/* pb-28 reserva a área do launcher para não cobrir CTAs / rodapé. */}
+      <main id="chrismed-main" className="pb-28 md:pb-24">
+        {children}
+      </main>
       <ChrismedFooter />
       <OliverFab />
-      {/* Onda 2.9 — padrão global. Offset extra p/ não colidir com Oliver FAB. */}
-      <MoreContentFab bg="#0f3b2c" accent="#fef3c7" offsetBottom={96} />
+      <ChrismedOliverPanel />
     </div>
   );
 }
