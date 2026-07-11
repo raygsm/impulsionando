@@ -383,6 +383,44 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
+      {/* ─────────── Onda 6 — Escada de relacionamento ─────────── */}
+      <ChrismedSection tone="ivory">
+        <div className="max-w-2xl">
+          <ChrismedEyebrow>Continuidade</ChrismedEyebrow>
+          <ChrismedHeading level={2} className="mt-4">
+            O cuidado não termina na consulta.
+          </ChrismedHeading>
+          <p className="chrismed-sans mt-5 text-base leading-relaxed text-[var(--chrismed-graphite)]">
+            Cada paciente CHRISMED entra em uma escada de acompanhamento discreta —
+            do preparo pré-consulta ao retorno periódico — coordenada pela recepção
+            humana e sinalizada pelo Oliver.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <ChrismedFollowUpCard
+            eyebrow="Antes"
+            title="Preparo enviado com antecedência"
+            body="Você recebe orientações práticas — documentos, jejum quando aplicável, tempo de deslocamento — no dia anterior à consulta."
+            cta="Agendar consulta"
+            to="/chrismed/agendar"
+          />
+          <ChrismedFollowUpCard
+            eyebrow="Durante"
+            title="Consulta sem cronômetro"
+            body="Blocos com margem para escutar e explicar. Ao final, você sai com plano clínico por escrito e próximos passos combinados."
+            cta="Conhecer as modalidades"
+            to="/chrismed/especialidades"
+          />
+          <ChrismedFollowUpCard
+            eyebrow="Depois"
+            title="Retorno e ajustes"
+            body="Se combinado, a recepção lembra o retorno na janela adequada. Renovação de receitas e interpretação de exames por teleconsulta rápida."
+            cta="Falar com a recepção"
+            to="/chrismed/contato"
+          />
+        </div>
+      </ChrismedSection>
+
       {/* ─────────── Seção 8 — Fechamento ─────────── */}
       <ChrismedSection tone="noir">
         <div className="mx-auto max-w-3xl text-center">
