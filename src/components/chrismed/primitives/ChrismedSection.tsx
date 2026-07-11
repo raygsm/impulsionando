@@ -24,7 +24,7 @@ export function ChrismedSection({
   };
   return (
     <section
-      className={cn("w-full py-20 md:py-28", toneCls[tone], className)}
+      className={cn("chrismed-bleed w-full py-20 md:py-28", toneCls[tone], className)}
       {...rest}
     >
       {contained ? <ChrismedContainer>{children}</ChrismedContainer> : children}
