@@ -33,6 +33,11 @@ import {
   ChrismedModalityCard,
   ChrismedOliverLauncher,
 } from '@/components/chrismed/primitives';
+import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
+import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
+
+const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
+
 
 export const Route = createFileRoute('/chrismed/')({
   head: () => ({
