@@ -219,3 +219,40 @@
   background: var(--chrismed-forest-mist);
 }
 
+/* ── Alternância cromática global (mostarda × verde) ──
+   Aplique .chrismed-page-mustard OU .chrismed-page-forest em um wrapper
+   logo abaixo do ChrismedShell (ou no primeiro <section>) para pintar a
+   página inteira. Títulos e textos usam classes utilitárias abaixo. */
+:root {
+  --chrismed-mustard:        #C9A227;
+  --chrismed-mustard-deep:   #8E6E12;
+  --chrismed-mustard-soft:   #F0DFA2;
+  --chrismed-mustard-tint:   #FAF1D2;
+}
+[data-tenant="chrismed"] .chrismed-page-forest {
+  background: linear-gradient(180deg, var(--chrismed-forest) 0%, var(--chrismed-forest-deep) 100%);
+  color: var(--chrismed-ivory);
+}
+[data-tenant="chrismed"] .chrismed-page-forest h1,
+[data-tenant="chrismed"] .chrismed-page-forest h2,
+[data-tenant="chrismed"] .chrismed-page-forest h3 { color: var(--chrismed-amber); }
+[data-tenant="chrismed"] .chrismed-page-forest .chrismed-lede,
+[data-tenant="chrismed"] .chrismed-page-forest p { color: rgba(255,255,255,0.86); }
+
+[data-tenant="chrismed"] .chrismed-page-mustard {
+  background: linear-gradient(180deg, var(--chrismed-mustard-tint) 0%, var(--chrismed-mustard-soft) 100%);
+  color: var(--chrismed-forest-deep);
+}
+[data-tenant="chrismed"] .chrismed-page-mustard h1,
+[data-tenant="chrismed"] .chrismed-page-mustard h2,
+[data-tenant="chrismed"] .chrismed-page-mustard h3 { color: var(--chrismed-forest-deep); }
+[data-tenant="chrismed"] .chrismed-page-mustard p { color: #2A3B36; }
+
+/* CTA invertido para páginas mostarda: fundo verde, texto branco/amarelo */
+[data-tenant="chrismed"] .chrismed-page-mustard .chrismed-cta {
+  background: var(--chrismed-forest-deep);
+  color: var(--chrismed-amber-soft);
+  border-color: var(--chrismed-forest);
+}
+
+

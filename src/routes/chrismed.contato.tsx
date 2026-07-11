@@ -59,15 +59,16 @@ function ContatoPage() {
 
   return (
     <ChrismedShell>
-      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-20 max-w-5xl">
-          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Contato</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">Como podemos ajudar?</h1>
-          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">Escolha o melhor canal. A equipe CrisMed responde em horário comercial, com sigilo e cordialidade.</p>
-        </div>
-      </section>
+      <div className="chrismed-page-mustard">
+        <section className="border-b border-[var(--chrismed-forest-deep)]/10">
+          <div className="mx-auto max-w-4xl px-4 py-20 md:px-6 text-center">
+            <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber-soft)] border-0 mb-5 uppercase tracking-[0.18em] text-[10px]">Contato</Badge>
+            <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.05]">Fale com a CHRISMED</h1>
+            <p className="mx-auto mt-6 text-lg max-w-2xl">Escolha o canal mais adequado para consultas, Medicina Ocupacional, GMS, ASO, perícias ou suporte institucional.</p>
+          </div>
+        </section>
 
-      <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
+        <section className="mx-auto max-w-5xl px-4 md:px-6 py-16 grid lg:grid-cols-2 gap-10 items-start">
         <div className="space-y-4">
           <a href={WHATSAPP} target="_blank" rel="noreferrer" className="block rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 hover:bg-[var(--chrismed-bone)] transition">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><MessageCircle className="h-4 w-4" /> WhatsApp principal</h3>
@@ -115,7 +116,8 @@ function ContatoPage() {
             {sending ? 'Enviando…' : 'Enviar mensagem'}
           </Button>
         </form>
-      </section>
+        </section>
+      </div>
     </ChrismedShell>
   );
 }
