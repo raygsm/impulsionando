@@ -75,9 +75,22 @@ function ChrismedHomePage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
-      {/* ─────────── Seção 1 — Hero ─────────── */}
-      <ChrismedSection tone="ivory" className="pt-16 md:pt-24">
-        <div className="grid gap-12 md:gap-16 lg:grid-cols-[1.15fr_1fr] lg:items-end">
+      {/* ─────────── Seção 1 — Hero ───────────
+          Composição varia conforme haja retrato autorizado (regra V2):
+          - Com retrato: 2 colunas editoriais com cartão-legenda ancorado.
+          - Sem retrato: 1 coluna centralizada com cartucho tipográfico
+            (nunca uma moldura vazia grande no lugar da mídia). */}
+      <ChrismedSection
+        tone="ivory"
+        className={hasPortrait ? 'pt-16 md:pt-24' : 'pt-20 md:pt-32'}
+      >
+        <div
+          className={
+            hasPortrait
+              ? 'grid gap-12 md:gap-16 lg:grid-cols-[1.15fr_1fr] lg:items-end'
+              : 'mx-auto max-w-3xl text-left'
+          }
+        >
           <div>
             <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
             <ChrismedHeading level={1} className="mt-6">
@@ -115,27 +128,43 @@ function ChrismedHomePage() {
                 <li key={m}>· {m}</li>
               ))}
             </ul>
+
+            {!hasPortrait && (
+              <div className="mt-14 border-t border-[var(--chrismed-sand)] pt-8">
+                <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
+                <p className="chrismed-serif mt-3 text-2xl font-light italic text-[var(--chrismed-ink)]">
+                  {CHRISMED_DOCTOR.shortName}
+                </p>
+                <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
+                  {t.hero.portraitRole}
+                </p>
+              </div>
+            )}
           </div>
 
-          <div className="relative">
-            <ChrismedPortrait
-              ratio="4/5"
-              alt={t.hero.portraitAlt}
-              eyebrow={t.hero.portraitEyebrow}
-              className="w-full"
-            />
-            <div className="absolute -bottom-6 left-6 right-6 border-l border-[var(--chrismed-champagne)] bg-[var(--chrismed-ivory)] px-6 py-5 md:-bottom-8 md:left-10">
-              <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
-              <p className="chrismed-serif mt-2 text-xl font-light italic text-[var(--chrismed-ink)]">
-                Dra. Christiane Alencar
-              </p>
-              <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
-                {t.hero.portraitRole}
-              </p>
+          {hasPortrait && (
+            <div className="relative">
+              <ChrismedPortrait
+                src={DRA_CHRISTIANE_PORTRAIT_SRC}
+                ratio="4/5"
+                alt={t.hero.portraitAlt}
+                eyebrow={t.hero.portraitEyebrow}
+                className="w-full"
+              />
+              <div className="absolute -bottom-6 left-6 right-6 border-l border-[var(--chrismed-champagne)] bg-[var(--chrismed-ivory)] px-6 py-5 md:-bottom-8 md:left-10">
+                <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
+                <p className="chrismed-serif mt-2 text-xl font-light italic text-[var(--chrismed-ink)]">
+                  {CHRISMED_DOCTOR.shortName}
+                </p>
+                <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
+                  {t.hero.portraitRole}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ChrismedSection>
+
 
       {/* ─────────── Seção 2 — Como deseja ser atendido? ─────────── */}
       <ChrismedSection tone="bone">
