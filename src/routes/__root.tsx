@@ -418,8 +418,8 @@ function RootComponent() {
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
-      {/* Painel visual do agente Impulsionito (somente UI — integração posterior). */}
-      <ImpulsionitoPanel />
+      {/* Concierge Impulsionito — Onda A3 */}
+      <ImpulsionitoConcierge />
       <DemoAccessGate />
     </QueryClientProvider>
   );
