@@ -313,7 +313,7 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)] lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)] lg:hidden"
             aria-label="Abrir menu"
             aria-expanded={open}
             aria-controls="chrismed-mobile-drawer"
