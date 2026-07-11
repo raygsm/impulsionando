@@ -32,7 +32,16 @@ function ChrismedWordmark({ variant = 'default' }: { variant?: 'default' | 'sm' 
 
 export type Lang = 'pt' | 'en' | 'es';
 
-/** Bandeiras SVG minimalistas para as duas ofertas GMS. */
+/** Bandeiras SVG minimalistas — usadas no bloco GMS e menu. Ordem oficial: Brasil, Inglaterra, Espanha. */
+function FlagBR({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 42" className={className} aria-hidden>
+      <path d="M0,0 h60 v42 h-60 z" fill="#009B3A" />
+      <path d="M30,4 L56,21 L30,38 L4,21 z" fill="#FEDF00" />
+      <circle cx="30" cy="21" r="8" fill="#002776" />
+    </svg>
+  );
+}
 function FlagUK({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 60 30" className={className} aria-hidden>
@@ -53,6 +62,8 @@ function FlagES({ className }: { className?: string }) {
     </svg>
   );
 }
+const FLAG_MAP = { br: FlagBR, uk: FlagUK, es: FlagES } as const;
+type FlagKey = keyof typeof FLAG_MAP;
 
 type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: 'uk' | 'es' };
 type NavGroup = {
