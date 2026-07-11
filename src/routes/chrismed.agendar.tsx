@@ -256,15 +256,23 @@ function ChrismedAgendarPage() {
         )}
 
         {/* STEP 1: Especialidade */}
-        {step === 'specialty' && (
+        {step === 'specialty' && (() => {
+          const specialtiesToShow = doctor
+            ? CHRISMED_SPECIALTIES.filter((s) => doctor.specialtySlugs.includes(s.slug))
+            : CHRISMED_SPECIALTIES;
+          return (
           <section aria-labelledby="s1">
             <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h1>
-            <p className="mt-2 text-[var(--chrismed-graphite)]">Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.</p>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">
+              {doctor
+                ? <>Especialidades atendidas por <strong>{doctor.name}</strong>.</>
+                : 'Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.'}
+            </p>
             <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {CHRISMED_SPECIALTIES.map((sp) => {
+              {specialtiesToShow.map((sp) => {
                 const Icon = SPECIALTY_ICON[sp.icon];
                 return (
-                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep('doctor'); }}
+                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep(doctor ? 'modality' : 'doctor'); }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                       <Icon className="h-5 w-5" />
@@ -276,7 +284,8 @@ function ChrismedAgendarPage() {
               })}
             </div>
           </section>
-        )}
+          );
+        })()}
 
         {/* STEP 2: Médico */}
         {step === 'doctor' && specialty && (
