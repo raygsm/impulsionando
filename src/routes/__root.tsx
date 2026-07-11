@@ -18,7 +18,7 @@ import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { TenantHostFallback } from "@/components/app/TenantHostFallback";
-import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
+import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import { getTenantSubdomain, tenantSubdomainTarget, deprecatedSubdomainRedirect } from "@/lib/subdomain";
@@ -418,8 +418,8 @@ function RootComponent() {
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
-      {/* Painel visual do agente Impulsionito (somente UI — integração posterior). */}
-      <ImpulsionitoPanel />
+      {/* Concierge Impulsionito — Onda A3 */}
+      <ImpulsionitoConcierge />
       <DemoAccessGate />
     </QueryClientProvider>
   );
