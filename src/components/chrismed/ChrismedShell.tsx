@@ -538,6 +538,7 @@ export function ChrismedShell({
         Pular para o conteúdo principal
       </a>
       <ChrismedOliverProvider>
+        <ChrismedPreloader />
         <ChrismedHeader variant={variant} />
         <main id="chrismed-main" className="mx-auto w-full max-w-7xl pb-28 md:pb-24">
           {children}
