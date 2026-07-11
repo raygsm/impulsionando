@@ -153,7 +153,7 @@ function DoctorsDirectory() {
                   {units.map((u: any) => u.name).join(' · ')}
                 </p>
 
-                <Link to="/chrismed/agendar" className="mt-5">
+                <Link to="/chrismed/agendar" search={{ doctor: d.slug }} className="mt-5">
                   <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">
                     Agendar com este médico <ArrowRight className="h-4 w-4" />
                   </Button>

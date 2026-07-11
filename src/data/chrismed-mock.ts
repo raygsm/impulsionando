@@ -51,10 +51,11 @@ export type ChrismedDay = {
 };
 
 export const CHRISMED_SPECIALTIES: ChrismedSpecialty[] = [
+  { slug: 'gastroenterologia', name: 'Gastroenterologia', short: 'Sistema digestivo, refluxo, endoscopia', icon: 'stethoscope' },
+  { slug: 'hepatologia', name: 'Hepatologia', short: 'Fígado, vias biliares e hepatites', icon: 'stethoscope' },
   { slug: 'clinica-medica', name: 'Clínica Médica', short: 'Diagnóstico geral e acompanhamento', icon: 'stethoscope' },
+  { slug: 'medicina-do-trabalho', name: 'Medicina do Trabalho', short: 'ASO e atendimento pericial', icon: 'briefcase' },
   { slug: 'cardiologia', name: 'Cardiologia', short: 'Saúde do coração e pressão arterial', icon: 'heart' },
-  { slug: 'medicina-do-trabalho', name: 'Medicina do Trabalho', short: 'ASO, PCMSO e saúde ocupacional', icon: 'briefcase' },
-  { slug: 'saude-ocupacional', name: 'Saúde Ocupacional', short: 'Programas corporativos e insalubridade', icon: 'briefcase' },
   { slug: 'pediatria', name: 'Pediatria', short: 'Consulta e acompanhamento infantil', icon: 'baby' },
   { slug: 'saude-mental', name: 'Saúde Mental', short: 'Acolhimento e encaminhamento clínico', icon: 'brain' },
   { slug: 'medicina-internacional', name: 'Medicina Internacional', short: 'Atendimento em PT/EN/ES para viajantes', icon: 'plane' },
@@ -69,11 +70,11 @@ export const CHRISMED_UNITS: ChrismedUnit[] = [
 export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
   {
     slug: 'dra-cristiane-alencar',
-    name: 'Dra. Cristiane Alencar',
-    title: 'Clínica Médica · Medicina Internacional',
-    crm: 'CRM/RJ 00.000',
-    bio: 'Atendimento clínico de alto padrão em PT/EN/ES, com foco em pacientes exigentes, executivos e viajantes.',
-    specialtySlugs: ['clinica-medica', 'medicina-internacional', 'medicina-do-trabalho', 'saude-ocupacional'],
+    name: 'Dra. Christiane Alencar',
+    title: 'Gastroenterologia · Hepatologia · Clínica Médica · Medicina Ocupacional',
+    crm: 'CRM/RJ · UFRJ',
+    bio: 'Médica formada pela UFRJ, +30 anos de experiência e +80.000 atendimentos. Atendimento pericial (laudos para Justiça e Previdência) e emissão de ASO na modalidade ocupacional.',
+    specialtySlugs: ['gastroenterologia', 'hepatologia', 'clinica-medica', 'medicina-do-trabalho'],
     modalities: ['presencial', 'telemedicina', 'domiciliar', 'retorno'],
     unitSlugs: ['copacabana', 'telemedicina', 'domiciliar'],
   },
