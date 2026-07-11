@@ -29,13 +29,10 @@ import {
   ChrismedOliverLauncher,
 } from '@/components/chrismed/primitives';
 
-/**
- * Retrato oficial da Dra. Christiane Alencar.
- * Definir a URL AUTORIZADA aqui para publicar o rosto. Enquanto for
- * `undefined`, a página renderiza a moldura editorial neutra (fallback).
- * Não substituir por foto genérica, banco de imagens ou IA.
- */
-const DRA_CRISTIANE_PORTRAIT_SRC: string | undefined = undefined;
+import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
+
+const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
+
 
 /**
  * Conteúdos validados (formação, artigos, congressos, cooperações).
@@ -121,13 +118,17 @@ function openOliver() {
 
 function DraCristianePage() {
   const lang = useLang();
-  const t = COPY[lang];
-
-  return (
-    <ChrismedShell>
-      {/* ─────────── 1. Hero editorial ─────────── */}
-      <ChrismedSection tone="ivory" className="pt-16 md:pt-24">
-        <div className="grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-end lg:gap-20">
+      {/* ─────────── 1. Hero editorial ───────────
+          Composição varia se houver retrato autorizado (regra V2:
+          nunca renderizar caixa vazia com aparência de mídia ausente). */}
+      <ChrismedSection tone="ivory" className={hasPortrait ? 'pt-16 md:pt-24' : 'pt-20 md:pt-32'}>
+        <div
+          className={
+            hasPortrait
+              ? 'grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-end lg:gap-20'
+              : 'mx-auto max-w-3xl'
+          }
+        >
           <div>
             <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
             <ChrismedHeading level={1} className="mt-6">
@@ -154,26 +155,40 @@ function DraCristianePage() {
                 {t.hero.ctaSecondary}
               </button>
             </div>
+            {!hasPortrait && (
+              <div className="mt-12 flex flex-wrap items-center gap-6 border-t border-[var(--chrismed-sand)] pt-6 text-[var(--chrismed-mist)]">
+                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em]">
+                  CHRISMED · Rio de Janeiro
+                </span>
+                <span aria-hidden className="text-[var(--chrismed-sand)]">·</span>
+                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em]">
+                  PT · EN · ES
+                </span>
+              </div>
+            )}
           </div>
 
-          <div className="relative">
-            <ChrismedPortrait
-              src={DRA_CRISTIANE_PORTRAIT_SRC}
-              alt={t.hero.portraitAlt}
-              ratio="4/5"
-              eyebrow={t.hero.eyebrow}
-            />
-            <div className="mt-6 flex items-center justify-between border-t border-[var(--chrismed-sand)] pt-4">
-              <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
-                CHRISMED · Rio de Janeiro
-              </span>
-              <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
-                PT · EN · ES
-              </span>
+          {hasPortrait && (
+            <div className="relative">
+              <ChrismedPortrait
+                src={DRA_CHRISTIANE_PORTRAIT_SRC}
+                alt={t.hero.portraitAlt}
+                ratio="4/5"
+                eyebrow={t.hero.eyebrow}
+              />
+              <div className="mt-6 flex items-center justify-between border-t border-[var(--chrismed-sand)] pt-4">
+                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
+                  CHRISMED · Rio de Janeiro
+                </span>
+                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
+                  PT · EN · ES
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ChrismedSection>
+
 
       {/* ─────────── 2. Trajetória ─────────── */}
       <ChrismedSection tone="bone">
