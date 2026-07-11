@@ -55,19 +55,20 @@ const MODALITY_META: Record<ChrismedModality, { icon: typeof Stethoscope; label:
 const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Briefcase, baby: Baby, brain: Brain, plane: Plane } as const;
 
 /**
- * Especialidade sintética "Teleconsulta 360°": ao escolher Teleconsulta,
- * o paciente não escolhe especialidade — recebe a visão integrada das
- * três atuações ambulatoriais da Dra. Christiane Alencar (Gastroenterologia,
- * Hepatologia e Clínica Médica). Esse é justamente o diferencial da
- * teleconsulta CHRISMED: diagnóstico 360° pelo mesmo médico.
+ * Especialidade sintética "Atendimento 360°": ao escolher Teleconsulta
+ * OU Domiciliar, o paciente não escolhe especialidade — recebe a visão
+ * integrada das três atuações ambulatoriais da Dra. Christiane Alencar
+ * (Gastroenterologia, Hepatologia e Clínica Médica). Só no Presencial
+ * (Consultório) o paciente escolhe especialidade antes.
  */
-const TELECONSULTA_360_LABEL = 'Gastroenterologia · Hepatologia · Clínica Médica';
-const TELECONSULTA_360: ChrismedSpecialty = {
-  slug: 'teleconsulta-360',
-  name: 'Teleconsulta 360°',
-  short: TELECONSULTA_360_LABEL,
+const CARE_360_LABEL = 'Gastroenterologia · Hepatologia · Clínica Médica';
+const CARE_360: ChrismedSpecialty = {
+  slug: 'care-360',
+  name: 'Atendimento 360°',
+  short: CARE_360_LABEL,
   icon: 'stethoscope',
 };
+
 
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
