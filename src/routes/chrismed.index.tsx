@@ -328,7 +328,7 @@ function ChrismedHomePage() {
           {t.verticals.items.map((v) => (
             <article
               key={v.title}
-              className="flex flex-col border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)]/40 p-8"
+              className="chrismed-card-lift flex flex-col border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)]/40 p-8 hover:border-[var(--chrismed-amber)]/70"
             >
               <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
                 {v.eyebrow}
