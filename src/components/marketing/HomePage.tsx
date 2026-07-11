@@ -41,7 +41,7 @@ const INTENCOES: Intencao[] = [
     headline: "Cada oportunidade recebida, respondida e acompanhada.",
     body:
       "CRM, WhatsApp oficial, funis por etapa e cobrança automática trabalhando em conjunto para transformar interesse em receita — sem depender de planilhas ou memória.",
-    cta: { to: "/solucoes/vender-mais", label: "Ver como vender mais" },
+    cta: { to: "/solucoes", label: "Ver como vender mais" },
     hint: "Ideal para quem perde lead por demora, esquece follow-up ou não sabe quanto vale seu funil.",
   },
   {
@@ -51,7 +51,7 @@ const INTENCOES: Intencao[] = [
     headline: "A operação inteira visível em um único painel.",
     body:
       "Agenda, cadastros, contratos, fluxo financeiro e permissões por equipe conectados. Menos abas abertas, menos retrabalho, mais clareza para decidir.",
-    cta: { to: "/solucoes/organizar-empresa", label: "Organizar minha empresa" },
+    cta: { to: "/solucoes", label: "Organizar minha empresa" },
     hint: "Ideal para quem opera em várias ferramentas soltas e perde tempo consolidando informação.",
   },
   {
@@ -61,7 +61,7 @@ const INTENCOES: Intencao[] = [
     headline: "Um atendimento que não dorme e nunca esquece o cliente.",
     body:
       "Impulsionito responde 24/7, o time entra quando precisa, tudo com histórico. O cliente sente que a empresa lembra dele em cada interação.",
-    cta: { to: "/solucoes/melhorar-atendimento", label: "Ver atendimento inteligente" },
+    cta: { to: "/solucoes", label: "Ver atendimento inteligente" },
     hint: "Ideal para negócios que perdem venda por demora ou por atendimento inconsistente entre canais.",
   },
   {
@@ -71,7 +71,7 @@ const INTENCOES: Intencao[] = [
     headline: "Cada rotina repetida vira automação silenciosa.",
     body:
       "Réguas de comunicação, cobrança, onboarding, renovação e pós-venda executadas em segundo plano. O time cuida do que importa — o sistema cuida do resto.",
-    cta: { to: "/solucoes/automatizar-processos", label: "Automatizar operações" },
+    cta: { to: "/solucoes", label: "Automatizar operações" },
     hint: "Ideal para quem sente que a equipe passa o dia apagando incêndio em vez de crescer.",
   },
   {
@@ -81,7 +81,7 @@ const INTENCOES: Intencao[] = [
     headline: "Uma presença digital que trabalha vendendo por você.",
     body:
       "Vitrines, páginas por serviço, catálogos, agendamento online e link único integrados ao Core. O que aparece na internet conecta direto na operação.",
-    cta: { to: "/solucoes/presenca-digital", label: "Ver presença digital" },
+    cta: { to: "/solucoes", label: "Ver presença digital" },
     hint: "Ideal para quem tem redes sociais ativas, mas nenhuma jornada estruturada até a venda.",
   },
   {
@@ -109,10 +109,10 @@ const DEMO_STEPS = [
 
 // ============== 4. BENEFÍCIOS ==============
 const BENEFICIOS = [
-  { icon: TrendingUp, title: "Mais vendas fechadas", body: "Nenhum lead esquecido. Follow-up automático até a decisão.", to: "/solucoes/vender-mais" },
-  { icon: Bot, title: "Menos tarefa manual", body: "Rotinas repetidas viram automação. O time cuida do que importa.", to: "/solucoes/automatizar-processos" },
-  { icon: MessageCircle, title: "Atendimento contínuo", body: "Impulsionito responde 24/7 e passa o bastão para o humano com contexto.", to: "/solucoes/melhorar-atendimento" },
-  { icon: Target, title: "Visão da operação", body: "Um painel único: agenda, vendas, atendimento e financeiro juntos.", to: "/solucoes/organizar-empresa" },
+  { icon: TrendingUp, title: "Mais vendas fechadas", body: "Nenhum lead esquecido. Follow-up automático até a decisão.", to: "/solucoes" },
+  { icon: Bot, title: "Menos tarefa manual", body: "Rotinas repetidas viram automação. O time cuida do que importa.", to: "/solucoes" },
+  { icon: MessageCircle, title: "Atendimento contínuo", body: "Impulsionito responde 24/7 e passa o bastão para o humano com contexto.", to: "/solucoes" },
+  { icon: Target, title: "Visão da operação", body: "Um painel único: agenda, vendas, atendimento e financeiro juntos.", to: "/solucoes" },
   { icon: Rocket, title: "Implantação guiada", body: "Você não fica sozinho. Ativação assistida por especialista.", to: "/central-de-ajuda" },
   { icon: ShieldCheck, title: "Crescimento com controle", body: "Permissões, LGPD, dados no Brasil e trilhas de auditoria.", to: "/sobre" },
 ];
