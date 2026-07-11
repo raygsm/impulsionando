@@ -126,16 +126,14 @@ function ChrismedAmbulatorialPage() {
             <Link to="/chrismed/agendar" className="inline-flex">
               <ChrismedButton size="lg">{t.hero.ctaPrimary}</ChrismedButton>
             </Link>
-            <button
-              type="button"
+            <ChrismedButton
+              size="lg"
+              variant="ghost"
               onClick={openOliver}
-              className="inline-flex"
               aria-label={t.hero.ctaSecondary}
             >
-              <ChrismedButton size="lg" variant="ghost">
-                {t.hero.ctaSecondary}
-              </ChrismedButton>
-            </button>
+              {t.hero.ctaSecondary}
+            </ChrismedButton>
           </div>
           <ul className="chrismed-sans mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
             {t.hero.modes.map((m) => (
@@ -413,15 +411,14 @@ function ChrismedAmbulatorialPage() {
                 {t.close.ctaPrimary}
               </ChrismedButton>
             </Link>
-            <button type="button" onClick={openOliver} className="inline-flex">
-              <ChrismedButton
-                size="lg"
-                variant="ghost"
-                className="border-[var(--chrismed-champagne)]/40 text-[var(--chrismed-ivory)] hover:bg-[var(--chrismed-ivory)]/5"
-              >
-                {t.close.ctaSecondary}
-              </ChrismedButton>
-            </button>
+            <ChrismedButton
+              size="lg"
+              variant="ghost"
+              onClick={openOliver}
+              className="border-[var(--chrismed-champagne)]/40 text-[var(--chrismed-ivory)] hover:bg-[var(--chrismed-ivory)]/5"
+            >
+              {t.close.ctaSecondary}
+            </ChrismedButton>
           </div>
         </div>
       </ChrismedSection>
