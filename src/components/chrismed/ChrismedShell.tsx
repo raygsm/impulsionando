@@ -411,10 +411,10 @@ function MobileDrawer({
           <Link
             to="/chrismed/agendar"
             onClick={onClose}
-            className="chrismed-sans flex items-center justify-center gap-2 rounded-full bg-[var(--chrismed-forest)] px-4 py-3 text-[14px] font-medium text-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-md)]"
+            className="chrismed-sans chrismed-cta flex items-center justify-center gap-2 rounded-full px-4 py-3 text-[14px] font-medium"
           >
-            <CalendarCheck className="h-4 w-4" aria-hidden />
-            {CTA.book[lang]}
+            <CalendarCheck className="h-4 w-4 chrismed-cta-lead" aria-hidden />
+            <span className="chrismed-cta-lead">{CTA.book[lang]}</span>
           </Link>
           <button
             type="button"
