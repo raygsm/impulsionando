@@ -65,15 +65,6 @@ function FlagES({ className }: { className?: string }) {
 const FLAG_MAP = { br: FlagBR, uk: FlagUK, es: FlagES } as const;
 type FlagKey = keyof typeof FLAG_MAP;
 
-type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: 'uk' | 'es' };
-type NavGroup = {
-  key: string;
-  labels: Record<Lang, string>;
-  children: NavLeaf[];
-};
-type NavItem = NavLeaf | NavGroup;
-
-const isGroup = (i: NavItem): i is NavGroup => 'children' in i;
 
 type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: FlagKey; setLang?: Lang };
 type NavGroup = {
