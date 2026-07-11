@@ -1,13 +1,70 @@
 /**
- * CHRISMED V4 — contratos de props (schemas visuais).
- * NENHUM valor real, nenhuma chamada, nenhum mock.
- * Todo bloco `TODO(Codex)` aguarda contrato oficial do backend.
+ * CHRISMED V4 — contratos de props e schemas backend (inertes).
+ *
+ * ESTE ARQUIVO É APENAS TIPAGEM.
+ * Nenhum valor real. Nenhuma chamada. Nenhum mock.
+ * Nenhum componente ativo importa isto.
+ *
+ * Todo campo/estado marcado `TODO(Codex)` aguarda contrato oficial do
+ * backend (endpoints /api/chrismed/scheduling/*, mpago-create-payment,
+ * webhooks de confirmação, tabelas de políticas versionadas).
+ *
+ * Cobertura obrigatória (13 contratos):
+ *   1. offerings
+ *   2. professionals
+ *   3. availability
+ *   4. hold (create)
+ *   5. hold (status/get)
+ *   6. hold (release)
+ *   7. payment (create)
+ *   8. payment (status)
+ *   9. appointment (confirm via webhook)
+ *  10. appointment (lookup)
+ *  11. reschedule
+ *  12. cancel
+ *  13. refund
+ *  + policies & consents (versionadas)
  */
 
-// ─── Offering ──────────────────────────────────────────────────────────────
-// TODO(Codex): confirmar fonte de verdade e política de override por
-// profissional/plano/convênio.
-export type V4Modality = 'presencial' | 'telemedicina' | 'domiciliar' | 'retorno' | 'ocupacional';
+// ─── Comuns ────────────────────────────────────────────────────────────────
+export type V4Lang = 'pt' | 'en' | 'es';
+export type V4Currency = 'BRL';
+export type V4ISODate = string; // ISO-8601 UTC (definido pelo backend)
+
+/** Token público efêmero — TODO(Codex): TTL, escopo, algoritmo. */
+export type V4PublicToken = string;
+
+/** Envelope de erro tipado devolvido pelos endpoints. */
+export interface V4ErrorEnvelope {
+  code:
+    | 'validation_error'
+    | 'not_found'
+    | 'conflict'
+    | 'hold_expired'
+    | 'hold_conflict'
+    | 'payment_declined'
+    | 'gateway_unavailable'
+    | 'rate_limited'
+    | 'unauthorized'
+    | 'forbidden'
+    | 'server_error';
+  message: string;
+  details?: Record<string, unknown>;
+  // TODO(Codex): trace_id/request_id para observabilidade.
+}
+
+/** Correção de deriva do relógio para countdowns server-authoritative. */
+export interface V4ServerClock {
+  server_time: V4ISODate; // devolvido em toda resposta com expires_at
+}
+
+// ─── 1. Offerings ──────────────────────────────────────────────────────────
+export type V4Modality =
+  | 'presencial'
+  | 'telemedicina'
+  | 'domiciliar'
+  | 'retorno'
+  | 'ocupacional';
 
 export interface V4Offering {
   id: string;
@@ -16,20 +73,21 @@ export interface V4Offering {
   description: string | null;
   modality: V4Modality;
   price_cents: number;
-  currency: 'BRL';
+  currency: V4Currency;
   duration_minutes: number;
   requires_prepayment: boolean;
+  /** TODO(Codex): cortesia/retorno autorizado pelo backend, nunca client-side. */
+  is_courtesy?: boolean;
 }
 
-// ─── Professional / Unit ───────────────────────────────────────────────────
-// TODO(Codex): tabelas `professionals`, `units`, `rooms` e junção
-// `service_offering_professional`. RLS anon-safe para leitura pública.
+// ─── 2. Professionals / Units ──────────────────────────────────────────────
 export interface V4Professional {
   id: string;
   display_name: string;
   crm?: string;
   specialties: string[];
   photo_url?: string;
+  // TODO(Codex): vínculo service_offering_professional + unidades.
 }
 
 export interface V4Unit {
@@ -38,44 +96,37 @@ export interface V4Unit {
   address_short?: string;
 }
 
-// ─── Availability & Slot Hold ──────────────────────────────────────────────
-// TODO(Codex): endpoints `availability`, `hold-slot`, `release-slot`.
-// `expires_at` SEMPRE vem do backend. Front nunca inventa contagem.
+// ─── 3. Availability ───────────────────────────────────────────────────────
 export interface V4Slot {
-  starts_at: string; // ISO
-  ends_at: string;   // ISO
+  starts_at: V4ISODate;
+  ends_at: V4ISODate;
   professional_id: string;
   unit_id?: string;
   room_id?: string;
 }
 
-export interface V4SlotHold {
+export interface V4AvailabilityResponse extends V4ServerClock {
+  slots: readonly V4Slot[];
+}
+
+// ─── 4–6. Hold (estados oficiais) ──────────────────────────────────────────
+export type V4HoldStatus =
+  | 'active'
+  | 'expired'
+  | 'released'
+  | 'consumed'
+  | 'conflict';
+
+export interface V4SlotHold extends V4ServerClock {
   hold_id: string;
   slot: V4Slot;
-  expires_at: string; // ISO — fonte única do countdown
+  status: V4HoldStatus;
+  expires_at: V4ISODate; // fonte única do countdown (servidor)
+  /** Token público para consultar status sem sessão autenticada. */
+  public_status_token: V4PublicToken;
 }
 
-// ─── Payer / Consents ──────────────────────────────────────────────────────
-// TODO(Codex): política oficial de cancelamento/reembolso (parar de
-// hardcodar "24h"). Termos e Política de Privacidade versionados.
-export interface V4Payer {
-  first_name: string;
-  last_name?: string;
-  email: string;
-  phone_e164?: string;
-  doc_type?: 'CPF' | 'PASSPORT';
-  doc_number?: string;
-}
-
-export interface V4Consents {
-  lgpd_version: string;
-  terms_version: string;
-  accepted_at: string; // ISO
-}
-
-// ─── Payment ───────────────────────────────────────────────────────────────
-// TODO(Codex): contrato estável de `mpago-create-payment` (idempotência,
-// expires_at, mapeamento canônico de status). Webhook documentado.
+// ─── 7–8. Payment ──────────────────────────────────────────────────────────
 export type V4PaymentStatus =
   | 'creating'
   | 'awaiting_pix'
@@ -93,35 +144,140 @@ export interface V4PixPayload {
   payment_id: string;
   qr_code: string;
   qr_code_base64: string;
-  expires_at: string; // ISO — do gateway
+  expires_at: V4ISODate; // do gateway (Mercado Pago)
 }
 
-// ─── Appointment (persistido) ──────────────────────────────────────────────
-// TODO(Codex): entidade `appointments` real, vinculada ao hold consumido e
-// ao pagamento aprovado. Regras de remarcação/cancelamento/reembolso.
+export interface V4PaymentCreateResponse extends V4ServerClock {
+  payment_id: string;
+  status: V4PaymentStatus;
+  pix?: V4PixPayload;
+  public_status_token: V4PublicToken;
+  /** TODO(Codex): appointment_id só é atribuído após webhook aprovado. */
+  appointment_id?: string;
+}
+
+export interface V4PaymentStatusResponse extends V4ServerClock {
+  payment_id: string;
+  status: V4PaymentStatus;
+  appointment_id?: string;
+}
+
+// ─── 9–10. Appointment ─────────────────────────────────────────────────────
+export type V4AppointmentStatus =
+  | 'confirmed'
+  | 'cancelled'
+  | 'no_show'
+  | 'completed'
+  | 'rescheduled';
+
 export interface V4Appointment {
   id: string;
   offering_id: string;
   professional_id: string;
   unit_id?: string;
-  starts_at: string;
-  ends_at: string;
-  status: 'confirmed' | 'cancelled' | 'no_show' | 'completed' | 'rescheduled';
+  starts_at: V4ISODate;
+  ends_at: V4ISODate;
+  status: V4AppointmentStatus;
   payment_id?: string;
+  // TODO(Codex): links de calendário, meeting_url para telemedicina.
+}
+
+// ─── 11. Reschedule ────────────────────────────────────────────────────────
+export type V4RescheduleStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'expired';
+
+export interface V4RescheduleRequest {
+  appointment_id: string;
+  new_slot: V4Slot;
+  reason?: string;
+}
+
+export interface V4RescheduleResponse {
+  appointment_id: string;
+  status: V4RescheduleStatus;
+  appointment?: V4Appointment;
+}
+
+// ─── 12. Cancellation ──────────────────────────────────────────────────────
+export type V4CancellationStatus =
+  | 'requested'
+  | 'accepted'
+  | 'rejected'
+  | 'auto_no_show';
+
+export interface V4CancellationResponse {
+  appointment_id: string;
+  status: V4CancellationStatus;
+  /** TODO(Codex): valor de reembolso e taxa vêm da política versionada. */
+  refund_preview_cents?: number;
+}
+
+// ─── 13. Refund ────────────────────────────────────────────────────────────
+export type V4RefundStatus =
+  | 'requested'
+  | 'processing'
+  | 'approved'
+  | 'rejected'
+  | 'failed';
+
+export interface V4RefundResponse {
+  refund_id: string;
+  payment_id: string;
+  status: V4RefundStatus;
+  amount_cents: number;
+}
+
+// ─── Policies & Consents (versionadas) ─────────────────────────────────────
+export type V4PolicyKind =
+  | 'lgpd'
+  | 'terms_of_care'
+  | 'cancellation'
+  | 'communication';
+
+export interface V4Policy {
+  kind: V4PolicyKind;
+  version: string;
+  effective_at: V4ISODate;
+  html?: string;
+  url?: string;
+}
+
+export interface V4PoliciesResponse {
+  policies: readonly V4Policy[];
+}
+
+// ─── Payer / Consents ──────────────────────────────────────────────────────
+export interface V4Payer {
+  first_name: string;
+  last_name?: string;
+  email: string;
+  phone_e164?: string;
+  doc_type?: 'CPF' | 'PASSPORT';
+  doc_number?: string;
+}
+
+export interface V4Consents {
+  lgpd_version: string;
+  terms_version: string;
+  cancellation_version: string;
+  communication_version: string;
+  accepted_at: V4ISODate;
 }
 
 // ─── Props dos componentes visuais (esqueletos em _unmounted/) ─────────────
-
 export interface V4StepIndicatorProps {
   current: 1 | 2 | 3 | 4 | 5;
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
 
 export interface V4ModalityGridProps {
-  offerings: readonly V4Offering[]; // fornecido por loader real futuro
+  offerings: readonly V4Offering[];
   onSelect(id: V4Offering['id']): void;
   state: 'loading' | 'ready' | 'empty' | 'error';
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
 
 export interface V4SlotPickerProps {
@@ -141,7 +297,7 @@ export interface V4SlotPickerProps {
   onPickProfessional(id: string): void;
   onPickSlot(slot: V4Slot): void;
   onReleaseHold(): void;
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
 
 export interface V4PayerFormProps {
@@ -149,9 +305,10 @@ export interface V4PayerFormProps {
   onChange(next: Partial<V4Payer>): void;
   consents: Partial<V4Consents>;
   onConsentsChange(next: Partial<V4Consents>): void;
+  policies?: readonly V4Policy[];
   state: 'draft' | 'validating' | 'invalid' | 'valid' | 'submit_blocked_by_consent';
   onSubmit(): void;
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
 
 export interface V4PaymentProps {
@@ -159,12 +316,12 @@ export interface V4PaymentProps {
   status: V4PaymentStatus;
   onCancel(): void;
   onOpenOliver(): void;
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
 
 export interface V4ConfirmationProps {
   appointment: V4Appointment;
   warnings?: readonly string[];
   onNew(): void;
-  lang: 'pt' | 'en' | 'es';
+  lang: V4Lang;
 }
