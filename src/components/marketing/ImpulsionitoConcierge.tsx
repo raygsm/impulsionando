@@ -80,6 +80,13 @@ function writeLeadContext(ctx: LeadContext) {
   } catch { /* noop */ }
 }
 
+function clearLeadContext() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEAD_STORAGE_KEY);
+  } catch { /* noop */ }
+}
+
 // ---------------------------------------------------------------------------
 // Ações rápidas por audiência.
 // ---------------------------------------------------------------------------
