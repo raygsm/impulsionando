@@ -227,9 +227,16 @@ export function ChrismedFooter() {
           </ul>
         </div>
       </div>
+      <div className="container mt-8 pt-4 border-t border-emerald-900/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-emerald-900/60">
+        <span className="uppercase tracking-wider">
+          {lang === 'en' ? 'Live publish' : lang === 'es' ? 'Publicación en vivo' : 'Publicação em tempo real'}
+        </span>
+        <BuildStamp />
+      </div>
     </footer>
   );
 }
+
 
 export function ChrismedShell({ children }: { children: React.ReactNode }) {
   return (
