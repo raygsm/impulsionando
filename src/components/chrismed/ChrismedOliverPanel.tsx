@@ -1,20 +1,18 @@
 /**
- * ChrismedOliverPanel — Wave 2 (redesign).
+ * ChrismedOliverPanel — Wave 5 (Oliver como membro da equipe).
  *
- * Painel funcional. NÃO simula IA. Ações reais: navegar, exibir
- * informação institucional, encaminhar para humano (canal ainda
- * pendente Codex).
- *
- * Novidades Wave 2:
- *  - Identidade forte (avatar monograma, nome, papel, disclaimer visível)
- *  - Grid de "atalhos rápidos" global sempre visível (Agendar, Médicos,
- *    Especialidades, Meus agendamentos, Pagamento, Falar humano)
- *  - Ações contextuais por rota (mantém sistema OLIVER_CONTEXTS)
- *  - Botão "reiniciar orientação" para limpar info atual
- *  - Estados: sem info, com info, canal humano indisponível
+ * Reposicionamento:
+ *  - Oliver deixa de ser "chatbot" e passa a ser apresentado como
+ *    concierge administrativo humano-assistido da equipe CHRISMED.
+ *  - Identidade: nome próprio, papel, janela de atendimento humano.
+ *  - Handoff visível: card fixo "Recepção CHRISMED" com estado da
+ *    disponibilidade humana (dentro/fora do horário) e ação clara.
+ *  - Nunca simula IA nem finge conversa. Cada botão executa uma ação
+ *    real: navegar, exibir informação institucional, ou avisar que o
+ *    canal humano assumirá.
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, MessageSquare, ArrowRight } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound } from 'lucide-react';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   resolveOliverContextOverride,
@@ -31,6 +29,16 @@ import {
 
 const WHATSAPP_ENABLED = false;
 
+// Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
+// sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
+function isHumanOnline(now: Date = new Date()): boolean {
+  const day = now.getDay();
+  const hour = now.getHours();
+  if (day === 0) return false;
+  if (day === 6) return hour >= 9 && hour < 13;
+  return hour >= 9 && hour < 19;
+}
+
 type GlobalAction = {
   label: string;
   hint: string;
@@ -45,7 +53,6 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
   { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
   { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
-  { label: 'Falar com atendimento', hint: 'Canal humano — em breve', icon: MessageSquare, info: 'O canal humano (WhatsApp/telefone) está em ativação. Enquanto isso, use o formulário em /chrismed/contato — a equipe responde no próximo horário administrativo.' },
 ];
 
 export function ChrismedOliverPanel() {
