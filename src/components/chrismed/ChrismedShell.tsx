@@ -246,8 +246,7 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
                   )}
                 </div>
               </Link>
-            </Link>
-            );
+              );
             })}
           </div>
         </div>
