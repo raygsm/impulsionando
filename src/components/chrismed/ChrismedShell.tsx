@@ -15,12 +15,17 @@ import { openChrismedOliver } from './oliver-store';
  * Usa exclusivamente tokens --chrismed-* (nada de cores hardcoded).
  */
 function ChrismedWordmark({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  // Tamanhos ajustados para 300% do valor anterior (solicitação do cliente).
   const cls =
     size === 'sm'
-      ? 'text-lg tracking-[0.28em]'
-      : 'text-xl md:text-[1.35rem] tracking-[0.32em]';
+      ? 'text-[3.375rem] tracking-[0.28em]'
+      : 'text-[3.75rem] md:text-[4.05rem] tracking-[0.32em]';
+  const suffixCls =
+    size === 'sm'
+      ? 'text-[20px]'
+      : 'text-[27px]';
   return (
-    <span className="inline-flex items-baseline gap-2 leading-none">
+    <span className="inline-flex items-baseline gap-3 leading-none">
       <span
         aria-hidden
         className={cn(
@@ -32,7 +37,10 @@ function ChrismedWordmark({ size = 'md' }: { size?: 'sm' | 'md' }) {
       </span>
       <span
         aria-hidden
-        className="chrismed-sans text-[9px] uppercase tracking-[0.35em] text-[var(--chrismed-champagne-deep)]"
+        className={cn(
+          'chrismed-sans uppercase tracking-[0.35em] text-[var(--chrismed-champagne-deep)]',
+          suffixCls,
+        )}
       >
         · MD
       </span>
