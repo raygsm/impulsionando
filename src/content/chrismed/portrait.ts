@@ -16,7 +16,7 @@
  * não existir, os componentes reorganizam a composição editorial em vez
  * de renderizar moldura vazia.
  */
-import draCristianePortrait from '@/assets/chrismed/dra-cristiane-portrait.png.asset.json';
+import draCristianePortrait from '@/assets/chrismed/dra-cristiane-portrait.jpg.asset.json';
 
 const PORTRAIT_MODULES = import.meta.glob(
   '/src/assets/chrismed/dra-christiane.{avif,webp,jpg,jpeg,png}',
@@ -41,5 +41,5 @@ export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined =
 
 /** Caminho recomendado para o asset final (documentação). */
 export const DRA_CHRISTIANE_PORTRAIT_TARGET_PATH =
-  'src/assets/chrismed/dra-cristiane-portrait.png';
+  'src/assets/chrismed/dra-cristiane-portrait.jpg';
 
