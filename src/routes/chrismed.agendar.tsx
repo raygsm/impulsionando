@@ -55,19 +55,20 @@ const MODALITY_META: Record<ChrismedModality, { icon: typeof Stethoscope; label:
 const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Briefcase, baby: Baby, brain: Brain, plane: Plane } as const;
 
 /**
- * Especialidade sintética "Teleconsulta 360°": ao escolher Teleconsulta,
- * o paciente não escolhe especialidade — recebe a visão integrada das
- * três atuações ambulatoriais da Dra. Christiane Alencar (Gastroenterologia,
- * Hepatologia e Clínica Médica). Esse é justamente o diferencial da
- * teleconsulta CHRISMED: diagnóstico 360° pelo mesmo médico.
+ * Especialidade sintética "Atendimento 360°": ao escolher Teleconsulta
+ * OU Domiciliar, o paciente não escolhe especialidade — recebe a visão
+ * integrada das três atuações ambulatoriais da Dra. Christiane Alencar
+ * (Gastroenterologia, Hepatologia e Clínica Médica). Só no Presencial
+ * (Consultório) o paciente escolhe especialidade antes.
  */
-const TELECONSULTA_360_LABEL = 'Gastroenterologia · Hepatologia · Clínica Médica';
-const TELECONSULTA_360: ChrismedSpecialty = {
-  slug: 'teleconsulta-360',
-  name: 'Teleconsulta 360°',
-  short: TELECONSULTA_360_LABEL,
+const CARE_360_LABEL = 'Gastroenterologia · Hepatologia · Clínica Médica';
+const CARE_360: ChrismedSpecialty = {
+  slug: 'care-360',
+  name: 'Atendimento 360°',
+  short: CARE_360_LABEL,
   icon: 'stethoscope',
 };
+
 
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
@@ -124,7 +125,7 @@ function isValidCPF(v: string) { return v.replace(/\D/g, '').length === 11; }
 
 function ChrismedAgendarPage() {
   const search = useSearch({ from: '/chrismed/agendar' });
-  const [step, setStep] = useState<Step>('specialty');
+  const [step, setStep] = useState<Step>('modality');
   const [specialty, setSpecialty] = useState<ChrismedSpecialty | null>(null);
   const [doctor, setDoctor] = useState<ChrismedDoctor | null>(null);
   const [modality, setModality] = useState<ChrismedModality | null>(null);
@@ -139,34 +140,38 @@ function ChrismedAgendarPage() {
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
 
-  // Pré-seleção via querystring
+  // Aplica "Atendimento 360°" (tele + domiciliar) — 1 médico, 3 especialidades.
+  function applyCare360(mod: 'telemedicina' | 'domiciliar') {
+    const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+    const targetUnit = CHRISMED_UNITS.find((u) => u.slug === mod);
+    setSpecialty(CARE_360);
+    if (doc) setDoctor(doc);
+    setModality(mod);
+    if (targetUnit) setUnit(targetUnit);
+    setStep('schedule');
+  }
+
+  // Pré-seleção via querystring — fluxo invertido: modalidade primeiro.
   useEffect(() => {
-    // TELECONSULTA 360°: funde as 3 especialidades ambulatoriais.
-    // Não há escolha de especialidade após clicar em Teleconsulta —
-    // o benefício é justamente o diagnóstico integrado.
-    if (search.modality === 'telemedicina') {
-      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
-      const tele = CHRISMED_UNITS.find((u) => u.slug === 'telemedicina');
-      setSpecialty(TELECONSULTA_360);
-      if (doc) setDoctor(doc);
-      setModality('telemedicina');
-      if (tele) setUnit(tele);
-      setStep('schedule');
+    if (search.modality === 'telemedicina' || search.modality === 'domiciliar') {
+      applyCare360(search.modality);
+      return;
+    }
+    if (search.modality === 'presencial') {
+      setModality('presencial');
+      setStep('specialty');
       return;
     }
     if (search.doctor) {
       const doc = CHRISMED_DOCTORS.find((d) => d.slug === search.doctor);
-      if (doc) {
-        setDoctor(doc);
-        setStep('specialty');
-        return;
-      }
+      if (doc) { setDoctor(doc); }
     }
     if (search.specialty) {
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
-      if (sp) { setSpecialty(sp); setStep('doctor'); }
+      if (sp) { setSpecialty(sp); }
     }
   }, [search.specialty, search.doctor, search.modality]);
+
 
 
   // Carrega offerings reais (para preço/duração no passo de pagamento)
@@ -259,21 +264,22 @@ function ChrismedAgendarPage() {
     }
   }
 
-  const stepOrder: Step[] = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'];
-  const stepIndex = stepOrder.indexOf(step);
-  const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+  // Ordem dinâmica: presencial exige especialidade; tele/domiciliar pula direto para o schedule (Atendimento 360°).
+  const isCare360 = specialty?.slug === 'care-360' || modality === 'telemedicina' || modality === 'domiciliar';
+  const stepOrder: Step[] = isCare360
+    ? ['modality','schedule','identify','confirm','payment','done']
+    : ['modality','specialty','doctor','unit','schedule','identify','confirm','payment','done'];
+  const stepLabels = isCare360
+    ? ['Modalidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto']
+    : ['Modalidade','Especialidade','Médico','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+  const stepIndex = Math.max(0, stepOrder.indexOf(step));
   const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
-  const isTele360 = specialty?.slug === 'teleconsulta-360';
   function goBack() {
     if (stepIndex <= 0) return;
-    // No fluxo Teleconsulta 360°, o paciente não escolhe especialidade/
-    // médico/modalidade/unidade — chão mínimo é 'schedule'.
-    if (isTele360 && stepIndex <= stepOrder.indexOf('schedule')) return;
-    // pula 'doctor' quando o médico foi pré-selecionado via querystring
-    let prev = stepOrder[stepIndex - 1];
-    if (prev === 'doctor' && search.doctor) prev = 'specialty';
+    const prev = stepOrder[stepIndex - 1];
     setStep(prev);
   }
+
 
 
   const stickySummary = [
@@ -309,38 +315,95 @@ function ChrismedAgendarPage() {
           </div>
         )}
 
-        {/* Banner Teleconsulta 360° — reforça a fusão das 3 especialidades */}
-        {isTele360 && step !== 'done' && (
+        {/* Banner Atendimento 360° — reforça a fusão das 3 especialidades (tele + domiciliar) */}
+        {isCare360 && step !== 'done' && step !== 'modality' && (
           <div className="mb-6 rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Teleconsulta 360°</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Atendimento 360° · {modality === 'domiciliar' ? 'Domiciliar' : 'Teleconsulta'}</div>
             <p className="leading-relaxed">
               Nesta modalidade, a Dra. Christiane Alencar avalia você com o olhar integrado das três especialidades — <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — sem que você precise escolher uma antes. É o mesmo médico, com diagnóstico 360°.
             </p>
           </div>
         )}
 
-        {/* STEP 1: Especialidade */}
+
+        {/* STEP 1: Modalidade (agora primeiro) */}
+        {step === 'modality' && (
+          <section aria-labelledby="s1">
+            <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Como você quer ser atendido?</h1>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">
+              Escolha a modalidade primeiro. Em <strong>Teleconsulta</strong> e <strong>Domiciliar</strong>, a Dra. Christiane Alencar atende com a visão 360° das três especialidades — <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — sem que você precise escolher uma antes. Em <strong>Presencial no Consultório</strong>, você escolhe a especialidade em seguida.
+            </p>
+            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(['telemedicina','presencial','domiciliar'] as ChrismedModality[]).map((m) => {
+                const meta = MODALITY_META[m];
+                const Icon = meta.icon;
+                const badge = m === 'presencial' ? 'Escolha a especialidade' : 'Visão 360° · 3 especialidades';
+                const label = m === 'presencial' ? 'Presencial no Consultório' : meta.label;
+                return (
+                  <button key={m} type="button"
+                    onClick={() => {
+                      if (m === 'telemedicina' || m === 'domiciliar') { applyCare360(m); return; }
+                      setModality('presencial');
+                      setSpecialty(null); setDoctor(null); setUnit(null);
+                      setStep('specialty');
+                    }}
+                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{label}</div>
+                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{meta.sub}</div>
+                    <div className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[var(--chrismed-champagne-deep)]">{badge}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Evolução Teleconsulta → Presencial */}
+            <div className="mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Continuidade de cuidado</div>
+              <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)]">Fez uma Teleconsulta que evoluiu para Consulta Presencial?</h3>
+              <p className="text-sm text-[var(--chrismed-graphite)] mt-2 leading-relaxed">
+                Em caso de dúvidas, uma teleconsulta pode ser marcada primeiro. Se a Dra. Christiane entender ser necessária a consulta presencial, <strong>somente a diferença de valor será cobrada</strong>. A recepção CHRISMED será avisada e enviará as orientações para o agendamento específico.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4 border-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-ivory)]"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('chrismed:reception:notify', {
+                      detail: { reason: 'tele_to_presencial_upgrade' },
+                    }));
+                  }
+                  openOliver();
+                  toast.success('Recepção CHRISMED avisada. Você receberá as orientações em breve.');
+                }}
+              >
+                Clique aqui — avisar a recepção CHRISMED
+              </Button>
+            </div>
+          </section>
+        )}
+
+        {/* STEP 2: Especialidade (apenas fluxo Presencial) */}
         {step === 'specialty' && (() => {
-          // Ambulatorial only: nunca mistura ocupacional/internacional no fluxo público de "Agendar".
-          // Medicina Ocupacional tem jornada própria em /chrismed/ocupacional.
           const AMBULATORIAL_ONLY = ['gastroenterologia', 'hepatologia', 'clinica-medica'];
           const base = doctor
             ? CHRISMED_SPECIALTIES.filter((s) => doctor.specialtySlugs.includes(s.slug))
             : CHRISMED_SPECIALTIES;
           const specialtiesToShow = base.filter((s) => AMBULATORIAL_ONLY.includes(s.slug));
           return (
-          <section aria-labelledby="s1">
-            <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h1>
+          <section aria-labelledby="s2">
+            <button onClick={() => setStep('modality')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar modalidade</button>
+            <h2 id="s2" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">
-              {doctor
-                ? <>Especialidades atendidas por <strong>{doctor.name}</strong>.</>
-                : 'Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.'}
+              Consulta <strong>presencial no consultório</strong> em Copacabana. Selecione a especialidade que melhor atende sua demanda.
             </p>
             <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {specialtiesToShow.map((sp) => {
                 const Icon = SPECIALTY_ICON[sp.icon];
                 return (
-                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep(doctor ? 'modality' : 'doctor'); }}
+                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep('doctor'); }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                       <Icon className="h-5 w-5" />
@@ -355,25 +418,25 @@ function ChrismedAgendarPage() {
           );
         })()}
 
-        {/* STEP 2: Médico */}
+        {/* STEP 3: Médico (fluxo Presencial) */}
         {step === 'doctor' && specialty && (
-          <section aria-labelledby="s2">
+          <section aria-labelledby="s3">
             <button onClick={() => setStep('specialty')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar especialidade</button>
-            <h2 id="s2" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha o médico</h2>
+            <h2 id="s3" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha o médico</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Profissionais que atendem <strong>{specialty.name}</strong>.</p>
             {doctorsForSpecialty.length === 0 ? (
               <EmptyState message="Nenhum médico disponível para esta especialidade no momento." onOliver={openOliver} />
             ) : (
               <div className="mt-8 grid md:grid-cols-2 gap-4">
                 {doctorsForSpecialty.map((d) => (
-                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('modality'); }}
+                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('unit'); }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{d.name}</div>
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mt-1">{d.title}</div>
                     <div className="text-xs text-[var(--chrismed-mist)] mt-1">{d.crm}</div>
                     <p className="text-sm text-[var(--chrismed-graphite)] mt-3">{d.bio}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
-                      {d.modalities.map((m) => (
+                      {d.modalities.filter((m) => m === 'presencial').map((m) => (
                         <Badge key={m} variant="outline" className="text-[10px] uppercase tracking-[0.14em] border-[var(--chrismed-sand)]">{MODALITY_META[m].label}</Badge>
                       ))}
                     </div>
@@ -384,35 +447,12 @@ function ChrismedAgendarPage() {
           </section>
         )}
 
-        {/* STEP 3: Modalidade */}
-        {step === 'modality' && doctor && (
-          <section aria-labelledby="s3">
-            <button onClick={() => setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar médico</button>
-            <h2 id="s3" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Como quer ser atendido?</h2>
-            <p className="mt-2 text-[var(--chrismed-graphite)]">{doctor.name} atende nas modalidades abaixo.</p>
-            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {modalitiesForDoctor.map((m) => {
-                const meta = MODALITY_META[m];
-                const Icon = meta.icon;
-                return (
-                  <button key={m} type="button" onClick={() => { setModality(m); setStep('unit'); }}
-                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
-                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{meta.label}</div>
-                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{meta.sub}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
-        {/* STEP 4: Unidade */}
+
+        {/* STEP 4: Unidade (fluxo Presencial) */}
         {step === 'unit' && modality && (
           <section aria-labelledby="s4">
-            <button onClick={() => setStep('modality')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar modalidade</button>
+            <button onClick={() => setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar médico</button>
             <h2 id="s4" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Onde será o atendimento?</h2>
             <div className="mt-8 grid md:grid-cols-2 gap-4">
               {unitsForModality.map((u) => (
@@ -432,9 +472,11 @@ function ChrismedAgendarPage() {
         {/* STEP 5: Calendário + horários */}
         {step === 'schedule' && unit && (
           <section aria-labelledby="s5">
-            <button onClick={() => setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar unidade</button>
+            <button onClick={() => isCare360 ? setStep('modality') : setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar unidade'}</button>
             <h2 id="s5" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha data e horário</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
+
+
 
             <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6">
               <MockCalendar
@@ -525,12 +567,13 @@ function ChrismedAgendarPage() {
             <h2 id="s7" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Confirme os dados</h2>
             <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 space-y-3 text-sm">
-                <Row label="Especialidade" value={isTele360 ? `Teleconsulta 360° — ${TELECONSULTA_360_LABEL}` : specialty.name} />
-                {isTele360 && (
+                <Row label="Especialidade" value={isCare360 ? `Atendimento 360° — ${CARE_360_LABEL}` : specialty.name} />
+                {isCare360 && (
                   <p className="text-xs text-[var(--chrismed-graphite)] leading-relaxed">
-                    A teleconsulta funde o conhecimento das três especialidades da Dra. Christiane Alencar em uma única consulta — diagnóstico 360°, sem escolher especialidade.
+                    Esta modalidade funde o conhecimento das três especialidades da Dra. Christiane Alencar em uma única consulta — diagnóstico 360°, sem escolher especialidade.
                   </p>
                 )}
+
                 <Row label="Médico" value={doctor.name} />
                 <Row label="Modalidade" value={MODALITY_META[modality].label} />
                 <Row label="Unidade" value={unit.name} />
