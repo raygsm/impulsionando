@@ -226,12 +226,28 @@ function ChrismedAgendarPage() {
     }
   }
 
-  const stepIndex = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'].indexOf(step);
+  const stepOrder: Step[] = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'];
+  const stepIndex = stepOrder.indexOf(step);
   const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+  const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
+  function goBack() {
+    if (stepIndex <= 0) return;
+    // pula 'doctor' quando o médico foi pré-selecionado via querystring
+    let prev = stepOrder[stepIndex - 1];
+    if (prev === 'doctor' && search.doctor) prev = 'specialty';
+    setStep(prev);
+  }
+
+  const stickySummary = [
+    doctor?.name,
+    specialty?.name,
+    modality ? MODALITY_META[modality].label : null,
+    selectedTime,
+  ].filter(Boolean).join(' · ');
 
   return (
     <ChrismedShell variant="minimal">
-      <div className="container py-10 max-w-5xl">
+      <div className="container py-10 max-w-5xl pb-32 sm:pb-10">
         {/* Progress trail */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--chrismed-mist)] flex-wrap">
