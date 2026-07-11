@@ -97,13 +97,12 @@ function visitorSuggestions(): string[] {
 
 function clientQuickActions(): QuickAction[] {
   return [
-    { label: "Consultar cobrança", to: "/core/financeiro" },
-    { label: "Reenviar link de pagamento", to: "/core/financeiro" },
-    { label: "Confirmar pagamento", to: "/core/financeiro" },
-    { label: "Continuar onboarding", to: "/core/onboarding" },
+    { label: "Consultar cobrança", to: "/core/financeiro-master" },
+    { label: "Reenviar link de pagamento", to: "/core/financeiro-master" },
+    { label: "Confirmar pagamento", to: "/core/financeiro-master" },
+    { label: "Continuar onboarding", to: "/onboarding" },
     { label: "Configurar módulos", to: "/core/modulos" },
     { label: "Abrir suporte", to: "/central-de-ajuda" },
-    { label: "Consultar documentos", to: "/core/documentos" },
     { label: "Entrar no Core", to: "/core", kind: "primary" },
   ];
 }
