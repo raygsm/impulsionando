@@ -126,11 +126,19 @@ function ChrismedAgendarPage() {
 
   // Pré-seleção via querystring
   useEffect(() => {
+    if (search.doctor) {
+      const doc = CHRISMED_DOCTORS.find((d) => d.slug === search.doctor);
+      if (doc) {
+        setDoctor(doc);
+        setStep('specialty');
+        return;
+      }
+    }
     if (search.specialty) {
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
       if (sp) { setSpecialty(sp); setStep('doctor'); }
     }
-  }, [search.specialty]);
+  }, [search.specialty, search.doctor]);
 
   // Carrega offerings reais (para preço/duração no passo de pagamento)
   useEffect(() => {
