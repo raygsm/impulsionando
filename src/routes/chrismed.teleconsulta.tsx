@@ -49,7 +49,7 @@ function TeleconsultaPage() {
         </div>
       </section>
 
-      <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
+      <section className="container mx-auto px-4 py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div>
           <h2 className="chrismed-serif text-2xl text-[var(--chrismed-ink)] flex items-center gap-2"><Video className="h-5 w-5" /> Como funciona</h2>
           <ol className="mt-5 space-y-3 text-[var(--chrismed-graphite)] list-decimal pl-5">
