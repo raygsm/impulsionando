@@ -116,6 +116,7 @@ function ChrismedGmsPage() {
       {/* 1 · Hero internacional ─────────────────── */}
       <ChrismedSection tone="ivory" className="pt-20 md:pt-28">
         <div className="mx-auto max-w-3xl text-left">
+          <ChrismedFlagsBar tone="light" align="right" className="mb-6" />
           <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
 
           {/* Chamada em português — única presença do PT nesta página */}
