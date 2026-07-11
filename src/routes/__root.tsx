@@ -352,7 +352,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/pwa-icon-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/pwa-icon-512.png" },
       { rel: "apple-touch-icon", sizes: "192x192", href: "/pwa-icon-192.png" },
+      // CHRISMED V1 — Quiet Luxury: Cormorant Garamond (serif editorial) + Inter (sans UI).
+      // Carregado no root para evitar FOUT no primeiro paint da marca CHRISMED.
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" },
     ],
+
     scripts: [
       {
         type: "application/ld+json",
