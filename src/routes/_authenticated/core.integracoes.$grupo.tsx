@@ -38,11 +38,13 @@ function GrupoPage() {
         </Button>
       </div>
 
-      <PageHeader
-        title={meta.label}
-        description={meta.description}
-        icon={<Icon className="h-5 w-5" />}
-      />
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Icon className="h-5 w-5" />
+        </div>
+        <PageHeader title={meta.label} description={meta.description} />
+      </div>
+
 
       <ImpulsinitoHint title={`Dicas para ${meta.label}`}>
         Prefira começar pelas ferramentas que você já usa. Ao clicar em <strong>Conectar</strong> eu
