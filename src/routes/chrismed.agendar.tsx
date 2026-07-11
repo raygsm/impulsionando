@@ -449,10 +449,10 @@ function ChrismedAgendarPage() {
 
 
 
-        {/* STEP 4: Unidade */}
+        {/* STEP 4: Unidade (fluxo Presencial) */}
         {step === 'unit' && modality && (
           <section aria-labelledby="s4">
-            <button onClick={() => setStep('modality')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar modalidade</button>
+            <button onClick={() => setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar médico</button>
             <h2 id="s4" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Onde será o atendimento?</h2>
             <div className="mt-8 grid md:grid-cols-2 gap-4">
               {unitsForModality.map((u) => (
@@ -472,9 +472,11 @@ function ChrismedAgendarPage() {
         {/* STEP 5: Calendário + horários */}
         {step === 'schedule' && unit && (
           <section aria-labelledby="s5">
-            <button onClick={() => setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar unidade</button>
+            <button onClick={() => isCare360 ? setStep('modality') : setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar unidade'}</button>
             <h2 id="s5" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha data e horário</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
+
+
 
             <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6">
               <MockCalendar
