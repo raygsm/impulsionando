@@ -115,6 +115,16 @@ function OcupacionalAgendarPage() {
             Selecione o serviço e envie os dados da empresa ou do caso. A equipe da CHRISMED confirma
             janela, documentação e responsável em até 48h úteis.
           </p>
+          <div className="mt-8 inline-flex flex-col border border-[var(--chrismed-amber)]/30 bg-black/20 px-6 py-5 max-w-xl">
+            <div className="chrismed-sans text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-amber)] mb-2">
+              Atendimento presencial · Copacabana
+            </div>
+            <p className="chrismed-sans text-sm text-white/90 leading-relaxed">
+              Atendimento presencial no consultório da CHRISMED em Copacabana.
+              <br />
+              <span className="text-white/75">Rua Santa Clara, 50 – Sala 912, Copacabana, Rio de Janeiro – RJ.</span>
+            </p>
+          </div>
         </div>
       </section>
 
