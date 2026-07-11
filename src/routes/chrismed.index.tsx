@@ -38,7 +38,8 @@ import {
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
-import chrismedFilmAsset from '@/assets/chrismed/home-hero.mp4.asset.json';
+import consultorioExame from '@/assets/chrismed/consultorio-exame.jpg.asset.json';
+import consultorioRecepcao from '@/assets/chrismed/consultorio-recepcao.jpg.asset.json';
 
 const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
 
