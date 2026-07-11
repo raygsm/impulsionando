@@ -333,7 +333,7 @@ export function ImpulsionitoConcierge() {
         abortRef.current = null;
       }
     },
-    [audience, messages, pathname, sending, transport],
+    [audience, messages, pathname, sending, transport, captureNichoContext],
   );
 
   // Não renderiza em rotas ocultas.
