@@ -60,11 +60,11 @@ function ContatoPage() {
   return (
     <ChrismedShell>
       <div className="chrismed-page-mustard">
-        <section className="border-b border-[var(--chrismed-forest-deep)]/10">
-          <div className="mx-auto max-w-4xl px-4 py-20 md:px-6 text-center">
-            <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber-soft)] border-0 mb-5 uppercase tracking-[0.18em] text-[10px]">Contato</Badge>
-            <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.05]">Fale com a CHRISMED</h1>
-            <p className="mx-auto mt-6 text-lg max-w-2xl">Escolha o canal mais adequado para consultas, Medicina Ocupacional, GMS, ASO, perícias ou suporte institucional.</p>
+        <section className="chrismed-band-forest">
+          <div className="mx-auto max-w-4xl px-4 py-24 md:px-6 text-center text-white">
+            <Badge className="bg-white/10 text-[var(--chrismed-amber-soft)] border border-white/15 mb-5 uppercase tracking-[0.22em] text-[10px]">Contato</Badge>
+            <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] tracking-tight">Fale com a CHRISMED</h1>
+            <p className="mx-auto mt-6 text-lg max-w-2xl text-white/80">Escolha o canal mais adequado para consultas, Medicina Ocupacional, GMS, ASO, perícias ou suporte institucional.</p>
           </div>
         </section>
 
