@@ -32,6 +32,8 @@ import {
   ChrismedPortrait,
   ChrismedModalityCard,
   ChrismedOliverLauncher,
+  ChrismedTrustBar,
+  ChrismedFollowUpCard,
 } from '@/components/chrismed/primitives';
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
