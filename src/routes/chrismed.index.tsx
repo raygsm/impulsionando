@@ -257,7 +257,7 @@ function ChrismedHomePage() {
           {t.modalities.items.map((m, i) => (
             <article
               key={m.title}
-              className="group relative flex flex-col border border-[var(--chrismed-amber)]/25 bg-black/10 p-8 transition-all hover:border-[var(--chrismed-amber)]/70 hover:bg-black/20"
+              className="chrismed-card-lift group relative flex flex-col border border-[var(--chrismed-amber)]/25 bg-black/10 p-8 hover:border-[var(--chrismed-amber)]/70 hover:bg-black/20"
             >
               <div className="chrismed-serif text-6xl font-light leading-none text-[var(--chrismed-amber)]/50 group-hover:text-[var(--chrismed-amber)]">
                 {String(i + 1).padStart(2, '0')}
