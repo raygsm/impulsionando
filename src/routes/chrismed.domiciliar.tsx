@@ -71,7 +71,7 @@ function DomiciliarPage() {
   }
 
   return (
-    <ChrismedShell><div className="chrismed-page-mustard">
+    <ChrismedShell><div className="bg-[var(--chrismed-ivory)]">
       <section className="chrismed-bleed chrismed-page-forest">
         <div className="container py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber)] border border-[var(--chrismed-amber)]/40 mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta Domiciliar</Badge>
