@@ -707,7 +707,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'CHRISMED · Medicina privada',
       title: 'Cuidado clínico',
       titleItalic: 'que pertence a você.',
-      lead: 'Consultas com a Dra. Christiane Alencar em Copacabana, na sua residência, hotel ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
+      lead: 'Consultas com a Dra. Christiane Alencar em Copacabana, atendimento domiciliar onde você estiver ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Conhecer a Dra. Christiane',
       oliverHint: 'Falar antes com Oliver',
@@ -754,10 +754,10 @@ const COPY: Record<Lang, Copy> = {
             'Consultório reservado, agenda sob horário e recepção discreta. Tempo dedicado antes, durante e depois da consulta.',
         },
         {
-          eyebrow: 'Casa · Hotel',
-          title: 'Consulta domiciliar',
+          eyebrow: 'Onde você estiver',
+          title: 'Domiciliar',
           description:
-            'Atendimento em sua residência, hotel ou escritório, com o mesmo rigor clínico e a privacidade que a sua rotina exige.',
+            'Atendimento domiciliar — onde você estiver — com o mesmo rigor clínico e a privacidade que a sua rotina exige.',
         },
       ],
     },
