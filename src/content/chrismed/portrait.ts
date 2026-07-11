@@ -1,23 +1,41 @@
 /**
  * Fonte única do retrato oficial da Dra. Christiane Alencar.
  *
- * COMO PUBLICAR O RETRATO (etapa de front-end, sem depender do Codex):
- *  1. Colocar o arquivo autorizado em `src/assets/chrismed/dra-christiane.jpg`
- *     (formatos preferidos, nessa ordem: AVIF > WebP > JPG otimizado).
- *  2. Se o arquivo tiver >100 KB, migrar para o CDN via `lovable-assets create`
- *     e importar o `.asset.json` gerado; caso contrário importar direto.
- *  3. Trocar o `undefined` abaixo pelo `.url` do asset ou pelo import da imagem.
- *  4. Rodar `bunx tsgo --noEmit` — Home, /chrismed/dra-cristiane e
- *     /chrismed/ocupacional (Direção Técnica) passam a exibir o retrato
- *     automaticamente via <ChrismedPortrait />.
+ * PIPELINE AUTOMÁTICO (Onda Final):
+ *   1. Basta soltar o arquivo autorizado em
+ *      `src/assets/chrismed/dra-christiane.{avif|webp|jpg|jpeg|png}`
+ *      (preferência: AVIF > WebP > JPG > PNG).
+ *   2. O Vite resolve o URL em build-time via `import.meta.glob` abaixo.
+ *   3. Todos os componentes que consomem `DRA_CHRISTIANE_PORTRAIT_SRC`
+ *      (Home Hero, /dra-cristiane, Direção Técnica, GMS, chamadas
+ *      institucionais) passam a exibir o retrato automaticamente — sem
+ *      novos ajustes de código.
  *
  * REGRA INEGOCIÁVEL: Nunca substituir por foto genérica, banco de imagens
- * ou geração por IA que altere a identidade da médica. Enquanto for
- * `undefined`, os componentes reorganizam a composição editorial em vez
+ * ou geração por IA que altere a identidade da médica. Enquanto o arquivo
+ * não existir, os componentes reorganizam a composição editorial em vez
  * de renderizar moldura vazia.
  */
-export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined = undefined;
+const PORTRAIT_MODULES = import.meta.glob(
+  '/src/assets/chrismed/dra-christiane.{avif,webp,jpg,jpeg,png}',
+  { eager: true, query: '?url', import: 'default' },
+) as Record<string, string>;
 
-/** Caminho recomendado para importar o asset final (documentação). */
+// Preferência por formato: AVIF > WebP > JPG > JPEG > PNG.
+const PRIORITY = ['.avif', '.webp', '.jpg', '.jpeg', '.png'];
+function pickPortrait(): string | undefined {
+  const entries = Object.entries(PORTRAIT_MODULES);
+  if (entries.length === 0) return undefined;
+  entries.sort(([a], [b]) => {
+    const ai = PRIORITY.findIndex((ext) => a.toLowerCase().endsWith(ext));
+    const bi = PRIORITY.findIndex((ext) => b.toLowerCase().endsWith(ext));
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+  return entries[0]?.[1];
+}
+
+export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined = pickPortrait();
+
+/** Caminho recomendado para o asset final (documentação). */
 export const DRA_CHRISTIANE_PORTRAIT_TARGET_PATH =
   'src/assets/chrismed/dra-christiane.jpg';

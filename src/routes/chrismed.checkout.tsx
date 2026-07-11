@@ -27,7 +27,7 @@ function CheckoutPage() {
 
   return (
     <ChrismedShell variant="minimal">
-      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
+      <section className="chrismed-bleed chrismed-page-forest border-b border-white/10">
         <div className="container py-8 sm:py-14 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
           <h1 className="chrismed-serif text-3xl sm:text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>

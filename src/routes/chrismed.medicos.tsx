@@ -44,7 +44,7 @@ const SPEC_ICON: Record<string, any> = {
 function MedicosPage() {
   return (
     <ChrismedShell>
-      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
+      <section className="chrismed-bleed chrismed-page-forest border-b border-white/10">
         <div className="container py-16 md:py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Rede CrisMed</Badge>
           <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">Nossos médicos</h1>
