@@ -56,10 +56,19 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
 ];
 
+type OliverLang = 'pt' | 'en' | 'es';
+
 export function ChrismedOliverPanel() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchLang = useRouterState({ select: (s) => (s.location.search as { lang?: OliverLang })?.lang }) ?? 'pt';
   const navigate = useNavigate();
   const { open, context, info } = useChrismedOliverState();
+
+  const switchLang = (l: OliverLang) => {
+    navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never });
+  };
+
+
 
   const ctx: OliverContext = resolveOliverContextOverride(pathname, context);
 
