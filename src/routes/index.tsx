@@ -61,10 +61,14 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const target = resolveSubdomainRedirect(window.location.hostname);
-    if (target && window.location.pathname === "/") {
-      window.location.replace(target);
+    const { hostname, pathname, search, hash } = window.location;
+    if (pathname !== "/") return;
+    const target = resolveSubdomainRedirect(hostname);
+    if (target) {
+      window.location.replace(`${target}${search}${hash}`);
     }
   }, []);
   return <HomePage />;
 }
+
+export { resolveSubdomainRedirect, SUBDOMAIN_LANDING, CUSTOM_HOST_LANDING };
