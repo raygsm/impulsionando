@@ -335,6 +335,15 @@
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 }
+[data-tenant="chrismed"] .chrismed-fixed-header {
+  position: fixed !important;
+  inset-block-start: 0 !important;
+  inset-inline: 0 !important;
+  width: 100vw;
+  margin: 0;
+  transform: none !important;
+  will-change: auto;
+}
 [data-tenant="chrismed"] .chrismed-serif { letter-spacing: -0.015em; }
 [data-tenant="chrismed"] h1.chrismed-serif,
 [data-tenant="chrismed"] .chrismed-h1 {
