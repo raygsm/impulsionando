@@ -20,7 +20,7 @@ export type ChrismedSpecialty = {
   slug: string;
   name: string;
   short: string;
-  icon: 'stethoscope' | 'heart' | 'briefcase' | 'baby' | 'brain' | 'plane' | 'liver' | 'scale';
+  icon: 'stethoscope' | 'heart' | 'briefcase' | 'baby' | 'brain' | 'plane';
 };
 
 export type ChrismedDoctor = {
