@@ -309,6 +309,16 @@ function ChrismedAgendarPage() {
           </div>
         )}
 
+        {/* Banner Teleconsulta 360° — reforça a fusão das 3 especialidades */}
+        {isTele360 && step !== 'done' && (
+          <div className="mb-6 rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Teleconsulta 360°</div>
+            <p className="leading-relaxed">
+              Nesta modalidade, a Dra. Christiane Alencar avalia você com o olhar integrado das três especialidades — <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — sem que você precise escolher uma antes. É o mesmo médico, com diagnóstico 360°.
+            </p>
+          </div>
+        )}
+
         {/* STEP 1: Especialidade */}
         {step === 'specialty' && (() => {
           // Ambulatorial only: nunca mistura ocupacional/internacional no fluxo público de "Agendar".
