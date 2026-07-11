@@ -119,5 +119,38 @@
   --fs-brick:  #9a3412;
   --fs-cream:  #fef7ed;
   --fs-ink:    #1c1917;
+
+  /* ============================================================
+     CHRISMED V1 — Quiet Luxury (Onda V1 aprovada em 11/07/2026)
+     Direção B: marfim + carvão + acento champagne. Editorial,
+     sereno, padrão AA. NUNCA usar fora de [data-tenant="chrismed"].
+     ============================================================ */
+  --chrismed-ivory:      #FDFCFB; /* superfície principal */
+  --chrismed-bone:       #F3F1ED; /* superfície secundária */
+  --chrismed-sand:       #E8E4DF; /* bordas / divisores */
+  --chrismed-champagne:  #B5A48B; /* accent editorial (uso restrito) */
+  --chrismed-champagne-deep: #8C7E6A;
+  --chrismed-ink:        #1A1A1A; /* texto principal */
+  --chrismed-graphite:   #4A4A4A; /* texto secundário */
+  --chrismed-mist:       #8A8680; /* texto terciário / meta */
+  --chrismed-noir:       #0F0F0F; /* superfícies escuras (footer/autoridade) */
+
+  /* Fontes CHRISMED — carregadas via <link> em src/routes/__root.tsx */
+  --chrismed-font-serif: "Cormorant Garamond", "Times New Roman", serif;
+  --chrismed-font-sans:  "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --chrismed-ease:       cubic-bezier(0.22, 0.61, 0.36, 1);
+  --chrismed-duration:   500ms;
 }
+
+/* Escopo CHRISMED — aplica tokens globais dentro do tenant */
+[data-tenant="chrismed"] {
+  --primary: var(--chrismed-champagne-deep);
+  --ring:    var(--chrismed-champagne-deep);
+  color-scheme: light;
+}
+[data-tenant="chrismed"] .chrismed-serif { font-family: var(--chrismed-font-serif); font-feature-settings: "liga","dlig","kern"; }
+[data-tenant="chrismed"] .chrismed-sans  { font-family: var(--chrismed-font-sans); }
+
 
