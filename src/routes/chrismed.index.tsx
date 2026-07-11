@@ -191,20 +191,20 @@ function ChrismedHomePage() {
       </ChrismedSection>
 
       {/* ─────────── Seção 2 — Prova social institucional (números editoriais) ─────────── */}
-      <section className="chrismed-page-mustard border-y border-[var(--chrismed-mustard-deep)]/20 py-14 md:py-16">
+      <section className="chrismed-page-mustard border-y border-[var(--chrismed-mustard-deep)]/25 py-16 md:py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-6">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-8">
             {t.stats.map((s) => (
               <div key={s.label} className="text-center md:text-left">
-                <div className="chrismed-serif text-4xl font-light leading-none text-[var(--chrismed-forest-deep)] md:text-6xl">
+                <div className="chrismed-serif text-5xl font-normal leading-none text-[var(--chrismed-forest-deep)] md:text-6xl">
                   {s.value}
                   {s.suffix && (
-                    <span className="ml-1 text-2xl text-[var(--chrismed-mustard-deep)] md:text-3xl">
+                    <span className="ml-1.5 text-2xl font-medium text-[var(--chrismed-mustard-deep)] md:text-3xl">
                       {s.suffix}
                     </span>
                   )}
                 </div>
-                <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-forest-deep)]/70">
+                <div className="chrismed-sans mt-4 text-[13px] md:text-sm font-semibold uppercase tracking-[0.18em] text-[var(--chrismed-forest-deep)]">
                   {s.label}
                 </div>
               </div>
@@ -218,27 +218,45 @@ function ChrismedHomePage() {
         <ChrismedTrustBar />
       </ChrismedSection>
 
-      {/* ── Vídeo institucional ─ */}
+      {/* ── Retrato editorial do consultório real em Copacabana ── */}
       <section className="chrismed-bleed chrismed-page-forest py-16 md:py-24">
-        <div className="mx-auto max-w-5xl px-4 md:px-6">
-          <div className="mb-6 text-center">
-            <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">Filme institucional</div>
-            <h2 className="chrismed-serif mt-3 text-3xl md:text-5xl text-[var(--chrismed-amber)]">Excelência médica com discrição absoluta</h2>
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="mb-10 text-center">
+            <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">Consultório · Copacabana</div>
+            <h2 className="chrismed-serif mt-3 text-3xl md:text-5xl font-light text-[var(--chrismed-amber)]">Um espaço leve, reservado e sem filas</h2>
+            <p className="chrismed-sans mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/80">
+              Atendimento exclusivo e discreto — cada horário é reservado a um único paciente, com o tempo integral da Dra. Christiane.
+            </p>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]">
-            <video
-              src={chrismedFilmAsset.url}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="Filme institucional CHRISMED — atendimento com discrição e excelência"
-              className="aspect-video w-full object-cover"
-            />
+          <div className="grid gap-4 md:grid-cols-3">
+            <figure className="md:col-span-2 md:row-span-2">
+              <img
+                src={consultorioExame.url}
+                alt="Sala clínica do consultório CHRISMED em Copacabana"
+                className="h-full w-full object-cover shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
+                loading="lazy"
+              />
+            </figure>
+            <figure>
+              <img
+                src={consultorioRecepcao.url}
+                alt="Recepção reservada do consultório CHRISMED"
+                className="aspect-[4/3] w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+            <figure>
+              <img
+                src={consultorioExame.url}
+                alt="Detalhe do ambiente clínico CHRISMED"
+                className="aspect-[4/3] w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
           </div>
         </div>
       </section>
+
 
 
       {/* ─────────── Seção 3 — Modalidades sobre verde institucional ─────────── */}
