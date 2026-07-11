@@ -1,17 +1,11 @@
 /**
- * /chrismed — Home institucional CrisMed.
- * Redireciona /chrismed exato para a Dra. Cristiane Alencar (autoridade médica).
- * Como este arquivo é o layout de /chrismed/*, precisamos redirecionar SOMENTE
- * quando o pathname bater exatamente em /chrismed — caso contrário o beforeLoad
- * dispara também nas rotas filhas e causa loop de redirecionamento (ERR_TOO_MANY_REDIRECTS).
+ * /chrismed — layout do tenant CHRISMED.
+ * Onda V2: /chrismed passa a ser a Home editorial (chrismed.index.tsx),
+ * portanto o redirect anterior foi removido. Este arquivo é apenas o
+ * outlet do subtree /chrismed/*.
  */
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/chrismed')({
-  beforeLoad: ({ location }) => {
-    if (location.pathname === '/chrismed' || location.pathname === '/chrismed/') {
-      throw redirect({ to: '/chrismed/dra-cristiane' });
-    }
-  },
   component: () => <Outlet />,
 });
