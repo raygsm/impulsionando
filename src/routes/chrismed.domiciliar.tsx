@@ -75,9 +75,9 @@ function DomiciliarPage() {
       <section className="chrismed-bleed chrismed-page-forest">
         <div className="container py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber)] border border-[var(--chrismed-amber)]/40 mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta Domiciliar</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] max-w-3xl">Na sua residência, hotel ou onde você estiver.</h1>
+          <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] max-w-3xl">Consulta Domiciliar — na sua residência, hotel ou onde você estiver.</h1>
           <p className="chrismed-lede mt-6 max-w-2xl">
-            Atendimento médico com a Dra. Christiane Alencar no conforto e na discrição do seu ambiente. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online.
+            Atendimento médico com a Dra. Christiane Alencar no conforto e na discrição do seu ambiente. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online. Os retornos poderão ser realizados por Teleconsulta ou Consulta Presencial no consultório em Copacabana, conforme orientação médica.
           </p>
           <div className="mt-8 inline-flex flex-col rounded-2xl border border-[var(--chrismed-amber)]/30 bg-[var(--chrismed-forest-deep)]/60 px-6 py-5">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--chrismed-amber)] mb-2">Bairros atualmente atendidos</div>
