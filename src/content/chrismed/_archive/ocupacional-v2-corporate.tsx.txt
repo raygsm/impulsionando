@@ -1,3 +1,19 @@
+/**
+ * ARQUIVO — /chrismed/ocupacional (V2 corporativa)
+ * Substituído pela V3.b (Quiet Luxury) em 11/07/2026.
+ *
+ * Classificação do conteúdo:
+ *  - APROVEITÁVEL COM REVISÃO: lista de serviços ocupacionais (admissional,
+ *    periódico, retorno, mudança de função, demissional, ASO).
+ *  - DUPLICADO/DESATUALIZADO: copy corporativa "sem fricção", formulário
+ *    direto para marketing_leads (substituído por Oliver contextual).
+ *  - NÃO PUBLICÁVEL AGORA: menções a PCMSO, NR-1, "gestão completa",
+ *    "painel de conformidade", "arquivamento digital" — sem confirmação
+ *    factual do Codex; foram removidas da V3.b.
+ *
+ * Preservado apenas para histórico. Não importar em produção.
+ */
+/*
 import { createFileRoute } from '@tanstack/react-router';
 import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
 import { Button } from '@/components/ui/button';
@@ -197,3 +213,4 @@ const COPY = {
     errMissing: 'Complete razón social, contacto y correo.',
   },
 } as const;
+*/
