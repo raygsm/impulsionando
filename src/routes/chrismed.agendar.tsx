@@ -372,7 +372,7 @@ function ChrismedAgendarPage() {
                 <div className="mt-5 flex items-center gap-3 text-[10px] text-[var(--chrismed-mist)] flex-wrap">
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]" /> Disponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]/30" /> Indisponível</span>
-                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Reservado</span>
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-champagne-deep)]" /> Reservado</span>
                 </div>
                 <Button className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
                   Continuar
@@ -544,10 +544,10 @@ function EmptyState({ message, onOliver }: { message: string; onOliver: () => vo
 function SlotButton({ slot, selected, onPick }: { slot: ChrismedSlot; selected: boolean; onPick: () => void }) {
   const disabled = slot.state !== 'available';
   const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]';
-  if (slot.state === 'held') return <button disabled className={`${base} border-amber-400/60 bg-amber-50 text-amber-800 cursor-not-allowed`}>{slot.time} · reservado</button>;
+  if (slot.state === 'held') return <button disabled className={`${base} border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] cursor-not-allowed`}>{slot.time} · reservado</button>;
   if (disabled) return <button disabled className={`${base} border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)]/40 cursor-not-allowed line-through`}>{slot.time}</button>;
   return (
-    <button onClick={onPick} className={`${base} ${selected ? 'border-emerald-900 bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-emerald-900/60'}`}>
+    <button onClick={onPick} className={`${base} ${selected ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}>
       {slot.time}
     </button>
   );
