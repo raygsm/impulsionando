@@ -245,6 +245,7 @@ import { Route as ChrismedContatoRouteImport } from './routes/chrismed.contato'
 import { Route as ChrismedConsultorioRouteImport } from './routes/chrismed.consultorio'
 import { Route as ChrismedClinicaRouteImport } from './routes/chrismed.clinica'
 import { Route as ChrismedCheckoutRouteImport } from './routes/chrismed.checkout'
+import { Route as ChrismedAppRouteImport } from './routes/chrismed.app'
 import { Route as ChrismedAgendarRouteImport } from './routes/chrismed.agendar'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
@@ -2104,6 +2105,11 @@ const ChrismedClinicaRoute = ChrismedClinicaRouteImport.update({
 const ChrismedCheckoutRoute = ChrismedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedAppRoute = ChrismedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ChrismedAgendarRoute = ChrismedAgendarRouteImport.update({
@@ -6121,6 +6127,7 @@ export interface FileRoutesByFullPath {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
+  '/chrismed/app': typeof ChrismedAppRoute
   '/chrismed/checkout': typeof ChrismedCheckoutRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
@@ -7013,6 +7020,7 @@ export interface FileRoutesByTo {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
+  '/chrismed/app': typeof ChrismedAppRoute
   '/chrismed/checkout': typeof ChrismedCheckoutRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
@@ -7918,6 +7926,7 @@ export interface FileRoutesById {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
+  '/chrismed/app': typeof ChrismedAppRoute
   '/chrismed/checkout': typeof ChrismedCheckoutRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
@@ -8830,6 +8839,7 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
+    | '/chrismed/app'
     | '/chrismed/checkout'
     | '/chrismed/clinica'
     | '/chrismed/consultorio'
@@ -9722,6 +9732,7 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
+    | '/chrismed/app'
     | '/chrismed/checkout'
     | '/chrismed/clinica'
     | '/chrismed/consultorio'
@@ -10626,6 +10637,7 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
+    | '/chrismed/app'
     | '/chrismed/checkout'
     | '/chrismed/clinica'
     | '/chrismed/consultorio'
@@ -13303,6 +13315,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/chrismed/checkout'
       preLoaderRoute: typeof ChrismedCheckoutRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/app': {
+      id: '/chrismed/app'
+      path: '/app'
+      fullPath: '/chrismed/app'
+      preLoaderRoute: typeof ChrismedAppRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/chrismed/agendar': {
@@ -19692,6 +19711,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ChrismedRouteChildren {
   ChrismedAgendarRoute: typeof ChrismedAgendarRoute
+  ChrismedAppRoute: typeof ChrismedAppRoute
   ChrismedCheckoutRoute: typeof ChrismedCheckoutRoute
   ChrismedClinicaRoute: typeof ChrismedClinicaRoute
   ChrismedConsultorioRoute: typeof ChrismedConsultorioRoute
@@ -19713,6 +19733,7 @@ interface ChrismedRouteChildren {
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedAgendarRoute: ChrismedAgendarRoute,
+  ChrismedAppRoute: ChrismedAppRoute,
   ChrismedCheckoutRoute: ChrismedCheckoutRoute,
   ChrismedClinicaRoute: ChrismedClinicaRoute,
   ChrismedConsultorioRoute: ChrismedConsultorioRoute,
@@ -20499,13 +20520,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

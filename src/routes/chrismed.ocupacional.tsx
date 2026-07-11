@@ -170,8 +170,37 @@ function ChrismedOcupacionalPage() {
               <li key={m}>· {m}</li>
             ))}
           </ul>
+
+          {/* Painel de preços oficiais publicáveis — ASO e Perícia (2026-07)
+              Valores confirmados pela cliente para a página institucional.
+              Reagendamento, cancelamento e reembolso continuam sob a lógica
+              existente do Codex. */}
+          <div className="mt-10 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
+              <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">Atestado de Saúde Ocupacional</div>
+              <div className="chrismed-serif mt-2 text-3xl text-[var(--chrismed-forest-deep)]">R$ 110,00</div>
+              <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
+                Admissional · Periódico · Retorno · Mudança de função · Demissional.
+              </p>
+              <Link to="/chrismed/agendar" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+                Agendar ASO →
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
+              <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">Perícia · Laudo judicial ou previdenciário</div>
+              <div className="chrismed-serif mt-2 text-3xl text-[var(--chrismed-forest-deep)]">R$ 2.400,00</div>
+              <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
+                Entrega em até <strong>15 dias corridos</strong>, contados a partir da entrevista técnica e do recebimento integral da documentação.
+              </p>
+              <Link to="/chrismed/agendar" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+                Agendar entrevista para laudo →
+              </Link>
+            </div>
+          </div>
         </div>
       </ChrismedSection>
+
+
 
       {/* 2 · Seletor de público ────────────────── */}
       <ChrismedSection tone="bone">

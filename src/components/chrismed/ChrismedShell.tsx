@@ -477,15 +477,13 @@ function MobileDrawer({
           >
             Falar com Oliver
           </button>
-          <a
-            href="https://airgo.bio/chrismed"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            to="/chrismed/app"
             onClick={onClose}
             className="chrismed-sans flex w-full items-center justify-center gap-2 rounded-full border border-dashed border-[var(--chrismed-sand)] px-4 py-3 text-[13px] font-medium text-[var(--chrismed-graphite)] hover:border-[var(--chrismed-forest)] hover:text-[var(--chrismed-forest-deep)]"
           >
             Baixar o App · Em breve
-          </a>
+          </Link>
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px] uppercase tracking-wider text-[var(--chrismed-mist)]">Idioma</span>
             <LangSwitcher lang={lang} />
@@ -509,6 +507,7 @@ const FOOTER_LINKS_2: Array<{ label: string; to: string }> = [
   { label: 'Exames e preparo', to: '/chrismed/exames' },
   { label: 'Empresa · Medicina ocupacional', to: '/chrismed/ocupacional' },
   { label: 'Área dos Médicos', to: '/chrismed/medicos' },
+  { label: 'Baixar o App', to: '/chrismed/app' },
   { label: 'Perguntas frequentes', to: '/chrismed/faq' },
 ];
 
@@ -527,8 +526,12 @@ export function ChrismedFooter() {
           <div>
             <ChrismedWordmark variant="onDark" />
             <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70">{copy[lang]}</p>
-            <div className="mt-6 text-[11px] uppercase tracking-[0.28em] text-white/50">CRM/RJ · Registro ativo</div>
-            <div className="text-[11px] uppercase tracking-[0.28em] text-white/50">LGPD · Dados protegidos</div>
+            <div className="mt-6 space-y-1 text-[11px] uppercase tracking-[0.28em] text-white/60">
+              <div className="text-[var(--chrismed-amber-soft)]">Diretora Técnica</div>
+              <div className="text-white/85 normal-case tracking-normal">Dra. Christiane Soares Alencar</div>
+              <div>CRM/RJ 52.58575-0 · Registro ativo</div>
+              <div>LGPD · Dados protegidos</div>
+            </div>
           </div>
 
           <FooterCol title="Atendimento" links={FOOTER_LINKS} />
