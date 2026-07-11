@@ -151,7 +151,7 @@ function ChrismedHomePage() {
 
           {/* Coluna do retrato — sempre presente para preservar composição editorial;
               renderiza fallback silencioso quando o asset ainda não foi publicado. */}
-          <div className="relative">
+          <div className="chrismed-rise chrismed-rise-delay-4 relative">
             <div className="absolute -inset-6 -z-10 border border-[var(--chrismed-amber)]/30" aria-hidden />
             <div className="absolute -top-4 -left-4 h-16 w-16 border-l border-t border-[var(--chrismed-amber)]" aria-hidden />
             <div className="absolute -bottom-4 -right-4 h-16 w-16 border-r border-b border-[var(--chrismed-amber)]" aria-hidden />
