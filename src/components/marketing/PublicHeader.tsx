@@ -402,10 +402,10 @@ function MobileNav({ onClose }: { onClose: () => void }) {
         <SectionButton id="solucoes" label="Soluções" hint="O que você quer transformar" icon={Sparkles} />
         <SectionButton id="setores" label="Setores" hint="Sua realidade, seu segmento" icon={Building2} />
         <SectionButton id="demos" label="Demonstrações" hint="Veja funcionando antes" icon={Target} />
-        <Link to="/escolher-nicho" onClick={onClose} className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 hover:bg-accent/60">
+        <Link to="/planos" onClick={onClose} className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 hover:bg-accent/60">
           <span>
             <span className="block text-sm font-semibold text-foreground">Planos</span>
-            <span className="block text-xs text-muted-foreground">Recomendação por porte e objetivo</span>
+            <span className="block text-xs text-muted-foreground">Comparar e escolher o plano ideal</span>
           </span>
           <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
         </Link>
