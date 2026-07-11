@@ -16,12 +16,13 @@
  * não existir, os componentes reorganizam a composição editorial em vez
  * de renderizar moldura vazia.
  */
+import draCristianePortrait from '@/assets/chrismed/dra-cristiane-portrait.png.asset.json';
+
 const PORTRAIT_MODULES = import.meta.glob(
   '/src/assets/chrismed/dra-christiane.{avif,webp,jpg,jpeg,png}',
   { eager: true, query: '?url', import: 'default' },
 ) as Record<string, string>;
 
-// Preferência por formato: AVIF > WebP > JPG > JPEG > PNG.
 const PRIORITY = ['.avif', '.webp', '.jpg', '.jpeg', '.png'];
 function pickPortrait(): string | undefined {
   const entries = Object.entries(PORTRAIT_MODULES);
@@ -34,8 +35,11 @@ function pickPortrait(): string | undefined {
   return entries[0]?.[1];
 }
 
-export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined = pickPortrait();
+// Prioridade: CDN oficial (Lovable Assets) > arquivo local legado.
+export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined =
+  draCristianePortrait?.url ?? pickPortrait();
 
 /** Caminho recomendado para o asset final (documentação). */
 export const DRA_CHRISTIANE_PORTRAIT_TARGET_PATH =
-  'src/assets/chrismed/dra-christiane.jpg';
+  'src/assets/chrismed/dra-cristiane-portrait.png';
+
