@@ -26,7 +26,7 @@ function CheckoutPage() {
   const [method, setMethod] = useState<Method>('pix');
 
   return (
-    <ChrismedShell>
+    <ChrismedShell variant="minimal">
       <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
         <div className="container py-14 max-w-5xl">
           <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
