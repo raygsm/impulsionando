@@ -27,6 +27,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { ChrismedShell, useLang, type Lang } from '@/components/chrismed/ChrismedShell';
+import { ChrismedFlagsBar } from '@/components/chrismed/ChrismedFlagsBar';
 import {
   ChrismedSection,
   ChrismedHeading,
