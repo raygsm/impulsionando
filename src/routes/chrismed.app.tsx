@@ -9,7 +9,7 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Smartphone, Bell, Calendar, ShieldCheck, Download } from 'lucide-react';
+import { Smartphone, Bell, Calendar, ShieldCheck } from 'lucide-react';
 
 export const Route = createFileRoute('/chrismed/app')({
   head: () => ({
