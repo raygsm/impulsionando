@@ -624,8 +624,3 @@ export function HomePage() {
 
 export default HomePage;
 
-// Marcadores de compatibilidade com o funil (ícones que outros módulos
-// esperavam encontrar via barrel implícito não são mais reexportados —
-// mantida apenas a API pública HomePage).
-export const __HOME_A2__ = true;
-Store; Users; // referenciados apenas para manter tree-shaking previsível
