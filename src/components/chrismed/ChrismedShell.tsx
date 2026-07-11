@@ -553,7 +553,7 @@ export function ChrismedFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-center text-[11px] uppercase tracking-[0.24em] text-white/45 sm:flex-row sm:text-left">
+        <div className="mt-12 flex flex-col items-center justify-center gap-3 border-t border-white/10 pt-6 text-center text-[11px] uppercase tracking-[0.24em] text-white/45">
           <span>© {new Date().getFullYear()} CHRISMED · Todos os direitos reservados</span>
           <span>
             Produzido e gerenciado por{' '}
