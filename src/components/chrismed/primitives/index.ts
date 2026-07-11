@@ -31,3 +31,5 @@ export { ChrismedStat } from "./ChrismedStat";
 export { ChrismedModalityCard } from "./ChrismedModalityCard";
 export { ChrismedOliverLauncher } from "./ChrismedOliverLauncher";
 export { ChrismedLanguageSelector } from "./ChrismedLanguageSelector";
+export { ChrismedTrustBar } from "./ChrismedTrustBar";
+export { ChrismedFollowUpCard } from "./ChrismedFollowUpCard";
