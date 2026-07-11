@@ -69,6 +69,7 @@ import { Route as FoodserviceIndexRouteImport } from './routes/foodservice.index
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as ClubeIndexRouteImport } from './routes/clube.index'
+import { Route as ChrismedIndexRouteImport } from './routes/chrismed.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as WmpSobreRouteImport } from './routes/wmp.sobre'
 import { Route as WmpParceiroRouteImport } from './routes/wmp.parceiro'
@@ -1208,6 +1209,11 @@ const ClubeIndexRoute = ClubeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ClubeRoute,
+} as any)
+const ChrismedIndexRoute = ChrismedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChrismedRoute,
 } as any)
 const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
@@ -6234,6 +6240,7 @@ export interface FileRoutesByFullPath {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/chrismed/': typeof ChrismedIndexRoute
   '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
@@ -6873,7 +6880,6 @@ export interface FileRoutesByTo {
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
   '/central-de-ajuda': typeof CentralDeAjudaRoute
-  '/chrismed': typeof ChrismedRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -7116,6 +7122,7 @@ export interface FileRoutesByTo {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/chrismed': typeof ChrismedIndexRoute
   '/clube': typeof ClubeIndexRoute
   '/colors': typeof ColorsIndexRoute
   '/demo': typeof DemoIndexRoute
@@ -8014,6 +8021,7 @@ export interface FileRoutesById {
   '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/wmp/sobre': typeof WmpSobreRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/chrismed/': typeof ChrismedIndexRoute
   '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
   '/demo/': typeof DemoIndexRoute
@@ -8917,6 +8925,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout/'
+    | '/chrismed/'
     | '/clube/'
     | '/colors/'
     | '/demo/'
@@ -9556,7 +9565,6 @@ export interface FileRouteTypes {
     | '/canal-oficial'
     | '/catalogo'
     | '/central-de-ajuda'
-    | '/chrismed'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -9799,6 +9807,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout'
+    | '/chrismed'
     | '/clube'
     | '/colors'
     | '/demo'
@@ -10696,6 +10705,7 @@ export interface FileRouteTypes {
     | '/wmp/parceiro'
     | '/wmp/sobre'
     | '/checkout/'
+    | '/chrismed/'
     | '/clube/'
     | '/colors/'
     | '/demo/'
@@ -11960,6 +11970,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clube/'
       preLoaderRoute: typeof ClubeIndexRouteImport
       parentRoute: typeof ClubeRoute
+    }
+    '/chrismed/': {
+      id: '/chrismed/'
+      path: '/'
+      fullPath: '/chrismed/'
+      preLoaderRoute: typeof ChrismedIndexRouteImport
+      parentRoute: typeof ChrismedRoute
     }
     '/checkout/': {
       id: '/checkout/'
@@ -19501,6 +19518,7 @@ interface ChrismedRouteChildren {
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
   ChrismedPrivacidadeRoute: typeof ChrismedPrivacidadeRoute
   ChrismedTeleconsultaRoute: typeof ChrismedTeleconsultaRoute
+  ChrismedIndexRoute: typeof ChrismedIndexRoute
 }
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
@@ -19519,6 +19537,7 @@ const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedOfertasRoute: ChrismedOfertasRoute,
   ChrismedPrivacidadeRoute: ChrismedPrivacidadeRoute,
   ChrismedTeleconsultaRoute: ChrismedTeleconsultaRoute,
+  ChrismedIndexRoute: ChrismedIndexRoute,
 }
 
 const ChrismedRouteWithChildren = ChrismedRoute._addFileChildren(
