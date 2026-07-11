@@ -174,6 +174,13 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
+      {/* ─────────── Onda 6 — Prova social institucional discreta ─────────── */}
+      <ChrismedSection tone="ivory" className="!py-0">
+        <ChrismedTrustBar />
+      </ChrismedSection>
+
+
+
 
       {/* ─────────── Seção 2 — Como deseja ser atendido? ─────────── */}
       <ChrismedSection tone="bone">
