@@ -3,6 +3,7 @@ import { Globe, Menu, X, CalendarCheck, ChevronDown, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChrismedOliverProvider } from './ChrismedOliverProvider';
+import { ChrismedPreloader } from './ChrismedPreloader';
 import { openChrismedOliver } from './oliver-store';
 import chrismedHorizontal from '@/assets/chrismed-horizontal.png.asset.json';
 
@@ -312,7 +313,7 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)] lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)] lg:hidden"
             aria-label="Abrir menu"
             aria-expanded={open}
             aria-controls="chrismed-mobile-drawer"
@@ -537,6 +538,7 @@ export function ChrismedShell({
         Pular para o conteúdo principal
       </a>
       <ChrismedOliverProvider>
+        <ChrismedPreloader />
         <ChrismedHeader variant={variant} />
         <main id="chrismed-main" className="mx-auto w-full max-w-7xl pb-28 md:pb-24">
           {children}
