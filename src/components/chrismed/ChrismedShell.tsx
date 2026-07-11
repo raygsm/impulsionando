@@ -286,6 +286,7 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
     return (
       <header
         data-chrismed-header
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100vw', zIndex: 80 }}
         className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
@@ -308,6 +309,7 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
   return (
     <header
       data-chrismed-header
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100vw', zIndex: 80 }}
       className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur"
     >
 
