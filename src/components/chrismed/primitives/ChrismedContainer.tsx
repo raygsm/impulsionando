@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { ElementType, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
  */
 export function ChrismedContainer({
   className,
-  as: Tag = "div",
+  as,
   ...rest
-}: HTMLAttributes<HTMLElement> & { as?: keyof JSX.IntrinsicElements }) {
-  const Component = Tag as "div";
+}: HTMLAttributes<HTMLElement> & { as?: ElementType }) {
+  const Component = (as ?? "div") as ElementType;
   return (
     <Component
       className={cn("mx-auto w-full max-w-[1200px] px-6 md:px-10", className)}
@@ -18,3 +18,4 @@ export function ChrismedContainer({
     />
   );
 }
+
