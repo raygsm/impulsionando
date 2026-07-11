@@ -516,7 +516,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Medicina Ambulatorial',
       title: 'Um cuidado clínico',
       titleItalic: 'sereno, contínuo e feito para você.',
-      lead: 'Consulta particular com a Dra. Christiane Alencar em três formatos — para acolher você onde estiver mais confortável: online, presencial em Copacabana ou em sua residência.',
+      lead: 'Consulta particular com a Dra. Christiane Alencar em três formatos — online, presencial em Copacabana ou domiciliar onde você estiver.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
       modes: ['Teleconsulta', 'Presencial · Copacabana', 'Consulta domiciliar'],
@@ -607,10 +607,10 @@ const COPY: Record<Lang, Copy> = {
           eyebrow: '03',
           title: 'Consulta domiciliar',
           description:
-            'Atendimento na sua residência ou local de hospedagem, com discrição.',
+            'Atendimento domiciliar onde você estiver, com discrição.',
           audience:
             'Restrição de mobilidade, recuperação recente, cuidado a familiares ou preferência pelo próprio ambiente.',
-          how: 'Consulta presencial na residência, com estrutura clínica portátil e tempo dedicado.',
+          how: 'Consulta presencial no local confirmado, com estrutura clínica portátil e tempo dedicado.',
           where: 'Rio de Janeiro e regiões atendidas — confirmadas antes do agendamento.',
           notice:
             'Alguns exames ou procedimentos podem exigir complemento em ambiente clínico; isso é indicado no plano.',
@@ -757,7 +757,7 @@ const COPY: Record<Lang, Copy> = {
         {
           eyebrow: '03',
           title: 'Home visit',
-          description: 'Consultation at your home or accommodation, with discretion.',
+          description: 'Care wherever you are, with discretion.',
           audience: 'Limited mobility, recent recovery, care for family members or preference for your own space.',
           how: 'In-person consultation at home with portable clinical structure and dedicated time.',
           where: 'Rio de Janeiro and served areas — confirmed before booking.',
@@ -833,7 +833,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Medicina Ambulatoria',
       title: 'Un cuidado clínico',
       titleItalic: 'sereno, continuo y pensado para usted.',
-      lead: 'Consulta particular con la Dra. Christiane Alencar en tres formatos — para recibirla donde se sienta más cómoda: en línea, presencial en Copacabana o en su residencia.',
+      lead: 'Consulta particular con la Dra. Christiane Alencar en tres formatos — en línea, presencial en Copacabana o a domicilio donde usted esté.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Hablar con Oliver',
       modes: ['Teleconsulta', 'Presencial · Copacabana', 'Consulta a domicilio'],
@@ -893,9 +893,9 @@ const COPY: Record<Lang, Copy> = {
         {
           eyebrow: '03',
           title: 'Consulta a domicilio',
-          description: 'Atención en su residencia o lugar de hospedaje, con discreción.',
+          description: 'Atención donde usted esté, con discreción.',
           audience: 'Restricción de movilidad, recuperación reciente, cuidado de familiares o preferencia por el propio ambiente.',
-          how: 'Consulta presencial en la residencia, con estructura clínica portátil y tiempo dedicado.',
+          how: 'Consulta presencial en el lugar confirmado, con estructura clínica portátil y tiempo dedicado.',
           where: 'Río de Janeiro y regiones atendidas — confirmadas antes del agendamiento.',
           notice: 'Algunos exámenes o procedimientos pueden requerir complemento en ambiente clínico; se indica en el plan.',
         },
