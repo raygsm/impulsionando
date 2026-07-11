@@ -3,128 +3,149 @@ import { MessageCircle, Mail, ExternalLink } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { BuildStamp } from "@/components/brand/BuildStamp";
 
+/* ============================================================================
+ * PublicFooter — Onda A1 (redundâncias eliminadas, jornada clara)
+ *
+ * Estrutura: 4 colunas por JORNADA (Explorar · Contratar · Cliente · Institucional).
+ * Cada destino aparece 1x; /modulos e /demo não são repetidos com labels
+ * artificiais. Setores agrupados por macro sem paralelismo confuso.
+ * ========================================================================== */
+
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
 
-const COLS = [
+type Col = {
+  title: string;
+  eyebrow: string;
+  links: { to: string; label: string; hash?: string }[];
+};
+
+const COLS: Col[] = [
   {
-    title: "Impulsionando Tecnologia",
+    eyebrow: "Explorar",
+    title: "Conhecer a plataforma",
     links: [
-      { to: "/", label: "Início" },
-      { to: "/modulos", label: "Soluções" },
-      { to: "/modulos", label: "Módulos" },
-      { to: "/nichos", label: "Nichos" },
+      { to: "/modulos", label: "Soluções e módulos" },
+      { to: "/nichos", label: "Setores atendidos" },
       { to: "/demo", label: "Demonstrações" },
-      { to: "/escolher-nicho", label: "Planos" },
-      { to: "/orcamento", label: "Orçamento automático" },
-      { to: "/app", label: "App Impulsionando" },
+      { to: "/vitrine", label: "Vitrine de páginas prontas" },
+      { to: "/ecossistema", label: "Ecossistema Impulsionando" },
+      { to: "/clube", label: "Clube (consumidor final)" },
     ],
   },
   {
-    title: "Produtos",
+    eyebrow: "Contratar",
+    title: "Começar agora",
     links: [
-      { to: "/modulos", label: "CRM e Atendimento" },
-      { to: "/modulos", label: "Automação e Comunicação" },
-      { to: "/modulos", label: "Agenda e Reservas" },
-      { to: "/modulos", label: "Pagamentos" },
-      { to: "/modulos", label: "BI e Dashboards" },
-      { to: "/auth", label: "Área do Cliente" },
-      { to: "/orcamento", label: "White Label" },
+      { to: "/escolher-nicho", label: "Descobrir minha solução" },
+      { to: "/orcamento", label: "Montar orçamento" },
+      { to: "/contratar", label: "Contratar direto" },
+      { to: "/app", label: "Baixar o app" },
     ],
   },
   {
-    title: "Soluções por Nicho",
-    // Agrupado por macro-nicho — cada item é o macro inteiro, não subnichos
-    // paralelos. Saúde NÃO pode aparecer ao lado de Psicologia/Clínicas:
-    // elas vivem dentro do macro Saúde em /nichos.
+    eyebrow: "Cliente",
+    title: "Já sou cliente",
     links: [
-      { to: "/nichos#saude", label: "Saúde (clínicas, psicologia, fitness)" },
-      { to: "/nichos#alimentacao", label: "Alimentação (bares, restaurantes, cervejarias)" },
-      { to: "/nichos#imobiliario", label: "Imobiliário" },
-      { to: "/nichos#servicos", label: "Serviços (jurídico, contábil, agências)" },
-      { to: "/nichos#educacao", label: "Educação e Universidades" },
-      { to: "/nichos#eventos", label: "Eventos" },
-      { to: "/nichos#varejo", label: "Varejo, E-commerce e Veículos" },
-      { to: "/nichos#fornecedores", label: "Fornecedores e Indústria" },
-      { to: "/nichos/white-label", label: "White Label" },
-      { to: "/clube", label: "Clube Impulsionando" },
+      { to: "/auth", label: "Entrar no Core" },
+      { to: "/suporte", label: "Suporte" },
+      { to: "/central-de-ajuda", label: "Central de ajuda" },
+      { to: "/canal-oficial", label: "Canal oficial único" },
     ],
   },
   {
-    title: "Experimente",
-    links: [
-      { to: "/demo", label: "Demo geral" },
-      { to: "/demo", label: "Demo por nicho" },
-      { to: "/demo/feira", label: "Demo feira" },
-      { to: "/auth", label: "Área do cliente" },
-      { to: "/orcamento", label: "Solicitar implantação" },
-    ],
-  },
-  {
-    title: "Institucional",
+    eyebrow: "Institucional",
+    title: "Impulsionando Tecnologia",
     links: [
       { to: "/sobre", label: "Sobre" },
       { to: "/contato", label: "Contato" },
-      { to: "/trabalhe-conosco", label: "Trabalhe Conosco" },
-      { to: "/termos", label: "Termos de Uso" },
-      { to: "/privacidade", label: "Política de Privacidade" },
-      { to: "/reembolso", label: "Política de Reembolso" },
-      { to: "/canal-oficial", label: "Canal oficial único" },
+      { to: "/trabalhe-conosco", label: "Trabalhe conosco" },
+      { to: "/termos", label: "Termos de uso" },
+      { to: "/privacidade", label: "Política de privacidade" },
+      { to: "/reembolso", label: "Política de reembolso" },
     ],
   },
 ];
 
 export function PublicFooter() {
   return (
-    <footer className="border-t border-border bg-card/30 mt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6 mb-10">
-          <div className="lg:col-span-1 space-y-3">
+    <footer className="border-t border-border surface-2 mt-20">
+      <div className="container-narrow section-tight">
+        {/* Bloco superior: marca + navegação por jornada */}
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,3fr)]">
+          <div className="space-y-4 min-w-0">
             <LogoImpulsionando variant="light" size="xl" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Sistemas modulares, automação e comunicação para empresas que precisam crescer com organização.
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              Uma plataforma que entende sua empresa, organiza suas jornadas e cresce com você.
             </p>
             <div className="space-y-1.5 text-xs">
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
                 <MessageCircle className="w-3.5 h-3.5" /> +55 21 99307-5000
               </a>
-              <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <a
+                href={`mailto:${EMAIL}`}
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
                 <Mail className="w-3.5 h-3.5" /> {EMAIL}
               </a>
-              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <a
+                href="https://impulsionandobrasil.com.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
                 <ExternalLink className="w-3.5 h-3.5" /> Impulsionando Tecnologia
               </a>
             </div>
           </div>
 
-          {COLS.map((col) => (
-            <div key={col.title}>
-              <div className="text-xs font-semibold mb-3 text-foreground">{col.title}</div>
-              <ul className="space-y-1.5 text-xs text-muted-foreground">
-                {col.links.map((l, i) => (
-                  <li key={`${col.title}-${i}`}>
-                    <Link
-                      to={l.to}
-                      className="inline-block text-muted-foreground hover:text-foreground focus-ring rounded-sm transition-colors"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <nav aria-label="Rodapé" className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {COLS.map((col) => (
+              <div key={col.title} className="min-w-0">
+                <div className="text-eyebrow mb-2">{col.eyebrow}</div>
+                <div className="text-sm font-semibold text-foreground mb-3">{col.title}</div>
+                <ul className="space-y-1.5 text-sm">
+                  {col.links.map((l) => (
+                    <li key={`${col.title}-${l.to}-${l.label}`}>
+                      <Link
+                        to={l.to}
+                        className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm transition-colors"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-3 text-[11px] leading-snug text-amber-900 dark:text-amber-100 mb-6">
-          <strong>Canal oficial único.</strong> Toda e qualquer informação, envio de documentos, comprovantes de pagamento, solicitações e comunicações deve ser realizada exclusivamente pelo WhatsApp oficial da Impulsionando:{" "}
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-2">
+        {/* Canal oficial — mantido, sem "Saiba mais" duplicado (já linkado ao lado) */}
+        <div className="mt-10 rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-4 text-xs leading-snug text-amber-900 dark:text-amber-100">
+          <strong>Canal oficial único.</strong> Toda comunicação, envio de documentos, comprovantes
+          e solicitações acontece exclusivamente pelo WhatsApp oficial:{" "}
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline underline-offset-2"
+          >
             (21) 99307-5000
           </a>
-          . Para sua segurança e melhor acompanhamento, contatos por outros canais não oficiais não serão considerados. <Link to="/canal-oficial" className="underline underline-offset-2 font-semibold">Saiba mais</Link>.
+          . Para sua segurança, contatos por outros canais não serão considerados{" "}
+          <Link to="/canal-oficial" className="underline underline-offset-2 font-semibold">
+            (política completa)
+          </Link>
+          .
         </div>
 
-        <div className="border-t border-border pt-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="mt-8 pt-6 border-t border-border text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© {new Date().getFullYear()} Impulsionando Tecnologia. Todos os direitos reservados.</span>
           <div className="flex items-center gap-3">
             <BuildStamp />
