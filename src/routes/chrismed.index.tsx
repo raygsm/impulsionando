@@ -94,28 +94,28 @@ function ChrismedHomePage() {
               'radial-gradient(ellipse at 85% 15%, rgba(228,181,74,0.18), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(228,181,74,0.08), transparent 60%)',
           }}
         />
-        <div className="relative grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-20">
+        <div className="relative grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-24">
           <div>
-            <div className="mb-8 inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/40 bg-black/10 px-4 py-2">
+            <div className="chrismed-rise mb-10 inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/40 bg-black/10 px-4 py-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--chrismed-amber)]" />
               <span className="chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">
                 {t.hero.eyebrow}
               </span>
             </div>
-            <h1 className="chrismed-serif font-light tracking-tight text-[clamp(3rem,7vw,5.75rem)] leading-[0.98] text-[var(--chrismed-amber)]">
+            <h1 className="chrismed-rise chrismed-rise-delay-1 chrismed-serif font-light tracking-tight text-[clamp(3rem,7vw,5.75rem)] leading-[0.96] text-[var(--chrismed-amber)]">
               {t.hero.title}
               <br />
               <span className="italic text-white">{t.hero.titleItalic}</span>
             </h1>
-            <p className="chrismed-sans mt-8 max-w-[42ch] text-lg leading-relaxed text-white/85 md:text-xl">
+            <p className="chrismed-rise chrismed-rise-delay-2 chrismed-sans mt-10 max-w-[42ch] text-lg leading-[1.7] text-white/85 md:text-xl">
               {t.hero.lead}
             </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="chrismed-rise chrismed-rise-delay-3 mt-12 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <Link to="/chrismed/agendar" className="inline-flex">
                 <button
                   type="button"
-                  className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] transition-all hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
+                  className="chrismed-cta-glow chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] transition-all hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
                 >
                   {t.hero.ctaPrimary}
                   <span aria-hidden>→</span>
