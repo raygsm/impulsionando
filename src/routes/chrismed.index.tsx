@@ -94,28 +94,28 @@ function ChrismedHomePage() {
               'radial-gradient(ellipse at 85% 15%, rgba(228,181,74,0.18), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(228,181,74,0.08), transparent 60%)',
           }}
         />
-        <div className="relative grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-20">
+        <div className="relative grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-24">
           <div>
-            <div className="mb-8 inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/40 bg-black/10 px-4 py-2">
+            <div className="chrismed-rise mb-10 inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/40 bg-black/10 px-4 py-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--chrismed-amber)]" />
               <span className="chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">
                 {t.hero.eyebrow}
               </span>
             </div>
-            <h1 className="chrismed-serif font-light tracking-tight text-[clamp(3rem,7vw,5.75rem)] leading-[0.98] text-[var(--chrismed-amber)]">
+            <h1 className="chrismed-rise chrismed-rise-delay-1 chrismed-serif font-light tracking-tight text-[clamp(3rem,7vw,5.75rem)] leading-[0.96] text-[var(--chrismed-amber)]">
               {t.hero.title}
               <br />
               <span className="italic text-white">{t.hero.titleItalic}</span>
             </h1>
-            <p className="chrismed-sans mt-8 max-w-[42ch] text-lg leading-relaxed text-white/85 md:text-xl">
+            <p className="chrismed-rise chrismed-rise-delay-2 chrismed-sans mt-10 max-w-[42ch] text-lg leading-[1.7] text-white/85 md:text-xl">
               {t.hero.lead}
             </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="chrismed-rise chrismed-rise-delay-3 mt-12 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <Link to="/chrismed/agendar" className="inline-flex">
                 <button
                   type="button"
-                  className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] transition-all hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
+                  className="chrismed-cta-glow chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] transition-all hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
                 >
                   {t.hero.ctaPrimary}
                   <span aria-hidden>→</span>
@@ -151,7 +151,7 @@ function ChrismedHomePage() {
 
           {/* Coluna do retrato — sempre presente para preservar composição editorial;
               renderiza fallback silencioso quando o asset ainda não foi publicado. */}
-          <div className="relative">
+          <div className="chrismed-rise chrismed-rise-delay-4 relative">
             <div className="absolute -inset-6 -z-10 border border-[var(--chrismed-amber)]/30" aria-hidden />
             <div className="absolute -top-4 -left-4 h-16 w-16 border-l border-t border-[var(--chrismed-amber)]" aria-hidden />
             <div className="absolute -bottom-4 -right-4 h-16 w-16 border-r border-b border-[var(--chrismed-amber)]" aria-hidden />
@@ -257,7 +257,7 @@ function ChrismedHomePage() {
           {t.modalities.items.map((m, i) => (
             <article
               key={m.title}
-              className="group relative flex flex-col border border-[var(--chrismed-amber)]/25 bg-black/10 p-8 transition-all hover:border-[var(--chrismed-amber)]/70 hover:bg-black/20"
+              className="chrismed-card-lift group relative flex flex-col border border-[var(--chrismed-amber)]/25 bg-black/10 p-8 hover:border-[var(--chrismed-amber)]/70 hover:bg-black/20"
             >
               <div className="chrismed-serif text-6xl font-light leading-none text-[var(--chrismed-amber)]/50 group-hover:text-[var(--chrismed-amber)]">
                 {String(i + 1).padStart(2, '0')}
@@ -328,7 +328,7 @@ function ChrismedHomePage() {
           {t.verticals.items.map((v) => (
             <article
               key={v.title}
-              className="flex flex-col border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)]/40 p-8"
+              className="chrismed-card-lift flex flex-col border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)]/40 p-8 hover:border-[var(--chrismed-amber)]/70"
             >
               <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
                 {v.eyebrow}
@@ -368,34 +368,62 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 6 — GMS Spotlight (destaque internacional) ─────────── */}
-      <section className="chrismed-page-mustard py-20 md:py-28">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      {/* ─────────── Seção 6 — GMS · Concierge médico internacional ─────────── */}
+      <section className="chrismed-page-mustard relative overflow-hidden py-24 md:py-32">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 90% 10%, rgba(11,42,36,0.10), transparent 55%), radial-gradient(circle at 5% 95%, rgba(184,137,43,0.14), transparent 55%)',
+          }}
+        />
+        <div className="relative mx-auto grid max-w-6xl gap-14 px-4 md:px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-20">
           <div>
-            <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-mustard-deep)]">
-              {t.gms.eyebrow}
+            <div className="inline-flex items-center gap-3 border-l-2 border-[var(--chrismed-forest-deep)] pl-3">
+              <span className="chrismed-sans text-[10px] uppercase tracking-[0.36em] text-[var(--chrismed-mustard-deep)]">
+                Global Medical Support
+              </span>
             </div>
-            <h2 className="chrismed-serif mt-4 text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.02] text-[var(--chrismed-forest-deep)]">
+            <h2 className="chrismed-serif mt-6 text-[clamp(2.5rem,5.5vw,4rem)] font-light leading-[0.98] text-[var(--chrismed-forest-deep)]">
               {t.gms.title}
             </h2>
-            <p className="chrismed-sans mt-6 max-w-[52ch] text-lg leading-relaxed text-[var(--chrismed-forest-deep)]/85">
+            <p className="chrismed-sans mt-8 max-w-[54ch] text-lg leading-[1.7] text-[var(--chrismed-forest-deep)]/85">
               {t.gms.lead}
             </p>
-            <div className="mt-8 flex flex-wrap gap-2">
+
+            <div className="mt-10 flex flex-wrap gap-2">
               {t.gms.languages.map((l) => (
                 <span
                   key={l}
-                  className="chrismed-sans border border-[var(--chrismed-forest-deep)]/25 bg-white/40 px-3 py-1.5 text-[11px] uppercase tracking-[0.28em] text-[var(--chrismed-forest-deep)]"
+                  className="chrismed-sans inline-flex items-center gap-2 border border-[var(--chrismed-forest-deep)]/25 bg-white/50 px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-[var(--chrismed-forest-deep)] backdrop-blur-sm"
                 >
+                  <span className="h-1 w-1 rounded-full bg-[var(--chrismed-forest-deep)]" />
                   {l}
                 </span>
               ))}
             </div>
-            <div className="mt-10">
+
+            <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-[var(--chrismed-forest-deep)]/15 pt-8">
+              <div>
+                <dt className="chrismed-sans text-[9px] uppercase tracking-[0.3em] text-[var(--chrismed-forest-deep)]/60">Contato</dt>
+                <dd className="chrismed-serif mt-2 text-2xl italic text-[var(--chrismed-forest-deep)]">24/7</dd>
+              </div>
+              <div>
+                <dt className="chrismed-sans text-[9px] uppercase tracking-[0.3em] text-[var(--chrismed-forest-deep)]/60">Idiomas</dt>
+                <dd className="chrismed-serif mt-2 text-2xl italic text-[var(--chrismed-forest-deep)]">3</dd>
+              </div>
+              <div>
+                <dt className="chrismed-sans text-[9px] uppercase tracking-[0.3em] text-[var(--chrismed-forest-deep)]/60">Sigilo</dt>
+                <dd className="chrismed-serif mt-2 text-2xl italic text-[var(--chrismed-forest-deep)]">LGPD</dd>
+              </div>
+            </dl>
+
+            <div className="mt-12">
               <Link to="/chrismed/internacional" className="inline-flex">
                 <button
                   type="button"
-                  className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-forest-deep)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:bg-[var(--chrismed-forest)]"
+                  className="chrismed-cta-glow chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-forest-deep)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] shadow-[0_20px_60px_-24px_rgba(11,42,36,0.55)] transition-colors hover:bg-[var(--chrismed-forest)]"
                 >
                   {t.gms.cta}
                   <span aria-hidden>→</span>
@@ -403,16 +431,20 @@ function ChrismedHomePage() {
               </Link>
             </div>
           </div>
+
           <ul className="grid gap-4 sm:grid-cols-2">
             {t.gms.audience.map((a, i) => (
               <li
                 key={a}
-                className="border border-[var(--chrismed-forest-deep)]/20 bg-white/50 p-6 backdrop-blur-sm"
+                className="chrismed-card-lift group relative border border-[var(--chrismed-forest-deep)]/15 bg-white/60 p-7 backdrop-blur-sm hover:border-[var(--chrismed-forest-deep)]/40"
               >
-                <div className="chrismed-serif text-3xl font-light text-[var(--chrismed-mustard-deep)]">
-                  {String(i + 1).padStart(2, '0')}
+                <div className="flex items-start justify-between">
+                  <div className="chrismed-serif text-4xl font-light leading-none text-[var(--chrismed-mustard-deep)]">
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div className="h-px w-10 translate-y-4 bg-[var(--chrismed-forest-deep)]/30" />
                 </div>
-                <div className="chrismed-sans mt-3 text-sm leading-relaxed text-[var(--chrismed-forest-deep)]">
+                <div className="chrismed-sans mt-6 text-sm leading-[1.6] text-[var(--chrismed-forest-deep)]">
                   {a}
                 </div>
               </li>
@@ -420,6 +452,7 @@ function ChrismedHomePage() {
           </ul>
         </div>
       </section>
+
 
       {/* ─────────── Seção 7 — Autoridade da Dra. Christiane ─────────── */}
       <ChrismedSection tone="forest">
