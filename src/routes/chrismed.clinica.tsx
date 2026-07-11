@@ -113,6 +113,7 @@ function ChrismedAmbulatorialPage() {
 
   return (
     <ChrismedShell>
+      <div className="mx-auto w-full max-w-6xl px-4 pt-4"><ChrismedFlagsBar tone="light" align="right" /></div>
       {/* ─────────── 1 · Hero editorial ─────────── */}
       <ChrismedSection tone="ivory" className="pt-20 md:pt-28">
         <div className="mx-auto max-w-3xl text-left">
