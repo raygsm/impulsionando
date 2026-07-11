@@ -118,7 +118,12 @@ function openOliver() {
 
 function DraCristianePage() {
   const lang = useLang();
+  const t = COPY[lang];
+
+  return (
+    <ChrismedShell>
       {/* ─────────── 1. Hero editorial ───────────
+
           Composição varia se houver retrato autorizado (regra V2:
           nunca renderizar caixa vazia com aparência de mídia ausente). */}
       <ChrismedSection tone="ivory" className={hasPortrait ? 'pt-16 md:pt-24' : 'pt-20 md:pt-32'}>
