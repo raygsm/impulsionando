@@ -80,3 +80,31 @@ Permitido:
 
 Ver auditoria V4 (mensagem anterior). Reproduzido em `contracts.ts` como
 `TODO(Codex)` por bloco.
+
+## Regra oficial do SlotHoldBanner (server-authoritative)
+
+O contador visual do hold PODE existir no front-end, desde que:
+
+1. seja calculado a partir do `expires_at` oficial recebido do servidor,
+   corrigido por um offset de skew (server_time − client_time) devolvido na
+   mesma resposta;
+2. seja reconciliado periodicamente contra o backend (GET de status do
+   hold), nunca decidindo expiração sozinho;
+3. em qualquer divergência com o backend, o servidor vence — o estado do
+   componente cai para `hold_expired` ou `hold_conflict` conforme resposta;
+4. nunca simule, prolongue ou renove o hold no cliente;
+5. na perda de rede, o contador congela e exibe estado de reconciliação,
+   não continua contando.
+
+O cliente nunca é fonte de verdade do hold. O contador é apenas leitura
+espelhada com correção de deriva.
+
+## Aprovações e próximo passo
+
+- Preparação congelada da V4: **aprovada**.
+- Próxima decisão: depende integralmente do relatório do Codex
+  (agenda, serviços, profissionais, disponibilidade, lock, Mercado Pago,
+  webhooks, reservas, preços, remarcação, cancelamento, reembolso, RLS,
+  N8N).
+- Enquanto isso: nenhuma linha de `/chrismed/agendar`, Supabase, edge
+  functions, Mercado Pago, N8N, RLS ou banco será alterada.
