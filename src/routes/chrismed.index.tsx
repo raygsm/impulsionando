@@ -38,8 +38,7 @@ import {
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
-import consultorioExame from '@/assets/chrismed/consultorio-exame.jpg.asset.json';
-import consultorioRecepcao from '@/assets/chrismed/consultorio-recepcao.jpg.asset.json';
+import consultorioComposite from '@/assets/chrismed/consultorio-composite.jpg.asset.json';
 
 const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
 
@@ -228,32 +227,14 @@ function ChrismedHomePage() {
               Atendimento exclusivo e discreto — cada horário é reservado a um único paciente, com o tempo integral da Dra. Christiane.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <figure className="md:col-span-2 md:row-span-2">
-              <img
-                src={consultorioExame.url}
-                alt="Sala clínica do consultório CHRISMED em Copacabana"
-                className="h-full w-full object-cover shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
-                loading="lazy"
-              />
-            </figure>
-            <figure>
-              <img
-                src={consultorioRecepcao.url}
-                alt="Recepção reservada do consultório CHRISMED"
-                className="aspect-[4/3] w-full object-cover"
-                loading="lazy"
-              />
-            </figure>
-            <figure>
-              <img
-                src={consultorioExame.url}
-                alt="Detalhe do ambiente clínico CHRISMED"
-                className="aspect-[4/3] w-full object-cover"
-                loading="lazy"
-              />
-            </figure>
-          </div>
+          <figure className="overflow-hidden rounded-sm">
+            <img
+              src={consultorioComposite.url}
+              alt="Consultório CHRISMED em Copacabana — sala de espera reservada e sala clínica"
+              className="w-full object-cover shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
+              loading="lazy"
+            />
+          </figure>
         </div>
       </section>
 
@@ -726,7 +707,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'CHRISMED · Medicina privada',
       title: 'Cuidado clínico',
       titleItalic: 'que pertence a você.',
-      lead: 'Consultas com a Dra. Christiane Alencar em Copacabana, na sua residência, hotel ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
+      lead: 'Consultas com a Dra. Christiane Alencar em Copacabana, atendimento domiciliar onde você estiver ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Conhecer a Dra. Christiane',
       oliverHint: 'Falar antes com Oliver',
@@ -773,10 +754,10 @@ const COPY: Record<Lang, Copy> = {
             'Consultório reservado, agenda sob horário e recepção discreta. Tempo dedicado antes, durante e depois da consulta.',
         },
         {
-          eyebrow: 'Casa · Hotel',
-          title: 'Consulta domiciliar',
+          eyebrow: 'Onde você estiver',
+          title: 'Domiciliar',
           description:
-            'Atendimento em sua residência, hotel ou escritório, com o mesmo rigor clínico e a privacidade que a sua rotina exige.',
+            'Atendimento domiciliar — onde você estiver — com o mesmo rigor clínico e a privacidade que a sua rotina exige.',
         },
       ],
     },
@@ -864,7 +845,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Próximo passo',
       title: 'Reservar um tempo',
       titleItalic: 'com a Dra. Christiane.',
-      lead: 'Consulta privada em Copacabana, na sua residência, hotel ou por vídeo. Escolha a modalidade que preserva o seu tempo — o cuidado é o mesmo.',
+      lead: 'Consulta privada em Copacabana, domiciliar onde você estiver ou por vídeo. Escolha a modalidade que preserva o seu tempo — o cuidado é o mesmo.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
     },
@@ -921,10 +902,10 @@ const COPY: Record<Lang, Copy> = {
             'Private office, scheduled time slots and a discreet reception. Dedicated time before, during and after your visit.',
         },
         {
-          eyebrow: 'Home · Hotel',
+          eyebrow: 'Wherever you are',
           title: 'Home visit',
           description:
-            'Care at your home, hotel, or office, with the same clinical rigor and the privacy your routine demands.',
+            'Home visit — wherever you are — with the same clinical rigor and the privacy your routine demands.',
         },
       ],
     },
@@ -1069,10 +1050,10 @@ const COPY: Record<Lang, Copy> = {
             'Consultorio reservado, agenda con horario y recepción discreta. Tiempo dedicado antes, durante y después de la consulta.',
         },
         {
-          eyebrow: 'Casa · Hotel',
-          title: 'Visita a domicilio',
+          eyebrow: 'Donde usted esté',
+          title: 'Domiciliaria',
           description:
-            'Atención en su residencia, hotel u oficina, con el mismo rigor clínico y la privacidad que su rutina exige.',
+            'Atención domiciliaria — donde usted esté — con el mismo rigor clínico y la privacidad que su rutina exige.',
         },
       ],
     },
