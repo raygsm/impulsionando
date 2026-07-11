@@ -236,8 +236,20 @@
 [data-tenant="chrismed"] .chrismed-page-forest h1,
 [data-tenant="chrismed"] .chrismed-page-forest h2,
 [data-tenant="chrismed"] .chrismed-page-forest h3 { color: var(--chrismed-amber); }
+[data-tenant="chrismed"] .chrismed-page-forest h4,
+[data-tenant="chrismed"] .chrismed-page-forest h5,
+[data-tenant="chrismed"] .chrismed-page-forest h6 { color: var(--chrismed-amber-soft); }
 [data-tenant="chrismed"] .chrismed-page-forest .chrismed-lede,
-[data-tenant="chrismed"] .chrismed-page-forest p { color: rgba(255,255,255,0.86); }
+[data-tenant="chrismed"] .chrismed-page-forest p,
+[data-tenant="chrismed"] .chrismed-page-forest li,
+[data-tenant="chrismed"] .chrismed-page-forest dd { color: rgba(255,255,255,0.86); }
+[data-tenant="chrismed"] .chrismed-page-forest a:not(.chrismed-cta):not([class*="bg-"]) {
+  color: var(--chrismed-amber);
+  text-decoration-color: rgba(228,181,74,0.35);
+}
+[data-tenant="chrismed"] .chrismed-page-forest a:not(.chrismed-cta):not([class*="bg-"]):hover {
+  color: #fff;
+}
 
 [data-tenant="chrismed"] .chrismed-page-mustard {
   background: linear-gradient(180deg, var(--chrismed-mustard-tint) 0%, var(--chrismed-mustard-soft) 100%);
