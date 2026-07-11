@@ -6,6 +6,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -392,11 +393,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
@@ -406,6 +407,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isChrismedRoute = pathname.startsWith("/chrismed");
   return (
     <QueryClientProvider client={queryClient}>
       <SkipLink />
@@ -422,10 +425,10 @@ function RootComponent() {
       <CoreCopyGuard />
       
       <Outlet />
-      <PoweredByImpulsionando />
+      {!isChrismedRoute && <PoweredByImpulsionando />}
       <LGPDBanner />
-      {/* Concierge Impulsionito — Onda A3 */}
-      <ImpulsionitoConcierge />
+      {/* Concierge Impulsionito — oculto na CHRISMED para não concorrer com Oliver. */}
+      {!isChrismedRoute && <ImpulsionitoConcierge />}
       <DemoAccessGate />
     </QueryClientProvider>
   );

@@ -16,103 +16,86 @@
  *  - foco preso enquanto aberto;
  *  - respeita prefers-reduced-motion via classes utilitárias.
  */
-import { useEffect, useMemo, useState } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
-import {
-  resolveOliverContext,
+  resolveOliverContextOverride,
   type OliverContext,
   type OliverQuickReply,
 } from '@/content/chrismed/oliver-contexts';
+import {
+  closeChrismedOliver,
+  focusChrismedOliverTrigger,
+  openChrismedOliver,
+  setChrismedOliverInfo,
+  useChrismedOliverState,
+} from './oliver-store';
 
 const WHATSAPP_ENABLED = false; // Codex libera quando URL + transferência de contexto forem validadas.
 
 export function ChrismedOliverPanel() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const defaultCtx = useMemo(() => resolveOliverContext(pathname), [pathname]);
-  const [override, setOverride] = useState<OliverContext | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+  const { open, context, info } = useChrismedOliverState();
 
-  const ctx = override ?? defaultCtx;
-
-
-
-
-
-  // Substitui / limpa o contexto ao mudar de rota.
-  useEffect(() => {
-    setOverride(null);
-    setInfo(null);
-    // Sai da CHRISMED → fecha o painel.
-    if (!pathname.startsWith('/chrismed')) setOpen(false);
-  }, [pathname]);
-
-  // Listeners globais.
-  useEffect(() => {
-    const onOpen = () => {
-      setInfo(null);
-      setOpen(true);
-    };
-    const onContext = (e: Event) => {
-      const detail = (e as CustomEvent).detail as Partial<OliverContext> | undefined;
-      if (!detail) return;
-      // Aceita override parcial; mescla sobre a base da rota.
-      setOverride({
-        key: detail.key ?? defaultCtx.key,
-        eyebrow: detail.eyebrow ?? defaultCtx.eyebrow,
-        greeting: detail.greeting ?? defaultCtx.greeting,
-        quickReplies: detail.quickReplies ?? defaultCtx.quickReplies,
-      });
-    };
-    window.addEventListener('chrismed:oliver:open', onOpen);
-    window.addEventListener('chrismed:oliver:context', onContext as EventListener);
-    return () => {
-      window.removeEventListener('chrismed:oliver:open', onOpen);
-      window.removeEventListener('chrismed:oliver:context', onContext as EventListener);
-    };
-  }, [defaultCtx]);
+  const ctx: OliverContext = resolveOliverContextOverride(pathname, context);
 
   const runReply = (r: OliverQuickReply) => {
-    setInfo(null);
+    setChrismedOliverInfo(null);
     if (r.kind === 'navigate') {
-      setOpen(false);
-      navigate({ to: r.to, search: (r.search ?? {}) as never });
+      closeChrismedOliver();
+      navigate({ to: r.to as never, search: (r.search ?? {}) as never });
       return;
     }
     if (r.kind === 'info') {
-      setInfo(r.message);
+      setChrismedOliverInfo(r.message);
       return;
     }
     if (r.kind === 'close') {
-      setOpen(false);
+      closeChrismedOliver();
     }
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent
-        side="right"
-        className="flex w-full flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] motion-reduce:transition-none motion-reduce:animate-none sm:max-w-md"
-      >
-        <SheetHeader className="border-b border-[var(--chrismed-sand)] px-6 py-5 text-left">
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen) openChrismedOliver();
+        else closeChrismedOliver();
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          onPointerDown={closeChrismedOliver}
+          className="fixed inset-0 z-[90] bg-[var(--chrismed-noir)]/45 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 motion-reduce:animate-none"
+        />
+        <DialogPrimitive.Content
+          data-chrismed-oliver-panel
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            focusChrismedOliverTrigger();
+          }}
+          className="fixed inset-y-0 right-0 z-[91] flex h-dvh w-full max-w-[min(100vw,28rem)] flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] shadow-[0_24px_80px_-24px_rgba(15,15,15,0.55)] outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none"
+        >
+        <div className="border-b border-[var(--chrismed-sand)] px-6 py-5 text-left">
           <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
             Oliver · {ctx.eyebrow}
           </p>
-          <SheetTitle className="chrismed-serif mt-1 text-2xl font-light text-[var(--chrismed-ink)]">
+          <DialogPrimitive.Title className="chrismed-serif mt-1 text-2xl font-light text-[var(--chrismed-ink)]">
             Concierge CHRISMED
-          </SheetTitle>
-          <SheetDescription className="chrismed-sans text-sm leading-relaxed text-[var(--chrismed-graphite)]">
+          </DialogPrimitive.Title>
+          <DialogPrimitive.Description className="chrismed-sans mt-2 pr-10 text-sm leading-relaxed text-[var(--chrismed-graphite)]">
             {ctx.greeting}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogPrimitive.Description>
+          <DialogPrimitive.Close
+            type="button"
+            aria-label="Fechar Oliver"
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center border border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </DialogPrimitive.Close>
+        </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
@@ -151,16 +134,16 @@ export function ChrismedOliverPanel() {
               disabled={!WHATSAPP_ENABLED}
               className="chrismed-sans mt-3 w-full cursor-not-allowed border border-dashed border-[var(--chrismed-sand)] bg-transparent px-4 py-3 text-left text-sm text-[var(--chrismed-mist)]"
               aria-disabled="true"
-              title="Disponível assim que o Codex fornecer o número oficial e a transferência de contexto."
             >
-              Continuar pelo WhatsApp — disponível em breve
+              Canal indisponível neste momento
             </button>
             <p className="chrismed-sans mt-3 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
-              A conversa com o agente ainda está em integração pelo Codex. Oliver oferece apoio administrativo — não diagnostica, não prescreve e não substitui avaliação médica.
+              Oliver oferece apoio administrativo — não diagnostica, não prescreve e não substitui avaliação médica.
             </p>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
