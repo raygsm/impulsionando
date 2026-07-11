@@ -28,14 +28,14 @@ function CheckoutPage() {
   return (
     <ChrismedShell variant="minimal">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-14 max-w-5xl">
+        <div className="container py-8 sm:py-14 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>
-          <p className="mt-4 text-[var(--chrismed-graphite)] max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
+          <h1 className="chrismed-serif text-3xl sm:text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-[var(--chrismed-graphite)] max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
         </div>
       </section>
 
-      <section className="container py-12 max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+      <section className="container py-8 sm:py-12 max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 sm:gap-8">
         {/* Coluna esquerda: método */}
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
