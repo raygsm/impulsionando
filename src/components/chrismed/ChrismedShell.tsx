@@ -226,19 +226,39 @@ export function ChrismedShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * OliverFab — launcher do concierge Oliver.
+ *
+ * ⚠️  V1: removido apontamento direto para WhatsApp (regra CHRISMED:
+ * "Nenhum CTA público deverá apontar diretamente para o WhatsApp.
+ *  O WhatsApp só poderá aparecer dentro da janela do Oliver.").
+ *
+ * Este launcher agora é um <button> que sinaliza a intenção de abrir
+ * o painel Oliver. A conexão com o painel real (chat, triagem, WA
+ * interno, transferência humana, seletor de idioma) entra na Onda V8.
+ */
 export function OliverFab() {
   const lang = useLang();
   const labels = {
-    pt: { title: 'Falar com Oliver', sub: 'Agente virtual CrisMed' },
-    en: { title: 'Talk to Oliver', sub: 'CrisMed virtual concierge' },
-    es: { title: 'Hablar con Oliver', sub: 'Concierge virtual CrisMed' },
+    pt: { title: 'Falar com Oliver', sub: 'Concierge CrisMed' },
+    en: { title: 'Talk to Oliver', sub: 'CrisMed concierge' },
+    es: { title: 'Hablar con Oliver', sub: 'Concierge CrisMed' },
   }[lang];
   return (
-    <a
+    <button
+      type="button"
       id="oliver"
-      href="https://wa.me/5521000000000?text=Ol%C3%A1%20Oliver%2C%20gostaria%20de%20atendimento%20CrisMed"
-      target="_blank"
-      rel="noreferrer"
+      data-oliver-launcher
+      aria-label={labels.title}
+      onClick={() => {
+        // TODO Onda V8: abrir painel Oliver (chat multilíngue + WA interno).
+        // Por ora, dispara evento custom para observabilidade sem side-effect.
+        try {
+          window.dispatchEvent(new CustomEvent('chrismed:oliver:open', { detail: { lang } }));
+        } catch {
+          /* noop */
+        }
+      }}
       className="fixed bottom-5 right-5 z-40 group flex items-center gap-3 rounded-full bg-emerald-950 text-amber-50 pl-3 pr-5 py-3 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] hover:bg-emerald-900 transition-all"
     >
       <span className="h-9 w-9 rounded-full bg-amber-300 text-emerald-950 font-serif text-lg flex items-center justify-center">O</span>
@@ -246,6 +266,7 @@ export function OliverFab() {
         <span className="block text-sm font-medium">{labels.title}</span>
         <span className="block text-[10px] uppercase tracking-wider text-amber-200/80">{labels.sub}</span>
       </span>
-    </a>
+    </button>
   );
 }
+
