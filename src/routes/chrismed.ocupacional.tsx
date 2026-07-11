@@ -153,7 +153,8 @@ function ChrismedOcupacionalPage() {
             {t.hero.lead}
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <Link to="/chrismed/agendar" className="inline-flex">
+            <Link to="/chrismed/ocupacional/agendar" search={{ service: 'aso' }} className="inline-flex">
+
               <ChrismedButton size="lg">{t.hero.ctaPrimary}</ChrismedButton>
             </Link>
             <ChrismedButton
@@ -182,7 +183,8 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Admissional · Periódico · Retorno · Mudança de função · Demissional.
               </p>
-              <Link to="/chrismed/agendar" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+              <Link to="/chrismed/ocupacional/agendar" search={{ service: 'aso' }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+
                 Agendar ASO →
               </Link>
             </div>
@@ -192,7 +194,7 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Entrega em até <strong>15 dias corridos</strong>, contados a partir da entrevista técnica e do recebimento integral da documentação.
               </p>
-              <Link to="/chrismed/agendar" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+              <Link to="/chrismed/ocupacional/agendar" search={{ service: 'pericia' }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
                 Agendar entrevista para laudo →
               </Link>
             </div>
@@ -343,7 +345,7 @@ function ChrismedOcupacionalPage() {
                 {t.journeyCompany.cta}
               </ChrismedButton>
             ) : (
-              <Link to="/chrismed/agendar" className="inline-flex">
+              <Link to="/chrismed/ocupacional/agendar" search={{ service: 'aso' }} className="inline-flex">
                 <ChrismedButton size="lg">{t.journeyEmployee.cta}</ChrismedButton>
               </Link>
             )}
