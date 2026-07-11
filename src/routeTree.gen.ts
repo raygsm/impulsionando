@@ -697,6 +697,7 @@ import { Route as MarocasAppHospedeIndexRouteImport } from './routes/marocas.app
 import { Route as MarocasAppAnfitriaoIndexRouteImport } from './routes/marocas.app.anfitriao.index'
 import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_authenticated/core.tenants.index'
 import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
+import { Route as AuthenticatedCoreIntegracoesIndexRouteImport } from './routes/_authenticated/core.integracoes.index'
 import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './routes/_authenticated/core.estudio-visual.index'
 import { Route as AuthenticatedCoreComercialIndexRouteImport } from './routes/_authenticated/core.comercial.index'
 import { Route as AuthenticatedCoreAutomacaoIndexRouteImport } from './routes/_authenticated/core.automacao.index'
@@ -814,9 +815,13 @@ import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './route
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
 import { Route as AuthenticatedCoreMarketplaceFinanceiroRouteImport } from './routes/_authenticated/core.marketplace.financeiro'
 import { Route as AuthenticatedCoreMarketplaceCompradoresRouteImport } from './routes/_authenticated/core.marketplace.compradores'
+import { Route as AuthenticatedCoreMarketingDashboardRouteImport } from './routes/_authenticated/core.marketing.dashboard'
+import { Route as AuthenticatedCoreIntegracoesOmnichannelRouteImport } from './routes/_authenticated/core.integracoes.omnichannel'
 import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_authenticated/core.integracoes.n8n'
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
+import { Route as AuthenticatedCoreIntegracoesAlertasRouteImport } from './routes/_authenticated/core.integracoes.alertas'
+import { Route as AuthenticatedCoreIntegracoesGrupoRouteImport } from './routes/_authenticated/core.integracoes.$grupo'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedCoreAutomacaoWebhooksRouteImport } from './routes/_authenticated/core.automacao.webhooks'
 import { Route as AuthenticatedCoreAutomacaoTemplatesRouteImport } from './routes/_authenticated/core.automacao.templates'
@@ -857,6 +862,7 @@ import { Route as ApiPublicRiomedBroadcastsDueRouteImport } from './routes/api/p
 import { Route as ApiPublicRiomedArOverdueRouteImport } from './routes/api/public/riomed/ar/overdue'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
+import { Route as AuthenticatedCoreIntegracoesGrupoSlugRouteImport } from './routes/_authenticated/core.integracoes.$grupo.$slug'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
 import { Route as AuthenticatedAdminClientesRiomedVendedoresRouteImport } from './routes/_authenticated/admin.clientes.riomed.vendedores'
 import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
@@ -4712,6 +4718,12 @@ const AuthenticatedCoreNichosIndexRoute =
     path: '/nichos/',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreIntegracoesIndexRoute =
+  AuthenticatedCoreIntegracoesIndexRouteImport.update({
+    id: '/integracoes/',
+    path: '/integracoes/',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreEstudioVisualIndexRoute =
   AuthenticatedCoreEstudioVisualIndexRouteImport.update({
     id: '/estudio-visual/',
@@ -5395,6 +5407,18 @@ const AuthenticatedCoreMarketplaceCompradoresRoute =
     path: '/compradores',
     getParentRoute: () => AuthenticatedCoreMarketplaceRoute,
   } as any)
+const AuthenticatedCoreMarketingDashboardRoute =
+  AuthenticatedCoreMarketingDashboardRouteImport.update({
+    id: '/marketing/dashboard',
+    path: '/marketing/dashboard',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreIntegracoesOmnichannelRoute =
+  AuthenticatedCoreIntegracoesOmnichannelRouteImport.update({
+    id: '/integracoes/omnichannel',
+    path: '/integracoes/omnichannel',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreIntegracoesN8nRoute =
   AuthenticatedCoreIntegracoesN8nRouteImport.update({
     id: '/integracoes/n8n',
@@ -5411,6 +5435,18 @@ const AuthenticatedCoreIntegracoesDiagnosticoRoute =
   AuthenticatedCoreIntegracoesDiagnosticoRouteImport.update({
     id: '/integracoes/diagnostico',
     path: '/integracoes/diagnostico',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreIntegracoesAlertasRoute =
+  AuthenticatedCoreIntegracoesAlertasRouteImport.update({
+    id: '/integracoes/alertas',
+    path: '/integracoes/alertas',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreIntegracoesGrupoRoute =
+  AuthenticatedCoreIntegracoesGrupoRouteImport.update({
+    id: '/integracoes/$grupo',
+    path: '/integracoes/$grupo',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreClienteIdRoute =
@@ -5650,6 +5686,12 @@ const AuthenticatedImobiliariaAprovacoesIdImprimirRoute =
     id: '/$id/imprimir',
     path: '/$id/imprimir',
     getParentRoute: () => AuthenticatedImobiliariaAprovacoesRoute,
+  } as any)
+const AuthenticatedCoreIntegracoesGrupoSlugRoute =
+  AuthenticatedCoreIntegracoesGrupoSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedCoreIntegracoesGrupoRoute,
   } as any)
 const AuthenticatedCoreClienteIdPaginasRoute =
   AuthenticatedCoreClienteIdPaginasRouteImport.update({
@@ -6682,9 +6724,13 @@ export interface FileRoutesByFullPath {
   '/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
   '/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/$grupo': typeof AuthenticatedCoreIntegracoesGrupoRouteWithChildren
+  '/core/integracoes/alertas': typeof AuthenticatedCoreIntegracoesAlertasRoute
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/core/integracoes/omnichannel': typeof AuthenticatedCoreIntegracoesOmnichannelRoute
+  '/core/marketing/dashboard': typeof AuthenticatedCoreMarketingDashboardRoute
   '/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
   '/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
@@ -6802,6 +6848,7 @@ export interface FileRoutesByFullPath {
   '/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
   '/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/core/integracoes/': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
@@ -6858,6 +6905,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
@@ -7559,9 +7607,13 @@ export interface FileRoutesByTo {
   '/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
   '/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/$grupo': typeof AuthenticatedCoreIntegracoesGrupoRouteWithChildren
+  '/core/integracoes/alertas': typeof AuthenticatedCoreIntegracoesAlertasRoute
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/core/integracoes/omnichannel': typeof AuthenticatedCoreIntegracoesOmnichannelRoute
+  '/core/marketing/dashboard': typeof AuthenticatedCoreMarketingDashboardRoute
   '/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
   '/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
@@ -7679,6 +7731,7 @@ export interface FileRoutesByTo {
   '/core/automacao': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial': typeof AuthenticatedCoreComercialIndexRoute
   '/core/estudio-visual': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/core/integracoes': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
   '/core/tenants': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao': typeof MarocasAppAnfitriaoIndexRoute
@@ -7735,6 +7788,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
@@ -8463,9 +8517,13 @@ export interface FileRoutesById {
   '/_authenticated/core/automacao/templates': typeof AuthenticatedCoreAutomacaoTemplatesRoute
   '/_authenticated/core/automacao/webhooks': typeof AuthenticatedCoreAutomacaoWebhooksRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/_authenticated/core/integracoes/$grupo': typeof AuthenticatedCoreIntegracoesGrupoRouteWithChildren
+  '/_authenticated/core/integracoes/alertas': typeof AuthenticatedCoreIntegracoesAlertasRoute
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/_authenticated/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/_authenticated/core/integracoes/omnichannel': typeof AuthenticatedCoreIntegracoesOmnichannelRoute
+  '/_authenticated/core/marketing/dashboard': typeof AuthenticatedCoreMarketingDashboardRoute
   '/_authenticated/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
   '/_authenticated/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
@@ -8583,6 +8641,7 @@ export interface FileRoutesById {
   '/_authenticated/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/_authenticated/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
   '/_authenticated/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
+  '/_authenticated/core/integracoes/': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
   '/_authenticated/core/tenants/': typeof AuthenticatedCoreTenantsIndexRoute
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
@@ -8639,6 +8698,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/_authenticated/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/_authenticated/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
@@ -9367,9 +9427,13 @@ export interface FileRouteTypes {
     | '/core/automacao/templates'
     | '/core/automacao/webhooks'
     | '/core/cliente/$id'
+    | '/core/integracoes/$grupo'
+    | '/core/integracoes/alertas'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
+    | '/core/integracoes/omnichannel'
+    | '/core/marketing/dashboard'
     | '/core/marketplace/compradores'
     | '/core/marketplace/financeiro'
     | '/core/marketplace/fornecedores'
@@ -9487,6 +9551,7 @@ export interface FileRouteTypes {
     | '/core/automacao/'
     | '/core/comercial/'
     | '/core/estudio-visual/'
+    | '/core/integracoes/'
     | '/core/nichos/'
     | '/core/tenants/'
     | '/marocas/app/anfitriao/'
@@ -9543,6 +9608,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/routing'
     | '/admin/clientes/riomed/vendedores'
     | '/core/cliente/$id/paginas'
+    | '/core/integracoes/$grupo/$slug'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
@@ -10244,9 +10310,13 @@ export interface FileRouteTypes {
     | '/core/automacao/templates'
     | '/core/automacao/webhooks'
     | '/core/cliente/$id'
+    | '/core/integracoes/$grupo'
+    | '/core/integracoes/alertas'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
+    | '/core/integracoes/omnichannel'
+    | '/core/marketing/dashboard'
     | '/core/marketplace/compradores'
     | '/core/marketplace/financeiro'
     | '/core/marketplace/fornecedores'
@@ -10364,6 +10434,7 @@ export interface FileRouteTypes {
     | '/core/automacao'
     | '/core/comercial'
     | '/core/estudio-visual'
+    | '/core/integracoes'
     | '/core/nichos'
     | '/core/tenants'
     | '/marocas/app/anfitriao'
@@ -10420,6 +10491,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/routing'
     | '/admin/clientes/riomed/vendedores'
     | '/core/cliente/$id/paginas'
+    | '/core/integracoes/$grupo/$slug'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
@@ -11147,9 +11219,13 @@ export interface FileRouteTypes {
     | '/_authenticated/core/automacao/templates'
     | '/_authenticated/core/automacao/webhooks'
     | '/_authenticated/core/cliente/$id'
+    | '/_authenticated/core/integracoes/$grupo'
+    | '/_authenticated/core/integracoes/alertas'
     | '/_authenticated/core/integracoes/diagnostico'
     | '/_authenticated/core/integracoes/mercadopago'
     | '/_authenticated/core/integracoes/n8n'
+    | '/_authenticated/core/integracoes/omnichannel'
+    | '/_authenticated/core/marketing/dashboard'
     | '/_authenticated/core/marketplace/compradores'
     | '/_authenticated/core/marketplace/financeiro'
     | '/_authenticated/core/marketplace/fornecedores'
@@ -11267,6 +11343,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/automacao/'
     | '/_authenticated/core/comercial/'
     | '/_authenticated/core/estudio-visual/'
+    | '/_authenticated/core/integracoes/'
     | '/_authenticated/core/nichos/'
     | '/_authenticated/core/tenants/'
     | '/marocas/app/anfitriao/'
@@ -11323,6 +11400,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/routing'
     | '/_authenticated/admin/clientes/riomed/vendedores'
     | '/_authenticated/core/cliente/$id/paginas'
+    | '/_authenticated/core/integracoes/$grupo/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
@@ -16367,6 +16445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreNichosIndexRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/integracoes/': {
+      id: '/_authenticated/core/integracoes/'
+      path: '/integracoes'
+      fullPath: '/core/integracoes/'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/estudio-visual/': {
       id: '/_authenticated/core/estudio-visual/'
       path: '/estudio-visual'
@@ -17186,6 +17271,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreMarketplaceCompradoresRouteImport
       parentRoute: typeof AuthenticatedCoreMarketplaceRoute
     }
+    '/_authenticated/core/marketing/dashboard': {
+      id: '/_authenticated/core/marketing/dashboard'
+      path: '/marketing/dashboard'
+      fullPath: '/core/marketing/dashboard'
+      preLoaderRoute: typeof AuthenticatedCoreMarketingDashboardRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/integracoes/omnichannel': {
+      id: '/_authenticated/core/integracoes/omnichannel'
+      path: '/integracoes/omnichannel'
+      fullPath: '/core/integracoes/omnichannel'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesOmnichannelRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/integracoes/n8n': {
       id: '/_authenticated/core/integracoes/n8n'
       path: '/integracoes/n8n'
@@ -17205,6 +17304,20 @@ declare module '@tanstack/react-router' {
       path: '/integracoes/diagnostico'
       fullPath: '/core/integracoes/diagnostico'
       preLoaderRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/integracoes/alertas': {
+      id: '/_authenticated/core/integracoes/alertas'
+      path: '/integracoes/alertas'
+      fullPath: '/core/integracoes/alertas'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesAlertasRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/integracoes/$grupo': {
+      id: '/_authenticated/core/integracoes/$grupo'
+      path: '/integracoes/$grupo'
+      fullPath: '/core/integracoes/$grupo'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesGrupoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/cliente/$id': {
@@ -17486,6 +17599,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/imobiliaria/aprovacoes/$id/imprimir'
       preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport
       parentRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
+    }
+    '/_authenticated/core/integracoes/$grupo/$slug': {
+      id: '/_authenticated/core/integracoes/$grupo/$slug'
+      path: '/$slug'
+      fullPath: '/core/integracoes/$grupo/$slug'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesGrupoSlugRouteImport
+      parentRoute: typeof AuthenticatedCoreIntegracoesGrupoRoute
     }
     '/_authenticated/core/cliente/$id/paginas': {
       id: '/_authenticated/core/cliente/$id/paginas'
@@ -18170,6 +18290,21 @@ const AuthenticatedCoreClienteIdRouteWithChildren =
     AuthenticatedCoreClienteIdRouteChildren,
   )
 
+interface AuthenticatedCoreIntegracoesGrupoRouteChildren {
+  AuthenticatedCoreIntegracoesGrupoSlugRoute: typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
+}
+
+const AuthenticatedCoreIntegracoesGrupoRouteChildren: AuthenticatedCoreIntegracoesGrupoRouteChildren =
+  {
+    AuthenticatedCoreIntegracoesGrupoSlugRoute:
+      AuthenticatedCoreIntegracoesGrupoSlugRoute,
+  }
+
+const AuthenticatedCoreIntegracoesGrupoRouteWithChildren =
+  AuthenticatedCoreIntegracoesGrupoRoute._addFileChildren(
+    AuthenticatedCoreIntegracoesGrupoRouteChildren,
+  )
+
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreAutomacaoRoute: typeof AuthenticatedCoreAutomacaoRouteWithChildren
   AuthenticatedCoreBiEcossistemaRoute: typeof AuthenticatedCoreBiEcossistemaRoute
@@ -18219,15 +18354,20 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRouteWithChildren
+  AuthenticatedCoreIntegracoesGrupoRoute: typeof AuthenticatedCoreIntegracoesGrupoRouteWithChildren
+  AuthenticatedCoreIntegracoesAlertasRoute: typeof AuthenticatedCoreIntegracoesAlertasRoute
   AuthenticatedCoreIntegracoesDiagnosticoRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   AuthenticatedCoreIntegracoesMercadopagoRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
+  AuthenticatedCoreIntegracoesOmnichannelRoute: typeof AuthenticatedCoreIntegracoesOmnichannelRoute
+  AuthenticatedCoreMarketingDashboardRoute: typeof AuthenticatedCoreMarketingDashboardRoute
   AuthenticatedCoreNichosSlugRoute: typeof AuthenticatedCoreNichosSlugRoute
   AuthenticatedCoreTenantsDominiosRoute: typeof AuthenticatedCoreTenantsDominiosRoute
   AuthenticatedCoreTenantsNovoRoute: typeof AuthenticatedCoreTenantsNovoRoute
   AuthenticatedCoreAdministracaoIndexRoute: typeof AuthenticatedCoreAdministracaoIndexRoute
   AuthenticatedCoreComercialIndexRoute: typeof AuthenticatedCoreComercialIndexRoute
   AuthenticatedCoreEstudioVisualIndexRoute: typeof AuthenticatedCoreEstudioVisualIndexRoute
+  AuthenticatedCoreIntegracoesIndexRoute: typeof AuthenticatedCoreIntegracoesIndexRoute
   AuthenticatedCoreNichosIndexRoute: typeof AuthenticatedCoreNichosIndexRoute
   AuthenticatedCoreTenantsIndexRoute: typeof AuthenticatedCoreTenantsIndexRoute
 }
@@ -18289,11 +18429,19 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRouteWithChildren,
+  AuthenticatedCoreIntegracoesGrupoRoute:
+    AuthenticatedCoreIntegracoesGrupoRouteWithChildren,
+  AuthenticatedCoreIntegracoesAlertasRoute:
+    AuthenticatedCoreIntegracoesAlertasRoute,
   AuthenticatedCoreIntegracoesDiagnosticoRoute:
     AuthenticatedCoreIntegracoesDiagnosticoRoute,
   AuthenticatedCoreIntegracoesMercadopagoRoute:
     AuthenticatedCoreIntegracoesMercadopagoRoute,
   AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,
+  AuthenticatedCoreIntegracoesOmnichannelRoute:
+    AuthenticatedCoreIntegracoesOmnichannelRoute,
+  AuthenticatedCoreMarketingDashboardRoute:
+    AuthenticatedCoreMarketingDashboardRoute,
   AuthenticatedCoreNichosSlugRoute: AuthenticatedCoreNichosSlugRoute,
   AuthenticatedCoreTenantsDominiosRoute: AuthenticatedCoreTenantsDominiosRoute,
   AuthenticatedCoreTenantsNovoRoute: AuthenticatedCoreTenantsNovoRoute,
@@ -18302,6 +18450,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreComercialIndexRoute: AuthenticatedCoreComercialIndexRoute,
   AuthenticatedCoreEstudioVisualIndexRoute:
     AuthenticatedCoreEstudioVisualIndexRoute,
+  AuthenticatedCoreIntegracoesIndexRoute:
+    AuthenticatedCoreIntegracoesIndexRoute,
   AuthenticatedCoreNichosIndexRoute: AuthenticatedCoreNichosIndexRoute,
   AuthenticatedCoreTenantsIndexRoute: AuthenticatedCoreTenantsIndexRoute,
 }
