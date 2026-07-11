@@ -255,4 +255,64 @@
   border-color: var(--chrismed-forest);
 }
 
+/* ═════════════════ Microinterações editoriais CHRISMED ═════════════════
+   Animações discretas, próprias de marca médica premium. Nunca chamativas.
+   Respeitam prefers-reduced-motion. */
+@keyframes chrismed-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes chrismed-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes chrismed-glow {
+  0%, 100% { box-shadow: 0 20px 60px -20px rgba(228,181,74,0.35); }
+  50%      { box-shadow: 0 24px 70px -18px rgba(228,181,74,0.55); }
+}
+
+[data-tenant="chrismed"] .chrismed-rise {
+  opacity: 0;
+  animation: chrismed-rise 900ms var(--chrismed-ease-out) forwards;
+}
+[data-tenant="chrismed"] .chrismed-rise-delay-1 { animation-delay: 120ms; }
+[data-tenant="chrismed"] .chrismed-rise-delay-2 { animation-delay: 240ms; }
+[data-tenant="chrismed"] .chrismed-rise-delay-3 { animation-delay: 360ms; }
+[data-tenant="chrismed"] .chrismed-rise-delay-4 { animation-delay: 480ms; }
+
+[data-tenant="chrismed"] .chrismed-fade-slow {
+  animation: chrismed-fade 1400ms var(--chrismed-ease-out) both;
+}
+
+/* Elevação sutil em cards editoriais — próprio para páginas verde/mustard. */
+[data-tenant="chrismed"] .chrismed-card-lift {
+  transition:
+    transform var(--chrismed-dur-base) var(--chrismed-ease-out),
+    border-color var(--chrismed-dur-base) var(--chrismed-ease-out),
+    box-shadow var(--chrismed-dur-base) var(--chrismed-ease-out),
+    background-color var(--chrismed-dur-base) var(--chrismed-ease-out);
+}
+[data-tenant="chrismed"] .chrismed-card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 70px -30px rgba(0,0,0,0.45);
+}
+
+/* CTA com brilho respirado: usa animação lenta apenas no hover. */
+[data-tenant="chrismed"] .chrismed-cta-glow:hover {
+  animation: chrismed-glow 2600ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tenant="chrismed"] .chrismed-rise,
+  [data-tenant="chrismed"] .chrismed-fade-slow,
+  [data-tenant="chrismed"] .chrismed-card-lift,
+  [data-tenant="chrismed"] .chrismed-cta-glow {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
 
