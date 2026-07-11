@@ -97,9 +97,7 @@ export function ChrismedOliverPanel() {
   };
 
   return (
-    <>
-      <span data-oliver-panel-mounted="true" hidden />
-      <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] motion-reduce:transition-none motion-reduce:animate-none sm:max-w-md"
@@ -164,6 +162,5 @@ export function ChrismedOliverPanel() {
         </div>
       </SheetContent>
     </Sheet>
-    </>
   );
 }
