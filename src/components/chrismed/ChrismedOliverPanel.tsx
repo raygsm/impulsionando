@@ -28,7 +28,6 @@ import {
   useChrismedOliverState,
 } from './oliver-store';
 
-const WHATSAPP_ENABLED = true;
 const C = CHRISMED_CONTACT.channels;
 
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
