@@ -75,12 +75,27 @@ type NavItem = NavLeaf | NavGroup;
 
 const isGroup = (i: NavItem): i is NavGroup => 'children' in i;
 
-// IA reorganizada: 5 pontos de entrada — Atendimento (dropdown), Especialidades,
-// Médicos, Empresa, Contato. "Dra. Cristiane" fica ancorada no logo.
+type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: FlagKey; setLang?: Lang };
+type NavGroup = {
+  key: string;
+  labels: Record<Lang, string>;
+  children: NavLeaf[];
+};
+type NavItem = NavLeaf | NavGroup;
+
+const isGroup = (i: NavItem): i is NavGroup => 'children' in i;
+
+// Arquitetura definitiva do menu (2026-07): 6 pontos de entrada na ordem
+// pedida pela cliente — Dra. Christiane (Home) · Medicina Ambulatorial ▾ ·
+// Medicina Ocupacional · Contato · GMS ▾ (com bandeiras BR/UK/ES) · Agendar.
 const NAV: NavItem[] = [
   {
-    key: 'atendimento',
-    labels: { pt: 'Atendimento', en: 'Care', es: 'Atención' },
+    to: '/chrismed',
+    labels: { pt: 'Dra. Christiane Alencar', en: 'Dr. Christiane Alencar', es: 'Dra. Christiane Alencar' },
+  },
+  {
+    key: 'ambulatorial',
+    labels: { pt: 'Medicina Ambulatorial', en: 'Ambulatory Care', es: 'Medicina Ambulatoria' },
     children: [
       {
         to: '/chrismed/teleconsulta',
@@ -109,32 +124,40 @@ const NAV: NavItem[] = [
           es: 'Residencia, hotel u oficina',
         },
       },
+    ],
+  },
+  {
+    to: '/chrismed/ocupacional',
+    labels: { pt: 'Medicina Ocupacional', en: 'Occupational Medicine', es: 'Medicina Ocupacional' },
+  },
+  { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
+  {
+    key: 'gms',
+    labels: { pt: 'GMS · Global Medical Support', en: 'GMS · Global Medical Support', es: 'GMS · Global Medical Support' },
+    children: [
+      {
+        to: '/chrismed',
+        labels: { pt: 'Português (Brasil)', en: 'Portuguese (Brazil)', es: 'Portugués (Brasil)' },
+        desc: { pt: 'Atendimento nacional', en: 'Nationwide care', es: 'Atención nacional' },
+        icon: 'br',
+        setLang: 'pt',
+      },
       {
         to: '/chrismed/internacional',
         labels: { pt: 'GMS · Services for foreigners', en: 'GMS · Services for foreigners', es: 'GMS · Services for foreigners' },
-        desc: {
-          pt: 'Global Medical Services — English-speaking care',
-          en: 'Global Medical Services — English-speaking care',
-          es: 'Global Medical Services — English-speaking care',
-        },
+        desc: { pt: 'English-speaking medical care', en: 'English-speaking medical care', es: 'English-speaking medical care' },
         icon: 'uk',
+        setLang: 'en',
       },
       {
         to: '/chrismed/internacional',
         labels: { pt: 'GMS · Servicios para extranjeros', en: 'GMS · Servicios para extranjeros', es: 'GMS · Servicios para extranjeros' },
-        desc: {
-          pt: 'Global Medical Services — atención en español',
-          en: 'Global Medical Services — atención en español',
-          es: 'Global Medical Services — atención en español',
-        },
+        desc: { pt: 'Atención médica en español', en: 'Atención médica en español', es: 'Atención médica en español' },
         icon: 'es',
+        setLang: 'es',
       },
     ],
   },
-  { to: '/chrismed/especialidades', labels: { pt: 'Especialidades', en: 'Specialties', es: 'Especialidades' } },
-  { to: '/chrismed/medicos', labels: { pt: 'Médicos', en: 'Doctors', es: 'Médicos' } },
-  { to: '/chrismed/ocupacional', labels: { pt: 'Empresa', en: 'Business', es: 'Empresa' } },
-  { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
 ];
 
 const CTA = {
@@ -146,6 +169,7 @@ export function useLang(): Lang {
   const raw = (search?.lang as string | undefined) ?? 'pt';
   return (['pt', 'en', 'es'].includes(raw) ? raw : 'pt') as Lang;
 }
+
 
 function LangSwitcher({ lang, tone = 'light' }: { lang: Lang; tone?: 'light' | 'dark' }) {
   const navigate = useNavigate();
