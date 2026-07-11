@@ -140,7 +140,7 @@ function ChrismedOcupacionalPage() {
   return (
     <ChrismedShell>
       {/* 1 · Hero editorial ─────────────────────── */}
-      <ChrismedSection tone="ivory" className="pt-20 md:pt-28">
+      <ChrismedSection className="pt-20 md:pt-28">
         <div className="mx-auto max-w-3xl text-left">
           <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
           <ChrismedHeading level={1} className="mt-6">
@@ -233,7 +233,7 @@ function ChrismedOcupacionalPage() {
 
       {/* 3-4 · Jornada (empresa | colaborador) ─── */}
       <ChrismedSection
-        tone="ivory"
+       
         id="chrismed-oc-panel"
         aria-labelledby={
           audience === 'empresa'
@@ -298,7 +298,7 @@ function ChrismedOcupacionalPage() {
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {t.services.items.map((item) => (
-              <ChrismedCard key={item.title} tone="ivory" className="p-8">
+              <ChrismedCard key={item.title} className="p-8">
                 <div className="chrismed-sans text-[10px] uppercase tracking-[0.22em] text-[var(--chrismed-champagne-deep)]">
                   {item.tag}
                 </div>
@@ -319,7 +319,7 @@ function ChrismedOcupacionalPage() {
       </ChrismedSection>
 
       {/* 6 · Como funciona o agendamento ────────── */}
-      <ChrismedSection tone="ivory">
+      <ChrismedSection>
         <div className="mx-auto max-w-4xl">
           <ChrismedEyebrow>{t.scheduling.eyebrow}</ChrismedEyebrow>
           <ChrismedHeading level={2} className="mt-4">
@@ -368,10 +368,10 @@ function ChrismedOcupacionalPage() {
       </ChrismedSection>
 
       {/* 8 · Oliver contextual ──────────────────── */}
-      <ChrismedSection tone="ink">
+      <ChrismedSection tone="noir">
         <div className="mx-auto flex max-w-3xl flex-col items-start gap-8">
-          <ChrismedEyebrow tone="light">{t.oliver.eyebrow}</ChrismedEyebrow>
-          <ChrismedHeading level={2} tone="light">
+          <ChrismedEyebrow>{t.oliver.eyebrow}</ChrismedEyebrow>
+          <ChrismedHeading level={2}>
             {t.oliver.title}
           </ChrismedHeading>
           <p className="chrismed-sans max-w-[52ch] text-base leading-relaxed text-[var(--chrismed-ivory)]/85">
@@ -382,7 +382,7 @@ function ChrismedOcupacionalPage() {
       </ChrismedSection>
 
       {/* 9 · Fechamento editorial ───────────────── */}
-      <ChrismedSection tone="ivory">
+      <ChrismedSection>
         <div className="mx-auto max-w-3xl text-left">
           <ChrismedHeading level={3}>{t.closing.title}</ChrismedHeading>
           <p className="chrismed-sans mt-6 max-w-[52ch] text-base leading-relaxed text-[var(--chrismed-graphite)]">
