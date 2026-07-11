@@ -18,7 +18,7 @@ import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { TenantHostFallback } from "@/components/app/TenantHostFallback";
-import { ImpulsionitoPanel } from "@/components/marketing/ImpulsionitoPanel";
+import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import { getTenantSubdomain, tenantSubdomainTarget, deprecatedSubdomainRedirect } from "@/lib/subdomain";
