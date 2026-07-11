@@ -19,6 +19,7 @@
  */
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChrismedShell, useLang, type Lang } from '@/components/chrismed/ChrismedShell';
+import { ChrismedFlagsBar } from '@/components/chrismed/ChrismedFlagsBar';
 import {
   ChrismedSection,
   ChrismedHeading,
@@ -124,6 +125,7 @@ function DraCristianePage() {
 
   return (
     <ChrismedShell>
+      <div className="mx-auto w-full max-w-6xl px-4 pt-4"><ChrismedFlagsBar tone="light" align="right" /></div>
       {/* ─────────── 1. Hero editorial ───────────
 
           Composição varia se houver retrato autorizado (regra V2:

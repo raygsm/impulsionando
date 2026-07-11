@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
+import { ChrismedFlagsBar } from '@/components/chrismed/ChrismedFlagsBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Video, Globe2, CreditCard, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
@@ -20,7 +21,8 @@ function TeleconsultaPage() {
   return (
     <ChrismedShell><div className="chrismed-page-mustard">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-20 max-w-5xl">
+        <div className="container mx-auto px-4 py-20 max-w-5xl">
+          <ChrismedFlagsBar tone="light" align="right" className="mb-6" />
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] hover:bg-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">
             Teleconsulta médica
           </Badge>
@@ -47,7 +49,7 @@ function TeleconsultaPage() {
         </div>
       </section>
 
-      <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
+      <section className="container mx-auto px-4 py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div>
           <h2 className="chrismed-serif text-2xl text-[var(--chrismed-ink)] flex items-center gap-2"><Video className="h-5 w-5" /> Como funciona</h2>
           <ol className="mt-5 space-y-3 text-[var(--chrismed-graphite)] list-decimal pl-5">

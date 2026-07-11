@@ -23,6 +23,7 @@
  */
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChrismedShell, useLang, type Lang } from '@/components/chrismed/ChrismedShell';
+import { ChrismedFlagsBar } from '@/components/chrismed/ChrismedFlagsBar';
 import {
   ChrismedSection,
   ChrismedHeading,
@@ -85,6 +86,7 @@ function ChrismedHomePage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
+      <div className="mx-auto w-full max-w-6xl px-4 pt-4"><ChrismedFlagsBar tone="light" align="right" /></div>
       {/* ─────────── Seção 1 — Hero editorial em verde institucional ─────────── */}
       <ChrismedSection tone="forest" className="relative overflow-hidden pt-24 md:pt-32">
         <div
