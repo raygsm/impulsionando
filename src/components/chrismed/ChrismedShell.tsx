@@ -223,16 +223,18 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
           className="absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-2"
         >
           <div className="overflow-hidden rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-lg)]">
-            {group.children.map((leaf) => (
+            {group.children.map((leaf) => {
+              const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
+              return (
               <Link
                 key={`${leaf.to}-${leaf.labels.pt}`}
                 to={leaf.to}
+                search={leaf.setLang ? (prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never : undefined}
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
               >
-                {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
-                {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                {Flag && <Flag className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
                 <div className="min-w-0">
                   <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
                     {leaf.labels[lang]}
