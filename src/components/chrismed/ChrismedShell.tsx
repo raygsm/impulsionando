@@ -373,17 +373,19 @@ function MobileDrawer({
                 </div>
                 {item.children.map((leaf) => (
                   <Link
-                    key={leaf.to}
+                    key={`${leaf.to}-${leaf.labels.pt}`}
                     to={leaf.to}
                     onClick={onClose}
                     className={cn(
-                      'block rounded-md px-3 py-2.5 text-[15px]',
+                      'flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px]',
                       pathname === leaf.to
                         ? 'bg-[var(--chrismed-bone)] text-[var(--chrismed-forest-deep)]'
                         : 'text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]',
                     )}
                   >
-                    {leaf.labels[lang]}
+                    {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    <span className="min-w-0 truncate">{leaf.labels[lang]}</span>
                   </Link>
                 ))}
               </div>
