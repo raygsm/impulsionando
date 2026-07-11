@@ -3,8 +3,39 @@ import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { MoreContentFab } from '@/components/impulsionando';
-import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
+import { ChrismedOliverPanel } from './ChrismedOliverPanel';
+
+/**
+ * Wordmark tipográfico CHRISMED — fallback oficial V3.F.
+ * Substitui o PNG anterior (que carregava fundo preto embutido) até que
+ * o Codex/marca forneça um asset com fundo transparente aprovado.
+ * Usa exclusivamente tokens --chrismed-* (nada de cores hardcoded).
+ */
+function ChrismedWordmark({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  const cls =
+    size === 'sm'
+      ? 'text-lg tracking-[0.28em]'
+      : 'text-xl md:text-[1.35rem] tracking-[0.32em]';
+  return (
+    <span className="inline-flex items-baseline gap-2 leading-none">
+      <span
+        aria-hidden
+        className={cn(
+          'chrismed-serif font-light text-[var(--chrismed-ink)]',
+          cls,
+        )}
+      >
+        CHRISMED
+      </span>
+      <span
+        aria-hidden
+        className="chrismed-sans text-[9px] uppercase tracking-[0.35em] text-[var(--chrismed-champagne-deep)]"
+      >
+        · MD
+      </span>
+    </span>
+  );
+}
 
 export type Lang = 'pt' | 'en' | 'es';
 
