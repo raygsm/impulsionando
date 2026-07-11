@@ -1050,10 +1050,10 @@ const COPY: Record<Lang, Copy> = {
             'Consultorio reservado, agenda con horario y recepción discreta. Tiempo dedicado antes, durante y después de la consulta.',
         },
         {
-          eyebrow: 'Casa · Hotel',
-          title: 'Visita a domicilio',
+          eyebrow: 'Donde usted esté',
+          title: 'Domiciliaria',
           description:
-            'Atención en su residencia, hotel u oficina, con el mismo rigor clínico y la privacidad que su rutina exige.',
+            'Atención domiciliaria — donde usted esté — con el mismo rigor clínico y la privacidad que su rutina exige.',
         },
       ],
     },
