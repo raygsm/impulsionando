@@ -3,6 +3,9 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, MapPin, Clock, RefreshCw, CreditCard } from 'lucide-react';
+import consultorioExame from '@/assets/chrismed/consultorio-exame.jpg.asset.json';
+import consultorioRecepcao from '@/assets/chrismed/consultorio-recepcao.jpg.asset.json';
+import consultorioEspera from '@/assets/chrismed/consultorio-espera.jpg.asset.json';
 
 export const Route = createFileRoute('/chrismed/consultorio')({
   head: () => ({
