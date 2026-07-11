@@ -32,7 +32,16 @@ function ChrismedWordmark({ variant = 'default' }: { variant?: 'default' | 'sm' 
 
 export type Lang = 'pt' | 'en' | 'es';
 
-/** Bandeiras SVG minimalistas para as duas ofertas GMS. */
+/** Bandeiras SVG minimalistas — usadas no bloco GMS e menu. Ordem oficial: Brasil, Inglaterra, Espanha. */
+function FlagBR({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 42" className={className} aria-hidden>
+      <path d="M0,0 h60 v42 h-60 z" fill="#009B3A" />
+      <path d="M30,4 L56,21 L30,38 L4,21 z" fill="#FEDF00" />
+      <circle cx="30" cy="21" r="8" fill="#002776" />
+    </svg>
+  );
+}
 function FlagUK({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 60 30" className={className} aria-hidden>
@@ -53,8 +62,11 @@ function FlagES({ className }: { className?: string }) {
     </svg>
   );
 }
+const FLAG_MAP = { br: FlagBR, uk: FlagUK, es: FlagES } as const;
+type FlagKey = keyof typeof FLAG_MAP;
 
-type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: 'uk' | 'es' };
+
+type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: FlagKey; setLang?: Lang };
 type NavGroup = {
   key: string;
   labels: Record<Lang, string>;
@@ -64,12 +76,17 @@ type NavItem = NavLeaf | NavGroup;
 
 const isGroup = (i: NavItem): i is NavGroup => 'children' in i;
 
-// IA reorganizada: 5 pontos de entrada — Atendimento (dropdown), Especialidades,
-// Médicos, Empresa, Contato. "Dra. Cristiane" fica ancorada no logo.
+// Arquitetura definitiva do menu (2026-07): 6 pontos de entrada na ordem
+// pedida pela cliente — Dra. Christiane (Home) · Medicina Ambulatorial ▾ ·
+// Medicina Ocupacional · Contato · GMS ▾ (com bandeiras BR/UK/ES) · Agendar.
 const NAV: NavItem[] = [
   {
-    key: 'atendimento',
-    labels: { pt: 'Atendimento', en: 'Care', es: 'Atención' },
+    to: '/chrismed',
+    labels: { pt: 'Dra. Christiane Alencar', en: 'Dr. Christiane Alencar', es: 'Dra. Christiane Alencar' },
+  },
+  {
+    key: 'ambulatorial',
+    labels: { pt: 'Medicina Ambulatorial', en: 'Ambulatory Care', es: 'Medicina Ambulatoria' },
     children: [
       {
         to: '/chrismed/teleconsulta',
@@ -98,32 +115,40 @@ const NAV: NavItem[] = [
           es: 'Residencia, hotel u oficina',
         },
       },
+    ],
+  },
+  {
+    to: '/chrismed/ocupacional',
+    labels: { pt: 'Medicina Ocupacional', en: 'Occupational Medicine', es: 'Medicina Ocupacional' },
+  },
+  { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
+  {
+    key: 'gms',
+    labels: { pt: 'GMS · Global Medical Support', en: 'GMS · Global Medical Support', es: 'GMS · Global Medical Support' },
+    children: [
+      {
+        to: '/chrismed',
+        labels: { pt: 'Português (Brasil)', en: 'Portuguese (Brazil)', es: 'Portugués (Brasil)' },
+        desc: { pt: 'Atendimento nacional', en: 'Nationwide care', es: 'Atención nacional' },
+        icon: 'br',
+        setLang: 'pt',
+      },
       {
         to: '/chrismed/internacional',
         labels: { pt: 'GMS · Services for foreigners', en: 'GMS · Services for foreigners', es: 'GMS · Services for foreigners' },
-        desc: {
-          pt: 'Global Medical Services — English-speaking care',
-          en: 'Global Medical Services — English-speaking care',
-          es: 'Global Medical Services — English-speaking care',
-        },
+        desc: { pt: 'English-speaking medical care', en: 'English-speaking medical care', es: 'English-speaking medical care' },
         icon: 'uk',
+        setLang: 'en',
       },
       {
         to: '/chrismed/internacional',
         labels: { pt: 'GMS · Servicios para extranjeros', en: 'GMS · Servicios para extranjeros', es: 'GMS · Servicios para extranjeros' },
-        desc: {
-          pt: 'Global Medical Services — atención en español',
-          en: 'Global Medical Services — atención en español',
-          es: 'Global Medical Services — atención en español',
-        },
+        desc: { pt: 'Atención médica en español', en: 'Atención médica en español', es: 'Atención médica en español' },
         icon: 'es',
+        setLang: 'es',
       },
     ],
   },
-  { to: '/chrismed/especialidades', labels: { pt: 'Especialidades', en: 'Specialties', es: 'Especialidades' } },
-  { to: '/chrismed/medicos', labels: { pt: 'Médicos', en: 'Doctors', es: 'Médicos' } },
-  { to: '/chrismed/ocupacional', labels: { pt: 'Empresa', en: 'Business', es: 'Empresa' } },
-  { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
 ];
 
 const CTA = {
@@ -135,6 +160,7 @@ export function useLang(): Lang {
   const raw = (search?.lang as string | undefined) ?? 'pt';
   return (['pt', 'en', 'es'].includes(raw) ? raw : 'pt') as Lang;
 }
+
 
 function LangSwitcher({ lang, tone = 'light' }: { lang: Lang; tone?: 'light' | 'dark' }) {
   const navigate = useNavigate();
@@ -197,16 +223,18 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
           className="absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-2"
         >
           <div className="overflow-hidden rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-lg)]">
-            {group.children.map((leaf) => (
+            {group.children.map((leaf) => {
+              const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
+              return (
               <Link
                 key={`${leaf.to}-${leaf.labels.pt}`}
                 to={leaf.to}
+                search={leaf.setLang ? (prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never : undefined}
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
               >
-                {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
-                {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                {Flag && <Flag className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
                 <div className="min-w-0">
                   <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
                     {leaf.labels[lang]}
@@ -218,7 +246,8 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
                   )}
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -300,8 +329,26 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
 
         {/* Ações */}
         <div className="flex items-center justify-end gap-2">
-          <div className="hidden sm:block">
-            <LangSwitcher lang={lang} />
+          {/* Bloco GMS de idiomas — visível como bandeiras em telas < lg. No desktop, o GMS aparece no NAV. */}
+          <div className="hidden items-center gap-1 rounded-full border border-[var(--chrismed-sand)] bg-white/70 px-2 py-1 sm:flex lg:hidden" role="group" aria-label="GMS · idioma">
+            {(['pt', 'en', 'es'] as Lang[]).map((l) => {
+              const Flag = FLAG_MAP[l === 'pt' ? 'br' : l === 'en' ? 'uk' : 'es'];
+              return (
+                <Link
+                  key={l}
+                  to="."
+                  search={(prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never}
+                  aria-label={`Idioma ${l.toUpperCase()}`}
+                  aria-pressed={lang === l}
+                  className={cn(
+                    'rounded-sm p-0.5 transition-opacity',
+                    lang === l ? 'opacity-100 ring-1 ring-[var(--chrismed-forest-deep)]' : 'opacity-60 hover:opacity-100',
+                  )}
+                >
+                  <Flag className="h-3.5 w-6" />
+                </Link>
+              );
+            })}
           </div>
           <Link
             to="/chrismed/agendar"
@@ -372,10 +419,13 @@ function MobileDrawer({
                 <div className="chrismed-sans px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
                   {item.labels[lang]}
                 </div>
-                {item.children.map((leaf) => (
+                {item.children.map((leaf) => {
+                  const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
+                  return (
                   <Link
                     key={`${leaf.to}-${leaf.labels.pt}`}
                     to={leaf.to}
+                    search={leaf.setLang ? (prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never : undefined}
                     onClick={onClose}
                     className={cn(
                       'flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px]',
@@ -384,11 +434,11 @@ function MobileDrawer({
                         : 'text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]',
                     )}
                   >
-                    {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
-                    {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    {Flag && <Flag className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
                     <span className="min-w-0 truncate">{leaf.labels[lang]}</span>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <Link
@@ -427,6 +477,15 @@ function MobileDrawer({
           >
             Falar com Oliver
           </button>
+          <a
+            href="https://airgo.bio/chrismed"
+            target="_blank"
+            rel="noreferrer"
+            onClick={onClose}
+            className="chrismed-sans flex w-full items-center justify-center gap-2 rounded-full border border-dashed border-[var(--chrismed-sand)] px-4 py-3 text-[13px] font-medium text-[var(--chrismed-graphite)] hover:border-[var(--chrismed-forest)] hover:text-[var(--chrismed-forest-deep)]"
+          >
+            Baixar o App · Em breve
+          </a>
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px] uppercase tracking-wider text-[var(--chrismed-mist)]">Idioma</span>
             <LangSwitcher lang={lang} />
