@@ -85,19 +85,19 @@ export function NichoPage({ nicho }: Props) {
           </div>
           <p className="text-lg text-white/85 max-w-3xl leading-relaxed">{nicho.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-6">
-            <Button asChild size="lg" className="gap-2 shadow-lg bg-white text-primary hover:bg-white/90">
+            <Button asChild size="lg" className="gap-2 shadow-lg bg-white text-primary hover:bg-white/90 max-w-full whitespace-normal text-left h-auto min-h-11 py-3">
               <Link to="/orcamento">
-                {nicho.ctaPrimary.label} <ArrowRight className="w-4 h-4" />
+                <span className="min-w-0 break-words">{nicho.ctaPrimary.label}</span> <ArrowRight className="w-4 h-4 shrink-0" />
               </Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
+              className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white max-w-full whitespace-normal text-left h-auto min-h-11 py-3"
             >
               <SecondaryCta>
-                {nicho.ctaSecondary.label} <ArrowRight className="w-4 h-4" />
+                <span className="min-w-0 break-words">{nicho.ctaSecondary.label}</span> <ArrowRight className="w-4 h-4 shrink-0" />
               </SecondaryCta>
             </Button>
             <Button
