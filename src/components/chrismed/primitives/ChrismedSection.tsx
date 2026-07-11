@@ -2,11 +2,11 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { ChrismedContainer } from "./ChrismedContainer";
 
-type Tone = "ivory" | "bone" | "noir";
+type Tone = "ivory" | "bone" | "noir" | "forest" | "amber";
 
 /**
  * ChrismedSection — banda vertical editorial. Ritmo respirável (py-20/py-28).
- * Tons semânticos: ivory (padrão), bone (contraste sutil), noir (autoridade).
+ * Tons: ivory / bone / noir / forest (verde institucional dominante) / amber (dourado editorial).
  */
 export function ChrismedSection({
   className,
@@ -19,6 +19,8 @@ export function ChrismedSection({
     ivory: "bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]",
     bone: "bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)]",
     noir: "bg-[var(--chrismed-noir)] text-[var(--chrismed-ivory)]",
+    forest: "chrismed-page-forest",
+    amber: "chrismed-page-mustard",
   };
   return (
     <section
