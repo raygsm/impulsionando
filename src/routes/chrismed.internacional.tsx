@@ -380,7 +380,7 @@ const PT: Copy = {
       'A jornada descreve como uma solicitação internacional é acolhida e organizada. Nenhum passo garante aceitação, tempo de resposta ou transferência antes da avaliação humana.',
     steps: [
       { title: 'Selecionar idioma', body: 'Português, inglês ou espanhol. A conversa toda é conduzida no idioma escolhido.' },
-      { title: 'Informar localização e situação', body: 'Cidade atual (hotel, residência, hospital, aeroporto ou outro local) e uma descrição breve da situação.' },
+      { title: 'Informar localização e situação', body: 'Cidade e local atual, com uma descrição breve da situação.' },
       { title: 'Identificar o tipo de suporte', body: 'Consulta, telemedicina, acompanhamento, coordenação familiar, interface institucional ou transferência.' },
       { title: 'Organizar as informações essenciais', body: 'Dados clínicos disponíveis, medicações em uso, autorizações, representantes legais e canais de contato.' },
       { title: 'Conectar a equipe apropriada', body: 'A equipe CHRISMED avalia se pode atender diretamente ou se a situação exige coordenação com terceiros autorizados.' },
@@ -483,7 +483,7 @@ const EN: Copy = {
       'The journey describes how an international request is received and organised. No step guarantees acceptance, response time or transfer before human assessment.',
     steps: [
       { title: 'Select the language', body: 'Portuguese, English or Spanish. The whole conversation is conducted in the chosen language.' },
-      { title: 'Provide location and situation', body: 'Current city (hotel, residence, hospital, airport or other), plus a brief description of the situation.' },
+      { title: 'Provide location and situation', body: 'Current city and location, plus a brief description of the situation.' },
       { title: 'Identify the type of support', body: 'Consultation, telemedicine, follow-up, family coordination, institutional interface or transfer.' },
       { title: 'Organise the essentials', body: 'Available clinical data, current medications, authorisations, legal representatives and contact channels.' },
       { title: 'Connect the appropriate team', body: 'The CHRISMED team assesses whether it can serve directly or the situation requires coordination with authorised third parties.' },
@@ -586,7 +586,7 @@ const ES: Copy = {
       'La jornada describe cómo se acoge y organiza una solicitud internacional. Ningún paso garantiza aceptación, tiempo de respuesta o traslado antes de la evaluación humana.',
     steps: [
       { title: 'Seleccionar el idioma', body: 'Portugués, inglés o español. Toda la conversación se conduce en el idioma elegido.' },
-      { title: 'Informar ubicación y situación', body: 'Ciudad actual (hotel, residencia, hospital, aeropuerto u otro) y una descripción breve de la situación.' },
+      { title: 'Informar ubicación y situación', body: 'Ciudad y ubicación actual, con una descripción breve de la situación.' },
       { title: 'Identificar el tipo de soporte', body: 'Consulta, telemedicina, acompañamiento, coordinación familiar, interfaz institucional o traslado.' },
       { title: 'Organizar la información esencial', body: 'Datos clínicos disponibles, medicaciones en uso, autorizaciones, representantes legales y canales de contacto.' },
       { title: 'Conectar al equipo apropiado', body: 'El equipo CHRISMED evalúa si puede atender directamente o si la situación requiere coordinación con terceros autorizados.' },

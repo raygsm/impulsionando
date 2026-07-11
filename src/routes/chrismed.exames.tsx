@@ -94,7 +94,7 @@ const COPY = {
     cta2: 'Solicitar orientação',
     categories: [
       { icon: 'lab', title: 'Laboratoriais', body: 'Hemograma, perfil metabólico, hormônios, sorologias, marcadores inflamatórios e mais.' },
-      { icon: 'blood', title: 'Coleta domiciliar', body: 'Coleta em residência, hotel ou empresa com equipe de enfermagem parceira, mediante agendamento.' },
+      { icon: 'blood', title: 'Coleta domiciliar', body: 'Coleta onde você estiver, dentro da área atendida pela equipe de enfermagem parceira, mediante agendamento.' },
       { icon: 'cardio', title: 'Cardiológicos', body: 'ECG, MAPA, Holter, teste ergométrico e ecocardiograma via centros parceiros.' },
       { icon: 'imaging', title: 'Imagem', body: 'Ultrassonografia, ressonância, tomografia e radiografia em centros de referência.' },
     ],
@@ -116,7 +116,7 @@ const COPY = {
     cta2: 'Request guidance',
     categories: [
       { icon: 'lab', title: 'Laboratory', body: 'CBC, metabolic panel, hormones, serology, inflammatory markers and more.' },
-      { icon: 'blood', title: 'Home collection', body: 'Collection at home, hotel or workplace by a partner nursing team, upon appointment.' },
+      { icon: 'blood', title: 'Home collection', body: 'Collection wherever you are within the served area, by a partner nursing team, upon appointment.' },
       { icon: 'cardio', title: 'Cardiology', body: 'ECG, ABPM, Holter, stress test and echocardiogram via partner centers.' },
       { icon: 'imaging', title: 'Imaging', body: 'Ultrasound, MRI, CT and X-ray in reference centers.' },
     ],
@@ -138,7 +138,7 @@ const COPY = {
     cta2: 'Solicitar orientación',
     categories: [
       { icon: 'lab', title: 'Laboratorio', body: 'Hemograma, perfil metabólico, hormonas, serologías, marcadores inflamatorios y más.' },
-      { icon: 'blood', title: 'Toma domiciliaria', body: 'Toma en domicilio, hotel u oficina por equipo de enfermería asociado, con cita.' },
+      { icon: 'blood', title: 'Toma domiciliaria', body: 'Toma donde usted esté, dentro del área atendida por el equipo de enfermería asociado, con cita.' },
       { icon: 'cardio', title: 'Cardiología', body: 'ECG, MAPA, Holter, ergometría y ecocardiograma en centros asociados.' },
       { icon: 'imaging', title: 'Imagen', body: 'Ecografía, resonancia, tomografía y radiografía en centros de referencia.' },
     ],

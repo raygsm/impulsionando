@@ -690,7 +690,7 @@ const COPY: Record<Lang, Copy> = {
     hero: {
       eyebrow: 'Autoridad médica · CHRISMED',
       positioning: 'Medicina privada con continuidad, escucha y precisión.',
-      lead: 'Consultas en Copacabana, en su residencia o por video. Una única médica, la misma atención y el tiempo necesario para cuidar bien.',
+      lead: 'Consultas en Copacabana, a domicilio donde usted esté o por video. Una única médica, la misma atención y el tiempo necesario para cuidar bien.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Hablar con Oliver',
       portraitAlt: 'Retrato editorial de la Dra. Christiane Alencar',
