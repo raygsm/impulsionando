@@ -77,11 +77,20 @@ const NAV: NavItem[] = [
       },
       {
         to: '/chrismed/internacional',
-        labels: { pt: 'Atendimento internacional', en: 'International care', es: 'Atención internacional' },
+        labels: { pt: 'GMS · Services for foreigners', en: 'GMS · Services for foreigners', es: 'GMS · Services for foreigners' },
         desc: {
-          pt: 'Pacientes em viagem · PT/EN/ES',
-          en: 'Travelers · PT/EN/ES',
-          es: 'Pacientes en viaje · PT/EN/ES',
+          pt: 'Global Medical Services — English-speaking care',
+          en: 'Global Medical Services — English-speaking care',
+          es: 'Global Medical Services — English-speaking care',
+        },
+      },
+      {
+        to: '/chrismed/internacional',
+        labels: { pt: 'GMS · Servicios para extranjeros', en: 'GMS · Servicios para extranjeros', es: 'GMS · Servicios para extranjeros' },
+        desc: {
+          pt: 'Global Medical Services — atención en español',
+          en: 'Global Medical Services — atención en español',
+          es: 'Global Medical Services — atención en español',
         },
       },
     ],
