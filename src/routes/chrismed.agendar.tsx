@@ -225,22 +225,22 @@ function ChrismedAgendarPage() {
       <div className="container py-10 max-w-5xl">
         {/* Progress trail */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-emerald-900/60 flex-wrap">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--chrismed-mist)] flex-wrap">
             {stepLabels.map((label, i) => (
               <span key={label} className="flex items-center gap-2">
-                <span className={i <= stepIndex ? 'text-emerald-950 font-medium' : ''}>{i + 1}. {label}</span>
+                <span className={i <= stepIndex ? 'text-[var(--chrismed-ink)] font-medium' : ''}>{i + 1}. {label}</span>
                 {i < stepLabels.length - 1 && <ChevronRight className="h-3 w-3 opacity-40" />}
               </span>
             ))}
           </div>
-          <div className="mt-3 h-1 rounded-full bg-emerald-900/10">
-            <div className="h-full rounded-full bg-emerald-900 transition-all" style={{ width: `${((stepIndex + 1) / stepLabels.length) * 100}%` }} />
+          <div className="mt-3 h-1 rounded-full bg-[var(--chrismed-sand)]">
+            <div className="h-full rounded-full bg-[var(--chrismed-ink)] transition-all" style={{ width: `${((stepIndex + 1) / stepLabels.length) * 100}%` }} />
           </div>
         </div>
 
         {/* Aviso público sobre mock */}
         {step !== 'done' && (
-          <div className="mb-6 flex items-start gap-2 rounded-lg border border-amber-300/50 bg-amber-50/60 px-4 py-3 text-sm text-emerald-950">
+          <div className="mb-6 flex items-start gap-2 rounded-lg border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
             <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700 flex-shrink-0" />
             <p><strong>Agenda em demonstração:</strong> horários exibidos aqui são visuais. A reserva definitiva e o bloqueio de slot dependem do backend (Codex) — o pagamento PIX no final é real.</p>
           </div>
@@ -249,19 +249,19 @@ function ChrismedAgendarPage() {
         {/* STEP 1: Especialidade */}
         {step === 'specialty' && (
           <section aria-labelledby="s1">
-            <h1 id="s1" className="font-serif text-3xl md:text-4xl text-emerald-950">Escolha a especialidade</h1>
-            <p className="mt-2 text-emerald-900/70">Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.</p>
+            <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h1>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.</p>
             <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {CHRISMED_SPECIALTIES.map((sp) => {
                 const Icon = SPECIALTY_ICON[sp.icon];
                 return (
                   <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep('doctor'); }}
-                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
-                    <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="font-serif text-lg text-emerald-950">{sp.name}</div>
-                    <div className="text-sm text-emerald-900/70 mt-1">{sp.short}</div>
+                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{sp.name}</div>
+                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{sp.short}</div>
                   </button>
                 );
               })}
@@ -272,23 +272,23 @@ function ChrismedAgendarPage() {
         {/* STEP 2: Médico */}
         {step === 'doctor' && specialty && (
           <section aria-labelledby="s2">
-            <button onClick={() => setStep('specialty')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar especialidade</button>
-            <h2 id="s2" className="font-serif text-3xl text-emerald-950">Escolha o médico</h2>
-            <p className="mt-2 text-emerald-900/70">Profissionais que atendem <strong>{specialty.name}</strong>.</p>
+            <button onClick={() => setStep('specialty')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar especialidade</button>
+            <h2 id="s2" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha o médico</h2>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">Profissionais que atendem <strong>{specialty.name}</strong>.</p>
             {doctorsForSpecialty.length === 0 ? (
               <EmptyState message="Nenhum médico disponível para esta especialidade no momento." onOliver={openOliver} />
             ) : (
               <div className="mt-8 grid md:grid-cols-2 gap-4">
                 {doctorsForSpecialty.map((d) => (
                   <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('modality'); }}
-                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
-                    <div className="font-serif text-xl text-emerald-950">{d.name}</div>
-                    <div className="text-xs uppercase tracking-[0.14em] text-emerald-900/60 mt-1">{d.title}</div>
-                    <div className="text-xs text-emerald-900/60 mt-1">{d.crm}</div>
-                    <p className="text-sm text-emerald-900/75 mt-3">{d.bio}</p>
+                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                    <div className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{d.name}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mt-1">{d.title}</div>
+                    <div className="text-xs text-[var(--chrismed-mist)] mt-1">{d.crm}</div>
+                    <p className="text-sm text-[var(--chrismed-graphite)] mt-3">{d.bio}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {d.modalities.map((m) => (
-                        <Badge key={m} variant="outline" className="text-[10px] uppercase tracking-[0.14em] border-emerald-900/20">{MODALITY_META[m].label}</Badge>
+                        <Badge key={m} variant="outline" className="text-[10px] uppercase tracking-[0.14em] border-[var(--chrismed-sand)]">{MODALITY_META[m].label}</Badge>
                       ))}
                     </div>
                   </button>
@@ -301,21 +301,21 @@ function ChrismedAgendarPage() {
         {/* STEP 3: Modalidade */}
         {step === 'modality' && doctor && (
           <section aria-labelledby="s3">
-            <button onClick={() => setStep('doctor')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar médico</button>
-            <h2 id="s3" className="font-serif text-3xl text-emerald-950">Como quer ser atendido?</h2>
-            <p className="mt-2 text-emerald-900/70">{doctor.name} atende nas modalidades abaixo.</p>
+            <button onClick={() => setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar médico</button>
+            <h2 id="s3" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Como quer ser atendido?</h2>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">{doctor.name} atende nas modalidades abaixo.</p>
             <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {modalitiesForDoctor.map((m) => {
                 const meta = MODALITY_META[m];
                 const Icon = meta.icon;
                 return (
                   <button key={m} type="button" onClick={() => { setModality(m); setStep('unit'); }}
-                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
-                    <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="font-serif text-lg text-emerald-950">{meta.label}</div>
-                    <div className="text-sm text-emerald-900/70 mt-1">{meta.sub}</div>
+                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{meta.label}</div>
+                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{meta.sub}</div>
                   </button>
                 );
               })}
@@ -326,17 +326,17 @@ function ChrismedAgendarPage() {
         {/* STEP 4: Unidade */}
         {step === 'unit' && modality && (
           <section aria-labelledby="s4">
-            <button onClick={() => setStep('modality')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar modalidade</button>
-            <h2 id="s4" className="font-serif text-3xl text-emerald-950">Onde será o atendimento?</h2>
+            <button onClick={() => setStep('modality')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar modalidade</button>
+            <h2 id="s4" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Onde será o atendimento?</h2>
             <div className="mt-8 grid md:grid-cols-2 gap-4">
               {unitsForModality.map((u) => (
                 <button key={u.slug} type="button" onClick={() => { setUnit(u); setStep('schedule'); }}
-                  className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
-                  <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                  className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                  <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                     <MapPin className="h-5 w-5" />
                   </div>
-                  <div className="font-serif text-lg text-emerald-950">{u.name}</div>
-                  <div className="text-sm text-emerald-900/70 mt-1">{u.address}</div>
+                  <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{u.name}</div>
+                  <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{u.address}</div>
                 </button>
               ))}
             </div>
@@ -346,9 +346,9 @@ function ChrismedAgendarPage() {
         {/* STEP 5: Calendário + horários */}
         {step === 'schedule' && unit && (
           <section aria-labelledby="s5">
-            <button onClick={() => setStep('unit')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar unidade</button>
-            <h2 id="s5" className="font-serif text-3xl text-emerald-950">Escolha data e horário</h2>
-            <p className="mt-2 text-emerald-900/70">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
+            <button onClick={() => setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar unidade</button>
+            <h2 id="s5" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha data e horário</h2>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
 
             <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6">
               <MockCalendar
@@ -358,10 +358,10 @@ function ChrismedAgendarPage() {
                 selectedIso={selectedDayIso}
                 onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); }}
               />
-              <div className="rounded-xl border border-emerald-900/10 bg-white p-5">
-                <div className="text-xs uppercase tracking-[0.14em] text-emerald-900/60 mb-3">Horários disponíveis</div>
-                {!selectedDay && <p className="text-sm text-emerald-900/60">Selecione uma data para ver horários.</p>}
-                {selectedDay?.state === 'empty' && <p className="text-sm text-emerald-900/60">Sem agenda neste dia.</p>}
+              <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
+                <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">Horários disponíveis</div>
+                {!selectedDay && <p className="text-sm text-[var(--chrismed-mist)]">Selecione uma data para ver horários.</p>}
+                {selectedDay?.state === 'empty' && <p className="text-sm text-[var(--chrismed-mist)]">Sem agenda neste dia.</p>}
                 {selectedDay && selectedDay.slots.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
                     {selectedDay.slots.map((s) => (
@@ -369,15 +369,15 @@ function ChrismedAgendarPage() {
                     ))}
                   </div>
                 )}
-                <div className="mt-5 flex items-center gap-3 text-[10px] text-emerald-900/60 flex-wrap">
-                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-emerald-900" /> Disponível</span>
-                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-emerald-900/30" /> Indisponível</span>
+                <div className="mt-5 flex items-center gap-3 text-[10px] text-[var(--chrismed-mist)] flex-wrap">
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]" /> Disponível</span>
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]/30" /> Indisponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Reservado</span>
                 </div>
-                <Button className="w-full mt-5 bg-emerald-900 hover:bg-emerald-950 text-amber-50" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
+                <Button className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
                   Continuar
                 </Button>
-                <p className="text-[11px] text-emerald-900/60 mt-3">Reserva definitiva e lock de horário: <strong>Pendente Codex</strong>.</p>
+                <p className="text-[11px] text-[var(--chrismed-mist)] mt-3">Reserva definitiva e lock de horário: <strong>Pendente Codex</strong>.</p>
               </div>
             </div>
           </section>
@@ -386,10 +386,10 @@ function ChrismedAgendarPage() {
         {/* STEP 6: Identificação */}
         {step === 'identify' && (
           <section aria-labelledby="s6" className="max-w-2xl">
-            <button onClick={() => setStep('schedule')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar horário</button>
-            <h2 id="s6" className="font-serif text-3xl text-emerald-950">Sua identificação</h2>
-            <p className="mt-2 text-emerald-900/70">Pedimos só agora. Cadastro completo (endereço, documentos) fica para depois do pagamento.</p>
-            <Card className="mt-6 border-emerald-900/10 bg-white">
+            <button onClick={() => setStep('schedule')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar horário</button>
+            <h2 id="s6" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Sua identificação</h2>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">Pedimos só agora. Cadastro completo (endereço, documentos) fica para depois do pagamento.</p>
+            <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
@@ -420,9 +420,9 @@ function ChrismedAgendarPage() {
                 <div>
                   <Label htmlFor="cep">CEP (opcional)</Label>
                   <Input id="cep" inputMode="numeric" value={patient.cep} onChange={(e) => setPatient({ ...patient, cep: maskCEP(e.target.value) })} placeholder="00000-000" />
-                  <p className="text-[11px] text-emerald-900/60 mt-1">Preenchimento automático de endereço: <strong>Pendente Codex</strong>.</p>
+                  <p className="text-[11px] text-[var(--chrismed-mist)] mt-1">Preenchimento automático de endereço: <strong>Pendente Codex</strong>.</p>
                 </div>
-                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50"
+                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
                   disabled={!patient.first_name || !isValidEmail(patient.email) || !isValidCPF(patient.doc)}
                   onClick={() => setStep('confirm')}>
                   Continuar para confirmação
@@ -435,9 +435,9 @@ function ChrismedAgendarPage() {
         {/* STEP 7: Confirmação */}
         {step === 'confirm' && specialty && doctor && modality && unit && (
           <section aria-labelledby="s7" className="max-w-2xl">
-            <button onClick={() => setStep('identify')} className="text-sm text-emerald-900 hover:underline mb-3">← Voltar</button>
-            <h2 id="s7" className="font-serif text-3xl text-emerald-950">Confirme os dados</h2>
-            <Card className="mt-6 border-emerald-900/10 bg-white">
+            <button onClick={() => setStep('identify')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Voltar</button>
+            <h2 id="s7" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Confirme os dados</h2>
+            <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 space-y-3 text-sm">
                 <Row label="Especialidade" value={specialty.name} />
                 <Row label="Médico" value={doctor.name} />
@@ -448,18 +448,18 @@ function ChrismedAgendarPage() {
                 <Row label="Paciente" value={`${patient.first_name} ${patient.last_name}`.trim()} />
                 <Row label="E-mail" value={patient.email} />
                 <Row label="CPF" value={patient.doc} />
-                <hr className="border-emerald-900/10" />
+                <hr className="border-[var(--chrismed-sand)]" />
                 {loadingOfferings ? (
-                  <div className="flex items-center gap-2 text-emerald-900/70"><Loader2 className="h-4 w-4 animate-spin" /> Carregando preço...</div>
+                  <div className="flex items-center gap-2 text-[var(--chrismed-graphite)]"><Loader2 className="h-4 w-4 animate-spin" /> Carregando preço...</div>
                 ) : currentOffering ? (
                   <Row label="Valor" value={currentOffering.price_cents === 0 ? 'Cortesia' : `R$ ${(currentOffering.price_cents / 100).toFixed(2).replace('.', ',')}`} />
                 ) : (
                   <p className="text-xs text-amber-700">Preço não configurado para esta modalidade. Fale com Oliver.</p>
                 )}
-                <p className="text-xs text-emerald-900/60">
+                <p className="text-xs text-[var(--chrismed-mist)]">
                   Ao continuar, você concorda com a política de cancelamento (reembolso integral com mais de 24h de antecedência). Termos completos e política de LGPD: <strong>versionamento Pendente Codex</strong>.
                 </p>
-                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50" disabled={submitting || !currentOffering} onClick={handlePay}>
+                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={submitting || !currentOffering} onClick={handlePay}>
                   {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
                   {currentOffering && currentOffering.price_cents === 0 ? 'Confirmar reserva (cortesia)' : 'Ir para pagamento PIX'}
                 </Button>
@@ -471,12 +471,12 @@ function ChrismedAgendarPage() {
         {/* STEP 8: Pagamento (PIX real) */}
         {step === 'payment' && pixResult && (
           <section aria-labelledby="s8" className="max-w-xl mx-auto">
-            <h2 id="s8" className="font-serif text-3xl text-emerald-950 text-center">Pague via PIX</h2>
-            <p className="mt-2 text-emerald-900/70 text-center">Aponte a câmera para o QR ou copie o código. Confirmação automática.</p>
-            <Card className="mt-6 border-emerald-900/10 bg-white">
+            <h2 id="s8" className="chrismed-serif text-3xl text-[var(--chrismed-ink)] text-center">Pague via PIX</h2>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-center">Aponte a câmera para o QR ou copie o código. Confirmação automática.</p>
+            <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 space-y-4">
                 {pixResult.qr_code_base64 && (
-                  <img src={`data:image/png;base64,${pixResult.qr_code_base64}`} alt="QR Code PIX" className="mx-auto rounded-lg border bg-white p-3" width={256} height={256} />
+                  <img src={`data:image/png;base64,${pixResult.qr_code_base64}`} alt="QR Code PIX" className="mx-auto rounded-lg border bg-[var(--chrismed-ivory)] p-3" width={256} height={256} />
                 )}
                 {pixResult.qr_code && (
                   <div className="space-y-1">
@@ -489,10 +489,10 @@ function ChrismedAgendarPage() {
                     </div>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-sm text-emerald-900/70 justify-center">
+                <div className="flex items-center gap-2 text-sm text-[var(--chrismed-graphite)] justify-center">
                   <Loader2 className="h-4 w-4 animate-spin" /> Aguardando confirmação do pagamento...
                 </div>
-                <Button variant="outline" className="w-full border-emerald-900/20" onClick={() => { setPixResult(null); setPollStatus('pending'); setStep('confirm'); }}>
+                <Button variant="outline" className="w-full border-[var(--chrismed-sand)]" onClick={() => { setPixResult(null); setPollStatus('pending'); setStep('confirm'); }}>
                   Cancelar e voltar
                 </Button>
               </CardContent>
@@ -503,21 +503,21 @@ function ChrismedAgendarPage() {
         {/* STEP 9: Sucesso */}
         {step === 'done' && (
           <section aria-labelledby="s9" className="max-w-xl mx-auto text-center">
-            <div className="mx-auto h-16 w-16 rounded-full bg-emerald-900/10 text-emerald-900 flex items-center justify-center mb-4">
+            <div className="mx-auto h-16 w-16 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] flex items-center justify-center mb-4">
               <CheckCircle2 className="h-9 w-9" />
             </div>
-            <h2 id="s9" className="font-serif text-3xl text-emerald-950">Pagamento confirmado</h2>
-            <p className="mt-3 text-emerald-900/75">
+            <h2 id="s9" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Pagamento confirmado</h2>
+            <p className="mt-3 text-[var(--chrismed-graphite)]">
               Recebemos seu pagamento. A persistência definitiva do agendamento, o envio de e-mail/WhatsApp e o link de teleconsulta dependem do webhook idempotente (<strong>Pendente Codex</strong>).
             </p>
             <div className="mt-6 flex gap-3 justify-center flex-wrap">
-              <Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50" onClick={() => window.location.reload()}>Agendar outra</Button>
-              <Button variant="outline" className="border-emerald-900/20" onClick={openOliver}>Falar com Oliver</Button>
+              <Button className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" onClick={() => window.location.reload()}>Agendar outra</Button>
+              <Button variant="outline" className="border-[var(--chrismed-sand)]" onClick={openOliver}>Falar com Oliver</Button>
             </div>
           </section>
         )}
 
-        <p className="mt-12 text-center text-[11px] text-emerald-900/50">{CHRISMED_MOCK_NOTICE}</p>
+        <p className="mt-12 text-center text-[11px] text-[var(--chrismed-ink)]/50">{CHRISMED_MOCK_NOTICE}</p>
       </div>
     </ChrismedShell>
   );
@@ -526,28 +526,28 @@ function ChrismedAgendarPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
-      <span className="text-emerald-900/60">{label}</span>
-      <span className="text-emerald-950 font-medium text-right">{value}</span>
+      <span className="text-[var(--chrismed-mist)]">{label}</span>
+      <span className="text-[var(--chrismed-ink)] font-medium text-right">{value}</span>
     </div>
   );
 }
 
 function EmptyState({ message, onOliver }: { message: string; onOliver: () => void }) {
   return (
-    <div className="mt-8 rounded-xl border border-dashed border-emerald-900/20 bg-emerald-900/5 p-8 text-center">
-      <p className="text-emerald-900/80">{message}</p>
-      <Button variant="outline" className="mt-4 border-emerald-900/20" onClick={onOliver}>Falar com Oliver</Button>
+    <div className="mt-8 rounded-xl border border-dashed border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-8 text-center">
+      <p className="text-[var(--chrismed-graphite)]">{message}</p>
+      <Button variant="outline" className="mt-4 border-[var(--chrismed-sand)]" onClick={onOliver}>Falar com Oliver</Button>
     </div>
   );
 }
 
 function SlotButton({ slot, selected, onPick }: { slot: ChrismedSlot; selected: boolean; onPick: () => void }) {
   const disabled = slot.state !== 'available';
-  const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900';
+  const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]';
   if (slot.state === 'held') return <button disabled className={`${base} border-amber-400/60 bg-amber-50 text-amber-800 cursor-not-allowed`}>{slot.time} · reservado</button>;
-  if (disabled) return <button disabled className={`${base} border-emerald-900/10 bg-emerald-900/5 text-emerald-900/40 cursor-not-allowed line-through`}>{slot.time}</button>;
+  if (disabled) return <button disabled className={`${base} border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)]/40 cursor-not-allowed line-through`}>{slot.time}</button>;
   return (
-    <button onClick={onPick} className={`${base} ${selected ? 'border-emerald-900 bg-emerald-900 text-amber-50' : 'border-emerald-900/20 bg-white text-emerald-950 hover:border-emerald-900/60'}`}>
+    <button onClick={onPick} className={`${base} ${selected ? 'border-emerald-900 bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-emerald-900/60'}`}>
       {slot.time}
     </button>
   );
@@ -574,17 +574,17 @@ function MockCalendar({
   }
 
   return (
-    <div className="rounded-xl border border-emerald-900/10 bg-white p-5">
+    <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="icon" onClick={() => onMonth(monthOffset - 1)} disabled={monthOffset === 0} aria-label="Mês anterior">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="font-serif text-emerald-950 capitalize">{monthLabel}</div>
+        <div className="chrismed-serif text-[var(--chrismed-ink)] capitalize">{monthLabel}</div>
         <Button variant="ghost" size="icon" onClick={() => onMonth(monthOffset + 1)} aria-label="Próximo mês">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.14em] text-emerald-900/50 mb-2">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.14em] text-[var(--chrismed-ink)]/50 mb-2">
         {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d) => <div key={d}>{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
@@ -598,10 +598,10 @@ function MockCalendar({
             <button key={cell.iso} disabled={disabled} onClick={() => onPick(cell.iso)}
               aria-label={`${d.getDate()} — ${disabled ? 'indisponível' : 'disponível'}`}
               className={[
-                'aspect-square rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900',
-                isSelected ? 'bg-emerald-900 text-amber-50 font-medium' :
-                disabled ? 'text-emerald-900/25 cursor-not-allowed' :
-                'text-emerald-950 hover:bg-emerald-900/5',
+                'aspect-square rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]',
+                isSelected ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] font-medium' :
+                disabled ? 'text-[var(--chrismed-ink)]/25 cursor-not-allowed' :
+                'text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-bone)]',
               ].join(' ')}>
               {d.getDate()}
             </button>
