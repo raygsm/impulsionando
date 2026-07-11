@@ -43,8 +43,8 @@ export function ChrismedOliverPanel() {
 
   const ctx = override ?? defaultCtx;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { console.log('[OliverPanel] mounted'); }, []);
+
+
 
 
   // Substitui / limpa o contexto ao mudar de rota.
