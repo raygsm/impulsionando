@@ -3,6 +3,7 @@ import { Globe, Menu, X, CalendarCheck, ChevronDown, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChrismedOliverProvider } from './ChrismedOliverProvider';
+import { ChrismedPreloader } from './ChrismedPreloader';
 import { openChrismedOliver } from './oliver-store';
 import chrismedHorizontal from '@/assets/chrismed-horizontal.png.asset.json';
 
