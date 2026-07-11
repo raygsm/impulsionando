@@ -180,8 +180,9 @@ function ChrismedAgendarPage() {
 
   // "Retorno" foi removido do fluxo público de Agendar. Retornos após consultas
   // ambulatoriais são combinados diretamente com a médica (Teleconsulta ou Presencial em Copacabana).
-  const modalitiesForDoctor: ChrismedModality[] = (doctor ? doctor.modalities : ['presencial', 'telemedicina', 'domiciliar'])
-    .filter((m) => m !== 'retorno');
+  const modalitiesForDoctor: ChrismedModality[] = (
+    doctor ? doctor.modalities : (['presencial', 'telemedicina', 'domiciliar'] as ChrismedModality[])
+  ).filter((m): m is ChrismedModality => m !== 'retorno');
   const unitsForModality = modality === 'telemedicina'
     ? CHRISMED_UNITS.filter((u) => u.slug === 'telemedicina')
     : modality === 'domiciliar'
