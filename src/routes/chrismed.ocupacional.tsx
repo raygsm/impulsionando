@@ -371,7 +371,7 @@ function ChrismedOcupacionalPage() {
       <ChrismedSection tone="noir">
         <div className="mx-auto flex max-w-3xl flex-col items-start gap-8">
           <ChrismedEyebrow>{t.oliver.eyebrow}</ChrismedEyebrow>
-          <ChrismedHeading level={2}>
+          <ChrismedHeading level={2} className="text-[var(--chrismed-ivory)]">
             {t.oliver.title}
           </ChrismedHeading>
           <p className="chrismed-sans max-w-[52ch] text-base leading-relaxed text-[var(--chrismed-ivory)]/85">
