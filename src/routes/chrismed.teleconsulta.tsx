@@ -21,7 +21,8 @@ function TeleconsultaPage() {
   return (
     <ChrismedShell><div className="chrismed-page-mustard">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-20 max-w-5xl">
+        <div className="container mx-auto px-4 py-20 max-w-5xl">
+          <ChrismedFlagsBar tone="light" align="right" className="mb-6" />
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] hover:bg-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">
             Teleconsulta médica
           </Badge>
