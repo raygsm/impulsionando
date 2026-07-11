@@ -902,10 +902,10 @@ const COPY: Record<Lang, Copy> = {
             'Private office, scheduled time slots and a discreet reception. Dedicated time before, during and after your visit.',
         },
         {
-          eyebrow: 'Home · Hotel',
+          eyebrow: 'Wherever you are',
           title: 'Home visit',
           description:
-            'Care at your home, hotel, or office, with the same clinical rigor and the privacy your routine demands.',
+            'Home visit — wherever you are — with the same clinical rigor and the privacy your routine demands.',
         },
       ],
     },
