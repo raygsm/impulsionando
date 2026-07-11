@@ -401,10 +401,13 @@ function MobileDrawer({
                 <div className="chrismed-sans px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
                   {item.labels[lang]}
                 </div>
-                {item.children.map((leaf) => (
+                {item.children.map((leaf) => {
+                  const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
+                  return (
                   <Link
                     key={`${leaf.to}-${leaf.labels.pt}`}
                     to={leaf.to}
+                    search={leaf.setLang ? (prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never : undefined}
                     onClick={onClose}
                     className={cn(
                       'flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px]',
@@ -413,11 +416,11 @@ function MobileDrawer({
                         : 'text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]',
                     )}
                   >
-                    {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
-                    {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    {Flag && <Flag className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
                     <span className="min-w-0 truncate">{leaf.labels[lang]}</span>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <Link
