@@ -25,21 +25,21 @@ function FaqPage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">{t.title}</h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{t.lead}</p>
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">{t.title}</h1>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">{t.lead}</p>
         </div>
       </section>
 
       <section className="container py-16 max-w-3xl">
         <FaqAccordion faqs={t.faqs.map((f) => ({ question: f.q, answer: f.a }))} />
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
+          <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
             <Link to="/chrismed/agendar">{t.ctaBook}</Link>
           </Button>
-          <Button asChild variant="outline" className="border-emerald-900/30 text-emerald-900 hover:bg-emerald-900/5">
+          <Button asChild variant="outline" className="border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-bone)]">
             <Link to="/chrismed/contato">{t.ctaContact}</Link>
           </Button>
         </div>

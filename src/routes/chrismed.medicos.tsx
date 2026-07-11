@@ -44,11 +44,11 @@ const SPEC_ICON: Record<string, any> = {
 function MedicosPage() {
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-16 md:py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">Rede CrisMed</Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">Nossos médicos</h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Rede CrisMed</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">Nossos médicos</h1>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
             Rede curada pela Dra. Cristiane Alencar. Atendimento presencial, teleconsulta, domiciliar e medicina ocupacional.
           </p>
         </div>
@@ -81,14 +81,14 @@ function DoctorsDirectory() {
 
   return (
     <section className="container py-12 md:py-16 max-w-6xl">
-      <div className="flex items-center gap-2 mb-5 text-emerald-950">
+      <div className="flex items-center gap-2 mb-5 text-[var(--chrismed-ink)]">
         <Filter className="h-4 w-4" />
-        <h2 className="font-serif text-2xl">Encontrar um médico</h2>
+        <h2 className="chrismed-serif text-2xl">Encontrar um médico</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_220px_220px] gap-3 mb-6">
         <div className="relative">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-900/50" />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--chrismed-ink)]/50" />
           <Input placeholder="Buscar por nome ou título" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
         </div>
         <Select value={spec} onValueChange={setSpec}>
@@ -108,7 +108,7 @@ function DoctorsDirectory() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-emerald-900/10 bg-white p-10 text-center text-emerald-900/70">
+        <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-10 text-center text-[var(--chrismed-graphite)]">
           Nenhum médico encontrado com esses filtros.
         </div>
       ) : (
@@ -117,24 +117,24 @@ function DoctorsDirectory() {
             const specs = d.specialtySlugs.map((s) => CHRISMED_SPECIALTIES.find((x) => x.slug === s)).filter(Boolean);
             const units = d.unitSlugs.map((u) => CHRISMED_UNITS.find((x) => x.slug === u)).filter(Boolean);
             return (
-              <article key={d.slug} className="rounded-2xl border border-emerald-900/10 bg-white p-6 flex flex-col">
+              <article key={d.slug} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 flex flex-col">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-emerald-900/10 text-emerald-950 grid place-items-center font-serif text-lg">
+                  <div className="h-12 w-12 rounded-full bg-emerald-900/10 text-[var(--chrismed-ink)] grid place-items-center chrismed-serif text-lg">
                     {d.name.split(' ').slice(0, 2).map((w) => w[0]).join('')}
                   </div>
                   <div>
-                    <h3 className="font-serif text-lg text-emerald-950 leading-tight">{d.name}</h3>
-                    <p className="text-[11px] text-emerald-900/60 uppercase tracking-wider">{d.crm}</p>
+                    <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] leading-tight">{d.name}</h3>
+                    <p className="text-[11px] text-[var(--chrismed-mist)] uppercase tracking-wider">{d.crm}</p>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-emerald-900/80">{d.title}</p>
-                <p className="mt-2 text-xs text-emerald-900/70 flex-1">{d.bio}</p>
+                <p className="mt-3 text-sm text-[var(--chrismed-graphite)]">{d.title}</p>
+                <p className="mt-2 text-xs text-[var(--chrismed-graphite)] flex-1">{d.bio}</p>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {specs.map((s: any) => {
                     const Icon = SPEC_ICON[s.icon] ?? Stethoscope;
                     return (
-                      <span key={s.slug} className="inline-flex items-center gap-1 rounded-full border border-emerald-900/15 bg-emerald-900/[0.03] px-2 py-0.5 text-[11px] text-emerald-900">
+                      <span key={s.slug} className="inline-flex items-center gap-1 rounded-full border border-emerald-900/15 bg-emerald-900/[0.03] px-2 py-0.5 text-[11px] text-[var(--chrismed-ink)]">
                         <Icon className="h-3 w-3" /> {s.name}
                       </span>
                     );
@@ -143,18 +143,18 @@ function DoctorsDirectory() {
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {d.modalities.map((m) => (
-                    <span key={m} className="text-[10px] uppercase tracking-wider text-emerald-900/60 border border-emerald-900/10 rounded-full px-2 py-0.5">
+                    <span key={m} className="text-[10px] uppercase tracking-wider text-[var(--chrismed-mist)] border border-[var(--chrismed-sand)] rounded-full px-2 py-0.5">
                       {m}
                     </span>
                   ))}
                 </div>
 
-                <p className="mt-3 text-[11px] text-emerald-900/55">
+                <p className="mt-3 text-[11px] text-[var(--chrismed-ink)]/55">
                   {units.map((u: any) => u.name).join(' · ')}
                 </p>
 
                 <Link to="/chrismed/agendar" className="mt-5">
-                  <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">
+                  <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">
                     Agendar com este médico <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -164,7 +164,7 @@ function DoctorsDirectory() {
         </div>
       )}
 
-      <p className="mt-5 text-[11px] text-emerald-900/55 flex items-start gap-1.5">
+      <p className="mt-5 text-[11px] text-[var(--chrismed-ink)]/55 flex items-start gap-1.5">
         <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
         Alguns perfis exibem "Pendente Codex" enquanto a integração com o banco definitivo de médicos parceiros é finalizada.
       </p>
@@ -260,13 +260,13 @@ function DoctorRegistration() {
   if (done) {
     return (
       <section className="container py-16 max-w-3xl">
-        <div className="rounded-2xl border border-emerald-900/10 bg-white p-10 text-center">
+        <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-10 text-center">
           <div className="mx-auto h-14 w-14 rounded-full bg-emerald-900 text-amber-50 grid place-items-center">
             <Check className="h-7 w-7" />
           </div>
-          <h3 className="mt-5 font-serif text-2xl text-emerald-950">Cadastro enviado</h3>
-          <p className="mt-2 text-emerald-900/75">Nossa equipe entrará em contato após análise dos dados.</p>
-          <p className="mt-1 text-[11px] text-emerald-900/55">Status: novo cadastro → em análise → aprovado / recusado → ativo.</p>
+          <h3 className="mt-5 chrismed-serif text-2xl text-[var(--chrismed-ink)]">Cadastro enviado</h3>
+          <p className="mt-2 text-[var(--chrismed-graphite)]">Nossa equipe entrará em contato após análise dos dados.</p>
+          <p className="mt-1 text-[11px] text-[var(--chrismed-ink)]/55">Status: novo cadastro → em análise → aprovado / recusado → ativo.</p>
           <Button onClick={() => { setDone(false); setF(INITIAL); setStep(0); setConsent(false); }} variant="outline" className="mt-6">
             Enviar outro cadastro
           </Button>
@@ -276,13 +276,13 @@ function DoctorRegistration() {
   }
 
   return (
-    <section className="border-t border-emerald-900/10 bg-[#fbf9f4]/40">
+    <section className="border-t border-[var(--chrismed-sand)] bg-[#fbf9f4]/40">
       <div className="container py-16 max-w-3xl">
-        <div className="flex items-center gap-2 text-emerald-950 mb-2">
+        <div className="flex items-center gap-2 text-[var(--chrismed-ink)] mb-2">
           <Stethoscope className="h-5 w-5" />
-          <h2 className="font-serif text-2xl">Seja um médico parceiro</h2>
+          <h2 className="chrismed-serif text-2xl">Seja um médico parceiro</h2>
         </div>
-        <p className="text-sm text-emerald-900/70 mb-6">
+        <p className="text-sm text-[var(--chrismed-graphite)] mb-6">
           Cadastro em 4 etapas. Todos os cadastros passam por análise da equipe CrisMed.
         </p>
 
@@ -293,18 +293,18 @@ function DoctorRegistration() {
               <div className={
                 'h-7 w-7 rounded-full grid place-items-center text-xs font-medium border transition ' +
                 (i < step ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                  : i === step ? 'bg-emerald-900/10 text-emerald-950 border-emerald-900/40'
-                  : 'bg-white text-emerald-900/50 border-emerald-900/15')
+                  : i === step ? 'bg-emerald-900/10 text-[var(--chrismed-ink)] border-emerald-900/40'
+                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]/50 border-emerald-900/15')
               }>
                 {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
               </div>
-              <span className={'text-xs ' + (i === step ? 'text-emerald-950 font-medium' : 'text-emerald-900/60')}>{label}</span>
+              <span className={'text-xs ' + (i === step ? 'text-[var(--chrismed-ink)] font-medium' : 'text-[var(--chrismed-mist)]')}>{label}</span>
               {i < STEPS.length - 1 && <div className="flex-1 h-px bg-emerald-900/10" />}
             </li>
           ))}
         </ol>
 
-        <div className="rounded-2xl border border-emerald-900/10 bg-white p-6 md:p-7 space-y-4">
+        <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 md:p-7 space-y-4">
           {step === 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2"><Label>Nome completo*</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
@@ -342,14 +342,14 @@ function DoctorRegistration() {
                         onClick={() => toggle('especialidades', s.slug)}
                         className={'px-3 py-1.5 rounded-full text-xs border transition ' +
                           (on ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                              : 'border-emerald-900/20 text-emerald-900/80 hover:bg-emerald-900/5')}
+                              : 'border-[var(--chrismed-sand)] text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]')}
                       >
                         {s.name}
                       </button>
                     );
                   })}
                 </div>
-                <p className="mt-2 text-[11px] text-emerald-900/55 flex items-start gap-1.5">
+                <p className="mt-2 text-[11px] text-[var(--chrismed-ink)]/55 flex items-start gap-1.5">
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   O banco atual grava 1 especialidade principal por médico; múltiplas especialidades por profissional ficam pendentes de ajuste no schema (Codex).
                 </p>
@@ -386,7 +386,7 @@ function DoctorRegistration() {
                         onClick={() => toggle('modalidades', m.id)}
                         className={'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs transition ' +
                           (on ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                              : 'border-emerald-900/15 text-emerald-900/80 hover:bg-emerald-900/5')}
+                              : 'border-emerald-900/15 text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]')}
                       >
                         <Icon className="h-5 w-5" />
                         {m.label}
@@ -409,16 +409,16 @@ function DoctorRegistration() {
                 <Textarea rows={3} value={f.disponibilidade} onChange={(e) => setF({ ...f, disponibilidade: e.target.value })} placeholder="Ex.: seg/qua 14h–18h · sáb manhã" />
               </div>
 
-              <div className="rounded-xl border border-emerald-900/10 bg-[#fbf9f4]/50 p-4 text-sm space-y-1">
-                <p className="font-medium text-emerald-950">Revisão</p>
-                <p className="text-emerald-900/75"><b>Nome:</b> {f.nome || '—'}</p>
-                <p className="text-emerald-900/75"><b>CRM:</b> {f.crm ? `${f.crm}/${f.crmUf}` : '—'}</p>
-                <p className="text-emerald-900/75"><b>Especialidades:</b> {f.especialidades.length ? f.especialidades.map((s) => CHRISMED_SPECIALTIES.find((x) => x.slug === s)?.name).join(', ') : '—'}</p>
-                <p className="text-emerald-900/75"><b>Principal:</b> {CHRISMED_SPECIALTIES.find((x) => x.slug === f.especialidadePrincipal)?.name ?? '—'}</p>
-                <p className="text-emerald-900/75"><b>Modalidades:</b> {f.modalidades.join(', ') || '—'}</p>
+              <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[#fbf9f4]/50 p-4 text-sm space-y-1">
+                <p className="font-medium text-[var(--chrismed-ink)]">Revisão</p>
+                <p className="text-[var(--chrismed-graphite)]"><b>Nome:</b> {f.nome || '—'}</p>
+                <p className="text-[var(--chrismed-graphite)]"><b>CRM:</b> {f.crm ? `${f.crm}/${f.crmUf}` : '—'}</p>
+                <p className="text-[var(--chrismed-graphite)]"><b>Especialidades:</b> {f.especialidades.length ? f.especialidades.map((s) => CHRISMED_SPECIALTIES.find((x) => x.slug === s)?.name).join(', ') : '—'}</p>
+                <p className="text-[var(--chrismed-graphite)]"><b>Principal:</b> {CHRISMED_SPECIALTIES.find((x) => x.slug === f.especialidadePrincipal)?.name ?? '—'}</p>
+                <p className="text-[var(--chrismed-graphite)]"><b>Modalidades:</b> {f.modalidades.join(', ') || '—'}</p>
               </div>
 
-              <label className="flex items-start gap-2 text-xs text-emerald-900/75">
+              <label className="flex items-start gap-2 text-xs text-[var(--chrismed-graphite)]">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
                 <span>Autorizo o uso dos meus dados profissionais para análise de parceria, conforme a LGPD.</span>
               </label>
@@ -436,18 +436,18 @@ function DoctorRegistration() {
             </Button>
 
             {step < STEPS.length - 1 ? (
-              <Button type="button" onClick={next} className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">
+              <Button type="button" onClick={next} className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">
                 Continuar <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button type="button" onClick={submit} disabled={sending} className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">
+              <Button type="button" onClick={submit} disabled={sending} className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">
                 <UserCheck className="h-4 w-4" /> {sending ? 'Enviando…' : 'Enviar cadastro'}
               </Button>
             )}
           </div>
         </div>
 
-        <p className="mt-3 text-[11px] text-emerald-900/55">
+        <p className="mt-3 text-[11px] text-[var(--chrismed-ink)]/55">
           Status interno: novo cadastro → em análise → aprovado / recusado → ativo.
         </p>
       </div>

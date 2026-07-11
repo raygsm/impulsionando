@@ -59,39 +59,39 @@ function ContatoPage() {
 
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">Contato</Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">Como podemos ajudar?</h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">Escolha o melhor canal. A equipe CrisMed responde em horário comercial, com sigilo e cordialidade.</p>
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Contato</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">Como podemos ajudar?</h1>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">Escolha o melhor canal. A equipe CrisMed responde em horário comercial, com sigilo e cordialidade.</p>
         </div>
       </section>
 
       <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div className="space-y-4">
-          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="block rounded-2xl border border-emerald-900/10 bg-white p-6 hover:bg-emerald-900/5 transition">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><MessageCircle className="h-4 w-4" /> WhatsApp principal</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Atendimento rápido para dúvidas e suporte ao agendamento.</p>
+          <a href={WHATSAPP} target="_blank" rel="noreferrer" className="block rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 hover:bg-[var(--chrismed-bone)] transition">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><MessageCircle className="h-4 w-4" /> WhatsApp principal</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Atendimento rápido para dúvidas e suporte ao agendamento.</p>
           </a>
-          <a href={`mailto:${EMAIL}`} className="block rounded-2xl border border-emerald-900/10 bg-white p-6 hover:bg-emerald-900/5 transition">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><Mail className="h-4 w-4" /> E-mail</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">{EMAIL}</p>
+          <a href={`mailto:${EMAIL}`} className="block rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 hover:bg-[var(--chrismed-bone)] transition">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Mail className="h-4 w-4" /> E-mail</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">{EMAIL}</p>
           </a>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><MapPin className="h-4 w-4" /> Endereço</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Copacabana — Rio de Janeiro. Endereço completo enviado na confirmação do agendamento.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><MapPin className="h-4 w-4" /> Endereço</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Copacabana — Rio de Janeiro. Endereço completo enviado na confirmação do agendamento.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5"><Link to="/chrismed/agendar"><CalendarCheck className="h-4 w-4" />Agendar</Link></Button>
-            <Button asChild variant="outline" className="border-emerald-900/20 gap-1.5"><Link to="/chrismed/ocupacional"><Briefcase className="h-4 w-4" />Empresa</Link></Button>
-            <Button asChild variant="outline" className="border-emerald-900/20 gap-1.5"><Link to="/chrismed/medicos"><Stethoscope className="h-4 w-4" />Médicos</Link></Button>
+            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5"><Link to="/chrismed/agendar"><CalendarCheck className="h-4 w-4" />Agendar</Link></Button>
+            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] gap-1.5"><Link to="/chrismed/ocupacional"><Briefcase className="h-4 w-4" />Empresa</Link></Button>
+            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] gap-1.5"><Link to="/chrismed/medicos"><Stethoscope className="h-4 w-4" />Médicos</Link></Button>
           </div>
         </div>
 
-        <form onSubmit={submit} className="rounded-2xl border border-emerald-900/10 bg-white p-7 space-y-4">
+        <form onSubmit={submit} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-7 space-y-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90">Mensagem</div>
-            <h3 className="font-serif text-xl text-emerald-950 mt-1">Fale com a equipe CrisMed</h3>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-champagne-deep)]">Mensagem</div>
+            <h3 className="chrismed-serif text-xl text-[var(--chrismed-ink)] mt-1">Fale com a equipe CrisMed</h3>
           </div>
           <div className="space-y-3">
             <div>
@@ -107,11 +107,11 @@ function ContatoPage() {
               <Textarea rows={5} value={msg} onChange={(e) => setMsg(e.target.value)} />
             </div>
           </div>
-          <label className="flex items-start gap-2 text-xs text-emerald-900/75">
+          <label className="flex items-start gap-2 text-xs text-[var(--chrismed-graphite)]">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
             <span>Autorizo o uso dos meus dados para retorno da equipe CrisMed (LGPD).</span>
           </label>
-          <Button type="submit" disabled={sending} className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50">
+          <Button type="submit" disabled={sending} className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
             {sending ? 'Enviando…' : 'Enviar mensagem'}
           </Button>
         </form>
