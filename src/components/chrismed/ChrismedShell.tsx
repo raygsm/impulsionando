@@ -115,6 +115,7 @@ const NAV: NavItem[] = [
           en: 'Global Medical Services — atención en español',
           es: 'Global Medical Services — atención en español',
         },
+        icon: 'es',
       },
     ],
   },
