@@ -439,12 +439,31 @@ export function ImpulsionitoConcierge() {
               {/* Corpo — scroll interno */}
               <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
                 {/* Mensagem contextual */}
-                <div className="rounded-xl border border-primary/15 bg-primary/5 p-3">
+                <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 space-y-2">
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     <p className="text-sm leading-relaxed text-foreground">{contextualHeadline}</p>
                   </div>
+                  {audience === "lead" && lead ? (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <Link
+                        to={lead.lastPath}
+                        className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/15"
+                      >
+                        <ArrowRight className="h-3 w-3" /> Continuar de onde parei
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={resetLead}
+                        className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        data-testid="impulsionito-reset-lead"
+                      >
+                        Recomeçar
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
+
 
                 {/* Ações rápidas / sugestões */}
                 {audience === "client" ? (
