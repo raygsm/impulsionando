@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Stethoscope, Video, Home, RefreshCw, CheckCircle2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
+import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -35,6 +36,13 @@ const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; la
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
 });
+
+function openOliver() {
+  if (typeof window !== 'undefined') {
+    openChrismedOliver();
+    window.dispatchEvent(new CustomEvent('chrismed:oliver:open'));
+  }
+}
 
 export const Route = createFileRoute('/chrismed/agendar')({
   validateSearch: zodValidator(searchSchema),
@@ -194,6 +202,14 @@ function ChrismedPage() {
                 {heroCopy.title} <span className="text-amber-700/90">{heroCopy.titleHL}</span>
               </h1>
               <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{heroCopy.lead}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={openOliver}
+                className="mt-6 border-emerald-900/20 text-emerald-950 hover:bg-emerald-900/5"
+              >
+                Falar com Oliver
+              </Button>
             </div>
 
             <div id="teleconsulta" className="scroll-mt-24">
