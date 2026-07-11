@@ -198,20 +198,24 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
           <div className="overflow-hidden rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-lg)]">
             {group.children.map((leaf) => (
               <Link
-                key={leaf.to}
+                key={`${leaf.to}-${leaf.labels.pt}`}
                 to={leaf.to}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
+                className="flex items-center gap-3 border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
               >
-                <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
-                  {leaf.labels[lang]}
-                </div>
-                {leaf.desc && (
-                  <div className="mt-0.5 text-[12px] leading-snug text-[var(--chrismed-mist)]">
-                    {leaf.desc[lang]}
+                {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                <div className="min-w-0">
+                  <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
+                    {leaf.labels[lang]}
                   </div>
-                )}
+                  {leaf.desc && (
+                    <div className="mt-0.5 text-[12px] leading-snug text-[var(--chrismed-mist)]">
+                      {leaf.desc[lang]}
+                    </div>
+                  )}
+                </div>
               </Link>
             ))}
           </div>
