@@ -261,6 +261,7 @@ export function ImpulsionitoConcierge() {
     const handler = (e: Event) => {
       setOpen(true);
       setMinimized(false);
+      captureNichoContext();
       const origin = (e as CustomEvent<{ origin?: string }>).detail?.origin ?? "unknown";
       trackImpulsionitoOpen(origin, { path: pathname, ctx: ctx.id });
     };
