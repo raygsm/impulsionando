@@ -267,7 +267,7 @@ export function ImpulsionitoConcierge() {
     };
     window.addEventListener("impulsionito:open", handler);
     return () => window.removeEventListener("impulsionito:open", handler);
-  }, [pathname, ctx.id]);
+  }, [pathname, ctx.id, captureNichoContext]);
 
   const send = useCallback(
     async (text: string) => {
