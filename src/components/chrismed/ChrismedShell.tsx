@@ -304,10 +304,10 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
           </div>
           <Link
             to="/chrismed/agendar"
-            className="chrismed-sans hidden items-center gap-1.5 rounded-full bg-[var(--chrismed-forest)] px-4 py-2 text-[13px] font-medium text-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-md)] transition-all hover:-translate-y-px hover:bg-[var(--chrismed-forest-deep)] sm:inline-flex"
+            className="chrismed-sans chrismed-cta hidden items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium sm:inline-flex"
           >
-            <CalendarCheck className="h-4 w-4" aria-hidden />
-            {CTA.book[lang]}
+            <CalendarCheck className="h-4 w-4 chrismed-cta-lead" aria-hidden />
+            <span className="chrismed-cta-lead">{CTA.book[lang]}</span>
           </Link>
           <button
             type="button"
