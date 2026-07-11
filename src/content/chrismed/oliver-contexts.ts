@@ -69,11 +69,33 @@ export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
     key: 'ocupacional',
     eyebrow: 'Medicina Ocupacional',
     greeting:
-      'Posso ajudar empresas e colaboradores. Escolha se você representa uma empresa ou é colaborador convidado.',
+      'Posso ajudar com ASO, exames ocupacionais ou atendimento para sua empresa.',
     quickReplies: [
-      { label: 'Sou empresa', kind: 'info', message: 'A equipe CHRISMED entra em contato para entender operação, unidades e volume. Deixe empresa e responsável.' },
-      { label: 'Sou colaborador', kind: 'info', message: 'Se sua empresa já é cliente CHRISMED, você receberá o link direto do agendamento. Verifique o e-mail do RH.' },
+      {
+        label: 'Sou uma empresa',
+        kind: 'info',
+        message:
+          'A equipe CHRISMED orienta a implantação conforme o perfil da empresa: unidades, volume de colaboradores e periodicidade. Deixe empresa, responsável e melhor horário de contato.',
+      },
+      {
+        label: 'Sou colaborador',
+        kind: 'info',
+        message:
+          'Se sua empresa já é cliente CHRISMED, você receberá pelo RH as instruções e o link do agendamento. Se ainda não, oriente sua empresa a iniciar o atendimento com a CHRISMED.',
+      },
       { label: 'Agendar ASO', kind: 'navigate', to: '/chrismed/agendar' },
+      {
+        label: 'Consultar orientações',
+        kind: 'info',
+        message:
+          'Os exames ocupacionais confirmados na CHRISMED são: admissional, periódico, retorno ao trabalho, mudança de função e demissional (ASO). As condições e a preparação são apresentadas durante o agendamento.',
+      },
+      {
+        label: 'Falar com a equipe',
+        kind: 'info',
+        message:
+          'A equipe CHRISMED responde no próximo horário administrativo. Deixe nome, empresa (quando aplicável) e contato preferencial.',
+      },
     ],
   },
   gms: {
