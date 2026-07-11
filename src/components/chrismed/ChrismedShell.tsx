@@ -105,6 +105,7 @@ const NAV: NavItem[] = [
           en: 'Global Medical Services — English-speaking care',
           es: 'Global Medical Services — English-speaking care',
         },
+        icon: 'uk',
       },
       {
         to: '/chrismed/internacional',
