@@ -538,7 +538,7 @@ export function ChrismedShell({
       </a>
       <ChrismedOliverProvider>
         <ChrismedHeader variant={variant} />
-        <main id="chrismed-main" className="pb-28 md:pb-24">
+        <main id="chrismed-main" className="mx-auto w-full max-w-7xl pb-28 md:pb-24">
           {children}
         </main>
         {variant === 'full' && <ChrismedFooter />}
