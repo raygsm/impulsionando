@@ -1,5 +1,18 @@
-import { createFileRoute, useRouter, useSearch } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+/**
+ * /chrismed/agendar — Wave 1 (fluxo invertido, frontend-only).
+ *
+ * Ordem oficial: 1) Especialidade → 2) Médico → 3) Modalidade → 4) Unidade
+ * → 5) Data + Horário (SEM login) → 6) Identificação → 7) Confirmação
+ * → 8) Pagamento PIX (Mercado Pago, único ponto real hoje) → 9) Sucesso.
+ *
+ * Wave 1 usa dados-mock explicitados (`src/data/chrismed-mock.ts`) para
+ * especialidade / médico / unidade / calendário / horário. Pagamento PIX
+ * segue chamando `mpago-create-payment` real. Reserva transacional de
+ * slot, lock, webhook idempotente e persistência de agendamento continuam
+ * como Pendências Codex — marcadas no rodapé de cada passo.
+ */
+import { createFileRoute, useSearch } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
 import { zodValidator, fallback } from '@tanstack/zod-adapter';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,10 +21,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Stethoscope, Video, Home, RefreshCw, CheckCircle2, Copy } from 'lucide-react';
+import {
+  Loader2, Stethoscope, Video, Home, RefreshCw, CheckCircle2, Copy,
+  Heart, Briefcase, Baby, Brain, Plane, ChevronLeft, ChevronRight, MapPin, AlertCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
+import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
+import {
+  CHRISMED_SPECIALTIES, CHRISMED_DOCTORS, CHRISMED_UNITS,
+  buildChrismedMockCalendar, CHRISMED_MOCK_NOTICE,
+  type ChrismedModality, type ChrismedSpecialty, type ChrismedDoctor, type ChrismedUnit, type ChrismedDay, type ChrismedSlot,
+} from '@/data/chrismed-mock';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -19,43 +40,36 @@ type Offering = {
   id: string;
   slug: string;
   name: string;
-  description: string | null;
-  modality: 'presencial' | 'telemedicina' | 'domiciliar' | 'retorno';
+  modality: ChrismedModality;
   price_cents: number;
   duration_minutes: number;
-  requires_prepayment: boolean;
 };
 
-const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; label: string }> = {
-  presencial: { icon: Stethoscope, label: 'Atendimento no consultório' },
-  telemedicina: { icon: Video, label: 'Atendimento por vídeo' },
-  domiciliar: { icon: Home, label: 'Médico onde você estiver' },
-  retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
+const MODALITY_META: Record<ChrismedModality, { icon: typeof Stethoscope; label: string; sub: string }> = {
+  presencial: { icon: Stethoscope, label: 'Presencial', sub: 'No consultório em Copacabana' },
+  telemedicina: { icon: Video, label: 'Teleconsulta', sub: 'Consulta por vídeo, onde estiver' },
+  domiciliar: { icon: Home, label: 'Domiciliar', sub: 'Médico no seu endereço' },
+  retorno: { icon: RefreshCw, label: 'Retorno', sub: 'Continuidade de tratamento' },
 };
+
+const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Briefcase, baby: Baby, brain: Brain, plane: Plane } as const;
 
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
+  specialty: fallback(z.string().optional(), undefined),
 });
-
-function openOliver() {
-  if (typeof window !== 'undefined') {
-    openChrismedOliver();
-    window.dispatchEvent(new CustomEvent('chrismed:oliver:open'));
-  }
-}
 
 export const Route = createFileRoute('/chrismed/agendar')({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
-      { name: 'description', content: 'Atendimento médico premium: presencial, por vídeo ou na sua residência, hotel ou empresa. Confirmação imediata via PIX, prontuário eletrônico e equipe à disposição.' },
-      { property: 'og:title', content: 'CHRISMED — Sua saúde com agilidade, sigilo e excelência' },
-      { property: 'og:description', content: 'Escolha o melhor horário e confirme seu atendimento em poucos minutos. Presencial, vídeo e domiciliar.' },
-      { property: 'og:type', content: 'website' },
+      { title: 'Agendar consulta · CrisMed' },
+      { name: 'description', content: 'Escolha especialidade, médico, modalidade, data e horário. Sem cadastro obrigatório para consultar a agenda.' },
+      { property: 'og:title', content: 'Agendar consulta · CrisMed' },
+      { property: 'og:description', content: 'Agenda pública CrisMed — presencial, teleconsulta e domiciliar. Cadastro só após escolher o horário.' },
     ],
   }),
-  component: ChrismedPage,
+  component: ChrismedAgendarPage,
   errorComponent: ({ error, reset }) => (
     <div className="container py-12 text-center">
       <h1 className="text-2xl font-semibold mb-2">Ops, algo deu errado</h1>
@@ -66,96 +80,136 @@ export const Route = createFileRoute('/chrismed/agendar')({
   notFoundComponent: () => <div className="container py-12">Página não encontrada.</div>,
 });
 
-function ChrismedPage() {
-  const { modality } = useSearch({ from: '/chrismed/agendar' });
-  const router = useRouter();
+type Step = 'specialty' | 'doctor' | 'modality' | 'unit' | 'schedule' | 'identify' | 'confirm' | 'payment' | 'done';
+
+function openOliver() {
+  if (typeof window !== 'undefined') {
+    openChrismedOliver();
+    window.dispatchEvent(new CustomEvent('chrismed:oliver:open'));
+  }
+}
+
+function maskCPF(v: string) {
+  return v.replace(/\D/g, '').slice(0, 11)
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+function maskPhone(v: string) {
+  return v.replace(/\D/g, '').slice(0, 11)
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2');
+}
+function maskCEP(v: string) {
+  return v.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2');
+}
+function isValidEmail(v: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function isValidCPF(v: string) { return v.replace(/\D/g, '').length === 11; }
+
+function ChrismedAgendarPage() {
+  const search = useSearch({ from: '/chrismed/agendar' });
+  const [step, setStep] = useState<Step>('specialty');
+  const [specialty, setSpecialty] = useState<ChrismedSpecialty | null>(null);
+  const [doctor, setDoctor] = useState<ChrismedDoctor | null>(null);
+  const [modality, setModality] = useState<ChrismedModality | null>(null);
+  const [unit, setUnit] = useState<ChrismedUnit | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [selectedDayIso, setSelectedDayIso] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [patient, setPatient] = useState({ first_name: '', last_name: '', email: '', doc: '', phone: '', cep: '' });
   const [offerings, setOfferings] = useState<Offering[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Offering | null>(null);
-  const [payer, setPayer] = useState({ first_name: '', last_name: '', email: '', doc: '' });
+  const [loadingOfferings, setLoadingOfferings] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
 
+  // Pré-seleção via querystring
+  useEffect(() => {
+    if (search.specialty) {
+      const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
+      if (sp) { setSpecialty(sp); setStep('doctor'); }
+    }
+  }, [search.specialty]);
+
+  // Carrega offerings reais (para preço/duração no passo de pagamento)
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('chrismed_service_offerings')
-        .select('id,slug,name,description,modality,price_cents,duration_minutes,requires_prepayment')
+        .select('id,slug,name,modality,price_cents,duration_minutes')
         .eq('company_id', CHRISMED_COMPANY_ID)
         .eq('active', true)
         .order('display_order');
-      if (error) toast.error('Erro ao carregar serviços');
-      else setOfferings((data ?? []) as Offering[]);
-      setLoading(false);
+      setOfferings((data ?? []) as Offering[]);
+      setLoadingOfferings(false);
     })();
   }, []);
 
-  // Pré-seleciona modalidade vinda da URL (?modality=telemedicina|presencial|domiciliar|retorno)
-  useEffect(() => {
-    if (!modality || selected || offerings.length === 0) return;
-    const match = offerings.find((o) => o.modality === modality);
-    if (match) setSelected(match);
-  }, [modality, offerings, selected]);
+  const calendar = useMemo(() => buildChrismedMockCalendar(), []);
+  const currentOffering = useMemo(
+    () => modality ? offerings.find((o) => o.modality === modality) ?? null : null,
+    [modality, offerings],
+  );
 
-  // Polling do status do pagamento PIX
+  // PIX polling
   useEffect(() => {
     if (!pixResult || pollStatus === 'approved') return;
     const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('mpago_payments')
-        .select('status')
-        .eq('id', pixResult.payment_id)
-        .maybeSingle();
+      const { data } = await supabase.from('mpago_payments').select('status').eq('id', pixResult.payment_id).maybeSingle();
       if (data?.status) {
         setPollStatus(data.status);
-        if (data.status === 'approved') {
-          clearInterval(interval);
-          toast.success('Pagamento confirmado! Você receberá os detalhes por e-mail.');
-        }
+        if (data.status === 'approved') { clearInterval(interval); setStep('done'); toast.success('Pagamento confirmado!'); }
       }
     }, 5000);
     return () => clearInterval(interval);
   }, [pixResult, pollStatus]);
 
-  async function handlePay() {
-    if (!selected) return;
-    if (!payer.email || !payer.first_name) {
-      toast.error('Preencha pelo menos nome e e-mail.');
-      return;
-    }
-    if (selected.price_cents === 0) {
-      toast.success('Retorno agendado sem cobrança. Entraremos em contato para confirmar.');
-      setSelected(null);
-      return;
-    }
+  // Filtros por escolha
+  const doctorsForSpecialty = specialty
+    ? CHRISMED_DOCTORS.filter((d) => d.specialtySlugs.includes(specialty.slug))
+    : CHRISMED_DOCTORS;
 
+  const modalitiesForDoctor: ChrismedModality[] = doctor ? doctor.modalities : ['presencial', 'telemedicina', 'domiciliar', 'retorno'];
+  const unitsForModality = modality === 'telemedicina'
+    ? CHRISMED_UNITS.filter((u) => u.slug === 'telemedicina')
+    : modality === 'domiciliar'
+      ? CHRISMED_UNITS.filter((u) => u.slug === 'domiciliar')
+      : CHRISMED_UNITS.filter((u) => doctor?.unitSlugs.includes(u.slug) ?? true);
+
+  const selectedDay: ChrismedDay | null = selectedDayIso ? calendar.find((d) => d.iso === selectedDayIso) ?? null : null;
+
+  async function handlePay() {
+    if (!currentOffering) {
+      toast.error('Selecione uma modalidade com preço configurado.');
+      return;
+    }
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke('mpago-create-payment', {
         body: {
           company_id: CHRISMED_COMPANY_ID,
           payment_method: 'pix',
-          amount_cents: selected.price_cents,
-          description: `CHRISMED — ${selected.name}`,
+          amount_cents: currentOffering.price_cents,
+          description: `CrisMed — ${specialty?.name} · ${doctor?.name} · ${selectedDayIso} ${selectedTime}`,
           payer: {
-            email: payer.email,
-            first_name: payer.first_name,
-            last_name: payer.last_name || undefined,
-            identification: payer.doc ? { type: 'CPF', number: payer.doc.replace(/\D/g, '') } : undefined,
+            email: patient.email,
+            first_name: patient.first_name,
+            last_name: patient.last_name || undefined,
+            identification: patient.doc ? { type: 'CPF', number: patient.doc.replace(/\D/g, '') } : undefined,
           },
           context_type: 'chrismed_service_offering',
-          context_id: selected.id,
-          metadata: { offering_slug: selected.slug, modality: selected.modality },
+          context_id: currentOffering.id,
+          metadata: {
+            offering_slug: currentOffering.slug, modality: currentOffering.modality,
+            wave1_mock: true, specialty: specialty?.slug, doctor: doctor?.slug, unit: unit?.slug,
+            requested_day: selectedDayIso, requested_time: selectedTime,
+          },
         },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setPixResult({
-        qr_code: data.mp.qr_code,
-        qr_code_base64: data.mp.qr_code_base64,
-        payment_id: data.payment.id,
-      });
+      setPixResult({ qr_code: data.mp.qr_code, qr_code_base64: data.mp.qr_code_base64, payment_id: data.payment.id });
+      setStep('payment');
     } catch (e) {
       toast.error(`Erro ao gerar PIX: ${(e as Error).message}`);
     } finally {
@@ -163,178 +217,268 @@ function ChrismedPage() {
     }
   }
 
-  const lang = useLang();
-  const heroCopy = {
-    pt: {
-      eyebrow: 'Medicina privada · Internacional · Concierge',
-      title: 'Medicina privada, internacional e humana,',
-      titleHL: 'com a autoridade da Dra. Cristiane Alencar.',
-      lead: 'Atendimento clínico de alto padrão para brasileiros e estrangeiros — em português, inglês e espanhol. Teleconsulta, consulta domiciliar e atendimento presencial em Copacabana.',
-      reserveTitle: 'Reserve em minutos',
-      reserveSub: 'Pagamento via PIX, confirmação imediata e horário bloqueado em sua agenda.',
-    },
-    en: {
-      eyebrow: 'Private · International · Concierge',
-      title: 'Private, international and humane medicine,',
-      titleHL: 'with the authority of Dr. Cristiane Alencar.',
-      lead: 'High-end clinical care for Brazilians and international patients — in Portuguese, English and Spanish. Telehealth, home visit and in-person care in Copacabana.',
-      reserveTitle: 'Book in minutes',
-      reserveSub: 'PIX payment, instant confirmation, slot locked in your agenda.',
-    },
-    es: {
-      eyebrow: 'Privada · Internacional · Concierge',
-      title: 'Medicina privada, internacional y humana,',
-      titleHL: 'con la autoridad de la Dra. Cristiane Alencar.',
-      lead: 'Atención clínica de alto nivel para brasileños y extranjeros — en portugués, inglés y español. Teleconsulta, visita a domicilio y atención presencial en Copacabana.',
-      reserveTitle: 'Reserve en minutos',
-      reserveSub: 'Pago vía PIX, confirmación inmediata y horario bloqueado en su agenda.',
-    },
-  }[lang];
+  const stepIndex = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'].indexOf(step);
+  const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
 
   return (
     <ChrismedShell>
-      <div className="container py-12 max-w-5xl">
-        {!pixResult && !selected && (
-          <>
-            <div className="mb-14">
-              <Badge variant="outline" className="border-emerald-900/15 bg-emerald-900/5 text-emerald-900 uppercase tracking-[0.18em] text-[10px] mb-5">{heroCopy.eyebrow}</Badge>
-              <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">
-                {heroCopy.title} <span className="text-amber-700/90">{heroCopy.titleHL}</span>
-              </h1>
-              <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{heroCopy.lead}</p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={openOliver}
-                className="mt-6 border-emerald-900/20 text-emerald-950 hover:bg-emerald-900/5"
-              >
-                Falar com Oliver
-              </Button>
-            </div>
+      <div className="container py-10 max-w-5xl">
+        {/* Progress trail */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-emerald-900/60 flex-wrap">
+            {stepLabels.map((label, i) => (
+              <span key={label} className="flex items-center gap-2">
+                <span className={i <= stepIndex ? 'text-emerald-950 font-medium' : ''}>{i + 1}. {label}</span>
+                {i < stepLabels.length - 1 && <ChevronRight className="h-3 w-3 opacity-40" />}
+              </span>
+            ))}
+          </div>
+          <div className="mt-3 h-1 rounded-full bg-emerald-900/10">
+            <div className="h-full rounded-full bg-emerald-900 transition-all" style={{ width: `${((stepIndex + 1) / stepLabels.length) * 100}%` }} />
+          </div>
+        </div>
 
-            <div id="teleconsulta" className="scroll-mt-24">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90 mb-2">{heroCopy.reserveTitle}</div>
-              <p className="text-sm text-emerald-900/70 mb-6">{heroCopy.reserveSub}</p>
-            </div>
+        {/* Aviso público sobre mock */}
+        {step !== 'done' && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg border border-amber-300/50 bg-amber-50/60 px-4 py-3 text-sm text-emerald-950">
+            <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700 flex-shrink-0" />
+            <p><strong>Agenda em demonstração:</strong> horários exibidos aqui são visuais. A reserva definitiva e o bloqueio de slot dependem do backend (Codex) — o pagamento PIX no final é real.</p>
+          </div>
+        )}
 
-            {loading ? (
-              <div className="flex justify-center py-16"><Loader2 className="animate-spin text-emerald-900" /></div>
+        {/* STEP 1: Especialidade */}
+        {step === 'specialty' && (
+          <section aria-labelledby="s1">
+            <h1 id="s1" className="font-serif text-3xl md:text-4xl text-emerald-950">Escolha a especialidade</h1>
+            <p className="mt-2 text-emerald-900/70">Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.</p>
+            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {CHRISMED_SPECIALTIES.map((sp) => {
+                const Icon = SPECIALTY_ICON[sp.icon];
+                return (
+                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep('doctor'); }}
+                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
+                    <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="font-serif text-lg text-emerald-950">{sp.name}</div>
+                    <div className="text-sm text-emerald-900/70 mt-1">{sp.short}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* STEP 2: Médico */}
+        {step === 'doctor' && specialty && (
+          <section aria-labelledby="s2">
+            <button onClick={() => setStep('specialty')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar especialidade</button>
+            <h2 id="s2" className="font-serif text-3xl text-emerald-950">Escolha o médico</h2>
+            <p className="mt-2 text-emerald-900/70">Profissionais que atendem <strong>{specialty.name}</strong>.</p>
+            {doctorsForSpecialty.length === 0 ? (
+              <EmptyState message="Nenhum médico disponível para esta especialidade no momento." onOliver={openOliver} />
             ) : (
-              <div className="grid md:grid-cols-2 gap-5">
-                {offerings.map((o) => {
-                  const Icon = MODALITY_META[o.modality].icon;
-                  return (
-                    <Card key={o.id} className="border-emerald-900/10 hover:border-emerald-900/30 hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] hover:-translate-y-0.5 transition-all cursor-pointer group bg-white" onClick={() => setSelected(o)}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="h-12 w-12 rounded-xl bg-emerald-900/5 text-emerald-900 flex items-center justify-center group-hover:bg-emerald-900 group-hover:text-amber-50 transition-colors">
-                            <Icon className="h-6 w-6" />
-                          </div>
-                          <Badge variant="secondary" className="bg-amber-100/70 text-emerald-950 hover:bg-amber-100 border border-amber-300/60 uppercase tracking-[0.14em] text-[10px]">{MODALITY_META[o.modality].label}</Badge>
-                        </div>
-                        <CardTitle className="mt-3 text-xl font-serif text-emerald-950">{o.name}</CardTitle>
-                        <CardDescription className="text-emerald-900/70">{o.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="flex items-end justify-between">
-                        <div>
-                          <div className="text-3xl font-serif text-emerald-950">
-                            {o.price_cents === 0 ? 'Cortesia' : `R$ ${(o.price_cents / 100).toFixed(2).replace('.', ',')}`}
-                          </div>
-                          <div className="text-xs text-emerald-900/60">Duração estimada: {o.duration_minutes} min</div>
-                        </div>
-                        <Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 shadow-sm">Reservar horário</Button>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+              <div className="mt-8 grid md:grid-cols-2 gap-4">
+                {doctorsForSpecialty.map((d) => (
+                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('modality'); }}
+                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
+                    <div className="font-serif text-xl text-emerald-950">{d.name}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-emerald-900/60 mt-1">{d.title}</div>
+                    <div className="text-xs text-emerald-900/60 mt-1">{d.crm}</div>
+                    <p className="text-sm text-emerald-900/75 mt-3">{d.bio}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {d.modalities.map((m) => (
+                        <Badge key={m} variant="outline" className="text-[10px] uppercase tracking-[0.14em] border-emerald-900/20">{MODALITY_META[m].label}</Badge>
+                      ))}
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
+          </section>
+        )}
 
-            {/* Trust signals */}
-            <div className="grid sm:grid-cols-3 gap-4 mt-14 pt-10 border-t border-emerald-900/10">
-              {[
-                { t: 'Confirmação imediata', d: 'Pagou, está confirmado. Horário reservado e bloqueado em sua agenda.' },
-                { t: 'Sigilo absoluto', d: 'Prontuário eletrônico criptografado. Conformidade total com a LGPD.' },
-                { t: 'Suporte pelo WhatsApp', d: 'Canal de SAC e pós-atendimento para dúvidas antes e orientação após a consulta.' },
-              ].map((b) => (
-                <div key={b.t} className="text-center sm:text-left">
-                  <div className="font-medium text-emerald-950 mb-1">{b.t}</div>
-                  <div className="text-sm text-emerald-900/70">{b.d}</div>
-                </div>
+        {/* STEP 3: Modalidade */}
+        {step === 'modality' && doctor && (
+          <section aria-labelledby="s3">
+            <button onClick={() => setStep('doctor')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar médico</button>
+            <h2 id="s3" className="font-serif text-3xl text-emerald-950">Como quer ser atendido?</h2>
+            <p className="mt-2 text-emerald-900/70">{doctor.name} atende nas modalidades abaixo.</p>
+            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {modalitiesForDoctor.map((m) => {
+                const meta = MODALITY_META[m];
+                const Icon = meta.icon;
+                return (
+                  <button key={m} type="button" onClick={() => { setModality(m); setStep('unit'); }}
+                    className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
+                    <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="font-serif text-lg text-emerald-950">{meta.label}</div>
+                    <div className="text-sm text-emerald-900/70 mt-1">{meta.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* STEP 4: Unidade */}
+        {step === 'unit' && modality && (
+          <section aria-labelledby="s4">
+            <button onClick={() => setStep('modality')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar modalidade</button>
+            <h2 id="s4" className="font-serif text-3xl text-emerald-950">Onde será o atendimento?</h2>
+            <div className="mt-8 grid md:grid-cols-2 gap-4">
+              {unitsForModality.map((u) => (
+                <button key={u.slug} type="button" onClick={() => { setUnit(u); setStep('schedule'); }}
+                  className="text-left rounded-xl border border-emerald-900/10 bg-white p-5 hover:border-emerald-900/40 hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900">
+                  <div className="h-11 w-11 rounded-lg bg-emerald-900/5 text-emerald-900 flex items-center justify-center mb-3">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div className="font-serif text-lg text-emerald-950">{u.name}</div>
+                  <div className="text-sm text-emerald-900/70 mt-1">{u.address}</div>
+                </button>
               ))}
             </div>
-          </>
+          </section>
         )}
 
-        {/* Form */}
-        {selected && !pixResult && (
-          <Card className="max-w-xl mx-auto border-emerald-900/10 bg-white">
-            <CardHeader>
-              <button onClick={() => setSelected(null)} className="text-sm text-emerald-900 hover:underline self-start mb-2">← Trocar modalidade</button>
-              <CardTitle className="font-serif text-emerald-950">{selected.name}</CardTitle>
-              <CardDescription className="text-emerald-900/70">
-                {selected.price_cents === 0
-                  ? 'Sem custo — confirme seus dados e reservamos seu horário.'
-                  : `Investimento de R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} · pagamento via PIX com confirmação imediata`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="fn">Nome*</Label>
-                  <Input id="fn" value={payer.first_name} onChange={(e) => setPayer({ ...payer, first_name: e.target.value })} />
-                </div>
-                <div>
-                  <Label htmlFor="ln">Sobrenome</Label>
-                  <Input id="ln" value={payer.last_name} onChange={(e) => setPayer({ ...payer, last_name: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="em">E-mail*</Label>
-                <Input id="em" type="email" inputMode="email" autoComplete="email" value={payer.email} onChange={(e) => setPayer({ ...payer, email: e.target.value })} />
-              </div>
-              <div>
-                <Label htmlFor="doc">CPF</Label>
-                <Input id="doc" inputMode="numeric" value={payer.doc} onChange={(e) => setPayer({ ...payer, doc: e.target.value })} placeholder="000.000.000-00" />
-              </div>
-              <Button onClick={handlePay} disabled={submitting} className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50">
-                {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                {selected.price_cents === 0 ? 'Confirmar reserva' : 'Reservar e pagar via PIX'}
-              </Button>
-              <p className="text-xs text-center text-emerald-900/60 mt-2">
-                Seu horário só é bloqueado após a confirmação do pagamento. Reembolso integral para cancelamentos com mais de 24h.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {/* STEP 5: Calendário + horários */}
+        {step === 'schedule' && unit && (
+          <section aria-labelledby="s5">
+            <button onClick={() => setStep('unit')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar unidade</button>
+            <h2 id="s5" className="font-serif text-3xl text-emerald-950">Escolha data e horário</h2>
+            <p className="mt-2 text-emerald-900/70">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
 
-        {/* PIX result */}
-        {pixResult && (
-          <Card className="max-w-xl mx-auto border-emerald-900/10 bg-white">
-            <CardHeader className="text-center">
-              {pollStatus === 'approved' ? (
-                <>
-                  <div className="mx-auto h-16 w-16 rounded-full bg-emerald-900/10 text-emerald-900 flex items-center justify-center mb-3">
-                    <CheckCircle2 className="h-9 w-9" />
+            <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6">
+              <MockCalendar
+                calendar={calendar}
+                monthOffset={monthOffset}
+                onMonth={setMonthOffset}
+                selectedIso={selectedDayIso}
+                onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); }}
+              />
+              <div className="rounded-xl border border-emerald-900/10 bg-white p-5">
+                <div className="text-xs uppercase tracking-[0.14em] text-emerald-900/60 mb-3">Horários disponíveis</div>
+                {!selectedDay && <p className="text-sm text-emerald-900/60">Selecione uma data para ver horários.</p>}
+                {selectedDay?.state === 'empty' && <p className="text-sm text-emerald-900/60">Sem agenda neste dia.</p>}
+                {selectedDay && selectedDay.slots.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedDay.slots.map((s) => (
+                      <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
+                    ))}
                   </div>
-                  <CardTitle className="font-serif text-emerald-950">Atendimento confirmado</CardTitle>
-                  <CardDescription className="text-emerald-900/70">Seu horário está bloqueado em nossa agenda. Enviamos os detalhes e orientações para o seu e-mail e WhatsApp.</CardDescription>
-                </>
-              ) : (
-                <>
-                  <CardTitle className="font-serif text-emerald-950">Reserve seu horário em segundos</CardTitle>
-                  <CardDescription className="text-emerald-900/70">
-                    Aponte a câmera para o QR Code ou use o código copia-e-cola. Confirmaremos automaticamente após o pagamento.
-                  </CardDescription>
-                </>
-              )}
-            </CardHeader>
-            {pollStatus !== 'approved' && (
-              <CardContent className="space-y-4">
-                {pixResult.qr_code_base64 ? (
+                )}
+                <div className="mt-5 flex items-center gap-3 text-[10px] text-emerald-900/60 flex-wrap">
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-emerald-900" /> Disponível</span>
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-emerald-900/30" /> Indisponível</span>
+                  <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-amber-500" /> Reservado</span>
+                </div>
+                <Button className="w-full mt-5 bg-emerald-900 hover:bg-emerald-950 text-amber-50" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
+                  Continuar
+                </Button>
+                <p className="text-[11px] text-emerald-900/60 mt-3">Reserva definitiva e lock de horário: <strong>Pendente Codex</strong>.</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* STEP 6: Identificação */}
+        {step === 'identify' && (
+          <section aria-labelledby="s6" className="max-w-2xl">
+            <button onClick={() => setStep('schedule')} className="text-sm text-emerald-900 hover:underline mb-3">← Trocar horário</button>
+            <h2 id="s6" className="font-serif text-3xl text-emerald-950">Sua identificação</h2>
+            <p className="mt-2 text-emerald-900/70">Pedimos só agora. Cadastro completo (endereço, documentos) fica para depois do pagamento.</p>
+            <Card className="mt-6 border-emerald-900/10 bg-white">
+              <CardContent className="p-6 grid gap-4">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="fn">Nome*</Label>
+                    <Input id="fn" value={patient.first_name} onChange={(e) => setPatient({ ...patient, first_name: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="ln">Sobrenome</Label>
+                    <Input id="ln" value={patient.last_name} onChange={(e) => setPatient({ ...patient, last_name: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="em">E-mail*</Label>
+                  <Input id="em" type="email" autoComplete="email" value={patient.email} onChange={(e) => setPatient({ ...patient, email: e.target.value })} />
+                  {patient.email && !isValidEmail(patient.email) && <p className="text-xs text-red-600 mt-1">E-mail inválido.</p>}
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="doc">CPF*</Label>
+                    <Input id="doc" inputMode="numeric" value={patient.doc} onChange={(e) => setPatient({ ...patient, doc: maskCPF(e.target.value) })} placeholder="000.000.000-00" />
+                    {patient.doc && !isValidCPF(patient.doc) && <p className="text-xs text-red-600 mt-1">CPF incompleto.</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="ph">Telefone</Label>
+                    <Input id="ph" inputMode="tel" value={patient.phone} onChange={(e) => setPatient({ ...patient, phone: maskPhone(e.target.value) })} placeholder="(00) 00000-0000" />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="cep">CEP (opcional)</Label>
+                  <Input id="cep" inputMode="numeric" value={patient.cep} onChange={(e) => setPatient({ ...patient, cep: maskCEP(e.target.value) })} placeholder="00000-000" />
+                  <p className="text-[11px] text-emerald-900/60 mt-1">Preenchimento automático de endereço: <strong>Pendente Codex</strong>.</p>
+                </div>
+                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50"
+                  disabled={!patient.first_name || !isValidEmail(patient.email) || !isValidCPF(patient.doc)}
+                  onClick={() => setStep('confirm')}>
+                  Continuar para confirmação
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* STEP 7: Confirmação */}
+        {step === 'confirm' && specialty && doctor && modality && unit && (
+          <section aria-labelledby="s7" className="max-w-2xl">
+            <button onClick={() => setStep('identify')} className="text-sm text-emerald-900 hover:underline mb-3">← Voltar</button>
+            <h2 id="s7" className="font-serif text-3xl text-emerald-950">Confirme os dados</h2>
+            <Card className="mt-6 border-emerald-900/10 bg-white">
+              <CardContent className="p-6 space-y-3 text-sm">
+                <Row label="Especialidade" value={specialty.name} />
+                <Row label="Médico" value={doctor.name} />
+                <Row label="Modalidade" value={MODALITY_META[modality].label} />
+                <Row label="Unidade" value={unit.name} />
+                <Row label="Data" value={selectedDayIso ?? '—'} />
+                <Row label="Horário" value={selectedTime ?? '—'} />
+                <Row label="Paciente" value={`${patient.first_name} ${patient.last_name}`.trim()} />
+                <Row label="E-mail" value={patient.email} />
+                <Row label="CPF" value={patient.doc} />
+                <hr className="border-emerald-900/10" />
+                {loadingOfferings ? (
+                  <div className="flex items-center gap-2 text-emerald-900/70"><Loader2 className="h-4 w-4 animate-spin" /> Carregando preço...</div>
+                ) : currentOffering ? (
+                  <Row label="Valor" value={currentOffering.price_cents === 0 ? 'Cortesia' : `R$ ${(currentOffering.price_cents / 100).toFixed(2).replace('.', ',')}`} />
+                ) : (
+                  <p className="text-xs text-amber-700">Preço não configurado para esta modalidade. Fale com Oliver.</p>
+                )}
+                <p className="text-xs text-emerald-900/60">
+                  Ao continuar, você concorda com a política de cancelamento (reembolso integral com mais de 24h de antecedência). Termos completos e política de LGPD: <strong>versionamento Pendente Codex</strong>.
+                </p>
+                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50" disabled={submitting || !currentOffering} onClick={handlePay}>
+                  {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
+                  {currentOffering && currentOffering.price_cents === 0 ? 'Confirmar reserva (cortesia)' : 'Ir para pagamento PIX'}
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* STEP 8: Pagamento (PIX real) */}
+        {step === 'payment' && pixResult && (
+          <section aria-labelledby="s8" className="max-w-xl mx-auto">
+            <h2 id="s8" className="font-serif text-3xl text-emerald-950 text-center">Pague via PIX</h2>
+            <p className="mt-2 text-emerald-900/70 text-center">Aponte a câmera para o QR ou copie o código. Confirmação automática.</p>
+            <Card className="mt-6 border-emerald-900/10 bg-white">
+              <CardContent className="p-6 space-y-4">
+                {pixResult.qr_code_base64 && (
                   <img src={`data:image/png;base64,${pixResult.qr_code_base64}`} alt="QR Code PIX" className="mx-auto rounded-lg border bg-white p-3" width={256} height={256} />
-                ) : null}
-                {pixResult.qr_code ? (
+                )}
+                {pixResult.qr_code && (
                   <div className="space-y-1">
                     <Label>Código PIX copia-e-cola</Label>
                     <div className="flex gap-2">
@@ -344,22 +488,126 @@ function ChrismedPage() {
                       </Button>
                     </div>
                   </div>
-                ) : null}
-                <Button variant="outline" className="w-full border-emerald-900/20" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); router.invalidate(); }}>
+                )}
+                <div className="flex items-center gap-2 text-sm text-emerald-900/70 justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Aguardando confirmação do pagamento...
+                </div>
+                <Button variant="outline" className="w-full border-emerald-900/20" onClick={() => { setPixResult(null); setPollStatus('pending'); setStep('confirm'); }}>
                   Cancelar e voltar
                 </Button>
               </CardContent>
-            )}
-            {pollStatus === 'approved' && (
-              <CardContent>
-                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50" onClick={() => { setPixResult(null); setSelected(null); setPollStatus('pending'); }}>
-                  Agendar outra consulta
-                </Button>
-              </CardContent>
-            )}
-          </Card>
+            </Card>
+          </section>
         )}
+
+        {/* STEP 9: Sucesso */}
+        {step === 'done' && (
+          <section aria-labelledby="s9" className="max-w-xl mx-auto text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-emerald-900/10 text-emerald-900 flex items-center justify-center mb-4">
+              <CheckCircle2 className="h-9 w-9" />
+            </div>
+            <h2 id="s9" className="font-serif text-3xl text-emerald-950">Pagamento confirmado</h2>
+            <p className="mt-3 text-emerald-900/75">
+              Recebemos seu pagamento. A persistência definitiva do agendamento, o envio de e-mail/WhatsApp e o link de teleconsulta dependem do webhook idempotente (<strong>Pendente Codex</strong>).
+            </p>
+            <div className="mt-6 flex gap-3 justify-center flex-wrap">
+              <Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50" onClick={() => window.location.reload()}>Agendar outra</Button>
+              <Button variant="outline" className="border-emerald-900/20" onClick={openOliver}>Falar com Oliver</Button>
+            </div>
+          </section>
+        )}
+
+        <p className="mt-12 text-center text-[11px] text-emerald-900/50">{CHRISMED_MOCK_NOTICE}</p>
       </div>
     </ChrismedShell>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span className="text-emerald-900/60">{label}</span>
+      <span className="text-emerald-950 font-medium text-right">{value}</span>
+    </div>
+  );
+}
+
+function EmptyState({ message, onOliver }: { message: string; onOliver: () => void }) {
+  return (
+    <div className="mt-8 rounded-xl border border-dashed border-emerald-900/20 bg-emerald-900/5 p-8 text-center">
+      <p className="text-emerald-900/80">{message}</p>
+      <Button variant="outline" className="mt-4 border-emerald-900/20" onClick={onOliver}>Falar com Oliver</Button>
+    </div>
+  );
+}
+
+function SlotButton({ slot, selected, onPick }: { slot: ChrismedSlot; selected: boolean; onPick: () => void }) {
+  const disabled = slot.state !== 'available';
+  const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900';
+  if (slot.state === 'held') return <button disabled className={`${base} border-amber-400/60 bg-amber-50 text-amber-800 cursor-not-allowed`}>{slot.time} · reservado</button>;
+  if (disabled) return <button disabled className={`${base} border-emerald-900/10 bg-emerald-900/5 text-emerald-900/40 cursor-not-allowed line-through`}>{slot.time}</button>;
+  return (
+    <button onClick={onPick} className={`${base} ${selected ? 'border-emerald-900 bg-emerald-900 text-amber-50' : 'border-emerald-900/20 bg-white text-emerald-950 hover:border-emerald-900/60'}`}>
+      {slot.time}
+    </button>
+  );
+}
+
+function MockCalendar({
+  calendar, monthOffset, onMonth, selectedIso, onPick,
+}: {
+  calendar: ChrismedDay[]; monthOffset: number; onMonth: (n: number) => void;
+  selectedIso: string | null; onPick: (iso: string) => void;
+}) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const viewDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+  const monthLabel = viewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const firstDow = viewDate.getDay();
+  const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+
+  const dayMap = new Map(calendar.map((d) => [d.iso, d]));
+  const cells: (ChrismedDay | null)[] = [];
+  for (let i = 0; i < firstDow; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = new Date(viewDate.getFullYear(), viewDate.getMonth(), d).toISOString().slice(0, 10);
+    cells.push(dayMap.get(iso) ?? { iso, state: 'empty', slots: [] });
+  }
+
+  return (
+    <div className="rounded-xl border border-emerald-900/10 bg-white p-5">
+      <div className="flex items-center justify-between mb-4">
+        <Button variant="ghost" size="icon" onClick={() => onMonth(monthOffset - 1)} disabled={monthOffset === 0} aria-label="Mês anterior">
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="font-serif text-emerald-950 capitalize">{monthLabel}</div>
+        <Button variant="ghost" size="icon" onClick={() => onMonth(monthOffset + 1)} aria-label="Próximo mês">
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.14em] text-emerald-900/50 mb-2">
+        {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d) => <div key={d}>{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((cell, i) => {
+          if (!cell) return <div key={i} />;
+          const d = new Date(cell.iso + 'T00:00:00');
+          const isPast = d < today;
+          const disabled = isPast || cell.state !== 'available';
+          const isSelected = selectedIso === cell.iso;
+          return (
+            <button key={cell.iso} disabled={disabled} onClick={() => onPick(cell.iso)}
+              aria-label={`${d.getDate()} — ${disabled ? 'indisponível' : 'disponível'}`}
+              className={[
+                'aspect-square rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900',
+                isSelected ? 'bg-emerald-900 text-amber-50 font-medium' :
+                disabled ? 'text-emerald-900/25 cursor-not-allowed' :
+                'text-emerald-950 hover:bg-emerald-900/5',
+              ].join(' ')}>
+              {d.getDate()}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
