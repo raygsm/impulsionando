@@ -978,6 +978,25 @@ const COPY: Record<Lang, Copy> = {
       portraitEyebrow: 'Autoridad médica',
       portraitRole: 'Medicina privada · Río de Janeiro',
     },
+    stats: [
+      { value: '80.000', suffix: '+', label: 'Pacientes atendidos' },
+      { value: '3', suffix: 'décadas', label: 'De práctica clínica' },
+      { value: '3', suffix: 'idiomas', label: 'PT · EN · ES' },
+      { value: '100', suffix: '%', label: 'Discreción · LGPD' },
+    ],
+    gms: {
+      eyebrow: 'GMS · Global Medical Support',
+      title: 'Atención internacional en Río de Janeiro.',
+      lead: 'Un único punto de contacto clínico para extranjeros, consulados, diplomáticos y familias internacionales. Coordinación hospitalaria, soporte multilingüe y continuidad cuando regresa a su país.',
+      cta: 'Conocer GMS',
+      languages: ['Português', 'English', 'Español'],
+      audience: [
+        'Extranjeros y expatriados residentes en Río de Janeiro.',
+        'Consulados, embajadas y familias diplomáticas.',
+        'Ejecutivos internacionales en tránsito por Brasil.',
+        'Continuidad clínica coordinada con médicos en el exterior.',
+      ],
+    },
     modalities: {
       eyebrow: 'Cómo desea ser atendido',
       title: 'Tres modalidades pensadas para su rutina.',
