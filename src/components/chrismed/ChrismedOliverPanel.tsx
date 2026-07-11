@@ -12,7 +12,8 @@
  *    canal humano assumirá.
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink } from 'lucide-react';
+import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   resolveOliverContextOverride,
@@ -27,7 +28,8 @@ import {
   useChrismedOliverState,
 } from './oliver-store';
 
-const WHATSAPP_ENABLED = false;
+const WHATSAPP_ENABLED = true;
+const C = CHRISMED_CONTACT.channels;
 
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
 // sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
@@ -241,20 +243,64 @@ export function ChrismedOliverPanel() {
               </section>
             )}
 
-            {/* Canal humano */}
-            <section>
+            {/* Salvar contato + canais oficiais (dados airgo.bio/chrismed) */}
+            <section aria-label="Contato oficial CHRISMED">
               <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)] mb-3">
-                Continuar por outro canal
+                Salvar contato · canais oficiais
               </p>
-              <button
-                type="button"
-                disabled={!WHATSAPP_ENABLED}
-                aria-disabled="true"
-                className="chrismed-sans w-full cursor-not-allowed border border-dashed border-[var(--chrismed-sand)] bg-transparent px-4 py-3 text-left text-sm text-[var(--chrismed-mist)]"
+
+              <a
+                href={C.vcard}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="chrismed-sans group mb-2 flex items-center justify-between gap-3 border border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] px-4 py-3 text-[var(--chrismed-ivory)] transition-colors hover:bg-[var(--chrismed-noir)]"
               >
-                WhatsApp e telefone da recepção — ativação pendente (Codex).
-              </button>
+                <span className="flex items-center gap-2.5">
+                  <Contact className="h-4 w-4" aria-hidden />
+                  <span className="text-sm font-medium">Salvar contato (vCard · 1 clique)</span>
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100" aria-hidden />
+              </a>
+
+              <a
+                href={C.airgo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="chrismed-sans mb-3 flex items-center justify-between gap-3 border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/40 px-4 py-2.5 text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)]"
+              >
+                <span className="flex items-center gap-2.5">
+                  <QrCode className="h-4 w-4 text-[var(--chrismed-champagne-deep)]" aria-hidden />
+                  <span className="text-[13px]">Cartão digital · airgo.bio/chrismed</span>
+                </span>
+                <ExternalLink className="h-3 w-3 opacity-60" aria-hidden />
+              </a>
+
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'WhatsApp', href: C.whatsapp, icon: MessageCircle },
+                  { label: 'Telefone', href: C.phone, icon: Phone },
+                  { label: 'E-mail', href: C.email, icon: Mail },
+                  { label: 'Instagram', href: C.instagram, icon: Instagram },
+                  { label: 'Localização', href: C.location, icon: MapPin },
+                  { label: 'Site oficial', href: C.website, icon: GlobeIcon },
+                  { label: 'PIX (QR)', href: C.pix, icon: CreditCard },
+                  { label: 'Avaliar · Google', href: C.reviewGoogle, icon: Star },
+                  { label: 'Avaliar · Doctoralia', href: C.reviewDoctoralia, icon: Star },
+                ].map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target={href.startsWith('http') ? '_blank' : undefined}
+                    rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="chrismed-sans flex items-center gap-2 border border-[var(--chrismed-sand)] bg-transparent px-3 py-2.5 text-left text-[12px] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] hover:bg-[var(--chrismed-bone)]/60"
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--chrismed-champagne-deep)]" aria-hidden />
+                    <span className="truncate">{label}</span>
+                  </a>
+                ))}
+              </div>
             </section>
+
 
             {/* Disclaimer clínico */}
             <p className="chrismed-sans border-t border-[var(--chrismed-sand)] pt-4 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
