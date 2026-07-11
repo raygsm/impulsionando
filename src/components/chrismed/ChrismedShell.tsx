@@ -485,6 +485,7 @@ function MobileDrawer({
             className="chrismed-sans flex w-full items-center justify-center gap-2 rounded-full border border-dashed border-[var(--chrismed-sand)] px-4 py-3 text-[13px] font-medium text-[var(--chrismed-graphite)] hover:border-[var(--chrismed-forest)] hover:text-[var(--chrismed-forest-deep)]"
           >
             Baixar o App · Em breve
+          </a>
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px] uppercase tracking-wider text-[var(--chrismed-mist)]">Idioma</span>
             <LangSwitcher lang={lang} />
