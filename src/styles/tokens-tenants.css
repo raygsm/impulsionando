@@ -121,36 +121,79 @@
   --fs-ink:    #1c1917;
 
   /* ============================================================
-     CHRISMED V1 — Quiet Luxury (Onda V1 aprovada em 11/07/2026)
-     Direção B: marfim + carvão + acento champagne. Editorial,
-     sereno, padrão AA. NUNCA usar fora de [data-tenant="chrismed"].
+     CHRISMED V3 — Quiet Luxury + Oliver Forest (aprovado Onda 3)
+     Palette unificada: marfim editorial + verde profundo Oliver
+     + âmbar como accent único. NUNCA usar fora de
+     [data-tenant="chrismed"].
      ============================================================ */
-  --chrismed-ivory:      #FDFCFB; /* superfície principal */
-  --chrismed-bone:       #F3F1ED; /* superfície secundária */
-  --chrismed-sand:       #E8E4DF; /* bordas / divisores */
-  --chrismed-champagne:  #B5A48B; /* accent editorial (uso restrito) */
-  --chrismed-champagne-deep: #8C7E6A;
-  --chrismed-ink:        #1A1A1A; /* texto principal */
-  --chrismed-graphite:   #4A4A4A; /* texto secundário */
-  --chrismed-mist:       #8A8680; /* texto terciário / meta */
-  --chrismed-noir:       #0F0F0F; /* superfícies escuras (footer/autoridade) */
+  --chrismed-ivory:      #FDFCFB;
+  --chrismed-bone:       #F3F1ED;
+  --chrismed-sand:       #E8E4DF;
 
-  /* Fontes CHRISMED — carregadas via <link> em src/routes/__root.tsx */
+  --chrismed-forest:        #0B2A24;
+  --chrismed-forest-deep:   #071C18;
+  --chrismed-forest-soft:   #12403A;
+  --chrismed-forest-mist:   #E7EDEB;
+
+  --chrismed-amber:         #E4B54A;
+  --chrismed-amber-deep:    #B8892B;
+  --chrismed-amber-soft:    #F6E8BE;
+
+  --chrismed-champagne:      #B5A48B;
+  --chrismed-champagne-deep: #8C7E6A;
+
+  --chrismed-ink:        #0E1A17;
+  --chrismed-graphite:   #3F4A47;
+  --chrismed-mist:       #7B857F;
+  --chrismed-noir:       #05100D;
+
   --chrismed-font-serif: "Cormorant Garamond", "Times New Roman", serif;
   --chrismed-font-sans:  "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* Motion */
   --chrismed-ease:       cubic-bezier(0.22, 0.61, 0.36, 1);
+  --chrismed-ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --chrismed-dur-fast:   180ms;
+  --chrismed-dur-base:   320ms;
+  --chrismed-dur-slow:   520ms;
   --chrismed-duration:   500ms;
+
+  --chrismed-shadow-sm:  0 1px 2px rgba(11,42,36,0.06);
+  --chrismed-shadow-md:  0 8px 24px -12px rgba(11,42,36,0.22);
+  --chrismed-shadow-lg:  0 24px 60px -24px rgba(11,42,36,0.35);
 }
 
 /* Escopo CHRISMED — aplica tokens globais dentro do tenant */
 [data-tenant="chrismed"] {
-  --primary: var(--chrismed-champagne-deep);
-  --ring:    var(--chrismed-champagne-deep);
+  --primary: var(--chrismed-forest);
+  --ring:    var(--chrismed-forest);
   color-scheme: light;
 }
 [data-tenant="chrismed"] .chrismed-serif { font-family: var(--chrismed-font-serif); font-feature-settings: "liga","dlig","kern"; }
 [data-tenant="chrismed"] .chrismed-sans  { font-family: var(--chrismed-font-sans); }
+
+[data-tenant="chrismed"] .chrismed-hover-lift {
+  transition: transform var(--chrismed-dur-base) var(--chrismed-ease-out),
+              box-shadow var(--chrismed-dur-base) var(--chrismed-ease-out),
+              border-color var(--chrismed-dur-base) var(--chrismed-ease-out);
+}
+[data-tenant="chrismed"] .chrismed-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--chrismed-shadow-md);
+}
+[data-tenant="chrismed"] :focus-visible {
+  outline: 2px solid var(--chrismed-amber);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+[data-tenant="chrismed"] .chrismed-band-forest {
+  background: linear-gradient(180deg, var(--chrismed-forest) 0%, var(--chrismed-forest-deep) 100%);
+  color: var(--chrismed-ivory);
+}
+[data-tenant="chrismed"] .chrismed-hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--chrismed-sand) 20%, var(--chrismed-sand) 80%, transparent);
+}
+
+
 
 
