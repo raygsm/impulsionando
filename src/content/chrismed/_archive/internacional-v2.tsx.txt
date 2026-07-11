@@ -1,3 +1,20 @@
+/**
+ * ARQUIVO — /chrismed/internacional (V2 GMS)
+ * Substituído pela V3.c (Quiet Luxury · trilingual) em 11/07/2026.
+ *
+ * Classificação do conteúdo:
+ *  - APROVEITÁVEL: eixos de público (travelers, gms, consulates, languages),
+ *    trilinguismo básico PT/EN/ES.
+ *  - DUPLICADO/DESATUALIZADO: copy corporativa emerald, badges com bandeiras
+ *    decorativas, CTA direto a /chrismed/agendar como entrada única.
+ *  - NÃO PUBLICÁVEL AGORA: qualquer promessa de "24 horas", cobertura fixa,
+ *    parceria com consulados, seguradoras, hospitais, laboratórios nominados,
+ *    tempo de resposta, volume de atendimentos, transferência garantida.
+ *  - REGRA V3.c: nenhuma orientação de emergência substitui serviço público.
+ *
+ * Preservado apenas para histórico. Não importar em produção.
+ */
+/*
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
 import { Button } from '@/components/ui/button';
@@ -123,3 +140,4 @@ const COPY = {
     gmsBody: 'En el GMS el foco es la emergencia médica y el soporte internacional rápido. Fuera de ese contexto, la Dra. Cristiane también realiza consultas regulares para brasileños y extranjeros — teleconsulta, domiciliaria o presencial — según disponibilidad. Pacientes que hablan inglés o español pueden ser atendidos en cualquier modalidad.',
   },
 } as const;
+*/
