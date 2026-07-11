@@ -624,6 +624,15 @@ type Copy = {
     lead: string;
     items: { title: string; body: string }[];
   };
+  stats: { value: string; suffix?: string; label: string }[];
+  gms: {
+    eyebrow: string;
+    title: string;
+    lead: string;
+    cta: string;
+    languages: string[];
+    audience: string[];
+  };
   verticals: {
     eyebrow: string;
     title: string;
