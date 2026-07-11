@@ -1,23 +1,20 @@
 /**
- * ChrismedOliverPanel — painel funcional do concierge Oliver (V3.F).
+ * ChrismedOliverPanel — Wave 2 (redesign).
  *
- * Escuta:
- *  - `chrismed:oliver:open`   → abre o painel.
- *  - `chrismed:oliver:context` → substitui o contexto (saudação + sugestões).
+ * Painel funcional. NÃO simula IA. Ações reais: navegar, exibir
+ * informação institucional, encaminhar para humano (canal ainda
+ * pendente Codex).
  *
- * Trata-se de um painel funcional com AÇÕES REAIS (navegar, mostrar
- * informação, fechar). Não simula conversa com IA. A integração
- * conversacional (transport, WhatsApp interno, triagem) depende do Codex.
- *
- * A11y é herdada do Radix (Dialog):
- *  - foco inicial no painel;
- *  - retorno de foco ao launcher ao fechar;
- *  - Escape fecha;
- *  - foco preso enquanto aberto;
- *  - respeita prefers-reduced-motion via classes utilitárias.
+ * Novidades Wave 2:
+ *  - Identidade forte (avatar monograma, nome, papel, disclaimer visível)
+ *  - Grid de "atalhos rápidos" global sempre visível (Agendar, Médicos,
+ *    Especialidades, Meus agendamentos, Pagamento, Falar humano)
+ *  - Ações contextuais por rota (mantém sistema OLIVER_CONTEXTS)
+ *  - Botão "reiniciar orientação" para limpar info atual
+ *  - Estados: sem info, com info, canal humano indisponível
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, MessageSquare, ArrowRight } from 'lucide-react';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   resolveOliverContextOverride,
@@ -32,7 +29,24 @@ import {
   useChrismedOliverState,
 } from './oliver-store';
 
-const WHATSAPP_ENABLED = false; // Codex libera quando URL + transferência de contexto forem validadas.
+const WHATSAPP_ENABLED = false;
+
+type GlobalAction = {
+  label: string;
+  hint: string;
+  icon: typeof Calendar;
+  to?: string;
+  info?: string;
+};
+
+const GLOBAL_ACTIONS: GlobalAction[] = [
+  { label: 'Agendar consulta', hint: 'Sem cadastro para ver horários', icon: Calendar, to: '/chrismed/agendar' },
+  { label: 'Nossos médicos', hint: 'Equipe e especialidades', icon: Users, to: '/chrismed/medicos' },
+  { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
+  { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
+  { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
+  { label: 'Falar com atendimento', hint: 'Canal humano — em breve', icon: MessageSquare, info: 'O canal humano (WhatsApp/telefone) está em ativação. Enquanto isso, use o formulário em /chrismed/contato — a equipe responde no próximo horário administrativo.' },
+];
 
 export function ChrismedOliverPanel() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -48,22 +62,20 @@ export function ChrismedOliverPanel() {
       navigate({ to: r.to as never, search: (r.search ?? {}) as never });
       return;
     }
-    if (r.kind === 'info') {
-      setChrismedOliverInfo(r.message);
-      return;
-    }
-    if (r.kind === 'close') {
-      closeChrismedOliver();
-    }
+    if (r.kind === 'info') { setChrismedOliverInfo(r.message); return; }
+    if (r.kind === 'close') closeChrismedOliver();
+  };
+
+  const runGlobal = (a: GlobalAction) => {
+    setChrismedOliverInfo(null);
+    if (a.to) { closeChrismedOliver(); navigate({ to: a.to as never }); return; }
+    if (a.info) setChrismedOliverInfo(a.info);
   };
 
   return (
     <DialogPrimitive.Root
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) openChrismedOliver();
-        else closeChrismedOliver();
-      }}
+      onOpenChange={(nextOpen) => { if (nextOpen) openChrismedOliver(); else closeChrismedOliver(); }}
     >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
@@ -72,76 +84,133 @@ export function ChrismedOliverPanel() {
         />
         <DialogPrimitive.Content
           data-chrismed-oliver-panel
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            focusChrismedOliverTrigger();
-          }}
+          onCloseAutoFocus={(event) => { event.preventDefault(); focusChrismedOliverTrigger(); }}
           className="fixed inset-y-0 right-0 z-[91] flex h-dvh w-full max-w-[min(100vw,28rem)] flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] shadow-[0_24px_80px_-24px_rgba(15,15,15,0.55)] outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none"
         >
-        <div className="border-b border-[var(--chrismed-sand)] px-6 py-5 text-left">
-          <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
-            Oliver · {ctx.eyebrow}
-          </p>
-          <DialogPrimitive.Title className="chrismed-serif mt-1 text-2xl font-light text-[var(--chrismed-ink)]">
-            Concierge CHRISMED
-          </DialogPrimitive.Title>
-          <DialogPrimitive.Description className="chrismed-sans mt-2 pr-10 text-sm leading-relaxed text-[var(--chrismed-graphite)]">
-            {ctx.greeting}
-          </DialogPrimitive.Description>
-          <DialogPrimitive.Close
-            type="button"
-            aria-label="Fechar Oliver"
-            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center border border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
-          >
-            <X className="h-4 w-4" aria-hidden />
-          </DialogPrimitive.Close>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
-            Sugestões
-          </p>
-          <ul className="mt-4 space-y-2">
-            {ctx.quickReplies.map((r) => (
-              <li key={r.label}>
-                <button
-                  type="button"
-                  onClick={() => runReply(r)}
-                  className="chrismed-sans w-full rounded-none border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/40 px-4 py-3 text-left text-sm text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] hover:bg-[var(--chrismed-bone)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
-                >
-                  {r.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          {info && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="chrismed-sans mt-6 border-l-2 border-[var(--chrismed-champagne-deep)] bg-[var(--chrismed-bone)]/60 px-4 py-4 text-sm leading-relaxed text-[var(--chrismed-graphite)]"
-            >
-              {info}
+          {/* Header com identidade forte */}
+          <div className="border-b border-[var(--chrismed-sand)] px-6 pt-5 pb-4">
+            <div className="flex items-start gap-3">
+              <div
+                aria-hidden
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-900 to-emerald-950 text-amber-50 chrismed-serif text-xl font-light shadow-md"
+              >
+                O
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
+                  Oliver · {ctx.eyebrow}
+                </p>
+                <DialogPrimitive.Title className="chrismed-serif text-xl font-light text-[var(--chrismed-ink)]">
+                  Concierge CrisMed
+                </DialogPrimitive.Title>
+                <p className="chrismed-sans mt-0.5 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
+                  Assistente administrativo · não diagnostica, não prescreve.
+                </p>
+              </div>
+              <DialogPrimitive.Close
+                type="button"
+                aria-label="Fechar Oliver"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+              >
+                <X className="h-4 w-4" aria-hidden />
+              </DialogPrimitive.Close>
             </div>
-          )}
-
-          <div className="mt-8 border-t border-[var(--chrismed-sand)] pt-6">
-            <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
-              Continuar por outro canal
-            </p>
-            <button
-              type="button"
-              disabled={!WHATSAPP_ENABLED}
-              className="chrismed-sans mt-3 w-full cursor-not-allowed border border-dashed border-[var(--chrismed-sand)] bg-transparent px-4 py-3 text-left text-sm text-[var(--chrismed-mist)]"
-              aria-disabled="true"
-            >
-              Canal indisponível neste momento
-            </button>
-            <p className="chrismed-sans mt-3 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
-              Oliver oferece apoio administrativo — não diagnostica, não prescreve e não substitui avaliação médica.
+            <p className="chrismed-sans mt-3 text-sm leading-relaxed text-[var(--chrismed-graphite)]">
+              {ctx.greeting}
             </p>
           </div>
-        </div>
+
+          {/* Corpo scroll */}
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+            {/* Info retornada por uma ação */}
+            {info && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="border-l-2 border-[var(--chrismed-champagne-deep)] bg-[var(--chrismed-bone)]/60 px-4 py-4 text-sm leading-relaxed text-[var(--chrismed-graphite)]"
+              >
+                {info}
+                <button
+                  type="button"
+                  onClick={() => setChrismedOliverInfo(null)}
+                  className="chrismed-sans mt-3 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-[var(--chrismed-champagne-deep)] hover:underline"
+                >
+                  <RotateCcw className="h-3 w-3" /> Reiniciar orientação
+                </button>
+              </div>
+            )}
+
+            {/* Atalhos globais sempre visíveis */}
+            <section>
+              <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)] mb-3">
+                Atalhos rápidos
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {GLOBAL_ACTIONS.map((a) => {
+                  const Icon = a.icon;
+                  return (
+                    <button
+                      key={a.label}
+                      type="button"
+                      onClick={() => runGlobal(a)}
+                      className="group flex flex-col items-start gap-1.5 rounded-none border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/30 px-3 py-3 text-left transition-colors hover:border-[var(--chrismed-champagne-deep)] hover:bg-[var(--chrismed-bone)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+                    >
+                      <Icon className="h-4 w-4 text-[var(--chrismed-champagne-deep)]" aria-hidden />
+                      <span className="chrismed-sans text-[13px] font-medium leading-tight text-[var(--chrismed-ink)]">
+                        {a.label}
+                      </span>
+                      <span className="chrismed-sans text-[10px] leading-snug text-[var(--chrismed-mist)]">
+                        {a.hint}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sugestões contextuais da rota */}
+            {ctx.quickReplies.length > 0 && (
+              <section>
+                <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)] mb-3">
+                  Sugestões para esta página
+                </p>
+                <ul className="space-y-1.5">
+                  {ctx.quickReplies.map((r) => (
+                    <li key={r.label}>
+                      <button
+                        type="button"
+                        onClick={() => runReply(r)}
+                        className="chrismed-sans group flex w-full items-center justify-between gap-3 rounded-none border border-[var(--chrismed-sand)]/70 bg-transparent px-4 py-2.5 text-left text-sm text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)] hover:bg-[var(--chrismed-bone)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+                      >
+                        <span>{r.label}</span>
+                        <ArrowRight className="h-3.5 w-3.5 opacity-40 transition-opacity group-hover:opacity-100" aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Canal humano */}
+            <section>
+              <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)] mb-3">
+                Continuar por outro canal
+              </p>
+              <button
+                type="button"
+                disabled={!WHATSAPP_ENABLED}
+                aria-disabled="true"
+                className="chrismed-sans w-full cursor-not-allowed border border-dashed border-[var(--chrismed-sand)] bg-transparent px-4 py-3 text-left text-sm text-[var(--chrismed-mist)]"
+              >
+                WhatsApp e telefone da recepção — ativação pendente (Codex).
+              </button>
+            </section>
+
+            {/* Disclaimer clínico */}
+            <p className="chrismed-sans border-t border-[var(--chrismed-sand)] pt-4 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
+              Oliver oferece apoio administrativo — não substitui avaliação médica, não emite diagnóstico e não prescreve. Em emergência, procure o serviço público local imediatamente.
+            </p>
+          </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
