@@ -3,8 +3,10 @@ import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { BuildStamp } from '@/components/brand/BuildStamp';
 import { ChrismedOliverProvider } from './ChrismedOliverProvider';
 import { openChrismedOliver } from './oliver-store';
+
 
 /**
  * Wordmark tipográfico CHRISMED — fallback oficial V3.F.
