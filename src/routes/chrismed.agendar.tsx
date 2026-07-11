@@ -226,12 +226,28 @@ function ChrismedAgendarPage() {
     }
   }
 
-  const stepIndex = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'].indexOf(step);
+  const stepOrder: Step[] = ['specialty','doctor','modality','unit','schedule','identify','confirm','payment','done'];
+  const stepIndex = stepOrder.indexOf(step);
   const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+  const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
+  function goBack() {
+    if (stepIndex <= 0) return;
+    // pula 'doctor' quando o médico foi pré-selecionado via querystring
+    let prev = stepOrder[stepIndex - 1];
+    if (prev === 'doctor' && search.doctor) prev = 'specialty';
+    setStep(prev);
+  }
+
+  const stickySummary = [
+    doctor?.name,
+    specialty?.name,
+    modality ? MODALITY_META[modality].label : null,
+    selectedTime,
+  ].filter(Boolean).join(' · ');
 
   return (
     <ChrismedShell variant="minimal">
-      <div className="container py-10 max-w-5xl">
+      <div className="container py-10 max-w-5xl pb-32 sm:pb-10">
         {/* Progress trail */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--chrismed-mist)] flex-wrap">
@@ -537,6 +553,49 @@ function ChrismedAgendarPage() {
 
         <p className="mt-12 text-center text-[11px] text-[var(--chrismed-ink)]/50">{CHRISMED_MOCK_NOTICE}</p>
       </div>
+
+      {/* Sticky CTA bar mobile — contexto persistente + voltar + Oliver */}
+      {step !== 'done' && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:hidden"
+          role="region"
+          aria-label="Progresso do agendamento"
+        >
+          <div className="h-1 rounded-full bg-[var(--chrismed-sand)] mb-2">
+            <div
+              className="h-full rounded-full bg-[var(--chrismed-ink)] transition-all"
+              style={{ width: `${((stepIndex + 1) / stepLabels.length) * 100}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={!canGoBack}
+              className="min-h-11 min-w-11 -ml-1 flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-[var(--chrismed-ink)] disabled:opacity-30"
+              aria-label="Voltar ao passo anterior"
+            >
+              <ChevronLeft className="h-4 w-4" /> Voltar
+            </button>
+            <div className="flex-1 min-w-0 text-center">
+              <div className="text-[9px] uppercase tracking-[0.16em] text-[var(--chrismed-mist)]">
+                Passo {stepIndex + 1}/{stepLabels.length}
+              </div>
+              <div className="text-[11px] text-[var(--chrismed-ink)] truncate font-medium">
+                {stickySummary || stepLabels[stepIndex]}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={openOliver}
+              className="min-h-11 min-w-11 -mr-1 text-[11px] uppercase tracking-[0.14em] text-[var(--chrismed-champagne-deep)] font-medium"
+              aria-label="Falar com Oliver"
+            >
+              Oliver
+            </button>
+          </div>
+        </div>
+      )}
     </ChrismedShell>
   );
 }

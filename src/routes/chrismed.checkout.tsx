@@ -28,14 +28,14 @@ function CheckoutPage() {
   return (
     <ChrismedShell variant="minimal">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-14 max-w-5xl">
+        <div className="container py-8 sm:py-14 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>
-          <p className="mt-4 text-[var(--chrismed-graphite)] max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
+          <h1 className="chrismed-serif text-3xl sm:text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-[var(--chrismed-graphite)] max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
         </div>
       </section>
 
-      <section className="container py-12 max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+      <section className="container py-8 sm:py-12 max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 sm:gap-8">
         {/* Coluna esquerda: método */}
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -120,16 +120,16 @@ function MethodButton({ active, onClick, icon, title, hint }: { active: boolean;
     <button
       type="button" onClick={onClick}
       className={
-        'flex items-center gap-3 rounded-xl border p-4 text-left transition ' +
+        'flex items-center gap-2 sm:gap-3 rounded-xl border p-3 sm:p-4 text-left transition min-h-[56px] ' +
         (active
           ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
           : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] border-[var(--chrismed-sand)] hover:bg-[var(--chrismed-bone)]')
       }
     >
-      <div className={active ? 'text-[var(--chrismed-ivory)]' : 'text-[var(--chrismed-ink)]'}>{icon}</div>
-      <div>
-        <p className="font-medium">{title}</p>
-        <p className={'text-[11px] ' + (active ? 'text-[var(--chrismed-ivory)]/80' : 'text-[var(--chrismed-mist)]')}>{hint}</p>
+      <div className={'shrink-0 ' + (active ? 'text-[var(--chrismed-ivory)]' : 'text-[var(--chrismed-ink)]')}>{icon}</div>
+      <div className="min-w-0">
+        <p className="font-medium text-sm sm:text-base leading-tight">{title}</p>
+        <p className={'text-[10px] sm:text-[11px] truncate ' + (active ? 'text-[var(--chrismed-ivory)]/80' : 'text-[var(--chrismed-mist)]')}>{hint}</p>
       </div>
     </button>
   );
