@@ -571,7 +571,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Agenda',
       title: 'Reserve o tempo que a consulta pede.',
       body: 'O agendamento é conduzido inteiramente dentro da CHRISMED: escolha da modalidade, seleção do horário, confirmação dos dados e pagamento quando aplicável.',
-      note: 'A operação técnica de agenda e pagamento está em consolidação. Comunicaremos qualquer alteração antes da publicação em produção.',
+      note: 'Consulte as opções disponíveis na página de agendamento.',
       cta: 'Abrir agenda',
     },
     oliver: {
@@ -647,7 +647,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Schedule',
       title: 'Reserve the time the consultation deserves.',
       body: 'Booking is handled entirely within CHRISMED: modality selection, time slot, data confirmation and payment when applicable.',
-      note: 'The technical operation of scheduling and payment is under consolidation. Any change will be communicated before production release.',
+      note: 'Check the available options on the booking page.',
       cta: 'Open schedule',
     },
     oliver: {
@@ -723,7 +723,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Agenda',
       title: 'Reserve el tiempo que la consulta pide.',
       body: 'El agendamiento se conduce por completo dentro de CHRISMED: elección de modalidad, selección de horario, confirmación de datos y pago cuando corresponda.',
-      note: 'La operación técnica de agenda y pago está en consolidación. Cualquier cambio se comunicará antes de la publicación en producción.',
+      note: 'Consulte las opciones disponibles en la página de agendamiento.',
       cta: 'Abrir agenda',
     },
     oliver: {

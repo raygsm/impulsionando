@@ -545,7 +545,7 @@ const COPY: Record<Lang, Copy> = {
         'Pague, quando aplicável',
         'Receba confirmação',
       ],
-      note: 'A operação de agendamento, pagamento e confirmação está em consolidação técnica. As informações desta seção descrevem a jornada final; comunicaremos alterações antes de qualquer publicação em produção.',
+      note: 'O agendamento reúne escolha da modalidade, horário, confirmação e orientações em uma única jornada dentro da CHRISMED.',
     },
     oliver: {
       eyebrow: 'Oliver · Concierge',
@@ -674,7 +674,7 @@ const COPY: Record<Lang, Copy> = {
         'Pay, when applicable',
         'Receive confirmation',
       ],
-      note: 'Booking, payment and confirmation are under technical consolidation. This section describes the final journey; any change will be communicated before production release.',
+      note: 'Booking brings modality choice, scheduling, confirmation and instructions into a single journey inside CHRISMED.',
     },
     oliver: {
       eyebrow: 'Oliver · Concierge',
@@ -803,7 +803,7 @@ const COPY: Record<Lang, Copy> = {
         'Pague, cuando corresponda',
         'Reciba confirmación',
       ],
-      note: 'La operación de agenda, pago y confirmación está en consolidación técnica. Esta sección describe el recorrido final; cualquier cambio se comunicará antes de la publicación en producción.',
+      note: 'El agendamiento reúne la elección de modalidad, horario, confirmación e instrucciones en un único recorrido dentro de CHRISMED.',
     },
     oliver: {
       eyebrow: 'Oliver · Concierge',
