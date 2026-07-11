@@ -314,5 +314,37 @@
   }
 }
 
+/* ═════════════════ Full-bleed + tipografia editorial CHRISMED ═════════════════
+   `.chrismed-bleed` estende o fundo até as bordas mesmo dentro de um
+   container centrado. Elimina "faixas brancas laterais" pedidas pela cliente.
+   Escala tipográfica aumentada (H1 clamp até 4.5rem) para presença editorial. */
+[data-tenant="chrismed"] .chrismed-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+[data-tenant="chrismed"] .chrismed-serif { letter-spacing: -0.015em; }
+[data-tenant="chrismed"] h1.chrismed-serif,
+[data-tenant="chrismed"] .chrismed-h1 {
+  font-family: var(--chrismed-font-serif);
+  font-size: clamp(2.5rem, 5.2vw, 4.75rem);
+  line-height: 1.02;
+  font-weight: 500;
+}
+[data-tenant="chrismed"] h2.chrismed-serif,
+[data-tenant="chrismed"] .chrismed-h2 {
+  font-family: var(--chrismed-font-serif);
+  font-size: clamp(1.85rem, 3.4vw, 3rem);
+  line-height: 1.08;
+  font-weight: 500;
+}
+[data-tenant="chrismed"] .chrismed-lede {
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  line-height: 1.6;
+  font-weight: 400;
+}
+[data-tenant="chrismed"] .chrismed-sans { font-feature-settings: "ss01","cv11","kern"; }
+
+
 
 
