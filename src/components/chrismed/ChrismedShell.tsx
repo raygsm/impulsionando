@@ -284,7 +284,11 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
 
   if (variant === 'minimal') {
     return (
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur">
+      <header
+        data-chrismed-header
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100vw', zIndex: 80 }}
+        className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur"
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
           <Link to="/chrismed" aria-label="CHRISMED — voltar ao início" className="min-w-0 truncate">
             <ChrismedWordmark variant="sm" />
@@ -303,7 +307,11 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur">
+    <header
+      data-chrismed-header
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100vw', zIndex: 80 }}
+      className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur"
+    >
 
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 md:px-6 md:py-4 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)]">
         {/* Logo */}
