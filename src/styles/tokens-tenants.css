@@ -260,12 +260,26 @@
 [data-tenant="chrismed"] .chrismed-page-mustard h3 { color: var(--chrismed-forest-deep); }
 [data-tenant="chrismed"] .chrismed-page-mustard p { color: #2A3B36; }
 
+/* Bandas escuras (verde-floresta) DENTRO de qualquer página: recuperam
+   contraste claro. Evita o bug de texto verde sobre fundo verde quando
+   uma .chrismed-band-forest é aninhada em .chrismed-page-mustard. */
+[data-tenant="chrismed"] .chrismed-band-forest,
+[data-tenant="chrismed"] .chrismed-band-forest * { color: var(--chrismed-ivory); }
+[data-tenant="chrismed"] .chrismed-band-forest h1,
+[data-tenant="chrismed"] .chrismed-band-forest h2,
+[data-tenant="chrismed"] .chrismed-band-forest h3,
+[data-tenant="chrismed"] .chrismed-band-forest h4 { color: var(--chrismed-amber) !important; }
+[data-tenant="chrismed"] .chrismed-band-forest p,
+[data-tenant="chrismed"] .chrismed-band-forest li,
+[data-tenant="chrismed"] .chrismed-band-forest dd { color: rgba(255,255,255,0.86) !important; }
+
 /* CTA invertido para páginas mostarda: fundo verde, texto branco/amarelo */
 [data-tenant="chrismed"] .chrismed-page-mustard .chrismed-cta {
   background: var(--chrismed-forest-deep);
   color: var(--chrismed-amber-soft);
   border-color: var(--chrismed-forest);
 }
+
 
 /* ═════════════════ Microinterações editoriais CHRISMED ═════════════════
    Animações discretas, próprias de marca médica premium. Nunca chamativas.
