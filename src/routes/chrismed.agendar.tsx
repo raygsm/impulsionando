@@ -125,7 +125,7 @@ function isValidCPF(v: string) { return v.replace(/\D/g, '').length === 11; }
 
 function ChrismedAgendarPage() {
   const search = useSearch({ from: '/chrismed/agendar' });
-  const [step, setStep] = useState<Step>('specialty');
+  const [step, setStep] = useState<Step>('modality');
   const [specialty, setSpecialty] = useState<ChrismedSpecialty | null>(null);
   const [doctor, setDoctor] = useState<ChrismedDoctor | null>(null);
   const [modality, setModality] = useState<ChrismedModality | null>(null);
@@ -140,34 +140,38 @@ function ChrismedAgendarPage() {
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
 
-  // Pré-seleção via querystring
+  // Aplica "Atendimento 360°" (tele + domiciliar) — 1 médico, 3 especialidades.
+  function applyCare360(mod: 'telemedicina' | 'domiciliar') {
+    const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+    const targetUnit = CHRISMED_UNITS.find((u) => u.slug === mod);
+    setSpecialty(CARE_360);
+    if (doc) setDoctor(doc);
+    setModality(mod);
+    if (targetUnit) setUnit(targetUnit);
+    setStep('schedule');
+  }
+
+  // Pré-seleção via querystring — fluxo invertido: modalidade primeiro.
   useEffect(() => {
-    // TELECONSULTA 360°: funde as 3 especialidades ambulatoriais.
-    // Não há escolha de especialidade após clicar em Teleconsulta —
-    // o benefício é justamente o diagnóstico integrado.
-    if (search.modality === 'telemedicina') {
-      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
-      const tele = CHRISMED_UNITS.find((u) => u.slug === 'telemedicina');
-      setSpecialty(TELECONSULTA_360);
-      if (doc) setDoctor(doc);
-      setModality('telemedicina');
-      if (tele) setUnit(tele);
-      setStep('schedule');
+    if (search.modality === 'telemedicina' || search.modality === 'domiciliar') {
+      applyCare360(search.modality);
+      return;
+    }
+    if (search.modality === 'presencial') {
+      setModality('presencial');
+      setStep('specialty');
       return;
     }
     if (search.doctor) {
       const doc = CHRISMED_DOCTORS.find((d) => d.slug === search.doctor);
-      if (doc) {
-        setDoctor(doc);
-        setStep('specialty');
-        return;
-      }
+      if (doc) { setDoctor(doc); }
     }
     if (search.specialty) {
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
-      if (sp) { setSpecialty(sp); setStep('doctor'); }
+      if (sp) { setSpecialty(sp); }
     }
   }, [search.specialty, search.doctor, search.modality]);
+
 
 
   // Carrega offerings reais (para preço/duração no passo de pagamento)
