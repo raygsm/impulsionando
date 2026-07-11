@@ -90,7 +90,11 @@ function openOliver() {
 }
 
 function ChrismedGmsPage() {
-  const lang = useLang();
+  const shellLang = useLang();
+  // GMS opera apenas em EN e ES. Se o usuário estiver com PT selecionado
+  // no shell, exibimos o conteúdo em EN por padrão e mantemos o português
+  // apenas na chamada inicial (título) logo abaixo.
+  const lang: Lang = shellLang === 'es' ? 'es' : 'en';
   const t = COPY[lang];
 
   useEffect(() => {
@@ -112,12 +116,22 @@ function ChrismedGmsPage() {
       <ChrismedSection tone="ivory" className="pt-20 md:pt-28">
         <div className="mx-auto max-w-3xl text-left">
           <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
+
+          {/* Chamada em português — única presença do PT nesta página */}
+          <p className="chrismed-sans mt-4 text-[11px] uppercase tracking-[0.28em] text-[var(--chrismed-champagne-deep)]">
+            PT · para pacientes brasileiros
+          </p>
+          <p className="chrismed-serif mt-2 text-lg italic text-[var(--chrismed-graphite)] md:text-xl">
+            Coordenação médica internacional, discreta e multilíngue — atendimento conduzido em inglês e espanhol.
+          </p>
+
           <ChrismedHeading level={1} className="mt-6">
             {t.hero.title}{' '}
             <span className="chrismed-serif italic text-[var(--chrismed-graphite)]">
               {t.hero.titleItalic}
             </span>
           </ChrismedHeading>
+
           <p className="chrismed-sans mt-8 max-w-[50ch] text-base leading-relaxed text-[var(--chrismed-graphite)] md:text-lg">
             {t.hero.lead}
           </p>
