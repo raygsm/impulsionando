@@ -88,8 +88,8 @@ function OfertasPage() {
               onClick={() => setFilter(m)}
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 filter === m
-                  ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-graphite)] border-emerald-900/15 hover:border-emerald-900/40'
+                  ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
+                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-graphite)] border-[var(--chrismed-sand)] hover:border-[var(--chrismed-champagne-deep)]'
               }`}
               aria-pressed={filter === m}
             >
@@ -112,7 +112,7 @@ function OfertasPage() {
                       <div className="h-12 w-12 rounded-xl bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <Badge variant="outline" className="bg-amber-100/70 text-[var(--chrismed-ink)] border-amber-300/60 uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
+                      <Badge variant="outline" className="bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] border-[var(--chrismed-champagne)] uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
                     </div>
                     <CardTitle className="mt-3 chrismed-serif text-[var(--chrismed-ink)]">{o.name}</CardTitle>
                     <CardDescription className="text-[var(--chrismed-graphite)]">{o.description}</CardDescription>

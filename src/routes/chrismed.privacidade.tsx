@@ -31,7 +31,7 @@ function PrivacidadePage() {
         </div>
       </section>
 
-      <section className="container py-16 max-w-3xl prose prose-emerald prose-headings:chrismed-serif prose-headings:text-[var(--chrismed-ink)] prose-p:text-[var(--chrismed-graphite)]">
+      <section className="container py-16 max-w-3xl prose prose-neutral prose-headings:chrismed-serif prose-headings:text-[var(--chrismed-ink)] prose-p:text-[var(--chrismed-graphite)]">
         {(t.sections as ReadonlyArray<{ title: string; paragraphs: readonly string[]; list?: readonly string[] }>).map((s) => (
           <div key={s.title} className="mb-10">
             <h2 className="text-2xl">{s.title}</h2>
@@ -41,7 +41,7 @@ function PrivacidadePage() {
             {s.list && (
               <ul className="mt-3 space-y-2 text-[var(--chrismed-graphite)]">
                 {s.list.map((it) => (
-                  <li key={it} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />{it}</li>
+                  <li key={it} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--chrismed-champagne-deep)] shrink-0" />{it}</li>
                 ))}
               </ul>
             )}

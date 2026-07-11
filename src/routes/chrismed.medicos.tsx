@@ -119,7 +119,7 @@ function DoctorsDirectory() {
             return (
               <article key={d.slug} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 flex flex-col">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-emerald-900/10 text-[var(--chrismed-ink)] grid place-items-center chrismed-serif text-lg">
+                  <div className="h-12 w-12 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] grid place-items-center chrismed-serif text-lg">
                     {d.name.split(' ').slice(0, 2).map((w) => w[0]).join('')}
                   </div>
                   <div>
@@ -134,7 +134,7 @@ function DoctorsDirectory() {
                   {specs.map((s: any) => {
                     const Icon = SPEC_ICON[s.icon] ?? Stethoscope;
                     return (
-                      <span key={s.slug} className="inline-flex items-center gap-1 rounded-full border border-emerald-900/15 bg-emerald-900/[0.03] px-2 py-0.5 text-[11px] text-[var(--chrismed-ink)]">
+                      <span key={s.slug} className="inline-flex items-center gap-1 rounded-full border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] px-2 py-0.5 text-[11px] text-[var(--chrismed-ink)]">
                         <Icon className="h-3 w-3" /> {s.name}
                       </span>
                     );
@@ -261,7 +261,7 @@ function DoctorRegistration() {
     return (
       <section className="container py-16 max-w-3xl">
         <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-10 text-center">
-          <div className="mx-auto h-14 w-14 rounded-full bg-emerald-900 text-amber-50 grid place-items-center">
+          <div className="mx-auto h-14 w-14 rounded-full bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] grid place-items-center">
             <Check className="h-7 w-7" />
           </div>
           <h3 className="mt-5 chrismed-serif text-2xl text-[var(--chrismed-ink)]">Cadastro enviado</h3>
@@ -276,7 +276,7 @@ function DoctorRegistration() {
   }
 
   return (
-    <section className="border-t border-[var(--chrismed-sand)] bg-[#fbf9f4]/40">
+    <section className="border-t border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]">
       <div className="container py-16 max-w-3xl">
         <div className="flex items-center gap-2 text-[var(--chrismed-ink)] mb-2">
           <Stethoscope className="h-5 w-5" />
@@ -292,14 +292,14 @@ function DoctorRegistration() {
             <li key={label} className="flex-1 flex items-center gap-2">
               <div className={
                 'h-7 w-7 rounded-full grid place-items-center text-xs font-medium border transition ' +
-                (i < step ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                  : i === step ? 'bg-emerald-900/10 text-[var(--chrismed-ink)] border-emerald-900/40'
-                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]/50 border-emerald-900/15')
+                (i < step ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
+                  : i === step ? 'bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] border-[var(--chrismed-champagne-deep)]'
+                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]/50 border-[var(--chrismed-sand)]')
               }>
                 {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
               </div>
               <span className={'text-xs ' + (i === step ? 'text-[var(--chrismed-ink)] font-medium' : 'text-[var(--chrismed-mist)]')}>{label}</span>
-              {i < STEPS.length - 1 && <div className="flex-1 h-px bg-emerald-900/10" />}
+              {i < STEPS.length - 1 && <div className="flex-1 h-px bg-[var(--chrismed-sand)]" />}
             </li>
           ))}
         </ol>
@@ -341,7 +341,7 @@ function DoctorRegistration() {
                         type="button" key={s.slug}
                         onClick={() => toggle('especialidades', s.slug)}
                         className={'px-3 py-1.5 rounded-full text-xs border transition ' +
-                          (on ? 'bg-emerald-900 text-amber-50 border-emerald-900'
+                          (on ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
                               : 'border-[var(--chrismed-sand)] text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]')}
                       >
                         {s.name}
@@ -385,8 +385,8 @@ function DoctorRegistration() {
                         type="button" key={m.id}
                         onClick={() => toggle('modalidades', m.id)}
                         className={'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs transition ' +
-                          (on ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                              : 'border-emerald-900/15 text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]')}
+                          (on ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
+                              : 'border-[var(--chrismed-sand)] text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]')}
                       >
                         <Icon className="h-5 w-5" />
                         {m.label}
@@ -409,7 +409,7 @@ function DoctorRegistration() {
                 <Textarea rows={3} value={f.disponibilidade} onChange={(e) => setF({ ...f, disponibilidade: e.target.value })} placeholder="Ex.: seg/qua 14h–18h · sáb manhã" />
               </div>
 
-              <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[#fbf9f4]/50 p-4 text-sm space-y-1">
+              <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-4 text-sm space-y-1">
                 <p className="font-medium text-[var(--chrismed-ink)]">Revisão</p>
                 <p className="text-[var(--chrismed-graphite)]"><b>Nome:</b> {f.nome || '—'}</p>
                 <p className="text-[var(--chrismed-graphite)]"><b>CRM:</b> {f.crm ? `${f.crm}/${f.crmUf}` : '—'}</p>
