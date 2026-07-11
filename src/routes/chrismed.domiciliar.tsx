@@ -72,13 +72,24 @@ function DomiciliarPage() {
 
   return (
     <ChrismedShell><div className="chrismed-page-mustard">
-      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
+      <section className="chrismed-bleed chrismed-page-forest">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta domiciliar</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">A médica vai até você</h1>
-          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
-            Atendimento domiciliar no Rio de Janeiro. A disponibilidade depende de localização, agenda e confirmação prévia. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online.
+          <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber)] border border-[var(--chrismed-amber)]/40 mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta Domiciliar</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] max-w-3xl">Na sua residência, hotel ou onde você estiver.</h1>
+          <p className="chrismed-lede mt-6 max-w-2xl">
+            Atendimento médico com a Dra. Christiane Alencar no conforto e na discrição do seu ambiente. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online.
           </p>
+          <div className="mt-8 inline-flex flex-col rounded-2xl border border-[var(--chrismed-amber)]/30 bg-[var(--chrismed-forest-deep)]/60 px-6 py-5">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--chrismed-amber)] mb-2">Bairros atualmente atendidos</div>
+            <ul className="text-[var(--chrismed-ivory)] text-base space-y-1">
+              <li>· Zona Sul do Rio de Janeiro</li>
+              <li>· Grande Tijuca</li>
+              <li>· Barra da Tijuca</li>
+            </ul>
+            <p className="mt-3 text-xs text-[var(--chrismed-ivory)]/70 max-w-md">
+              Outras regiões podem ser avaliadas mediante consulta prévia.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -86,11 +97,11 @@ function DomiciliarPage() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><MapPin className="h-4 w-4" /> Como confirmamos seu endereço</h3>
-            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Informe CEP, bairro e cidade. Validamos a zona de atendimento e respondemos com a disponibilidade do dia/horário desejado.</p>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Informe CEP, bairro e cidade. Validamos a zona de atendimento (Zona Sul · Grande Tijuca · Barra) e respondemos com a disponibilidade do dia/horário desejado.</p>
           </div>
           <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Home className="h-4 w-4" /> Onde atendemos</h3>
-            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Residências, hotéis, escritórios e empresas. Pacientes brasileiros e estrangeiros.</p>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Residências, hotéis, escritórios e empresas. Pacientes brasileiros e estrangeiros. Retornos posteriores ocorrem por Teleconsulta ou Consulta Presencial em Copacabana.</p>
           </div>
           <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento e reserva</h3>
