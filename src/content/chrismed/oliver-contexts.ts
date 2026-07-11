@@ -102,10 +102,40 @@ export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
     key: 'gms',
     eyebrow: 'Global Medical Support',
     greeting:
-      'Posso orientar sobre assistência internacional, teleconsulta para brasileiros no exterior ou visitantes no Brasil.',
+      'Posso orientar assistência médica internacional no Rio de Janeiro em português, inglês ou espanhol. Não substituo o serviço público de emergência local.',
     quickReplies: [
-      { label: 'Teleconsulta internacional', kind: 'navigate', to: '/chrismed/agendar', search: { modality: 'telemedicina' } },
-      { label: 'Falar com a equipe', kind: 'info', message: 'A equipe internacional responde em PT · EN · ES. Deixe fuso horário e idioma preferencial.' },
+      {
+        label: 'Isto pode ser uma emergência',
+        kind: 'info',
+        message:
+          'Se houver risco imediato à vida, dificuldade intensa para respirar, perda de consciência ou outra situação grave, procure o serviço de emergência local imediatamente. A CHRISMED não substitui esse serviço.',
+      },
+      {
+        label: 'Preciso de consulta médica',
+        kind: 'info',
+        message:
+          'Descreva a necessidade em uma frase (idioma, localização, tipo de suporte). A equipe CHRISMED responde no próximo horário administrativo e coordena os próximos passos.',
+      },
+      {
+        label: 'Estou em um hospital',
+        kind: 'info',
+        message:
+          'Informe o nome do hospital, cidade e situação em uma frase. A equipe CHRISMED avalia se a coordenação é possível e retorna com orientação.',
+      },
+      {
+        label: 'Preciso de transferência médica',
+        kind: 'info',
+        message:
+          'Transferências médicas exigem avaliação individualizada e aceitação da unidade receptora. Deixe cidade atual, cidade destino e responsável pelo contato.',
+      },
+      { label: 'Continue in English', kind: 'info', message: 'Please switch the site language to English (top of the page) and reopen this panel. The greeting and options will be presented in English.' },
+      { label: 'Continuar en español', kind: 'info', message: 'Cambie el idioma del sitio a español (arriba de la página) y vuelva a abrir este panel. El saludo y las opciones aparecerán en español.' },
+      {
+        label: 'Falar com a equipe',
+        kind: 'info',
+        message:
+          'A equipe internacional responde em PT · EN · ES no próximo horário administrativo. Deixe idioma preferencial e fuso horário.',
+      },
     ],
   },
   agendar: {
