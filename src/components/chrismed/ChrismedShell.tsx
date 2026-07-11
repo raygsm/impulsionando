@@ -3,7 +3,8 @@ import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ChrismedOliverPanel } from './ChrismedOliverPanel';
+import { ChrismedOliverProvider } from './ChrismedOliverProvider';
+import { openChrismedOliver } from './oliver-store';
 
 /**
  * Wordmark tipográfico CHRISMED — fallback oficial V3.F.
@@ -240,14 +241,15 @@ export function ChrismedShell({ children }: { children: React.ReactNode }) {
       >
         Pular para o conteúdo principal
       </a>
-      <ChrismedHeader />
-      {/* pb-28 reserva a área do launcher para não cobrir CTAs / rodapé. */}
-      <main id="chrismed-main" className="pb-28 md:pb-24">
-        {children}
-      </main>
-      <ChrismedFooter />
-      <OliverFab />
-      <ChrismedOliverPanel />
+      <ChrismedOliverProvider>
+        <ChrismedHeader />
+        {/* pb-28 reserva a área do launcher para não cobrir CTAs / rodapé. */}
+        <main id="chrismed-main" className="pb-28 md:pb-24">
+          {children}
+        </main>
+        <ChrismedFooter />
+        <OliverFab />
+      </ChrismedOliverProvider>
     </div>
   );
 }
@@ -275,9 +277,11 @@ export function OliverFab() {
       type="button"
       id="oliver"
       data-oliver-launcher
+      data-chrismed-oliver-fixed-launcher
       aria-label={labels.title}
       aria-haspopup="dialog"
       onClick={() => {
+        openChrismedOliver();
         try {
           window.dispatchEvent(new CustomEvent('chrismed:oliver:open', { detail: { lang } }));
         } catch {

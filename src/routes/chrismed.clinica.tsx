@@ -37,6 +37,7 @@ import {
   ChrismedOliverLauncher,
 } from '@/components/chrismed/primitives';
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
+import { openChrismedOliver, setChrismedOliverContext } from '@/components/chrismed/oliver-store';
 
 export const Route = createFileRoute('/chrismed/clinica')({
   head: () => ({
@@ -85,6 +86,7 @@ export const Route = createFileRoute('/chrismed/clinica')({
 
 function openOliver() {
   if (typeof window !== 'undefined') {
+    openChrismedOliver();
     window.dispatchEvent(new CustomEvent('chrismed:oliver:open'));
   }
 }
@@ -102,6 +104,7 @@ function ChrismedAmbulatorialPage() {
       greeting: t.oliver.contextGreeting,
       quickReplies: t.oliver.quickReplies,
     };
+    setChrismedOliverContext(detail);
     window.dispatchEvent(
       new CustomEvent('chrismed:oliver:context', { detail }),
     );

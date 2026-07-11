@@ -30,6 +30,7 @@ import {
 } from '@/components/chrismed/primitives';
 
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
+import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 
 const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
 
@@ -112,6 +113,7 @@ export const Route = createFileRoute('/chrismed/dra-cristiane')({
 
 function openOliver() {
   if (typeof window !== 'undefined') {
+    openChrismedOliver();
     window.dispatchEvent(new CustomEvent('chrismed:oliver:open'));
   }
 }
