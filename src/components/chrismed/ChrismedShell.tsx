@@ -4,23 +4,28 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChrismedOliverProvider } from './ChrismedOliverProvider';
 import { openChrismedOliver } from './oliver-store';
+import chrismedHorizontal from '@/assets/chrismed-horizontal.png.asset.json';
 
 /**
- * Wordmark CHRISMED V3 — tipográfico, responsivo com clamp(), sem duplicação.
- * Substitui a versão anterior de 60px que estourava container em mobile e
- * desktop. Alinhado com a paleta unificada Forest + Marfim.
+ * Wordmark CHRISMED V4 — logo oficial CDN (upscale fiel da arte enviada
+ * pela cliente). Substitui a versão tipográfica: passamos a usar a marca
+ * institucional em header, drawer e footer. A altura escala responsivo
+ * para respeitar o shell mobile/desktop.
  */
 function ChrismedWordmark({ variant = 'default' }: { variant?: 'default' | 'sm' | 'onDark' }) {
-  const inkColor =
-    variant === 'onDark' ? 'text-[var(--chrismed-ivory)]' : 'text-[var(--chrismed-forest-deep)]';
-  const size =
-    variant === 'sm'
-      ? 'text-[1.125rem] tracking-[0.32em]'
-      : 'text-[clamp(1.25rem,3.2vw,1.75rem)] tracking-[0.34em]';
+  const height =
+    variant === 'sm' ? 'h-8 md:h-9' : 'h-10 md:h-12';
   return (
-    <span className={cn('inline-flex items-center leading-none', inkColor)} aria-hidden>
-      <span className={cn('chrismed-serif font-light', size)}>CHRISMED</span>
-    </span>
+    <img
+      src={chrismedHorizontal.url}
+      alt="CHRISMED"
+      className={cn(
+        'w-auto object-contain select-none',
+        height,
+        variant === 'onDark' && 'brightness-0 invert',
+      )}
+      draggable={false}
+    />
   );
 }
 

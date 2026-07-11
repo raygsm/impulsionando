@@ -1,20 +1,18 @@
 /**
- * ChrismedOliverPanel — Wave 2 (redesign).
+ * ChrismedOliverPanel — Wave 5 (Oliver como membro da equipe).
  *
- * Painel funcional. NÃO simula IA. Ações reais: navegar, exibir
- * informação institucional, encaminhar para humano (canal ainda
- * pendente Codex).
- *
- * Novidades Wave 2:
- *  - Identidade forte (avatar monograma, nome, papel, disclaimer visível)
- *  - Grid de "atalhos rápidos" global sempre visível (Agendar, Médicos,
- *    Especialidades, Meus agendamentos, Pagamento, Falar humano)
- *  - Ações contextuais por rota (mantém sistema OLIVER_CONTEXTS)
- *  - Botão "reiniciar orientação" para limpar info atual
- *  - Estados: sem info, com info, canal humano indisponível
+ * Reposicionamento:
+ *  - Oliver deixa de ser "chatbot" e passa a ser apresentado como
+ *    concierge administrativo humano-assistido da equipe CHRISMED.
+ *  - Identidade: nome próprio, papel, janela de atendimento humano.
+ *  - Handoff visível: card fixo "Recepção CHRISMED" com estado da
+ *    disponibilidade humana (dentro/fora do horário) e ação clara.
+ *  - Nunca simula IA nem finge conversa. Cada botão executa uma ação
+ *    real: navegar, exibir informação institucional, ou avisar que o
+ *    canal humano assumirá.
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, MessageSquare, ArrowRight } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound } from 'lucide-react';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
   resolveOliverContextOverride,
@@ -31,6 +29,16 @@ import {
 
 const WHATSAPP_ENABLED = false;
 
+// Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
+// sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
+function isHumanOnline(now: Date = new Date()): boolean {
+  const day = now.getDay();
+  const hour = now.getHours();
+  if (day === 0) return false;
+  if (day === 6) return hour >= 9 && hour < 13;
+  return hour >= 9 && hour < 19;
+}
+
 type GlobalAction = {
   label: string;
   hint: string;
@@ -45,7 +53,6 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
   { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
   { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
-  { label: 'Falar com atendimento', hint: 'Canal humano — em breve', icon: MessageSquare, info: 'O canal humano (WhatsApp/telefone) está em ativação. Enquanto isso, use o formulário em /chrismed/contato — a equipe responde no próximo horário administrativo.' },
 ];
 
 export function ChrismedOliverPanel() {
@@ -72,6 +79,10 @@ export function ChrismedOliverPanel() {
     if (a.info) setChrismedOliverInfo(a.info);
   };
 
+  const humanOnline = isHumanOnline();
+
+
+
   return (
     <DialogPrimitive.Root
       open={open}
@@ -87,24 +98,24 @@ export function ChrismedOliverPanel() {
           onCloseAutoFocus={(event) => { event.preventDefault(); focusChrismedOliverTrigger(); }}
           className="fixed inset-y-0 right-0 z-[91] flex h-dvh w-full max-w-[min(100vw,28rem)] flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] shadow-[0_24px_80px_-24px_rgba(15,15,15,0.55)] outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none"
         >
-          {/* Header com identidade forte */}
+          {/* Header — identidade Oliver como membro da equipe */}
           <div className="border-b border-[var(--chrismed-sand)] px-6 pt-5 pb-4">
             <div className="flex items-start gap-3">
               <div
                 aria-hidden
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-900 to-emerald-950 text-amber-50 chrismed-serif text-xl font-light shadow-md"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] chrismed-serif text-xl font-light shadow-md"
               >
                 O
               </div>
               <div className="min-w-0 flex-1">
                 <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
-                  Oliver · {ctx.eyebrow}
+                  Oliver · Concierge CHRISMED
                 </p>
                 <DialogPrimitive.Title className="chrismed-serif text-xl font-light text-[var(--chrismed-ink)]">
-                  Concierge CrisMed
+                  Membro da equipe · {ctx.eyebrow}
                 </DialogPrimitive.Title>
                 <p className="chrismed-sans mt-0.5 text-[11px] leading-relaxed text-[var(--chrismed-mist)]">
-                  Assistente administrativo · não diagnostica, não prescreve.
+                  Recepção humano-assistida · não diagnostica, não prescreve.
                 </p>
               </div>
               <DialogPrimitive.Close
@@ -122,6 +133,43 @@ export function ChrismedOliverPanel() {
 
           {/* Corpo scroll */}
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+            {/* Handoff humano visível — sempre no topo */}
+            <section
+              aria-label="Recepção humana CHRISMED"
+              className="border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/50 px-4 py-4"
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  aria-hidden
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--chrismed-champagne)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]"
+                >
+                  <UserRound className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
+                    Recepção CHRISMED
+                  </p>
+                  <p className="chrismed-serif mt-1 text-base font-light text-[var(--chrismed-ink)]">
+                    {humanOnline ? 'Equipe humana disponível agora' : 'Fora do horário de atendimento'}
+                  </p>
+                  <p className="chrismed-sans mt-1 flex items-center gap-1.5 text-[11px] text-[var(--chrismed-graphite)]">
+                    <Clock3 className="h-3 w-3" aria-hidden />
+                    Seg–Sex 09h–19h · Sáb 09h–13h (horário de Brasília)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setChrismedOliverInfo(humanOnline
+                      ? 'A equipe humana da recepção CHRISMED já foi notificada e assumirá esta conversa em instantes. Você pode continuar navegando — avisaremos por aqui quando o atendente responder. Para agilizar, deixe seu contato em /chrismed/contato.'
+                      : 'Estamos fora do horário de atendimento humano. Sua mensagem entra na fila e será respondida no próximo turno. Para urgências clínicas, procure serviço público local. Para agendamento, use /chrismed/agendar — a agenda funciona 24h.')}
+                    className="chrismed-sans mt-3 inline-flex items-center gap-2 border-b border-[var(--chrismed-ink)] pb-0.5 text-[11px] uppercase tracking-[0.24em] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)]"
+                  >
+                    {humanOnline ? 'Chamar a recepção agora' : 'Deixar mensagem para o próximo turno'}
+                    <ArrowRight className="h-3 w-3" aria-hidden />
+                  </button>
+                </div>
+              </div>
+            </section>
+
             {/* Info retornada por uma ação */}
             {info && (
               <div
@@ -139,6 +187,8 @@ export function ChrismedOliverPanel() {
                 </button>
               </div>
             )}
+
+
 
             {/* Atalhos globais sempre visíveis */}
             <section>
