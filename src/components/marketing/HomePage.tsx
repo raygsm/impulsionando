@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   ArrowRight, Sparkles, PlayCircle, MessageCircle, CheckCircle2,
-  Target, TrendingUp, Bot, Users, Rocket, Store, ShieldCheck,
+  Target, TrendingUp, Bot, Rocket, ShieldCheck,
   Stethoscope, Utensils, Dumbbell, Home as HomeIcon, ShoppingBag, Briefcase,
   ChevronRight, LogIn,
 } from "lucide-react";
