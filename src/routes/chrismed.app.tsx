@@ -9,7 +9,7 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Smartphone, Bell, Calendar, ShieldCheck, Download } from 'lucide-react';
+import { Smartphone, Bell, Calendar, ShieldCheck } from 'lucide-react';
 
 export const Route = createFileRoute('/chrismed/app')({
   head: () => ({
@@ -67,20 +67,41 @@ function AppPage() {
             histórico, prescrições e o Concierge Oliver — tudo no seu bolso.
           </p>
 
-          {/* Placeholders de loja — sem URL até que os apps sejam publicados */}
+          {/* Selos de loja em estado "Em breve" — visualmente refinados,
+              não-interativos, sem URL inventada. Substituir por links reais
+              quando App Store / Google Play publicarem o app. */}
           <div className="mx-auto mt-10 grid max-w-md gap-3 sm:grid-cols-2">
-            <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white/70">
-              <Download className="h-4 w-4" /> App Store · Em breve
+            {[
+              { store: 'App Store', hint: 'iPhone · iPad' },
+              { store: 'Google Play', hint: 'Android' },
+            ].map(({ store, hint }) => (
+              <div
+                key={store}
+                aria-disabled="true"
+                className="group relative overflow-hidden rounded-2xl border border-[var(--chrismed-amber)]/30 bg-gradient-to-br from-white/[0.06] to-white/[0.02] px-5 py-4 text-left"
+              >
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]/80">Em breve</div>
+                <div className="chrismed-serif mt-1 text-lg text-white">{store}</div>
+                <div className="text-[11px] text-white/50">{hint}</div>
+                <div className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-[var(--chrismed-amber)]/10 blur-xl" />
+              </div>
+            ))}
+          </div>
+
+          {/* Bloco pré-lançamento — sem QR fake. Composição editorial
+              com selo lacrado que substitui o QR até o app ir ao ar. */}
+          <div className="mx-auto mt-10 flex max-w-md items-center gap-4 rounded-2xl border border-white/15 bg-white/[0.04] p-5 text-left">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[var(--chrismed-forest)] ring-1 ring-[var(--chrismed-amber)]/40">
+              <span className="chrismed-serif text-2xl text-[var(--chrismed-amber)]">C</span>
+              <span className="absolute -bottom-1 -right-1 rounded-full bg-[var(--chrismed-amber)] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-widest text-[var(--chrismed-forest-deep)]">Beta</span>
             </div>
-            <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white/70">
-              <Download className="h-4 w-4" /> Google Play · Em breve
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]/80">Programa fechado</div>
+              <div className="chrismed-serif text-base text-white">Pré-lançamento CHRISMED</div>
+              <p className="mt-1 text-[12px] leading-relaxed text-white/70">Assim que o app entrar em loja, quem estiver na lista recebe o acesso antes.</p>
             </div>
           </div>
 
-          {/* QR — quando os apps saírem, substituir por QR real gerado no build */}
-          <div className="mx-auto mt-8 flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-white/30 bg-white/5 text-[10px] uppercase tracking-widest text-white/50">
-            QR · Em breve
-          </div>
         </section>
 
         <section className="mx-auto max-w-4xl px-4 pb-20 md:px-6">

@@ -18,7 +18,7 @@ export const Route = createFileRoute('/chrismed/consultorio')({
 
 function ConsultorioPage() {
   return (
-    <ChrismedShell>
+    <ChrismedShell><div className="chrismed-page-mustard">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta presencial</Badge>
@@ -67,6 +67,6 @@ function ConsultorioPage() {
           </ul>
         </div>
       </section>
-    </ChrismedShell>
+    </div></ChrismedShell>
   );
 }

@@ -71,7 +71,7 @@ function DomiciliarPage() {
   }
 
   return (
-    <ChrismedShell>
+    <ChrismedShell><div className="chrismed-page-mustard">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta domiciliar</Badge>
@@ -143,6 +143,6 @@ function DomiciliarPage() {
           <p className="text-[11px] text-[var(--chrismed-mist)]">Após confirmação da zona, enviamos os horários e o link de pagamento. <Link to="/chrismed/agendar" search={{ modality: 'domiciliar' }} className="underline">Ver fluxo completo</Link>.</p>
         </form>
       </section>
-    </ChrismedShell>
+    </div></ChrismedShell>
   );
 }
