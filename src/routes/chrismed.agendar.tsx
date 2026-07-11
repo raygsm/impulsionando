@@ -178,7 +178,11 @@ function ChrismedAgendarPage() {
     ? CHRISMED_DOCTORS.filter((d) => d.specialtySlugs.includes(specialty.slug))
     : CHRISMED_DOCTORS;
 
-  const modalitiesForDoctor: ChrismedModality[] = doctor ? doctor.modalities : ['presencial', 'telemedicina', 'domiciliar', 'retorno'];
+  // "Retorno" foi removido do fluxo público de Agendar. Retornos após consultas
+  // ambulatoriais são combinados diretamente com a médica (Teleconsulta ou Presencial em Copacabana).
+  const modalitiesForDoctor: ChrismedModality[] = (
+    doctor ? doctor.modalities : (['presencial', 'telemedicina', 'domiciliar'] as ChrismedModality[])
+  ).filter((m): m is ChrismedModality => m !== 'retorno');
   const unitsForModality = modality === 'telemedicina'
     ? CHRISMED_UNITS.filter((u) => u.slug === 'telemedicina')
     : modality === 'domiciliar'
@@ -273,9 +277,13 @@ function ChrismedAgendarPage() {
 
         {/* STEP 1: Especialidade */}
         {step === 'specialty' && (() => {
-          const specialtiesToShow = doctor
+          // Ambulatorial only: nunca mistura ocupacional/internacional no fluxo público de "Agendar".
+          // Medicina Ocupacional tem jornada própria em /chrismed/ocupacional.
+          const AMBULATORIAL_ONLY = ['gastroenterologia', 'hepatologia', 'clinica-medica'];
+          const base = doctor
             ? CHRISMED_SPECIALTIES.filter((s) => doctor.specialtySlugs.includes(s.slug))
             : CHRISMED_SPECIALTIES;
+          const specialtiesToShow = base.filter((s) => AMBULATORIAL_ONLY.includes(s.slug));
           return (
           <section aria-labelledby="s1">
             <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h1>

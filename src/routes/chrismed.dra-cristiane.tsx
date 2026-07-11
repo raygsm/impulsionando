@@ -605,7 +605,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Próximo passo',
       title: 'Reservar um tempo',
       titleItalic: 'com a Dra. Christiane.',
-      lead: 'Consulta privada em Copacabana, na sua casa ou por vídeo. Um único ponto de contato para todo o cuidado.',
+      lead: 'Consulta privada em Copacabana, na sua residência, hotel ou por vídeo. Um único ponto de contato para todo o cuidado.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
     },
