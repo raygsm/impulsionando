@@ -273,6 +273,7 @@ export function ImpulsionitoConcierge() {
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || sending) return;
+      captureNichoContext();
       const now = Date.now();
       const userMsg: ImpulsionitoMessage = {
         id: `u_${now}`,
