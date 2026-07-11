@@ -242,7 +242,6 @@ import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-
 import { Route as ChrismedDomiciliarRouteImport } from './routes/chrismed.domiciliar'
 import { Route as ChrismedContatoRouteImport } from './routes/chrismed.contato'
 import { Route as ChrismedConsultorioRouteImport } from './routes/chrismed.consultorio'
-import { Route as ChrismedClinicaRouteImport } from './routes/chrismed.clinica'
 import { Route as ChrismedAgendarRouteImport } from './routes/chrismed.agendar'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
@@ -2081,11 +2080,6 @@ const ChrismedContatoRoute = ChrismedContatoRouteImport.update({
 const ChrismedConsultorioRoute = ChrismedConsultorioRouteImport.update({
   id: '/consultorio',
   path: '/consultorio',
-  getParentRoute: () => ChrismedRoute,
-} as any)
-const ChrismedClinicaRoute = ChrismedClinicaRouteImport.update({
-  id: '/clinica',
-  path: '/clinica',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ChrismedAgendarRoute = ChrismedAgendarRouteImport.update({
@@ -6067,7 +6061,6 @@ export interface FileRoutesByFullPath {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
-  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
@@ -6951,7 +6944,6 @@ export interface FileRoutesByTo {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
-  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
@@ -7848,7 +7840,6 @@ export interface FileRoutesById {
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
-  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/consultorio': typeof ChrismedConsultorioRoute
   '/chrismed/contato': typeof ChrismedContatoRoute
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
@@ -8752,7 +8743,6 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
-    | '/chrismed/clinica'
     | '/chrismed/consultorio'
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
@@ -9636,7 +9626,6 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
-    | '/chrismed/clinica'
     | '/chrismed/consultorio'
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
@@ -10532,7 +10521,6 @@ export interface FileRouteTypes {
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
-    | '/chrismed/clinica'
     | '/chrismed/consultorio'
     | '/chrismed/contato'
     | '/chrismed/domiciliar'
@@ -13180,13 +13168,6 @@ declare module '@tanstack/react-router' {
       path: '/consultorio'
       fullPath: '/chrismed/consultorio'
       preLoaderRoute: typeof ChrismedConsultorioRouteImport
-      parentRoute: typeof ChrismedRoute
-    }
-    '/chrismed/clinica': {
-      id: '/chrismed/clinica'
-      path: '/clinica'
-      fullPath: '/chrismed/clinica'
-      preLoaderRoute: typeof ChrismedClinicaRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/chrismed/agendar': {
@@ -19504,7 +19485,6 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ChrismedRouteChildren {
   ChrismedAgendarRoute: typeof ChrismedAgendarRoute
-  ChrismedClinicaRoute: typeof ChrismedClinicaRoute
   ChrismedConsultorioRoute: typeof ChrismedConsultorioRoute
   ChrismedContatoRoute: typeof ChrismedContatoRoute
   ChrismedDomiciliarRoute: typeof ChrismedDomiciliarRoute
@@ -19523,7 +19503,6 @@ interface ChrismedRouteChildren {
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedAgendarRoute: ChrismedAgendarRoute,
-  ChrismedClinicaRoute: ChrismedClinicaRoute,
   ChrismedConsultorioRoute: ChrismedConsultorioRoute,
   ChrismedContatoRoute: ChrismedContatoRoute,
   ChrismedDomiciliarRoute: ChrismedDomiciliarRoute,
