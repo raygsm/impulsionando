@@ -57,6 +57,7 @@ const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Brie
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
   specialty: fallback(z.string().optional(), undefined),
+  doctor: fallback(z.string().optional(), undefined),
 });
 
 export const Route = createFileRoute('/chrismed/agendar')({
