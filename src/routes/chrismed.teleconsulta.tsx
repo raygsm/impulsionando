@@ -30,6 +30,12 @@ function TeleconsultaPage() {
           <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
             Atendimento médico online, com acolhimento clínico e orientação detalhada. Em português, inglês ou espanhol, para você onde estiver.
           </p>
+          <div className="mt-6 rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-5 max-w-2xl">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)]">Diagnóstico 360°</div>
+            <p className="mt-1 text-[var(--chrismed-ink)]">
+              Na teleconsulta você <strong>não precisa escolher especialidade</strong>. A Dra. Christiane funde na mesma consulta o conhecimento de <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — um único olhar clínico, integrado.
+            </p>
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
               <Link to="/chrismed/agendar" search={{ modality: 'telemedicina' }}>Ver horários e agendar</Link>
