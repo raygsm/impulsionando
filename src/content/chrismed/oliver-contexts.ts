@@ -20,6 +20,11 @@ export type OliverContext = {
   quickReplies: OliverQuickReply[];
 };
 
+export type OliverContextEventDetail = Partial<Omit<OliverContext, 'quickReplies'>> & {
+  context?: string;
+  quickReplies?: OliverQuickReply[] | string[];
+};
+
 const CTA_AGENDAR = 'Ir para o agendamento';
 
 export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
@@ -114,4 +119,53 @@ export function resolveOliverContext(pathname: string): OliverContext {
   if (pathname.startsWith('/chrismed/agendar')) return OLIVER_CONTEXTS.agendar;
   if (pathname.startsWith('/chrismed/medicos')) return OLIVER_CONTEXTS.medicos;
   return OLIVER_CONTEXTS.home;
+}
+
+function isOliverQuickReply(value: unknown): value is OliverQuickReply {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'label' in value &&
+      'kind' in value &&
+      typeof (value as { label?: unknown }).label === 'string',
+  );
+}
+
+function resolveQuickReplies(
+  quickReplies: OliverContextEventDetail['quickReplies'],
+  base: OliverContext,
+): OliverQuickReply[] {
+  if (!quickReplies) return base.quickReplies;
+  if (quickReplies.every(isOliverQuickReply)) return quickReplies;
+
+  const labels = quickReplies.filter((item): item is string => typeof item === 'string');
+  if (labels.length === 0) return base.quickReplies;
+
+  return labels.map((label) => {
+    const existing = base.quickReplies.find((reply) => reply.label === label);
+    if (existing) return existing;
+    return {
+      label,
+      kind: 'info' as const,
+      message: 'A equipe CHRISMED pode orientar esse ponto no próximo horário administrativo.',
+    };
+  });
+}
+
+export function resolveOliverContextOverride(
+  pathname: string,
+  override: OliverContextEventDetail | null,
+): OliverContext {
+  const routeDefault = resolveOliverContext(pathname);
+  if (!override) return routeDefault;
+
+  const overrideKey = override.key ?? override.context;
+  const base = overrideKey && OLIVER_CONTEXTS[overrideKey] ? OLIVER_CONTEXTS[overrideKey] : routeDefault;
+
+  return {
+    key: override.key ?? override.context ?? base.key,
+    eyebrow: override.eyebrow ?? base.eyebrow,
+    greeting: override.greeting ?? base.greeting,
+    quickReplies: resolveQuickReplies(override.quickReplies, base),
+  };
 }
