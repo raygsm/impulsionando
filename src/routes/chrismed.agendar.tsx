@@ -532,12 +532,13 @@ function ChrismedAgendarPage() {
             <h2 id="s7" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Confirme os dados</h2>
             <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 space-y-3 text-sm">
-                <Row label="Especialidade" value={isTele360 ? `Teleconsulta 360° — ${TELECONSULTA_360_LABEL}` : specialty.name} />
-                {isTele360 && (
+                <Row label="Especialidade" value={isCare360 ? `Atendimento 360° — ${CARE_360_LABEL}` : specialty.name} />
+                {isCare360 && (
                   <p className="text-xs text-[var(--chrismed-graphite)] leading-relaxed">
-                    A teleconsulta funde o conhecimento das três especialidades da Dra. Christiane Alencar em uma única consulta — diagnóstico 360°, sem escolher especialidade.
+                    Esta modalidade funde o conhecimento das três especialidades da Dra. Christiane Alencar em uma única consulta — diagnóstico 360°, sem escolher especialidade.
                   </p>
                 )}
+
                 <Row label="Médico" value={doctor.name} />
                 <Row label="Modalidade" value={MODALITY_META[modality].label} />
                 <Row label="Unidade" value={unit.name} />
