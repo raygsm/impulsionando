@@ -54,6 +54,21 @@ const MODALITY_META: Record<ChrismedModality, { icon: typeof Stethoscope; label:
 
 const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Briefcase, baby: Baby, brain: Brain, plane: Plane } as const;
 
+/**
+ * Especialidade sintética "Teleconsulta 360°": ao escolher Teleconsulta,
+ * o paciente não escolhe especialidade — recebe a visão integrada das
+ * três atuações ambulatoriais da Dra. Christiane Alencar (Gastroenterologia,
+ * Hepatologia e Clínica Médica). Esse é justamente o diferencial da
+ * teleconsulta CHRISMED: diagnóstico 360° pelo mesmo médico.
+ */
+const TELECONSULTA_360_LABEL = 'Gastroenterologia · Hepatologia · Clínica Médica';
+const TELECONSULTA_360: ChrismedSpecialty = {
+  slug: 'teleconsulta-360',
+  name: 'Teleconsulta 360°',
+  short: TELECONSULTA_360_LABEL,
+  icon: 'stethoscope',
+};
+
 const searchSchema = z.object({
   modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
   specialty: fallback(z.string().optional(), undefined),
@@ -126,6 +141,19 @@ function ChrismedAgendarPage() {
 
   // Pré-seleção via querystring
   useEffect(() => {
+    // TELECONSULTA 360°: funde as 3 especialidades ambulatoriais.
+    // Não há escolha de especialidade após clicar em Teleconsulta —
+    // o benefício é justamente o diagnóstico integrado.
+    if (search.modality === 'telemedicina') {
+      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+      const tele = CHRISMED_UNITS.find((u) => u.slug === 'telemedicina');
+      setSpecialty(TELECONSULTA_360);
+      if (doc) setDoctor(doc);
+      setModality('telemedicina');
+      if (tele) setUnit(tele);
+      setStep('schedule');
+      return;
+    }
     if (search.doctor) {
       const doc = CHRISMED_DOCTORS.find((d) => d.slug === search.doctor);
       if (doc) {
@@ -138,7 +166,8 @@ function ChrismedAgendarPage() {
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
       if (sp) { setSpecialty(sp); setStep('doctor'); }
     }
-  }, [search.specialty, search.doctor]);
+  }, [search.specialty, search.doctor, search.modality]);
+
 
   // Carrega offerings reais (para preço/duração no passo de pagamento)
   useEffect(() => {
@@ -234,13 +263,18 @@ function ChrismedAgendarPage() {
   const stepIndex = stepOrder.indexOf(step);
   const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
   const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
+  const isTele360 = specialty?.slug === 'teleconsulta-360';
   function goBack() {
     if (stepIndex <= 0) return;
+    // No fluxo Teleconsulta 360°, o paciente não escolhe especialidade/
+    // médico/modalidade/unidade — chão mínimo é 'schedule'.
+    if (isTele360 && stepIndex <= stepOrder.indexOf('schedule')) return;
     // pula 'doctor' quando o médico foi pré-selecionado via querystring
     let prev = stepOrder[stepIndex - 1];
     if (prev === 'doctor' && search.doctor) prev = 'specialty';
     setStep(prev);
   }
+
 
   const stickySummary = [
     doctor?.name,
@@ -272,6 +306,16 @@ function ChrismedAgendarPage() {
           <div className="mb-6 flex items-start gap-2 rounded-lg border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
             <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700 flex-shrink-0" />
             <p><strong>Agenda em demonstração:</strong> horários exibidos aqui são visuais. A reserva definitiva e o bloqueio de slot dependem do backend (Codex) — o pagamento PIX no final é real.</p>
+          </div>
+        )}
+
+        {/* Banner Teleconsulta 360° — reforça a fusão das 3 especialidades */}
+        {isTele360 && step !== 'done' && (
+          <div className="mb-6 rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Teleconsulta 360°</div>
+            <p className="leading-relaxed">
+              Nesta modalidade, a Dra. Christiane Alencar avalia você com o olhar integrado das três especialidades — <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — sem que você precise escolher uma antes. É o mesmo médico, com diagnóstico 360°.
+            </p>
           </div>
         )}
 
@@ -481,7 +525,12 @@ function ChrismedAgendarPage() {
             <h2 id="s7" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Confirme os dados</h2>
             <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
               <CardContent className="p-6 space-y-3 text-sm">
-                <Row label="Especialidade" value={specialty.name} />
+                <Row label="Especialidade" value={isTele360 ? `Teleconsulta 360° — ${TELECONSULTA_360_LABEL}` : specialty.name} />
+                {isTele360 && (
+                  <p className="text-xs text-[var(--chrismed-graphite)] leading-relaxed">
+                    A teleconsulta funde o conhecimento das três especialidades da Dra. Christiane Alencar em uma única consulta — diagnóstico 360°, sem escolher especialidade.
+                  </p>
+                )}
                 <Row label="Médico" value={doctor.name} />
                 <Row label="Modalidade" value={MODALITY_META[modality].label} />
                 <Row label="Unidade" value={unit.name} />
