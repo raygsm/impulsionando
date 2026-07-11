@@ -326,28 +326,84 @@ function ChrismedAgendarPage() {
         )}
 
 
-        {/* STEP 1: Especialidade */}
+        {/* STEP 1: Modalidade (agora primeiro) */}
+        {step === 'modality' && (
+          <section aria-labelledby="s1">
+            <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Como você quer ser atendido?</h1>
+            <p className="mt-2 text-[var(--chrismed-graphite)]">
+              Escolha a modalidade primeiro. Em <strong>Teleconsulta</strong> e <strong>Domiciliar</strong>, a Dra. Christiane Alencar atende com a visão 360° das três especialidades — <strong>Gastroenterologia</strong>, <strong>Hepatologia</strong> e <strong>Clínica Médica</strong> — sem que você precise escolher uma antes. Em <strong>Presencial no Consultório</strong>, você escolhe a especialidade em seguida.
+            </p>
+            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(['telemedicina','presencial','domiciliar'] as ChrismedModality[]).map((m) => {
+                const meta = MODALITY_META[m];
+                const Icon = meta.icon;
+                const badge = m === 'presencial' ? 'Escolha a especialidade' : 'Visão 360° · 3 especialidades';
+                const label = m === 'presencial' ? 'Presencial no Consultório' : meta.label;
+                return (
+                  <button key={m} type="button"
+                    onClick={() => {
+                      if (m === 'telemedicina' || m === 'domiciliar') { applyCare360(m); return; }
+                      setModality('presencial');
+                      setSpecialty(null); setDoctor(null); setUnit(null);
+                      setStep('specialty');
+                    }}
+                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
+                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{label}</div>
+                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{meta.sub}</div>
+                    <div className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[var(--chrismed-champagne-deep)]">{badge}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Evolução Teleconsulta → Presencial */}
+            <div className="mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)] mb-1">Continuidade de cuidado</div>
+              <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)]">Fez uma Teleconsulta que evoluiu para Consulta Presencial?</h3>
+              <p className="text-sm text-[var(--chrismed-graphite)] mt-2 leading-relaxed">
+                Em caso de dúvidas, uma teleconsulta pode ser marcada primeiro. Se a Dra. Christiane entender ser necessária a consulta presencial, <strong>somente a diferença de valor será cobrada</strong>. A recepção CHRISMED será avisada e enviará as orientações para o agendamento específico.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4 border-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-ivory)]"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('chrismed:reception:notify', {
+                      detail: { reason: 'tele_to_presencial_upgrade' },
+                    }));
+                  }
+                  openOliver();
+                  toast.success('Recepção CHRISMED avisada. Você receberá as orientações em breve.');
+                }}
+              >
+                Clique aqui — avisar a recepção CHRISMED
+              </Button>
+            </div>
+          </section>
+        )}
+
+        {/* STEP 2: Especialidade (apenas fluxo Presencial) */}
         {step === 'specialty' && (() => {
-          // Ambulatorial only: nunca mistura ocupacional/internacional no fluxo público de "Agendar".
-          // Medicina Ocupacional tem jornada própria em /chrismed/ocupacional.
           const AMBULATORIAL_ONLY = ['gastroenterologia', 'hepatologia', 'clinica-medica'];
           const base = doctor
             ? CHRISMED_SPECIALTIES.filter((s) => doctor.specialtySlugs.includes(s.slug))
             : CHRISMED_SPECIALTIES;
           const specialtiesToShow = base.filter((s) => AMBULATORIAL_ONLY.includes(s.slug));
           return (
-          <section aria-labelledby="s1">
-            <h1 id="s1" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h1>
+          <section aria-labelledby="s2">
+            <button onClick={() => setStep('modality')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar modalidade</button>
+            <h2 id="s2" className="chrismed-serif text-3xl md:text-4xl text-[var(--chrismed-ink)]">Escolha a especialidade</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">
-              {doctor
-                ? <>Especialidades atendidas por <strong>{doctor.name}</strong>.</>
-                : 'Consulte a agenda sem precisar de cadastro. Você se identifica só depois de escolher o horário.'}
+              Consulta <strong>presencial no consultório</strong> em Copacabana. Selecione a especialidade que melhor atende sua demanda.
             </p>
             <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {specialtiesToShow.map((sp) => {
                 const Icon = SPECIALTY_ICON[sp.icon];
                 return (
-                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep(doctor ? 'modality' : 'doctor'); }}
+                  <button key={sp.slug} type="button" onClick={() => { setSpecialty(sp); setStep('doctor'); }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
                       <Icon className="h-5 w-5" />
@@ -362,25 +418,25 @@ function ChrismedAgendarPage() {
           );
         })()}
 
-        {/* STEP 2: Médico */}
+        {/* STEP 3: Médico (fluxo Presencial) */}
         {step === 'doctor' && specialty && (
-          <section aria-labelledby="s2">
+          <section aria-labelledby="s3">
             <button onClick={() => setStep('specialty')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar especialidade</button>
-            <h2 id="s2" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha o médico</h2>
+            <h2 id="s3" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha o médico</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Profissionais que atendem <strong>{specialty.name}</strong>.</p>
             {doctorsForSpecialty.length === 0 ? (
               <EmptyState message="Nenhum médico disponível para esta especialidade no momento." onOliver={openOliver} />
             ) : (
               <div className="mt-8 grid md:grid-cols-2 gap-4">
                 {doctorsForSpecialty.map((d) => (
-                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('modality'); }}
+                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('unit'); }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{d.name}</div>
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mt-1">{d.title}</div>
                     <div className="text-xs text-[var(--chrismed-mist)] mt-1">{d.crm}</div>
                     <p className="text-sm text-[var(--chrismed-graphite)] mt-3">{d.bio}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
-                      {d.modalities.map((m) => (
+                      {d.modalities.filter((m) => m === 'presencial').map((m) => (
                         <Badge key={m} variant="outline" className="text-[10px] uppercase tracking-[0.14em] border-[var(--chrismed-sand)]">{MODALITY_META[m].label}</Badge>
                       ))}
                     </div>
@@ -391,30 +447,7 @@ function ChrismedAgendarPage() {
           </section>
         )}
 
-        {/* STEP 3: Modalidade */}
-        {step === 'modality' && doctor && (
-          <section aria-labelledby="s3">
-            <button onClick={() => setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← Trocar médico</button>
-            <h2 id="s3" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Como quer ser atendido?</h2>
-            <p className="mt-2 text-[var(--chrismed-graphite)]">{doctor.name} atende nas modalidades abaixo.</p>
-            <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {modalitiesForDoctor.map((m) => {
-                const meta = MODALITY_META[m];
-                const Icon = meta.icon;
-                return (
-                  <button key={m} type="button" onClick={() => { setModality(m); setStep('unit'); }}
-                    className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
-                    <div className="h-11 w-11 rounded-lg bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center mb-3">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">{meta.label}</div>
-                    <div className="text-sm text-[var(--chrismed-graphite)] mt-1">{meta.sub}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
+
 
         {/* STEP 4: Unidade */}
         {step === 'unit' && modality && (
