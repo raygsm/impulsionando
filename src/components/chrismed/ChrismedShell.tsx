@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { Globe, Menu, X, CalendarCheck, ChevronDown, Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChrismedOliverProvider } from './ChrismedOliverProvider';
 import { ChrismedPreloader } from './ChrismedPreloader';
@@ -108,11 +108,11 @@ const NAV: NavItem[] = [
       },
       {
         to: '/chrismed/domiciliar',
-        labels: { pt: 'Consulta domiciliar', en: 'Home visit', es: 'Visita a domicilio' },
+        labels: { pt: 'Domiciliar — onde você estiver', en: 'Wherever you are', es: 'Donde usted esté' },
         desc: {
-          pt: 'Residência, hotel ou escritório',
-          en: 'Home, hotel or office',
-          es: 'Residencia, hotel u oficina',
+          pt: 'Atendimento no local em que você estiver',
+          en: 'Care at your current location',
+          es: 'Atención donde usted esté',
         },
       },
     ],
@@ -154,6 +154,8 @@ const NAV: NavItem[] = [
 const CTA = {
   book: { pt: 'Agendar', en: 'Book', es: 'Agendar' },
 } as const;
+
+const ChrismedShellContext = createContext(false);
 
 export function useLang(): Lang {
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
@@ -607,27 +609,35 @@ export function ChrismedShell({
   children: React.ReactNode;
   variant?: 'full' | 'minimal';
 }) {
+  const insideChrismedShell = useContext(ChrismedShellContext);
+
+  if (insideChrismedShell) {
+    return <>{children}</>;
+  }
+
   return (
-    <div
-      data-tenant="chrismed"
-      className="chrismed-brand min-h-dvh bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-ivory)]"
-    >
-      <a
-        href="#chrismed-main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded focus:bg-[var(--chrismed-forest)] focus:px-4 focus:py-2 focus:text-[var(--chrismed-ivory)]"
+    <ChrismedShellContext.Provider value>
+      <div
+        data-tenant="chrismed"
+        className="chrismed-brand min-h-dvh bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-ivory)]"
       >
-        Pular para o conteúdo principal
-      </a>
-      <ChrismedOliverProvider>
-        <ChrismedPreloader />
-        <ChrismedHeader variant={variant} />
-        <main id="chrismed-main" className="mx-auto w-full max-w-7xl pt-16 pb-28 md:pt-20 md:pb-24">
-          {children}
-        </main>
-        {variant === 'full' && <ChrismedFooter />}
-        <OliverFab />
-      </ChrismedOliverProvider>
-    </div>
+        <a
+          href="#chrismed-main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded focus:bg-[var(--chrismed-forest)] focus:px-4 focus:py-2 focus:text-[var(--chrismed-ivory)]"
+        >
+          Pular para o conteúdo principal
+        </a>
+        <ChrismedOliverProvider>
+          <ChrismedPreloader />
+          <ChrismedHeader variant={variant} />
+          <main id="chrismed-main" className="mx-auto w-full max-w-7xl pt-16 pb-28 md:pt-20 md:pb-24">
+            {children}
+          </main>
+          {variant === 'full' && <ChrismedFooter />}
+          <OliverFab />
+        </ChrismedOliverProvider>
+      </div>
+    </ChrismedShellContext.Provider>
   );
 }
 

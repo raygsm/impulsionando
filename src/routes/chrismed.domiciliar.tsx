@@ -16,7 +16,7 @@ export const Route = createFileRoute('/chrismed/domiciliar')({
       { title: 'Consulta domiciliar — Dra. Cristiane Alencar · CrisMed' },
       { name: 'description', content: 'Atendimento médico domiciliar no Rio de Janeiro com a Dra. Cristiane Alencar. Validação de endereço, agenda integrada e pagamento online via Mercado Pago.' },
       { property: 'og:title', content: 'Consulta domiciliar · CrisMed' },
-      { property: 'og:description', content: 'A médica vai até você — em casa, hotel ou empresa. Verifique disponibilidade para sua região.' },
+      { property: 'og:description', content: 'Atendimento domiciliar onde você estiver. Verifique disponibilidade para sua região.' },
     ],
   }),
   component: DomiciliarPage,
@@ -75,7 +75,7 @@ function DomiciliarPage() {
       <section className="chrismed-bleed chrismed-page-forest">
         <div className="container py-20 max-w-5xl">
           <Badge className="bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-amber)] border border-[var(--chrismed-amber)]/40 mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta Domiciliar</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] max-w-3xl">Consulta Domiciliar — na sua residência, hotel ou onde você estiver.</h1>
+          <h1 className="chrismed-serif text-4xl md:text-6xl leading-[1.02] max-w-3xl">Consulta Domiciliar — onde você estiver.</h1>
           <p className="chrismed-lede mt-6 max-w-2xl">
             Atendimento médico com a Dra. Christiane Alencar no conforto e na discrição do seu ambiente. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online. Os retornos poderão ser realizados por Teleconsulta ou Consulta Presencial no consultório em Copacabana, conforme orientação médica.
           </p>
@@ -101,7 +101,7 @@ function DomiciliarPage() {
           </div>
           <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Home className="h-4 w-4" /> Onde atendemos</h3>
-            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Residências, hotéis, escritórios e empresas. Pacientes brasileiros e estrangeiros. Retornos posteriores ocorrem por Teleconsulta ou Consulta Presencial em Copacabana.</p>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Onde você estiver, dentro das regiões atendidas e confirmadas pela equipe. Pacientes brasileiros e estrangeiros. Retornos posteriores ocorrem por Teleconsulta ou Consulta Presencial em Copacabana.</p>
           </div>
           <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
             <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento e reserva</h3>

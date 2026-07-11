@@ -535,7 +535,7 @@ const COPY: Record<Lang, Copy> = {
     hero: {
       eyebrow: 'Autoridade médica · CHRISMED',
       positioning: 'Medicina privada com continuidade, escuta e precisão.',
-      lead: 'Consultas em Copacabana, em sua residência ou por vídeo. Uma única médica, a mesma escuta, e o tempo necessário para cuidar bem.',
+      lead: 'Consultas em Copacabana, domiciliar onde você estiver ou por vídeo. Uma única médica, a mesma escuta, e o tempo necessário para cuidar bem.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
       portraitAlt: 'Retrato editorial da Dra. Christiane Alencar',
@@ -545,7 +545,7 @@ const COPY: Record<Lang, Copy> = {
       title: 'Uma prática construída em torno do paciente.',
       paragraphs: [
         'A Dra. Christiane Alencar dedica sua prática à medicina privada, com foco em acompanhamento contínuo, escuta atenta e coordenação clínica.',
-        'A rotina combina consultas presenciais em Copacabana, atendimento domiciliar em residências e hotéis do Rio de Janeiro e teleconsulta para pacientes em viagem ou fora da cidade.',
+        'A rotina combina consultas presenciais em Copacabana, atendimento domiciliar onde você estiver no Rio de Janeiro e teleconsulta para pacientes em viagem ou fora da cidade.',
         'A trajetória completa — formação, atuação hospitalar, produção científica e cooperações institucionais — é publicada apenas com material verificado. Os blocos correspondentes aparecerão nesta página assim que forem consolidados.',
       ],
     },
@@ -586,7 +586,7 @@ const COPY: Record<Lang, Copy> = {
       items: [
         { eyebrow: 'Vídeo', title: 'Teleconsulta', body: 'Consulta por vídeo com prescrição digital e prontuário eletrônico.' },
         { eyebrow: 'Copacabana', title: 'Presencial', body: 'Consultório discreto, agenda sob horário, recepção reservada.' },
-        { eyebrow: 'Casa · Hotel', title: 'Consulta domiciliar', body: 'Atendimento na sua residência, hotel ou escritório no Rio de Janeiro.' },
+        { eyebrow: 'Onde você estiver', title: 'Consulta domiciliar', body: 'Atendimento domiciliar onde você estiver no Rio de Janeiro.' },
       ],
     },
     schedule: {
@@ -605,7 +605,7 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'Próximo passo',
       title: 'Reservar um tempo',
       titleItalic: 'com a Dra. Christiane.',
-      lead: 'Consulta privada em Copacabana, na sua residência, hotel ou por vídeo. Um único ponto de contato para todo o cuidado.',
+      lead: 'Consulta privada em Copacabana, domiciliar onde você estiver ou por vídeo. Um único ponto de contato para todo o cuidado.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
     },
@@ -624,7 +624,7 @@ const COPY: Record<Lang, Copy> = {
       title: 'A practice built around the patient.',
       paragraphs: [
         'Dr. Christiane Alencar dedicates her practice to private medicine, focused on continuous follow-up, attentive listening and clinical coordination.',
-        'Her routine combines in-office consultations in Copacabana, home visits at residences and hotels in Rio de Janeiro, and telehealth for patients on travel or abroad.',
+        'Her routine combines in-office consultations in Copacabana, care wherever you are in Rio de Janeiro, and telehealth for patients on travel or abroad.',
         'The full trajectory — training, hospital practice, scientific work and institutional collaborations — is published only with verified material. The corresponding sections will appear here once consolidated.',
       ],
     },
@@ -662,7 +662,7 @@ const COPY: Record<Lang, Copy> = {
       items: [
         { eyebrow: 'Video', title: 'Telehealth', body: 'Video consultation with digital prescription and electronic records.' },
         { eyebrow: 'Copacabana', title: 'In-person', body: 'Discreet office, scheduled time slots, private reception.' },
-        { eyebrow: 'Home · Hotel', title: 'Home visit', body: 'Care at your home, hotel or office in Rio de Janeiro.' },
+        { eyebrow: 'Wherever you are', title: 'Home visit', body: 'Care wherever you are in Rio de Janeiro.' },
       ],
     },
     schedule: {
@@ -700,7 +700,7 @@ const COPY: Record<Lang, Copy> = {
       title: 'Una práctica construida en torno al paciente.',
       paragraphs: [
         'La Dra. Christiane Alencar dedica su práctica a la medicina privada, con foco en seguimiento continuo, escucha atenta y coordinación clínica.',
-        'La rutina combina consultas presenciales en Copacabana, atención domiciliaria en residencias y hoteles de Río de Janeiro, y teleconsulta para pacientes en viaje o fuera de la ciudad.',
+        'La rutina combina consultas presenciales en Copacabana, atención domiciliaria donde usted esté en Río de Janeiro, y teleconsulta para pacientes en viaje o fuera de la ciudad.',
         'La trayectoria completa — formación, actuación hospitalaria, producción científica y cooperaciones institucionales — se publica solo con material verificado. Los bloques correspondientes aparecerán aquí cuando estén consolidados.',
       ],
     },
@@ -738,7 +738,7 @@ const COPY: Record<Lang, Copy> = {
       items: [
         { eyebrow: 'Video', title: 'Teleconsulta', body: 'Consulta por video con receta digital e historia clínica electrónica.' },
         { eyebrow: 'Copacabana', title: 'Presencial', body: 'Consultorio discreto, agenda con horario, recepción reservada.' },
-        { eyebrow: 'Casa · Hotel', title: 'Visita a domicilio', body: 'Atención en su residencia, hotel u oficina en Río de Janeiro.' },
+        { eyebrow: 'Donde usted esté', title: 'Visita a domicilio', body: 'Atención donde usted esté en Río de Janeiro.' },
       ],
     },
     schedule: {
