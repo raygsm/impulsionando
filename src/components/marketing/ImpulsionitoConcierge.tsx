@@ -80,6 +80,13 @@ function writeLeadContext(ctx: LeadContext) {
   } catch { /* noop */ }
 }
 
+function clearLeadContext() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEAD_STORAGE_KEY);
+  } catch { /* noop */ }
+}
+
 // ---------------------------------------------------------------------------
 // Ações rápidas por audiência.
 // ---------------------------------------------------------------------------
@@ -226,8 +233,10 @@ export function ImpulsionitoConcierge() {
     setLead(readLeadContext());
   }, []);
 
-  // Registra contexto ao visitar rota de nicho (base para "lead").
-  useEffect(() => {
+  // Opt-in: SOMENTE promove a "lead" após interação explícita (abrir concierge
+  // numa rota de nicho ou enviar mensagem). Visita passiva a /nichos/* NÃO
+  // classifica o visitante.
+  const captureNichoContext = useCallback(() => {
     const nicho = nichoSlugFromPath(pathname);
     if (!nicho) return;
     const nextLead: LeadContext = {
@@ -240,23 +249,31 @@ export function ImpulsionitoConcierge() {
     setLead(nextLead);
   }, [pathname]);
 
+  const resetLead = useCallback(() => {
+    clearLeadContext();
+    setLead(null);
+    setMessages([]);
+  }, []);
+
   // Evento global impulsionito:open — mantém compatibilidade.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handler = (e: Event) => {
       setOpen(true);
       setMinimized(false);
+      captureNichoContext();
       const origin = (e as CustomEvent<{ origin?: string }>).detail?.origin ?? "unknown";
       trackImpulsionitoOpen(origin, { path: pathname, ctx: ctx.id });
     };
     window.addEventListener("impulsionito:open", handler);
     return () => window.removeEventListener("impulsionito:open", handler);
-  }, [pathname, ctx.id]);
+  }, [pathname, ctx.id, captureNichoContext]);
 
   const send = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || sending) return;
+      captureNichoContext();
       const now = Date.now();
       const userMsg: ImpulsionitoMessage = {
         id: `u_${now}`,
@@ -316,7 +333,7 @@ export function ImpulsionitoConcierge() {
         abortRef.current = null;
       }
     },
-    [audience, messages, pathname, sending, transport],
+    [audience, messages, pathname, sending, transport, captureNichoContext],
   );
 
   // Não renderiza em rotas ocultas.
@@ -336,6 +353,7 @@ export function ImpulsionitoConcierge() {
           onClick={() => {
             setOpen(true);
             setMinimized(false);
+            captureNichoContext();
             trackImpulsionitoOpen("launcher", { path: pathname, ctx: ctx.id });
           }}
           aria-label="Abrir Impulsionito, seu concierge digital"
@@ -421,12 +439,31 @@ export function ImpulsionitoConcierge() {
               {/* Corpo — scroll interno */}
               <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
                 {/* Mensagem contextual */}
-                <div className="rounded-xl border border-primary/15 bg-primary/5 p-3">
+                <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 space-y-2">
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                     <p className="text-sm leading-relaxed text-foreground">{contextualHeadline}</p>
                   </div>
+                  {audience === "lead" && lead ? (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <Link
+                        to={lead.lastPath}
+                        className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/15"
+                      >
+                        <ArrowRight className="h-3 w-3" /> Continuar de onde parei
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={resetLead}
+                        className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        data-testid="impulsionito-reset-lead"
+                      >
+                        Recomeçar
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
+
 
                 {/* Ações rápidas / sugestões */}
                 {audience === "client" ? (
