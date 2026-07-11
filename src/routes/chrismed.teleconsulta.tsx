@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
+import { ChrismedFlagsBar } from '@/components/chrismed/ChrismedFlagsBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Video, Globe2, CreditCard, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
