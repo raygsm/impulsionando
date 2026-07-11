@@ -187,15 +187,8 @@ export function ChrismedOliverPanel() {
                 </button>
               </div>
             )}
-                <button
-                  type="button"
-                  onClick={() => setChrismedOliverInfo(null)}
-                  className="chrismed-sans mt-3 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-[var(--chrismed-champagne-deep)] hover:underline"
-                >
-                  <RotateCcw className="h-3 w-3" /> Reiniciar orientação
-                </button>
-              </div>
-            )}
+
+
 
             {/* Atalhos globais sempre visíveis */}
             <section>
