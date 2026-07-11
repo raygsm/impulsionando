@@ -540,11 +540,11 @@ export function PublicHeader() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link
-                  to="/escolher-nicho"
+                  to="/planos"
                   className={cn(
                     "inline-flex items-center px-3 py-1.5 text-sm rounded-md font-medium transition-colors",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    useActive("/planos") || useActive("/escolher-nicho")
+                    useActive("/planos")
                       ? "text-foreground bg-accent"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
                   )}
