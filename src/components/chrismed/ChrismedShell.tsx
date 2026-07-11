@@ -8,11 +8,11 @@ import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 export type Lang = 'pt' | 'en' | 'es';
 
-// Menu principal — ordem definida pelo cliente: Dra. Cristiane, Teleconsulta,
+// Menu principal — ordem definida pelo cliente: Dra. Christiane, Teleconsulta,
 // Consulta domiciliar, Consulta no consultório, Empresa (destaque), Contato,
 // Área dos Médicos, e CTA "Agendar agora" como botão final.
 const NAV: Array<{ to: string; labels: Record<Lang, string>; emphasis?: 'company' }> = [
-  { to: '/chrismed/dra-cristiane', labels: { pt: 'Dra. Cristiane', en: 'Dr. Alencar', es: 'Dra. Alencar' } },
+  { to: '/chrismed/dra-cristiane', labels: { pt: 'Dra. Christiane', en: 'Dr. Alencar', es: 'Dra. Alencar' } },
   { to: '/chrismed/teleconsulta', labels: { pt: 'Teleconsulta', en: 'Telehealth', es: 'Teleconsulta' } },
   { to: '/chrismed/domiciliar', labels: { pt: 'Consulta domiciliar', en: 'Home visit', es: 'Visita a domicilio' } },
   { to: '/chrismed/consultorio', labels: { pt: 'Consulta no consultório', en: 'In-office', es: 'En consultorio' } },
@@ -62,7 +62,7 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Cristiane Alencar">
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Christiane Alencar">
           <img
             src={chrismedLogo.url}
             alt="CrisMed"
@@ -72,7 +72,7 @@ export function ChrismedHeader() {
             loading="eager"
             decoding="async"
           />
-          <span className="sr-only">CrisMed · Dra. Cristiane Alencar</span>
+          <span className="sr-only">CrisMed · Dra. Christiane Alencar</span>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
@@ -178,7 +178,7 @@ export function ChrismedFooter() {
         <div>
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Atendimento</div>
           <ul className="space-y-1">
-            <li><Link to="/chrismed/dra-cristiane" className="hover:text-emerald-950">Dra. Cristiane Alencar</Link></li>
+            <li><Link to="/chrismed/dra-cristiane" className="hover:text-emerald-950">Dra. Christiane Alencar</Link></li>
             <li><Link to="/chrismed/teleconsulta" className="hover:text-emerald-950">Teleconsulta</Link></li>
             <li><Link to="/chrismed/domiciliar" className="hover:text-emerald-950">Consulta domiciliar</Link></li>
             <li><Link to="/chrismed/consultorio" className="hover:text-emerald-950">Consulta no consultório</Link></li>

@@ -1,11 +1,11 @@
 /**
- * /chrismed/dra-cristiane — Página editorial da Dra. Cristiane Alencar
+ * /chrismed/dra-cristiane — Página editorial da Dra. Christiane Alencar
  * (Onda V2 · Quiet Luxury).
  *
  * Reconstrução completa aplicando o design system aprovado.
  *
  * REGRAS APROVADAS PARA A V2 (aplicadas aqui):
- *  - Grafia oficial: "Dra. Cristiane Alencar" (consistente com o menu/shell).
+ *  - Grafia oficial: "Dra. Christiane Alencar" (consistente com o menu/shell).
  *    Pendência: confirmar contra material institucional antes da publicação
  *    em produção (o texto "Christiane" mencionado no histórico será ajustado
  *    em massa se a fonte validada divergir).
@@ -30,7 +30,7 @@ import {
 } from '@/components/chrismed/primitives';
 
 /**
- * Retrato oficial da Dra. Cristiane Alencar.
+ * Retrato oficial da Dra. Christiane Alencar.
  * Definir a URL AUTORIZADA aqui para publicar o rosto. Enquanto for
  * `undefined`, a página renderiza a moldura editorial neutra (fallback).
  * Não substituir por foto genérica, banco de imagens ou IA.
@@ -60,13 +60,13 @@ const VALIDATED: ValidatedContent = {
 export const Route = createFileRoute('/chrismed/dra-cristiane')({
   head: () => ({
     meta: [
-      { title: 'Dra. Cristiane Alencar — Medicina privada · CHRISMED' },
+      { title: 'Dra. Christiane Alencar — Medicina privada · CHRISMED' },
       {
         name: 'description',
         content:
-          'Trajetória, filosofia e prática clínica da Dra. Cristiane Alencar. Medicina privada, contínua e discreta em Copacabana, Rio de Janeiro. PT · EN · ES.',
+          'Trajetória, filosofia e prática clínica da Dra. Christiane Alencar. Medicina privada, contínua e discreta em Copacabana, Rio de Janeiro. PT · EN · ES.',
       },
-      { property: 'og:title', content: 'Dra. Cristiane Alencar — CHRISMED' },
+      { property: 'og:title', content: 'Dra. Christiane Alencar — CHRISMED' },
       {
         property: 'og:description',
         content:
@@ -79,7 +79,7 @@ export const Route = createFileRoute('/chrismed/dra-cristiane')({
       },
       { property: 'og:site_name', content: 'CHRISMED' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: 'Dra. Cristiane Alencar — CHRISMED' },
+      { name: 'twitter:title', content: 'Dra. Christiane Alencar — CHRISMED' },
       {
         name: 'twitter:description',
         content: 'Medicina privada, contínua e discreta.',
@@ -97,7 +97,7 @@ export const Route = createFileRoute('/chrismed/dra-cristiane')({
         children: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'Physician',
-          name: 'Dra. Cristiane Alencar',
+          name: 'Dra. Christiane Alencar',
           medicalSpecialty: ['GeneralPractice', 'InternalMedicine'],
           areaServed: ['Rio de Janeiro', 'International'],
           availableService: [
@@ -131,7 +131,7 @@ function DraCristianePage() {
           <div>
             <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
             <ChrismedHeading level={1} className="mt-6">
-              Dra. Cristiane{' '}
+              Dra. Christiane{' '}
               <span className="chrismed-serif italic text-[var(--chrismed-graphite)]">
                 Alencar.
               </span>
@@ -516,13 +516,13 @@ const COPY: Record<Lang, Copy> = {
       lead: 'Consultas em Copacabana, em sua residência ou por vídeo. Uma única médica, a mesma escuta, e o tempo necessário para cuidar bem.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
-      portraitAlt: 'Retrato editorial da Dra. Cristiane Alencar',
+      portraitAlt: 'Retrato editorial da Dra. Christiane Alencar',
     },
     trajectory: {
       eyebrow: 'Trajetória',
       title: 'Uma prática construída em torno do paciente.',
       paragraphs: [
-        'A Dra. Cristiane Alencar dedica sua prática à medicina privada, com foco em acompanhamento contínuo, escuta atenta e coordenação clínica.',
+        'A Dra. Christiane Alencar dedica sua prática à medicina privada, com foco em acompanhamento contínuo, escuta atenta e coordenação clínica.',
         'A rotina combina consultas presenciais em Copacabana, atendimento domiciliar em residências e hotéis do Rio de Janeiro e teleconsulta para pacientes em viagem ou fora da cidade.',
         'A trajetória completa — formação, atuação hospitalar, produção científica e cooperações institucionais — é publicada apenas com material verificado. Os blocos correspondentes aparecerão nesta página assim que forem consolidados.',
       ],
@@ -546,7 +546,7 @@ const COPY: Record<Lang, Copy> = {
     practice: {
       eyebrow: 'Experiência clínica',
       title: 'Uma prática consolidada em três frentes complementares.',
-      lead: 'A experiência da Dra. Cristiane articula consulta privada, acompanhamento hospitalar e coordenação internacional — sempre com a mesma médica no centro do cuidado.',
+      lead: 'A experiência da Dra. Christiane articula consulta privada, acompanhamento hospitalar e coordenação internacional — sempre com a mesma médica no centro do cuidado.',
       items: [
         { title: 'Consulta privada', body: 'Acompanhamento longitudinal de adultos, com foco em continuidade e prevenção. Consultas em Copacabana, à distância e a domicílio.' },
         { title: 'Acompanhamento hospitalar', body: 'Coordenação clínica em internações e procedimentos em redes hospitalares parceiras, mantendo o paciente sob a mesma referência médica.' },
@@ -582,7 +582,7 @@ const COPY: Record<Lang, Copy> = {
     close: {
       eyebrow: 'Próximo passo',
       title: 'Reservar um tempo',
-      titleItalic: 'com a Dra. Cristiane.',
+      titleItalic: 'com a Dra. Christiane.',
       lead: 'Consulta privada em Copacabana, na sua casa ou por vídeo. Um único ponto de contato para todo o cuidado.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
@@ -595,13 +595,13 @@ const COPY: Record<Lang, Copy> = {
       lead: 'Consultations in Copacabana, at your home, or by video. One physician, the same attention, and the time it takes to care well.',
       ctaPrimary: 'Book a consultation',
       ctaSecondary: 'Talk to Oliver',
-      portraitAlt: 'Editorial portrait of Dr. Cristiane Alencar',
+      portraitAlt: 'Editorial portrait of Dr. Christiane Alencar',
     },
     trajectory: {
       eyebrow: 'Trajectory',
       title: 'A practice built around the patient.',
       paragraphs: [
-        'Dr. Cristiane Alencar dedicates her practice to private medicine, focused on continuous follow-up, attentive listening and clinical coordination.',
+        'Dr. Christiane Alencar dedicates her practice to private medicine, focused on continuous follow-up, attentive listening and clinical coordination.',
         'Her routine combines in-office consultations in Copacabana, home visits at residences and hotels in Rio de Janeiro, and telehealth for patients on travel or abroad.',
         'The full trajectory — training, hospital practice, scientific work and institutional collaborations — is published only with verified material. The corresponding sections will appear here once consolidated.',
       ],
@@ -671,13 +671,13 @@ const COPY: Record<Lang, Copy> = {
       lead: 'Consultas en Copacabana, en su residencia o por video. Una única médica, la misma atención y el tiempo necesario para cuidar bien.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Hablar con Oliver',
-      portraitAlt: 'Retrato editorial de la Dra. Cristiane Alencar',
+      portraitAlt: 'Retrato editorial de la Dra. Christiane Alencar',
     },
     trajectory: {
       eyebrow: 'Trayectoria',
       title: 'Una práctica construida en torno al paciente.',
       paragraphs: [
-        'La Dra. Cristiane Alencar dedica su práctica a la medicina privada, con foco en seguimiento continuo, escucha atenta y coordinación clínica.',
+        'La Dra. Christiane Alencar dedica su práctica a la medicina privada, con foco en seguimiento continuo, escucha atenta y coordinación clínica.',
         'La rutina combina consultas presenciales en Copacabana, atención domiciliaria en residencias y hoteles de Río de Janeiro, y teleconsulta para pacientes en viaje o fuera de la ciudad.',
         'La trayectoria completa — formación, actuación hospitalaria, producción científica y cooperaciones institucionales — se publica solo con material verificado. Los bloques correspondientes aparecerán aquí cuando estén consolidados.',
       ],

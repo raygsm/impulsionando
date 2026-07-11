@@ -1,7 +1,7 @@
 /**
  * /chrismed — Home CHRISMED (Onda V2 · Quiet Luxury)
  *
- * Reposiciona a marca ao redor da Dra. Cristiane Alencar como símbolo de
+ * Reposiciona a marca ao redor da Dra. Christiane Alencar como símbolo de
  * atendimento AA, discrição, experiência e continuidade.
  *
  * Guardrails aprovados na Onda V2:
@@ -9,15 +9,15 @@
  *  - Nenhum CTA público aponta para WhatsApp. Oliver é o único ponto de conversa.
  *  - Sem preços fixos, sem estatísticas não validadas, sem placeholders visíveis.
  *  - CTA primário sempre → /chrismed/agendar. Secundário → /chrismed/dra-cristiane.
- *  - Retrato da Dra. Cristiane só é publicado com src autorizado; caso contrário,
+ *  - Retrato da Dra. Christiane só é publicado com src autorizado; caso contrário,
  *    ChrismedPortrait renderiza fallback silencioso.
  *  - Ambulatorial ainda aponta para /chrismed/clinica (rota provisória).
  *
  * Pendências registradas para o Codex / próximas ondas:
- *  - Grafia oficial do nome (Cristiane × Christiane) — adotado "Cristiane Alencar"
+ *  - Grafia oficial do nome (Christiane × Christiane) — adotado "Christiane Alencar"
  *    conforme material atual do menu/shell; confirmar no material institucional
  *    antes de publicar em produção.
- *  - Retrato autorizado da Dra. Cristiane (asset ainda não existe em src/assets).
+ *  - Retrato autorizado da Dra. Christiane (asset ainda não existe em src/assets).
  *  - Trajetória, artigos, congressos, cooperações (Seção 5) — só serão exibidos
  *    após validação da fonte oficial. Hoje entregamos versão editorial neutra.
  */
@@ -37,13 +37,13 @@ import {
 export const Route = createFileRoute('/chrismed/')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Medicina privada com a Dra. Cristiane Alencar' },
+      { title: 'CHRISMED — Medicina privada com a Dra. Christiane Alencar' },
       {
         name: 'description',
         content:
-          'Atendimento clínico de padrão AA com a Dra. Cristiane Alencar: teleconsulta, consulta presencial em Copacabana e visita domiciliar. PT · EN · ES.',
+          'Atendimento clínico de padrão AA com a Dra. Christiane Alencar: teleconsulta, consulta presencial em Copacabana e visita domiciliar. PT · EN · ES.',
       },
-      { property: 'og:title', content: 'CHRISMED — Dra. Cristiane Alencar' },
+      { property: 'og:title', content: 'CHRISMED — Dra. Christiane Alencar' },
       {
         property: 'og:description',
         content:
@@ -53,10 +53,10 @@ export const Route = createFileRoute('/chrismed/')({
       { property: 'og:url', content: 'https://chrismed.impulsionando.com.br/chrismed' },
       { property: 'og:site_name', content: 'CHRISMED' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: 'CHRISMED — Dra. Cristiane Alencar' },
+      { name: 'twitter:title', content: 'CHRISMED — Dra. Christiane Alencar' },
       {
         name: 'twitter:description',
-        content: 'Medicina privada, contínua e discreta com a Dra. Cristiane Alencar.',
+        content: 'Medicina privada, contínua e discreta com a Dra. Christiane Alencar.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://chrismed.impulsionando.com.br/chrismed' }],
@@ -127,7 +127,7 @@ function ChrismedHomePage() {
             <div className="absolute -bottom-6 left-6 right-6 border-l border-[var(--chrismed-champagne)] bg-[var(--chrismed-ivory)] px-6 py-5 md:-bottom-8 md:left-10">
               <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
               <p className="chrismed-serif mt-2 text-xl font-light italic text-[var(--chrismed-ink)]">
-                Dra. Cristiane Alencar
+                Dra. Christiane Alencar
               </p>
               <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
                 {t.hero.portraitRole}
@@ -246,7 +246,7 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 5 — Autoridade da Dra. Cristiane ───────────
+      {/* ─────────── Seção 5 — Autoridade da Dra. Christiane ───────────
           Sem números não validados. Sem lista de artigos/congressos até
           o Codex confirmar. Entregamos versão editorial neutra com CTA
           para a página completa. */}
@@ -271,7 +271,7 @@ function ChrismedHomePage() {
               “{t.authority.quote}”
             </p>
             <p className="chrismed-sans mt-6 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
-              Dra. Cristiane Alencar
+              Dra. Christiane Alencar
             </p>
           </div>
         </div>
@@ -444,12 +444,12 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'CHRISMED · Medicina privada',
       title: 'Cuidado clínico',
       titleItalic: 'que pertence a você.',
-      lead: 'Consultas com a Dra. Cristiane Alencar em Copacabana, na sua casa ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
+      lead: 'Consultas com a Dra. Christiane Alencar em Copacabana, na sua casa ou por vídeo. Tempo dedicado, escuta atenta e continuidade — sem pressa, sem intermediários.',
       ctaPrimary: 'Agendar consulta',
-      ctaSecondary: 'Conhecer a Dra. Cristiane',
+      ctaSecondary: 'Conhecer a Dra. Christiane',
       oliverHint: 'Falar antes com Oliver',
       modes: ['Teleconsulta', 'Presencial · Copacabana', 'Consulta domiciliar'],
-      portraitAlt: 'Retrato editorial da Dra. Cristiane Alencar',
+      portraitAlt: 'Retrato editorial da Dra. Christiane Alencar',
       portraitEyebrow: 'Autoridade médica',
       portraitRole: 'Medicina privada · Rio de Janeiro',
     },
@@ -528,9 +528,9 @@ const COPY: Record<Lang, Copy> = {
       ],
     },
     authority: {
-      eyebrow: 'Sobre a Dra. Cristiane',
+      eyebrow: 'Sobre a Dra. Christiane',
       title: 'Uma prática construída paciente a paciente.',
-      body: 'A Dra. Cristiane Alencar dedica sua prática à medicina privada com foco em continuidade, escuta e precisão. A trajetória completa — formação, atuação, cooperações e produção científica — é apresentada em página dedicada, publicada somente com material verificado.',
+      body: 'A Dra. Christiane Alencar dedica sua prática à medicina privada com foco em continuidade, escuta e precisão. A trajetória completa — formação, atuação, cooperações e produção científica — é apresentada em página dedicada, publicada somente com material verificado.',
       cta: 'Ler a página completa',
       quote: 'A medicina que pratico começa antes da consulta e continua depois dela.',
     },
@@ -562,7 +562,7 @@ const COPY: Record<Lang, Copy> = {
     close: {
       eyebrow: 'Próximo passo',
       title: 'Reservar um tempo',
-      titleItalic: 'com a Dra. Cristiane.',
+      titleItalic: 'com a Dra. Christiane.',
       lead: 'Consulta privada em Copacabana, na sua casa ou por vídeo. Escolha a modalidade que preserva o seu tempo — o cuidado é o mesmo.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Falar com Oliver',
@@ -573,12 +573,12 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'CHRISMED · Private medicine',
       title: 'Clinical care',
       titleItalic: 'that belongs to you.',
-      lead: 'Consultations with Dr. Cristiane Alencar in Copacabana, at your home, or by video. Dedicated time, attentive listening, and continuity — without haste or intermediaries.',
+      lead: 'Consultations with Dr. Christiane Alencar in Copacabana, at your home, or by video. Dedicated time, attentive listening, and continuity — without haste or intermediaries.',
       ctaPrimary: 'Book a consultation',
       ctaSecondary: 'Meet Dr. Alencar',
       oliverHint: 'Talk to Oliver first',
       modes: ['Telehealth', 'In-person · Copacabana', 'Home visit'],
-      portraitAlt: 'Editorial portrait of Dr. Cristiane Alencar',
+      portraitAlt: 'Editorial portrait of Dr. Christiane Alencar',
       portraitEyebrow: 'Medical authority',
       portraitRole: 'Private medicine · Rio de Janeiro',
     },
@@ -659,7 +659,7 @@ const COPY: Record<Lang, Copy> = {
     authority: {
       eyebrow: 'About Dr. Alencar',
       title: 'A practice built patient by patient.',
-      body: 'Dr. Cristiane Alencar dedicates her practice to private medicine with a focus on continuity, listening and precision. Her full trajectory — training, practice, collaborations and scientific work — is presented on a dedicated page, published only with verified material.',
+      body: 'Dr. Christiane Alencar dedicates her practice to private medicine with a focus on continuity, listening and precision. Her full trajectory — training, practice, collaborations and scientific work — is presented on a dedicated page, published only with verified material.',
       cta: 'Read the full page',
       quote: 'The medicine I practice begins before the consultation and continues after it.',
     },
@@ -702,12 +702,12 @@ const COPY: Record<Lang, Copy> = {
       eyebrow: 'CHRISMED · Medicina privada',
       title: 'Un cuidado clínico',
       titleItalic: 'que le pertenece.',
-      lead: 'Consultas con la Dra. Cristiane Alencar en Copacabana, en su casa o por video. Tiempo dedicado, escucha atenta y continuidad — sin prisa ni intermediarios.',
+      lead: 'Consultas con la Dra. Christiane Alencar en Copacabana, en su casa o por video. Tiempo dedicado, escucha atenta y continuidad — sin prisa ni intermediarios.',
       ctaPrimary: 'Agendar consulta',
       ctaSecondary: 'Conocer a la Dra. Alencar',
       oliverHint: 'Hablar antes con Oliver',
       modes: ['Teleconsulta', 'Presencial · Copacabana', 'Visita a domicilio'],
-      portraitAlt: 'Retrato editorial de la Dra. Cristiane Alencar',
+      portraitAlt: 'Retrato editorial de la Dra. Christiane Alencar',
       portraitEyebrow: 'Autoridad médica',
       portraitRole: 'Medicina privada · Río de Janeiro',
     },
@@ -788,7 +788,7 @@ const COPY: Record<Lang, Copy> = {
     authority: {
       eyebrow: 'Sobre la Dra. Alencar',
       title: 'Una práctica construida paciente a paciente.',
-      body: 'La Dra. Cristiane Alencar dedica su práctica a la medicina privada con foco en continuidad, escucha y precisión. Su trayectoria completa — formación, actuación, cooperaciones y producción científica — se presenta en una página dedicada, publicada solo con material verificado.',
+      body: 'La Dra. Christiane Alencar dedica su práctica a la medicina privada con foco en continuidad, escucha y precisión. Su trayectoria completa — formación, actuación, cooperaciones y producción científica — se presenta en una página dedicada, publicada solo con material verificado.',
       cta: 'Leer la página completa',
       quote: 'La medicina que practico comienza antes de la consulta y continúa después de ella.',
     },
