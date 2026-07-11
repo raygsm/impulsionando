@@ -132,7 +132,7 @@ function ChrismedAmbulatorialPage() {
               className="inline-flex"
               aria-label={t.hero.ctaSecondary}
             >
-              <ChrismedButton size="lg" variant="ghost" asChild={false}>
+              <ChrismedButton size="lg" variant="ghost">
                 {t.hero.ctaSecondary}
               </ChrismedButton>
             </button>
