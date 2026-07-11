@@ -31,7 +31,29 @@ function ChrismedWordmark({ variant = 'default' }: { variant?: 'default' | 'sm' 
 
 export type Lang = 'pt' | 'en' | 'es';
 
-type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string> };
+/** Bandeiras SVG minimalistas para as duas ofertas GMS. */
+function FlagUK({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 30" className={className} aria-hidden>
+      <clipPath id="fuk"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+      <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#fuk)" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="2.4" clipPath="url(#fuk)" />
+      <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="4" />
+    </svg>
+  );
+}
+function FlagES({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 30" className={className} aria-hidden>
+      <path d="M0,0 h60 v30 h-60 z" fill="#AA151B" />
+      <path d="M0,7.5 h60 v15 h-60 z" fill="#F1BF00" />
+    </svg>
+  );
+}
+
+type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; icon?: 'uk' | 'es' };
 type NavGroup = {
   key: string;
   labels: Record<Lang, string>;
@@ -77,12 +99,23 @@ const NAV: NavItem[] = [
       },
       {
         to: '/chrismed/internacional',
-        labels: { pt: 'Atendimento internacional', en: 'International care', es: 'Atención internacional' },
+        labels: { pt: 'GMS · Services for foreigners', en: 'GMS · Services for foreigners', es: 'GMS · Services for foreigners' },
         desc: {
-          pt: 'Pacientes em viagem · PT/EN/ES',
-          en: 'Travelers · PT/EN/ES',
-          es: 'Pacientes en viaje · PT/EN/ES',
+          pt: 'Global Medical Services — English-speaking care',
+          en: 'Global Medical Services — English-speaking care',
+          es: 'Global Medical Services — English-speaking care',
         },
+        icon: 'uk',
+      },
+      {
+        to: '/chrismed/internacional',
+        labels: { pt: 'GMS · Servicios para extranjeros', en: 'GMS · Servicios para extranjeros', es: 'GMS · Servicios para extranjeros' },
+        desc: {
+          pt: 'Global Medical Services — atención en español',
+          en: 'Global Medical Services — atención en español',
+          es: 'Global Medical Services — atención en español',
+        },
+        icon: 'es',
       },
     ],
   },
@@ -165,20 +198,24 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
           <div className="overflow-hidden rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-lg)]">
             {group.children.map((leaf) => (
               <Link
-                key={leaf.to}
+                key={`${leaf.to}-${leaf.labels.pt}`}
                 to={leaf.to}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
+                className="flex items-center gap-3 border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
               >
-                <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
-                  {leaf.labels[lang]}
-                </div>
-                {leaf.desc && (
-                  <div className="mt-0.5 text-[12px] leading-snug text-[var(--chrismed-mist)]">
-                    {leaf.desc[lang]}
+                {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                <div className="min-w-0">
+                  <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">
+                    {leaf.labels[lang]}
                   </div>
-                )}
+                  {leaf.desc && (
+                    <div className="mt-0.5 text-[12px] leading-snug text-[var(--chrismed-mist)]">
+                      {leaf.desc[lang]}
+                    </div>
+                  )}
+                </div>
               </Link>
             ))}
           </div>
@@ -267,10 +304,10 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
           </div>
           <Link
             to="/chrismed/agendar"
-            className="chrismed-sans hidden items-center gap-1.5 rounded-full bg-[var(--chrismed-forest)] px-4 py-2 text-[13px] font-medium text-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-md)] transition-all hover:-translate-y-px hover:bg-[var(--chrismed-forest-deep)] sm:inline-flex"
+            className="chrismed-sans chrismed-cta hidden items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium sm:inline-flex"
           >
-            <CalendarCheck className="h-4 w-4" aria-hidden />
-            {CTA.book[lang]}
+            <CalendarCheck className="h-4 w-4 chrismed-cta-lead" aria-hidden />
+            <span className="chrismed-cta-lead">{CTA.book[lang]}</span>
           </Link>
           <button
             type="button"
@@ -336,17 +373,19 @@ function MobileDrawer({
                 </div>
                 {item.children.map((leaf) => (
                   <Link
-                    key={leaf.to}
+                    key={`${leaf.to}-${leaf.labels.pt}`}
                     to={leaf.to}
                     onClick={onClose}
                     className={cn(
-                      'block rounded-md px-3 py-2.5 text-[15px]',
+                      'flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px]',
                       pathname === leaf.to
                         ? 'bg-[var(--chrismed-bone)] text-[var(--chrismed-forest-deep)]'
                         : 'text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]',
                     )}
                   >
-                    {leaf.labels[lang]}
+                    {leaf.icon === 'uk' && <FlagUK className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    {leaf.icon === 'es' && <FlagES className="h-4 w-8 shrink-0 rounded-sm shadow-sm" />}
+                    <span className="min-w-0 truncate">{leaf.labels[lang]}</span>
                   </Link>
                 ))}
               </div>
@@ -372,10 +411,10 @@ function MobileDrawer({
           <Link
             to="/chrismed/agendar"
             onClick={onClose}
-            className="chrismed-sans flex items-center justify-center gap-2 rounded-full bg-[var(--chrismed-forest)] px-4 py-3 text-[14px] font-medium text-[var(--chrismed-ivory)] shadow-[var(--chrismed-shadow-md)]"
+            className="chrismed-sans chrismed-cta flex items-center justify-center gap-2 rounded-full px-4 py-3 text-[14px] font-medium"
           >
-            <CalendarCheck className="h-4 w-4" aria-hidden />
-            {CTA.book[lang]}
+            <CalendarCheck className="h-4 w-4 chrismed-cta-lead" aria-hidden />
+            <span className="chrismed-cta-lead">{CTA.book[lang]}</span>
           </Link>
           <button
             type="button"
@@ -499,7 +538,7 @@ export function ChrismedShell({
       </a>
       <ChrismedOliverProvider>
         <ChrismedHeader variant={variant} />
-        <main id="chrismed-main" className="pb-28 md:pb-24">
+        <main id="chrismed-main" className="mx-auto w-full max-w-7xl pb-28 md:pb-24">
           {children}
         </main>
         {variant === 'full' && <ChrismedFooter />}
