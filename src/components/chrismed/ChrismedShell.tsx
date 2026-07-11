@@ -552,9 +552,19 @@ export function ChrismedFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-[11px] uppercase tracking-[0.24em] text-white/45 sm:flex-row sm:items-center">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-center text-[11px] uppercase tracking-[0.24em] text-white/45 sm:flex-row sm:text-left">
           <span>© {new Date().getFullYear()} CHRISMED · Todos os direitos reservados</span>
-          <span>Tecnologia Impulsionando</span>
+          <span>
+            Produzido e gerenciado por{' '}
+            <a
+              href="https://impulsionando.com.br"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--chrismed-amber)] hover:text-white transition-colors"
+            >
+              Impulsionando Tecnologia
+            </a>
+          </span>
         </div>
       </div>
     </footer>
