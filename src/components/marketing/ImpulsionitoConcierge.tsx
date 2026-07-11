@@ -353,6 +353,7 @@ export function ImpulsionitoConcierge() {
           onClick={() => {
             setOpen(true);
             setMinimized(false);
+            captureNichoContext();
             trackImpulsionitoOpen("launcher", { path: pathname, ctx: ctx.id });
           }}
           aria-label="Abrir Impulsionito, seu concierge digital"
