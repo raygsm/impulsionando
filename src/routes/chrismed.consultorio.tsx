@@ -23,22 +23,53 @@ function ConsultorioPage() {
   return (
     <ChrismedShell><div className="chrismed-page-mustard">
       <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
-        <div className="container py-20 max-w-5xl">
-          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta presencial</Badge>
-          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">Consulta no consultório, em Copacabana</h1>
-          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
-            Atendimento presencial com a Dra. Cristiane Alencar em consultório próprio, no coração de Copacabana. Agende online, com horários reais e pagamento confirmando o seu lugar.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
-              <Link to="/chrismed/agendar" search={{ modality: 'presencial' }}>Ver horários e agendar</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-[var(--chrismed-sand)]">
-              <Link to="/chrismed/contato">Falar com a recepção</Link>
-            </Button>
+        <div className="container py-16 max-w-6xl grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
+          <div>
+            <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta presencial</Badge>
+            <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05]">Consulta no consultório, em Copacabana</h1>
+            <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-xl">
+              Um espaço leve, discreto e reservado — atendimento exclusivo, sem filas, com a Dra. Cristiane Alencar. Agende online, com horários reais e pagamento confirmando o seu lugar.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
+                <Link to="/chrismed/agendar" search={{ modality: 'presencial' }}>Ver horários e agendar</Link>
+              </Button>
+              <Button asChild variant="outline" className="border-[var(--chrismed-sand)]">
+                <Link to="/chrismed/contato">Falar com a recepção</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="relative">
+            <img
+              src={consultorioExame.url}
+              alt="Sala de exame do consultório CrisMed em Copacabana"
+              className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]"
+              loading="eager"
+            />
+            <div className="absolute -bottom-6 -left-6 hidden md:block w-40 h-52 border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-2">
+              <img src={consultorioRecepcao.url} alt="Recepção do consultório" className="w-full h-full object-cover" loading="lazy" />
+            </div>
           </div>
         </div>
       </section>
+
+      <section className="container py-14 max-w-6xl">
+        <div className="grid md:grid-cols-3 gap-4">
+          <figure className="col-span-2 md:row-span-2">
+            <img src={consultorioRecepcao.url} alt="Ambiente de trabalho da recepção — claro e sereno" className="w-full h-full aspect-[4/3] md:aspect-auto object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
+          </figure>
+          <figure>
+            <img src={consultorioEspera.url} alt="Sala de espera aconchegante do consultório" className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
+          </figure>
+          <figure>
+            <img src={consultorioExame.url} alt="Detalhe da sala clínica" className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
+          </figure>
+        </div>
+        <p className="mt-5 text-sm text-[var(--chrismed-graphite)] italic max-w-2xl">
+          Um consultório propositalmente pequeno — porque não há filas. Cada horário é reservado a um único paciente, com privacidade e tempo integral da Dra. Cristiane.
+        </p>
+      </section>
+
 
       <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div className="space-y-4">
