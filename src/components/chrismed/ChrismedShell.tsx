@@ -329,8 +329,26 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
 
         {/* Ações */}
         <div className="flex items-center justify-end gap-2">
-          <div className="hidden sm:block">
-            <LangSwitcher lang={lang} />
+          {/* Bloco GMS de idiomas — visível como bandeiras em telas < lg. No desktop, o GMS aparece no NAV. */}
+          <div className="hidden items-center gap-1 rounded-full border border-[var(--chrismed-sand)] bg-white/70 px-2 py-1 sm:flex lg:hidden" role="group" aria-label="GMS · idioma">
+            {(['pt', 'en', 'es'] as Lang[]).map((l) => {
+              const Flag = FLAG_MAP[l === 'pt' ? 'br' : l === 'en' ? 'uk' : 'es'];
+              return (
+                <Link
+                  key={l}
+                  to="."
+                  search={(prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never}
+                  aria-label={`Idioma ${l.toUpperCase()}`}
+                  aria-pressed={lang === l}
+                  className={cn(
+                    'rounded-sm p-0.5 transition-opacity',
+                    lang === l ? 'opacity-100 ring-1 ring-[var(--chrismed-forest-deep)]' : 'opacity-60 hover:opacity-100',
+                  )}
+                >
+                  <Flag className="h-3.5 w-6" />
+                </Link>
+              );
+            })}
           </div>
           <Link
             to="/chrismed/agendar"
