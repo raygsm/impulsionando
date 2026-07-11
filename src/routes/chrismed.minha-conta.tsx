@@ -34,12 +34,12 @@ const MOD_ICON = { presencial: MapPin, telemedicina: Video, domiciliar: Home } a
 function MinhaContaPage() {
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-14 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-4 uppercase tracking-[0.18em] text-[10px]">Minha área</Badge>
-          <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 leading-[1.05]">Bem-vindo(a) de volta</h1>
-          <p className="mt-4 text-emerald-900/75 max-w-2xl">Acompanhe suas consultas, pagamentos e mantenha seus dados atualizados.</p>
-          <div className="mt-5 rounded-lg border border-emerald-900/10 bg-white/60 px-4 py-2.5 text-[11px] text-emerald-900/70 flex items-start gap-1.5 max-w-2xl">
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-4 uppercase tracking-[0.18em] text-[10px]">Minha área</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Bem-vindo(a) de volta</h1>
+          <p className="mt-4 text-[var(--chrismed-graphite)] max-w-2xl">Acompanhe suas consultas, pagamentos e mantenha seus dados atualizados.</p>
+          <div className="mt-5 rounded-lg border border-[var(--chrismed-sand)] bg-white/60 px-4 py-2.5 text-[11px] text-[var(--chrismed-graphite)] flex items-start gap-1.5 max-w-2xl">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             Dados exibidos são demonstrativos. Integração com autenticação do paciente e histórico real está pendente Codex.
           </div>
@@ -48,7 +48,7 @@ function MinhaContaPage() {
 
       <section className="container py-10 max-w-5xl">
         <Tabs defaultValue="agendamentos">
-          <TabsList className="bg-emerald-900/5 border border-emerald-900/10">
+          <TabsList className="bg-[var(--chrismed-bone)] border border-[var(--chrismed-sand)]">
             <TabsTrigger value="agendamentos" className="gap-1.5"><CalendarCheck className="h-4 w-4" />Agendamentos</TabsTrigger>
             <TabsTrigger value="pagamentos" className="gap-1.5"><Receipt className="h-4 w-4" />Pagamentos</TabsTrigger>
             <TabsTrigger value="dados" className="gap-1.5"><UserRound className="h-4 w-4" />Meus dados</TabsTrigger>
@@ -61,13 +61,13 @@ function MinhaContaPage() {
             ) : MOCK_APPOINTMENTS.map((a) => {
               const Icon = MOD_ICON[a.modality as keyof typeof MOD_ICON] ?? MapPin;
               return (
-                <article key={a.id} className="rounded-2xl border border-emerald-900/10 bg-white p-5 flex flex-col md:flex-row md:items-center gap-4">
+                <article key={a.id} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 text-emerald-900/70 text-xs">
+                    <div className="flex items-center gap-2 text-[var(--chrismed-graphite)] text-xs">
                       <Icon className="h-3.5 w-3.5" /> {a.modality} · {a.unit}
                     </div>
-                    <h3 className="mt-1 font-serif text-lg text-emerald-950">{a.when}</h3>
-                    <p className="text-sm text-emerald-900/80">{a.doctor} · {a.spec}</p>
+                    <h3 className="mt-1 chrismed-serif text-lg text-[var(--chrismed-ink)]">{a.when}</h3>
+                    <p className="text-sm text-[var(--chrismed-graphite)]">{a.doctor} · {a.spec}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusPill status={a.status} />
@@ -77,7 +77,7 @@ function MinhaContaPage() {
               );
             })}
             <div className="pt-2">
-              <Link to="/chrismed/agendar"><Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">Agendar nova consulta <ArrowRight className="h-4 w-4" /></Button></Link>
+              <Link to="/chrismed/agendar"><Button className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">Agendar nova consulta <ArrowRight className="h-4 w-4" /></Button></Link>
             </div>
           </TabsContent>
 
@@ -86,9 +86,9 @@ function MinhaContaPage() {
             {MOCK_PAYMENTS.length === 0 ? (
               <EmptyState title="Nenhum pagamento registrado" />
             ) : (
-              <div className="rounded-2xl border border-emerald-900/10 bg-white overflow-hidden">
+              <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-emerald-900/5 text-emerald-900/70 text-xs uppercase tracking-wider">
+                  <thead className="bg-[var(--chrismed-bone)] text-[var(--chrismed-graphite)] text-xs uppercase tracking-wider">
                     <tr>
                       <th className="text-left px-4 py-3">Data</th>
                       <th className="text-left px-4 py-3">Descrição</th>
@@ -100,11 +100,11 @@ function MinhaContaPage() {
                   </thead>
                   <tbody>
                     {MOCK_PAYMENTS.map((p) => (
-                      <tr key={p.id} className="border-t border-emerald-900/10">
-                        <td className="px-4 py-3 text-emerald-900/80">{p.date}</td>
-                        <td className="px-4 py-3 text-emerald-950">{p.desc}</td>
-                        <td className="px-4 py-3 text-emerald-900/80">{p.method}</td>
-                        <td className="px-4 py-3 text-right font-medium text-emerald-950">{p.amount}</td>
+                      <tr key={p.id} className="border-t border-[var(--chrismed-sand)]">
+                        <td className="px-4 py-3 text-[var(--chrismed-graphite)]">{p.date}</td>
+                        <td className="px-4 py-3 text-[var(--chrismed-ink)]">{p.desc}</td>
+                        <td className="px-4 py-3 text-[var(--chrismed-graphite)]">{p.method}</td>
+                        <td className="px-4 py-3 text-right font-medium text-[var(--chrismed-ink)]">{p.amount}</td>
                         <td className="px-4 py-3 text-right"><StatusPill status={p.status} /></td>
                         <td className="px-4 py-3 text-right">
                           <Button variant="ghost" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" />Recibo</Button>
@@ -115,7 +115,7 @@ function MinhaContaPage() {
                 </table>
               </div>
             )}
-            <p className="text-[11px] text-emerald-900/55 flex items-start gap-1.5">
+            <p className="text-[11px] text-[var(--chrismed-ink)]/55 flex items-start gap-1.5">
               <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               Recibos e notas fiscais geradas automaticamente após conciliação (pendente Codex).
             </p>
@@ -123,7 +123,7 @@ function MinhaContaPage() {
 
           {/* Dados */}
           <TabsContent value="dados" className="mt-6">
-            <form className="rounded-2xl border border-emerald-900/10 bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-3" onSubmit={(e) => e.preventDefault()}>
+            <form className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 grid grid-cols-1 sm:grid-cols-2 gap-3" onSubmit={(e) => e.preventDefault()}>
               <div className="sm:col-span-2"><Label>Nome completo</Label><Input defaultValue="—" /></div>
               <div><Label>E-mail</Label><Input type="email" defaultValue="—" /></div>
               <div><Label>Telefone</Label><Input defaultValue="—" /></div>
@@ -131,8 +131,8 @@ function MinhaContaPage() {
               <div><Label>Data de nascimento</Label><Input type="date" /></div>
               <div className="sm:col-span-2"><Label>Endereço</Label><Input defaultValue="—" /></div>
               <div className="sm:col-span-2 flex items-center justify-between pt-2">
-                <p className="text-[11px] text-emerald-900/55">Persistência dos dados vinculada ao login do paciente — pendente Codex.</p>
-                <Button type="submit" className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">Salvar alterações</Button>
+                <p className="text-[11px] text-[var(--chrismed-ink)]/55">Persistência dos dados vinculada ao login do paciente — pendente Codex.</p>
+                <Button type="submit" className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">Salvar alterações</Button>
               </div>
             </form>
           </TabsContent>
@@ -144,8 +144,8 @@ function MinhaContaPage() {
 
 function StatusPill({ status }: { status: 'confirmado' | 'aguardando' | 'pago' | 'pendente' | 'cancelado' }) {
   const map: Record<string, string> = {
-    confirmado: 'bg-emerald-900 text-amber-50 border-emerald-900',
-    pago: 'bg-emerald-900 text-amber-50 border-emerald-900',
+    confirmado: 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]',
+    pago: 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]',
     aguardando: 'bg-amber-100 text-amber-900 border-amber-200',
     pendente: 'bg-amber-100 text-amber-900 border-amber-200',
     cancelado: 'bg-red-50 text-red-700 border-red-200',
@@ -155,11 +155,11 @@ function StatusPill({ status }: { status: 'confirmado' | 'aguardando' | 'pago' |
 
 function EmptyState({ title, cta }: { title: string; cta?: boolean }) {
   return (
-    <div className="rounded-2xl border border-dashed border-emerald-900/15 bg-white p-10 text-center">
-      <p className="text-emerald-900/70">{title}</p>
+    <div className="rounded-2xl border border-dashed border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-10 text-center">
+      <p className="text-[var(--chrismed-graphite)]">{title}</p>
       {cta && (
         <Link to="/chrismed/agendar" className="inline-block mt-4">
-          <Button className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">Agendar consulta <ArrowRight className="h-4 w-4" /></Button>
+          <Button className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">Agendar consulta <ArrowRight className="h-4 w-4" /></Button>
         </Link>
       )}
     </div>

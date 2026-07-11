@@ -27,11 +27,11 @@ function CheckoutPage() {
 
   return (
     <ChrismedShell variant="minimal">
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-14 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
-          <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 leading-[1.05]">Pagamento seguro</h1>
-          <p className="mt-4 text-emerald-900/75 max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-4 uppercase tracking-[0.18em] text-[10px]">Checkout</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05]">Pagamento seguro</h1>
+          <p className="mt-4 text-[var(--chrismed-graphite)] max-w-2xl">Concluído em segundos. Você recebe a confirmação no e-mail e no WhatsApp.</p>
         </div>
       </section>
 
@@ -44,26 +44,26 @@ function CheckoutPage() {
           </div>
 
           {method === 'pix' ? (
-            <div className="rounded-2xl border border-emerald-900/10 bg-white p-7 space-y-4">
-              <div className="flex items-start gap-2 text-sm text-emerald-900/80">
-                <ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-800" />
+            <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-7 space-y-4">
+              <div className="flex items-start gap-2 text-sm text-[var(--chrismed-graphite)]">
+                <ShieldCheck className="h-4 w-4 mt-0.5 text-[var(--chrismed-ink)]" />
                 <p>QR Code e código copia-e-cola gerados via Mercado Pago no fluxo de agendamento. Este checkout é um ponto de retorno direto quando o paciente já possui um agendamento pendente.</p>
               </div>
-              <div className="rounded-xl border border-dashed border-emerald-900/15 bg-[#fbf9f4]/50 p-6 text-center">
-                <div className="mx-auto h-40 w-40 rounded-lg bg-emerald-900/5 grid place-items-center">
-                  <QrCode className="h-16 w-16 text-emerald-900/40" />
+              <div className="rounded-xl border border-dashed border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-6 text-center">
+                <div className="mx-auto h-40 w-40 rounded-lg bg-[var(--chrismed-bone)] grid place-items-center">
+                  <QrCode className="h-16 w-16 text-[var(--chrismed-mist)]" />
                 </div>
-                <p className="mt-3 text-xs text-emerald-900/60">QR Code aparece após iniciar o pagamento no fluxo /chrismed/agendar.</p>
+                <p className="mt-3 text-xs text-[var(--chrismed-mist)]">QR Code aparece após iniciar o pagamento no fluxo /chrismed/agendar.</p>
               </div>
               <Link to="/chrismed/agendar" className="block">
-                <Button className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">
+                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5">
                   Iniciar agendamento com PIX <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           ) : (
-            <div className="rounded-2xl border border-emerald-900/10 bg-white p-7 space-y-4 opacity-90">
-              <div className="flex items-start gap-2 text-sm text-emerald-900/80">
+            <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-7 space-y-4 opacity-90">
+              <div className="flex items-start gap-2 text-sm text-[var(--chrismed-graphite)]">
                 <Info className="h-4 w-4 mt-0.5" />
                 <p>Captura de cartão será liberada após conclusão da configuração do provedor (Codex). Interface abaixo é somente visual.</p>
               </div>
@@ -73,7 +73,7 @@ function CheckoutPage() {
                 <div><Label>Validade</Label><Input disabled placeholder="MM/AA" /></div>
                 <div><Label>CVV</Label><Input disabled placeholder="•••" /></div>
               </div>
-              <Button disabled className="w-full bg-emerald-900/60 text-amber-50 gap-1.5 cursor-not-allowed">
+              <Button disabled className="w-full bg-[var(--chrismed-mist)] text-[var(--chrismed-ivory)] gap-1.5 cursor-not-allowed">
                 <Lock className="h-4 w-4" /> Pagamento com cartão — pendente Codex
               </Button>
             </div>
@@ -81,19 +81,19 @@ function CheckoutPage() {
         </div>
 
         {/* Resumo */}
-        <aside className="rounded-2xl border border-emerald-900/10 bg-white p-6 h-fit sticky top-24 space-y-3">
-          <h3 className="font-serif text-lg text-emerald-950">Resumo</h3>
-          <div className="text-sm text-emerald-900/80 space-y-1.5">
+        <aside className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 h-fit sticky top-24 space-y-3">
+          <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)]">Resumo</h3>
+          <div className="text-sm text-[var(--chrismed-graphite)] space-y-1.5">
             <Row label="Consulta" value="—" />
             <Row label="Modalidade" value="—" />
             <Row label="Unidade" value="—" />
             <Row label="Data / horário" value="—" />
           </div>
-          <div className="border-t border-emerald-900/10 pt-3 flex items-baseline justify-between">
-            <span className="text-xs uppercase tracking-wider text-emerald-900/60">Total</span>
-            <span className="font-serif text-2xl text-emerald-950">R$ —</span>
+          <div className="border-t border-[var(--chrismed-sand)] pt-3 flex items-baseline justify-between">
+            <span className="text-xs uppercase tracking-wider text-[var(--chrismed-mist)]">Total</span>
+            <span className="chrismed-serif text-2xl text-[var(--chrismed-ink)]">R$ —</span>
           </div>
-          <p className="text-[11px] text-emerald-900/55 flex items-start gap-1.5">
+          <p className="text-[11px] text-[var(--chrismed-ink)]/55 flex items-start gap-1.5">
             <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             Valores exibidos no fluxo /chrismed/agendar após seleção de especialidade e modalidade.
           </p>
@@ -109,8 +109,8 @@ function CheckoutPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
-      <span className="text-emerald-900/60">{label}</span>
-      <span className="text-emerald-950">{value}</span>
+      <span className="text-[var(--chrismed-mist)]">{label}</span>
+      <span className="text-[var(--chrismed-ink)]">{value}</span>
     </div>
   );
 }
@@ -122,14 +122,14 @@ function MethodButton({ active, onClick, icon, title, hint }: { active: boolean;
       className={
         'flex items-center gap-3 rounded-xl border p-4 text-left transition ' +
         (active
-          ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-          : 'bg-white text-emerald-900 border-emerald-900/15 hover:bg-emerald-900/5')
+          ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
+          : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] border-[var(--chrismed-sand)] hover:bg-[var(--chrismed-bone)]')
       }
     >
-      <div className={active ? 'text-amber-50' : 'text-emerald-900'}>{icon}</div>
+      <div className={active ? 'text-[var(--chrismed-ivory)]' : 'text-[var(--chrismed-ink)]'}>{icon}</div>
       <div>
         <p className="font-medium">{title}</p>
-        <p className={'text-[11px] ' + (active ? 'text-amber-50/80' : 'text-emerald-900/60')}>{hint}</p>
+        <p className={'text-[11px] ' + (active ? 'text-[var(--chrismed-ivory)]/80' : 'text-[var(--chrismed-mist)]')}>{hint}</p>
       </div>
     </button>
   );

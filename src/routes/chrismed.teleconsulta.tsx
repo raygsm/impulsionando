@@ -19,22 +19,22 @@ export const Route = createFileRoute('/chrismed/teleconsulta')({
 function TeleconsultaPage() {
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 hover:bg-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] hover:bg-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">
             Teleconsulta médica
           </Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">
             Consulta por vídeo com a Dra. Cristiane Alencar
           </h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
             Atendimento médico online, com acolhimento clínico e orientação detalhada. Em português, inglês ou espanhol, para você onde estiver.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
+            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
               <Link to="/chrismed/agendar" search={{ modality: 'telemedicina' }}>Ver horários e agendar</Link>
             </Button>
-            <Button asChild variant="outline" className="border-emerald-900/20">
+            <Button asChild variant="outline" className="border-[var(--chrismed-sand)]">
               <Link to="/chrismed/contato">Falar com a equipe</Link>
             </Button>
           </div>
@@ -43,8 +43,8 @@ function TeleconsultaPage() {
 
       <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div>
-          <h2 className="font-serif text-2xl text-emerald-950 flex items-center gap-2"><Video className="h-5 w-5" /> Como funciona</h2>
-          <ol className="mt-5 space-y-3 text-emerald-900/80 list-decimal pl-5">
+          <h2 className="chrismed-serif text-2xl text-[var(--chrismed-ink)] flex items-center gap-2"><Video className="h-5 w-5" /> Como funciona</h2>
+          <ol className="mt-5 space-y-3 text-[var(--chrismed-graphite)] list-decimal pl-5">
             <li>Você escolhe o serviço “Teleconsulta”.</li>
             <li>Vê os horários disponíveis na agenda da Dra. Cristiane.</li>
             <li>Seleciona data e horário e preenche seu cadastro.</li>
@@ -55,29 +55,29 @@ function TeleconsultaPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><Globe2 className="h-4 w-4" /> Idiomas</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Atendimento em português, inglês e espanhol — pacientes brasileiros e estrangeiros.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Globe2 className="h-4 w-4" /> Idiomas</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Atendimento em português, inglês e espanhol — pacientes brasileiros e estrangeiros.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Pagamento obrigatório no ato do agendamento via Mercado Pago. O horário só fica reservado após confirmação do pagamento.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Pagamento obrigatório no ato do agendamento via Mercado Pago. O horário só fica reservado após confirmação do pagamento.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><Mail className="h-4 w-4" /> Confirmação automática</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Você recebe o link da consulta por e-mail e WhatsApp assim que o pagamento for aprovado.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Mail className="h-4 w-4" /> Confirmação automática</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Você recebe o link da consulta por e-mail e WhatsApp assim que o pagamento for aprovado.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Sigilo e LGPD</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Seus dados são tratados conforme a LGPD. Prontuário eletrônico criptografado e acessível apenas pela equipe médica.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Sigilo e LGPD</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Seus dados são tratados conforme a LGPD. Prontuário eletrônico criptografado e acessível apenas pela equipe médica.</p>
           </div>
         </div>
       </section>
 
       <section className="container max-w-5xl pb-20">
-        <div className="rounded-2xl border border-emerald-900/10 bg-emerald-900/5 p-7">
-          <h3 className="font-serif text-xl text-emerald-950 flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Indicado para</h3>
-          <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-emerald-900/80 text-sm">
+        <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-7">
+          <h3 className="chrismed-serif text-xl text-[var(--chrismed-ink)] flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Indicado para</h3>
+          <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-[var(--chrismed-graphite)] text-sm">
             <li>• Avaliação clínica geral</li>
             <li>• Acompanhamento de pacientes crônicos</li>
             <li>• Orientação e interpretação de exames</li>

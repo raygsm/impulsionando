@@ -72,11 +72,11 @@ function DomiciliarPage() {
 
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta domiciliar</Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">A médica vai até você</h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">Consulta domiciliar</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">A médica vai até você</h1>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
             Atendimento domiciliar no Rio de Janeiro. A disponibilidade depende de localização, agenda e confirmação prévia. Após validar seu endereço, você recebe os horários disponíveis e finaliza o agendamento com pagamento online.
           </p>
         </div>
@@ -84,28 +84,28 @@ function DomiciliarPage() {
 
       <section className="container py-16 max-w-5xl grid lg:grid-cols-2 gap-10">
         <div className="space-y-4">
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><MapPin className="h-4 w-4" /> Como confirmamos seu endereço</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Informe CEP, bairro e cidade. Validamos a zona de atendimento e respondemos com a disponibilidade do dia/horário desejado.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><MapPin className="h-4 w-4" /> Como confirmamos seu endereço</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Informe CEP, bairro e cidade. Validamos a zona de atendimento e respondemos com a disponibilidade do dia/horário desejado.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><Home className="h-4 w-4" /> Onde atendemos</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Residências, hotéis, escritórios e empresas. Pacientes brasileiros e estrangeiros.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><Home className="h-4 w-4" /> Onde atendemos</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Residências, hotéis, escritórios e empresas. Pacientes brasileiros e estrangeiros.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento e reserva</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">A reserva do horário só é confirmada após pagamento aprovado via Mercado Pago.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><CreditCard className="h-4 w-4" /> Pagamento e reserva</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">A reserva do horário só é confirmada após pagamento aprovado via Mercado Pago.</p>
           </div>
-          <div className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-            <h3 className="font-serif text-lg text-emerald-950 flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> LGPD</h3>
-            <p className="mt-2 text-emerald-900/80 text-sm">Seus dados são usados exclusivamente para análise da solicitação e contato pela equipe CrisMed.</p>
+          <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+            <h3 className="chrismed-serif text-lg text-[var(--chrismed-ink)] flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> LGPD</h3>
+            <p className="mt-2 text-[var(--chrismed-graphite)] text-sm">Seus dados são usados exclusivamente para análise da solicitação e contato pela equipe CrisMed.</p>
           </div>
         </div>
 
-        <form onSubmit={submit} className="rounded-2xl border border-emerald-900/10 bg-white p-7 space-y-4">
+        <form onSubmit={submit} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-7 space-y-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90">Verificar disponibilidade</div>
-            <h3 className="font-serif text-xl text-emerald-950 mt-1">Solicite seu atendimento domiciliar</h3>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-champagne-deep)]">Verificar disponibilidade</div>
+            <h3 className="chrismed-serif text-xl text-[var(--chrismed-ink)] mt-1">Solicite seu atendimento domiciliar</h3>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -133,14 +133,14 @@ function DomiciliarPage() {
               <Textarea rows={3} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Conte brevemente o motivo do atendimento." />
             </div>
           </div>
-          <label className="flex items-start gap-2 text-xs text-emerald-900/75">
+          <label className="flex items-start gap-2 text-xs text-[var(--chrismed-graphite)]">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
             <span>Autorizo o uso dos meus dados pela CrisMed para retorno comercial e clínico, conforme a LGPD.</span>
           </label>
-          <Button type="submit" disabled={sending} className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50">
+          <Button type="submit" disabled={sending} className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
             {sending ? 'Enviando…' : 'Solicitar disponibilidade'}
           </Button>
-          <p className="text-[11px] text-emerald-900/60">Após confirmação da zona, enviamos os horários e o link de pagamento. <Link to="/chrismed/agendar" search={{ modality: 'domiciliar' }} className="underline">Ver fluxo completo</Link>.</p>
+          <p className="text-[11px] text-[var(--chrismed-mist)]">Após confirmação da zona, enviamos os horários e o link de pagamento. <Link to="/chrismed/agendar" search={{ modality: 'domiciliar' }} className="underline">Ver fluxo completo</Link>.</p>
         </form>
       </section>
     </ChrismedShell>

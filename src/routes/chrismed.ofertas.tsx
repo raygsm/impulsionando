@@ -65,15 +65,15 @@ function OfertasPage() {
 
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-16 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">
             Modalidades de atendimento
           </Badge>
-          <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 leading-[1.05] max-w-3xl">
+          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">
             O atendimento certo, no formato que cabe na sua rotina
           </h1>
-          <p className="mt-5 text-lg text-emerald-900/75 max-w-2xl">
+          <p className="mt-5 text-lg text-[var(--chrismed-graphite)] max-w-2xl">
             Cada modalidade entrega a mesma qualidade clínica, com prontuário eletrônico, prescrição digital e equipe sempre acessível.
           </p>
         </div>
@@ -81,15 +81,15 @@ function OfertasPage() {
 
       <section className="container py-12 max-w-5xl">
         <div className="flex items-center gap-2 justify-center flex-wrap mb-8">
-          <Filter className="h-4 w-4 text-emerald-900/60" />
+          <Filter className="h-4 w-4 text-[var(--chrismed-mist)]" />
           {modalities.map((m) => (
             <button
               key={m}
               onClick={() => setFilter(m)}
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 filter === m
-                  ? 'bg-emerald-900 text-amber-50 border-emerald-900'
-                  : 'bg-white text-emerald-900/80 border-emerald-900/15 hover:border-emerald-900/40'
+                  ? 'bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] border-[var(--chrismed-ink)]'
+                  : 'bg-[var(--chrismed-ivory)] text-[var(--chrismed-graphite)] border-[var(--chrismed-sand)] hover:border-[var(--chrismed-champagne-deep)]'
               }`}
               aria-pressed={filter === m}
             >
@@ -99,30 +99,30 @@ function OfertasPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-emerald-900" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[var(--chrismed-ink)]" /></div>
         ) : (
           <div className="grid md:grid-cols-2 gap-5">
             {filtered.map((o) => {
               const meta = MODALITY_META[o.modality];
               const Icon = meta.icon;
               return (
-                <Card key={o.id} className="border-emerald-900/10 bg-white hover:border-emerald-900/30 hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] transition">
+                <Card key={o.id} className="border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] hover:border-[var(--chrismed-sand)] hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] transition">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="h-12 w-12 rounded-xl bg-emerald-900/5 text-emerald-900 flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-xl bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <Badge variant="outline" className="bg-amber-100/70 text-emerald-950 border-amber-300/60 uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
+                      <Badge variant="outline" className="bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] border-[var(--chrismed-champagne)] uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
                     </div>
-                    <CardTitle className="mt-3 font-serif text-emerald-950">{o.name}</CardTitle>
-                    <CardDescription className="text-emerald-900/70">{o.description}</CardDescription>
+                    <CardTitle className="mt-3 chrismed-serif text-[var(--chrismed-ink)]">{o.name}</CardTitle>
+                    <CardDescription className="text-[var(--chrismed-graphite)]">{o.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="flex items-end justify-between">
                     <div>
-                      <div className="text-2xl font-serif text-emerald-950">{brl(o.price_cents)}</div>
-                      <div className="text-xs text-emerald-900/60">~{o.duration_minutes} min</div>
+                      <div className="text-2xl chrismed-serif text-[var(--chrismed-ink)]">{brl(o.price_cents)}</div>
+                      <div className="text-xs text-[var(--chrismed-mist)]">~{o.duration_minutes} min</div>
                     </div>
-                    <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50 shadow-sm">
+                    <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] shadow-sm">
                       <Link to="/chrismed/agendar" search={{ modality: o.modality }}>Reservar horário</Link>
                     </Button>
                   </CardContent>
@@ -130,7 +130,7 @@ function OfertasPage() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="md:col-span-2 text-center py-12 text-emerald-900/60">
+              <div className="md:col-span-2 text-center py-12 text-[var(--chrismed-mist)]">
                 Nenhuma modalidade ativa nesse filtro no momento.
               </div>
             )}

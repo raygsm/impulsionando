@@ -23,16 +23,16 @@ function ExamesPage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-5xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
-          <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">{t.title}</h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{t.lead}</p>
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">{t.title}</h1>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">{t.lead}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
+            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
               <Link to="/chrismed/agendar">{t.cta1}</Link>
             </Button>
-            <Button asChild variant="outline" className="border-emerald-900/30 text-emerald-900 hover:bg-emerald-900/5">
+            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-bone)]">
               <Link to="/chrismed/contato">{t.cta2}</Link>
             </Button>
           </div>
@@ -43,31 +43,31 @@ function ExamesPage() {
         {t.categories.map((c) => {
           const Icon = CATEGORY_ICONS[c.icon as keyof typeof CATEGORY_ICONS];
           return (
-            <article key={c.title} className="rounded-2xl border border-emerald-900/10 bg-white/70 p-6">
-              <div className="h-11 w-11 rounded-full bg-emerald-900/5 text-emerald-900 flex items-center justify-center">
+            <article key={c.title} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+              <div className="h-11 w-11 rounded-full bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center">
                 <Icon className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 font-serif text-lg text-emerald-950">{c.title}</h3>
-              <p className="mt-2 text-sm text-emerald-900/75 leading-relaxed">{c.body}</p>
+              <h3 className="mt-4 chrismed-serif text-lg text-[var(--chrismed-ink)]">{c.title}</h3>
+              <p className="mt-2 text-sm text-[var(--chrismed-graphite)] leading-relaxed">{c.body}</p>
             </article>
           );
         })}
       </section>
 
-      <section className="border-y border-emerald-900/10 bg-[#f3ede0]/40">
+      <section className="border-y border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]">
         <div className="container py-14 max-w-5xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90">{t.prepEyebrow}</div>
-          <h2 className="font-serif text-3xl text-emerald-950 mt-2">{t.prepTitle}</h2>
+          <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-champagne-deep)]">{t.prepEyebrow}</div>
+          <h2 className="chrismed-serif text-3xl text-[var(--chrismed-ink)] mt-2">{t.prepTitle}</h2>
           <div className="mt-6 grid md:grid-cols-3 gap-5">
             {t.prep.map((p, i) => {
               const Icon = [AlarmClock, ClipboardCheck, FileText][i % 3];
               return (
-                <div key={p.title} className="rounded-2xl border border-emerald-900/10 bg-white p-6">
-                  <div className="flex items-center gap-2 text-emerald-950">
+                <div key={p.title} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
+                  <div className="flex items-center gap-2 text-[var(--chrismed-ink)]">
                     <Icon className="h-4 w-4" />
-                    <h3 className="font-serif text-lg">{p.title}</h3>
+                    <h3 className="chrismed-serif text-lg">{p.title}</h3>
                   </div>
-                  <p className="mt-2 text-sm text-emerald-900/75 leading-relaxed">{p.body}</p>
+                  <p className="mt-2 text-sm text-[var(--chrismed-graphite)] leading-relaxed">{p.body}</p>
                 </div>
               );
             })}
@@ -76,9 +76,9 @@ function ExamesPage() {
       </section>
 
       <section className="container py-16 max-w-5xl">
-        <div className="rounded-2xl border border-emerald-900/10 bg-emerald-900/5 p-7">
-          <h3 className="font-serif text-xl text-emerald-950">{t.disclaimerTitle}</h3>
-          <p className="mt-3 text-sm text-emerald-900/80 leading-relaxed">{t.disclaimerBody}</p>
+        <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-7">
+          <h3 className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{t.disclaimerTitle}</h3>
+          <p className="mt-3 text-sm text-[var(--chrismed-graphite)] leading-relaxed">{t.disclaimerBody}</p>
         </div>
       </section>
     </ChrismedShell>

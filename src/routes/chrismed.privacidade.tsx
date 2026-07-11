@@ -20,18 +20,18 @@ function PrivacidadePage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
-      <section className="border-b border-emerald-900/10 bg-gradient-to-b from-[#fbf9f4] to-[#f3ede0]/40">
+      <section className="border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
         <div className="container py-20 max-w-4xl">
-          <Badge className="bg-emerald-900/5 text-emerald-900 border border-emerald-900/10 mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
-          <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 leading-[1.05] max-w-3xl flex items-start gap-3">
-            <ShieldCheck className="h-9 w-9 mt-2 text-emerald-900 shrink-0" />
+          <Badge className="bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] border border-[var(--chrismed-sand)] mb-5 uppercase tracking-[0.18em] text-[10px]">{t.eyebrow}</Badge>
+          <h1 className="chrismed-serif text-4xl md:text-5xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl flex items-start gap-3">
+            <ShieldCheck className="h-9 w-9 mt-2 text-[var(--chrismed-ink)] shrink-0" />
             <span>{t.title}</span>
           </h1>
-          <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{t.lead}</p>
+          <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">{t.lead}</p>
         </div>
       </section>
 
-      <section className="container py-16 max-w-3xl prose prose-emerald prose-headings:font-serif prose-headings:text-emerald-950 prose-p:text-emerald-900/80">
+      <section className="container py-16 max-w-3xl prose prose-neutral prose-headings:chrismed-serif prose-headings:text-[var(--chrismed-ink)] prose-p:text-[var(--chrismed-graphite)]">
         {(t.sections as ReadonlyArray<{ title: string; paragraphs: readonly string[]; list?: readonly string[] }>).map((s) => (
           <div key={s.title} className="mb-10">
             <h2 className="text-2xl">{s.title}</h2>
@@ -39,20 +39,20 @@ function PrivacidadePage() {
               <p key={i} className="mt-3 leading-relaxed">{p}</p>
             ))}
             {s.list && (
-              <ul className="mt-3 space-y-2 text-emerald-900/80">
+              <ul className="mt-3 space-y-2 text-[var(--chrismed-graphite)]">
                 {s.list.map((it) => (
-                  <li key={it} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />{it}</li>
+                  <li key={it} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--chrismed-champagne-deep)] shrink-0" />{it}</li>
                 ))}
               </ul>
             )}
           </div>
         ))}
 
-        <div className="mt-12 rounded-2xl border border-emerald-900/10 bg-white p-6 text-sm text-emerald-900/80">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90 mb-1">{t.dpoLabel}</div>
+        <div className="mt-12 rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6 text-sm text-[var(--chrismed-graphite)]">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-champagne-deep)] mb-1">{t.dpoLabel}</div>
           <div>{t.dpoBody}</div>
           <div className="mt-3">
-            <Link to="/chrismed/contato" className="underline text-emerald-900 hover:text-emerald-950">{t.dpoLink}</Link>
+            <Link to="/chrismed/contato" className="underline text-[var(--chrismed-ink)] hover:text-[var(--chrismed-ink)]">{t.dpoLink}</Link>
           </div>
         </div>
       </section>
