@@ -3,9 +3,7 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, MapPin, Clock, RefreshCw, CreditCard } from 'lucide-react';
-import consultorioExame from '@/assets/chrismed/consultorio-exame.jpg.asset.json';
-import consultorioRecepcao from '@/assets/chrismed/consultorio-recepcao.jpg.asset.json';
-import consultorioEspera from '@/assets/chrismed/consultorio-espera.jpg.asset.json';
+import consultorioComposite from '@/assets/chrismed/consultorio-composite.jpg.asset.json';
 
 export const Route = createFileRoute('/chrismed/consultorio')({
   head: () => ({
@@ -41,31 +39,17 @@ function ConsultorioPage() {
           </div>
           <div className="relative">
             <img
-              src={consultorioExame.url}
-              alt="Sala de exame do consultório CrisMed em Copacabana"
-              className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]"
+              src={consultorioComposite.url}
+              alt="Consultório CHRISMED em Copacabana — sala de espera reservada e sala clínica"
+              className="w-full object-cover border border-[var(--chrismed-sand)] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]"
               loading="eager"
             />
-            <div className="absolute -bottom-6 -left-6 hidden md:block w-40 h-52 border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-2">
-              <img src={consultorioRecepcao.url} alt="Recepção do consultório" className="w-full h-full object-cover" loading="lazy" />
-            </div>
           </div>
         </div>
       </section>
 
-      <section className="container py-14 max-w-6xl">
-        <div className="grid md:grid-cols-3 gap-4">
-          <figure className="col-span-2 md:row-span-2">
-            <img src={consultorioRecepcao.url} alt="Ambiente de trabalho da recepção — claro e sereno" className="w-full h-full aspect-[4/3] md:aspect-auto object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
-          </figure>
-          <figure>
-            <img src={consultorioEspera.url} alt="Sala de espera aconchegante do consultório" className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
-          </figure>
-          <figure>
-            <img src={consultorioExame.url} alt="Detalhe da sala clínica" className="w-full aspect-[4/5] object-cover border border-[var(--chrismed-sand)]" loading="lazy" />
-          </figure>
-        </div>
-        <p className="mt-5 text-sm text-[var(--chrismed-graphite)] italic max-w-2xl">
+      <section className="container py-10 max-w-6xl">
+        <p className="text-sm text-[var(--chrismed-graphite)] italic max-w-2xl">
           Um consultório propositalmente pequeno — porque não há filas. Cada horário é reservado a um único paciente, com privacidade e tempo integral da Dra. Cristiane.
         </p>
       </section>
