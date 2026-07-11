@@ -276,21 +276,31 @@ export function OliverFab() {
       id="oliver"
       data-oliver-launcher
       aria-label={labels.title}
+      aria-haspopup="dialog"
       onClick={() => {
-        // TODO Onda V8: abrir painel Oliver (chat multilíngue + WA interno).
-        // Por ora, dispara evento custom para observabilidade sem side-effect.
         try {
           window.dispatchEvent(new CustomEvent('chrismed:oliver:open', { detail: { lang } }));
         } catch {
           /* noop */
         }
       }}
-      className="fixed bottom-5 right-5 z-40 group flex items-center gap-3 rounded-full bg-emerald-950 text-amber-50 pl-3 pr-5 py-3 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] hover:bg-emerald-900 transition-all"
+      style={{
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+        right: 'calc(env(safe-area-inset-right, 0px) + 1rem)',
+      }}
+      className="fixed z-40 flex items-center gap-3 rounded-full bg-emerald-950 py-3 pl-3 text-amber-50 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] transition-all hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 min-[380px]:pr-5 pr-3"
     >
-      <span className="h-9 w-9 rounded-full bg-amber-300 text-emerald-950 font-serif text-lg flex items-center justify-center">O</span>
-      <span className="text-left leading-tight">
+      <span
+        aria-hidden
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-300 font-serif text-lg text-emerald-950"
+      >
+        O
+      </span>
+      <span className="hidden text-left leading-tight min-[380px]:block">
         <span className="block text-sm font-medium">{labels.title}</span>
-        <span className="block text-[10px] uppercase tracking-wider text-amber-200/80">{labels.sub}</span>
+        <span className="block text-[10px] uppercase tracking-wider text-amber-200/80">
+          {labels.sub}
+        </span>
       </span>
     </button>
   );
