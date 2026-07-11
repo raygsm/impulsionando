@@ -284,7 +284,7 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
 
   if (variant === 'minimal') {
     return (
-      <header className="sticky top-0 z-30 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
           <Link to="/chrismed" aria-label="CHRISMED — voltar ao início" className="min-w-0 truncate">
             <ChrismedWordmark variant="sm" />
@@ -303,7 +303,8 @@ export function ChrismedHeader({ variant = 'full' }: { variant?: 'full' | 'minim
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur">
+
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 md:px-6 md:py-4 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)]">
         {/* Logo */}
         <Link
@@ -612,7 +613,7 @@ export function ChrismedShell({
       <ChrismedOliverProvider>
         <ChrismedPreloader />
         <ChrismedHeader variant={variant} />
-        <main id="chrismed-main" className="mx-auto w-full max-w-7xl pb-28 md:pb-24">
+        <main id="chrismed-main" className="mx-auto w-full max-w-7xl pt-16 pb-28 md:pt-20 md:pb-24">
           {children}
         </main>
         {variant === 'full' && <ChrismedFooter />}

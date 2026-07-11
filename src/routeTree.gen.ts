@@ -337,6 +337,7 @@ import { Route as ColorsRastreioCodigoRouteImport } from './routes/colors.rastre
 import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
 import { Route as ColorsMinhaContaPerfilRouteImport } from './routes/colors.minha-conta.perfil'
 import { Route as ColorsMinhaContaPedidosRouteImport } from './routes/colors.minha-conta.pedidos'
+import { Route as ChrismedOcupacionalAgendarRouteImport } from './routes/chrismed.ocupacional.agendar'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
 import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
@@ -2592,6 +2593,12 @@ const ColorsMinhaContaPedidosRoute = ColorsMinhaContaPedidosRouteImport.update({
   path: '/pedidos',
   getParentRoute: () => ColorsMinhaContaRoute,
 } as any)
+const ChrismedOcupacionalAgendarRoute =
+  ChrismedOcupacionalAgendarRouteImport.update({
+    id: '/agendar',
+    path: '/agendar',
+    getParentRoute: () => ChrismedOcupacionalRoute,
+  } as any)
 const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   id: '/api/public/version',
   path: '/api/public/version',
@@ -6140,7 +6147,7 @@ export interface FileRoutesByFullPath {
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/minha-conta': typeof ChrismedMinhaContaRoute
-  '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
+  '/chrismed/ocupacional': typeof ChrismedOcupacionalRouteWithChildren
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
@@ -6674,6 +6681,7 @@ export interface FileRoutesByFullPath {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/chrismed/ocupacional/agendar': typeof ChrismedOcupacionalAgendarRoute
   '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
@@ -7033,7 +7041,7 @@ export interface FileRoutesByTo {
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/minha-conta': typeof ChrismedMinhaContaRoute
-  '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
+  '/chrismed/ocupacional': typeof ChrismedOcupacionalRouteWithChildren
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
@@ -7564,6 +7572,7 @@ export interface FileRoutesByTo {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/chrismed/ocupacional/agendar': typeof ChrismedOcupacionalAgendarRoute
   '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
@@ -7939,7 +7948,7 @@ export interface FileRoutesById {
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/medicos': typeof ChrismedMedicosRoute
   '/chrismed/minha-conta': typeof ChrismedMinhaContaRoute
-  '/chrismed/ocupacional': typeof ChrismedOcupacionalRoute
+  '/chrismed/ocupacional': typeof ChrismedOcupacionalRouteWithChildren
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
@@ -8473,6 +8482,7 @@ export interface FileRoutesById {
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
+  '/chrismed/ocupacional/agendar': typeof ChrismedOcupacionalAgendarRoute
   '/colors/minha-conta/pedidos': typeof ColorsMinhaContaPedidosRouteWithChildren
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
@@ -9386,6 +9396,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/chrismed/ocupacional/agendar'
     | '/colors/minha-conta/pedidos'
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
@@ -10276,6 +10287,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/chrismed/ocupacional/agendar'
     | '/colors/minha-conta/pedidos'
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
@@ -11184,6 +11196,7 @@ export interface FileRouteTypes {
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
+    | '/chrismed/ocupacional/agendar'
     | '/colors/minha-conta/pedidos'
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
@@ -13960,6 +13973,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/colors/minha-conta/pedidos'
       preLoaderRoute: typeof ColorsMinhaContaPedidosRouteImport
       parentRoute: typeof ColorsMinhaContaRoute
+    }
+    '/chrismed/ocupacional/agendar': {
+      id: '/chrismed/ocupacional/agendar'
+      path: '/agendar'
+      fullPath: '/chrismed/ocupacional/agendar'
+      preLoaderRoute: typeof ChrismedOcupacionalAgendarRouteImport
+      parentRoute: typeof ChrismedOcupacionalRoute
     }
     '/api/public/version': {
       id: '/api/public/version'
@@ -19709,6 +19729,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ChrismedOcupacionalRouteChildren {
+  ChrismedOcupacionalAgendarRoute: typeof ChrismedOcupacionalAgendarRoute
+}
+
+const ChrismedOcupacionalRouteChildren: ChrismedOcupacionalRouteChildren = {
+  ChrismedOcupacionalAgendarRoute: ChrismedOcupacionalAgendarRoute,
+}
+
+const ChrismedOcupacionalRouteWithChildren =
+  ChrismedOcupacionalRoute._addFileChildren(ChrismedOcupacionalRouteChildren)
+
 interface ChrismedRouteChildren {
   ChrismedAgendarRoute: typeof ChrismedAgendarRoute
   ChrismedAppRoute: typeof ChrismedAppRoute
@@ -19724,7 +19755,7 @@ interface ChrismedRouteChildren {
   ChrismedInternacionalRoute: typeof ChrismedInternacionalRoute
   ChrismedMedicosRoute: typeof ChrismedMedicosRoute
   ChrismedMinhaContaRoute: typeof ChrismedMinhaContaRoute
-  ChrismedOcupacionalRoute: typeof ChrismedOcupacionalRoute
+  ChrismedOcupacionalRoute: typeof ChrismedOcupacionalRouteWithChildren
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
   ChrismedPrivacidadeRoute: typeof ChrismedPrivacidadeRoute
   ChrismedTeleconsultaRoute: typeof ChrismedTeleconsultaRoute
@@ -19746,7 +19777,7 @@ const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedInternacionalRoute: ChrismedInternacionalRoute,
   ChrismedMedicosRoute: ChrismedMedicosRoute,
   ChrismedMinhaContaRoute: ChrismedMinhaContaRoute,
-  ChrismedOcupacionalRoute: ChrismedOcupacionalRoute,
+  ChrismedOcupacionalRoute: ChrismedOcupacionalRouteWithChildren,
   ChrismedOfertasRoute: ChrismedOfertasRoute,
   ChrismedPrivacidadeRoute: ChrismedPrivacidadeRoute,
   ChrismedTeleconsultaRoute: ChrismedTeleconsultaRoute,
