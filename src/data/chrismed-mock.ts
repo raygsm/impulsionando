@@ -50,15 +50,18 @@ export type ChrismedDay = {
   slots: ChrismedSlot[];
 };
 
+/**
+ * CHRISMED opera hoje exclusivamente com a Dra. Christiane Alencar.
+ * Especialidades e médicos parceiros (Cardiologia, Pediatria, Saúde Mental,
+ * Dermatologia, Ginecologia, Ortopedia) NÃO devem aparecer na jornada —
+ * quando/se forem contratados, cada um passa a ter perfil próprio.
+ */
 export const CHRISMED_SPECIALTIES: ChrismedSpecialty[] = [
   { slug: 'gastroenterologia', name: 'Gastroenterologia', short: 'Sistema digestivo, refluxo, endoscopia', icon: 'stethoscope' },
   { slug: 'hepatologia', name: 'Hepatologia', short: 'Fígado, vias biliares e hepatites', icon: 'stethoscope' },
   { slug: 'clinica-medica', name: 'Clínica Médica', short: 'Diagnóstico geral e acompanhamento', icon: 'stethoscope' },
-  { slug: 'medicina-do-trabalho', name: 'Medicina do Trabalho', short: 'ASO e atendimento pericial', icon: 'briefcase' },
-  { slug: 'cardiologia', name: 'Cardiologia', short: 'Saúde do coração e pressão arterial', icon: 'heart' },
-  { slug: 'pediatria', name: 'Pediatria', short: 'Consulta e acompanhamento infantil', icon: 'baby' },
-  { slug: 'saude-mental', name: 'Saúde Mental', short: 'Acolhimento e encaminhamento clínico', icon: 'brain' },
-  { slug: 'medicina-internacional', name: 'Medicina Internacional', short: 'Atendimento em PT/EN/ES para viajantes', icon: 'plane' },
+  { slug: 'medicina-do-trabalho', name: 'Medicina Ocupacional', short: 'ASO presencial e atendimento pericial (laudos)', icon: 'briefcase' },
+  { slug: 'medicina-internacional', name: 'International Medical Care · GMS', short: 'Atendimento em PT · EN · ES para viajantes e consulados', icon: 'plane' },
 ];
 
 export const CHRISMED_UNITS: ChrismedUnit[] = [
@@ -71,32 +74,12 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
   {
     slug: 'dra-cristiane-alencar',
     name: 'Dra. Christiane Alencar',
-    title: 'Gastroenterologia · Hepatologia · Clínica Médica · Medicina Ocupacional',
-    crm: 'CRM/RJ · UFRJ',
-    bio: 'Médica formada pela UFRJ, +30 anos de experiência e +80.000 atendimentos. Atendimento pericial (laudos para Justiça e Previdência) e emissão de ASO na modalidade ocupacional.',
-    specialtySlugs: ['gastroenterologia', 'hepatologia', 'clinica-medica', 'medicina-do-trabalho'],
+    title: 'Gastroenterologia · Hepatologia · Clínica Médica · Medicina Ocupacional · GMS',
+    crm: 'CRM/RJ 52.58575-0',
+    bio: 'Médica formada pela UFRJ, +30 anos de experiência e +80.000 atendimentos. Direção técnica da CHRISMED, atendimento pericial (laudos para Justiça e Previdência) e emissão de ASO presencial.',
+    specialtySlugs: ['gastroenterologia', 'hepatologia', 'clinica-medica', 'medicina-do-trabalho', 'medicina-internacional'],
     modalities: ['presencial', 'telemedicina', 'domiciliar', 'retorno'],
     unitSlugs: ['copacabana', 'telemedicina', 'domiciliar'],
-  },
-  {
-    slug: 'equipe-cardio',
-    name: 'Cardiologia parceira',
-    title: 'Cardiologia · rede de confiança CrisMed',
-    crm: 'Pendente Codex',
-    bio: 'Time cardiológico parceiro para exames, avaliação de risco e acompanhamento contínuo.',
-    specialtySlugs: ['cardiologia'],
-    modalities: ['presencial', 'telemedicina'],
-    unitSlugs: ['copacabana', 'telemedicina'],
-  },
-  {
-    slug: 'pediatria-parceira',
-    name: 'Pediatria parceira',
-    title: 'Pediatria · rede de confiança CrisMed',
-    crm: 'Pendente Codex',
-    bio: 'Encaminhamento pediátrico dentro da rede curada pela Dra. Cristiane Alencar.',
-    specialtySlugs: ['pediatria'],
-    modalities: ['presencial', 'telemedicina'],
-    unitSlugs: ['copacabana', 'telemedicina'],
   },
 ];
 
