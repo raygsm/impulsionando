@@ -830,6 +830,25 @@ const COPY: Record<Lang, Copy> = {
       portraitEyebrow: 'Medical authority',
       portraitRole: 'Private medicine · Rio de Janeiro',
     },
+    stats: [
+      { value: '80,000', suffix: '+', label: 'Patients seen' },
+      { value: '3', suffix: 'decades', label: 'Of clinical practice' },
+      { value: '3', suffix: 'languages', label: 'PT · EN · ES' },
+      { value: '100', suffix: '%', label: 'Discretion · LGPD' },
+    ],
+    gms: {
+      eyebrow: 'GMS · Global Medical Support',
+      title: 'International medical care in Rio de Janeiro.',
+      lead: 'A single clinical point of contact for foreigners, consulates, diplomats and international families. Hospital coordination, multilingual support and continuity when you return home.',
+      cta: 'Discover GMS',
+      languages: ['Português', 'English', 'Español'],
+      audience: [
+        'Foreigners and expatriates living in Rio de Janeiro.',
+        'Consulates, embassies and diplomatic families.',
+        'International executives passing through Brazil.',
+        'Clinical continuity coordinated with physicians abroad.',
+      ],
+    },
     modalities: {
       eyebrow: 'How would you like to be seen',
       title: 'Three modalities designed around your routine.',
