@@ -10,7 +10,7 @@ type Tone = "ivory" | "bone" | "noir" | "forest" | "amber";
  */
 export function ChrismedSection({
   className,
-  tone = "ivory",
+  tone = "forest",
   contained = true,
   children,
   ...rest

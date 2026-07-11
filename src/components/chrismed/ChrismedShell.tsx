@@ -601,7 +601,7 @@ export function ChrismedShell({
   return (
     <div
       data-tenant="chrismed"
-      className="chrismed-brand min-h-dvh bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)]"
+      className="chrismed-brand min-h-dvh bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-ivory)]"
     >
       <a
         href="#chrismed-main"
