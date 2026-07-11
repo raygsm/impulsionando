@@ -3,8 +3,39 @@ import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { MoreContentFab } from '@/components/impulsionando';
-import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
+import { ChrismedOliverPanel } from './ChrismedOliverPanel';
+
+/**
+ * Wordmark tipográfico CHRISMED — fallback oficial V3.F.
+ * Substitui o PNG anterior (que carregava fundo preto embutido) até que
+ * o Codex/marca forneça um asset com fundo transparente aprovado.
+ * Usa exclusivamente tokens --chrismed-* (nada de cores hardcoded).
+ */
+function ChrismedWordmark({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  const cls =
+    size === 'sm'
+      ? 'text-lg tracking-[0.28em]'
+      : 'text-xl md:text-[1.35rem] tracking-[0.32em]';
+  return (
+    <span className="inline-flex items-baseline gap-2 leading-none">
+      <span
+        aria-hidden
+        className={cn(
+          'chrismed-serif font-light text-[var(--chrismed-ink)]',
+          cls,
+        )}
+      >
+        CHRISMED
+      </span>
+      <span
+        aria-hidden
+        className="chrismed-sans text-[9px] uppercase tracking-[0.35em] text-[var(--chrismed-champagne-deep)]"
+      >
+        · MD
+      </span>
+    </span>
+  );
+}
 
 export type Lang = 'pt' | 'en' | 'es';
 
@@ -62,17 +93,9 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CrisMed — Dra. Christiane Alencar">
-          <img
-            src={chrismedLogo.url}
-            alt="CrisMed"
-            className="h-11 w-auto object-contain"
-            width={190}
-            height={44}
-            loading="eager"
-            decoding="async"
-          />
-          <span className="sr-only">CrisMed · Dra. Christiane Alencar</span>
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3" aria-label="CHRISMED — Dra. Christiane Alencar">
+          <ChrismedWordmark />
+          <span className="sr-only">CHRISMED · Dra. Christiane Alencar</span>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
@@ -164,15 +187,7 @@ export function ChrismedFooter() {
     <footer className="border-t border-emerald-900/10 bg-[#f7f4ed] mt-20 py-10">
       <div className="container grid gap-6 md:grid-cols-4 text-sm text-emerald-900/80">
         <div>
-          <img
-            src={chrismedLogo.url}
-            alt="CrisMed"
-            className="h-10 w-auto object-contain"
-            width={170}
-            height={40}
-            loading="lazy"
-            decoding="async"
-          />
+          <ChrismedWordmark size="sm" />
           <p className="mt-3 text-emerald-900/70">{copy[lang]}</p>
         </div>
         <div>
@@ -215,13 +230,24 @@ export function ChrismedFooter() {
 
 export function ChrismedShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="chrismed-brand min-h-screen bg-[#fbf9f4] text-emerald-950">
+    <div
+      data-tenant="chrismed"
+      className="chrismed-brand min-h-screen bg-[#fbf9f4] text-emerald-950"
+    >
+      <a
+        href="#chrismed-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded focus:bg-[var(--chrismed-ink)] focus:px-4 focus:py-2 focus:text-[var(--chrismed-ivory)]"
+      >
+        Pular para o conteúdo principal
+      </a>
       <ChrismedHeader />
-      <main>{children}</main>
+      {/* pb-28 reserva a área do launcher para não cobrir CTAs / rodapé. */}
+      <main id="chrismed-main" className="pb-28 md:pb-24">
+        {children}
+      </main>
       <ChrismedFooter />
       <OliverFab />
-      {/* Onda 2.9 — padrão global. Offset extra p/ não colidir com Oliver FAB. */}
-      <MoreContentFab bg="#0f3b2c" accent="#fef3c7" offsetBottom={96} />
+      <ChrismedOliverPanel />
     </div>
   );
 }
@@ -250,21 +276,31 @@ export function OliverFab() {
       id="oliver"
       data-oliver-launcher
       aria-label={labels.title}
+      aria-haspopup="dialog"
       onClick={() => {
-        // TODO Onda V8: abrir painel Oliver (chat multilíngue + WA interno).
-        // Por ora, dispara evento custom para observabilidade sem side-effect.
         try {
           window.dispatchEvent(new CustomEvent('chrismed:oliver:open', { detail: { lang } }));
         } catch {
           /* noop */
         }
       }}
-      className="fixed bottom-5 right-5 z-40 group flex items-center gap-3 rounded-full bg-emerald-950 text-amber-50 pl-3 pr-5 py-3 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] hover:bg-emerald-900 transition-all"
+      style={{
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+        right: 'calc(env(safe-area-inset-right, 0px) + 1rem)',
+      }}
+      className="fixed z-40 flex items-center gap-3 rounded-full bg-emerald-950 py-3 pl-3 text-amber-50 shadow-[0_18px_40px_-12px_rgba(6,42,32,0.6)] transition-all hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 min-[380px]:pr-5 pr-3"
     >
-      <span className="h-9 w-9 rounded-full bg-amber-300 text-emerald-950 font-serif text-lg flex items-center justify-center">O</span>
-      <span className="text-left leading-tight">
+      <span
+        aria-hidden
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-300 font-serif text-lg text-emerald-950"
+      >
+        O
+      </span>
+      <span className="hidden text-left leading-tight min-[380px]:block">
         <span className="block text-sm font-medium">{labels.title}</span>
-        <span className="block text-[10px] uppercase tracking-wider text-amber-200/80">{labels.sub}</span>
+        <span className="block text-[10px] uppercase tracking-wider text-amber-200/80">
+          {labels.sub}
+        </span>
       </span>
     </button>
   );
