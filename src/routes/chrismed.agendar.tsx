@@ -221,7 +221,7 @@ function ChrismedAgendarPage() {
   const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
 
   return (
-    <ChrismedShell>
+    <ChrismedShell variant="minimal">
       <div className="container py-10 max-w-5xl">
         {/* Progress trail */}
         <div className="mb-8">
