@@ -200,7 +200,47 @@ function ChrismedOcupacionalPage() {
         </div>
       </ChrismedSection>
 
+      {/* Legislação & Atualizações SST — estrutura visual editorial pronta,
+          conteúdo persistido virá via CMS (dependência do Codex). Enquanto
+          a base não estiver validada, apresentamos estado vazio elegante,
+          sem inventar normas, prazos ou multas. */}
+      <ChrismedSection>
+        <div className="mx-auto max-w-4xl text-center">
+          <ChrismedEyebrow>Legislação · SST</ChrismedEyebrow>
+          <ChrismedHeading level={2} className="mt-4">
+            Legislação e atualizações em Medicina Ocupacional
+          </ChrismedHeading>
+          <p className="chrismed-sans mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--chrismed-graphite)]">
+            Publicamos aqui as normas regulamentadoras acompanhadas pela
+            direção técnica da CHRISMED — com resumo, impacto para a empresa,
+            prazo aplicável e fonte oficial. Este painel é atualizado à
+            medida que cada norma é revisada.
+          </p>
 
+          <div className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-2">
+            {['NR-1', 'NR-7', 'NR-9', 'eSocial SST'].map((label) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-dashed border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5"
+                aria-label={`${label} — conteúdo em curadoria`}
+              >
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">Norma</div>
+                <div className="chrismed-serif mt-1 text-xl text-[var(--chrismed-forest-deep)]">{label}</div>
+                <div className="mt-3 h-px bg-[var(--chrismed-sand)]" />
+                <div className="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.22em] text-[var(--chrismed-mist)]">
+                  <span>Resumo · Impacto · Prazo</span>
+                  <span>Em curadoria</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mx-auto mt-6 max-w-2xl text-[12px] text-[var(--chrismed-mist)]">
+            A CHRISMED não publica prazos, multas ou obrigações antes da
+            validação editorial pela direção técnica.
+          </p>
+        </div>
+      </ChrismedSection>
 
       {/* 2 · Seletor de público ────────────────── */}
       <ChrismedSection tone="bone">
