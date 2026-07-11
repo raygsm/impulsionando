@@ -38,6 +38,7 @@ import {
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
+import chrismedFilmAsset from '@/assets/chrismed/home-hero.mp4.asset.json';
 
 const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
 
@@ -216,28 +217,28 @@ function ChrismedHomePage() {
         <ChrismedTrustBar />
       </ChrismedSection>
 
-      {/* ── Vídeo institucional — slot pronto ─ */}
-      <section className="chrismed-page-forest py-16 md:py-24">
+      {/* ── Vídeo institucional ─ */}
+      <section className="chrismed-bleed chrismed-page-forest py-16 md:py-24">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <div className="mb-6 text-center">
             <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">Filme institucional</div>
             <h2 className="chrismed-serif mt-3 text-3xl md:text-5xl text-[var(--chrismed-amber)]">Excelência médica com discrição absoluta</h2>
           </div>
           <div className="relative overflow-hidden rounded-3xl border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]">
-            <div className="aspect-video w-full bg-[radial-gradient(ellipse_at_center,rgba(228,181,74,0.10),transparent_60%)]">
-              <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[var(--chrismed-amber)]/15 ring-1 ring-[var(--chrismed-amber)]/40">
-                  <span className="chrismed-serif text-2xl text-[var(--chrismed-amber)]">▶</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.32em] text-white/60">Em preparação</div>
-                <p className="max-w-md px-6 text-sm text-white/70">
-                  Atendimento personalizado, ambiente elegante, ciência, pesquisa e discrição — em breve nesta composição.
-                </p>
-              </div>
-            </div>
+            <video
+              src={chrismedFilmAsset.url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Filme institucional CHRISMED — atendimento com discrição e excelência"
+              className="aspect-video w-full object-cover"
+            />
           </div>
         </div>
       </section>
+
 
       {/* ─────────── Seção 3 — Modalidades sobre verde institucional ─────────── */}
       <ChrismedSection tone="forest">
