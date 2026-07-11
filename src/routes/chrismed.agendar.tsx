@@ -263,13 +263,18 @@ function ChrismedAgendarPage() {
   const stepIndex = stepOrder.indexOf(step);
   const stepLabels = ['Especialidade','Médico','Modalidade','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
   const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
+  const isTele360 = specialty?.slug === 'teleconsulta-360';
   function goBack() {
     if (stepIndex <= 0) return;
+    // No fluxo Teleconsulta 360°, o paciente não escolhe especialidade/
+    // médico/modalidade/unidade — chão mínimo é 'schedule'.
+    if (isTele360 && stepIndex <= stepOrder.indexOf('schedule')) return;
     // pula 'doctor' quando o médico foi pré-selecionado via querystring
     let prev = stepOrder[stepIndex - 1];
     if (prev === 'doctor' && search.doctor) prev = 'specialty';
     setStep(prev);
   }
+
 
   const stickySummary = [
     doctor?.name,
