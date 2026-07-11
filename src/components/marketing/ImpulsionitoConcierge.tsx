@@ -233,8 +233,10 @@ export function ImpulsionitoConcierge() {
     setLead(readLeadContext());
   }, []);
 
-  // Registra contexto ao visitar rota de nicho (base para "lead").
-  useEffect(() => {
+  // Opt-in: SOMENTE promove a "lead" após interação explícita (abrir concierge
+  // numa rota de nicho ou enviar mensagem). Visita passiva a /nichos/* NÃO
+  // classifica o visitante.
+  const captureNichoContext = useCallback(() => {
     const nicho = nichoSlugFromPath(pathname);
     if (!nicho) return;
     const nextLead: LeadContext = {
@@ -246,6 +248,12 @@ export function ImpulsionitoConcierge() {
     writeLeadContext(nextLead);
     setLead(nextLead);
   }, [pathname]);
+
+  const resetLead = useCallback(() => {
+    clearLeadContext();
+    setLead(null);
+    setMessages([]);
+  }, []);
 
   // Evento global impulsionito:open — mantém compatibilidade.
   useEffect(() => {
