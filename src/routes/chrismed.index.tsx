@@ -84,75 +84,78 @@ function ChrismedHomePage() {
   const t = COPY[lang];
   return (
     <ChrismedShell>
-      {/* ─────────── Seção 1 — Hero ───────────
-          Composição varia conforme haja retrato autorizado (regra V2):
-          - Com retrato: 2 colunas editoriais com cartão-legenda ancorado.
-          - Sem retrato: 1 coluna centralizada com cartucho tipográfico
-            (nunca uma moldura vazia grande no lugar da mídia). */}
-      <ChrismedSection
-        tone="ivory"
-        className={hasPortrait ? 'pt-16 md:pt-24' : 'pt-20 md:pt-32'}
-      >
+      {/* ─────────── Seção 1 — Hero editorial em verde institucional ─────────── */}
+      <ChrismedSection tone="forest" className="relative overflow-hidden pt-24 md:pt-32">
         <div
-          className={
-            hasPortrait
-              ? 'grid gap-12 md:gap-16 lg:grid-cols-[1.15fr_1fr] lg:items-end'
-              : 'mx-auto max-w-3xl text-left'
-          }
-        >
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse at 85% 15%, rgba(228,181,74,0.18), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(228,181,74,0.08), transparent 60%)',
+          }}
+        />
+        <div className="relative grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-20">
           <div>
-            <ChrismedEyebrow>{t.hero.eyebrow}</ChrismedEyebrow>
-            <ChrismedHeading level={1} className="mt-6">
-              {t.hero.title}{' '}
-              <span className="chrismed-serif italic text-[var(--chrismed-graphite)]">
-                {t.hero.titleItalic}
+            <div className="mb-8 inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/40 bg-black/10 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--chrismed-amber)]" />
+              <span className="chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">
+                {t.hero.eyebrow}
               </span>
-            </ChrismedHeading>
-            <p className="chrismed-sans mt-8 max-w-[36ch] text-base leading-relaxed text-[var(--chrismed-graphite)] md:text-lg">
+            </div>
+            <h1 className="chrismed-serif font-light tracking-tight text-[clamp(3rem,7vw,5.75rem)] leading-[0.98] text-[var(--chrismed-amber)]">
+              {t.hero.title}
+              <br />
+              <span className="italic text-white">{t.hero.titleItalic}</span>
+            </h1>
+            <p className="chrismed-sans mt-8 max-w-[42ch] text-lg leading-relaxed text-white/85 md:text-xl">
               {t.hero.lead}
             </p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <Link to="/chrismed/agendar" className="inline-flex">
-                <ChrismedButton size="lg">{t.hero.ctaPrimary}</ChrismedButton>
+                <button
+                  type="button"
+                  className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] transition-all hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
+                >
+                  {t.hero.ctaPrimary}
+                  <span aria-hidden>→</span>
+                </button>
               </Link>
               <Link to="/chrismed/dra-cristiane" className="inline-flex">
-                <ChrismedButton size="lg" variant="ghost">
+                <button
+                  type="button"
+                  className="chrismed-sans inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/50 px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:bg-[var(--chrismed-amber)]/10"
+                >
                   {t.hero.ctaSecondary}
-                </ChrismedButton>
+                </button>
               </Link>
             </div>
 
             <button
               type="button"
               onClick={openOliver}
-              className="chrismed-sans mt-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-champagne-deep)] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne)]"
-              aria-label={t.hero.oliverHint}
+              className="chrismed-sans mt-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]/80 transition-opacity hover:opacity-100"
             >
               <span aria-hidden>—</span> {t.hero.oliverHint}
             </button>
 
-            <ul className="chrismed-sans mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
+            <ul className="chrismed-sans mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/10 pt-6 text-[11px] uppercase tracking-[0.28em] text-white/60">
               {t.hero.modes.map((m) => (
-                <li key={m}>· {m}</li>
+                <li key={m} className="flex items-center gap-2">
+                  <span className="h-px w-4 bg-[var(--chrismed-amber)]/60" />
+                  {m}
+                </li>
               ))}
             </ul>
-
-            {!hasPortrait && (
-              <div className="mt-14 border-t border-[var(--chrismed-sand)] pt-8">
-                <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
-                <p className="chrismed-serif mt-3 text-2xl font-light italic text-[var(--chrismed-ink)]">
-                  {CHRISMED_DOCTOR.shortName}
-                </p>
-                <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
-                  {t.hero.portraitRole}
-                </p>
-              </div>
-            )}
           </div>
 
-          {hasPortrait && (
-            <div className="relative">
+          {/* Coluna do retrato — sempre presente para preservar composição editorial;
+              renderiza fallback silencioso quando o asset ainda não foi publicado. */}
+          <div className="relative">
+            <div className="absolute -inset-6 -z-10 border border-[var(--chrismed-amber)]/30" aria-hidden />
+            <div className="absolute -top-4 -left-4 h-16 w-16 border-l border-t border-[var(--chrismed-amber)]" aria-hidden />
+            <div className="absolute -bottom-4 -right-4 h-16 w-16 border-r border-b border-[var(--chrismed-amber)]" aria-hidden />
+            {hasPortrait ? (
               <ChrismedPortrait
                 src={DRA_CHRISTIANE_PORTRAIT_SRC}
                 ratio="4/5"
@@ -160,34 +163,65 @@ function ChrismedHomePage() {
                 eyebrow={t.hero.portraitEyebrow}
                 className="w-full"
               />
-              <div className="absolute -bottom-6 left-6 right-6 border-l border-[var(--chrismed-champagne)] bg-[var(--chrismed-ivory)] px-6 py-5 md:-bottom-8 md:left-10">
-                <ChrismedEyebrow>{t.hero.portraitEyebrow}</ChrismedEyebrow>
-                <p className="chrismed-serif mt-2 text-xl font-light italic text-[var(--chrismed-ink)]">
-                  {CHRISMED_DOCTOR.shortName}
-                </p>
-                <p className="chrismed-sans mt-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-graphite)]">
-                  {t.hero.portraitRole}
-                </p>
+            ) : (
+              <div className="aspect-[4/5] w-full bg-gradient-to-br from-[var(--chrismed-forest-soft)] to-[var(--chrismed-forest-deep)] p-8 ring-1 ring-[var(--chrismed-amber)]/25">
+                <div className="flex h-full w-full flex-col justify-between">
+                  <div className="chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]/70">
+                    {t.hero.portraitEyebrow}
+                  </div>
+                  <div>
+                    <div className="chrismed-serif text-3xl italic text-[var(--chrismed-amber)] md:text-4xl">
+                      {CHRISMED_DOCTOR.shortName}
+                    </div>
+                    <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.3em] text-white/60">
+                      {t.hero.portraitRole}
+                    </div>
+                    <div className="mt-6 h-px w-16 bg-[var(--chrismed-amber)]" />
+                    <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.28em] text-white/50">
+                      CRM/RJ · 52.58575-0
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </ChrismedSection>
+
+      {/* ─────────── Seção 2 — Prova social institucional (números editoriais) ─────────── */}
+      <section className="chrismed-page-mustard border-y border-[var(--chrismed-mustard-deep)]/20 py-14 md:py-16">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-6">
+            {t.stats.map((s) => (
+              <div key={s.label} className="text-center md:text-left">
+                <div className="chrismed-serif text-4xl font-light leading-none text-[var(--chrismed-forest-deep)] md:text-6xl">
+                  {s.value}
+                  {s.suffix && (
+                    <span className="ml-1 text-2xl text-[var(--chrismed-mustard-deep)] md:text-3xl">
+                      {s.suffix}
+                    </span>
+                  )}
+                </div>
+                <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-forest-deep)]/70">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ─────────── Onda 6 — Prova social institucional discreta ─────────── */}
       <ChrismedSection tone="ivory" className="!py-0">
         <ChrismedTrustBar />
       </ChrismedSection>
 
-      {/* ── Vídeo institucional — slot pronto, sem áudio automático.
-          Enquanto o vídeo oficial não estiver publicado, renderiza uma
-          composição editorial silenciosa (fundo verde, selo, legenda).
-          Trocar para <video poster="..." src="..." /> ao receber o asset. */}
+      {/* ── Vídeo institucional — slot pronto ─ */}
       <section className="chrismed-page-forest py-16 md:py-24">
         <div className="mx-auto max-w-5xl px-4 md:px-6">
           <div className="mb-6 text-center">
             <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]">Filme institucional</div>
-            <h2 className="chrismed-serif mt-3 text-3xl md:text-4xl">Excelência médica com discrição absoluta</h2>
+            <h2 className="chrismed-serif mt-3 text-3xl md:text-5xl text-[var(--chrismed-amber)]">Excelência médica com discrição absoluta</h2>
           </div>
           <div className="relative overflow-hidden rounded-3xl border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]">
             <div className="aspect-video w-full bg-[radial-gradient(ellipse_at_center,rgba(228,181,74,0.10),transparent_60%)]">
@@ -205,40 +239,51 @@ function ChrismedHomePage() {
         </div>
       </section>
 
-      {/* ─────────── Seção 2 — Como deseja ser atendido? ─────────── */}
-      <ChrismedSection tone="bone">
+      {/* ─────────── Seção 3 — Modalidades sobre verde institucional ─────────── */}
+      <ChrismedSection tone="forest">
         <div className="max-w-2xl">
-          <ChrismedEyebrow>{t.modalities.eyebrow}</ChrismedEyebrow>
-          <ChrismedHeading level={2} className="mt-4">
+          <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
+            {t.modalities.eyebrow}
+          </div>
+          <h2 className="chrismed-serif mt-5 text-[clamp(2rem,4.5vw,3.5rem)] font-light leading-[1.05] text-[var(--chrismed-amber)]">
             {t.modalities.title}
-          </ChrismedHeading>
-          <p className="chrismed-sans mt-5 text-base leading-relaxed text-[var(--chrismed-graphite)]">
+          </h2>
+          <p className="chrismed-sans mt-6 text-lg leading-relaxed text-white/85">
             {t.modalities.lead}
           </p>
         </div>
 
-        <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
           {t.modalities.items.map((m, i) => (
-            <div key={m.title} className="flex flex-col">
-              <ChrismedModalityCard
-                index={i + 1}
-                eyebrow={m.eyebrow}
-                title={m.title}
-                description={m.description}
-              />
+            <article
+              key={m.title}
+              className="group relative flex flex-col border border-[var(--chrismed-amber)]/25 bg-black/10 p-8 transition-all hover:border-[var(--chrismed-amber)]/70 hover:bg-black/20"
+            >
+              <div className="chrismed-serif text-6xl font-light leading-none text-[var(--chrismed-amber)]/50 group-hover:text-[var(--chrismed-amber)]">
+                {String(i + 1).padStart(2, '0')}
+              </div>
+              <div className="mt-8 chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber-soft)]/80">
+                {m.eyebrow}
+              </div>
+              <h3 className="chrismed-serif mt-3 text-2xl font-light leading-snug text-white md:text-3xl">
+                {m.title}
+              </h3>
+              <p className="chrismed-sans mt-4 text-sm leading-relaxed text-white/70">
+                {m.description}
+              </p>
               <Link
                 to="/chrismed/agendar"
-                className="chrismed-sans mt-6 inline-flex items-center gap-2 self-start border-b border-[var(--chrismed-sand)] pb-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)]"
+                className="chrismed-sans mt-8 inline-flex items-center gap-2 self-start border-b border-[var(--chrismed-amber)]/40 pb-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:border-[var(--chrismed-amber)]"
               >
                 {t.modalities.cta}
                 <span aria-hidden>→</span>
               </Link>
-            </div>
+            </article>
           ))}
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 3 — Experiência de atendimento ─────────── */}
+      {/* ─────────── Seção 4 — Padrão AA (branco de apoio) ─────────── */}
       <ChrismedSection tone="ivory">
         <div className="grid gap-14 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
           <div>
@@ -249,11 +294,12 @@ function ChrismedHomePage() {
             <p className="chrismed-sans mt-6 text-base leading-relaxed text-[var(--chrismed-graphite)]">
               {t.experience.lead}
             </p>
+            <div className="mt-8 h-px w-24 bg-[var(--chrismed-forest)]" />
           </div>
           <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {t.experience.items.map((item, i) => (
-              <li key={item.title} className="border-t border-[var(--chrismed-sand)] pt-5">
-                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-mist)]">
+              <li key={item.title} className="border-t border-[var(--chrismed-forest)]/20 pt-5">
+                <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-forest)]">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <h3 className="chrismed-serif mt-3 text-xl font-light text-[var(--chrismed-ink)]">
@@ -268,85 +314,150 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 4 — Três grandes vertentes ─────────── */}
-      <ChrismedSection tone="bone">
+      {/* ─────────── Seção 5 — Três vertentes (verde dominante, alternado) ─────────── */}
+      <ChrismedSection tone="forest">
         <div className="max-w-2xl">
-          <ChrismedEyebrow>{t.verticals.eyebrow}</ChrismedEyebrow>
-          <ChrismedHeading level={2} className="mt-4">
+          <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
+            {t.verticals.eyebrow}
+          </div>
+          <h2 className="chrismed-serif mt-5 text-[clamp(2rem,4.5vw,3.5rem)] font-light leading-[1.05] text-[var(--chrismed-amber)]">
             {t.verticals.title}
-          </ChrismedHeading>
+          </h2>
         </div>
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-14 grid gap-6 lg:grid-cols-3">
           {t.verticals.items.map((v) => (
-            <ChrismedCard key={v.title} className="flex flex-col">
-              <ChrismedEyebrow>{v.eyebrow}</ChrismedEyebrow>
-              <h3 className="chrismed-serif mt-4 text-2xl font-light text-[var(--chrismed-ink)]">
+            <article
+              key={v.title}
+              className="flex flex-col border border-[var(--chrismed-amber)]/25 bg-[var(--chrismed-forest-deep)]/40 p-8"
+            >
+              <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
+                {v.eyebrow}
+              </div>
+              <h3 className="chrismed-serif mt-4 text-2xl font-light text-white md:text-3xl">
                 {v.title}
               </h3>
-              <p className="chrismed-sans mt-3 text-sm leading-relaxed text-[var(--chrismed-graphite)]">
+              <div className="mt-4 h-px w-12 bg-[var(--chrismed-amber)]" />
+              <p className="chrismed-sans mt-5 text-sm leading-relaxed text-white/80">
                 {v.context}
               </p>
-              <dl className="chrismed-sans mt-5 space-y-3 text-xs text-[var(--chrismed-graphite)]">
+              <dl className="chrismed-sans mt-6 space-y-4 text-xs text-white/70">
                 <div>
-                  <dt className="uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
+                  <dt className="uppercase tracking-[0.25em] text-[var(--chrismed-amber-soft)]/70">
                     {t.verticals.audience}
                   </dt>
-                  <dd className="mt-1">{v.audience}</dd>
+                  <dd className="mt-1 text-white/85">{v.audience}</dd>
                 </div>
                 <div>
-                  <dt className="uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
+                  <dt className="uppercase tracking-[0.25em] text-[var(--chrismed-amber-soft)]/70">
                     {t.verticals.benefit}
                   </dt>
-                  <dd className="mt-1">{v.benefit}</dd>
+                  <dd className="mt-1 text-white/85">{v.benefit}</dd>
                 </div>
               </dl>
               <div className="mt-auto pt-8">
                 <Link
                   to={v.to}
-                  className="chrismed-sans inline-flex items-center gap-2 border-b border-[var(--chrismed-sand)] pb-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-ink)] transition-colors hover:border-[var(--chrismed-champagne-deep)]"
+                  className="chrismed-sans inline-flex items-center gap-2 border-b border-[var(--chrismed-amber)]/40 pb-1 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:border-[var(--chrismed-amber)]"
                 >
                   {v.cta}
                   <span aria-hidden>→</span>
                 </Link>
               </div>
-            </ChrismedCard>
+            </article>
           ))}
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 5 — Autoridade da Dra. Christiane ───────────
-          Sem números não validados. Sem lista de artigos/congressos até
-          o Codex confirmar. Entregamos versão editorial neutra com CTA
-          para a página completa. */}
-      <ChrismedSection tone="ivory">
+      {/* ─────────── Seção 6 — GMS Spotlight (destaque internacional) ─────────── */}
+      <section className="chrismed-page-mustard py-20 md:py-28">
+        <div className="mx-auto grid max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+          <div>
+            <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-mustard-deep)]">
+              {t.gms.eyebrow}
+            </div>
+            <h2 className="chrismed-serif mt-4 text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.02] text-[var(--chrismed-forest-deep)]">
+              {t.gms.title}
+            </h2>
+            <p className="chrismed-sans mt-6 max-w-[52ch] text-lg leading-relaxed text-[var(--chrismed-forest-deep)]/85">
+              {t.gms.lead}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {t.gms.languages.map((l) => (
+                <span
+                  key={l}
+                  className="chrismed-sans border border-[var(--chrismed-forest-deep)]/25 bg-white/40 px-3 py-1.5 text-[11px] uppercase tracking-[0.28em] text-[var(--chrismed-forest-deep)]"
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
+            <div className="mt-10">
+              <Link to="/chrismed/internacional" className="inline-flex">
+                <button
+                  type="button"
+                  className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-forest-deep)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:bg-[var(--chrismed-forest)]"
+                >
+                  {t.gms.cta}
+                  <span aria-hidden>→</span>
+                </button>
+              </Link>
+            </div>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {t.gms.audience.map((a, i) => (
+              <li
+                key={a}
+                className="border border-[var(--chrismed-forest-deep)]/20 bg-white/50 p-6 backdrop-blur-sm"
+              >
+                <div className="chrismed-serif text-3xl font-light text-[var(--chrismed-mustard-deep)]">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div className="chrismed-sans mt-3 text-sm leading-relaxed text-[var(--chrismed-forest-deep)]">
+                  {a}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ─────────── Seção 7 — Autoridade da Dra. Christiane ─────────── */}
+      <ChrismedSection tone="forest">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:gap-20">
           <div>
-            <ChrismedEyebrow>{t.authority.eyebrow}</ChrismedEyebrow>
-            <ChrismedHeading level={2} className="mt-4">
+            <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
+              {t.authority.eyebrow}
+            </div>
+            <h2 className="chrismed-serif mt-5 text-[clamp(2rem,4.5vw,3.5rem)] font-light leading-[1.05] text-[var(--chrismed-amber)]">
               {t.authority.title}
-            </ChrismedHeading>
-            <p className="chrismed-sans mt-6 max-w-[52ch] text-base leading-relaxed text-[var(--chrismed-graphite)]">
+            </h2>
+            <p className="chrismed-sans mt-6 max-w-[52ch] text-lg leading-relaxed text-white/85">
               {t.authority.body}
             </p>
             <div className="mt-10">
               <Link to="/chrismed/dra-cristiane" className="inline-flex">
-                <ChrismedButton variant="ghost">{t.authority.cta}</ChrismedButton>
+                <button
+                  type="button"
+                  className="chrismed-sans inline-flex items-center gap-3 border border-[var(--chrismed-amber)]/50 px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-amber)] transition-colors hover:bg-[var(--chrismed-amber)]/10"
+                >
+                  {t.authority.cta}
+                </button>
               </Link>
             </div>
           </div>
-          <div className="border-l border-[var(--chrismed-champagne)] pl-8">
-            <p className="chrismed-serif text-2xl font-light italic leading-relaxed text-[var(--chrismed-ink)]">
+          <div className="border-l-2 border-[var(--chrismed-amber)] pl-8">
+            <p className="chrismed-serif text-2xl font-light italic leading-relaxed text-white md:text-3xl">
               “{t.authority.quote}”
             </p>
-            <p className="chrismed-sans mt-6 text-[11px] uppercase tracking-[0.25em] text-[var(--chrismed-mist)]">
-              Dra. Christiane Alencar
+            <p className="chrismed-sans mt-6 text-[11px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]/80">
+              Dra. Christiane Alencar · CRM/RJ 52.58575-0
             </p>
           </div>
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 6 — Como funciona ─────────── */}
-      <ChrismedSection tone="bone">
+      {/* ─────────── Seção 8 — Como funciona ─────────── */}
+      <ChrismedSection tone="ivory">
         <div className="max-w-2xl">
           <ChrismedEyebrow>{t.flow.eyebrow}</ChrismedEyebrow>
           <ChrismedHeading level={2} className="mt-4">
@@ -358,8 +469,8 @@ function ChrismedHomePage() {
         </div>
         <ol className="mt-12 grid gap-8 md:grid-cols-5">
           {t.flow.steps.map((step, i) => (
-            <li key={step} className="border-t border-[var(--chrismed-sand)] pt-4">
-              <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
+            <li key={step} className="border-t-2 border-[var(--chrismed-forest)] pt-4">
+              <span className="chrismed-sans text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-forest)]">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <p className="chrismed-serif mt-3 text-lg font-light leading-snug text-[var(--chrismed-ink)]">
@@ -373,26 +484,28 @@ function ChrismedHomePage() {
         </p>
       </ChrismedSection>
 
-      {/* ─────────── Seção 7 — Oliver ─────────── */}
-      <ChrismedSection tone="ivory">
+      {/* ─────────── Seção 9 — Oliver ─────────── */}
+      <ChrismedSection tone="forest">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <div>
-            <ChrismedEyebrow>{t.oliver.eyebrow}</ChrismedEyebrow>
-            <ChrismedHeading level={2} className="mt-4">
+            <div className="chrismed-sans text-[11px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]">
+              {t.oliver.eyebrow}
+            </div>
+            <h2 className="chrismed-serif mt-5 text-[clamp(2rem,4.5vw,3.5rem)] font-light leading-[1.05] text-[var(--chrismed-amber)]">
               {t.oliver.title}
-            </ChrismedHeading>
-            <p className="chrismed-sans mt-6 text-base leading-relaxed text-[var(--chrismed-graphite)]">
+            </h2>
+            <p className="chrismed-sans mt-6 text-lg leading-relaxed text-white/85">
               {t.oliver.lead}
             </p>
-            <ul className="chrismed-sans mt-6 space-y-3 text-sm text-[var(--chrismed-graphite)]">
+            <ul className="chrismed-sans mt-8 space-y-3 text-sm text-white/80">
               {t.oliver.bullets.map((b) => (
                 <li key={b} className="flex gap-3">
-                  <span aria-hidden className="text-[var(--chrismed-champagne-deep)]">·</span>
+                  <span aria-hidden className="mt-2 h-px w-4 shrink-0 bg-[var(--chrismed-amber)]" />
                   {b}
                 </li>
               ))}
             </ul>
-            <p className="chrismed-sans mt-6 text-xs italic text-[var(--chrismed-mist)]">
+            <p className="chrismed-sans mt-6 text-xs italic text-white/50">
               {t.oliver.disclaimer}
             </p>
           </div>
@@ -406,7 +519,7 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Onda 6 — Escada de relacionamento ─────────── */}
+      {/* ─────────── Escada de relacionamento ─────────── */}
       <ChrismedSection tone="ivory">
         <div className="max-w-2xl">
           <ChrismedEyebrow>Continuidade</ChrismedEyebrow>
@@ -444,34 +557,35 @@ function ChrismedHomePage() {
         </div>
       </ChrismedSection>
 
-      {/* ─────────── Seção 8 — Fechamento ─────────── */}
+      {/* ─────────── Fechamento ─────────── */}
       <ChrismedSection tone="noir">
         <div className="mx-auto max-w-3xl text-center">
-          <ChrismedEyebrow className="text-[var(--chrismed-champagne)]">
+          <ChrismedEyebrow className="text-[var(--chrismed-amber)]">
             {t.close.eyebrow}
           </ChrismedEyebrow>
-          <h2 className="chrismed-serif mt-6 text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.05] text-[var(--chrismed-ivory)]">
+          <h2 className="chrismed-serif mt-6 text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-[1.02] text-[var(--chrismed-ivory)]">
             {t.close.title}{' '}
-            <span className="italic text-[var(--chrismed-champagne)]">
+            <span className="italic text-[var(--chrismed-amber)]">
               {t.close.titleItalic}
             </span>
           </h2>
-          <p className="chrismed-sans mx-auto mt-6 max-w-xl text-base leading-relaxed text-[var(--chrismed-sand)]">
+          <p className="chrismed-sans mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/70">
             {t.close.lead}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link to="/chrismed/agendar" className="inline-flex">
-              <ChrismedButton
-                size="lg"
-                className="bg-[var(--chrismed-champagne)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)]"
+              <button
+                type="button"
+                className="chrismed-sans inline-flex items-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
               >
                 {t.close.ctaPrimary}
-              </ChrismedButton>
+                <span aria-hidden>→</span>
+              </button>
             </Link>
             <button
               type="button"
               onClick={openOliver}
-              className="chrismed-sans inline-flex items-center gap-2 border border-[var(--chrismed-champagne)]/50 px-8 py-4 text-[12px] uppercase tracking-[0.2em] text-[var(--chrismed-champagne)] transition-colors hover:bg-[var(--chrismed-champagne)]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne)]"
+              className="chrismed-sans inline-flex items-center gap-2 border border-[var(--chrismed-amber)]/50 px-8 py-4 text-[12px] uppercase tracking-[0.2em] text-[var(--chrismed-amber)] transition-colors hover:bg-[var(--chrismed-amber)]/10"
             >
               {t.close.ctaSecondary}
             </button>
