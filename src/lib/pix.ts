@@ -1,17 +1,23 @@
-// PIX BR Code (EMV) — builder + constantes do beneficiário (Impulsionando / CHRISMED).
+// PIX BR Code (EMV) — builder + constantes dos beneficiários (Impulsionando / CHRISMED).
 // Padrão Bacen / EMV MPM: campos TLV (ID 2 dígitos + tamanho 2 dígitos + valor).
 //
-// NOTA IMPORTANTE (CHRISMED): as constantes abaixo refletem o beneficiário atual
-// (Impulsionando Tecnologia LTDA). Para trocar o recebedor para a CHRISMED,
-// substitua PIX_KEY / PIX_KEY_PLAIN / PIX_RECEBEDOR / PIX_RECEBEDOR_SHORT pelo
-// CNPJ e razão social da clínica. O restante do fluxo (QR + copia-e-cola)
-// continua funcionando sem outras mudanças.
+// Beneficiários registrados:
+// - IMPULSIONANDO: Impulsionando Brasil Agencia de Marketing LTDA - ME · CNPJ 54.295.500/0001-27
+// - CHRISMED:     CSA Assessoria Consultoria Medica LTDA - ME         · CNPJ 42.625.058/0001-70
 
+// Default (core Impulsionando)
 export const PIX_KEY = '54.295.500/0001-27';
 export const PIX_KEY_PLAIN = '54295500000127';
 export const PIX_RECEBEDOR = 'Impulsionando Brasil Agencia de Marketing LTDA - ME';
 export const PIX_RECEBEDOR_SHORT = 'IMPULSIONANDO BRASIL'; // <= 25 chars ASCII
 export const PIX_CIDADE = 'RIO DE JANEIRO'; // <= 15 chars ASCII
+
+// Tenant CHRISMED (clínica)
+export const PIX_CHRISMED_KEY = '42.625.058/0001-70';
+export const PIX_CHRISMED_KEY_PLAIN = '42625058000170';
+export const PIX_CHRISMED_RECEBEDOR = 'CSA Assessoria Consultoria Medica LTDA - ME';
+export const PIX_CHRISMED_RECEBEDOR_SHORT = 'CSA CHRISMED'; // <= 25 chars ASCII
+export const PIX_CHRISMED_CIDADE = 'RIO DE JANEIRO';
 
 function tlv(id: string, value: string): string {
   const len = value.length.toString().padStart(2, '0');
