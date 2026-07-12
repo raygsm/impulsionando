@@ -9,8 +9,8 @@
 
 export const PIX_KEY = '54.295.500/0001-27';
 export const PIX_KEY_PLAIN = '54295500000127';
-export const PIX_RECEBEDOR = 'Impulsionando Tecnologia LTDA';
-export const PIX_RECEBEDOR_SHORT = 'IMPULSIONANDO TEC'; // <= 25 chars ASCII
+export const PIX_RECEBEDOR = 'Impulsionando Brasil Agencia de Marketing LTDA - ME';
+export const PIX_RECEBEDOR_SHORT = 'IMPULSIONANDO BRASIL'; // <= 25 chars ASCII
 export const PIX_CIDADE = 'RIO DE JANEIRO'; // <= 15 chars ASCII
 
 function tlv(id: string, value: string): string {
