@@ -170,6 +170,38 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
                 }
               }
 
+              // Dispara régua de recuperação de carrinho no N8N para pagamentos não concluídos
+              if (internal === "rejected" || internal === "canceled") {
+                try {
+                  const { dispatchN8nSigned } = await import("@/lib/n8n-dispatch.server");
+                  const meta = p?.metadata ?? {};
+                  const email = p?.payer?.email ?? meta?.email ?? null;
+                  const phone = p?.payer?.phone?.number ?? meta?.phone ?? null;
+                  const plan = meta?.plan_id ?? meta?.plano_id ?? meta?.plan ?? null;
+                  const recoverUrl = meta?.recover_url ?? meta?.checkout_url ?? null;
+                  if (email || phone) {
+                    const res = await dispatchN8nSigned("checkout-abandoned", {
+                      event: "checkout.abandoned",
+                      mp_payment_id: String(resourceId),
+                      status: internal,
+                      amount: Number(p?.transaction_amount ?? 0),
+                      currency: p?.currency_id ?? "BRL",
+                      email, phone, plan, recoverUrl,
+                      status_detail: p?.status_detail ?? null,
+                      metadata: meta,
+                    });
+                    if (!res.ok) {
+                      await logRuntime("warn", "N8N checkout-abandoned falhou", {
+                        mp_payment_id: String(resourceId), status: res.status, error: res.error,
+                      });
+                    }
+                  }
+                } catch (dispErr: any) {
+                  await logRuntime("warn", "erro ao disparar N8N recovery", {
+                    mp_payment_id: String(resourceId), message: dispErr?.message,
+                  });
+                }
+              }
             }
           }
 
