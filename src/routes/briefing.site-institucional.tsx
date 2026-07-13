@@ -92,9 +92,14 @@ function BriefingSite() {
               O time Impulsionando inicia a produção do seu site em até 1 dia útil.
               Você receberá o rascunho navegável no seu subdomínio em até 5 dias.
             </p>
-            <Button asChild className="mt-6 w-full">
-              <Link to="/">Voltar para a home</Link>
-            </Button>
+            <div className="mt-6 grid gap-2">
+              <Button asChild className="w-full">
+                <Link to="/meu-projeto">Acompanhar meu projeto</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/">Voltar para a home</Link>
+              </Button>
+            </div>
           </Card>
         </main>
         <PublicFooter />
