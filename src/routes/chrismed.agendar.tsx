@@ -445,7 +445,14 @@ function ChrismedAgendarPage() {
             ) : (
               <div className="mt-8 grid md:grid-cols-2 gap-4">
                 {doctorsForSpecialty.map((d) => (
-                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('unit'); }}
+                  <button key={d.slug} type="button" onClick={() => {
+                    setDoctor(d);
+                    // Presencial só existe em Copacabana — auto-seleciona a unidade e pula
+                    // direto para a agenda, evitando redundância com a modalidade escolhida antes.
+                    const autoUnit = CHRISMED_UNITS.find((u) => u.slug === 'copacabana');
+                    if (autoUnit) setUnit(autoUnit);
+                    setStep('schedule');
+                  }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{d.name}</div>
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mt-1">{d.title}</div>
