@@ -16,8 +16,8 @@ function validate(input: unknown): OliverInput {
   const msgs = Array.isArray(raw.messages) ? raw.messages : [];
   const messages: OliverMessage[] = msgs
     .filter((m): m is Record<string, unknown> => !!m && typeof m === 'object')
-    .map((m) => ({
-      role: m.role === 'assistant' ? 'assistant' : 'user',
+    .map((m): OliverMessage => ({
+      role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
       content: String(m.content ?? '').slice(0, 4000),
     }))
     .filter((m) => m.content.trim().length > 0)
