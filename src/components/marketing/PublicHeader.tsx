@@ -526,7 +526,7 @@ export function PublicHeader() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
         <Link
           to="/"
-          className="flex items-center shrink-0 [&_img]:!h-14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+          className="flex items-center shrink-0 [&_img]:!h-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
           aria-label="Impulsionando — página inicial"
         >
           <LogoImpulsionando variant="light" size="lg" asLink={false} />
