@@ -686,19 +686,80 @@ function ChrismedAgendarPage() {
           </section>
         )}
 
-        {/* STEP 9: Sucesso */}
+        {/* STEP 9: Sucesso — resumo completo do agendamento + próximos passos */}
         {step === 'done' && (
-          <section aria-labelledby="s9" className="max-w-xl mx-auto text-center">
-            <div className="mx-auto h-16 w-16 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] flex items-center justify-center mb-4">
-              <CheckCircle2 className="h-9 w-9" />
+          <section aria-labelledby="s9" className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-9 w-9" />
+              </div>
+              <h2 id="s9" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">
+                Agendamento confirmado
+              </h2>
+              <p className="mt-3 text-[var(--chrismed-graphite)]">
+                Pagamento aprovado e horário reservado em seu nome. Um resumo com todas as instruções foi enviado
+                para <strong>{patient.email || 'seu e-mail'}</strong>.
+              </p>
             </div>
-            <h2 id="s9" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Pagamento confirmado</h2>
-            <p className="mt-3 text-[var(--chrismed-graphite)]">
-              Recebemos seu pagamento. A persistência definitiva do agendamento, o envio de e-mail/WhatsApp e o link de teleconsulta dependem do webhook idempotente (<strong>Pendente Codex</strong>).
-            </p>
+
+            <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
+              <CardHeader>
+                <CardTitle className="chrismed-serif text-xl">Resumo da sua consulta</CardTitle>
+                <CardDescription>Guarde estes dados. Você também os recebe por e-mail e WhatsApp.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <Row label="Paciente" value={`${patient.first_name} ${patient.last_name}`.trim() || '—'} />
+                <Row label="Modalidade" value={modality ? MODALITY_META[modality].label : '—'} />
+                <Row
+                  label="Especialidade"
+                  value={isCare360 ? `Atendimento 360° — ${CARE_360_LABEL}` : specialty?.name ?? '—'}
+                />
+                <Row label="Médico(a)" value={doctor?.name ?? '—'} />
+                <Row label="Unidade" value={unit?.name ?? '—'} />
+                <Row label="Data" value={selectedDayIso ?? '—'} />
+                <Row label="Horário" value={selectedTime ?? '—'} />
+                {currentOffering && (
+                  <Row
+                    label="Valor pago"
+                    value={
+                      currentOffering.price_cents === 0
+                        ? 'Cortesia'
+                        : `R$ ${(currentOffering.price_cents / 100).toFixed(2).replace('.', ',')}`
+                    }
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="mt-4 border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]">
+              <CardHeader>
+                <CardTitle className="chrismed-serif text-lg">Próximos passos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-[var(--chrismed-graphite)]">
+                {modality === 'telemedicina' && (
+                  <p>1. Você receberá o <strong>link da teleconsulta</strong> por e-mail e WhatsApp até 30 min antes do horário.</p>
+                )}
+                {modality === 'presencial' && (
+                  <p>1. Chegue com <strong>15 min de antecedência</strong> em {unit?.address || 'nosso consultório em Copacabana'}. Traga documento com foto e exames anteriores.</p>
+                )}
+                {modality === 'domiciliar' && (
+                  <p>1. A equipe entrará em contato para confirmar o <strong>endereço e logística</strong> da visita domiciliar em até 4 horas úteis.</p>
+                )}
+                <p>2. Em caso de imprevisto, você pode <strong>remarcar sem custo</strong> com mais de 24h de antecedência.</p>
+                <p>3. Precisa preparar algum exame ou jejum? Fale com o Oliver para receber a orientação específica da sua consulta.</p>
+              </CardContent>
+            </Card>
+
             <div className="mt-6 flex gap-3 justify-center flex-wrap">
-              <Button className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" onClick={() => window.location.reload()}>Agendar outra</Button>
-              <Button variant="outline" className="border-[var(--chrismed-sand)]" onClick={openOliver}>Falar com Oliver</Button>
+              <Button
+                className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
+                onClick={() => window.location.reload()}
+              >
+                Agendar outra consulta
+              </Button>
+              <Button variant="outline" className="border-[var(--chrismed-sand)]" onClick={openOliver}>
+                Falar com Oliver
+              </Button>
             </div>
           </section>
         )}
