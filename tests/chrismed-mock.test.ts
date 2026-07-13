@@ -4,6 +4,7 @@ import {
   getChrismedOfficialTimes,
   type ChrismedModality,
 } from './chrismed-mock';
+} from '../src/data/chrismed-mock';
 
 const monday = new Date('2026-07-13T12:00:00');
 
