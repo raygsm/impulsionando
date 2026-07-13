@@ -178,6 +178,10 @@ function CheckoutPlanPage() {
       return next;
     });
 
+  /** Ciência obrigatória: cliente confirma que leu e aceita a cobrança de setup + 1ª mensalidade. */
+  const [consent, setConsent] = useState(false);
+
+
   // Loading state — plano ainda carregando
   if (planLoading) {
     return <CheckoutSkeleton />;
@@ -321,6 +325,15 @@ function CheckoutPlanPage() {
           </CardContent>
         </Card>
 
+        {/* Ciência da cobrança — SETUP + 1ª MENSALIDADE */}
+        <ConsentBox
+          checked={consent}
+          onChange={setConsent}
+          setupCents={cart?.setupCents ?? plan.price_cents}
+          firstMonthCents={cart?.monthlyCents ?? plan.price_cents}
+          recurringCents={cart?.monthlyCents ?? plan.price_cents}
+        />
+
         {/* Pagamento */}
         <Card>
           <CardHeader className="pb-3">
@@ -347,7 +360,7 @@ function CheckoutPlanPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="pix" className="mt-4">
-                <PixForm planId={plan.id} userEmail={session.email} createPix={createPix} getStatus={getStatus} />
+                <PixForm planId={plan.id} userEmail={session.email} createPix={createPix} getStatus={getStatus} consent={consent} />
               </TabsContent>
               <TabsContent value="card" className="mt-4">
                 <CardForm
@@ -356,6 +369,7 @@ function CheckoutPlanPage() {
                   mpReady={mpReady}
                   userEmail={session.email}
                   createCard={createCard}
+                  consent={consent}
                 />
               </TabsContent>
               <TabsContent value="boleto" className="mt-4">
@@ -628,47 +642,53 @@ function OrderSummary({
           </div>
         )}
 
-        {/* Totais — apenas o que ENTRA na cobrança do Mercado Pago */}
-        <div className="space-y-1.5 pt-1">
-          {usingCart && cart!.setupCents > 0 && (
-            <Row label="Setup (1ª cobrança)" value={brl(cart!.setupCents)} />
-          )}
-          <Row
-            label={usingCart ? "Mensalidade recorrente" : "Total"}
-            value={brl(summaryPreview.recurringMonthlyCents)}
-          />
-          {usingCart && cart!.billing === "annual" && (
-            <Row
-              label="Economia anual"
-              value={`− ${brl(cart!.monthlyCents * 2)}`}
-              highlight
-            />
-          )}
-        </div>
+        {/* Totais — sempre mostrar SETUP + PRIMEIRA MENSALIDADE */}
+        {(() => {
+          const setupCents = usingCart ? cart!.setupCents : plan.price_cents;
+          const firstMonthCents = usingCart ? cart!.monthlyCents : plan.price_cents;
+          const nowCents = setupCents + firstMonthCents;
+          return (
+            <>
+              <div className="space-y-1.5 pt-1">
+                <Row label="Setup (implantação)" value={brl(setupCents)} />
+                <Row label="1ª mensalidade" value={brl(firstMonthCents)} />
+                <Row
+                  label="Mensalidades seguintes"
+                  value={`${brl(summaryPreview.recurringMonthlyCents)}/mês`}
+                />
+                {usingCart && cart!.billing === "annual" && (
+                  <Row
+                    label="Economia anual"
+                    value={`− ${brl(cart!.monthlyCents * 2)}`}
+                    highlight
+                  />
+                )}
+              </div>
 
-        <div className="pt-3 border-t border-border">
-          <div className="flex items-end justify-between gap-2">
-            <span className="text-xs text-muted-foreground">
-              {usingCart && cart!.billing === "annual" ? "Total do 1º ciclo (anual)" : "Cobrança agora"}
-            </span>
-            <span className="text-lg font-bold text-primary">
-              {brl(summaryPreview.firstChargeCents)}
-            </span>
-          </div>
-          {usingCart && cart!.billing !== "annual" && (
-            <p className="text-[10px] text-muted-foreground mt-1 leading-snug">
-              Ciclo inicial obrigatório de {summaryPreview.cycleMonths} meses.
-              Depois: <b>{brl(summaryPreview.recurringMonthlyCents)}/mês</b> sem fidelidade.
-            </p>
-          )}
-          {interestedBumps.length > 0 && (
-            <p className="text-[10px] text-primary mt-1 leading-snug inline-flex items-start gap-1">
-              <Info className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
-              Os complementos marcados <strong>não entram nesta cobrança</strong> —
-              eles são registrados como interesse para inclusão posterior.
-            </p>
-          )}
-        </div>
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-end justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Cobrança agora (setup + 1ª mensalidade)
+                  </span>
+                  <span className="text-lg font-bold text-primary">{brl(nowCents)}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1 leading-snug">
+                  Após a ativação: <b>{brl(summaryPreview.recurringMonthlyCents)}/mês</b>
+                  {usingCart && cart!.billing !== "annual"
+                    ? ` · ciclo inicial de ${summaryPreview.cycleMonths} meses, sem fidelidade depois.`
+                    : "."}
+                </p>
+                {interestedBumps.length > 0 && (
+                  <p className="text-[10px] text-primary mt-1 leading-snug inline-flex items-start gap-1">
+                    <Info className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
+                    Os complementos marcados <strong>não entram nesta cobrança</strong> —
+                    eles são registrados como interesse para inclusão posterior.
+                  </p>
+                )}
+              </div>
+            </>
+          );
+        })()}
 
 
         <p className="text-[10px] text-muted-foreground flex items-center gap-1 pt-1">
@@ -792,7 +812,7 @@ function CheckoutSkeleton() {
 
 /* ---------------- Payment forms (lógica preservada) ---------------- */
 
-function PixForm({ planId, userEmail, createPix, getStatus }: any) {
+function PixForm({ planId, userEmail, createPix, getStatus, consent }: any) {
   const [loading, setLoading] = useState(false);
   const [doc, setDoc] = useState("");
   const [pix, setPix] = useState<any>(null);
@@ -812,6 +832,10 @@ function PixForm({ planId, userEmail, createPix, getStatus }: any) {
   }, [pix?.id]);
 
   async function pay() {
+    if (!consent) {
+      toast.error("Confirme que leu e aceita a cobrança de setup + 1ª mensalidade.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await createPix({
@@ -903,7 +927,7 @@ function PixForm({ planId, userEmail, createPix, getStatus }: any) {
       </div>
       <Button
         onClick={pay}
-        disabled={loading}
+        disabled={loading || !consent}
         size="lg"
         className="w-full min-h-12 text-base font-semibold"
       >
@@ -920,7 +944,7 @@ function PixForm({ planId, userEmail, createPix, getStatus }: any) {
   );
 }
 
-function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
+function CardForm({ planId, publicKey, mpReady, userEmail, createCard, consent }: any) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<{ status: string; detail?: string } | null>(null);
   const [form, setForm] = useState({
@@ -931,6 +955,10 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
   });
 
   async function pay() {
+    if (!consent) {
+      toast.error("Confirme que leu e aceita a cobrança de setup + 1ª mensalidade.");
+      return;
+    }
     setLoading(true);
     try {
       if (!mpReady || !window.MercadoPago) {
@@ -1055,7 +1083,7 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
       <div className="col-span-2 space-y-2 mt-2">
         <Button
           onClick={pay}
-          disabled={loading}
+          disabled={loading || !consent}
           size="lg"
           className="w-full min-h-12 text-base font-semibold"
         >
@@ -1070,5 +1098,84 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
         </p>
       </div>
     </div>
+  );
+}
+
+/* ---------------- Ciência da cobrança (obrigatório) ---------------- */
+
+function ConsentBox({
+  checked,
+  onChange,
+  setupCents,
+  firstMonthCents,
+  recurringCents,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  setupCents: number;
+  firstMonthCents: number;
+  recurringCents: number;
+}) {
+  const total = setupCents + firstMonthCents;
+  return (
+    <Card className={cn("border-2 transition-colors", checked ? "border-primary/60 bg-primary/[0.04]" : "border-amber-400/70 bg-amber-50/40 dark:bg-amber-950/10")}>
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start gap-2">
+          <Info className={cn("w-4 h-4 mt-0.5 shrink-0", checked ? "text-primary" : "text-amber-600")} aria-hidden="true" />
+          <div className="text-sm">
+            <p className="font-semibold">
+              Confirme o que será cobrado agora
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Esta contratação sempre inclui <strong>duas cobranças na ativação</strong>:
+              a taxa de <strong>setup (implantação)</strong> e a <strong>1ª mensalidade</strong>.
+              As mensalidades seguintes são recorrentes.
+            </p>
+          </div>
+        </div>
+
+        <ul className="rounded-md border border-border bg-background/60 divide-y divide-border text-xs">
+          <li className="flex items-center justify-between px-3 py-2">
+            <span className="text-muted-foreground">Setup (implantação)</span>
+            <span className="font-semibold">{brl(setupCents)}</span>
+          </li>
+          <li className="flex items-center justify-between px-3 py-2">
+            <span className="text-muted-foreground">1ª mensalidade</span>
+            <span className="font-semibold">{brl(firstMonthCents)}</span>
+          </li>
+          <li className="flex items-center justify-between px-3 py-2 bg-primary/5">
+            <span className="font-medium">Total cobrado agora</span>
+            <span className="font-bold text-primary">{brl(total)}</span>
+          </li>
+          <li className="flex items-center justify-between px-3 py-2">
+            <span className="text-muted-foreground">Mensalidades seguintes</span>
+            <span className="font-medium">{brl(recurringCents)}/mês</span>
+          </li>
+        </ul>
+
+        <label
+          htmlFor="checkout-consent"
+          className={cn(
+            "flex items-start gap-2 rounded-md border p-3 cursor-pointer transition-colors",
+            checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40",
+          )}
+        >
+          <input
+            id="checkout-consent"
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => onChange(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-2 focus:ring-primary"
+            aria-describedby="checkout-consent-desc"
+          />
+          <span id="checkout-consent-desc" className="text-xs leading-snug">
+            <strong>Li e concordo</strong> que, ao confirmar o pagamento, serão cobrados
+            agora <strong>{brl(setupCents)} de setup</strong> + <strong>{brl(firstMonthCents)} da 1ª mensalidade</strong>
+            {" "}(total <strong>{brl(total)}</strong>), e que as próximas mensalidades de
+            {" "}<strong>{brl(recurringCents)}</strong> serão cobradas de forma recorrente.
+          </span>
+        </label>
+      </CardContent>
+    </Card>
   );
 }
