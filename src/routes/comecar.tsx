@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/comecar" as never)({
+export const Route = createFileRoute("/comecar")({
   head: () => ({
     meta: [
       { title: "Começar agora — Impulsionando" },
