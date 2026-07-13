@@ -270,6 +270,7 @@ import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedMonetizacaoRouteImport } from './routes/_authenticated/monetizacao'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedMinhaAssinaturaRouteImport } from './routes/_authenticated/minha-assinatura'
+import { Route as AuthenticatedMeuProjetoRouteImport } from './routes/_authenticated/meu-projeto'
 import { Route as AuthenticatedMarketplaceEcoRouteImport } from './routes/_authenticated/marketplace-eco'
 import { Route as AuthenticatedLegalAceitesRouteImport } from './routes/_authenticated/legal-aceites'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
@@ -2242,6 +2243,11 @@ const AuthenticatedMinhaAssinaturaRoute =
     path: '/minha-assinatura',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMeuProjetoRoute = AuthenticatedMeuProjetoRouteImport.update({
+  id: '/meu-projeto',
+  path: '/meu-projeto',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMarketplaceEcoRoute =
   AuthenticatedMarketplaceEcoRouteImport.update({
     id: '/marketplace-eco',
@@ -6148,6 +6154,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
   '/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
+  '/meu-projeto': typeof AuthenticatedMeuProjetoRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -7049,6 +7056,7 @@ export interface FileRoutesByTo {
   '/inicio': typeof AuthenticatedInicioRoute
   '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
   '/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
+  '/meu-projeto': typeof AuthenticatedMeuProjetoRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -7958,6 +7966,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/_authenticated/legal-aceites': typeof AuthenticatedLegalAceitesRoute
   '/_authenticated/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
+  '/_authenticated/meu-projeto': typeof AuthenticatedMeuProjetoRoute
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -8877,6 +8886,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/legal-aceites'
     | '/marketplace-eco'
+    | '/meu-projeto'
     | '/minha-assinatura'
     | '/modules'
     | '/monetizacao'
@@ -9778,6 +9788,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/legal-aceites'
     | '/marketplace-eco'
+    | '/meu-projeto'
     | '/minha-assinatura'
     | '/modules'
     | '/monetizacao'
@@ -10686,6 +10697,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/legal-aceites'
     | '/_authenticated/marketplace-eco'
+    | '/_authenticated/meu-projeto'
     | '/_authenticated/minha-assinatura'
     | '/_authenticated/modules'
     | '/_authenticated/monetizacao'
@@ -13567,6 +13579,13 @@ declare module '@tanstack/react-router' {
       path: '/minha-assinatura'
       fullPath: '/minha-assinatura'
       preLoaderRoute: typeof AuthenticatedMinhaAssinaturaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meu-projeto': {
+      id: '/_authenticated/meu-projeto'
+      path: '/meu-projeto'
+      fullPath: '/meu-projeto'
+      preLoaderRoute: typeof AuthenticatedMeuProjetoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/marketplace-eco': {
@@ -19152,6 +19171,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRouteWithChildren
   AuthenticatedLegalAceitesRoute: typeof AuthenticatedLegalAceitesRoute
   AuthenticatedMarketplaceEcoRoute: typeof AuthenticatedMarketplaceEcoRoute
+  AuthenticatedMeuProjetoRoute: typeof AuthenticatedMeuProjetoRoute
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedMonetizacaoRoute: typeof AuthenticatedMonetizacaoRoute
@@ -19452,6 +19472,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRouteWithChildren,
   AuthenticatedLegalAceitesRoute: AuthenticatedLegalAceitesRoute,
   AuthenticatedMarketplaceEcoRoute: AuthenticatedMarketplaceEcoRoute,
+  AuthenticatedMeuProjetoRoute: AuthenticatedMeuProjetoRoute,
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedMonetizacaoRoute: AuthenticatedMonetizacaoRoute,
