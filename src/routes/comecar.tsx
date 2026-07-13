@@ -1,0 +1,212 @@
+/**
+ * /comecar — Onda 3: cadastro progressivo CEP-first.
+ *
+ * Passo 1: CEP → ViaCEP auto-preenche cidade/UF/bairro.
+ * Passo 2: Nome + WhatsApp + email + objetivo.
+ * Grava em marketing_leads (source=outro, answers.origin=comecar-cep) e
+ * redireciona para /orcamento com os dados prefixados via query string.
+ */
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { PublicHeader } from "@/components/marketing/PublicHeader";
+import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Loader2, MapPin, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/comecar")({
+  head: () => ({
+    meta: [
+      { title: "Começar agora — Impulsionando" },
+      { name: "description", content: "Cadastro rápido em 2 passos: informe seu CEP e complete seus dados para receber sua recomendação personalizada." },
+      { property: "og:title", content: "Começar agora — Impulsionando" },
+      { property: "og:description", content: "Cadastro rápido em 2 passos para receber sua recomendação personalizada." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/comecar" }],
+  }),
+  component: ComecarPage,
+});
+
+interface ViaCep {
+  cep?: string;
+  logradouro?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
+}
+
+function ComecarPage() {
+  const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [loadingCep, setLoadingCep] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [cep, setCep] = useState("");
+  const [address, setAddress] = useState<ViaCep | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", whatsapp: "", goal: "" });
+
+  function fmtCep(raw: string) {
+    const d = raw.replace(/\D/g, "").slice(0, 8);
+    return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+  }
+  function fmtWhats(raw: string) {
+    const d = raw.replace(/\D/g, "").slice(0, 11);
+    if (d.length <= 2) return d;
+    if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  }
+
+  async function lookupCep() {
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length !== 8) {
+      toast.error("Informe um CEP com 8 dígitos.");
+      return;
+    }
+    setLoadingCep(true);
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data: ViaCep = await r.json();
+      if (data.erro) {
+        toast.error("CEP não encontrado. Verifique e tente novamente.");
+        return;
+      }
+      setAddress(data);
+      setStep(2);
+    } catch {
+      toast.error("Não foi possível consultar o CEP. Tente novamente.");
+    } finally {
+      setLoadingCep(false);
+    }
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.whatsapp) {
+      toast.error("Preencha nome, email e WhatsApp.");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("marketing_leads").insert({
+      source: "outro",
+      name: form.name,
+      email: form.email,
+      phone: form.whatsapp,
+      message: form.goal || null,
+      page_url: typeof window !== "undefined" ? window.location.href : null,
+      answers: {
+        origin: "comecar-cep",
+        cep,
+        address,
+        goal: form.goal,
+      },
+    } as never);
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Cadastro recebido! Redirecionando para sua recomendação…");
+    navigate({
+      to: "/orcamento",
+      search: {
+        nome: form.name,
+        email: form.email,
+        whatsapp: form.whatsapp,
+        cidade: address?.localidade,
+        uf: address?.uf,
+      } as never,
+    });
+  }
+
+  return (
+    <div className="min-h-dvh flex flex-col bg-background">
+      <PublicHeader />
+      <main className="flex-1 mx-auto max-w-2xl w-full px-4 sm:px-6 py-12">
+        <Badge variant="outline" className="mb-2 gap-1">
+          <Sparkles className="w-3.5 h-3.5" /> Passo {step} de 2
+        </Badge>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {step === 1 ? "Vamos começar pelo seu CEP" : "Complete seus dados"}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {step === 1
+            ? "Usamos seu CEP para localizar sua região e sugerir o plano ideal."
+            : "Falta pouco. Depois disso, mostramos sua recomendação personalizada."}
+        </p>
+
+        <Card className="mt-8 p-6">
+          {step === 1 ? (
+            <div className="grid gap-4">
+              <div className="grid gap-1.5">
+                <Label className="text-sm flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4" /> CEP
+                </Label>
+                <Input
+                  value={cep}
+                  onChange={(e) => setCep(fmtCep(e.target.value))}
+                  placeholder="00000-000"
+                  inputMode="numeric"
+                  autoFocus
+                />
+              </div>
+              <Button onClick={lookupCep} disabled={loadingCep} size="lg" className="gap-2">
+                {loadingCep && <Loader2 className="w-4 h-4 animate-spin" />}
+                Continuar
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Não guardamos seu CEP para envio de correspondência. Apenas para
+                recomendar a solução regional certa.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={submit} className="grid gap-4">
+              {address && (
+                <div className="rounded-md border bg-muted/30 p-3 text-sm flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <div className="font-medium">{address.localidade} / {address.uf}</div>
+                    {address.bairro && <div className="text-muted-foreground text-xs">{address.bairro}{address.logradouro ? ` · ${address.logradouro}` : ""}</div>}
+                    <button type="button" className="text-xs underline text-muted-foreground mt-1" onClick={() => setStep(1)}>Alterar CEP</button>
+                  </div>
+                </div>
+              )}
+              <div className="grid gap-1.5">
+                <Label className="text-sm">Seu nome *</Label>
+                <Input value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} autoFocus />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label className="text-sm">Email *</Label>
+                  <Input type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-sm">WhatsApp *</Label>
+                  <Input value={form.whatsapp} onChange={(e) => setForm((s) => ({ ...s, whatsapp: fmtWhats(e.target.value) }))} placeholder="(11) 99999-9999" />
+                </div>
+              </div>
+              <div className="grid gap-1.5">
+                <Label className="text-sm">O que você quer resolver?</Label>
+                <Input value={form.goal} onChange={(e) => setForm((s) => ({ ...s, goal: e.target.value }))} placeholder="Ex.: Site novo, automatizar atendimento, gestão de clínica…" />
+              </div>
+              <Button type="submit" size="lg" disabled={submitting} className="gap-2 mt-2">
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Ver minha recomendação
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">
+                Ao continuar, você autoriza contato do time Impulsionando via WhatsApp e email.
+              </p>
+            </form>
+          )}
+        </Card>
+      </main>
+      <PublicFooter />
+    </div>
+  );
+}
