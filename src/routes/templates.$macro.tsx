@@ -6,7 +6,7 @@ import { getVitrineTemplate, VITRINE_TEMPLATES } from "@/data/vitrine-templates"
 import { VitrineTemplateView } from "@/components/vitrine/VitrineTemplateView";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/vitrine/$macro")({
+export const Route = createFileRoute("/templates/$macro")({
   head: ({ params }) => {
     const t = getVitrineTemplate(params.macro);
     if (!t) return { meta: [{ title: "Template não encontrado — Impulsionando" }, { name: "robots", content: "noindex" }] };

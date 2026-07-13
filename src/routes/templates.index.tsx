@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink, Sparkles } from "lucide-react";
 
-export const Route = createFileRoute("/vitrine/")({
+export const Route = createFileRoute("/templates/")({
   head: () => ({
     meta: [
       { title: "Vitrine de Templates — Impulsionando" },

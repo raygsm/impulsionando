@@ -60,8 +60,8 @@ import { Route as AbrirTicketRouteImport } from './routes/abrir-ticket'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WmpIndexRouteImport } from './routes/wmp.index'
-import { Route as VitrineIndexRouteImport } from './routes/vitrine.index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as TemplatesIndexRouteImport } from './routes/templates.index'
 import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
 import { Route as RiomedIndexRouteImport } from './routes/riomed.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
@@ -83,9 +83,9 @@ import { Route as WmpCasesRouteImport } from './routes/wmp.cases'
 import { Route as WhiteLabelParceiroRouteImport } from './routes/white-label.parceiro'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
-import { Route as VitrineMacroRouteImport } from './routes/vitrine.$macro'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
+import { Route as TemplatesMacroRouteImport } from './routes/templates.$macro'
 import { Route as StatusEmbedRouteImport } from './routes/status.embed'
 import { Route as StatusSlugRouteImport } from './routes/status.$slug'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
@@ -1184,14 +1184,14 @@ const WmpIndexRoute = WmpIndexRouteImport.update({
   path: '/',
   getParentRoute: () => WmpRoute,
 } as any)
-const VitrineIndexRoute = VitrineIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => VitrineRoute,
-} as any)
 const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   id: '/trabalhe-conosco/',
   path: '/trabalhe-conosco/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomIndexRoute = ShowroomIndexRouteImport.update({
@@ -1299,11 +1299,6 @@ const VitrineSlugRoute = VitrineSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => VitrineRoute,
 } as any)
-const VitrineMacroRoute = VitrineMacroRouteImport.update({
-  id: '/$macro',
-  path: '/$macro',
-  getParentRoute: () => VitrineRoute,
-} as any)
 const TrialCadastroRoute = TrialCadastroRouteImport.update({
   id: '/trial_/cadastro',
   path: '/trial/cadastro',
@@ -1312,6 +1307,11 @@ const TrialCadastroRoute = TrialCadastroRouteImport.update({
 const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
   path: '/trabalhe-conosco/$nicho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesMacroRoute = TemplatesMacroRouteImport.update({
+  id: '/templates/$macro',
+  path: '/templates/$macro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatusEmbedRoute = StatusEmbedRouteImport.update({
@@ -6360,9 +6360,9 @@ export interface FileRoutesByFullPath {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
+  '/templates/$macro': typeof TemplatesMacroRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
-  '/vitrine/$macro': typeof VitrineMacroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
   '/white-label/parceiro': typeof WhiteLabelParceiroRoute
@@ -6384,8 +6384,8 @@ export interface FileRoutesByFullPath {
   '/paciente/': typeof PacienteIndexRoute
   '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
+  '/templates/': typeof TemplatesIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
-  '/vitrine/': typeof VitrineIndexRoute
   '/wmp/': typeof WmpIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -7055,6 +7055,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -7260,9 +7261,9 @@ export interface FileRoutesByTo {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
+  '/templates/$macro': typeof TemplatesMacroRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
-  '/vitrine/$macro': typeof VitrineMacroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
   '/white-label/parceiro': typeof WhiteLabelParceiroRoute
@@ -7284,8 +7285,8 @@ export interface FileRoutesByTo {
   '/paciente': typeof PacienteIndexRoute
   '/riomed': typeof RiomedIndexRoute
   '/showroom': typeof ShowroomIndexRoute
+  '/templates': typeof TemplatesIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
-  '/vitrine': typeof VitrineIndexRoute
   '/wmp': typeof WmpIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -8177,9 +8178,9 @@ export interface FileRoutesById {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
+  '/templates/$macro': typeof TemplatesMacroRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
-  '/vitrine/$macro': typeof VitrineMacroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
   '/white-label/parceiro': typeof WhiteLabelParceiroRoute
@@ -8201,8 +8202,8 @@ export interface FileRoutesById {
   '/paciente/': typeof PacienteIndexRoute
   '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
+  '/templates/': typeof TemplatesIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
-  '/vitrine/': typeof VitrineIndexRoute
   '/wmp/': typeof WmpIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -9100,9 +9101,9 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/status/$slug'
     | '/status/embed'
+    | '/templates/$macro'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
-    | '/vitrine/$macro'
     | '/vitrine/$slug'
     | '/white-label/login'
     | '/white-label/parceiro'
@@ -9124,8 +9125,8 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/riomed/'
     | '/showroom/'
+    | '/templates/'
     | '/trabalhe-conosco/'
-    | '/vitrine/'
     | '/wmp/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -9795,6 +9796,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/trial'
     | '/unsubscribe'
+    | '/vitrine'
     | '/white-label'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -10000,9 +10002,9 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/status/$slug'
     | '/status/embed'
+    | '/templates/$macro'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
-    | '/vitrine/$macro'
     | '/vitrine/$slug'
     | '/white-label/login'
     | '/white-label/parceiro'
@@ -10024,8 +10026,8 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/riomed'
     | '/showroom'
+    | '/templates'
     | '/trabalhe-conosco'
-    | '/vitrine'
     | '/wmp'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -10916,9 +10918,9 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/status/$slug'
     | '/status/embed'
+    | '/templates/$macro'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
-    | '/vitrine/$macro'
     | '/vitrine/$slug'
     | '/white-label/login'
     | '/white-label/parceiro'
@@ -10940,8 +10942,8 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/riomed/'
     | '/showroom/'
+    | '/templates/'
     | '/trabalhe-conosco/'
-    | '/vitrine/'
     | '/wmp/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -11700,12 +11702,14 @@ export interface RootRouteChildren {
   ShowroomSegurancaRoute: typeof ShowroomSegurancaRoute
   ShowroomSiteRoute: typeof ShowroomSiteRoute
   ShowroomWhatsappRoute: typeof ShowroomWhatsappRoute
+  TemplatesMacroRoute: typeof TemplatesMacroRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
+  TemplatesIndexRoute: typeof TemplatesIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -12146,18 +12150,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WmpIndexRouteImport
       parentRoute: typeof WmpRoute
     }
-    '/vitrine/': {
-      id: '/vitrine/'
-      path: '/'
-      fullPath: '/vitrine/'
-      preLoaderRoute: typeof VitrineIndexRouteImport
-      parentRoute: typeof VitrineRoute
-    }
     '/trabalhe-conosco/': {
       id: '/trabalhe-conosco/'
       path: '/trabalhe-conosco'
       fullPath: '/trabalhe-conosco/'
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/': {
+      id: '/templates/'
+      path: '/templates'
+      fullPath: '/templates/'
+      preLoaderRoute: typeof TemplatesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/': {
@@ -12307,13 +12311,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VitrineSlugRouteImport
       parentRoute: typeof VitrineRoute
     }
-    '/vitrine/$macro': {
-      id: '/vitrine/$macro'
-      path: '/$macro'
-      fullPath: '/vitrine/$macro'
-      preLoaderRoute: typeof VitrineMacroRouteImport
-      parentRoute: typeof VitrineRoute
-    }
     '/trial_/cadastro': {
       id: '/trial_/cadastro'
       path: '/trial/cadastro'
@@ -12326,6 +12323,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco/$nicho'
       fullPath: '/trabalhe-conosco/$nicho'
       preLoaderRoute: typeof TrabalheConoscoNichoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/$macro': {
+      id: '/templates/$macro'
+      path: '/templates/$macro'
+      fullPath: '/templates/$macro'
+      preLoaderRoute: typeof TemplatesMacroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/status/embed': {
@@ -20407,15 +20411,11 @@ const StatusRouteWithChildren =
   StatusRoute._addFileChildren(StatusRouteChildren)
 
 interface VitrineRouteChildren {
-  VitrineMacroRoute: typeof VitrineMacroRoute
   VitrineSlugRoute: typeof VitrineSlugRoute
-  VitrineIndexRoute: typeof VitrineIndexRoute
 }
 
 const VitrineRouteChildren: VitrineRouteChildren = {
-  VitrineMacroRoute: VitrineMacroRoute,
   VitrineSlugRoute: VitrineSlugRoute,
-  VitrineIndexRoute: VitrineIndexRoute,
 }
 
 const VitrineRouteWithChildren =
@@ -20654,12 +20654,14 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomSegurancaRoute: ShowroomSegurancaRoute,
   ShowroomSiteRoute: ShowroomSiteRoute,
   ShowroomWhatsappRoute: ShowroomWhatsappRoute,
+  TemplatesMacroRoute: TemplatesMacroRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
+  TemplatesIndexRoute: TemplatesIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
