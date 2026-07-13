@@ -250,6 +250,7 @@ import { Route as ChrismedAppRouteImport } from './routes/chrismed.app'
 import { Route as ChrismedAgendarRouteImport } from './routes/chrismed.agendar'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
+import { Route as BriefingSiteInstitucionalRouteImport } from './routes/briefing.site-institucional'
 import { Route as AdminManutencaoRouteImport } from './routes/admin.manutencao'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -2136,6 +2137,12 @@ const CheckoutSlugRoute = CheckoutSlugRouteImport.update({
   path: '/checkout/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BriefingSiteInstitucionalRoute =
+  BriefingSiteInstitucionalRouteImport.update({
+    id: '/briefing/site-institucional',
+    path: '/briefing/site-institucional',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminManutencaoRoute = AdminManutencaoRouteImport.update({
   id: '/admin/manutencao',
   path: '/admin/manutencao',
@@ -6152,6 +6159,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
@@ -7049,6 +7057,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
@@ -7958,6 +7967,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/agendar': typeof ChrismedAgendarRoute
@@ -8875,6 +8885,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
@@ -9772,6 +9783,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
@@ -10680,6 +10692,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/agendar'
@@ -11555,6 +11568,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminManutencaoRoute: typeof AdminManutencaoRoute
+  BriefingSiteInstitucionalRoute: typeof BriefingSiteInstitucionalRoute
   CheckoutSlugRoute: typeof CheckoutSlugRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
@@ -13400,6 +13414,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/$slug'
       fullPath: '/checkout/$slug'
       preLoaderRoute: typeof CheckoutSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/briefing/site-institucional': {
+      id: '/briefing/site-institucional'
+      path: '/briefing/site-institucional'
+      fullPath: '/briefing/site-institucional'
+      preLoaderRoute: typeof BriefingSiteInstitucionalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/manutencao': {
@@ -20456,6 +20477,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminManutencaoRoute: AdminManutencaoRoute,
+  BriefingSiteInstitucionalRoute: BriefingSiteInstitucionalRoute,
   CheckoutSlugRoute: CheckoutSlugRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
