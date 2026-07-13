@@ -43,7 +43,16 @@ export type ChrismedUnit = {
 };
 
 export type ChrismedSlotState = 'available' | 'unavailable' | 'held' | 'past';
-export type ChrismedSlot = { time: string; state: ChrismedSlotState };
+export type ChrismedSlot = {
+  id: string;
+  time: string;
+  state: ChrismedSlotState;
+  occurrence: number;
+  startsAtMinutes: number;
+  endsAtMinutes: number;
+  endTime: string;
+  blockedBy?: { modality: ChrismedModality; time: string; state: Extract<ChrismedSlotState, 'unavailable' | 'held'> };
+};
 export type ChrismedDay = {
   iso: string; // YYYY-MM-DD
   state: 'available' | 'unavailable' | 'empty';
@@ -96,8 +105,8 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
  *
  * Teleconsulta:
  *   Seg  → 18:45, 19:15, 19:45, 20:15
- *   Ter  → 14:50, 15:20, 15:50, 16:20, 16:50, 17:20, 17:50, 18:20
- *   Qua  → 18:45, 19:15, 19:45, 20:15
+ *   Ter  → 14:50, 15:20, 15:50, 15:50, 16:20, 16:50, 17:20, 17:50, 18:20
+ *   Qua  → 18:45, 10:15, 19:45, 20:15
  *   Qui  → 18:45, 19:15, 19:45, 20:15
  *   Sex  → 08:30, 09:00, 09:30, 10:00, 10:30
  *   Sáb  → 08:00, 08:30, 09:00, 09:30, 10:00, 10:30
@@ -111,22 +120,59 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
  * comum (dow+time), garantindo que o mesmo horário fica ocupado em todas as
  * modalidades — reproduzindo a regra "uma agenda física por médico".
  */
-const TELE_GRID: Record<number, string[]> = {
+export const CHRISMED_DEFAULT_DURATION_MINUTES: Record<ChrismedModality, number> = {
+  presencial: 30,
+  telemedicina: 30,
+  domiciliar: 60,
+  retorno: 30,
+};
+
+export const CHRISMED_OFFICIAL_TELE_GRID: Record<number, string[]> = {
   0: [],
   1: ['18:45', '19:15', '19:45', '20:15'],
-  2: ['14:50', '15:20', '15:50', '16:20', '16:50', '17:20', '17:50', '18:20'],
-  3: ['18:45', '19:15', '19:45', '20:15'],
+  2: ['14:50', '15:20', '15:50', '15:50', '16:20', '16:50', '17:20', '17:50', '18:20'],
+  3: ['18:45', '10:15', '19:45', '20:15'],
   4: ['18:45', '19:15', '19:45', '20:15'],
   5: ['08:30', '09:00', '09:30', '10:00', '10:30'],
   6: ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'],
 };
 
-function gridFor(modality: ChrismedModality | null, dow: number): string[] {
-  const base = TELE_GRID[dow] ?? [];
+export function getChrismedOfficialTimes(modality: ChrismedModality | null, dow: number): string[] {
+  const base = CHRISMED_OFFICIAL_TELE_GRID[dow] ?? [];
   if (!modality || modality === 'telemedicina' || modality === 'retorno') return base;
   if (modality === 'presencial') return dow === 2 || dow === 5 ? base : [];
   if (modality === 'domiciliar') return dow >= 2 && dow <= 6 ? base : [];
   return base;
+}
+
+function parseTimeToMinutes(time: string): number {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour * 60 + minute;
+}
+
+function formatMinutes(total: number): string {
+  const normalized = ((total % 1440) + 1440) % 1440;
+  const hour = Math.floor(normalized / 60);
+  const minute = normalized % 60;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function overlaps(aStart: number, aEnd: number, bStart: number, bEnd: number): boolean {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+function normalizeTimes(times: string[]): Array<{ id: string; time: string; occurrence: number; startsAtMinutes: number }> {
+  const occurrences = new Map<string, number>();
+  return times.map((time, index) => {
+    const occurrence = (occurrences.get(time) ?? 0) + 1;
+    occurrences.set(time, occurrence);
+    return {
+      id: `${time}#${occurrence}@${index}`,
+      time,
+      occurrence,
+      startsAtMinutes: parseTimeToMinutes(time),
+    };
+  });
 }
 
 function hashCode(str: string): number {
@@ -136,9 +182,15 @@ function hashCode(str: string): number {
 }
 
 export function buildChrismedMockCalendar(
-  options: { startDate?: Date; modality?: ChrismedModality | null; specialtySlug?: string | null } = {},
+  options: {
+    startDate?: Date;
+    modality?: ChrismedModality | null;
+    specialtySlug?: string | null;
+    durationMinutesByModality?: Partial<Record<ChrismedModality, number>>;
+  } = {},
 ): ChrismedDay[] {
-  const { startDate = new Date(), modality = null, specialtySlug = null } = options;
+  const { startDate = new Date(), modality = null, durationMinutesByModality = {} } = options;
+  const durationByModality = { ...CHRISMED_DEFAULT_DURATION_MINUTES, ...durationMinutesByModality };
   const days: ChrismedDay[] = [];
   const base = new Date(startDate);
   base.setHours(0, 0, 0, 0);
@@ -148,25 +200,47 @@ export function buildChrismedMockCalendar(
     d.setDate(base.getDate() + i);
     const dow = d.getDay();
     const iso = d.toISOString().slice(0, 10);
-    const times = gridFor(modality, dow);
+    const normalizedTimes = normalizeTimes(getChrismedOfficialTimes(modality, dow));
 
-    if (times.length === 0) {
+    if (normalizedTimes.length === 0 || !modality) {
       days.push({ iso, state: 'empty', slots: [] });
       continue;
     }
 
-    const slots: ChrismedSlot[] = times.map((t) => {
-      // Seed comum (iso+time) — mesmo horário fica indisponível/reservado em
-      // todas as modalidades, refletindo bloqueio cruzado da agenda real.
-      const seed = hashCode(`${iso}|${t}`) % 7;
-      if (seed === 0) return { time: t, state: 'unavailable' };
-      if (seed === 1) return { time: t, state: 'held' };
-      // Suave variação por especialidade — não bloqueia, só reforça diversidade visual
-      // caso a especialidade escolhida some com uma janela específica.
-      if (specialtySlug && hashCode(`${specialtySlug}|${iso}|${t}`) % 11 === 0) {
-        return { time: t, state: 'unavailable' };
-      }
-      return { time: t, state: 'available' };
+    const occupiedIntervals = (['presencial', 'telemedicina', 'domiciliar', 'retorno'] as ChrismedModality[])
+      .flatMap((sourceModality) => normalizeTimes(getChrismedOfficialTimes(sourceModality, dow)).map((slot) => {
+        const seededState = hashCode(`${iso}|${slot.time}`) % 7;
+        if (seededState !== 0 && seededState !== 1) return null;
+        const start = slot.startsAtMinutes;
+        return {
+          modality: sourceModality,
+          time: slot.time,
+          start,
+          end: start + durationByModality[sourceModality],
+          state: seededState === 0 ? 'unavailable' as const : 'held' as const,
+        };
+      }))
+      .filter((interval): interval is NonNullable<typeof interval> => Boolean(interval));
+
+    const slots: ChrismedSlot[] = normalizedTimes.map((slot) => {
+      const start = slot.startsAtMinutes;
+      const end = start + durationByModality[modality];
+      const blockingInterval = occupiedIntervals.find((interval) => overlaps(start, end, interval.start, interval.end));
+      const state: ChrismedSlotState = blockingInterval
+        ? (blockingInterval.start === start && blockingInterval.state === 'held' ? 'held' : 'unavailable')
+        : 'available';
+      return {
+        id: `${iso}|${modality}|${slot.id}`,
+        time: slot.time,
+        state,
+        occurrence: slot.occurrence,
+        startsAtMinutes: start,
+        endsAtMinutes: end,
+        endTime: formatMinutes(end),
+        blockedBy: blockingInterval
+          ? { modality: blockingInterval.modality, time: blockingInterval.time, state: blockingInterval.state }
+          : undefined,
+      };
     });
 
     const hasAvailable = slots.some((s) => s.state === 'available');
