@@ -90,11 +90,51 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
  * - dias úteis: agenda cheia com alguns horários indisponíveis
  */
 /**
- * Gera calendário com disponibilidade variando por modalidade/especialidade,
- * de forma determinística (mesma escolha → mesma agenda). Simula a agenda
- * real filtrada — presencial abre menos janelas que teleconsulta, e cada
- * especialidade tem seu próprio padrão de ocupação.
+ * Grades oficiais por dia da semana × modalidade (fonte: direção clínica CHRISMED).
+ *
+ * dow: 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+ *
+ * Teleconsulta:
+ *   Seg  → 18:45, 19:15, 19:45, 20:15
+ *   Ter  → 14:50, 15:20, 15:50, 16:20, 16:50, 17:20, 17:50, 18:20
+ *   Qua  → 18:45, 19:15, 19:45, 20:15
+ *   Qui  → 18:45, 19:15, 19:45, 20:15
+ *   Sex  → 08:30, 09:00, 09:30, 10:00, 10:30
+ *   Sáb  → 08:00, 08:30, 09:00, 09:30, 10:00, 10:30
+ *
+ * Presencial (Consultório): só Ter e Sex, nos mesmos horários da tele.
+ * Domiciliar: Ter a Sáb, nos mesmos horários da tele/presencial.
+ * Retorno: espelha os horários da teleconsulta.
+ *
+ * Bloqueio cruzado: se um horário é reservado numa modalidade, ele deve
+ * aparecer indisponível nas demais. Aqui o mock aplica um seed determinístico
+ * comum (dow+time), garantindo que o mesmo horário fica ocupado em todas as
+ * modalidades — reproduzindo a regra "uma agenda física por médico".
  */
+const TELE_GRID: Record<number, string[]> = {
+  0: [],
+  1: ['18:45', '19:15', '19:45', '20:15'],
+  2: ['14:50', '15:20', '15:50', '16:20', '16:50', '17:20', '17:50', '18:20'],
+  3: ['18:45', '19:15', '19:45', '20:15'],
+  4: ['18:45', '19:15', '19:45', '20:15'],
+  5: ['08:30', '09:00', '09:30', '10:00', '10:30'],
+  6: ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'],
+};
+
+function gridFor(modality: ChrismedModality | null, dow: number): string[] {
+  const base = TELE_GRID[dow] ?? [];
+  if (!modality || modality === 'telemedicina' || modality === 'retorno') return base;
+  if (modality === 'presencial') return dow === 2 || dow === 5 ? base : [];
+  if (modality === 'domiciliar') return dow >= 2 && dow <= 6 ? base : [];
+  return base;
+}
+
+function hashCode(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
 export function buildChrismedMockCalendar(
   options: { startDate?: Date; modality?: ChrismedModality | null; specialtySlug?: string | null } = {},
 ): ChrismedDay[] {
@@ -103,37 +143,29 @@ export function buildChrismedMockCalendar(
   const base = new Date(startDate);
   base.setHours(0, 0, 0, 0);
 
-  // Grades por modalidade — presencial concentra tarde, tele/domiciliar são mais amplas.
-  const gridByModality: Record<string, string[]> = {
-    presencial: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
-    telemedicina: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
-    domiciliar: ['09:00', '10:30', '14:00', '15:30', '17:00'],
-    retorno: ['09:00', '10:00', '14:00', '15:00'],
-  };
-  const times = gridByModality[modality ?? 'telemedicina'] ?? gridByModality.telemedicina;
-
-  // Seed textual → número, para variar padrão por especialidade.
-  const specSeed = (specialtySlug ?? 'default')
-    .split('')
-    .reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) % 997, 7);
-
   for (let i = 0; i < 42; i++) {
     const d = new Date(base);
     d.setDate(base.getDate() + i);
     const dow = d.getDay();
     const iso = d.toISOString().slice(0, 10);
+    const times = gridFor(modality, dow);
 
-    if (dow === 0) {
+    if (times.length === 0) {
       days.push({ iso, state: 'empty', slots: [] });
       continue;
     }
 
-    const slots: ChrismedSlot[] = times.map((t, idx) => {
-      const seed = (i * 7 + idx * 3 + specSeed) % 5;
-      if (dow === 6 && idx > 2) return { time: t, state: 'unavailable' };
-      if (modality === 'presencial' && seed === 0) return { time: t, state: 'unavailable' };
+    const slots: ChrismedSlot[] = times.map((t) => {
+      // Seed comum (iso+time) — mesmo horário fica indisponível/reservado em
+      // todas as modalidades, refletindo bloqueio cruzado da agenda real.
+      const seed = hashCode(`${iso}|${t}`) % 7;
       if (seed === 0) return { time: t, state: 'unavailable' };
-      if (seed === 1 && idx === 2) return { time: t, state: 'held' };
+      if (seed === 1) return { time: t, state: 'held' };
+      // Suave variação por especialidade — não bloqueia, só reforça diversidade visual
+      // caso a especialidade escolhida some com uma janela específica.
+      if (specialtySlug && hashCode(`${specialtySlug}|${iso}|${t}`) % 11 === 0) {
+        return { time: t, state: 'unavailable' };
+      }
       return { time: t, state: 'available' };
     });
 
@@ -143,4 +175,5 @@ export function buildChrismedMockCalendar(
 
   return days;
 }
+
 
