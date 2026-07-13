@@ -290,10 +290,10 @@ function ChrismedAgendarPage() {
   const isCare360 = specialty?.slug === 'care-360' || modality === 'telemedicina' || modality === 'domiciliar';
   const stepOrder: Step[] = isCare360
     ? ['modality','schedule','identify','confirm','payment','done']
-    : ['modality','specialty','doctor','unit','schedule','identify','confirm','payment','done'];
+    : ['modality','specialty','doctor','schedule','identify','confirm','payment','done'];
   const stepLabels = isCare360
     ? ['Modalidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto']
-    : ['Modalidade','Especialidade','Médico','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+    : ['Modalidade','Especialidade','Médico','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
   const stepIndex = Math.max(0, stepOrder.indexOf(step));
   const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
   function goBack() {
@@ -445,7 +445,14 @@ function ChrismedAgendarPage() {
             ) : (
               <div className="mt-8 grid md:grid-cols-2 gap-4">
                 {doctorsForSpecialty.map((d) => (
-                  <button key={d.slug} type="button" onClick={() => { setDoctor(d); setStep('unit'); }}
+                  <button key={d.slug} type="button" onClick={() => {
+                    setDoctor(d);
+                    // Presencial só existe em Copacabana — auto-seleciona a unidade e pula
+                    // direto para a agenda, evitando redundância com a modalidade escolhida antes.
+                    const autoUnit = CHRISMED_UNITS.find((u) => u.slug === 'copacabana');
+                    if (autoUnit) setUnit(autoUnit);
+                    setStep('schedule');
+                  }}
                     className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]">
                     <div className="chrismed-serif text-xl text-[var(--chrismed-ink)]">{d.name}</div>
                     <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mt-1">{d.title}</div>
@@ -488,7 +495,7 @@ function ChrismedAgendarPage() {
         {/* STEP 5: Calendário + horários */}
         {step === 'schedule' && unit && (
           <section aria-labelledby="s5">
-            <button onClick={() => isCare360 ? setStep('modality') : setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar unidade'}</button>
+            <button onClick={() => isCare360 ? setStep('modality') : setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar médico'}</button>
             <h2 id="s5" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha data e horário</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
 
