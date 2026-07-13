@@ -122,6 +122,11 @@ function maskCEP(v: string) {
 }
 function isValidEmail(v: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function isValidCPF(v: string) { return v.replace(/\D/g, '').length === 11; }
+function formatSlotLabel(slot: Pick<ChrismedSlot, 'time' | 'occurrence' | 'endTime'> | null | undefined) {
+  if (!slot) return '—';
+  const duplicateSuffix = slot.occurrence > 1 ? ` · ${slot.occurrence}ª janela` : '';
+  return `${slot.time}${duplicateSuffix} · até ${slot.endTime}`;
+}
 
 function ChrismedAgendarPage() {
   const search = useSearch({ from: '/chrismed/agendar' });
@@ -133,6 +138,7 @@ function ChrismedAgendarPage() {
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedDayIso, setSelectedDayIso] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [patient, setPatient] = useState({ first_name: '', last_name: '', email: '', doc: '', phone: '', cep: '' });
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loadingOfferings, setLoadingOfferings] = useState(true);
@@ -188,14 +194,23 @@ function ChrismedAgendarPage() {
     })();
   }, []);
 
-  // Agenda dinâmica: recalcula quando modalidade/especialidade mudam.
-  const calendar = useMemo(
-    () => buildChrismedMockCalendar({ modality, specialtySlug: specialty?.slug ?? null }),
-    [modality, specialty?.slug],
-  );
   const currentOffering = useMemo(
     () => modality ? offerings.find((o) => o.modality === modality) ?? null : null,
     [modality, offerings],
+  );
+  const durationMinutesByModality = useMemo(
+    () => Object.fromEntries(offerings.map((o) => [o.modality, o.duration_minutes])) as Partial<Record<ChrismedModality, number>>,
+    [offerings],
+  );
+
+  // Agenda dinâmica: recalcula quando modalidade/especialidade/duração real mudam.
+  const calendar = useMemo(
+    () => buildChrismedMockCalendar({
+      modality,
+      specialtySlug: specialty?.slug ?? null,
+      durationMinutesByModality,
+    }),
+    [durationMinutesByModality, modality, specialty?.slug],
   );
 
   // Ao trocar modalidade/especialidade, limpa data/horário selecionados para forçar nova escolha
@@ -203,6 +218,7 @@ function ChrismedAgendarPage() {
   useEffect(() => {
     setSelectedDayIso(null);
     setSelectedTime(null);
+    setSelectedSlotId(null);
     setMonthOffset(0);
   }, [modality, specialty?.slug]);
 
@@ -246,6 +262,10 @@ function ChrismedAgendarPage() {
       : CHRISMED_UNITS.filter((u) => doctor?.unitSlugs.includes(u.slug) ?? true);
 
   const selectedDay: ChrismedDay | null = selectedDayIso ? calendar.find((d) => d.iso === selectedDayIso) ?? null : null;
+  const selectedSlot = selectedDay && selectedSlotId
+    ? selectedDay.slots.find((s) => s.id === selectedSlotId) ?? null
+    : null;
+  const selectedSlotLabel = selectedSlot ? formatSlotLabel(selectedSlot) : selectedTime ?? '—';
 
   async function handlePay() {
     if (!currentOffering) {
@@ -259,7 +279,7 @@ function ChrismedAgendarPage() {
           company_id: CHRISMED_COMPANY_ID,
           payment_method: 'pix',
           amount_cents: currentOffering.price_cents,
-          description: `CrisMed — ${specialty?.name} · ${doctor?.name} · ${selectedDayIso} ${selectedTime}`,
+          description: `CrisMed — ${specialty?.name} · ${doctor?.name} · ${selectedDayIso} ${selectedSlotLabel}`,
           payer: {
             email: patient.email,
             first_name: patient.first_name,
@@ -271,7 +291,8 @@ function ChrismedAgendarPage() {
           metadata: {
             offering_slug: currentOffering.slug, modality: currentOffering.modality,
             wave1_mock: true, specialty: specialty?.slug, doctor: doctor?.slug, unit: unit?.slug,
-            requested_day: selectedDayIso, requested_time: selectedTime,
+            requested_day: selectedDayIso, requested_time: selectedTime, requested_slot_id: selectedSlotId,
+            requested_end_time: selectedSlot?.endTime, requested_window_minutes: currentOffering.duration_minutes,
           },
         },
       });
@@ -308,7 +329,7 @@ function ChrismedAgendarPage() {
     doctor?.name,
     specialty?.name,
     modality ? MODALITY_META[modality].label : null,
-    selectedTime,
+    selectedSlot ? formatSlotLabel(selectedSlot) : selectedTime,
   ].filter(Boolean).join(' · ');
 
   return (
@@ -507,7 +528,7 @@ function ChrismedAgendarPage() {
                 monthOffset={monthOffset}
                 onMonth={setMonthOffset}
                 selectedIso={selectedDayIso}
-                onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); }}
+                onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); setSelectedSlotId(null); }}
               />
               <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
                 <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">
@@ -542,7 +563,12 @@ function ChrismedAgendarPage() {
                     )}
                     <div className="grid grid-cols-2 gap-2">
                       {selectedDay.slots.map((s) => (
-                        <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
+                        <SlotButton
+                          key={s.id}
+                          slot={s}
+                          selected={selectedSlotId === s.id}
+                          onPick={() => { setSelectedTime(s.time); setSelectedSlotId(s.id); }}
+                        />
                       ))}
                     </div>
                   </>
@@ -556,9 +582,9 @@ function ChrismedAgendarPage() {
                   className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
                   disabled={
                     !selectedDayIso ||
-                    !selectedTime ||
+                    !selectedSlotId ||
                     // trava dupla: horário selecionado precisa continuar 'available' (não pode ser held/past/indisponível)
-                    selectedDay?.slots.find((s) => s.time === selectedTime)?.state !== 'available'
+                    selectedSlot?.state !== 'available'
                   }
                   onClick={() => setStep('identify')}
                 >
@@ -637,7 +663,7 @@ function ChrismedAgendarPage() {
                 <Row label="Modalidade" value={MODALITY_META[modality].label} />
                 <Row label="Unidade" value={unit.name} />
                 <Row label="Data" value={selectedDayIso ?? '—'} />
-                <Row label="Horário" value={selectedTime ?? '—'} />
+                <Row label="Horário" value={selectedSlotLabel} />
                 <Row label="Paciente" value={`${patient.first_name} ${patient.last_name}`.trim()} />
                 <Row label="E-mail" value={patient.email} />
                 <Row label="CPF" value={patient.doc} />
@@ -724,7 +750,7 @@ function ChrismedAgendarPage() {
                 <Row label="Médico(a)" value={doctor?.name ?? '—'} />
                 <Row label="Unidade" value={unit?.name ?? '—'} />
                 <Row label="Data" value={selectedDayIso ?? '—'} />
-                <Row label="Horário" value={selectedTime ?? '—'} />
+                <Row label="Horário" value={selectedSlotLabel} />
                 {currentOffering && (
                   <Row
                     label="Valor pago"
@@ -840,12 +866,15 @@ function EmptyState({ message, onOliver }: { message: string; onOliver: () => vo
 
 function SlotButton({ slot, selected, onPick }: { slot: ChrismedSlot; selected: boolean; onPick: () => void }) {
   const disabled = slot.state !== 'available';
-  const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]';
-  if (slot.state === 'held') return <button disabled className={`${base} border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] cursor-not-allowed`}>{slot.time} · reservado</button>;
-  if (disabled) return <button disabled className={`${base} border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)]/40 cursor-not-allowed line-through`}>{slot.time}</button>;
+  const duplicateSuffix = slot.occurrence > 1 ? ` · ${slot.occurrence}ª janela` : '';
+  const visibleTime = `${slot.time}${duplicateSuffix}`;
+  const base = 'rounded-md py-2 text-sm border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)] min-h-12';
+  if (slot.state === 'held') return <button disabled className={`${base} border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] cursor-not-allowed`} aria-label={`${visibleTime}, reservado até ${slot.endTime}`}>{visibleTime} · reservado</button>;
+  if (disabled) return <button disabled className={`${base} border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)]/40 cursor-not-allowed line-through`} aria-label={`${visibleTime}, indisponível até ${slot.endTime}`}>{visibleTime}</button>;
   return (
-    <button onClick={onPick} className={`${base} ${selected ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}>
-      {slot.time}
+    <button onClick={onPick} aria-label={`${visibleTime}, disponível até ${slot.endTime}`} className={`${base} ${selected ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}>
+      <span className="block leading-tight">{visibleTime}</span>
+      <span className="block text-[10px] opacity-70 leading-tight">até {slot.endTime}</span>
     </button>
   );
 }
