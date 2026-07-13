@@ -395,6 +395,7 @@ import { Route as AuthenticatedInventoryCategoriesRouteImport } from './routes/_
 import { Route as AuthenticatedInsightsRespostasRouteImport } from './routes/_authenticated/insights.respostas'
 import { Route as AuthenticatedInsightsPercebidoRouteImport } from './routes/_authenticated/insights.percebido'
 import { Route as AuthenticatedInsightsOportunidadesRouteImport } from './routes/_authenticated/insights.oportunidades'
+import { Route as AuthenticatedImpulsionandoLeadsKanbanRouteImport } from './routes/_authenticated/impulsionando.leads-kanban'
 import { Route as AuthenticatedImobiliariaVitrineRouteImport } from './routes/_authenticated/imobiliaria.vitrine'
 import { Route as AuthenticatedImobiliariaVisitasRouteImport } from './routes/_authenticated/imobiliaria.visitas'
 import { Route as AuthenticatedImobiliariaProprietariosRouteImport } from './routes/_authenticated/imobiliaria.proprietarios'
@@ -2931,6 +2932,12 @@ const AuthenticatedInsightsOportunidadesRoute =
   AuthenticatedInsightsOportunidadesRouteImport.update({
     id: '/insights/oportunidades',
     path: '/insights/oportunidades',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImpulsionandoLeadsKanbanRoute =
+  AuthenticatedImpulsionandoLeadsKanbanRouteImport.update({
+    id: '/impulsionando/leads-kanban',
+    path: '/impulsionando/leads-kanban',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedImobiliariaVitrineRoute =
@@ -6671,6 +6678,7 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/imobiliaria/visitas': typeof AuthenticatedImobiliariaVisitasRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
+  '/impulsionando/leads-kanban': typeof AuthenticatedImpulsionandoLeadsKanbanRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
@@ -7567,6 +7575,7 @@ export interface FileRoutesByTo {
   '/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/imobiliaria/visitas': typeof AuthenticatedImobiliariaVisitasRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
+  '/impulsionando/leads-kanban': typeof AuthenticatedImpulsionandoLeadsKanbanRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
@@ -8483,6 +8492,7 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/_authenticated/imobiliaria/visitas': typeof AuthenticatedImobiliariaVisitasRoute
   '/_authenticated/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
+  '/_authenticated/impulsionando/leads-kanban': typeof AuthenticatedImpulsionandoLeadsKanbanRoute
   '/_authenticated/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/_authenticated/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/_authenticated/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
@@ -9403,6 +9413,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/proprietarios'
     | '/imobiliaria/visitas'
     | '/imobiliaria/vitrine'
+    | '/impulsionando/leads-kanban'
     | '/insights/oportunidades'
     | '/insights/percebido'
     | '/insights/respostas'
@@ -10299,6 +10310,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/proprietarios'
     | '/imobiliaria/visitas'
     | '/imobiliaria/vitrine'
+    | '/impulsionando/leads-kanban'
     | '/insights/oportunidades'
     | '/insights/percebido'
     | '/insights/respostas'
@@ -11214,6 +11226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/proprietarios'
     | '/_authenticated/imobiliaria/visitas'
     | '/_authenticated/imobiliaria/vitrine'
+    | '/_authenticated/impulsionando/leads-kanban'
     | '/_authenticated/insights/oportunidades'
     | '/_authenticated/insights/percebido'
     | '/_authenticated/insights/respostas'
@@ -14454,6 +14467,13 @@ declare module '@tanstack/react-router' {
       path: '/insights/oportunidades'
       fullPath: '/insights/oportunidades'
       preLoaderRoute: typeof AuthenticatedInsightsOportunidadesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/impulsionando/leads-kanban': {
+      id: '/_authenticated/impulsionando/leads-kanban'
+      path: '/impulsionando/leads-kanban'
+      fullPath: '/impulsionando/leads-kanban'
+      preLoaderRoute: typeof AuthenticatedImpulsionandoLeadsKanbanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/vitrine': {
@@ -19396,6 +19416,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaProprietariosRoute: typeof AuthenticatedImobiliariaProprietariosRoute
   AuthenticatedImobiliariaVisitasRoute: typeof AuthenticatedImobiliariaVisitasRoute
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
+  AuthenticatedImpulsionandoLeadsKanbanRoute: typeof AuthenticatedImpulsionandoLeadsKanbanRoute
   AuthenticatedInsightsOportunidadesRoute: typeof AuthenticatedInsightsOportunidadesRoute
   AuthenticatedInsightsPercebidoRoute: typeof AuthenticatedInsightsPercebidoRoute
   AuthenticatedInsightsRespostasRoute: typeof AuthenticatedInsightsRespostasRoute
@@ -19801,6 +19822,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedImobiliariaProprietariosRoute,
   AuthenticatedImobiliariaVisitasRoute: AuthenticatedImobiliariaVisitasRoute,
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
+  AuthenticatedImpulsionandoLeadsKanbanRoute:
+    AuthenticatedImpulsionandoLeadsKanbanRoute,
   AuthenticatedInsightsOportunidadesRoute:
     AuthenticatedInsightsOportunidadesRoute,
   AuthenticatedInsightsPercebidoRoute: AuthenticatedInsightsPercebidoRoute,
