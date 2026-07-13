@@ -75,6 +75,58 @@ export function ChrismedOliverPanel() {
   const navigate = useNavigate();
   const { open, context, info } = useChrismedOliverState();
 
+  // Chat real com IA — cérebro CHRISMED
+  const ask = useServerFn(askOliver);
+  const [messages, setMessages] = useState<ChatMsg[]>([OLIVER_WELCOME]);
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (open) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [open]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, sending]);
+
+  const sendMessage = async (text: string) => {
+    const clean = text.trim();
+    if (!clean || sending) return;
+    const next: ChatMsg[] = [...messages, { role: 'user', content: clean }];
+    setMessages(next);
+    setInput('');
+    setSending(true);
+    try {
+      const res = await ask({
+        data: {
+          messages: next,
+          pathname,
+          lang: searchLang,
+        },
+      });
+      setMessages((prev) => [...prev, { role: 'assistant', content: res.reply }]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            'Não consegui responder agora. Tente novamente ou fale com a recepção no WhatsApp +55 (21) 97253-7868.',
+        },
+      ]);
+      console.error(err);
+    } finally {
+      setSending(false);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  };
+
+  const resetChat = () => setMessages([OLIVER_WELCOME]);
+
+
   const switchLang = (l: OliverLang) => {
     navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never });
   };
