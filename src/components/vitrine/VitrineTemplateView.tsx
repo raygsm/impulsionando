@@ -36,7 +36,7 @@ export function VitrineTemplateView({ t }: { t: VitrineTemplate }) {
               <Icon className="h-3 w-3 mr-1" /> {t.label}
             </Badge>
             <Button asChild size="sm" variant="ghost">
-              <Link to="/vitrine">
+              <Link to="/templates">
                 <ArrowRight className="h-4 w-4 rotate-180" /> Vitrine
               </Link>
             </Button>
@@ -192,7 +192,7 @@ export function VitrineTemplateView({ t }: { t: VitrineTemplate }) {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/60 bg-white/10 text-white hover:bg-white/20">
-                <Link to="/vitrine">Ver outros templates</Link>
+                <Link to="/templates">Ver outros templates</Link>
               </Button>
             </div>
           </div>
@@ -235,7 +235,7 @@ export function VitrineTemplateView({ t }: { t: VitrineTemplate }) {
                 Versão navegável <ExternalLink className="h-3 w-3" />
               </Link>
             )}
-            <Link to="/vitrine" className="hover:text-foreground">Vitrine completa</Link>
+            <Link to="/templates" className="hover:text-foreground">Vitrine completa</Link>
             <Link to="/quero-comecar" className="hover:text-foreground">Contratar</Link>
           </div>
         </div>

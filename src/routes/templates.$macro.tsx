@@ -17,11 +17,11 @@ export const Route = createFileRoute("/templates/$macro")({
         { property: "og:title", content: `${t.templateName} — Vitrine Impulsionando` },
         { property: "og:description", content: t.hero.subtitle },
         { property: "og:image", content: t.hero.image },
-        { property: "og:url", content: `https://impulsionando.com.br/vitrine/${t.macro}` },
+        { property: "og:url", content: `https://impulsionando.com.br/templates/${t.macro}` },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: t.hero.image },
       ],
-      links: [{ rel: "canonical", href: `https://impulsionando.com.br/vitrine/${t.macro}` }],
+      links: [{ rel: "canonical", href: `https://impulsionando.com.br/templates/${t.macro}` }],
     };
   },
   loader: ({ params }) => {
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/templates/$macro")({
         <p className="mt-2 text-muted-foreground">
           Escolha um macro-nicho na vitrine principal.
         </p>
-        <Button asChild className="mt-4"><Link to="/vitrine">Voltar à vitrine</Link></Button>
+        <Button asChild className="mt-4"><Link to="/templates">Voltar à vitrine</Link></Button>
       </div>
     </div>
   ),

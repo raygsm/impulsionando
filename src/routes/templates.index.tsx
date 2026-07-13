@@ -20,9 +20,9 @@ export const Route = createFileRoute("/templates/")({
       { name: "description", content: "Templates de front-end por macro-nicho: exemplos reais do que a Impulsionando entrega em Saúde, Alimentação, Imobiliário, Serviços, Educação, Eventos, Varejo e Fornecedores B2B." },
       { property: "og:title", content: "Vitrine de Templates por Nicho — Impulsionando" },
       { property: "og:description", content: "Sites prontos por macro-nicho para inspirar sua próxima marca." },
-      { property: "og:url", content: "https://impulsionando.com.br/vitrine" },
+      { property: "og:url", content: "https://impulsionando.com.br/templates" },
     ],
-    links: [{ rel: "canonical", href: "https://impulsionando.com.br/vitrine" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/templates" }],
   }),
   component: VitrineHub,
 });
@@ -56,7 +56,7 @@ function VitrineHub() {
                   className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/40 transition"
                 >
                   <Link
-                    to="/vitrine/$macro"
+                    to="/templates/$macro"
                     params={{ macro: t.macro }}
                     className="block"
                     aria-label={`Abrir template ${t.templateName}`}
@@ -92,7 +92,7 @@ function VitrineHub() {
                     </p>
                     <div className="flex items-center gap-2 pt-1">
                       <Button asChild size="sm" className="gap-1">
-                        <Link to="/vitrine/$macro" params={{ macro: t.macro }}>
+                        <Link to="/templates/$macro" params={{ macro: t.macro }}>
                           Ver template <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       </Button>
