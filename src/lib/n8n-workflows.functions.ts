@@ -49,7 +49,11 @@ export const updateN8nWorkflow = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UpdateInput.parse(d))
   .handler(async ({ data, context }) => {
     await ensureStaff(context);
-    const patch: Record<string, unknown> = {
+    const patch: {
+      webhook_url: string | null;
+      is_active?: boolean;
+      notes?: string | null;
+    } = {
       webhook_url: data.webhook_url === "" ? null : data.webhook_url,
     };
     if (typeof data.is_active === "boolean") patch.is_active = data.is_active;
