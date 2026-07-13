@@ -12,7 +12,10 @@
  *    canal humano assumirá.
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink, Send, Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { askOliver } from '@/lib/oliver-chat.functions';
 import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
@@ -27,6 +30,14 @@ import {
   setChrismedOliverInfo,
   useChrismedOliverState,
 } from './oliver-store';
+
+type ChatMsg = { role: 'user' | 'assistant'; content: string };
+
+const OLIVER_WELCOME: ChatMsg = {
+  role: 'assistant',
+  content:
+    'Olá! Sou o Oliver, concierge da CHRISMED. Posso responder sobre a Dra. Christiane, agendar consultas (presencial, tele, domiciliar ou ocupacional), esclarecer valores, prazos, NRs e programas de saúde ocupacional. Como posso ajudar?',
+};
 
 const C = CHRISMED_CONTACT.channels;
 
@@ -63,6 +74,58 @@ export function ChrismedOliverPanel() {
   const searchLang = useRouterState({ select: (s) => (s.location.search as { lang?: OliverLang })?.lang }) ?? 'pt';
   const navigate = useNavigate();
   const { open, context, info } = useChrismedOliverState();
+
+  // Chat real com IA — cérebro CHRISMED
+  const ask = useServerFn(askOliver);
+  const [messages, setMessages] = useState<ChatMsg[]>([OLIVER_WELCOME]);
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (open) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [open]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, sending]);
+
+  const sendMessage = async (text: string) => {
+    const clean = text.trim();
+    if (!clean || sending) return;
+    const next: ChatMsg[] = [...messages, { role: 'user', content: clean }];
+    setMessages(next);
+    setInput('');
+    setSending(true);
+    try {
+      const res = await ask({
+        data: {
+          messages: next,
+          pathname,
+          lang: searchLang,
+        },
+      });
+      setMessages((prev) => [...prev, { role: 'assistant', content: res.reply }]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            'Não consegui responder agora. Tente novamente ou fale com a recepção no WhatsApp +55 (21) 97253-7868.',
+        },
+      ]);
+      console.error(err);
+    } finally {
+      setSending(false);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  };
+
+  const resetChat = () => setMessages([OLIVER_WELCOME]);
+
 
   const switchLang = (l: OliverLang) => {
     navigate({ to: '.', search: (prev: Record<string, unknown>) => ({ ...prev, lang: l }) as never });
@@ -228,6 +291,78 @@ export function ChrismedOliverPanel() {
                 </button>
               </div>
             )}
+
+            {/* Chat real com Oliver — cérebro CHRISMED com IA */}
+            <section aria-label="Conversar com Oliver">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="chrismed-sans inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
+                  <Sparkles className="h-3 w-3" aria-hidden /> Converse com Oliver
+                </p>
+                {messages.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={resetChat}
+                    className="chrismed-sans inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] text-[var(--chrismed-mist)] hover:text-[var(--chrismed-ink)]"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Reiniciar
+                  </button>
+                )}
+              </div>
+
+              <div
+                ref={scrollRef}
+                className="max-h-72 overflow-y-auto space-y-2 border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/30 p-3"
+              >
+                {messages.map((m, i) => (
+                  <div
+                    key={i}
+                    className={
+                      m.role === 'user'
+                        ? 'ml-6 border border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] px-3 py-2 text-[13px] leading-relaxed text-[var(--chrismed-ivory)]'
+                        : 'mr-6 whitespace-pre-wrap border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[13px] leading-relaxed text-[var(--chrismed-ink)]'
+                    }
+                  >
+                    {m.content}
+                  </div>
+                ))}
+                {sending && (
+                  <div className="mr-6 inline-flex items-center gap-2 border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[12px] text-[var(--chrismed-mist)]">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Oliver está pensando…
+                  </div>
+                )}
+              </div>
+
+              <form
+                onSubmit={(e) => { e.preventDefault(); void sendMessage(input); }}
+                className="mt-2 flex items-end gap-2"
+              >
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      void sendMessage(input);
+                    }
+                  }}
+                  rows={2}
+                  placeholder="Pergunte sobre a Dra. Christiane, valores, ASO, NRs, agenda…"
+                  disabled={sending}
+                  className="chrismed-sans flex-1 resize-none border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[13px] text-[var(--chrismed-ink)] placeholder:text-[var(--chrismed-mist)] focus:border-[var(--chrismed-champagne-deep)] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={sending || !input.trim()}
+                  aria-label="Enviar mensagem"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] transition-colors hover:bg-[var(--chrismed-noir)] disabled:opacity-40"
+                >
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </button>
+              </form>
+            </section>
+
+
 
 
 
