@@ -129,7 +129,7 @@ function DemoLanding() {
                 </p>
               </div>
               <Button asChild size="lg" className="bg-gradient-primary gap-2">
-                <Link to="/vitrine">Abrir vitrine <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/templates">Abrir vitrine <ArrowRight className="w-4 h-4" /></Link>
               </Button>
             </div>
           </Card>
