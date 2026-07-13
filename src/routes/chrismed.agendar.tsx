@@ -290,10 +290,10 @@ function ChrismedAgendarPage() {
   const isCare360 = specialty?.slug === 'care-360' || modality === 'telemedicina' || modality === 'domiciliar';
   const stepOrder: Step[] = isCare360
     ? ['modality','schedule','identify','confirm','payment','done']
-    : ['modality','specialty','doctor','unit','schedule','identify','confirm','payment','done'];
+    : ['modality','specialty','doctor','schedule','identify','confirm','payment','done'];
   const stepLabels = isCare360
     ? ['Modalidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto']
-    : ['Modalidade','Especialidade','Médico','Unidade','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
+    : ['Modalidade','Especialidade','Médico','Data e horário','Identificação','Confirmação','Pagamento','Pronto'];
   const stepIndex = Math.max(0, stepOrder.indexOf(step));
   const canGoBack = stepIndex > 0 && step !== 'done' && step !== 'payment';
   function goBack() {
