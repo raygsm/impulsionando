@@ -188,11 +188,33 @@ function ChrismedAgendarPage() {
     })();
   }, []);
 
-  const calendar = useMemo(() => buildChrismedMockCalendar(), []);
+  // Agenda dinâmica: recalcula quando modalidade/especialidade mudam.
+  const calendar = useMemo(
+    () => buildChrismedMockCalendar({ modality, specialtySlug: specialty?.slug ?? null }),
+    [modality, specialty?.slug],
+  );
   const currentOffering = useMemo(
     () => modality ? offerings.find((o) => o.modality === modality) ?? null : null,
     [modality, offerings],
   );
+
+  // Ao trocar modalidade/especialidade, limpa data/horário selecionados para forçar nova escolha
+  // dentro da nova agenda.
+  useEffect(() => {
+    setSelectedDayIso(null);
+    setSelectedTime(null);
+    setMonthOffset(0);
+  }, [modality, specialty?.slug]);
+
+  // Métricas agregadas para exibir mensagem clara de disponibilidade.
+  const availabilityStats = useMemo(() => {
+    const availableDays = calendar.filter((d) => d.state === 'available').length;
+    const availableSlots = calendar.reduce(
+      (acc, d) => acc + d.slots.filter((s) => s.state === 'available').length,
+      0,
+    );
+    return { availableDays, availableSlots };
+  }, [calendar]);
 
   // PIX polling
   useEffect(() => {
@@ -481,25 +503,61 @@ function ChrismedAgendarPage() {
                 onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); }}
               />
               <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
-                <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">Horários disponíveis</div>
-                {!selectedDay && <p className="text-sm text-[var(--chrismed-mist)]">Selecione uma data para ver horários.</p>}
-                {selectedDay?.state === 'empty' && <p className="text-sm text-[var(--chrismed-mist)]">Sem agenda neste dia.</p>}
-                {selectedDay && selectedDay.slots.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedDay.slots.map((s) => (
-                      <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
-                    ))}
+                <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">
+                  Horários disponíveis {modality ? `· ${MODALITY_META[modality].label}` : ''}
+                </div>
+
+                {availabilityStats.availableSlots === 0 && (
+                  <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    <strong>Sem disponibilidade nas próximas semanas</strong> para esta combinação de modalidade e
+                    especialidade. Fale com Oliver para entrar na lista de espera ou tentar outra modalidade.
                   </div>
+                )}
+
+                {!selectedDay && availabilityStats.availableSlots > 0 && (
+                  <p className="text-sm text-[var(--chrismed-mist)]">
+                    Selecione uma data disponível no calendário. {availabilityStats.availableDays} dia(s) com agenda
+                    aberta nas próximas semanas.
+                  </p>
+                )}
+
+                {selectedDay?.state === 'empty' && (
+                  <p className="text-sm text-[var(--chrismed-mist)]">Sem agenda neste dia. Escolha outra data.</p>
+                )}
+
+                {selectedDay && selectedDay.slots.length > 0 && (
+                  <>
+                    {selectedDay.slots.every((s) => s.state !== 'available') && (
+                      <div className="mb-3 rounded-md border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] px-3 py-2 text-xs text-[var(--chrismed-ink)]">
+                        Todos os horários deste dia estão ocupados ou indisponíveis. Selecione outra data no
+                        calendário.
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedDay.slots.map((s) => (
+                        <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
+                      ))}
+                    </div>
+                  </>
                 )}
                 <div className="mt-5 flex items-center gap-3 text-[10px] text-[var(--chrismed-mist)] flex-wrap">
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]" /> Disponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]/30" /> Indisponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-champagne-deep)]" /> Reservado</span>
                 </div>
-                <Button className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
+                <Button
+                  className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
+                  disabled={
+                    !selectedDayIso ||
+                    !selectedTime ||
+                    // trava dupla: horário selecionado precisa continuar 'available' (não pode ser held/past/indisponível)
+                    selectedDay?.slots.find((s) => s.time === selectedTime)?.state !== 'available'
+                  }
+                  onClick={() => setStep('identify')}
+                >
                   Continuar
                 </Button>
-                <p className="text-[11px] text-[var(--chrismed-mist)] mt-3">Reserva definitiva e lock de horário: <strong>Pendente Codex</strong>.</p>
+                <p className="text-[11px] text-[var(--chrismed-mist)] mt-3">A reserva é confirmada após a aprovação do pagamento PIX.</p>
               </div>
             </div>
           </section>
