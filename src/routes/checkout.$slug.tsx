@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -973,11 +974,26 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="cc-doctype">Tipo doc.</Label>
-        <Input id="cc-doctype" value={form.docType} onChange={(e) => setForm({ ...form, docType: e.target.value })} placeholder="CPF" />
+        <Select value={form.docType} onValueChange={(v) => setForm({ ...form, docType: v })}>
+          <SelectTrigger id="cc-doctype" aria-label="Tipo de documento">
+            <SelectValue placeholder="CPF" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="CPF">CPF</SelectItem>
+            <SelectItem value="CNPJ">CNPJ</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="cc-doc">Documento</Label>
-        <Input id="cc-doc" value={form.docNumber} onChange={(e) => setForm({ ...form, docNumber: e.target.value })} placeholder="000.000.000-00" inputMode="numeric" />
+        <Label htmlFor="cc-doc">Documento ({form.docType})</Label>
+        <Input
+          id="cc-doc"
+          value={form.docNumber}
+          onChange={(e) => setForm({ ...form, docNumber: e.target.value.replace(/\D/g, "").slice(0, form.docType === "CPF" ? 11 : 14) })}
+          placeholder={form.docType === "CPF" ? "000.000.000-00" : "00.000.000/0000-00"}
+          inputMode="numeric"
+          autoComplete="off"
+        />
       </div>
       <div className="col-span-2 space-y-2 mt-2">
         <Button
