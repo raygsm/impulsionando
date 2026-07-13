@@ -603,6 +603,8 @@ function Fechamento() {
 }
 
 // ============== ROOT ==============
+import { VitrineHighlight } from "@/components/marketing/VitrineHighlight";
+
 export function HomePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -613,6 +615,7 @@ export function HomePage() {
         <Demonstracao />
         <Beneficios />
         <Confianca />
+        <VitrineHighlight />
         <Setores />
         <PlanosChamada />
         <Fechamento />
