@@ -851,6 +851,7 @@ import { Route as AuthenticatedAdminOndaYProrataRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminOndaYFretesRouteImport } from './routes/_authenticated/admin.onda-y.fretes'
 import { Route as AuthenticatedAdminOndaYCrmReguasRouteImport } from './routes/_authenticated/admin.onda-y.crm-reguas'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
+import { Route as AuthenticatedAdminIntegracoesN8nRouteImport } from './routes/_authenticated/admin.integracoes.n8n'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as AuthenticatedAdminImpulsionitoCentroInteligenciaRouteImport } from './routes/_authenticated/admin.impulsionito.centro-inteligencia'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
@@ -5625,6 +5626,12 @@ const AuthenticatedAdminModulosClonagemRoute =
     path: '/admin/modulos/clonagem',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIntegracoesN8nRoute =
+  AuthenticatedAdminIntegracoesN8nRouteImport.update({
+    id: '/admin/integracoes/n8n',
+    path: '/admin/integracoes/n8n',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminIntegracoesMercadoPagoRoute =
   AuthenticatedAdminIntegracoesMercadoPagoRouteImport.update({
     id: '/admin/integracoes/mercado-pago',
@@ -6736,6 +6743,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
+  '/admin/integracoes/n8n': typeof AuthenticatedAdminIntegracoesN8nRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
   '/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
@@ -7623,6 +7631,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
+  '/admin/integracoes/n8n': typeof AuthenticatedAdminIntegracoesN8nRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
   '/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
@@ -8538,6 +8547,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
+  '/_authenticated/admin/integracoes/n8n': typeof AuthenticatedAdminIntegracoesN8nRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
   '/_authenticated/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
@@ -9453,6 +9463,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
+    | '/admin/integracoes/n8n'
     | '/admin/modulos/clonagem'
     | '/admin/onda-y/crm-reguas'
     | '/admin/onda-y/fretes'
@@ -10340,6 +10351,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
     | '/admin/integracoes/mercado-pago'
+    | '/admin/integracoes/n8n'
     | '/admin/modulos/clonagem'
     | '/admin/onda-y/crm-reguas'
     | '/admin/onda-y/fretes'
@@ -11254,6 +11266,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/impulsionito/centro-inteligencia'
     | '/_authenticated/admin/integracoes/mercado-pago'
+    | '/_authenticated/admin/integracoes/n8n'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/admin/onda-y/crm-reguas'
     | '/_authenticated/admin/onda-y/fretes'
@@ -17583,6 +17596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModulosClonagemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/integracoes/n8n': {
+      id: '/_authenticated/admin/integracoes/n8n'
+      path: '/admin/integracoes/n8n'
+      fullPath: '/admin/integracoes/n8n'
+      preLoaderRoute: typeof AuthenticatedAdminIntegracoesN8nRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/integracoes/mercado-pago': {
       id: '/_authenticated/admin/integracoes/mercado-pago'
       path: '/admin/integracoes/mercado-pago'
@@ -19336,6 +19356,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   AuthenticatedAdminImpulsionitoCentroInteligenciaRoute: typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
+  AuthenticatedAdminIntegracoesN8nRoute: typeof AuthenticatedAdminIntegracoesN8nRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
   AuthenticatedAssinaturaCheckoutPlanoRoute: typeof AuthenticatedAssinaturaCheckoutPlanoRoute
@@ -19749,6 +19770,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminImpulsionitoCentroInteligenciaRoute,
   AuthenticatedAdminIntegracoesMercadoPagoRoute:
     AuthenticatedAdminIntegracoesMercadoPagoRoute,
+  AuthenticatedAdminIntegracoesN8nRoute: AuthenticatedAdminIntegracoesN8nRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
   AuthenticatedAdminTenantIdRoute: AuthenticatedAdminTenantIdRoute,
