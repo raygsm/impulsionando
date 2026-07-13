@@ -33,6 +33,29 @@ import {
 
 type ChatMsg = { role: 'user' | 'assistant'; content: string };
 
+/** Bandeiras SVG oficiais — mesmas usadas no ChrismedShell. Inline para exibição
+ *  confiável em qualquer sistema (Windows não renderiza emojis 🇬🇧/🇪🇸). */
+function FlagUK({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 30" className={className} aria-hidden>
+      <clipPath id="oliver-fuk"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+      <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" clipPath="url(#oliver-fuk)" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="2.4" clipPath="url(#oliver-fuk)" />
+      <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="4" />
+    </svg>
+  );
+}
+function FlagES({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 60 30" className={className} aria-hidden>
+      <path d="M0,0 h60 v30 h-60 z" fill="#AA151B" />
+      <path d="M0,7.5 h60 v15 h-60 z" fill="#F1BF00" />
+    </svg>
+  );
+}
+
 const OLIVER_WELCOME: ChatMsg = {
   role: 'assistant',
   content:
