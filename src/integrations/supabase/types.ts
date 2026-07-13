@@ -20343,6 +20343,75 @@ export type Database = {
           },
         ]
       }
+      n8n_dispatch_log: {
+        Row: {
+          company_id: string | null
+          dispatched_at: string
+          error: string | null
+          event_code: string
+          id: string
+          payload: Json | null
+          response_body: string | null
+          status_code: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          dispatched_at?: string
+          error?: string | null
+          event_code: string
+          id?: string
+          payload?: Json | null
+          response_body?: string | null
+          status_code?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          dispatched_at?: string
+          error?: string | null
+          event_code?: string
+          id?: string
+          payload?: Json | null
+          response_body?: string | null
+          status_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_dispatch_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "n8n_dispatch_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "n8n_dispatch_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "n8n_dispatch_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "n8n_dispatch_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       n8n_workflow_runs: {
         Row: {
           channel: string | null
@@ -20415,6 +20484,45 @@ export type Database = {
           tenant_id?: string | null
           workflow_name?: string
           workflow_version?: string | null
+        }
+        Relationships: []
+      }
+      n8n_workflows: {
+        Row: {
+          created_at: string
+          event_code: string
+          funil: string
+          id: string
+          is_active: boolean
+          label: string
+          last_dispatched_at: string | null
+          notes: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_code: string
+          funil: string
+          id?: string
+          is_active?: boolean
+          label: string
+          last_dispatched_at?: string | null
+          notes?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_code?: string
+          funil?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_dispatched_at?: string | null
+          notes?: string | null
+          updated_at?: string
+          webhook_url?: string | null
         }
         Relationships: []
       }
