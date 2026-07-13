@@ -559,15 +559,7 @@ export function PublicHeader() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-          {/* Impulsionito — acesso destacado, sem competir com o CTA primário */}
-          <button
-            type="button"
-            onClick={() => triggerImpulsionito("header-topbar")}
-            className="hidden md:inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
-            aria-label="Falar com o Impulsionito"
-          >
-            <MessageCircle className="w-3.5 h-3.5" /> Impulsionito
-          </button>
+
 
           {/* CTA primário único */}
           <Button
