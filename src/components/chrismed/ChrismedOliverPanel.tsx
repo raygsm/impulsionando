@@ -292,6 +292,78 @@ export function ChrismedOliverPanel() {
               </div>
             )}
 
+            {/* Chat real com Oliver — cérebro CHRISMED com IA */}
+            <section aria-label="Conversar com Oliver">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="chrismed-sans inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] text-[var(--chrismed-champagne-deep)]">
+                  <Sparkles className="h-3 w-3" aria-hidden /> Converse com Oliver
+                </p>
+                {messages.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={resetChat}
+                    className="chrismed-sans inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] text-[var(--chrismed-mist)] hover:text-[var(--chrismed-ink)]"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Reiniciar
+                  </button>
+                )}
+              </div>
+
+              <div
+                ref={scrollRef}
+                className="max-h-72 overflow-y-auto space-y-2 border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/30 p-3"
+              >
+                {messages.map((m, i) => (
+                  <div
+                    key={i}
+                    className={
+                      m.role === 'user'
+                        ? 'ml-6 border border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] px-3 py-2 text-[13px] leading-relaxed text-[var(--chrismed-ivory)]'
+                        : 'mr-6 whitespace-pre-wrap border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[13px] leading-relaxed text-[var(--chrismed-ink)]'
+                    }
+                  >
+                    {m.content}
+                  </div>
+                ))}
+                {sending && (
+                  <div className="mr-6 inline-flex items-center gap-2 border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[12px] text-[var(--chrismed-mist)]">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Oliver está pensando…
+                  </div>
+                )}
+              </div>
+
+              <form
+                onSubmit={(e) => { e.preventDefault(); void sendMessage(input); }}
+                className="mt-2 flex items-end gap-2"
+              >
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      void sendMessage(input);
+                    }
+                  }}
+                  rows={2}
+                  placeholder="Pergunte sobre a Dra. Christiane, valores, ASO, NRs, agenda…"
+                  disabled={sending}
+                  className="chrismed-sans flex-1 resize-none border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] px-3 py-2 text-[13px] text-[var(--chrismed-ink)] placeholder:text-[var(--chrismed-mist)] focus:border-[var(--chrismed-champagne-deep)] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={sending || !input.trim()}
+                  aria-label="Enviar mensagem"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)] transition-colors hover:bg-[var(--chrismed-noir)] disabled:opacity-40"
+                >
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </button>
+              </form>
+            </section>
+
+
+
 
 
             {/* Atalhos globais sempre visíveis */}
