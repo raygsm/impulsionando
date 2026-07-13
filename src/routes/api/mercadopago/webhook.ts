@@ -136,6 +136,45 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
                   { onConflict: "mp_payment_id" },
                 );
 
+              // ===== N8N Onda 1: dispara réguas do funil Impulsionando =====
+              try {
+                const { dispatchN8nByEvent } = await import("@/lib/n8n-dispatch-by-event.server");
+                const method: string = p?.payment_method_id ?? "";
+                const paymentType: string = p?.payment_type_id ?? "";
+                const basePayload = {
+                  mp_payment_id: String(resourceId),
+                  status: internal,
+                  status_detail: p?.status_detail ?? null,
+                  amount: Number(p?.transaction_amount ?? 0),
+                  currency: p?.currency_id ?? "BRL",
+                  payment_method: method,
+                  payment_type: paymentType,
+                  email: p?.payer?.email ?? null,
+                  phone: p?.payer?.phone?.number ?? null,
+                  payer_name: [p?.payer?.first_name, p?.payer?.last_name].filter(Boolean).join(" ") || null,
+                  metadata: p?.metadata ?? {},
+                  external_reference: p?.external_reference ?? null,
+                };
+                const empresaId: string | null = (p?.metadata as any)?.empresa_id ?? null;
+
+                if (internal === "approved") {
+                  await dispatchN8nByEvent("conversao.pagamento-aprovado", basePayload, empresaId);
+                } else if (internal === "pending" && method === "pix") {
+                  await dispatchN8nByEvent("conversao.pix-gerado", {
+                    ...basePayload,
+                    qr_code: p?.point_of_interaction?.transaction_data?.qr_code ?? null,
+                    qr_code_base64: p?.point_of_interaction?.transaction_data?.qr_code_base64 ?? null,
+                    ticket_url: p?.point_of_interaction?.transaction_data?.ticket_url ?? null,
+                  }, empresaId);
+                } else if (internal === "rejected" && paymentType === "credit_card") {
+                  await dispatchN8nByEvent("conversao.cartao-recusado", basePayload, empresaId);
+                }
+              } catch (n8nErr: any) {
+                await logRuntime("warn", "N8N Onda 1 dispatch falhou", {
+                  mp_payment_id: String(resourceId), message: n8nErr?.message,
+                });
+              }
+
               if (internal === "approved") {
                 try {
                   const { autoProvisionFromPayment } = await import(
