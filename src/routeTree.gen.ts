@@ -20,6 +20,7 @@ import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as SiteInstitucionalRouteImport } from './routes/site-institucional'
 import { Route as RiomedRouteImport } from './routes/riomed'
 import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -976,6 +977,11 @@ const SolucoesRoute = SolucoesRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteInstitucionalRoute = SiteInstitucionalRouteImport.update({
+  id: '/site-institucional',
+  path: '/site-institucional',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RiomedRoute = RiomedRouteImport.update({
@@ -6088,6 +6094,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/riomed': typeof RiomedRouteWithChildren
+  '/site-institucional': typeof SiteInstitucionalRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/status': typeof StatusRouteWithChildren
@@ -6994,6 +7001,7 @@ export interface FileRoutesByTo {
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
+  '/site-institucional': typeof SiteInstitucionalRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/status': typeof StatusRouteWithChildren
@@ -7892,6 +7900,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/riomed': typeof RiomedRouteWithChildren
+  '/site-institucional': typeof SiteInstitucionalRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/status': typeof StatusRouteWithChildren
@@ -8808,6 +8817,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reset-password-sent'
     | '/riomed'
+    | '/site-institucional'
     | '/sobre'
     | '/solucoes'
     | '/status'
@@ -9714,6 +9724,7 @@ export interface FileRouteTypes {
     | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
+    | '/site-institucional'
     | '/sobre'
     | '/solucoes'
     | '/status'
@@ -10611,6 +10622,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/reset-password-sent'
     | '/riomed'
+    | '/site-institucional'
     | '/sobre'
     | '/solucoes'
     | '/status'
@@ -11527,6 +11539,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
   RiomedRoute: typeof RiomedRouteWithChildren
+  SiteInstitucionalRoute: typeof SiteInstitucionalRoute
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   StatusRoute: typeof StatusRouteWithChildren
@@ -11777,6 +11790,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site-institucional': {
+      id: '/site-institucional'
+      path: '/site-institucional'
+      fullPath: '/site-institucional'
+      preLoaderRoute: typeof SiteInstitucionalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/riomed': {
@@ -20419,6 +20439,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   RiomedRoute: RiomedRouteWithChildren,
+  SiteInstitucionalRoute: SiteInstitucionalRoute,
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   StatusRoute: StatusRouteWithChildren,
