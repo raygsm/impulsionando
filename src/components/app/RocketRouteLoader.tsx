@@ -93,18 +93,19 @@ export function RocketRouteLoader() {
           }}
         >
           <div className="relative">
-            <div className="rounded-full bg-primary text-primary-foreground p-3 shadow-lg shadow-primary/30">
-              <Rocket className="w-6 h-6" />
+            <div className="rounded-full bg-primary text-primary-foreground p-6 shadow-lg shadow-primary/30">
+              <Rocket className="w-12 h-12" />
             </div>
             {/* chama */}
             <div
               aria-hidden
-              className="absolute left-1/2 -bottom-2 w-3 h-4 rounded-b-full bg-gradient-to-b from-amber-400 via-orange-500 to-red-500 blur-[1px]"
+              className="absolute left-1/2 -bottom-4 w-6 h-8 rounded-b-full bg-gradient-to-b from-amber-400 via-orange-500 to-red-500 blur-[1px]"
               style={{
                 animation: visible ? "impRocketFlame 0.35s ease-in-out infinite" : "none",
                 transformOrigin: "top center",
               }}
             />
+
           </div>
         </div>
       </div>

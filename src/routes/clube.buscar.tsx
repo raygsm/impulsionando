@@ -90,7 +90,7 @@ function ClubeBuscar() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <SectionHeader eyebrow="Resultados de exemplo" title="Empresas do Ecossistema" align="left" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-6">
-          {TENANT_MODELS.map((t) => (
+          {TENANT_MODELS.filter((t) => t.segment !== "white-label").map((t) => (
             <Link
               key={t.slug}
               to={t.route}
