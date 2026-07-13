@@ -114,7 +114,7 @@ function ComecarPage() {
     }
     toast.success("Cadastro recebido! Redirecionando para sua recomendação…");
     navigate({
-      to: "/orcamento",
+      to: "/orcamento" as never,
       search: {
         nome: form.name,
         email: form.email,
