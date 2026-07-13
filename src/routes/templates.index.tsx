@@ -40,10 +40,16 @@ function VitrineHub() {
             Um exemplo de front-end para cada segmento
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
-            Explore templates navegáveis. São exemplos do que entregamos —
-            você contrata, troca imagens e conteúdos, e o site já nasce com a
-            operação Impulsionando por trás.
+            Explore templates navegáveis, alterne entre preview mobile e desktop,
+            e gere automaticamente um rascunho do seu site pelo{" "}
+            <Link to="/onboarding-site" className="text-primary underline">onboarding guiado</Link>.
           </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link to="/onboarding-site">Gerar meu rascunho <ArrowRight className="h-4 w-4 ml-1" /></Link>
+            </Button>
+          </div>
+
         </section>
 
         <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-20">

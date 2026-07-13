@@ -5,8 +5,38 @@
   <url><loc>https://impulsionando.com.br/modulos</loc><priority>0.8</priority></url>
   <url><loc>https://impulsionando.com.br/planos</loc><priority>0.9</priority></url>
   <url><loc>https://impulsionando.com.br/orcamento</loc><priority>0.9</priority></url>
-  <url><loc>https://impulsionando.com.br/demo</loc><priority>0.7</priority></url>
+  <url><loc>https://impulsionando.com.br/templates</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://impulsionando.com.br/templates/saude</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/saude/odontologia</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/saude/dermatologia</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/saude/fisioterapia</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/alimentacao</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/alimentacao/hamburgueria</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/alimentacao/cafeteria</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/alimentacao/pizzaria</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/fornecedores</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/fornecedores/medico-hospitalar</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/fornecedores/industrial</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/imobiliario</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/imobiliario/alto-padrao</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/imobiliario/aluguel</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/imobiliario/temporada</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/servicos</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/servicos/contabilidade</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/servicos/marketing</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/educacao</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/educacao/idiomas</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/educacao/cursos-livres</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/eventos</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/eventos/casamentos</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/eventos/congressos</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/varejo</loc><priority>0.6</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/varejo/moda</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/varejo/veiculos</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/templates/varejo/ecommerce</loc><priority>0.5</priority></url>
+  <url><loc>https://impulsionando.com.br/onboarding-site</loc><priority>0.7</priority></url>
   <url><loc>https://impulsionando.com.br/contato</loc><priority>0.7</priority></url>
+
   <url><loc>https://impulsionando.com.br/sobre</loc><priority>0.6</priority></url>
   <url><loc>https://impulsionando.com.br/nichos</loc><priority>0.7</priority></url>
   <url><loc>https://impulsionando.com.br/trabalhe-conosco</loc><priority>0.5</priority></url>

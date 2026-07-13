@@ -14,6 +14,18 @@ import {
 
 export type VitrineCTA = { label: string; href: string };
 
+export type VitrineSubniche = {
+  slug: string;
+  name: string;
+  templateName: string;
+  tagline: string;
+  heroImage?: string;
+  headline?: string;
+  subtitle?: string;
+  accent?: string;
+  heroGradient?: string;
+};
+
 export type VitrineTemplate = {
   macro: string; // slug do macro-nicho
   label: string; // rótulo do macro
@@ -43,7 +55,9 @@ export type VitrineTemplate = {
   showcase: { image: string; title: string; subtitle: string; meta?: string }[];
   testimonial: { quote: string; author: string; role: string };
   contact: { whatsapp: string; email: string; address: string };
+  subniches?: VitrineSubniche[];
 };
+
 
 const img = (seed: string, w = 1200, h = 800) =>
   `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
@@ -336,6 +350,78 @@ export const VITRINE_TEMPLATES: VitrineTemplate[] = [
   },
 ];
 
+// Subniches por macro — mantidos fora do objeto principal para leitura.
+const SUBNICHES: Record<string, VitrineSubniche[]> = {
+  saude: [
+    { slug: "odontologia", name: "Clínica Odontológica", templateName: "Clínica Odontológica · Sorriso Design", tagline: "Odontologia estética e ortodontia", headline: "Sorriso que transforma", subtitle: "Ortodontia digital, clareamento e implantes com atendimento humano.", accent: "#0ea5e9", heroImage: img("odonto-hero", 1600, 1000) },
+    { slug: "dermatologia", name: "Dermatologia & Estética", templateName: "Dermato · Pele & Bem-estar", tagline: "Dermatologia clínica e estética", headline: "Pele saudável, autoestima em alta", subtitle: "Protocolos personalizados, tecnologia de ponta e acompanhamento contínuo.", accent: "#db2777", heroImage: img("dermato-hero", 1600, 1000) },
+    { slug: "fisioterapia", name: "Fisioterapia & RPG", templateName: "Fisio · Movimento Pleno", tagline: "Reabilitação, RPG e Pilates clínico", headline: "Movimento sem dor, vida com energia", subtitle: "Avaliação funcional, planos individuais e evolução mensurada.", accent: "#059669", heroImage: img("fisio-hero", 1600, 1000) },
+  ],
+  alimentacao: [
+    { slug: "hamburgueria", name: "Hamburgueria Artesanal", templateName: "Hamburgueria · Smash & Craft", tagline: "Smash burger e cervejas artesanais", headline: "Do fogo direto ao seu delivery", subtitle: "Cardápio artesanal, pedido pelo QR e recompensas por visita.", accent: "#c2410c", heroImage: img("burger-hero", 1600, 1000) },
+    { slug: "cafeteria", name: "Cafeteria Especial", templateName: "Cafeteria · Grão de Origem", tagline: "Cafés especiais e bistrô", headline: "Cada xícara conta uma história", subtitle: "Grãos rastreáveis, brunch autoral e clube de assinatura mensal.", accent: "#78350f", heroImage: img("cafe-hero", 1600, 1000) },
+    { slug: "pizzaria", name: "Pizzaria Napoletana", templateName: "Pizzaria · Forno a Lenha", tagline: "Massa de fermentação natural", headline: "A pizza que Nápoles reconheceria", subtitle: "Forno a 450°C, ingredientes DOP e delivery com caixa térmica.", accent: "#991b1b", heroImage: img("pizza-hero", 1600, 1000) },
+  ],
+  fornecedores: [
+    { slug: "medico-hospitalar", name: "Distribuidora Médica", templateName: "B2B · Medico-hospitalar", tagline: "Suprimentos para clínicas e hospitais", headline: "Reposição inteligente para a área da saúde", subtitle: "SLA garantido, tabela por CNPJ e rastreio de lote.", accent: "#0369a1", heroImage: img("medhosp-hero", 1600, 1000) },
+    { slug: "industrial", name: "Suprimentos Industriais", templateName: "B2B · Industrial MRO", tagline: "MRO e ferramentaria", headline: "Sua linha de produção nunca para", subtitle: "Cadastro por unidade fabril, contrato de reposição e integração ERP.", accent: "#334155", heroImage: img("industry-hero", 1600, 1000) },
+  ],
+  imobiliario: [
+    { slug: "alto-padrao", name: "Alto Padrão", templateName: "Imob · Luxo & Alto Padrão", tagline: "Coberturas, mansões e lançamentos premium", headline: "Endereços que definem uma vida", subtitle: "Curadoria discreta, tour virtual e atendimento privativo.", accent: "#0b1120", heroImage: img("luxo-hero", 1600, 1000) },
+    { slug: "aluguel", name: "Locação Residencial", templateName: "Imob · Alugue em minutos", tagline: "Locação com garantia digital", headline: "Do interesse à chave em 48h", subtitle: "Análise online, contrato eletrônico e vistoria integrada.", accent: "#0f766e", heroImage: img("aluguel-hero", 1600, 1000) },
+    { slug: "temporada", name: "Temporada & Airbnb", templateName: "Imob · Temporada 5★", tagline: "Gestão de imóveis por temporada", headline: "Multiplique a receita do seu imóvel", subtitle: "Precificação dinâmica, faxina orquestrada e repasse transparente.", accent: "#7c2d12", heroImage: img("temporada-hero", 1600, 1000) },
+  ],
+  servicos: [
+    { slug: "contabilidade", name: "Contabilidade Digital", templateName: "Contab · Escritório Digital", tagline: "Contabilidade consultiva 100% online", headline: "Seu escritório sem papel, com clareza", subtitle: "Portal do cliente, obrigações no radar e IRPF descomplicado.", accent: "#065f46", heroImage: img("contab-hero", 1600, 1000) },
+    { slug: "marketing", name: "Agência de Marketing", templateName: "Agência · Marketing de Performance", tagline: "Growth, mídia paga e conteúdo", headline: "Marketing que prova cada real investido", subtitle: "Dashboards em tempo real, criativo próprio e squad dedicado.", accent: "#7c3aed", heroImage: img("mkt-hero", 1600, 1000) },
+  ],
+  educacao: [
+    { slug: "idiomas", name: "Escola de Idiomas", templateName: "Idiomas · Mundo em Aula", tagline: "Cursos regulares e imersão", headline: "Fluência acontece na conversa", subtitle: "Turmas reduzidas, professores nativos e trilha personalizada.", accent: "#1d4ed8", heroImage: img("idioma-hero", 1600, 1000) },
+    { slug: "cursos-livres", name: "Cursos Livres & Bootcamps", templateName: "Cursos · Bootcamps Tech", tagline: "Formações intensivas em tecnologia", headline: "Do zero ao mercado em 6 meses", subtitle: "Projetos reais, mentoria 1:1 e carreira acompanhada.", accent: "#0891b2", heroImage: img("bootcamp-hero", 1600, 1000) },
+  ],
+  eventos: [
+    { slug: "casamentos", name: "Casamentos", templateName: "Eventos · Cerimônia dos Sonhos", tagline: "Cerimônia, festa e experiência", headline: "O dia perfeito começa muito antes", subtitle: "Cerimonial, RSVP digital, cardápio interativo e fotos entregues no mesmo dia.", accent: "#be185d", heroImage: img("casa-hero", 1600, 1000) },
+    { slug: "congressos", name: "Congressos & Convenções", templateName: "Eventos · Congresso Pro", tagline: "Eventos corporativos e científicos", headline: "Sua marca em cada detalhe", subtitle: "Credenciamento por QR, agenda pessoal, hub de patrocinadores e ROI mensurado.", accent: "#1e3a8a", heroImage: img("congresso-hero", 1600, 1000) },
+  ],
+  varejo: [
+    { slug: "moda", name: "Boutique de Moda", templateName: "Varejo · Boutique Autoral", tagline: "Coleção autoral e clube de assinatura", headline: "Estilo que fala por você", subtitle: "Loja unificada, personal shopper no chat e assinatura mensal.", accent: "#db2777", heroImage: img("moda-hero", 1600, 1000) },
+    { slug: "veiculos", name: "Revenda de Veículos", templateName: "Varejo · Auto Premium", tagline: "Seminovos com selo de qualidade", headline: "Do teste drive à chave em suas mãos", subtitle: "Vitrine 360°, simulação de financiamento e proposta digital.", accent: "#111827", heroImage: img("auto-hero", 1600, 1000) },
+    { slug: "ecommerce", name: "E-commerce Nichado", templateName: "Varejo · E-commerce Nichado", tagline: "Loja online + operação omnichannel", headline: "Uma loja, todos os canais", subtitle: "Marketplace, checkout próprio e recuperação de carrinho no WhatsApp.", accent: "#f59e0b", heroImage: img("ecom-hero", 1600, 1000) },
+  ],
+};
+
+// Anexa os subniches em cada template.
+for (const t of VITRINE_TEMPLATES) {
+  t.subniches = SUBNICHES[t.macro] ?? [];
+}
+
 export function getVitrineTemplate(macro: string): VitrineTemplate | undefined {
   return VITRINE_TEMPLATES.find((t) => t.macro === macro);
 }
+
+export function getVitrineSubniche(macro: string, sub: string):
+  | { base: VitrineTemplate; subniche: VitrineSubniche; merged: VitrineTemplate }
+  | undefined {
+  const base = getVitrineTemplate(macro);
+  if (!base) return undefined;
+  const subniche = base.subniches?.find((s) => s.slug === sub);
+  if (!subniche) return undefined;
+  const merged: VitrineTemplate = {
+    ...base,
+    templateName: subniche.templateName,
+    brand: { ...base.brand, name: subniche.name, tagline: subniche.tagline },
+    palette: {
+      accent: subniche.accent ?? base.palette.accent,
+      heroGradient: subniche.heroGradient ?? base.palette.heroGradient,
+    },
+    hero: {
+      ...base.hero,
+      eyebrow: subniche.name,
+      title: subniche.headline ?? base.hero.title,
+      subtitle: subniche.subtitle ?? base.hero.subtitle,
+      image: subniche.heroImage ?? base.hero.image,
+    },
+  };
+  return { base, subniche, merged };
+}
+
