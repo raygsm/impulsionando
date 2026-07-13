@@ -312,7 +312,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         httpEquiv: "Content-Security-Policy",
         content: [
           "default-src 'self' https: data: blob:",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev https://sdk.mercadopago.com https://http2.mlstatic.com",
           "style-src 'self' 'unsafe-inline' https: data:",
           "img-src 'self' data: blob: https:",
           "font-src 'self' data: https:",
