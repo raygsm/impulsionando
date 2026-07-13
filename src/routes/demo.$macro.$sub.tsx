@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { DemoShell } from "@/components/demo/DemoShell";
+import { SmartDemoShell } from "@/components/demo/smart/SmartDemoShell";
 import { getDemoTemplate } from "@/data/demo-templates/registry";
 
 export const Route = createFileRoute("/demo/$macro/$sub")({
@@ -52,5 +52,5 @@ export const Route = createFileRoute("/demo/$macro/$sub")({
 
 function DemoPage() {
   const { template } = Route.useLoaderData();
-  return <DemoShell template={template} />;
+  return <SmartDemoShell template={template} />;
 }
