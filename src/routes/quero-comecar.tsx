@@ -30,7 +30,7 @@ export const Route = createFileRoute("/quero-comecar")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://impulsionando.com.br/comecar" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/quero-comecar" }],
   }),
   component: ComecarPage,
 });
