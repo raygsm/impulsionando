@@ -495,7 +495,7 @@ function ChrismedAgendarPage() {
         {/* STEP 5: Calendário + horários */}
         {step === 'schedule' && unit && (
           <section aria-labelledby="s5">
-            <button onClick={() => isCare360 ? setStep('modality') : setStep('unit')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar unidade'}</button>
+            <button onClick={() => isCare360 ? setStep('modality') : setStep('doctor')} className="text-sm text-[var(--chrismed-ink)] hover:underline mb-3">← {isCare360 ? 'Trocar modalidade' : 'Trocar médico'}</button>
             <h2 id="s5" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Escolha data e horário</h2>
             <p className="mt-2 text-[var(--chrismed-graphite)]">Datas em branco não têm agenda. Horários em cinza estão indisponíveis. Você reserva ao continuar.</p>
 
