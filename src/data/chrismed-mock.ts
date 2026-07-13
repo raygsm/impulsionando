@@ -89,12 +89,33 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
  * - sábado: metade dos horários
  * - dias úteis: agenda cheia com alguns horários indisponíveis
  */
-export function buildChrismedMockCalendar(startDate: Date = new Date()): ChrismedDay[] {
+/**
+ * Gera calendário com disponibilidade variando por modalidade/especialidade,
+ * de forma determinística (mesma escolha → mesma agenda). Simula a agenda
+ * real filtrada — presencial abre menos janelas que teleconsulta, e cada
+ * especialidade tem seu próprio padrão de ocupação.
+ */
+export function buildChrismedMockCalendar(
+  options: { startDate?: Date; modality?: ChrismedModality | null; specialtySlug?: string | null } = {},
+): ChrismedDay[] {
+  const { startDate = new Date(), modality = null, specialtySlug = null } = options;
   const days: ChrismedDay[] = [];
   const base = new Date(startDate);
   base.setHours(0, 0, 0, 0);
 
-  const times = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'];
+  // Grades por modalidade — presencial concentra tarde, tele/domiciliar são mais amplas.
+  const gridByModality: Record<string, string[]> = {
+    presencial: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+    telemedicina: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+    domiciliar: ['09:00', '10:30', '14:00', '15:30', '17:00'],
+    retorno: ['09:00', '10:00', '14:00', '15:00'],
+  };
+  const times = gridByModality[modality ?? 'telemedicina'] ?? gridByModality.telemedicina;
+
+  // Seed textual → número, para variar padrão por especialidade.
+  const specSeed = (specialtySlug ?? 'default')
+    .split('')
+    .reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) % 997, 7);
 
   for (let i = 0; i < 42; i++) {
     const d = new Date(base);
@@ -108,9 +129,9 @@ export function buildChrismedMockCalendar(startDate: Date = new Date()): Chrisme
     }
 
     const slots: ChrismedSlot[] = times.map((t, idx) => {
-      // padrão determinístico para variar disponibilidade
-      const seed = (i * 7 + idx) % 5;
-      if (dow === 6 && idx > 3) return { time: t, state: 'unavailable' };
+      const seed = (i * 7 + idx * 3 + specSeed) % 5;
+      if (dow === 6 && idx > 2) return { time: t, state: 'unavailable' };
+      if (modality === 'presencial' && seed === 0) return { time: t, state: 'unavailable' };
       if (seed === 0) return { time: t, state: 'unavailable' };
       if (seed === 1 && idx === 2) return { time: t, state: 'held' };
       return { time: t, state: 'available' };
@@ -122,3 +143,4 @@ export function buildChrismedMockCalendar(startDate: Date = new Date()): Chrisme
 
   return days;
 }
+

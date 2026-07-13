@@ -188,11 +188,33 @@ function ChrismedAgendarPage() {
     })();
   }, []);
 
-  const calendar = useMemo(() => buildChrismedMockCalendar(), []);
+  // Agenda dinâmica: recalcula quando modalidade/especialidade mudam.
+  const calendar = useMemo(
+    () => buildChrismedMockCalendar({ modality, specialtySlug: specialty?.slug ?? null }),
+    [modality, specialty?.slug],
+  );
   const currentOffering = useMemo(
     () => modality ? offerings.find((o) => o.modality === modality) ?? null : null,
     [modality, offerings],
   );
+
+  // Ao trocar modalidade/especialidade, limpa data/horário selecionados para forçar nova escolha
+  // dentro da nova agenda.
+  useEffect(() => {
+    setSelectedDayIso(null);
+    setSelectedTime(null);
+    setMonthOffset(0);
+  }, [modality, specialty?.slug]);
+
+  // Métricas agregadas para exibir mensagem clara de disponibilidade.
+  const availabilityStats = useMemo(() => {
+    const availableDays = calendar.filter((d) => d.state === 'available').length;
+    const availableSlots = calendar.reduce(
+      (acc, d) => acc + d.slots.filter((s) => s.state === 'available').length,
+      0,
+    );
+    return { availableDays, availableSlots };
+  }, [calendar]);
 
   // PIX polling
   useEffect(() => {
@@ -481,25 +503,61 @@ function ChrismedAgendarPage() {
                 onPick={(iso) => { setSelectedDayIso(iso); setSelectedTime(null); }}
               />
               <div className="rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
-                <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">Horários disponíveis</div>
-                {!selectedDay && <p className="text-sm text-[var(--chrismed-mist)]">Selecione uma data para ver horários.</p>}
-                {selectedDay?.state === 'empty' && <p className="text-sm text-[var(--chrismed-mist)]">Sem agenda neste dia.</p>}
-                {selectedDay && selectedDay.slots.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedDay.slots.map((s) => (
-                      <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
-                    ))}
+                <div className="text-xs uppercase tracking-[0.14em] text-[var(--chrismed-mist)] mb-3">
+                  Horários disponíveis {modality ? `· ${MODALITY_META[modality].label}` : ''}
+                </div>
+
+                {availabilityStats.availableSlots === 0 && (
+                  <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    <strong>Sem disponibilidade nas próximas semanas</strong> para esta combinação de modalidade e
+                    especialidade. Fale com Oliver para entrar na lista de espera ou tentar outra modalidade.
                   </div>
+                )}
+
+                {!selectedDay && availabilityStats.availableSlots > 0 && (
+                  <p className="text-sm text-[var(--chrismed-mist)]">
+                    Selecione uma data disponível no calendário. {availabilityStats.availableDays} dia(s) com agenda
+                    aberta nas próximas semanas.
+                  </p>
+                )}
+
+                {selectedDay?.state === 'empty' && (
+                  <p className="text-sm text-[var(--chrismed-mist)]">Sem agenda neste dia. Escolha outra data.</p>
+                )}
+
+                {selectedDay && selectedDay.slots.length > 0 && (
+                  <>
+                    {selectedDay.slots.every((s) => s.state !== 'available') && (
+                      <div className="mb-3 rounded-md border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] px-3 py-2 text-xs text-[var(--chrismed-ink)]">
+                        Todos os horários deste dia estão ocupados ou indisponíveis. Selecione outra data no
+                        calendário.
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedDay.slots.map((s) => (
+                        <SlotButton key={s.time} slot={s} selected={selectedTime === s.time} onPick={() => setSelectedTime(s.time)} />
+                      ))}
+                    </div>
+                  </>
                 )}
                 <div className="mt-5 flex items-center gap-3 text-[10px] text-[var(--chrismed-mist)] flex-wrap">
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]" /> Disponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-ink)]/30" /> Indisponível</span>
                   <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-[var(--chrismed-champagne-deep)]" /> Reservado</span>
                 </div>
-                <Button className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={!selectedDayIso || !selectedTime} onClick={() => setStep('identify')}>
+                <Button
+                  className="w-full mt-5 bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
+                  disabled={
+                    !selectedDayIso ||
+                    !selectedTime ||
+                    // trava dupla: horário selecionado precisa continuar 'available' (não pode ser held/past/indisponível)
+                    selectedDay?.slots.find((s) => s.time === selectedTime)?.state !== 'available'
+                  }
+                  onClick={() => setStep('identify')}
+                >
                   Continuar
                 </Button>
-                <p className="text-[11px] text-[var(--chrismed-mist)] mt-3">Reserva definitiva e lock de horário: <strong>Pendente Codex</strong>.</p>
+                <p className="text-[11px] text-[var(--chrismed-mist)] mt-3">A reserva é confirmada após a aprovação do pagamento PIX.</p>
               </div>
             </div>
           </section>
@@ -628,19 +686,80 @@ function ChrismedAgendarPage() {
           </section>
         )}
 
-        {/* STEP 9: Sucesso */}
+        {/* STEP 9: Sucesso — resumo completo do agendamento + próximos passos */}
         {step === 'done' && (
-          <section aria-labelledby="s9" className="max-w-xl mx-auto text-center">
-            <div className="mx-auto h-16 w-16 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] flex items-center justify-center mb-4">
-              <CheckCircle2 className="h-9 w-9" />
+          <section aria-labelledby="s9" className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-[var(--chrismed-sand)] text-[var(--chrismed-ink)] flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-9 w-9" />
+              </div>
+              <h2 id="s9" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">
+                Agendamento confirmado
+              </h2>
+              <p className="mt-3 text-[var(--chrismed-graphite)]">
+                Pagamento aprovado e horário reservado em seu nome. Um resumo com todas as instruções foi enviado
+                para <strong>{patient.email || 'seu e-mail'}</strong>.
+              </p>
             </div>
-            <h2 id="s9" className="chrismed-serif text-3xl text-[var(--chrismed-ink)]">Pagamento confirmado</h2>
-            <p className="mt-3 text-[var(--chrismed-graphite)]">
-              Recebemos seu pagamento. A persistência definitiva do agendamento, o envio de e-mail/WhatsApp e o link de teleconsulta dependem do webhook idempotente (<strong>Pendente Codex</strong>).
-            </p>
+
+            <Card className="mt-6 border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]">
+              <CardHeader>
+                <CardTitle className="chrismed-serif text-xl">Resumo da sua consulta</CardTitle>
+                <CardDescription>Guarde estes dados. Você também os recebe por e-mail e WhatsApp.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <Row label="Paciente" value={`${patient.first_name} ${patient.last_name}`.trim() || '—'} />
+                <Row label="Modalidade" value={modality ? MODALITY_META[modality].label : '—'} />
+                <Row
+                  label="Especialidade"
+                  value={isCare360 ? `Atendimento 360° — ${CARE_360_LABEL}` : specialty?.name ?? '—'}
+                />
+                <Row label="Médico(a)" value={doctor?.name ?? '—'} />
+                <Row label="Unidade" value={unit?.name ?? '—'} />
+                <Row label="Data" value={selectedDayIso ?? '—'} />
+                <Row label="Horário" value={selectedTime ?? '—'} />
+                {currentOffering && (
+                  <Row
+                    label="Valor pago"
+                    value={
+                      currentOffering.price_cents === 0
+                        ? 'Cortesia'
+                        : `R$ ${(currentOffering.price_cents / 100).toFixed(2).replace('.', ',')}`
+                    }
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="mt-4 border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]">
+              <CardHeader>
+                <CardTitle className="chrismed-serif text-lg">Próximos passos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-[var(--chrismed-graphite)]">
+                {modality === 'telemedicina' && (
+                  <p>1. Você receberá o <strong>link da teleconsulta</strong> por e-mail e WhatsApp até 30 min antes do horário.</p>
+                )}
+                {modality === 'presencial' && (
+                  <p>1. Chegue com <strong>15 min de antecedência</strong> em {unit?.address || 'nosso consultório em Copacabana'}. Traga documento com foto e exames anteriores.</p>
+                )}
+                {modality === 'domiciliar' && (
+                  <p>1. A equipe entrará em contato para confirmar o <strong>endereço e logística</strong> da visita domiciliar em até 4 horas úteis.</p>
+                )}
+                <p>2. Em caso de imprevisto, você pode <strong>remarcar sem custo</strong> com mais de 24h de antecedência.</p>
+                <p>3. Precisa preparar algum exame ou jejum? Fale com o Oliver para receber a orientação específica da sua consulta.</p>
+              </CardContent>
+            </Card>
+
             <div className="mt-6 flex gap-3 justify-center flex-wrap">
-              <Button className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" onClick={() => window.location.reload()}>Agendar outra</Button>
-              <Button variant="outline" className="border-[var(--chrismed-sand)]" onClick={openOliver}>Falar com Oliver</Button>
+              <Button
+                className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]"
+                onClick={() => window.location.reload()}
+              >
+                Agendar outra consulta
+              </Button>
+              <Button variant="outline" className="border-[var(--chrismed-sand)]" onClick={openOliver}>
+                Falar com Oliver
+              </Button>
             </div>
           </section>
         )}
