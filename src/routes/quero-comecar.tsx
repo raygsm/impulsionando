@@ -114,15 +114,15 @@ function ComecarPage() {
     }
     toast.success("Cadastro recebido! Redirecionando para sua recomendação…");
     navigate({
-      to: "/orcamento" as never,
+      to: "/orcamento",
       search: {
         nome: form.name,
         email: form.email,
         whatsapp: form.whatsapp,
         cidade: address?.localidade,
         uf: address?.uf,
-      } as never,
-    });
+      },
+    } as never);
   }
 
   return (
