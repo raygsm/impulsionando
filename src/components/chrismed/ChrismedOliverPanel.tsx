@@ -12,7 +12,10 @@
  *    canal humano assumirá.
  */
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink } from 'lucide-react';
+import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink, Send, Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { askOliver } from '@/lib/oliver-chat.functions';
 import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
@@ -27,6 +30,14 @@ import {
   setChrismedOliverInfo,
   useChrismedOliverState,
 } from './oliver-store';
+
+type ChatMsg = { role: 'user' | 'assistant'; content: string };
+
+const OLIVER_WELCOME: ChatMsg = {
+  role: 'assistant',
+  content:
+    'Olá! Sou o Oliver, concierge da CHRISMED. Posso responder sobre a Dra. Christiane, agendar consultas (presencial, tele, domiciliar ou ocupacional), esclarecer valores, prazos, NRs e programas de saúde ocupacional. Como posso ajudar?',
+};
 
 const C = CHRISMED_CONTACT.channels;
 
