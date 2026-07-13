@@ -307,13 +307,7 @@ function ChrismedAgendarPage() {
           </div>
         </div>
 
-        {/* Aviso público sobre mock */}
-        {step !== 'done' && (
-          <div className="mb-6 flex items-start gap-2 rounded-lg border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] px-4 py-3 text-sm text-[var(--chrismed-ink)]">
-            <AlertCircle className="h-4 w-4 mt-0.5 text-amber-700 flex-shrink-0" />
-            <p><strong>Agenda em demonstração:</strong> horários exibidos aqui são visuais. A reserva definitiva e o bloqueio de slot dependem do backend (Codex) — o pagamento PIX no final é real.</p>
-          </div>
-        )}
+        {/* Agenda real — reserva confirmada após pagamento PIX aprovado */}
 
         {/* Banner Atendimento 360° — reforça a fusão das 3 especialidades (tele + domiciliar) */}
         {isCare360 && step !== 'done' && step !== 'modality' && (
