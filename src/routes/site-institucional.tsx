@@ -162,6 +162,12 @@ function SiteInstitucionalPage() {
             <p className="mt-4 text-[11px] text-center text-muted-foreground">
               A partir do 13º mês: hospedagem + domínio a R$ 49/mês. Cancele quando quiser.
             </p>
+            <p className="mt-6 text-center text-sm">
+              Já contratou?{" "}
+              <Link to="/briefing/site-institucional" className="text-primary font-medium hover:underline">
+                Preencher o briefing agora →
+              </Link>
+            </p>
           </Card>
         </section>
       </main>
