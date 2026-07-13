@@ -17193,6 +17193,330 @@ export type Database = {
         }
         Relationships: []
       }
+      hostinger_domains: {
+        Row: {
+          auto_renew: boolean
+          company_id: string
+          created_at: string
+          domain: string
+          expires_at: string | null
+          hostinger_domain_id: string | null
+          hostinger_order_id: string | null
+          id: string
+          meta: Json
+          nameservers: string[]
+          registered_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          company_id: string
+          created_at?: string
+          domain: string
+          expires_at?: string | null
+          hostinger_domain_id?: string | null
+          hostinger_order_id?: string | null
+          id?: string
+          meta?: Json
+          nameservers?: string[]
+          registered_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_renew?: boolean
+          company_id?: string
+          created_at?: string
+          domain?: string
+          expires_at?: string | null
+          hostinger_domain_id?: string | null
+          hostinger_order_id?: string | null
+          id?: string
+          meta?: Json
+          nameservers?: string[]
+          registered_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostinger_domains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_domains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_domains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_domains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_domains_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      hostinger_mailboxes: {
+        Row: {
+          address: string
+          company_id: string
+          created_at: string
+          domain: string
+          hostinger_mailbox_id: string | null
+          id: string
+          meta: Json
+          quota_mb: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          company_id: string
+          created_at?: string
+          domain: string
+          hostinger_mailbox_id?: string | null
+          id?: string
+          meta?: Json
+          quota_mb?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          company_id?: string
+          created_at?: string
+          domain?: string
+          hostinger_mailbox_id?: string | null
+          id?: string
+          meta?: Json
+          quota_mb?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostinger_mailboxes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_mailboxes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_mailboxes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_mailboxes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_mailboxes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      hostinger_orders: {
+        Row: {
+          amount_cents: number | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          hostinger_order_id: string | null
+          id: string
+          kind: string
+          payload: Json
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          hostinger_order_id?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          hostinger_order_id?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostinger_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      hostinger_vps: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          hostinger_vps_id: string
+          hostname: string | null
+          id: string
+          ipv4: string[]
+          ipv6: string[]
+          last_synced_at: string | null
+          meta: Json
+          plan: string | null
+          region: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          hostinger_vps_id: string
+          hostname?: string | null
+          id?: string
+          ipv4?: string[]
+          ipv6?: string[]
+          last_synced_at?: string | null
+          meta?: Json
+          plan?: string | null
+          region?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          hostinger_vps_id?: string
+          hostname?: string | null
+          id?: string
+          ipv4?: string[]
+          ipv6?: string[]
+          last_synced_at?: string | null
+          meta?: Json
+          plan?: string | null
+          region?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostinger_vps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_vps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostinger_vps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_vps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "hostinger_vps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       impulsionito_training_snapshots: {
         Row: {
           captured_at: string

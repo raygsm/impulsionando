@@ -703,6 +703,7 @@ import { Route as AuthenticatedCoreTenantsIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedCoreNichosIndexRouteImport } from './routes/_authenticated/core.nichos.index'
 import { Route as AuthenticatedCoreIntegracoesIndexRouteImport } from './routes/_authenticated/core.integracoes.index'
 import { Route as AuthenticatedCoreEstudioVisualIndexRouteImport } from './routes/_authenticated/core.estudio-visual.index'
+import { Route as AuthenticatedCoreDominiosIndexRouteImport } from './routes/_authenticated/core/dominios/index'
 import { Route as AuthenticatedCoreComercialIndexRouteImport } from './routes/_authenticated/core.comercial.index'
 import { Route as AuthenticatedCoreAutomacaoIndexRouteImport } from './routes/_authenticated/core.automacao.index'
 import { Route as AuthenticatedCoreAdministracaoIndexRouteImport } from './routes/_authenticated/core.administracao.index'
@@ -4755,6 +4756,12 @@ const AuthenticatedCoreEstudioVisualIndexRoute =
     path: '/estudio-visual/',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreDominiosIndexRoute =
+  AuthenticatedCoreDominiosIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCoreDominiosRoute,
+  } as any)
 const AuthenticatedCoreComercialIndexRoute =
   AuthenticatedCoreComercialIndexRouteImport.update({
     id: '/comercial/',
@@ -6555,7 +6562,7 @@ export interface FileRoutesByFullPath {
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
-  '/core/dominios': typeof AuthenticatedCoreDominiosRoute
+  '/core/dominios': typeof AuthenticatedCoreDominiosRouteWithChildren
   '/core/ecossistema': typeof AuthenticatedCoreEcossistemaRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
@@ -6876,6 +6883,7 @@ export interface FileRoutesByFullPath {
   '/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
+  '/core/dominios/': typeof AuthenticatedCoreDominiosIndexRoute
   '/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/core/integracoes/': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
@@ -7446,7 +7454,6 @@ export interface FileRoutesByTo {
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
-  '/core/dominios': typeof AuthenticatedCoreDominiosRoute
   '/core/ecossistema': typeof AuthenticatedCoreEcossistemaRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
@@ -7763,6 +7770,7 @@ export interface FileRoutesByTo {
   '/core/administracao': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/core/automacao': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/core/comercial': typeof AuthenticatedCoreComercialIndexRoute
+  '/core/dominios': typeof AuthenticatedCoreDominiosIndexRoute
   '/core/estudio-visual': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/core/integracoes': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/core/nichos': typeof AuthenticatedCoreNichosIndexRoute
@@ -8356,7 +8364,7 @@ export interface FileRoutesById {
   '/_authenticated/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
-  '/_authenticated/core/dominios': typeof AuthenticatedCoreDominiosRoute
+  '/_authenticated/core/dominios': typeof AuthenticatedCoreDominiosRouteWithChildren
   '/_authenticated/core/ecossistema': typeof AuthenticatedCoreEcossistemaRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
@@ -8677,6 +8685,7 @@ export interface FileRoutesById {
   '/_authenticated/core/administracao/': typeof AuthenticatedCoreAdministracaoIndexRoute
   '/_authenticated/core/automacao/': typeof AuthenticatedCoreAutomacaoIndexRoute
   '/_authenticated/core/comercial/': typeof AuthenticatedCoreComercialIndexRoute
+  '/_authenticated/core/dominios/': typeof AuthenticatedCoreDominiosIndexRoute
   '/_authenticated/core/estudio-visual/': typeof AuthenticatedCoreEstudioVisualIndexRoute
   '/_authenticated/core/integracoes/': typeof AuthenticatedCoreIntegracoesIndexRoute
   '/_authenticated/core/nichos/': typeof AuthenticatedCoreNichosIndexRoute
@@ -9591,6 +9600,7 @@ export interface FileRouteTypes {
     | '/core/administracao/'
     | '/core/automacao/'
     | '/core/comercial/'
+    | '/core/dominios/'
     | '/core/estudio-visual/'
     | '/core/integracoes/'
     | '/core/nichos/'
@@ -10161,7 +10171,6 @@ export interface FileRouteTypes {
     | '/core/demo-insights'
     | '/core/demos'
     | '/core/diagnostico-geral'
-    | '/core/dominios'
     | '/core/ecossistema'
     | '/core/eventos'
     | '/core/feira-leads'
@@ -10478,6 +10487,7 @@ export interface FileRouteTypes {
     | '/core/administracao'
     | '/core/automacao'
     | '/core/comercial'
+    | '/core/dominios'
     | '/core/estudio-visual'
     | '/core/integracoes'
     | '/core/nichos'
@@ -11391,6 +11401,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/administracao/'
     | '/_authenticated/core/automacao/'
     | '/_authenticated/core/comercial/'
+    | '/_authenticated/core/dominios/'
     | '/_authenticated/core/estudio-visual/'
     | '/_authenticated/core/integracoes/'
     | '/_authenticated/core/nichos/'
@@ -16536,6 +16547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreEstudioVisualIndexRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/dominios/': {
+      id: '/_authenticated/core/dominios/'
+      path: '/'
+      fullPath: '/core/dominios/'
+      preLoaderRoute: typeof AuthenticatedCoreDominiosIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreDominiosRoute
+    }
     '/_authenticated/core/comercial/': {
       id: '/_authenticated/core/comercial/'
       path: '/comercial'
@@ -18279,6 +18297,20 @@ const AuthenticatedCoreAutomacaoRouteWithChildren =
     AuthenticatedCoreAutomacaoRouteChildren,
   )
 
+interface AuthenticatedCoreDominiosRouteChildren {
+  AuthenticatedCoreDominiosIndexRoute: typeof AuthenticatedCoreDominiosIndexRoute
+}
+
+const AuthenticatedCoreDominiosRouteChildren: AuthenticatedCoreDominiosRouteChildren =
+  {
+    AuthenticatedCoreDominiosIndexRoute: AuthenticatedCoreDominiosIndexRoute,
+  }
+
+const AuthenticatedCoreDominiosRouteWithChildren =
+  AuthenticatedCoreDominiosRoute._addFileChildren(
+    AuthenticatedCoreDominiosRouteChildren,
+  )
+
 interface AuthenticatedCoreMarketplaceRouteChildren {
   AuthenticatedCoreMarketplaceCompradoresRoute: typeof AuthenticatedCoreMarketplaceCompradoresRoute
   AuthenticatedCoreMarketplaceFinanceiroRoute: typeof AuthenticatedCoreMarketplaceFinanceiroRoute
@@ -18396,7 +18428,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreDemoInsightsRoute: typeof AuthenticatedCoreDemoInsightsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreDiagnosticoGeralRoute: typeof AuthenticatedCoreDiagnosticoGeralRoute
-  AuthenticatedCoreDominiosRoute: typeof AuthenticatedCoreDominiosRoute
+  AuthenticatedCoreDominiosRoute: typeof AuthenticatedCoreDominiosRouteWithChildren
   AuthenticatedCoreEcossistemaRoute: typeof AuthenticatedCoreEcossistemaRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFeiraLeadsRoute: typeof AuthenticatedCoreFeiraLeadsRoute
@@ -18465,7 +18497,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
   AuthenticatedCoreDiagnosticoGeralRoute:
     AuthenticatedCoreDiagnosticoGeralRoute,
-  AuthenticatedCoreDominiosRoute: AuthenticatedCoreDominiosRoute,
+  AuthenticatedCoreDominiosRoute: AuthenticatedCoreDominiosRouteWithChildren,
   AuthenticatedCoreEcossistemaRoute: AuthenticatedCoreEcossistemaRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFeiraLeadsRoute: AuthenticatedCoreFeiraLeadsRoute,
