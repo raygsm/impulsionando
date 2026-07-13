@@ -171,8 +171,10 @@ export function ChrismedOliverPanel() {
           onCloseAutoFocus={(event) => { event.preventDefault(); focusChrismedOliverTrigger(); }}
           className="fixed inset-y-0 right-0 z-[91] flex h-dvh w-full max-w-[min(100vw,28rem)] flex-col gap-0 border-l border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-0 text-[var(--chrismed-ink)] shadow-[0_24px_80px_-24px_rgba(15,15,15,0.55)] outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none"
         >
-          {/* Barra de idiomas — bandeiras UK / ES sempre no topo do balão Oliver.
-              Ao clicar, o idioma do site inteiro (inclusive contexto do Oliver) é alterado. */}
+          {/* Barra de idiomas — bandeiras oficiais UK (English) e Espanha (Español),
+              renderizadas em SVG para exibição confiável em qualquer sistema (Windows/Linux
+              não renderizam emojis de bandeira). Ao clicar, o idioma do site inteiro
+              (inclusive contexto do Oliver) é alterado. */}
           <div className="flex items-center justify-between gap-3 border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]/60 px-6 py-2.5">
             <span className="chrismed-sans text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
               Translate · Traducir
@@ -185,7 +187,7 @@ export function ChrismedOliverPanel() {
                 aria-pressed={searchLang === 'en'}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)] ${searchLang === 'en' ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}
               >
-                <span aria-hidden className="text-base leading-none">🇬🇧</span>
+                <FlagUK className="h-3.5 w-6 rounded-[2px] shadow-sm" />
                 EN
               </button>
               <button
@@ -195,11 +197,12 @@ export function ChrismedOliverPanel() {
                 aria-pressed={searchLang === 'es'}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)] ${searchLang === 'es' ? 'border-[var(--chrismed-ink)] bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]' : 'border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] text-[var(--chrismed-ink)] hover:border-[var(--chrismed-champagne-deep)]'}`}
               >
-                <span aria-hidden className="text-base leading-none">🇪🇸</span>
+                <FlagES className="h-3.5 w-6 rounded-[2px] shadow-sm" />
                 ES
               </button>
             </div>
           </div>
+
 
           {/* Header — identidade Oliver como membro da equipe */}
           <div className="border-b border-[var(--chrismed-sand)] px-6 pt-5 pb-4">
