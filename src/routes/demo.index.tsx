@@ -117,6 +117,24 @@ function DemoLanding() {
           </p>
         </div>
 
+        {/* Vitrine de templates */}
+        <section className="mb-12">
+          <Card className="p-6 sm:p-8 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border-primary/30">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="max-w-2xl">
+                <Badge variant="outline" className="mb-2 gap-1"><Sparkles className="h-3.5 w-3.5" /> Novo · Vitrine de templates</Badge>
+                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Um exemplo de front-end para cada macro-nicho</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Sites navegáveis (Foodservice, Clínica, Imobiliária, Advocacia, Educação, Eventos, Varejo, B2B) para mostrar o padrão de entrega da Impulsionando. Clientes novos podem partir de um template e só ajustar imagens e conteúdos.
+                </p>
+              </div>
+              <Button asChild size="lg" className="bg-gradient-primary gap-2">
+                <Link to="/vitrine">Abrir vitrine <ArrowRight className="w-4 h-4" /></Link>
+              </Button>
+            </div>
+          </Card>
+        </section>
+
         {/* 1) Por público */}
         <section className="mb-14">
           <div className="flex items-end justify-between mb-4">
