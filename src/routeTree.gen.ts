@@ -342,6 +342,7 @@ import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slu
 import { Route as GarridoImovelSlugRouteImport } from './routes/garrido.imovel.$slug'
 import { Route as FoodserviceProdutoSlugRouteImport } from './routes/foodservice.produto.$slug'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as DemoMacroSubRouteImport } from './routes/demo.$macro.$sub'
 import { Route as ColorsRastreioCodigoRouteImport } from './routes/colors.rastreio.$codigo'
 import { Route as ColorsProdutoSlugRouteImport } from './routes/colors.produto.$slug'
 import { Route as ColorsMinhaContaPerfilRouteImport } from './routes/colors.minha-conta.perfil'
@@ -2629,6 +2630,11 @@ const FoodserviceProdutoSlugRoute = FoodserviceProdutoSlugRouteImport.update({
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoMacroSubRoute = DemoMacroSubRouteImport.update({
+  id: '/demo/$macro/$sub',
+  path: '/demo/$macro/$sub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColorsRastreioCodigoRoute = ColorsRastreioCodigoRouteImport.update({
@@ -6770,6 +6776,7 @@ export interface FileRoutesByFullPath {
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
+  '/demo/$macro/$sub': typeof DemoMacroSubRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -7671,6 +7678,7 @@ export interface FileRoutesByTo {
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
+  '/demo/$macro/$sub': typeof DemoMacroSubRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -8593,6 +8601,7 @@ export interface FileRoutesById {
   '/colors/minha-conta/perfil': typeof ColorsMinhaContaPerfilRoute
   '/colors/produto/$slug': typeof ColorsProdutoSlugRoute
   '/colors/rastreio/$codigo': typeof ColorsRastreioCodigoRoute
+  '/demo/$macro/$sub': typeof DemoMacroSubRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/foodservice/produto/$slug': typeof FoodserviceProdutoSlugRoute
   '/garrido/imovel/$slug': typeof GarridoImovelSlugRoute
@@ -9519,6 +9528,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
     | '/colors/rastreio/$codigo'
+    | '/demo/$macro/$sub'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -10420,6 +10430,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
     | '/colors/rastreio/$codigo'
+    | '/demo/$macro/$sub'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -11341,6 +11352,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/perfil'
     | '/colors/produto/$slug'
     | '/colors/rastreio/$codigo'
+    | '/demo/$macro/$sub'
     | '/demo/nicho/$slug'
     | '/foodservice/produto/$slug'
     | '/garrido/imovel/$slug'
@@ -11758,6 +11770,7 @@ export interface RootRouteChildren {
   ApiPublicStatusSubscribeRoute: typeof ApiPublicStatusSubscribeRoute
   ApiPublicStatusUnsubscribeRoute: typeof ApiPublicStatusUnsubscribeRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
+  DemoMacroSubRoute: typeof DemoMacroSubRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -14157,6 +14170,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/nicho/$slug'
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/$macro/$sub': {
+      id: '/demo/$macro/$sub'
+      path: '/demo/$macro/$sub'
+      fullPath: '/demo/$macro/$sub'
+      preLoaderRoute: typeof DemoMacroSubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colors/rastreio/$codigo': {
@@ -20746,6 +20766,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicStatusSubscribeRoute: ApiPublicStatusSubscribeRoute,
   ApiPublicStatusUnsubscribeRoute: ApiPublicStatusUnsubscribeRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
+  DemoMacroSubRoute: DemoMacroSubRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
