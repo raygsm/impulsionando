@@ -291,7 +291,7 @@ function ChrismedAgendarPage() {
 
   return (
     <ChrismedShell variant="minimal">
-      <div className="container py-10 max-w-5xl pb-32 sm:pb-10">
+      <div className="mx-auto w-full max-w-5xl px-4 md:px-6 py-10 pb-32 sm:pb-10">
         {/* Progress trail */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[var(--chrismed-mist)] flex-wrap">
