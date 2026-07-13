@@ -8,7 +8,7 @@ import { ExternalLink, RefreshCw, Settings2, PlugZap, ActivitySquare } from "luc
 export function IntegrationCard({ item }: { item: IntegrationItem }) {
   const Icon = item.icon;
   const isConnected = item.state === "conectado" || item.state === "atencao" || item.state === "erro";
-  const detailTo = `/core/integracoes/${item.group}/${item.slug}` as const;
+  const detailTo = `/core/integracoes/${item.group}/${item.slug}` as unknown as never;
 
   return (
     <Card className="flex h-full flex-col p-4 transition hover:shadow-md">
