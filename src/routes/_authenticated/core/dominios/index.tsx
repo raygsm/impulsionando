@@ -30,7 +30,8 @@ export const Route = createFileRoute("/_authenticated/core/dominios/")({
 });
 
 function DomainsPage() {
-  const { company } = useActiveCompany();
+  const { companyId, options } = useActiveCompany();
+  const company = options.find((c) => c.id === companyId) ?? null;
   const qc = useQueryClient();
   const [term, setTerm] = useState("");
   const [years, setYears] = useState(1);
