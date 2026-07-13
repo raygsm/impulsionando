@@ -31,6 +31,7 @@ import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
+import { Route as OnboardingSiteRouteImport } from './routes/onboarding-site'
 import { Route as OnboardingGuiadoRouteImport } from './routes/onboarding-guiado'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -301,6 +302,7 @@ import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/ad
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as TemplatesMacroIndexRouteImport } from './routes/templates.$macro.index'
 import { Route as MarocasAppIndexRouteImport } from './routes/marocas.app.index'
 import { Route as ColorsRastreioIndexRouteImport } from './routes/colors.rastreio.index'
 import { Route as ColorsMinhaContaIndexRouteImport } from './routes/colors.minha-conta.index'
@@ -323,6 +325,7 @@ import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as WmpParceiroCadastroRouteImport } from './routes/wmp.parceiro.cadastro'
 import { Route as WmpObrigadoTipoRouteImport } from './routes/wmp.obrigado.$tipo'
+import { Route as TemplatesMacroSubRouteImport } from './routes/templates.$macro.$sub'
 import { Route as RiomedVendedoresCadastroRouteImport } from './routes/riomed.vendedores.cadastro'
 import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
@@ -1038,6 +1041,11 @@ const PacienteRoute = PacienteRouteImport.update({
 const OrcamentoRoute = OrcamentoRouteImport.update({
   id: '/orcamento',
   path: '/orcamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingSiteRoute = OnboardingSiteRouteImport.update({
+  id: '/onboarding-site',
+  path: '/onboarding-site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingGuiadoRoute = OnboardingGuiadoRouteImport.update({
@@ -2408,6 +2416,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const TemplatesMacroIndexRoute = TemplatesMacroIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TemplatesMacroRoute,
+} as any)
 const MarocasAppIndexRoute = MarocasAppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -2529,6 +2542,11 @@ const WmpObrigadoTipoRoute = WmpObrigadoTipoRouteImport.update({
   id: '/obrigado/$tipo',
   path: '/obrigado/$tipo',
   getParentRoute: () => WmpRoute,
+} as any)
+const TemplatesMacroSubRoute = TemplatesMacroSubRouteImport.update({
+  id: '/$sub',
+  path: '/$sub',
+  getParentRoute: () => TemplatesMacroRoute,
 } as any)
 const RiomedVendedoresCadastroRoute =
   RiomedVendedoresCadastroRouteImport.update({
@@ -6123,6 +6141,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
+  '/onboarding-site': typeof OnboardingSiteRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -6360,7 +6379,7 @@ export interface FileRoutesByFullPath {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
-  '/templates/$macro': typeof TemplatesMacroRoute
+  '/templates/$macro': typeof TemplatesMacroRouteWithChildren
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -6767,6 +6786,7 @@ export interface FileRoutesByFullPath {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$macro/$sub': typeof TemplatesMacroSubRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
@@ -6789,6 +6809,7 @@ export interface FileRoutesByFullPath {
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
+  '/templates/$macro/': typeof TemplatesMacroIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -7038,6 +7059,7 @@ export interface FileRoutesByTo {
   '/marocas': typeof MarocasRouteWithChildren
   '/mcp': typeof McpRoute
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
+  '/onboarding-site': typeof OnboardingSiteRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRoute
@@ -7261,7 +7283,6 @@ export interface FileRoutesByTo {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
-  '/templates/$macro': typeof TemplatesMacroRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -7663,6 +7684,7 @@ export interface FileRoutesByTo {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$macro/$sub': typeof TemplatesMacroSubRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
@@ -7685,6 +7707,7 @@ export interface FileRoutesByTo {
   '/colors/minha-conta': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio': typeof ColorsRastreioIndexRoute
   '/marocas/app': typeof MarocasAppIndexRoute
+  '/templates/$macro': typeof TemplatesMacroIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -7941,6 +7964,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/onboarding-guiado': typeof OnboardingGuiadoRoute
+  '/onboarding-site': typeof OnboardingSiteRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -8178,7 +8202,7 @@ export interface FileRoutesById {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
-  '/templates/$macro': typeof TemplatesMacroRoute
+  '/templates/$macro': typeof TemplatesMacroRouteWithChildren
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -8585,6 +8609,7 @@ export interface FileRoutesById {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$macro/$sub': typeof TemplatesMacroSubRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
@@ -8607,6 +8632,7 @@ export interface FileRoutesById {
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
+  '/templates/$macro/': typeof TemplatesMacroIndexRoute
   '/_authenticated/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -8864,6 +8890,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/modulos'
     | '/onboarding-guiado'
+    | '/onboarding-site'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -9508,6 +9535,7 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$macro/$sub'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/affiliates/'
@@ -9530,6 +9558,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
+    | '/templates/$macro/'
     | '/admin/auditoria/logs'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
@@ -9779,6 +9808,7 @@ export interface FileRouteTypes {
     | '/marocas'
     | '/mcp'
     | '/onboarding-guiado'
+    | '/onboarding-site'
     | '/orcamento'
     | '/pesquisa'
     | '/planos'
@@ -10002,7 +10032,6 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/status/$slug'
     | '/status/embed'
-    | '/templates/$macro'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
@@ -10404,6 +10433,7 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$macro/$sub'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/affiliates'
@@ -10426,6 +10456,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta'
     | '/colors/rastreio'
     | '/marocas/app'
+    | '/templates/$macro'
     | '/admin/auditoria/logs'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
@@ -10681,6 +10712,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/modulos'
     | '/onboarding-guiado'
+    | '/onboarding-site'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -11325,6 +11357,7 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$macro/$sub'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/_authenticated/affiliates/'
@@ -11347,6 +11380,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
+    | '/templates/$macro/'
     | '/_authenticated/admin/auditoria/logs'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
@@ -11604,6 +11638,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OnboardingGuiadoRoute: typeof OnboardingGuiadoRoute
+  OnboardingSiteRoute: typeof OnboardingSiteRoute
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
   PesquisaRoute: typeof PesquisaRoute
@@ -11702,7 +11737,7 @@ export interface RootRouteChildren {
   ShowroomSegurancaRoute: typeof ShowroomSegurancaRoute
   ShowroomSiteRoute: typeof ShowroomSiteRoute
   ShowroomWhatsappRoute: typeof ShowroomWhatsappRoute
-  TemplatesMacroRoute: typeof TemplatesMacroRoute
+  TemplatesMacroRoute: typeof TemplatesMacroRouteWithChildren
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
@@ -11945,6 +11980,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamento'
       fullPath: '/orcamento'
       preLoaderRoute: typeof OrcamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding-site': {
+      id: '/onboarding-site'
+      path: '/onboarding-site'
+      fullPath: '/onboarding-site'
+      preLoaderRoute: typeof OnboardingSiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding-guiado': {
@@ -13837,6 +13879,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/templates/$macro/': {
+      id: '/templates/$macro/'
+      path: '/'
+      fullPath: '/templates/$macro/'
+      preLoaderRoute: typeof TemplatesMacroIndexRouteImport
+      parentRoute: typeof TemplatesMacroRoute
+    }
     '/marocas/app/': {
       id: '/marocas/app/'
       path: '/'
@@ -13990,6 +14039,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/wmp/obrigado/$tipo'
       preLoaderRoute: typeof WmpObrigadoTipoRouteImport
       parentRoute: typeof WmpRoute
+    }
+    '/templates/$macro/$sub': {
+      id: '/templates/$macro/$sub'
+      path: '/$sub'
+      fullPath: '/templates/$macro/$sub'
+      preLoaderRoute: typeof TemplatesMacroSubRouteImport
+      parentRoute: typeof TemplatesMacroRoute
     }
     '/riomed/vendedores/cadastro': {
       id: '/riomed/vendedores/cadastro'
@@ -20483,6 +20539,20 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
   ImoveisSlugRouteChildren,
 )
 
+interface TemplatesMacroRouteChildren {
+  TemplatesMacroSubRoute: typeof TemplatesMacroSubRoute
+  TemplatesMacroIndexRoute: typeof TemplatesMacroIndexRoute
+}
+
+const TemplatesMacroRouteChildren: TemplatesMacroRouteChildren = {
+  TemplatesMacroSubRoute: TemplatesMacroSubRoute,
+  TemplatesMacroIndexRoute: TemplatesMacroIndexRoute,
+}
+
+const TemplatesMacroRouteWithChildren = TemplatesMacroRoute._addFileChildren(
+  TemplatesMacroRouteChildren,
+)
+
 interface ApiPublicHealthRouteChildren {
   ApiPublicHealthMercadopagoRoute: typeof ApiPublicHealthMercadopagoRoute
   ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
@@ -20555,6 +20625,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OnboardingGuiadoRoute: OnboardingGuiadoRoute,
+  OnboardingSiteRoute: OnboardingSiteRoute,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
   PesquisaRoute: PesquisaRoute,
@@ -20654,7 +20725,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomSegurancaRoute: ShowroomSegurancaRoute,
   ShowroomSiteRoute: ShowroomSiteRoute,
   ShowroomWhatsappRoute: ShowroomWhatsappRoute,
-  TemplatesMacroRoute: TemplatesMacroRoute,
+  TemplatesMacroRoute: TemplatesMacroRouteWithChildren,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
