@@ -46,6 +46,60 @@ const brl = (c: number) =>
 
 declare global { interface Window { MercadoPago: any } }
 
+let mercadoPagoSdkPromise: Promise<void> | null = null;
+
+function loadMercadoPagoSdk(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.MercadoPago) return Promise.resolve();
+  if (mercadoPagoSdkPromise) return mercadoPagoSdkPromise;
+
+  mercadoPagoSdkPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>('script[src="https://sdk.mercadopago.com/js/v2"]');
+    const script = existing ?? document.createElement("script");
+
+    const timeout = window.setTimeout(() => {
+      mercadoPagoSdkPromise = null;
+      reject(new Error("Não foi possível carregar o SDK do Mercado Pago. Recarregue a página e tente novamente."));
+    }, 12000);
+
+    const finish = () => {
+      window.clearTimeout(timeout);
+      if (window.MercadoPago) resolve();
+      else {
+        mercadoPagoSdkPromise = null;
+        reject(new Error("SDK do Mercado Pago carregou sem inicializar."));
+      }
+    };
+
+    script.addEventListener("load", finish, { once: true });
+    script.addEventListener("error", () => {
+      window.clearTimeout(timeout);
+      mercadoPagoSdkPromise = null;
+      reject(new Error("Falha ao carregar o SDK do Mercado Pago."));
+    }, { once: true });
+
+    if (!existing) {
+      script.src = "https://sdk.mercadopago.com/js/v2";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    if (existing) {
+      const startedAt = Date.now();
+      const poll = window.setInterval(() => {
+        if (window.MercadoPago) {
+          window.clearInterval(poll);
+          finish();
+        } else if (Date.now() - startedAt > 12000) {
+          window.clearInterval(poll);
+        }
+      }, 150);
+    }
+  });
+
+  return mercadoPagoSdkPromise;
+}
+
 /** Etapas do checkout premium. */
 const STEPS = [
   { id: "plano", label: "Plano" },
@@ -68,11 +122,15 @@ function useMpSdk(publicKey: string | null) {
   useEffect(() => {
     if (!publicKey) return;
     if (typeof window === "undefined") return;
-    if (window.MercadoPago) { setReady(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://sdk.mercadopago.com/js/v2";
-    s.onload = () => setReady(true);
-    document.head.appendChild(s);
+    let alive = true;
+    loadMercadoPagoSdk()
+      .then(() => { if (alive) setReady(true); })
+      .catch((error) => {
+        if (!alive) return;
+        setReady(false);
+        toast.error(error?.message ?? "Falha ao carregar Mercado Pago.");
+      });
+    return () => { alive = false; };
   }, [publicKey]);
   return ready;
 }
@@ -873,12 +931,11 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
   });
 
   async function pay() {
-    if (!mpReady || !window.MercadoPago) {
-      toast.error("SDK do Mercado Pago ainda carregando.");
-      return;
-    }
     setLoading(true);
     try {
+      if (!mpReady || !window.MercadoPago) {
+        await loadMercadoPagoSdk();
+      }
       const mp = new window.MercadoPago(publicKey);
       const cardToken = await mp.createCardToken({
         cardNumber: form.cardNumber.replace(/\s+/g, ""),
@@ -998,7 +1055,7 @@ function CardForm({ planId, publicKey, mpReady, userEmail, createCard }: any) {
       <div className="col-span-2 space-y-2 mt-2">
         <Button
           onClick={pay}
-          disabled={loading || !mpReady}
+          disabled={loading}
           size="lg"
           className="w-full min-h-12 text-base font-semibold"
         >
