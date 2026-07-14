@@ -11631,6 +11631,27 @@ export type Database = {
           },
         ]
       }
+      core_secret_values: {
+        Row: {
+          created_at: string
+          name: string
+          updated_at: string
+          value_ciphertext: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          updated_at?: string
+          value_ciphertext: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          updated_at?: string
+          value_ciphertext?: string
+        }
+        Relationships: []
+      }
       core_settings: {
         Row: {
           category: string
@@ -33930,6 +33951,7 @@ export type Database = {
       }
     }
     Functions: {
+      _enc_pepper: { Args: never; Returns: string }
       _restaurant_session_total_cents: {
         Args: { _session_id: string }
         Returns: number
@@ -34277,6 +34299,18 @@ export type Database = {
           route: string
           scope: string
           sort_order: number
+        }[]
+      }
+      get_mpago_credentials_masked: {
+        Args: { p_company_id: string }
+        Returns: {
+          access_token_configured: boolean
+          active: boolean
+          environment: string
+          public_key_masked: string
+          updated_at: string
+          user_id_mp: string
+          webhook_configured: boolean
         }[]
       }
       get_niche_template: {
@@ -34646,6 +34680,7 @@ export type Database = {
         }
         Returns: Json
       }
+      reveal_secret_value: { Args: { p_name: string }; Returns: string }
       riomed_accrue_commission: {
         Args: { p_order_id: string; p_user_id: string }
         Returns: string
@@ -34746,6 +34781,17 @@ export type Database = {
       }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
+        Returns: string
+      }
+      save_mpago_credentials: {
+        Args: {
+          p_access_token: string
+          p_company_id: string
+          p_environment: string
+          p_public_key: string
+          p_user_id_mp: string
+          p_webhook_secret: string
+        }
         Returns: string
       }
       set_company_courtesy_plan: {
