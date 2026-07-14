@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { SmartPlanSwitcher } from "./SmartPlanSwitcher";
 import { SmartSidebar } from "./SmartSidebar";
 import { SmartDashboard } from "./SmartDashboard";
+import { SmartLeadCapture } from "./SmartLeadCapture";
 import { useDemoPlan } from "@/hooks/useDemoPlan";
-import type { DemoTemplate } from "@/data/demo-templates/types";
+import { PLAN_LABEL, type DemoTemplate } from "@/data/demo-templates/types";
 
 type Props = { template: DemoTemplate };
 
