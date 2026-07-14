@@ -128,9 +128,10 @@ function Page() {
   });
 
   const setStatus = (s: Status) =>
-    navigate({ search: (p) => ({ ...p, status: s }), replace: true });
+    navigate({ search: (p: z.infer<typeof searchSchema>) => ({ ...p, status: s }), replace: true });
   const setQ = (v: string) =>
-    navigate({ search: (p) => ({ ...p, q: v }), replace: true });
+    navigate({ search: (p: z.infer<typeof searchSchema>) => ({ ...p, q: v }), replace: true });
+
 
   const c = countsQ.data ?? { pending: 0, approved: 0, rejected: 0, registered: 0, total: 0 };
 
