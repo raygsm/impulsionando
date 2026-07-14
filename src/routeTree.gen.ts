@@ -898,6 +898,7 @@ import { Route as ApiPublicRiomedBroadcastsMarkRouteImport } from './routes/api/
 import { Route as ApiPublicRiomedBroadcastsDueRouteImport } from './routes/api/public/riomed/broadcasts/due'
 import { Route as ApiPublicRiomedArOverdueRouteImport } from './routes/api/public/riomed/ar/overdue'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
+import { Route as ApiPublicHealthMpSlugRouteImport } from './routes/api/public/health/mp.$slug'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreIntegracoesGrupoSlugRouteImport } from './routes/_authenticated/core.integracoes.$grupo.$slug'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
@@ -5914,6 +5915,11 @@ const ApiPublicPaymentsCloseInvoiceReplayRoute =
     path: '/api/public/payments/close-invoice/replay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHealthMpSlugRoute = ApiPublicHealthMpSlugRouteImport.update({
+  id: '/mp/$slug',
+  path: '/mp/$slug',
+  getParentRoute: () => ApiPublicHealthRoute,
+} as any)
 const AuthenticatedImobiliariaAprovacoesIdImprimirRoute =
   AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport.update({
     id: '/$id/imprimir',
@@ -7183,6 +7189,7 @@ export interface FileRoutesByFullPath {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/health/mp/$slug': typeof ApiPublicHealthMpSlugRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
   '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
@@ -8102,6 +8109,7 @@ export interface FileRoutesByTo {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/health/mp/$slug': typeof ApiPublicHealthMpSlugRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
   '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
@@ -9050,6 +9058,7 @@ export interface FileRoutesById {
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/core/integracoes/$grupo/$slug': typeof AuthenticatedCoreIntegracoesGrupoSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/health/mp/$slug': typeof ApiPublicHealthMpSlugRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
   '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
@@ -9997,6 +10006,7 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/core/integracoes/$grupo/$slug'
     | '/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/health/mp/$slug'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
     | '/api/public/riomed/broadcasts/due'
@@ -10916,6 +10926,7 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/core/integracoes/$grupo/$slug'
     | '/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/health/mp/$slug'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
     | '/api/public/riomed/broadcasts/due'
@@ -11863,6 +11874,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/core/integracoes/$grupo/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/health/mp/$slug'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
     | '/api/public/riomed/broadcasts/due'
@@ -18331,6 +18343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health/mp/$slug': {
+      id: '/api/public/health/mp/$slug'
+      path: '/mp/$slug'
+      fullPath: '/api/public/health/mp/$slug'
+      preLoaderRoute: typeof ApiPublicHealthMpSlugRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
     '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': {
       id: '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
       path: '/$id/imprimir'
@@ -21023,12 +21042,14 @@ interface ApiPublicHealthRouteChildren {
   ApiPublicHealthMercadopagoRoute: typeof ApiPublicHealthMercadopagoRoute
   ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
   ApiPublicHealthMpWebhookRoute: typeof ApiPublicHealthMpWebhookRoute
+  ApiPublicHealthMpSlugRoute: typeof ApiPublicHealthMpSlugRoute
 }
 
 const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
   ApiPublicHealthMercadopagoRoute: ApiPublicHealthMercadopagoRoute,
   ApiPublicHealthMonetizationRoute: ApiPublicHealthMonetizationRoute,
   ApiPublicHealthMpWebhookRoute: ApiPublicHealthMpWebhookRoute,
+  ApiPublicHealthMpSlugRoute: ApiPublicHealthMpSlugRoute,
 }
 
 const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
