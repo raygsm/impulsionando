@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
+
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2,
   Stethoscope, Scissors, UtensilsCrossed, Store, Briefcase, GraduationCap,
@@ -33,9 +35,17 @@ export const Route = createFileRoute("/solucoes")({
       { name: "description", content: "Soluções digitais para clínicas, salões, restaurantes, varejo, serviços e educação. Atendimento, agenda, vendas, pagamentos, CRM e BI em um sistema modular." },
       { property: "og:title", content: "Soluções — Impulsionando Tecnologia" },
       { property: "og:description", content: "Atendimento, agenda, vendas, pagamentos e gestão em um só sistema modular." },
-      { property: "og:url", content: "https://sistemas.impulsionando.com.br/solucoes" },
+      { property: "og:url", content: "https://impulsionando.com.br/solucoes" },
+      { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://sistemas.impulsionando.com.br/solucoes" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/solucoes" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Soluções", path: "/solucoes" },
+      ]),
+    ],
+
   }),
   component: SolucoesPage,
 });
