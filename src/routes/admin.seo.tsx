@@ -1,17 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
   listGscSitesFn,
   querySearchAnalyticsFn,
+  inspectUrlFn,
   type GscSite,
   type GscQueryRow,
 } from "@/lib/search-console.functions";
+import { validateJsonLd, type JsonLdResult } from "@/lib/seo-jsonld";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, Search, AlertTriangle, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, AlertTriangle, ExternalLink, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/seo")({
   head: () => ({
