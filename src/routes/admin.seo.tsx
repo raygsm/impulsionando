@@ -160,6 +160,7 @@ function AdminSeoPanel() {
             <TabsList>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="inspect">Inspeção de URL</TabsTrigger>
+              <TabsTrigger value="audit">Auditoria de rota</TabsTrigger>
               <TabsTrigger value="jsonld">Validador JSON-LD</TabsTrigger>
             </TabsList>
 
