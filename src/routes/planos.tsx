@@ -72,9 +72,17 @@ export const Route = createFileRoute("/planos")({
       { name: "description", content: "Planos atrelados ao salário mínimo: Essencial (½ SM), Integrado (1 SM), Avançado (2 SM) e Sob Medida. Mensal ou anual com 2 meses grátis." },
       { property: "og:title", content: "Planos — Impulsionando Tecnologia" },
       { property: "og:description", content: "Do Essencial ao Sob Medida. Anual com 2 meses grátis. Sem fidelidade obrigatória." },
-      { property: "og:url", content: "https://sistemas.impulsionando.com.br/planos" },
+      { property: "og:url", content: "https://impulsionando.com.br/planos" },
+      { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://sistemas.impulsionando.com.br/planos" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/planos" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Planos", path: "/planos" },
+      ]),
+    ],
+
   }),
   component: PlanosPage,
 });
