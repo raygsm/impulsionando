@@ -46,7 +46,7 @@ function Page() {
   const rows: ClienteListItem[] = data ?? [];
 
   function updateSearch(next: Partial<Search>) {
-    navigate({ search: (prev) => ({ ...prev, ...next }), replace: true });
+    navigate({ search: (prev: Search) => ({ ...prev, ...next }), replace: true });
   }
 
   return (
