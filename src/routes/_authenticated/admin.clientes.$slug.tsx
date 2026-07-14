@@ -67,6 +67,7 @@ type TabDef = { key: string; label: string; to: string; exact?: boolean };
 function buildTabs(slug: string): TabDef[] {
   return [
     { key: "painel", label: "Painel", to: `/admin/clientes/${slug}/painel` },
+    { key: "auditoria", label: "Auditoria Full", to: `/admin/clientes/${slug}/auditoria` },
     { key: "dados", label: "Dados", to: `/admin/clientes/${slug}/dados` },
     { key: "plano", label: "Plano e cortesia", to: `/admin/clientes/${slug}/plano` },
     { key: "modulos", label: "Módulos", to: `/admin/clientes/${slug}/modulos` },

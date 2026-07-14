@@ -950,6 +950,7 @@ import { Route as AuthenticatedAdminClientesSlugCrmRouteImport } from './routes/
 import { Route as AuthenticatedAdminClientesSlugConfiguracoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.configuracoes'
 import { Route as AuthenticatedAdminClientesSlugCerebroIaRouteImport } from './routes/_authenticated/admin.clientes.$slug.cerebro-ia'
 import { Route as AuthenticatedAdminClientesSlugAutomacoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.automacoes'
+import { Route as AuthenticatedAdminClientesSlugAuditoriaRouteImport } from './routes/_authenticated/admin.clientes.$slug.auditoria'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
@@ -6224,6 +6225,12 @@ const AuthenticatedAdminClientesSlugAutomacoesRoute =
     path: '/automacoes',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
+const AuthenticatedAdminClientesSlugAuditoriaRoute =
+  AuthenticatedAdminClientesSlugAuditoriaRouteImport.update({
+    id: '/auditoria',
+    path: '/auditoria',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const AuthenticatedCoreClienteIdPaginasPageIdRoute =
   AuthenticatedCoreClienteIdPaginasPageIdRouteImport.update({
     id: '/$pageId',
@@ -7114,6 +7121,7 @@ export interface FileRoutesByFullPath {
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
   '/marocas/app/hospede/': typeof MarocasAppHospedeIndexRoute
   '/marocas/app/prestador/': typeof MarocasAppPrestadorIndexRoute
+  '/admin/clientes/$slug/auditoria': typeof AuthenticatedAdminClientesSlugAuditoriaRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -8031,6 +8039,7 @@ export interface FileRoutesByTo {
   '/marocas/app/anfitriao': typeof MarocasAppAnfitriaoIndexRoute
   '/marocas/app/hospede': typeof MarocasAppHospedeIndexRoute
   '/marocas/app/prestador': typeof MarocasAppPrestadorIndexRoute
+  '/admin/clientes/$slug/auditoria': typeof AuthenticatedAdminClientesSlugAuditoriaRoute
   '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -8977,6 +8986,7 @@ export interface FileRoutesById {
   '/marocas/app/anfitriao/': typeof MarocasAppAnfitriaoIndexRoute
   '/marocas/app/hospede/': typeof MarocasAppHospedeIndexRoute
   '/marocas/app/prestador/': typeof MarocasAppPrestadorIndexRoute
+  '/_authenticated/admin/clientes/$slug/auditoria': typeof AuthenticatedAdminClientesSlugAuditoriaRoute
   '/_authenticated/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   '/_authenticated/admin/clientes/$slug/cerebro-ia': typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   '/_authenticated/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -9922,6 +9932,7 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao/'
     | '/marocas/app/hospede/'
     | '/marocas/app/prestador/'
+    | '/admin/clientes/$slug/auditoria'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
@@ -10839,6 +10850,7 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao'
     | '/marocas/app/hospede'
     | '/marocas/app/prestador'
+    | '/admin/clientes/$slug/auditoria'
     | '/admin/clientes/$slug/automacoes'
     | '/admin/clientes/$slug/cerebro-ia'
     | '/admin/clientes/$slug/configuracoes'
@@ -11784,6 +11796,7 @@ export interface FileRouteTypes {
     | '/marocas/app/anfitriao/'
     | '/marocas/app/hospede/'
     | '/marocas/app/prestador/'
+    | '/_authenticated/admin/clientes/$slug/auditoria'
     | '/_authenticated/admin/clientes/$slug/automacoes'
     | '/_authenticated/admin/clientes/$slug/cerebro-ia'
     | '/_authenticated/admin/clientes/$slug/configuracoes'
@@ -18668,6 +18681,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugAutomacoesRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
+    '/_authenticated/admin/clientes/$slug/auditoria': {
+      id: '/_authenticated/admin/clientes/$slug/auditoria'
+      path: '/auditoria'
+      fullPath: '/admin/clientes/$slug/auditoria'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/_authenticated/core/cliente/$id/paginas/$pageId': {
       id: '/_authenticated/core/cliente/$id/paginas/$pageId'
       path: '/$pageId'
@@ -19477,6 +19497,7 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
   )
 
 interface AuthenticatedAdminClientesSlugRouteChildren {
+  AuthenticatedAdminClientesSlugAuditoriaRoute: typeof AuthenticatedAdminClientesSlugAuditoriaRoute
   AuthenticatedAdminClientesSlugAutomacoesRoute: typeof AuthenticatedAdminClientesSlugAutomacoesRoute
   AuthenticatedAdminClientesSlugCerebroIaRoute: typeof AuthenticatedAdminClientesSlugCerebroIaRoute
   AuthenticatedAdminClientesSlugConfiguracoesRoute: typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
@@ -19495,6 +19516,8 @@ interface AuthenticatedAdminClientesSlugRouteChildren {
 
 const AuthenticatedAdminClientesSlugRouteChildren: AuthenticatedAdminClientesSlugRouteChildren =
   {
+    AuthenticatedAdminClientesSlugAuditoriaRoute:
+      AuthenticatedAdminClientesSlugAuditoriaRoute,
     AuthenticatedAdminClientesSlugAutomacoesRoute:
       AuthenticatedAdminClientesSlugAutomacoesRoute,
     AuthenticatedAdminClientesSlugCerebroIaRoute:
