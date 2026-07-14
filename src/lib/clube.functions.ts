@@ -1,189 +1,641 @@
 /**
- * Onda D2 — Server functions e helpers do Clube Impulsionando.
- * Superfície inicial:
- *   listClubePlans        — planos ativos (público, sem auth)
- *   getMyMembership       — assinatura atual do usuário
- *   getMyBalance          — saldo consolidado do usuário
- *   listMyLedger          — extrato paginado
- *   listPartnerOffers     — vitrine de ofertas ativas (público)
- *   startMembershipTrial  — cria uma assinatura trial free para o usuário
- *   redeemPartnerOffer    — resgata oferta e debita pontos via RPC
+ * Clube Impulsionando — server functions (Fase 1)
+ *
+ * Cobre:
+ *  - Overview do membro (perfil estendido, nível, pontos, estatísticas)
+ *  - Alertas inteligentes (CRUD)
+ *  - Visitas / check-ins (gamificação)
+ *  - Histórico de consumo (Premium)
+ *  - Indicações (Indique e ganhe)
+ *  - Enquetes ativas + votação
+ *  - Sincronização de geolocalização do perfil
  */
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdminOrAudit } from "@/lib/security-audit.server";
 import { z } from "zod";
-import type { Database } from "@/integrations/supabase/types";
 
-function serverPublicClient() {
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-  return createClient<Database>(process.env.SUPABASE_URL!, key, {
-    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-    global: {
-      fetch: (input, init) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
+type LevelDef = { code: string; label: string; min: number; next: number | null };
+const LEVELS: LevelDef[] = [
+  { code: "explorador",    label: "Explorador",      min: 0,   next: 5   },
+  { code: "frequentador",  label: "Frequentador",    min: 5,   next: 20  },
+  { code: "entusiasta",    label: "Entusiasta",      min: 20,  next: 50  },
+  { code: "embaixador",    label: "Embaixador",      min: 50,  next: 100 },
+  { code: "lenda",         label: "Lenda do Clube",  min: 100, next: null },
+];
+
+function levelFromVisits(total: number): LevelDef {
+  let current: LevelDef = LEVELS[0];
+  for (const l of LEVELS) if (total >= l.min) current = l;
+  return current;
 }
 
-export const listClubePlans = createServerFn({ method: "GET" }).handler(async () => {
-  const sb = serverPublicClient();
-  const { data, error } = await (sb as any).from("clube_plans").select("*").eq("is_active", true).order("sort_order");
-  if (error) throw new Error(error.message);
-  return { plans: data ?? [] };
-});
 
-export const listPartnerOffers = createServerFn({ method: "GET" }).handler(async () => {
-  const sb = serverPublicClient();
-  const { data, error } = await (sb as any)
-    .from("clube_partner_offers")
-    .select("id,company_id,title,description,discount_type,discount_value,min_points,min_plan_code,starts_at,ends_at,image_url,category,is_active")
-    .eq("is_active", true)
-    .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
-    .order("starts_at", { ascending: false })
-    .limit(60);
-  if (error) throw new Error(error.message);
-  return { offers: data ?? [] };
-});
-
-export const getMyMembership = createServerFn({ method: "GET" })
+// -----------------------------------------------------------------
+// Overview unificado do membro
+// -----------------------------------------------------------------
+export const getMyClubeOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any)
-      .from("clube_memberships")
-      .select("*, plan:clube_plans(code,name,points_multiplier,benefits)")
-      .eq("user_id", context.userId)
-      .in("status", ["trial", "active", "paused"])
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return { membership: data ?? null };
+    const sb = context.supabase;
+    const uid = context.userId;
+
+    const [profile, membership, visitsAgg, pointsAgg, alertsCount, referralsCount, recentVisits, polls] = await Promise.all([
+      sb.from("consumer_profiles").select("*").eq("user_id", uid).maybeSingle(),
+      sb.from("consumer_memberships").select("*").eq("user_id", uid).maybeSingle(),
+      sb.from("clube_visits").select("id", { count: "exact", head: true }).eq("user_id", uid),
+      sb.from("clube_rewards_ledger").select("delta, kind").eq("user_id", uid),
+      sb.from("clube_alerts").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("active", true),
+      sb.from("clube_referrals").select("id", { count: "exact", head: true }).eq("referrer_user_id", uid),
+      sb.from("clube_visits").select("id, company_id, created_at, rating, source, companies(trade_name, name, logo_url, public_slug)").eq("user_id", uid).order("created_at", { ascending: false }).limit(8),
+      sb.from("clube_polls").select("id, question, options, kind, closes_at").eq("active", true).order("created_at", { ascending: false }).limit(3),
+    ]);
+
+    const totalVisits = visitsAgg.count ?? profile.data?.total_visits ?? 0;
+    const level = levelFromVisits(totalVisits);
+    const visitsToNext = level.next ? Math.max(0, level.next - totalVisits) : 0;
+
+    let pointsBalance = 0;
+    let cashbackCents = 0;
+    for (const row of (pointsAgg.data ?? []) as Array<{ delta: number; kind: string }>) {
+      if (row.kind === "points") pointsBalance += row.delta;
+      if (row.kind === "cashback") cashbackCents += row.delta;
+    }
+
+    const isPremium = membership.data?.plan === "premium" && membership.data?.status === "active";
+
+    return {
+      profile: profile.data ?? null,
+      membership: membership.data ?? null,
+      isPremium,
+      stats: {
+        totalVisits,
+        pointsBalance,
+        cashbackCents,
+        savingsCents: profile.data?.total_savings_cents ?? 0,
+        alertsActive: alertsCount.count ?? 0,
+        referrals: referralsCount.count ?? 0,
+      },
+      gamification: {
+        level: level.code,
+        levelLabel: level.label,
+        nextLevelAt: level.next,
+        visitsToNext,
+        progressPct: level.next ? Math.min(100, Math.round((totalVisits / level.next) * 100)) : 100,
+      },
+      recentVisits: (recentVisits.data ?? []).map((v: any) => ({
+        id: v.id,
+        when: v.created_at,
+        rating: v.rating,
+        source: v.source,
+        company: v.companies ? {
+          name: v.companies.trade_name || v.companies.name,
+          logo: v.companies.logo_url,
+          slug: v.companies.public_slug,
+        } : null,
+      })),
+      polls: polls.data ?? [],
+    };
   });
 
-export const getMyBalance = createServerFn({ method: "GET" })
+// -----------------------------------------------------------------
+// Perfil estendido (geo, interesses)
+// -----------------------------------------------------------------
+export const updateClubeLocation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any)
-      .from("clube_points_balance")
-      .select("balance,lifetime_earned,lifetime_spent,updated_at")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return { balance: data ?? { balance: 0, lifetime_earned: 0, lifetime_spent: 0, updated_at: null } };
-  });
-
-export const listMyLedger = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({
+      cep: z.string().max(12).optional(),
+      neighborhood: z.string().max(120).optional(),
+      city: z.string().max(120).optional(),
+      state: z.string().max(2).optional(),
+      lat: z.number().min(-90).max(90).optional(),
+      lng: z.number().min(-180).max(180).optional(),
+      default_radius_km: z.number().int().min(1).max(200).optional(),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await (context.supabase as any)
-      .from("clube_points_ledger")
-      .select("id,company_id,kind,points,reason,ref_type,ref_id,balance_after,created_at")
+    const { error } = await context.supabase
+      .from("consumer_profiles")
+      .upsert({ user_id: context.userId, ...data }, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateClubeInterests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ interests_tags: z.array(z.string().min(1).max(60)).max(60) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("consumer_profiles")
+      .upsert({ user_id: context.userId, interests_tags: data.interests_tags }, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Alertas inteligentes
+// -----------------------------------------------------------------
+export const listMyClubeAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_alerts")
+      .select("*")
       .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const upsertClubeAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      kind: z.enum(["food", "drink", "event", "ambience", "music", "promo"]),
+      tag: z.string().min(1).max(80),
+      channels: z.array(z.enum(["email", "whatsapp", "push"])).default(["email"]),
+      city: z.string().max(120).optional(),
+      radius_km: z.number().int().min(1).max(200).default(25),
+      active: z.boolean().default(true),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("clube_alerts")
+      .upsert({ user_id: context.userId, ...data }, { onConflict: "user_id,kind,tag" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteClubeAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("clube_alerts").delete()
+      .eq("id", data.id).eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Check-in / visita
+// -----------------------------------------------------------------
+export const createClubeVisit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      company_id: z.string().uuid().optional(),
+      event_id: z.string().uuid().optional(),
+      source: z.enum(["self_checkin", "partner_scan", "order", "reservation"]).default("self_checkin"),
+      rating: z.number().int().min(1).max(5).optional(),
+      notes: z.string().max(500).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("clube_visits")
+      .insert({ user_id: context.userId, ...data });
+    if (error) throw new Error(error.message);
+    // bônus de pontos: 10 por visita
+    await context.supabase.from("clube_rewards_ledger").insert({
+      user_id: context.userId,
+      kind: "points",
+      delta: 10,
+      reason: "Check-in registrado",
+      reference_type: "visit",
+    });
+    return { ok: true, pointsAwarded: 10 };
+  });
+
+// -----------------------------------------------------------------
+// Histórico de consumo (Premium)
+// -----------------------------------------------------------------
+export const listMyClubeConsumption = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_consumption")
+      .select("*, companies(trade_name, name, logo_url)")
+      .eq("user_id", context.userId)
+      .order("consumed_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// -----------------------------------------------------------------
+// Indicações
+// -----------------------------------------------------------------
+export const getMyReferralInfo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const uid = context.userId;
+    const [{ data: prof }, refs] = await Promise.all([
+      sb.from("consumer_profiles").select("referral_code").eq("user_id", uid).maybeSingle(),
+      sb.from("clube_referrals").select("*").eq("referrer_user_id", uid).order("created_at", { ascending: false }).limit(50),
+    ]);
+    return { code: prof?.referral_code ?? null, referrals: refs.data ?? [] };
+  });
+
+export const inviteReferral = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ email: z.string().email().optional(), source: z.string().max(60).optional() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("clube_referrals").insert({
+      referrer_user_id: context.userId,
+      referred_email: data.email ?? null,
+      source: data.source ?? "manual",
+      reward_points: 50,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Enquetes
+// -----------------------------------------------------------------
+export const votePoll = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ poll_id: z.string().uuid(), option_id: z.string().min(1).max(80) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("clube_poll_votes")
+      .upsert({ poll_id: data.poll_id, user_id: context.userId, option_id: data.option_id }, { onConflict: "poll_id,user_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Descobrir parceiros (públicos) com filtros simples
+// -----------------------------------------------------------------
+export const listClubePartners = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      city: z.string().optional(),
+      segment: z.string().optional(),
+      search: z.string().optional(),
+      limit: z.number().int().min(1).max(120).default(60),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
+      .from("companies")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state")
+      .eq("vitrine_enabled", true)
       .limit(data.limit);
+    if (data.city) q = q.ilike("address_city", `%${data.city}%`);
+    if (data.segment) q = q.eq("segment", data.segment);
+    if (data.search) q = q.or(`name.ilike.%${data.search}%,trade_name.ilike.%${data.search}%`);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { entries: rows ?? [] };
+    return rows ?? [];
   });
 
-export const startMembershipTrial = createServerFn({ method: "POST" })
+// -----------------------------------------------------------------
+// Registrar consumo (Premium)
+// -----------------------------------------------------------------
+export const recordClubeConsumption = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ plan_code: z.enum(["free", "premium", "black"]).default("free") }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({
+      company_id: z.string().uuid().optional(),
+      consumed_at: z.string().optional(),
+      total_cents: z.number().int().min(0),
+      payment_method: z.string().max(40).optional(),
+      receipt_url: z.string().url().optional(),
+      items: z.array(z.object({
+        name: z.string().min(1).max(120),
+        qty: z.number().int().min(1).default(1),
+        unit_cents: z.number().int().min(0).default(0),
+      })).default([]),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
-    const sb = context.supabase as any;
-    const { data: existing } = await sb
-      .from("clube_memberships")
-      .select("id,status,plan_id")
+    const { error } = await context.supabase.from("clube_consumption").insert({
+      user_id: context.userId,
+      ...data,
+      items: data.items as any,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Admin: overview do Clube
+// -----------------------------------------------------------------
+export const getAdminClubeOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+
+    const [members, premium, visits30d, refs, alerts, topVisits, recentSignups] = await Promise.all([
+      sb.from("consumer_profiles").select("user_id", { count: "exact", head: true }),
+      sb.from("consumer_memberships").select("user_id", { count: "exact", head: true }).eq("plan", "premium").eq("status", "active"),
+      sb.from("clube_visits").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 30 * 86400_000).toISOString()),
+      sb.from("clube_referrals").select("id", { count: "exact", head: true }),
+      sb.from("clube_alerts").select("id", { count: "exact", head: true }).eq("active", true),
+      sb.from("clube_visits").select("company_id, companies(trade_name, name)").not("company_id", "is", null).limit(500),
+      sb.from("consumer_profiles").select("user_id, full_name, city, state, current_level, created_at").order("created_at", { ascending: false }).limit(8),
+    ]);
+
+    // agrega top parceiros do mês
+    const counts = new Map<string, { name: string; total: number }>();
+    for (const v of (topVisits.data ?? []) as any[]) {
+      const key = v.company_id;
+      const name = v.companies?.trade_name || v.companies?.name || "Parceiro";
+      const cur = counts.get(key) ?? { name, total: 0 };
+      cur.total += 1;
+      counts.set(key, cur);
+    }
+    const topPartners = [...counts.values()].sort((a, b) => b.total - a.total).slice(0, 8);
+
+    return {
+      kpis: {
+        totalMembers: members.count ?? 0,
+        premiumActive: premium.count ?? 0,
+        visits30d: visits30d.count ?? 0,
+        referrals: refs.count ?? 0,
+        activeAlerts: alerts.count ?? 0,
+        mrrCents: (premium.count ?? 0) * 999,
+      },
+      topPartners,
+      recentSignups: recentSignups.data ?? [],
+    };
+  });
+
+// -----------------------------------------------------------------
+// Comprovantes digitais (Pix, consumo, manual)
+// -----------------------------------------------------------------
+export const listMyClubeReceipts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      kind: z.enum(["pix", "consumption", "manual", "all"]).default("all"),
+      status: z.enum(["available", "pending_upload", "all"]).default("all"),
+      from: z.string().optional(),
+      to: z.string().optional(),
+      search: z.string().max(120).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
+      .from("clube_receipts")
+      .select("*")
       .eq("user_id", context.userId)
-      .in("status", ["trial", "active", "paused"])
-      .maybeSingle();
-    if (existing) return { membership_id: existing.id, alreadyActive: true };
-
-    const { data: plan, error: planErr } = await sb
-      .from("clube_plans")
-      .select("id,code")
-      .eq("code", data.plan_code)
-      .maybeSingle();
-    if (planErr || !plan) throw new Error("Plano não encontrado");
-
-    const now = new Date();
-    const end = new Date(now.getTime() + 30 * 86400_000);
-    const { data: inserted, error } = await sb
-      .from("clube_memberships")
-      .insert({
-        user_id: context.userId,
-        plan_id: plan.id,
-        status: "trial",
-        billing_cycle: data.plan_code === "free" ? "free" : "monthly",
-        source: "self",
-        started_at: now.toISOString(),
-        current_period_end: end.toISOString(),
-      })
-      .select("id")
-      .single();
+      .order("issued_at", { ascending: false })
+      .limit(200);
+    if (data.kind !== "all") q = q.eq("kind", data.kind);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.from) q = q.gte("issued_at", data.from);
+    if (data.to) q = q.lte("issued_at", data.to);
+    if (data.search) q = q.ilike("title", `%${data.search}%`);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { membership_id: inserted.id, alreadyActive: false };
+    return rows ?? [];
   });
 
-export const redeemPartnerOffer = createServerFn({ method: "POST" })
+// -----------------------------------------------------------------
+// Recomendações por interesse (matching simples por segmento / nome)
+// -----------------------------------------------------------------
+export const getClubeRecommendations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ offer_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as any;
-    const { data: offer, error: offerErr } = await sb
-      .from("clube_partner_offers")
-      .select("id,company_id,min_points,min_plan_code,is_active,ends_at,max_uses_per_user")
-      .eq("id", data.offer_id)
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const { data: profile } = await sb
+      .from("consumer_profiles")
+      .select("interests_tags, city, state")
+      .eq("user_id", context.userId)
       .maybeSingle();
-    if (offerErr || !offer) throw new Error("Oferta não encontrada");
-    if (!offer.is_active || (offer.ends_at && new Date(offer.ends_at) < new Date())) {
-      throw new Error("Oferta indisponível");
+
+    const tags: string[] = (profile?.interests_tags as any) ?? [];
+    const city = profile?.city as string | undefined;
+
+    let q = sb
+      .from("companies")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state")
+      .eq("vitrine_enabled", true)
+      .limit(24);
+    if (city) q = q.ilike("address_city", `%${city}%`);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const scored = (rows ?? []).map((c: any) => {
+      const hay = `${c.segment ?? ""} ${c.trade_name ?? ""} ${c.name ?? ""}`.toLowerCase();
+      const score = tags.reduce((acc, t) => (hay.includes(t.toLowerCase()) ? acc + 1 : acc), 0);
+      return { ...c, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return { interests: tags, items: scored.slice(0, 12) };
+  });
+
+// -----------------------------------------------------------------
+// Admin: jornada de 21 dias (CRUD + run manual)
+// -----------------------------------------------------------------
+export const listJourneySteps = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_journey_steps")
+      .select("*")
+      .order("day_offset", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const upsertJourneyStep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      day_offset: z.number().int().min(0).max(60),
+      channel: z.enum(["email", "whatsapp", "in_app"]),
+      audience: z.enum(["free", "premium", "all"]),
+      event_code: z.string().min(2).max(80),
+      subject: z.string().max(200).nullable().optional(),
+      body: z.string().min(2).max(2000),
+      active: z.boolean().default(true),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { error } = await context.supabase.from("clube_journey_steps").upsert(data as any);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteJourneyStep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { error } = await context.supabase.from("clube_journey_steps").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Enquetes (parceiro cria/edita, admin modera)
+// -----------------------------------------------------------------
+export const listMyPartnerPolls = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_polls")
+      .select("*")
+      .eq("created_by", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const upsertPartnerPoll = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      company_id: z.string().uuid().optional(),
+      question: z.string().min(4).max(280),
+      options: z.array(z.object({ id: z.string().min(1).max(40), label: z.string().min(1).max(120) })).min(2).max(8),
+      kind: z.enum(["preference", "experience", "rating", "feature"]).default("preference"),
+      audience: z.enum(["all", "free", "premium", "city"]).default("all"),
+      city: z.string().max(120).optional(),
+      active: z.boolean().default(true),
+      closes_at: z.string().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const row = { ...data, created_by: context.userId } as any;
+    const { error } = await context.supabase.from("clube_polls").upsert(row);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setPollActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("clube_polls").update({ active: data.active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listAdminPolls = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { data, error } = await context.supabase
+      .from("clube_polls")
+      .select("*, companies(trade_name, name)")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// -----------------------------------------------------------------
+// Admin: auditoria do cron da jornada
+// -----------------------------------------------------------------
+export const listClubeCronRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "clube_cron_log",
+      metadata: { route: "/admin/clube", export_scope: "clube_cron_log_audit" },
+    });
+    const { data, error } = await context.supabase
+      .from("clube_cron_log")
+      .select("*")
+      .order("started_at", { ascending: false })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const getJourneyLogAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      step_id: z.string().uuid().optional(),
+      channel: z.enum(["email", "whatsapp", "in_app", "all"]).default("all"),
+      audience: z.enum(["free", "premium", "all"]).default("all"),
+      active: z.enum(["all", "on", "off"]).default("all"),
+      from: z.string().optional(),
+      to: z.string().optional(),
+      search: z.string().max(120).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "clube_journey_log",
+      metadata: { route: "/admin/clube", export_scope: "journey_audit", filters: data },
+    });
+
+
+    let stepQ = context.supabase
+      .from("clube_journey_steps")
+      .select("id, day_offset, channel, audience, event_code, subject, active")
+      .order("day_offset", { ascending: true });
+    if (data.channel !== "all") stepQ = stepQ.eq("channel", data.channel);
+    if (data.audience !== "all") stepQ = stepQ.eq("audience", data.audience);
+    if (data.active !== "all") stepQ = stepQ.eq("active", data.active === "on");
+    if (data.search) stepQ = stepQ.or(`event_code.ilike.%${data.search}%,subject.ilike.%${data.search}%`);
+
+    let logQ = context.supabase
+      .from("clube_journey_log")
+      .select("step_id, user_id, enqueued_at")
+      .order("enqueued_at", { ascending: false })
+      .limit(2000);
+    if (data.step_id) logQ = logQ.eq("step_id", data.step_id);
+    if (data.from) logQ = logQ.gte("enqueued_at", data.from);
+    if (data.to) logQ = logQ.lte("enqueued_at", data.to);
+
+    const [stepsRes, logRes] = await Promise.all([stepQ, logQ]);
+    if (stepsRes.error) throw new Error(stepsRes.error.message);
+    if (logRes.error) throw new Error(logRes.error.message);
+
+    const allowedStepIds = new Set((stepsRes.data ?? []).map((s: any) => s.id));
+    const logsFiltered = (logRes.data ?? []).filter((r: any) => allowedStepIds.has(r.step_id));
+
+    const byStep = new Map<string, { total: number; uniqueUsers: Set<string>; last: string | null }>();
+    for (const row of logsFiltered as any[]) {
+      const cur = byStep.get(row.step_id) ?? { total: 0, uniqueUsers: new Set<string>(), last: null };
+      cur.total += 1;
+      cur.uniqueUsers.add(row.user_id);
+      if (!cur.last || row.enqueued_at > cur.last) cur.last = row.enqueued_at;
+      byStep.set(row.step_id, cur);
     }
 
-    const { count: usedCount } = await sb
-      .from("clube_offer_redemptions")
-      .select("id", { count: "exact", head: true })
-      .eq("offer_id", offer.id)
-      .eq("user_id", context.userId);
-    if ((usedCount ?? 0) >= (offer.max_uses_per_user ?? 1)) {
-      throw new Error("Você já resgatou esta oferta");
-    }
+    const perStep = (stepsRes.data ?? []).map((s: any) => {
+      const agg = byStep.get(s.id);
+      const total = agg?.total ?? 0;
+      const unique = agg?.uniqueUsers.size ?? 0;
+      return {
+        ...s,
+        total,
+        unique_users: unique,
+        duplicates_blocked: Math.max(0, total - unique),
+        last_enqueued_at: agg?.last ?? null,
+      };
+    });
 
-    const code = `IMP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    const { data: red, error: redErr } = await sb
-      .from("clube_offer_redemptions")
-      .insert({
-        offer_id: offer.id,
-        user_id: context.userId,
-        company_id: offer.company_id,
-        points_spent: offer.min_points ?? 0,
-        status: "pending",
-        code,
-      })
-      .select("id,code")
-      .single();
-    if (redErr) throw new Error(redErr.message);
-
-    if ((offer.min_points ?? 0) > 0) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { error: creditErr } = await (supabaseAdmin as any).rpc("clube_credit_points", {
-        p_user_id: context.userId,
-        p_company_id: offer.company_id,
-        p_points: -Math.abs(offer.min_points),
-        p_reason: `Resgate oferta ${offer.id}`,
-        p_ref_type: "clube_offer_redemption",
-        p_ref_id: red.id,
-        p_kind: "spend",
-        p_metadata: { offer_id: offer.id },
-      });
-      if (creditErr) {
-        await sb.from("clube_offer_redemptions").update({ status: "canceled" }).eq("id", red.id);
-        throw new Error(creditErr.message);
-      }
-    }
-
-    return { redemption_id: red.id, code: red.code };
+    return {
+      perStep,
+      totals: { steps: perStep.length, events: logsFiltered.length },
+      recent: logsFiltered.slice(0, 50),
+    };
   });
