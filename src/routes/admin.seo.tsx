@@ -155,142 +155,295 @@ function AdminSeoPanel() {
         )}
 
         {sitesQ.data && sitesQ.data.length > 0 && (
-          <>
-            <Card className="p-4 grid gap-4 sm:grid-cols-3">
-              <div>
-                <Label className="text-xs">Propriedade</Label>
-                <select
-                  className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
-                  value={effectiveSite ?? ""}
-                  onChange={(e) => setSiteUrl(e.target.value)}
-                >
-                  {sitesQ.data.map((s: GscSite) => (
-                    <option key={s.siteUrl} value={s.siteUrl}>
-                      {s.siteUrl}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label className="text-xs">Dimensão</Label>
-                <select
-                  className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
-                  value={dim}
-                  onChange={(e) => setDim(e.target.value as Dim)}
-                >
-                  <option value="query">Consultas (queries)</option>
-                  <option value="page">Páginas</option>
-                </select>
-              </div>
-              <div>
-                <Label className="text-xs">Período</Label>
-                <select
-                  className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
-                  value={days}
-                  onChange={(e) => setDays(Number(e.target.value))}
-                >
-                  <option value={7}>Últimos 7 dias</option>
-                  <option value={28}>Últimos 28 dias</option>
-                  <option value={90}>Últimos 90 dias</option>
-                </select>
-              </div>
-            </Card>
+          <Tabs defaultValue="analytics">
+            <TabsList>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="inspect">Inspeção de URL</TabsTrigger>
+              <TabsTrigger value="jsonld">Validador JSON-LD</TabsTrigger>
+            </TabsList>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Card className="p-4">
-                <p className="text-xs text-muted-foreground">Cliques</p>
-                <p className="text-2xl font-semibold">
-                  {fmtNum(totals.clicks)}
-                </p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-muted-foreground">Impressões</p>
-                <p className="text-2xl font-semibold">
-                  {fmtNum(totals.impressions)}
-                </p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-muted-foreground">Posição média</p>
-                <p className="text-2xl font-semibold">
-                  {fmtPos(totals.avgPos)}
-                </p>
-              </Card>
-            </div>
-
-            <Card className="p-0 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b">
-                <h2 className="text-sm font-medium">
-                  Top 25 {dim === "query" ? "consultas" : "páginas"}
-                </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => analyticsQ.refetch()}
-                  disabled={analyticsQ.isFetching}
-                >
-                  {analyticsQ.isFetching ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    "Atualizar"
-                  )}
-                </Button>
-              </div>
-              {analyticsQ.error && (
-                <div className="p-4 text-sm text-destructive">
-                  {(analyticsQ.error as Error).message}
-                </div>
-              )}
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/40 text-xs text-muted-foreground">
-                    <tr>
-                      <th className="text-left px-4 py-2">
-                        {dim === "query" ? "Consulta" : "Página"}
-                      </th>
-                      <th className="text-right px-4 py-2">Cliques</th>
-                      <th className="text-right px-4 py-2">Impr.</th>
-                      <th className="text-right px-4 py-2">CTR</th>
-                      <th className="text-right px-4 py-2">Pos.</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(analyticsQ.data ?? []).map((r, i) => (
-                      <tr key={i} className="border-t">
-                        <td className="px-4 py-2 truncate max-w-[420px]">
-                          {r.keys?.[0]}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {fmtNum(r.clicks)}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {fmtNum(r.impressions)}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {fmtPct(r.ctr)}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {fmtPos(r.position)}
-                        </td>
-                      </tr>
+            <TabsContent value="analytics" className="mt-4 space-y-4">
+              <Card className="p-4 grid gap-4 sm:grid-cols-3">
+                <div>
+                  <Label className="text-xs">Propriedade</Label>
+                  <select
+                    className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
+                    value={effectiveSite ?? ""}
+                    onChange={(e) => setSiteUrl(e.target.value)}
+                  >
+                    {sitesQ.data.map((s: GscSite) => (
+                      <option key={s.siteUrl} value={s.siteUrl}>
+                        {s.siteUrl}
+                      </option>
                     ))}
-                    {!analyticsQ.isLoading &&
-                      (analyticsQ.data ?? []).length === 0 && (
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Dimensão</Label>
+                  <select
+                    className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
+                    value={dim}
+                    onChange={(e) => setDim(e.target.value as Dim)}
+                  >
+                    <option value="query">Consultas (queries)</option>
+                    <option value="page">Páginas</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Período</Label>
+                  <select
+                    className="w-full mt-1 rounded-md border bg-background px-2 py-1.5 text-sm"
+                    value={days}
+                    onChange={(e) => setDays(Number(e.target.value))}
+                  >
+                    <option value={7}>Últimos 7 dias</option>
+                    <option value={28}>Últimos 28 dias</option>
+                    <option value={90}>Últimos 90 dias</option>
+                  </select>
+                </div>
+              </Card>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Card className="p-4">
+                  <p className="text-xs text-muted-foreground">Cliques</p>
+                  <p className="text-2xl font-semibold">{fmtNum(totals.clicks)}</p>
+                </Card>
+                <Card className="p-4">
+                  <p className="text-xs text-muted-foreground">Impressões</p>
+                  <p className="text-2xl font-semibold">{fmtNum(totals.impressions)}</p>
+                </Card>
+                <Card className="p-4">
+                  <p className="text-xs text-muted-foreground">Posição média</p>
+                  <p className="text-2xl font-semibold">{fmtPos(totals.avgPos)}</p>
+                </Card>
+              </div>
+
+              <Card className="p-0 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b">
+                  <h2 className="text-sm font-medium">
+                    Top 25 {dim === "query" ? "consultas" : "páginas"}
+                  </h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => analyticsQ.refetch()}
+                    disabled={analyticsQ.isFetching}
+                  >
+                    {analyticsQ.isFetching ? <Loader2 className="size-3.5 animate-spin" /> : "Atualizar"}
+                  </Button>
+                </div>
+                {analyticsQ.error && (
+                  <div className="p-4 text-sm text-destructive">{(analyticsQ.error as Error).message}</div>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-xs text-muted-foreground">
+                      <tr>
+                        <th className="text-left px-4 py-2">{dim === "query" ? "Consulta" : "Página"}</th>
+                        <th className="text-right px-4 py-2">Cliques</th>
+                        <th className="text-right px-4 py-2">Impr.</th>
+                        <th className="text-right px-4 py-2">CTR</th>
+                        <th className="text-right px-4 py-2">Pos.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(analyticsQ.data ?? []).map((r, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="px-4 py-2 truncate max-w-[420px]">{r.keys?.[0]}</td>
+                          <td className="px-4 py-2 text-right">{fmtNum(r.clicks)}</td>
+                          <td className="px-4 py-2 text-right">{fmtNum(r.impressions)}</td>
+                          <td className="px-4 py-2 text-right">{fmtPct(r.ctr)}</td>
+                          <td className="px-4 py-2 text-right">{fmtPos(r.position)}</td>
+                        </tr>
+                      ))}
+                      {!analyticsQ.isLoading && (analyticsQ.data ?? []).length === 0 && (
                         <tr>
-                          <td
-                            colSpan={5}
-                            className="px-4 py-8 text-center text-muted-foreground"
-                          >
+                          <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                             Sem dados no período selecionado.
                           </td>
                         </tr>
                       )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </>
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="inspect" className="mt-4">
+              <UrlInspectPanel siteUrl={effectiveSite} />
+            </TabsContent>
+
+            <TabsContent value="jsonld" className="mt-4">
+              <JsonLdValidatorPanel />
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
   );
 }
+
+function UrlInspectPanel({ siteUrl }: { siteUrl: string | null }) {
+  const inspect = useServerFn(inspectUrlFn);
+  const [url, setUrl] = useState("https://impulsionando.com.br/");
+  const m = useMutation({
+    mutationFn: (u: string) => inspect({ data: { siteUrl: siteUrl!, inspectionUrl: u } }),
+  });
+  const result: any = m.data;
+  const idx = result?.indexStatusResult;
+  const rich = result?.richResultsResult;
+  const mobile = result?.mobileUsabilityResult;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4 flex flex-wrap gap-2 items-end">
+        <div className="flex-1 min-w-[260px]">
+          <Label className="text-xs">URL para inspecionar</Label>
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+        </div>
+        <Button onClick={() => m.mutate(url)} disabled={!siteUrl || !url || m.isPending}>
+          {m.isPending ? <Loader2 className="size-4 animate-spin" /> : "Inspecionar"}
+        </Button>
+      </Card>
+
+      {m.error && (
+        <Card className="p-4 border-destructive/40 bg-destructive/5 text-sm text-destructive">
+          {(m.error as Error).message}
+        </Card>
+      )}
+
+      {result && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <StatusCard title="Indexação" state={idx?.verdict} extra={[
+            ["Cobertura", idx?.coverageState],
+            ["Robots", idx?.robotsTxtState],
+            ["Canonical usada", idx?.googleCanonical],
+            ["Canonical declarada", idx?.userCanonical],
+            ["Última rastreada", idx?.lastCrawlTime],
+          ]} />
+          <StatusCard title="Rich Results" state={rich?.verdict} extra={
+            (rich?.detectedItems ?? []).map((it: any) => [it.richResultType, `${it.items?.length ?? 0} itens`])
+          } />
+          <StatusCard title="Mobile" state={mobile?.verdict} extra={
+            (mobile?.issues ?? []).map((it: any) => [it.issueType, it.severity])
+          } />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatusCard({
+  title,
+  state,
+  extra,
+}: {
+  title: string;
+  state?: string;
+  extra?: Array<[string, any]>;
+}) {
+  const good = state === "PASS";
+  const bad = state === "FAIL";
+  return (
+    <Card className="p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">{title}</h3>
+        <Badge variant="outline" className={good ? "border-emerald-500/40 text-emerald-600" : bad ? "border-destructive/40 text-destructive" : ""}>
+          {state ?? "—"}
+        </Badge>
+      </div>
+      <dl className="text-xs space-y-1">
+        {(extra ?? []).filter(([, v]) => v).map(([k, v], i) => (
+          <div key={i} className="flex justify-between gap-2">
+            <dt className="text-muted-foreground">{k}</dt>
+            <dd className="font-medium truncate max-w-[180px]" title={String(v)}>{String(v)}</dd>
+          </div>
+        ))}
+      </dl>
+    </Card>
+  );
+}
+
+function JsonLdValidatorPanel() {
+  const [html, setHtml] = useState("");
+  const [urlFetch, setUrlFetch] = useState("");
+  const results: JsonLdResult[] = useMemo(() => (html ? validateJsonLd(html) : []), [html]);
+
+  async function fetchHtml() {
+    try {
+      const r = await fetch(urlFetch);
+      setHtml(await r.text());
+    } catch (e: any) {
+      setHtml(`<!-- Erro ao buscar: ${e.message} -->`);
+    }
+  }
+
+  const errors = results.reduce((n, r) => n + r.issues.filter((i) => i.level === "error").length, 0);
+  const warnings = results.reduce((n, r) => n + r.issues.filter((i) => i.level === "warning").length, 0);
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4 space-y-3">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Buscar HTML de https://… (opcional)"
+            value={urlFetch}
+            onChange={(e) => setUrlFetch(e.target.value)}
+          />
+          <Button variant="outline" onClick={fetchHtml} disabled={!urlFetch}>Buscar</Button>
+        </div>
+        <div>
+          <Label className="text-xs">Cole o HTML da página (o validador extrai todos os &lt;script type="application/ld+json"&gt;)</Label>
+          <textarea
+            value={html}
+            onChange={(e) => setHtml(e.target.value)}
+            rows={8}
+            className="w-full mt-1 rounded-md border bg-background p-2 text-xs font-mono"
+            placeholder="<html>…</html>"
+          />
+        </div>
+      </Card>
+
+      {html && (
+        <div className="flex gap-3 text-sm">
+          <Badge variant="outline">{results.length} blocos</Badge>
+          <Badge variant="outline" className={errors ? "border-destructive/40 text-destructive" : "border-emerald-500/40 text-emerald-600"}>
+            {errors} erros
+          </Badge>
+          <Badge variant="outline" className={warnings ? "border-amber-500/40 text-amber-600" : ""}>
+            {warnings} avisos
+          </Badge>
+        </div>
+      )}
+
+      {results.map((r, i) => (
+        <Card key={i} className="p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold">
+              #{i + 1} · <span className="font-mono">{r.type}</span>
+            </h4>
+            {r.issues.length === 0 ? (
+              <span className="text-xs text-emerald-600 inline-flex items-center gap-1">
+                <CheckCircle2 className="size-3.5" /> OK
+              </span>
+            ) : (
+              <span className="text-xs text-destructive inline-flex items-center gap-1">
+                <XCircle className="size-3.5" /> {r.issues.length} problemas
+              </span>
+            )}
+          </div>
+          {r.issues.length > 0 && (
+            <ul className="text-xs space-y-1">
+              {r.issues.map((iss, k) => (
+                <li key={k} className={iss.level === "error" ? "text-destructive" : "text-amber-600"}>
+                  [{iss.level}] {iss.message}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+}
+
