@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import chrismedHorizontal from '@/assets/chrismed-horizontal.png.asset.json';
+import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 /**
  * ChrismedPreloader — splash inicial no padrão Impulsionando:
@@ -34,9 +34,9 @@ export function ChrismedPreloader() {
       style={{ opacity: fading ? 0 : 1, pointerEvents: fading ? 'none' : 'auto' }}
     >
       <img
-        src={chrismedHorizontal.url}
-        alt=""
-        className="h-10 w-auto select-none opacity-90 brightness-0 invert md:h-12"
+        src={chrismedLogo.url}
+        alt="CHRISMED"
+        className="h-20 w-auto select-none drop-shadow-[0_4px_18px_rgba(0,0,0,0.35)] md:h-24"
         draggable={false}
       />
       <div className="mt-6 h-[3px] w-40 overflow-hidden rounded-full bg-white/15">
