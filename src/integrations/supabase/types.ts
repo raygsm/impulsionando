@@ -4888,6 +4888,51 @@ export type Database = {
         }
         Relationships: []
       }
+      clube_earning_rules: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          event_key: string | null
+          fixed_points: number
+          id: string
+          is_active: boolean
+          params: Json
+          points_per_currency_unit: number
+          scope: string
+          scope_ref: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          event_key?: string | null
+          fixed_points?: number
+          id?: string
+          is_active?: boolean
+          params?: Json
+          points_per_currency_unit?: number
+          scope?: string
+          scope_ref?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          event_key?: string | null
+          fixed_points?: number
+          id?: string
+          is_active?: boolean
+          params?: Json
+          points_per_currency_unit?: number
+          scope?: string
+          scope_ref?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clube_journey_log: {
         Row: {
           enqueued_at: string
@@ -4955,6 +5000,444 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      clube_memberships: {
+        Row: {
+          billing_cycle: string
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          external_ref: string | null
+          id: string
+          metadata: Json
+          plan_id: string
+          referred_by_company_id: string | null
+          source: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          external_ref?: string | null
+          id?: string
+          metadata?: Json
+          plan_id: string
+          referred_by_company_id?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          external_ref?: string | null
+          id?: string
+          metadata?: Json
+          plan_id?: string
+          referred_by_company_id?: string | null
+          source?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_memberships_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "clube_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_memberships_referred_by_company_id_fkey"
+            columns: ["referred_by_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_memberships_referred_by_company_id_fkey"
+            columns: ["referred_by_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_memberships_referred_by_company_id_fkey"
+            columns: ["referred_by_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_memberships_referred_by_company_id_fkey"
+            columns: ["referred_by_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_memberships_referred_by_company_id_fkey"
+            columns: ["referred_by_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      clube_offer_redemptions: {
+        Row: {
+          amount_cents: number
+          code: string | null
+          company_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          offer_id: string
+          order_ref: string | null
+          points_spent: number
+          status: string
+          updated_at: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          code?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          offer_id: string
+          order_ref?: string | null
+          points_spent?: number
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          code?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          offer_id?: string
+          order_ref?: string | null
+          points_spent?: number
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_offer_redemptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_offer_redemptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_offer_redemptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_offer_redemptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_offer_redemptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_offer_redemptions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "clube_partner_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clube_partner_offers: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_uses_per_user: number
+          max_uses_total: number | null
+          min_plan_code: string | null
+          min_points: number
+          starts_at: string
+          terms: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          discount_type: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_uses_per_user?: number
+          max_uses_total?: number | null
+          min_plan_code?: string | null
+          min_points?: number
+          starts_at?: string
+          terms?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_uses_per_user?: number
+          max_uses_total?: number | null
+          min_plan_code?: string | null
+          min_points?: number
+          starts_at?: string
+          terms?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_partner_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_partner_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_partner_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_partner_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_partner_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_partner_offers_min_plan_code_fkey"
+            columns: ["min_plan_code"]
+            isOneToOne: false
+            referencedRelation: "clube_plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      clube_plans: {
+        Row: {
+          benefits: Json
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          monthly_price_cents: number
+          name: string
+          points_multiplier: number
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+          yearly_price_cents: number
+        }
+        Insert: {
+          benefits?: Json
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          name: string
+          points_multiplier?: number
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+          yearly_price_cents?: number
+        }
+        Update: {
+          benefits?: Json
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          name?: string
+          points_multiplier?: number
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+          yearly_price_cents?: number
+        }
+        Relationships: []
+      }
+      clube_points_balance: {
+        Row: {
+          balance: number
+          lifetime_earned: number
+          lifetime_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          lifetime_earned?: number
+          lifetime_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          lifetime_earned?: number
+          lifetime_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clube_points_ledger: {
+        Row: {
+          balance_after: number
+          company_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          points: number
+          reason: string
+          ref_id: string | null
+          ref_type: string | null
+          user_id: string
+        }
+        Insert: {
+          balance_after: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          points: number
+          reason: string
+          ref_id?: string | null
+          ref_type?: string | null
+          user_id: string
+        }
+        Update: {
+          balance_after?: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          points?: number
+          reason?: string
+          ref_id?: string | null
+          ref_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_points_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_points_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_points_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_points_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "clube_points_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       clube_poll_votes: {
         Row: {
@@ -34071,6 +34554,19 @@ export type Database = {
       billing_run_cycle: { Args: never; Returns: Json }
       calc_transaction_split: {
         Args: { _source_id: string; _source_table: string }
+        Returns: string
+      }
+      clube_credit_points: {
+        Args: {
+          p_company_id: string
+          p_kind?: string
+          p_metadata?: Json
+          p_points: number
+          p_reason: string
+          p_ref_id?: string
+          p_ref_type?: string
+          p_user_id: string
+        }
         Returns: string
       }
       company_can_transact: { Args: { _company_id: string }; Returns: boolean }
