@@ -1,7 +1,15 @@
 import type { DemoTemplate, DemoPlanId } from "./types";
 import { alimentacaoRestaurante } from "./alimentacao-restaurante";
+import { saudeClinica } from "./saude-clinica";
+import { imobiliariaLocacao } from "./imobiliaria-locacao";
+import { belezaSalao } from "./beleza-salao";
 
-const TEMPLATES: DemoTemplate[] = [alimentacaoRestaurante];
+const TEMPLATES: DemoTemplate[] = [
+  alimentacaoRestaurante,
+  saudeClinica,
+  imobiliariaLocacao,
+  belezaSalao,
+];
 
 export function getDemoTemplate(macro: string, sub: string): DemoTemplate | undefined {
   return TEMPLATES.find((t) => t.macro === macro && t.sub === sub && t.status === "active");
