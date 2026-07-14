@@ -28,7 +28,11 @@ function TenantMercadoPagoTab() {
   const companyQ = useQuery({
     queryKey: ["company-by-slug", slug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("companies").select("id,name,slug").eq("slug", slug).maybeSingle();
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id,name,public_slug,subdomain")
+        .or(`public_slug.eq.${slug},subdomain.eq.${slug}`)
+        .maybeSingle();
       if (error) throw new Error(error.message);
       if (!data) throw new Error(`Empresa ${slug} não encontrada`);
       return data;
