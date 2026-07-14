@@ -26,6 +26,7 @@ import { Route as RiomedRouteImport } from './routes/riomed'
 import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReembolsoRouteImport } from './routes/reembolso'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as QueroComecarRouteImport } from './routes/quero-comecar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
@@ -1036,6 +1037,11 @@ const ResetPasswordSentRoute = ResetPasswordSentRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReembolsoRoute = ReembolsoRouteImport.update({
@@ -21165,6 +21171,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   QueroComecarRoute: QueroComecarRoute,
   ReembolsoRoute: ReembolsoRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   RiomedRoute: RiomedRouteWithChildren,
