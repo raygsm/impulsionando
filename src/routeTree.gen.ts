@@ -784,6 +784,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicPainelLegacyHitRouteImport } from './routes/api/public/painel.legacy-hit'
 import { Route as ApiPublicPainelFunnelHitRouteImport } from './routes/api/public/painel.funnel-hit'
 import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/outbox/process'
+import { Route as ApiPublicMercadoPagoSlugRouteImport } from './routes/api/public/mercado-pago.$slug'
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
@@ -5239,6 +5240,12 @@ const ApiPublicOutboxProcessRoute = ApiPublicOutboxProcessRouteImport.update({
   path: '/api/public/outbox/process',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMercadoPagoSlugRoute =
+  ApiPublicMercadoPagoSlugRouteImport.update({
+    id: '/api/public/mercado-pago/$slug',
+    path: '/api/public/mercado-pago/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksZapiStatusRoute =
   ApiPublicHooksZapiStatusRouteImport.update({
     id: '/api/public/hooks/zapi-status',
@@ -7062,6 +7069,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
+  '/api/public/mercado-pago/$slug': typeof ApiPublicMercadoPagoSlugRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/painel/legacy-hit': typeof ApiPublicPainelLegacyHitRoute
@@ -7980,6 +7988,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
+  '/api/public/mercado-pago/$slug': typeof ApiPublicMercadoPagoSlugRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/painel/legacy-hit': typeof ApiPublicPainelLegacyHitRoute
@@ -8927,6 +8936,7 @@ export interface FileRoutesById {
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
+  '/api/public/mercado-pago/$slug': typeof ApiPublicMercadoPagoSlugRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/painel/funnel-hit': typeof ApiPublicPainelFunnelHitRoute
   '/api/public/painel/legacy-hit': typeof ApiPublicPainelLegacyHitRoute
@@ -9873,6 +9883,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
+    | '/api/public/mercado-pago/$slug'
     | '/api/public/outbox/process'
     | '/api/public/painel/funnel-hit'
     | '/api/public/painel/legacy-hit'
@@ -10791,6 +10802,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
+    | '/api/public/mercado-pago/$slug'
     | '/api/public/outbox/process'
     | '/api/public/painel/funnel-hit'
     | '/api/public/painel/legacy-hit'
@@ -11737,6 +11749,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
+    | '/api/public/mercado-pago/$slug'
     | '/api/public/outbox/process'
     | '/api/public/painel/funnel-hit'
     | '/api/public/painel/legacy-hit'
@@ -12067,6 +12080,7 @@ export interface RootRouteChildren {
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
+  ApiPublicMercadoPagoSlugRoute: typeof ApiPublicMercadoPagoSlugRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
   ApiPublicPainelFunnelHitRoute: typeof ApiPublicPainelFunnelHitRoute
   ApiPublicPainelLegacyHitRoute: typeof ApiPublicPainelLegacyHitRoute
@@ -17519,6 +17533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOutboxProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/mercado-pago/$slug': {
+      id: '/api/public/mercado-pago/$slug'
+      path: '/api/public/mercado-pago/$slug'
+      fullPath: '/api/public/mercado-pago/$slug'
+      preLoaderRoute: typeof ApiPublicMercadoPagoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/zapi-status': {
       id: '/api/public/hooks/zapi-status'
       path: '/api/public/hooks/zapi-status'
@@ -21254,6 +21275,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
+  ApiPublicMercadoPagoSlugRoute: ApiPublicMercadoPagoSlugRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
   ApiPublicPainelFunnelHitRoute: ApiPublicPainelFunnelHitRoute,
   ApiPublicPainelLegacyHitRoute: ApiPublicPainelLegacyHitRoute,
