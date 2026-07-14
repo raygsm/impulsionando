@@ -80,3 +80,50 @@ export const getAutomationApprovalCounts = createServerFn({ method: "GET" })
     return counts;
   });
 
+const ResolveSchema = z.object({
+  id: z.string().uuid(),
+  action: z.enum(["approve", "reject"]),
+  note: z.string().max(1000).nullable().optional(),
+});
+
+export const resolveAutomationApproval = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => ResolveSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    const { data: isGestor } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "gestor",
+    });
+    if (!isAdmin && !isGestor) throw new Error("Forbidden — admin/gestor only");
+
+    const nextStatus = data.action === "approve" ? "approved" : "rejected";
+    const { data: row, error } = await supabase
+      .from("automation_approvals")
+      .update({
+        status: nextStatus,
+        note: data.note ?? null,
+      })
+      .eq("id", data.id)
+      .eq("status", "pending")
+      .select("id, status, updated_at")
+      .single();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Solicitação não está mais pendente.");
+
+    await supabase.from("audit_logs" as never).insert({
+      user_id: userId,
+      action: `approvals.${data.action}`,
+      entity: "automation_approvals",
+      entity_id: data.id,
+      metadata: { note: data.note ?? null, source: "command.aprovacoes" },
+    } as never);
+
+    return { ok: true, id: row.id, status: row.status };
+  });
+
+
