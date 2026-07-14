@@ -35,11 +35,17 @@ Deno.serve(async (req) => {
   });
 
   // 2. Credencial MP
-  const { data: cred } = await sb
+  // Existem 2 linhas (sandbox+production). Preferimos production ativa; caímos para qualquer ativa; senão, a mais recente.
+  const { data: creds } = await sb
     .from("mpago_credentials")
-    .select("public_key,access_token_secret_name,webhook_secret_name,environment")
+    .select("public_key,access_token_secret_name,webhook_secret_name,environment,active,updated_at")
     .eq("company_id", companyId)
-    .maybeSingle();
+    .order("active", { ascending: false })
+    .order("updated_at", { ascending: false });
+  const cred = (creds ?? []).find((c: any) => c.environment === "production" && c.active)
+    ?? (creds ?? []).find((c: any) => c.active)
+    ?? (creds ?? [])[0]
+    ?? null;
   checks.push({
     id: "credential",
     label: "Credencial Mercado Pago",
