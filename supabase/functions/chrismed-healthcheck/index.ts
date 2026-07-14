@@ -64,7 +64,13 @@ Deno.serve(async (req) => {
   });
 
   // 4. Acesso ao token + probe da chave PIX
-  const accessToken = cred ? Deno.env.get(cred.access_token_secret_name) : null;
+  // Tokens ficam criptografados em core_secret_values (RPC reveal_secret_value);
+  // fallback para Deno.env para compatibilidade com secrets legados.
+  let accessToken: string | null = null;
+  if (cred) {
+    const { data: revealed } = await sb.rpc("reveal_secret_value", { p_name: cred.access_token_secret_name });
+    accessToken = (revealed as string | null) ?? Deno.env.get(cred.access_token_secret_name) ?? null;
+  }
   if (!accessToken) {
     checks.push({
       id: "token",
