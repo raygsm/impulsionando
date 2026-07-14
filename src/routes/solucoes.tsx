@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
+
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2,
   Stethoscope, Scissors, UtensilsCrossed, Store, Briefcase, GraduationCap,
