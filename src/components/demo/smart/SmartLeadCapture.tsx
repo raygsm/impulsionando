@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -108,7 +109,16 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
                 </div>
               </div>
             )}
-            <Button className="mt-2" onClick={() => onOpenChange(false)}>Continuar explorando a demo</Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              {draft && (
+                <Button asChild>
+                  <Link to="/demo/rascunho/$id" params={{ id: draft.id }} onClick={() => onOpenChange(false)}>
+                    Ver meu rascunho
+                  </Link>
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Continuar explorando</Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-4">
