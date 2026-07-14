@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import chrismedHorizontal from '@/assets/chrismed-horizontal.png.asset.json';
+import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 /**
  * ChrismedPreloader — splash inicial no padrão Impulsionando:
