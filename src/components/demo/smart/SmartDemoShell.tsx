@@ -13,6 +13,7 @@ type Props = { template: DemoTemplate };
 export function SmartDemoShell({ template }: Props) {
   const { plan, setPlan } = useDemoPlan(template.recommendedPlan);
   const [activeMenu, setActiveMenu] = useState<string>(template.menu[0]?.id ?? "overview");
+  const [leadOpen, setLeadOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -31,7 +32,7 @@ export function SmartDemoShell({ template }: Props) {
             <Badge variant="secondary" className="ml-1">Ambiente de demonstração</Badge>
           </div>
           <SmartPlanSwitcher active={plan} recommended={template.recommendedPlan} onChange={setPlan} />
-          <Button size="sm">{template.conversion.primaryCTA}</Button>
+          <Button size="sm" onClick={() => setLeadOpen(true)}>{template.conversion.primaryCTA}</Button>
         </div>
       </header>
 
@@ -54,6 +55,15 @@ export function SmartDemoShell({ template }: Props) {
           <SmartDashboard template={template} plan={plan} onUnlock={setPlan} />
         </main>
       </div>
+
+      <SmartLeadCapture
+        open={leadOpen}
+        onOpenChange={setLeadOpen}
+        templateId={template.id}
+        businessLabel={template.branding.businessName}
+        planLabel={PLAN_LABEL[plan]}
+        ctaLabel={template.conversion.primaryCTA}
+      />
     </div>
   );
 }
