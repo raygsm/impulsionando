@@ -6,6 +6,21 @@ import { colorsEvents, ensureGaInstalled } from "@/lib/colors-analytics";
 import { useColorsUtmHydration } from "@/lib/colors-utm-hydrate";
 import AntiFakePopup from "@/components/colors/AntiFakePopup";
 import ComprarOriginalFab from "@/components/colors/ComprarOriginalFab";
+import PreCheckoutHost from "@/components/colors/PreCheckoutHost";
+import { openColorsPreCheckout } from "@/lib/colors-precheckout-bus";
+
+function buySgb(origin: string, kitSize = 1) {
+  openColorsPreCheckout({
+    origin,
+    product: {
+      slug: "super-green-black",
+      name: "Super Green Black",
+      kitSize,
+      quantity: 1,
+      offerUrl: PRODUCT.links[0].href,
+    },
+  });
+}
 
 const LazyVideo = lazy(() => import("@/components/colors/VideoShowcase"));
 const LazyJornada = lazy(() => import("@/components/colors/JornadaTransformacao"));
