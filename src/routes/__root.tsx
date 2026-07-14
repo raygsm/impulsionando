@@ -381,8 +381,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "WebSite",
           name: "Impulsionando Tecnologia",
           url: "https://impulsionando.com.br",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "https://impulsionando.com.br/pesquisa?q={search_term_string}",
+            },
+            "query-input": "required name=search_term_string",
+          },
         }),
       },
+
     ],
   }),
   shellComponent: RootShell,
