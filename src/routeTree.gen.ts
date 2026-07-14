@@ -258,6 +258,7 @@ import { Route as ChrismedAgendarRouteImport } from './routes/chrismed.agendar'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as BriefingSiteInstitucionalRouteImport } from './routes/briefing.site-institucional'
+import { Route as AdminSeoRouteImport } from './routes/admin.seo'
 import { Route as AdminManutencaoRouteImport } from './routes/admin.manutencao'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -2203,6 +2204,11 @@ const BriefingSiteInstitucionalRoute =
     path: '/briefing/site-institucional',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminSeoRoute = AdminSeoRouteImport.update({
+  id: '/admin/seo',
+  path: '/admin/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminManutencaoRoute = AdminManutencaoRouteImport.update({
   id: '/admin/manutencao',
   path: '/admin/manutencao',
@@ -6323,6 +6329,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -7246,6 +7253,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -8182,6 +8190,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/manutencao': typeof AdminManutencaoRoute
+  '/admin/seo': typeof AdminSeoRoute
   '/briefing/site-institucional': typeof BriefingSiteInstitucionalRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -9125,6 +9134,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/admin/seo'
     | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
@@ -10048,6 +10058,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/admin/seo'
     | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
@@ -10983,6 +10994,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/admin/login'
     | '/admin/manutencao'
+    | '/admin/seo'
     | '/briefing/site-institucional'
     | '/checkout/$slug'
     | '/checkout/success'
@@ -11884,6 +11896,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminManutencaoRoute: typeof AdminManutencaoRoute
+  AdminSeoRoute: typeof AdminSeoRoute
   BriefingSiteInstitucionalRoute: typeof BriefingSiteInstitucionalRoute
   CheckoutSlugRoute: typeof CheckoutSlugRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
@@ -13796,6 +13809,13 @@ declare module '@tanstack/react-router' {
       path: '/briefing/site-institucional'
       fullPath: '/briefing/site-institucional'
       preLoaderRoute: typeof BriefingSiteInstitucionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/seo': {
+      id: '/admin/seo'
+      path: '/admin/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AdminSeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/manutencao': {
@@ -21023,6 +21043,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminManutencaoRoute: AdminManutencaoRoute,
+  AdminSeoRoute: AdminSeoRoute,
   BriefingSiteInstitucionalRoute: BriefingSiteInstitucionalRoute,
   CheckoutSlugRoute: CheckoutSlugRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
