@@ -288,10 +288,6 @@ function AdminSeoPanel() {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
 
 function UrlInspectPanel({ siteUrl }: { siteUrl: string | null }) {
   const inspect = useServerFn(inspectUrlFn);
