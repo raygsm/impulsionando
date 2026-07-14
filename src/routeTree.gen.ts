@@ -826,6 +826,7 @@ import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/
 import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as ApiPublicCommTickRouteImport } from './routes/api/public/comm/tick'
 import { Route as ApiPublicCommN8nCallbackRouteImport } from './routes/api/public/comm/n8n-callback'
+import { Route as CommandCommandClientesCompanyIdRouteImport } from './routes/_command.command.clientes.$companyId'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedTenantsSlugHomologacaoRouteImport } from './routes/_authenticated/tenants.$slug.homologacao'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -5482,6 +5483,12 @@ const ApiPublicCommN8nCallbackRoute =
     path: '/api/public/comm/n8n-callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CommandCommandClientesCompanyIdRoute =
+  CommandCommandClientesCompanyIdRouteImport.update({
+    id: '/$companyId',
+    path: '/$companyId',
+    getParentRoute: () => CommandCommandClientesRoute,
+  } as any)
 const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
   AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -6879,7 +6886,7 @@ export interface FileRoutesByFullPath {
   '/command/atendimento': typeof CommandCommandAtendimentoRoute
   '/command/automacoes': typeof CommandCommandAutomacoesRoute
   '/command/catalogo': typeof CommandCommandCatalogoRoute
-  '/command/clientes': typeof CommandCommandClientesRoute
+  '/command/clientes': typeof CommandCommandClientesRouteWithChildren
   '/command/comercial': typeof CommandCommandComercialRoute
   '/command/config': typeof CommandCommandConfigRoute
   '/command/financeiro': typeof CommandCommandFinanceiroRoute
@@ -7005,6 +7012,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/command/clientes/$companyId': typeof CommandCommandClientesCompanyIdRoute
   '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
   '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
@@ -7799,7 +7807,7 @@ export interface FileRoutesByTo {
   '/command/atendimento': typeof CommandCommandAtendimentoRoute
   '/command/automacoes': typeof CommandCommandAutomacoesRoute
   '/command/catalogo': typeof CommandCommandCatalogoRoute
-  '/command/clientes': typeof CommandCommandClientesRoute
+  '/command/clientes': typeof CommandCommandClientesRouteWithChildren
   '/command/comercial': typeof CommandCommandComercialRoute
   '/command/config': typeof CommandCommandConfigRoute
   '/command/financeiro': typeof CommandCommandFinanceiroRoute
@@ -7921,6 +7929,7 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/command/clientes/$companyId': typeof CommandCommandClientesCompanyIdRoute
   '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
   '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
@@ -8740,7 +8749,7 @@ export interface FileRoutesById {
   '/_command/command/atendimento': typeof CommandCommandAtendimentoRoute
   '/_command/command/automacoes': typeof CommandCommandAutomacoesRoute
   '/_command/command/catalogo': typeof CommandCommandCatalogoRoute
-  '/_command/command/clientes': typeof CommandCommandClientesRoute
+  '/_command/command/clientes': typeof CommandCommandClientesRouteWithChildren
   '/_command/command/comercial': typeof CommandCommandComercialRoute
   '/_command/command/config': typeof CommandCommandConfigRoute
   '/_command/command/financeiro': typeof CommandCommandFinanceiroRoute
@@ -8866,6 +8875,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/tenants/$slug/homologacao': typeof AuthenticatedTenantsSlugHomologacaoRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/_command/command/clientes/$companyId': typeof CommandCommandClientesCompanyIdRoute
   '/api/public/comm/n8n-callback': typeof ApiPublicCommN8nCallbackRoute
   '/api/public/comm/tick': typeof ApiPublicCommTickRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
@@ -9810,6 +9820,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
+    | '/command/clientes/$companyId'
     | '/api/public/comm/n8n-callback'
     | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
@@ -10726,6 +10737,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/tenants/$slug/homologacao'
     | '/torre/restaurantes-demo/auditoria'
+    | '/command/clientes/$companyId'
     | '/api/public/comm/n8n-callback'
     | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
@@ -11670,6 +11682,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/tenants/$slug/homologacao'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
+    | '/_command/command/clientes/$companyId'
     | '/api/public/comm/n8n-callback'
     | '/api/public/comm/tick'
     | '/api/public/cron/agenda-tick'
@@ -17787,6 +17800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCommN8nCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_command/command/clientes/$companyId': {
+      id: '/_command/command/clientes/$companyId'
+      path: '/$companyId'
+      fullPath: '/command/clientes/$companyId'
+      preLoaderRoute: typeof CommandCommandClientesCompanyIdRouteImport
+      parentRoute: typeof CommandCommandClientesRoute
+    }
     '/_authenticated/torre/restaurantes-demo/auditoria': {
       id: '/_authenticated/torre/restaurantes-demo/auditoria'
       path: '/auditoria'
@@ -20357,12 +20377,26 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface CommandCommandClientesRouteChildren {
+  CommandCommandClientesCompanyIdRoute: typeof CommandCommandClientesCompanyIdRoute
+}
+
+const CommandCommandClientesRouteChildren: CommandCommandClientesRouteChildren =
+  {
+    CommandCommandClientesCompanyIdRoute: CommandCommandClientesCompanyIdRoute,
+  }
+
+const CommandCommandClientesRouteWithChildren =
+  CommandCommandClientesRoute._addFileChildren(
+    CommandCommandClientesRouteChildren,
+  )
+
 interface CommandRouteChildren {
   CommandCommandAprovacoesRoute: typeof CommandCommandAprovacoesRoute
   CommandCommandAtendimentoRoute: typeof CommandCommandAtendimentoRoute
   CommandCommandAutomacoesRoute: typeof CommandCommandAutomacoesRoute
   CommandCommandCatalogoRoute: typeof CommandCommandCatalogoRoute
-  CommandCommandClientesRoute: typeof CommandCommandClientesRoute
+  CommandCommandClientesRoute: typeof CommandCommandClientesRouteWithChildren
   CommandCommandComercialRoute: typeof CommandCommandComercialRoute
   CommandCommandConfigRoute: typeof CommandCommandConfigRoute
   CommandCommandFinanceiroRoute: typeof CommandCommandFinanceiroRoute
@@ -20375,7 +20409,7 @@ const CommandRouteChildren: CommandRouteChildren = {
   CommandCommandAtendimentoRoute: CommandCommandAtendimentoRoute,
   CommandCommandAutomacoesRoute: CommandCommandAutomacoesRoute,
   CommandCommandCatalogoRoute: CommandCommandCatalogoRoute,
-  CommandCommandClientesRoute: CommandCommandClientesRoute,
+  CommandCommandClientesRoute: CommandCommandClientesRouteWithChildren,
   CommandCommandComercialRoute: CommandCommandComercialRoute,
   CommandCommandConfigRoute: CommandCommandConfigRoute,
   CommandCommandFinanceiroRoute: CommandCommandFinanceiroRoute,
