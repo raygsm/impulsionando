@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { submitMarketingLead } from "@/lib/marketing-lead.functions";
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
@@ -19,26 +22,35 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submitLead = useServerFn(submitMarketingLead);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const key = "demo:leads";
       const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
-      prev.push({
-        templateId,
-        businessLabel,
-        planLabel,
-        name,
-        whatsapp,
-        email,
-        ts: new Date().toISOString(),
-      });
+      prev.push({ templateId, businessLabel, planLabel, name, whatsapp, email, ts: new Date().toISOString() });
       localStorage.setItem(key, JSON.stringify(prev));
-    } catch {
-      /* noop */
+    } catch { /* noop */ }
+    try {
+      await submitLead({
+        data: {
+          name,
+          email,
+          phone: whatsapp,
+          interest: `${businessLabel} · Plano ${planLabel}`,
+          message: `Lead capturado na demo ${templateId}`,
+          page_url: typeof window !== "undefined" ? window.location.href : null,
+        },
+      });
+      setSent(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao enviar. Tente novamente.");
+    } finally {
+      setSubmitting(false);
     }
-    setSent(true);
   }
 
   return (
@@ -78,7 +90,9 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
             <p className="text-[11px] text-muted-foreground">
               Ao enviar, você concorda em receber contato comercial da Impulsionando. Sem spam.
             </p>
-            <Button type="submit" className="w-full">Quero receber a proposta</Button>
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enviando...</>) : "Quero receber a proposta"}
+            </Button>
           </form>
         )}
       </DialogContent>
