@@ -72,6 +72,7 @@ import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as GarridoIndexRouteImport } from './routes/garrido.index'
 import { Route as FoodserviceIndexRouteImport } from './routes/foodservice.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as ComoFuncionaIndexRouteImport } from './routes/como-funciona.index'
 import { Route as ColorsIndexRouteImport } from './routes/colors.index'
 import { Route as ClubeIndexRouteImport } from './routes/clube.index'
 import { Route as ChrismedIndexRouteImport } from './routes/chrismed.index'
@@ -1260,6 +1261,11 @@ const FoodserviceIndexRoute = FoodserviceIndexRouteImport.update({
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaIndexRoute = ComoFuncionaIndexRouteImport.update({
+  id: '/como-funciona/',
+  path: '/como-funciona/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColorsIndexRoute = ColorsIndexRouteImport.update({
@@ -6494,6 +6500,7 @@ export interface FileRoutesByFullPath {
   '/chrismed/': typeof ChrismedIndexRoute
   '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
+  '/como-funciona/': typeof ComoFuncionaIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/foodservice/': typeof FoodserviceIndexRoute
   '/garrido/': typeof GarridoIndexRoute
@@ -7413,6 +7420,7 @@ export interface FileRoutesByTo {
   '/chrismed': typeof ChrismedIndexRoute
   '/clube': typeof ClubeIndexRoute
   '/colors': typeof ColorsIndexRoute
+  '/como-funciona': typeof ComoFuncionaIndexRoute
   '/demo': typeof DemoIndexRoute
   '/foodservice': typeof FoodserviceIndexRoute
   '/garrido': typeof GarridoIndexRoute
@@ -8349,6 +8357,7 @@ export interface FileRoutesById {
   '/chrismed/': typeof ChrismedIndexRoute
   '/clube/': typeof ClubeIndexRoute
   '/colors/': typeof ColorsIndexRoute
+  '/como-funciona/': typeof ComoFuncionaIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/foodservice/': typeof FoodserviceIndexRoute
   '/garrido/': typeof GarridoIndexRoute
@@ -9290,6 +9299,7 @@ export interface FileRouteTypes {
     | '/chrismed/'
     | '/clube/'
     | '/colors/'
+    | '/como-funciona/'
     | '/demo/'
     | '/foodservice/'
     | '/garrido/'
@@ -10209,6 +10219,7 @@ export interface FileRouteTypes {
     | '/chrismed'
     | '/clube'
     | '/colors'
+    | '/como-funciona'
     | '/demo'
     | '/foodservice'
     | '/garrido'
@@ -11144,6 +11155,7 @@ export interface FileRouteTypes {
     | '/chrismed/'
     | '/clube/'
     | '/colors/'
+    | '/como-funciona/'
     | '/demo/'
     | '/foodservice/'
     | '/garrido/'
@@ -11935,6 +11947,7 @@ export interface RootRouteChildren {
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
+  ComoFuncionaIndexRoute: typeof ComoFuncionaIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
@@ -12468,6 +12481,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona/': {
+      id: '/como-funciona/'
+      path: '/como-funciona'
+      fullPath: '/como-funciona/'
+      preLoaderRoute: typeof ComoFuncionaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colors/': {
@@ -21058,6 +21078,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
+  ComoFuncionaIndexRoute: ComoFuncionaIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
