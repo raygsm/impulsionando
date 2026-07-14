@@ -302,6 +302,7 @@ import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/ad
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as TemplatesBrandIndexRouteImport } from './routes/templates.$brand.index'
 import { Route as MarocasAppIndexRouteImport } from './routes/marocas.app.index'
 import { Route as ColorsRastreioIndexRouteImport } from './routes/colors.rastreio.index'
 import { Route as ColorsMinhaContaIndexRouteImport } from './routes/colors.minha-conta.index'
@@ -324,6 +325,10 @@ import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as WmpParceiroCadastroRouteImport } from './routes/wmp.parceiro.cadastro'
 import { Route as WmpObrigadoTipoRouteImport } from './routes/wmp.obrigado.$tipo'
+import { Route as TemplatesBrandSobreRouteImport } from './routes/templates.$brand.sobre'
+import { Route as TemplatesBrandContatoRouteImport } from './routes/templates.$brand.contato'
+import { Route as TemplatesBrandCatalogoRouteImport } from './routes/templates.$brand.catalogo'
+import { Route as TemplatesBrandAdminRouteImport } from './routes/templates.$brand.admin'
 import { Route as RiomedVendedoresCadastroRouteImport } from './routes/riomed.vendedores.cadastro'
 import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
@@ -2416,6 +2421,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const TemplatesBrandIndexRoute = TemplatesBrandIndexRouteImport.update({
+  id: '/templates/$brand/',
+  path: '/templates/$brand/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarocasAppIndexRoute = MarocasAppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -2537,6 +2547,26 @@ const WmpObrigadoTipoRoute = WmpObrigadoTipoRouteImport.update({
   id: '/obrigado/$tipo',
   path: '/obrigado/$tipo',
   getParentRoute: () => WmpRoute,
+} as any)
+const TemplatesBrandSobreRoute = TemplatesBrandSobreRouteImport.update({
+  id: '/templates/$brand/sobre',
+  path: '/templates/$brand/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesBrandContatoRoute = TemplatesBrandContatoRouteImport.update({
+  id: '/templates/$brand/contato',
+  path: '/templates/$brand/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesBrandCatalogoRoute = TemplatesBrandCatalogoRouteImport.update({
+  id: '/templates/$brand/catalogo',
+  path: '/templates/$brand/catalogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesBrandAdminRoute = TemplatesBrandAdminRouteImport.update({
+  id: '/templates/$brand/admin',
+  path: '/templates/$brand/admin',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RiomedVendedoresCadastroRoute =
   RiomedVendedoresCadastroRouteImport.update({
@@ -6788,6 +6818,10 @@ export interface FileRoutesByFullPath {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$brand/admin': typeof TemplatesBrandAdminRoute
+  '/templates/$brand/catalogo': typeof TemplatesBrandCatalogoRoute
+  '/templates/$brand/contato': typeof TemplatesBrandContatoRoute
+  '/templates/$brand/sobre': typeof TemplatesBrandSobreRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
@@ -6810,6 +6844,7 @@ export interface FileRoutesByFullPath {
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
+  '/templates/$brand/': typeof TemplatesBrandIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -7687,6 +7722,10 @@ export interface FileRoutesByTo {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$brand/admin': typeof TemplatesBrandAdminRoute
+  '/templates/$brand/catalogo': typeof TemplatesBrandCatalogoRoute
+  '/templates/$brand/contato': typeof TemplatesBrandContatoRoute
+  '/templates/$brand/sobre': typeof TemplatesBrandSobreRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
@@ -7709,6 +7748,7 @@ export interface FileRoutesByTo {
   '/colors/minha-conta': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio': typeof ColorsRastreioIndexRoute
   '/marocas/app': typeof MarocasAppIndexRoute
+  '/templates/$brand': typeof TemplatesBrandIndexRoute
   '/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/impulsionito/centro-inteligencia': typeof AuthenticatedAdminImpulsionitoCentroInteligenciaRoute
@@ -8612,6 +8652,10 @@ export interface FileRoutesById {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/templates/$brand/admin': typeof TemplatesBrandAdminRoute
+  '/templates/$brand/catalogo': typeof TemplatesBrandCatalogoRoute
+  '/templates/$brand/contato': typeof TemplatesBrandContatoRoute
+  '/templates/$brand/sobre': typeof TemplatesBrandSobreRoute
   '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
   '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
@@ -8634,6 +8678,7 @@ export interface FileRoutesById {
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
+  '/templates/$brand/': typeof TemplatesBrandIndexRoute
   '/_authenticated/admin/auditoria/logs': typeof AuthenticatedAdminAuditoriaLogsRoute
   '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
@@ -9538,6 +9583,10 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$brand/admin'
+    | '/templates/$brand/catalogo'
+    | '/templates/$brand/contato'
+    | '/templates/$brand/sobre'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/affiliates/'
@@ -9560,6 +9609,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
+    | '/templates/$brand/'
     | '/admin/auditoria/logs'
     | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
@@ -10437,6 +10487,10 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$brand/admin'
+    | '/templates/$brand/catalogo'
+    | '/templates/$brand/contato'
+    | '/templates/$brand/sobre'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/affiliates'
@@ -10459,6 +10513,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta'
     | '/colors/rastreio'
     | '/marocas/app'
+    | '/templates/$brand'
     | '/admin/auditoria/logs'
     | '/admin/clientes/riomed'
     | '/admin/impulsionito/centro-inteligencia'
@@ -11361,6 +11416,10 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/templates/$brand/admin'
+    | '/templates/$brand/catalogo'
+    | '/templates/$brand/contato'
+    | '/templates/$brand/sobre'
     | '/wmp/obrigado/$tipo'
     | '/wmp/parceiro/cadastro'
     | '/_authenticated/affiliates/'
@@ -11383,6 +11442,7 @@ export interface FileRouteTypes {
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
+    | '/templates/$brand/'
     | '/_authenticated/admin/auditoria/logs'
     | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
@@ -11766,6 +11826,11 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  TemplatesBrandAdminRoute: typeof TemplatesBrandAdminRoute
+  TemplatesBrandCatalogoRoute: typeof TemplatesBrandCatalogoRoute
+  TemplatesBrandContatoRoute: typeof TemplatesBrandContatoRoute
+  TemplatesBrandSobreRoute: typeof TemplatesBrandSobreRoute
+  TemplatesBrandIndexRoute: typeof TemplatesBrandIndexRoute
   ApiPublicCommN8nCallbackRoute: typeof ApiPublicCommN8nCallbackRoute
   ApiPublicCommTickRoute: typeof ApiPublicCommTickRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
@@ -13883,6 +13948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/templates/$brand/': {
+      id: '/templates/$brand/'
+      path: '/templates/$brand'
+      fullPath: '/templates/$brand/'
+      preLoaderRoute: typeof TemplatesBrandIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marocas/app/': {
       id: '/marocas/app/'
       path: '/'
@@ -14036,6 +14108,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/wmp/obrigado/$tipo'
       preLoaderRoute: typeof WmpObrigadoTipoRouteImport
       parentRoute: typeof WmpRoute
+    }
+    '/templates/$brand/sobre': {
+      id: '/templates/$brand/sobre'
+      path: '/templates/$brand/sobre'
+      fullPath: '/templates/$brand/sobre'
+      preLoaderRoute: typeof TemplatesBrandSobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/$brand/contato': {
+      id: '/templates/$brand/contato'
+      path: '/templates/$brand/contato'
+      fullPath: '/templates/$brand/contato'
+      preLoaderRoute: typeof TemplatesBrandContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/$brand/catalogo': {
+      id: '/templates/$brand/catalogo'
+      path: '/templates/$brand/catalogo'
+      fullPath: '/templates/$brand/catalogo'
+      preLoaderRoute: typeof TemplatesBrandCatalogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/$brand/admin': {
+      id: '/templates/$brand/admin'
+      path: '/templates/$brand/admin'
+      fullPath: '/templates/$brand/admin'
+      preLoaderRoute: typeof TemplatesBrandAdminRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/riomed/vendedores/cadastro': {
       id: '/riomed/vendedores/cadastro'
@@ -20742,6 +20842,11 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  TemplatesBrandAdminRoute: TemplatesBrandAdminRoute,
+  TemplatesBrandCatalogoRoute: TemplatesBrandCatalogoRoute,
+  TemplatesBrandContatoRoute: TemplatesBrandContatoRoute,
+  TemplatesBrandSobreRoute: TemplatesBrandSobreRoute,
+  TemplatesBrandIndexRoute: TemplatesBrandIndexRoute,
   ApiPublicCommN8nCallbackRoute: ApiPublicCommN8nCallbackRoute,
   ApiPublicCommTickRoute: ApiPublicCommTickRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
