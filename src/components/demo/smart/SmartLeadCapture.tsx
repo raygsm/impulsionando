@@ -119,6 +119,8 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
               )}
               <Button variant="outline" onClick={() => onOpenChange(false)}>Continuar explorando</Button>
             </div>
+          </div>
+        ) : (
           <form onSubmit={submit} className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>{ctaLabel}</DialogTitle>
