@@ -5751,6 +5751,334 @@ export type Database = {
           },
         ]
       }
+      colors_affiliate_clicks: {
+        Row: {
+          affiliate_code: string | null
+          affiliate_id: string | null
+          created_at: string
+          id: string
+          ip_hash: string | null
+          landing_url: string | null
+          session_id: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          affiliate_code?: string | null
+          affiliate_id?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          landing_url?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          affiliate_code?: string | null
+          affiliate_id?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          landing_url?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colors_affiliate_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "colors_affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colors_affiliates: {
+        Row: {
+          code: string
+          created_at: string
+          document: string | null
+          email: string | null
+          external_id: string | null
+          external_platform: string | null
+          full_name: string
+          id: string
+          metadata: Json
+          public_name: string | null
+          status: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          external_id?: string | null
+          external_platform?: string | null
+          full_name: string
+          id?: string
+          metadata?: Json
+          public_name?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          external_id?: string | null
+          external_platform?: string | null
+          full_name?: string
+          id?: string
+          metadata?: Json
+          public_name?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      colors_contacts: {
+        Row: {
+          address_complement: string | null
+          address_line1: string | null
+          address_number: string | null
+          cep: string | null
+          city: string | null
+          consent_lgpd: boolean
+          consent_marketing: boolean
+          cpf_hash: string | null
+          created_at: string
+          email: string | null
+          email_normalized: string | null
+          first_seen_at: string
+          full_name: string
+          id: string
+          last_seen_at: string
+          neighborhood: string | null
+          state: string | null
+          updated_at: string
+          whatsapp: string | null
+          whatsapp_normalized: string | null
+        }
+        Insert: {
+          address_complement?: string | null
+          address_line1?: string | null
+          address_number?: string | null
+          cep?: string | null
+          city?: string | null
+          consent_lgpd?: boolean
+          consent_marketing?: boolean
+          cpf_hash?: string | null
+          created_at?: string
+          email?: string | null
+          email_normalized?: string | null
+          first_seen_at?: string
+          full_name: string
+          id?: string
+          last_seen_at?: string
+          neighborhood?: string | null
+          state?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          whatsapp_normalized?: string | null
+        }
+        Update: {
+          address_complement?: string | null
+          address_line1?: string | null
+          address_number?: string | null
+          cep?: string | null
+          city?: string | null
+          consent_lgpd?: boolean
+          consent_marketing?: boolean
+          cpf_hash?: string | null
+          created_at?: string
+          email?: string | null
+          email_normalized?: string | null
+          first_seen_at?: string
+          full_name?: string
+          id?: string
+          last_seen_at?: string
+          neighborhood?: string | null
+          state?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          whatsapp_normalized?: string | null
+        }
+        Relationships: []
+      }
+      colors_opportunities: {
+        Row: {
+          affiliate_id: string | null
+          browser: string | null
+          colors_checkout_id: string
+          contact_id: string | null
+          coupon: string | null
+          created_at: string
+          device: string | null
+          external_order_id: string | null
+          external_platform: string | null
+          external_sale_id: string | null
+          external_status: string | null
+          id: string
+          kit_size: number
+          metadata: Json
+          offer_url: string | null
+          origin: string | null
+          product_name: string
+          product_slug: string
+          quantity: number
+          reconciled_at: string | null
+          session_id: string | null
+          stage: string
+          total_price_cents: number | null
+          unit_price_cents: number | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          affiliate_id?: string | null
+          browser?: string | null
+          colors_checkout_id: string
+          contact_id?: string | null
+          coupon?: string | null
+          created_at?: string
+          device?: string | null
+          external_order_id?: string | null
+          external_platform?: string | null
+          external_sale_id?: string | null
+          external_status?: string | null
+          id?: string
+          kit_size?: number
+          metadata?: Json
+          offer_url?: string | null
+          origin?: string | null
+          product_name: string
+          product_slug: string
+          quantity?: number
+          reconciled_at?: string | null
+          session_id?: string | null
+          stage?: string
+          total_price_cents?: number | null
+          unit_price_cents?: number | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          affiliate_id?: string | null
+          browser?: string | null
+          colors_checkout_id?: string
+          contact_id?: string | null
+          coupon?: string | null
+          created_at?: string
+          device?: string | null
+          external_order_id?: string | null
+          external_platform?: string | null
+          external_sale_id?: string | null
+          external_status?: string | null
+          id?: string
+          kit_size?: number
+          metadata?: Json
+          offer_url?: string | null
+          origin?: string | null
+          product_name?: string
+          product_slug?: string
+          quantity?: number
+          reconciled_at?: string | null
+          session_id?: string | null
+          stage?: string
+          total_price_cents?: number | null
+          unit_price_cents?: number | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colors_opportunities_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "colors_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colors_opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "colors_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colors_opportunity_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          event_type: string
+          from_stage: string | null
+          id: string
+          opportunity_id: string
+          payload: Json
+          to_stage: string | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          event_type: string
+          from_stage?: string | null
+          id?: string
+          opportunity_id: string
+          payload?: Json
+          to_stage?: string | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          event_type?: string
+          from_stage?: string | null
+          id?: string
+          opportunity_id?: string
+          payload?: Json
+          to_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colors_opportunity_events_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "colors_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comm_attendance: {
         Row: {
           community_id: string
