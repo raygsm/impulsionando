@@ -25,9 +25,9 @@ export const Route = createFileRoute("/modulos/")({
         property: "og:description",
         content: "14 módulos principais que reúnem todos os submódulos, recursos e funcionalidades da plataforma.",
       },
-      { property: "og:url", content: "https://sistemas.impulsionando.com.br/modulos" },
+      { property: "og:url", content: "https://impulsionando.com.br/modulos" },
     ],
-    links: [{ rel: "canonical", href: "https://sistemas.impulsionando.com.br/modulos" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/modulos" }],
   }),
   component: ModulosPage,
 });
