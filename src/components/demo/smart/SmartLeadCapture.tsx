@@ -109,9 +109,16 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
                 </div>
               </div>
             )}
-            <Button className="mt-2" onClick={() => onOpenChange(false)}>Continuar explorando a demo</Button>
-          </div>
-        ) : (
+            <div className="flex flex-wrap justify-center gap-2">
+              {draft && (
+                <Button asChild>
+                  <Link to="/demo/rascunho/$id" params={{ id: draft.id }} onClick={() => onOpenChange(false)}>
+                    Ver meu rascunho
+                  </Link>
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Continuar explorando</Button>
+            </div>
           <form onSubmit={submit} className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>{ctaLabel}</DialogTitle>
