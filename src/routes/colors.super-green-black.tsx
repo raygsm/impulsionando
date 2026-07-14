@@ -96,6 +96,7 @@ function SgbLanding() {
       <LegalDisclaimer />
       <ComprarOriginalFab source="pdp_sgb" />
       <AntiFakePopup />
+      <PreCheckoutHost />
     </div>
   );
 }
@@ -126,15 +127,16 @@ function StickyCTA() {
   return (
     <div className="fixed bottom-4 left-1/2 z-40 hidden -translate-x-1/2 rounded-full border border-emerald-400/40 bg-black/80 px-2 py-2 shadow-2xl backdrop-blur md:flex md:items-center md:gap-3">
       <span className="pl-3 text-sm font-semibold text-white">Comece hoje sua transformação →</span>
-      <a
-        href={PRODUCT.links[0].href}
-        target="_blank"
-        rel="noreferrer"
-        onClick={() => colorsEvents.checkoutClick(PRODUCT.name, PRODUCT.links[0].label, PRODUCT.links[0].href)}
+      <button
+        type="button"
+        onClick={() => {
+          colorsEvents.checkoutClick(PRODUCT.name, "sticky_" + PRODUCT.links[0].label, PRODUCT.links[0].href);
+          buySgb("pdp_sgb_sticky");
+        }}
         className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-bold text-black transition hover:bg-emerald-400"
       >
         QUERO COMPRAR AGORA
-      </a>
+      </button>
     </div>
   );
 }
@@ -181,16 +183,17 @@ function SgbHero() {
           </ul>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={PRODUCT.links[0].href}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => colorsEvents.checkoutClick(PRODUCT.name, "hero_" + PRODUCT.links[0].label, PRODUCT.links[0].href)}
+            <button
+              type="button"
+              onClick={() => {
+                colorsEvents.checkoutClick(PRODUCT.name, "hero_" + PRODUCT.links[0].label, PRODUCT.links[0].href);
+                buySgb("pdp_sgb_hero");
+              }}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-lime-400 px-8 py-4 text-lg font-black text-black shadow-2xl shadow-emerald-500/50 transition hover:scale-[1.02]"
             >
-              Comprar no canal oficial
+              Comprar agora
               <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-            </a>
+            </button>
             <a href="#oferta" className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-4 font-semibold hover:bg-white/10">
               Ver oferta completa
             </a>
