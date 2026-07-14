@@ -30919,6 +30919,66 @@ export type Database = {
           },
         ]
       }
+      seo_route_audits: {
+        Row: {
+          canonical_declared: string | null
+          canonical_effective: string | null
+          canonical_ok: boolean | null
+          created_at: string
+          created_by: string | null
+          final_url: string | null
+          id: string
+          issues: Json
+          jsonld_blocks: Json
+          jsonld_errors: number
+          jsonld_warnings: number
+          redirect_chain: Json
+          robots_meta: string | null
+          route: string
+          score: number | null
+          status_code: number | null
+          url: string
+        }
+        Insert: {
+          canonical_declared?: string | null
+          canonical_effective?: string | null
+          canonical_ok?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          final_url?: string | null
+          id?: string
+          issues?: Json
+          jsonld_blocks?: Json
+          jsonld_errors?: number
+          jsonld_warnings?: number
+          redirect_chain?: Json
+          robots_meta?: string | null
+          route: string
+          score?: number | null
+          status_code?: number | null
+          url: string
+        }
+        Update: {
+          canonical_declared?: string | null
+          canonical_effective?: string | null
+          canonical_ok?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          final_url?: string | null
+          id?: string
+          issues?: Json
+          jsonld_blocks?: Json
+          jsonld_errors?: number
+          jsonld_warnings?: number
+          redirect_chain?: Json
+          robots_meta?: string | null
+          route?: string
+          score?: number | null
+          status_code?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
       service_order_events: {
         Row: {
           actor_id: string | null

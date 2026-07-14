@@ -10,6 +10,7 @@ import {
   type GscQueryRow,
 } from "@/lib/search-console.functions";
 import { validateJsonLd, type JsonLdResult } from "@/lib/seo-jsonld";
+import { auditRouteFn, listRouteAuditsFn } from "@/lib/seo-audit.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -159,6 +160,7 @@ function AdminSeoPanel() {
             <TabsList>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="inspect">Inspeção de URL</TabsTrigger>
+              <TabsTrigger value="audit">Auditoria de rota</TabsTrigger>
               <TabsTrigger value="jsonld">Validador JSON-LD</TabsTrigger>
             </TabsList>
 
@@ -271,6 +273,10 @@ function AdminSeoPanel() {
 
             <TabsContent value="inspect" className="mt-4">
               <UrlInspectPanel siteUrl={effectiveSite} />
+            </TabsContent>
+
+            <TabsContent value="audit" className="mt-4">
+              <RouteAuditPanel />
             </TabsContent>
 
             <TabsContent value="jsonld" className="mt-4">
@@ -443,6 +449,156 @@ function JsonLdValidatorPanel() {
           )}
         </Card>
       ))}
+    </div>
+  );
+}
+
+function RouteAuditPanel() {
+  const runAudit = useServerFn(auditRouteFn);
+  const listAudits = useServerFn(listRouteAuditsFn);
+  const [route, setRoute] = useState("/");
+  const [url, setUrl] = useState("https://impulsionando.com.br/");
+
+  const historyQ = useQuery({
+    queryKey: ["seo", "route-audits"],
+    queryFn: () => listAudits({ data: undefined as unknown as never }),
+    retry: false,
+  });
+
+  const m = useMutation({
+    mutationFn: () => runAudit({ data: { route, url } }),
+    onSuccess: () => historyQ.refetch(),
+  });
+
+  const result: any = m.data;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4 grid gap-3 sm:grid-cols-[1fr_2fr_auto] items-end">
+        <div>
+          <Label className="text-xs">Rota lógica</Label>
+          <Input value={route} onChange={(e) => setRoute(e.target.value)} placeholder="/servicos" />
+        </div>
+        <div>
+          <Label className="text-xs">URL absoluta</Label>
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+        </div>
+        <Button onClick={() => m.mutate()} disabled={!route || !url || m.isPending}>
+          {m.isPending ? <Loader2 className="size-4 animate-spin" /> : "Auditar"}
+        </Button>
+      </Card>
+
+      {m.error && (
+        <Card className="p-4 border-destructive/40 bg-destructive/5 text-sm text-destructive">
+          {(m.error as Error).message}
+        </Card>
+      )}
+
+      {result && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">Score</p>
+            <p className="text-3xl font-semibold">{result.score}</p>
+            <p className="text-xs text-muted-foreground mt-1">HTTP {result.status_code ?? "—"}</p>
+          </Card>
+          <Card className="p-4 md:col-span-2 space-y-1 text-xs">
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">URL final</span>
+              <span className="font-mono truncate max-w-[320px]" title={result.final_url}>{result.final_url}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">Canonical declarada</span>
+              <span className="font-mono truncate max-w-[320px]">{result.canonical_declared ?? "—"}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">Canonical OK?</span>
+              <span>{result.canonical_ok === true ? "sim" : result.canonical_ok === false ? "não" : "—"}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">Robots</span>
+              <span className="font-mono">{result.robots_meta ?? "—"}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">Cadeia de redirects</span>
+              <span>{(result.redirect_chain ?? []).length} hops</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-muted-foreground">JSON-LD</span>
+              <span>
+                {(result.jsonld_blocks ?? []).length} blocos ·{" "}
+                <span className={result.jsonld_errors ? "text-destructive" : ""}>{result.jsonld_errors} erros</span> ·{" "}
+                <span className={result.jsonld_warnings ? "text-amber-600" : ""}>{result.jsonld_warnings} avisos</span>
+              </span>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {result && (result.issues ?? []).length > 0 && (
+        <Card className="p-4 space-y-2">
+          <h4 className="text-sm font-semibold">Issues detectadas</h4>
+          <ul className="text-xs space-y-1">
+            {(result.issues as Array<{ level: string; code: string; message: string }>).map((iss, i) => (
+              <li
+                key={i}
+                className={
+                  iss.level === "error"
+                    ? "text-destructive"
+                    : iss.level === "warning"
+                    ? "text-amber-600"
+                    : "text-muted-foreground"
+                }
+              >
+                [{iss.level}] <span className="font-mono">{iss.code}</span> — {iss.message}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      <Card className="p-0 overflow-hidden">
+        <div className="px-4 py-3 border-b flex items-center justify-between">
+          <h3 className="text-sm font-medium">Histórico (50 mais recentes)</h3>
+          <Button variant="outline" size="sm" onClick={() => historyQ.refetch()} disabled={historyQ.isFetching}>
+            {historyQ.isFetching ? <Loader2 className="size-3.5 animate-spin" /> : "Atualizar"}
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-xs text-muted-foreground">
+              <tr>
+                <th className="text-left px-4 py-2">Quando</th>
+                <th className="text-left px-4 py-2">Rota</th>
+                <th className="text-left px-4 py-2">URL</th>
+                <th className="text-right px-4 py-2">HTTP</th>
+                <th className="text-right px-4 py-2">Canonical</th>
+                <th className="text-right px-4 py-2">JSON-LD (E/W)</th>
+                <th className="text-right px-4 py-2">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(historyQ.data ?? []).map((r: any) => (
+                <tr key={r.id} className="border-t">
+                  <td className="px-4 py-2 whitespace-nowrap">{new Date(r.created_at).toLocaleString("pt-BR")}</td>
+                  <td className="px-4 py-2 font-mono">{r.route}</td>
+                  <td className="px-4 py-2 truncate max-w-[280px]" title={r.url}>{r.url}</td>
+                  <td className="px-4 py-2 text-right">{r.status_code ?? "—"}</td>
+                  <td className="px-4 py-2 text-right">{r.canonical_ok === true ? "OK" : r.canonical_ok === false ? "≠" : "—"}</td>
+                  <td className="px-4 py-2 text-right">{r.jsonld_errors}/{r.jsonld_warnings}</td>
+                  <td className="px-4 py-2 text-right font-semibold">{r.score}</td>
+                </tr>
+              ))}
+              {!historyQ.isLoading && (historyQ.data ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    Nenhuma auditoria registrada ainda.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }
