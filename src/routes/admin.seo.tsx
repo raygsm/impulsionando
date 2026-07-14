@@ -275,11 +275,19 @@ function AdminSeoPanel() {
               <UrlInspectPanel siteUrl={effectiveSite} />
             </TabsContent>
 
+            <TabsContent value="audit" className="mt-4">
+              <RouteAuditPanel />
+            </TabsContent>
+
             <TabsContent value="jsonld" className="mt-4">
               <JsonLdValidatorPanel />
             </TabsContent>
           </Tabs>
         )}
+      </div>
+    </div>
+  );
+}
       </div>
     </div>
   );
