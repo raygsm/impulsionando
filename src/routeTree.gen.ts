@@ -192,6 +192,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
 import { Route as DemoTrialRouteImport } from './routes/demo.trial'
+import { Route as DemoTemplatesRouteImport } from './routes/demo.templates'
 import { Route as DemoSimuladorRouteImport } from './routes/demo.simulador'
 import { Route as DemoParceirosRouteImport } from './routes/demo.parceiros'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
@@ -1853,6 +1854,11 @@ const DemoWhatsappRoute = DemoWhatsappRouteImport.update({
 const DemoTrialRoute = DemoTrialRouteImport.update({
   id: '/demo/trial',
   path: '/demo/trial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoTemplatesRoute = DemoTemplatesRouteImport.update({
+  id: '/demo/templates',
+  path: '/demo/templates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoSimuladorRoute = DemoSimuladorRouteImport.update({
@@ -6280,6 +6286,7 @@ export interface FileRoutesByFullPath {
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
+  '/demo/templates': typeof DemoTemplatesRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -7186,6 +7193,7 @@ export interface FileRoutesByTo {
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
+  '/demo/templates': typeof DemoTemplatesRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -8105,6 +8113,7 @@ export interface FileRoutesById {
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
+  '/demo/templates': typeof DemoTemplatesRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -9032,6 +9041,7 @@ export interface FileRouteTypes {
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
+    | '/demo/templates'
     | '/demo/trial'
     | '/demo/whatsapp'
     | '/demo/white-label'
@@ -9938,6 +9948,7 @@ export interface FileRouteTypes {
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
+    | '/demo/templates'
     | '/demo/trial'
     | '/demo/whatsapp'
     | '/demo/white-label'
@@ -10856,6 +10867,7 @@ export interface FileRouteTypes {
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
+    | '/demo/templates'
     | '/demo/trial'
     | '/demo/whatsapp'
     | '/demo/white-label'
@@ -11696,6 +11708,7 @@ export interface RootRouteChildren {
   DemoModulosRoute: typeof DemoModulosRoute
   DemoParceirosRoute: typeof DemoParceirosRoute
   DemoSimuladorRoute: typeof DemoSimuladorRoute
+  DemoTemplatesRoute: typeof DemoTemplatesRoute
   DemoTrialRoute: typeof DemoTrialRoute
   DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
@@ -13120,6 +13133,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/trial'
       fullPath: '/demo/trial'
       preLoaderRoute: typeof DemoTrialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/templates': {
+      id: '/demo/templates'
+      path: '/demo/templates'
+      fullPath: '/demo/templates'
+      preLoaderRoute: typeof DemoTemplatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/simulador': {
@@ -20692,6 +20712,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoModulosRoute: DemoModulosRoute,
   DemoParceirosRoute: DemoParceirosRoute,
   DemoSimuladorRoute: DemoSimuladorRoute,
+  DemoTemplatesRoute: DemoTemplatesRoute,
   DemoTrialRoute: DemoTrialRoute,
   DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
