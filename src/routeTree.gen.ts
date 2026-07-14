@@ -774,6 +774,7 @@ import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.resta
 import { Route as ColorsMinhaContaPedidosIdRouteImport } from './routes/colors.minha-conta.pedidos.$id'
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
 import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
+import { Route as ApiPublicWebhooksMaisfyColorsRouteImport } from './routes/api/public/webhooks/maisfy-colors'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicStatusRssRouteImport } from './routes/api/public/status.rss'
 import { Route as ApiPublicStatusSlugRouteImport } from './routes/api/public/status.$slug'
@@ -954,6 +955,7 @@ import { Route as AuthenticatedAdminClientesSlugCerebroIaRouteImport } from './r
 import { Route as AuthenticatedAdminClientesSlugAutomacoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.automacoes'
 import { Route as AuthenticatedAdminClientesSlugAuditoriaRouteImport } from './routes/_authenticated/admin.clientes.$slug.auditoria'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
+import { Route as AuthenticatedAdminClientesColorsVendasImportarRouteImport } from './routes/_authenticated/admin.clientes.colors.vendas.importar'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
 const WmpRoute = WmpRouteImport.update({
@@ -5185,6 +5187,12 @@ const ApiPublicWebhooksN8nCallbackRoute =
     path: '/api/public/webhooks/n8n-callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksMaisfyColorsRoute =
+  ApiPublicWebhooksMaisfyColorsRouteImport.update({
+    id: '/api/public/webhooks/maisfy-colors',
+    path: '/api/public/webhooks/maisfy-colors',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSupportCreateTicketRoute =
   ApiPublicSupportCreateTicketRouteImport.update({
     id: '/api/public/support/create-ticket',
@@ -6250,6 +6258,12 @@ const AuthenticatedCoreClienteIdPaginasPageIdRoute =
     path: '/$pageId',
     getParentRoute: () => AuthenticatedCoreClienteIdPaginasRoute,
   } as any)
+const AuthenticatedAdminClientesColorsVendasImportarRoute =
+  AuthenticatedAdminClientesColorsVendasImportarRouteImport.update({
+    id: '/admin/clientes/colors/vendas/importar',
+    path: '/admin/clientes/colors/vendas/importar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
   AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport.update({
     id: '/modulo/$slug/configurar',
@@ -7086,6 +7100,7 @@ export interface FileRoutesByFullPath {
   '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/maisfy-colors': typeof ApiPublicWebhooksMaisfyColorsRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
@@ -7200,6 +7215,7 @@ export interface FileRoutesByFullPath {
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
+  '/admin/clientes/colors/vendas/importar': typeof AuthenticatedAdminClientesColorsVendasImportarRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -8006,6 +8022,7 @@ export interface FileRoutesByTo {
   '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/maisfy-colors': typeof ApiPublicWebhooksMaisfyColorsRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
@@ -8120,6 +8137,7 @@ export interface FileRoutesByTo {
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugIndexRoute
+  '/admin/clientes/colors/vendas/importar': typeof AuthenticatedAdminClientesColorsVendasImportarRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -8955,6 +8973,7 @@ export interface FileRoutesById {
   '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/maisfy-colors': typeof ApiPublicWebhooksMaisfyColorsRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/colors/minha-conta/pedidos/$id': typeof ColorsMinhaContaPedidosIdRoute
@@ -9069,6 +9088,7 @@ export interface FileRoutesById {
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/_authenticated/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
+  '/_authenticated/admin/clientes/colors/vendas/importar': typeof AuthenticatedAdminClientesColorsVendasImportarRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -9903,6 +9923,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/maisfy-colors'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/colors/minha-conta/pedidos/$id'
@@ -10017,6 +10038,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug/badge.svg'
     | '/api/public/status/$slug/rss'
     | '/admin/clientes/$slug/'
+    | '/admin/clientes/colors/vendas/importar'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
@@ -10823,6 +10845,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/maisfy-colors'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/colors/minha-conta/pedidos/$id'
@@ -10937,6 +10960,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug/badge.svg'
     | '/api/public/status/$slug/rss'
     | '/admin/clientes/$slug'
+    | '/admin/clientes/colors/vendas/importar'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   id:
@@ -11771,6 +11795,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/maisfy-colors'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/colors/minha-conta/pedidos/$id'
@@ -11885,6 +11910,7 @@ export interface FileRouteTypes {
     | '/api/public/status/$slug/badge.svg'
     | '/api/public/status/$slug/rss'
     | '/_authenticated/admin/clientes/$slug/'
+    | '/_authenticated/admin/clientes/colors/vendas/importar'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
@@ -12101,6 +12127,7 @@ export interface RootRouteChildren {
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
   ApiPublicRiomedEventsRoute: typeof ApiPublicRiomedEventsRoute
   ApiPublicSupportCreateTicketRoute: typeof ApiPublicSupportCreateTicketRoute
+  ApiPublicWebhooksMaisfyColorsRoute: typeof ApiPublicWebhooksMaisfyColorsRoute
   ApiPublicWebhooksN8nCallbackRoute: typeof ApiPublicWebhooksN8nCallbackRoute
   ApiPublicWhatsappSendRoute: typeof ApiPublicWhatsappSendRoute
   DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
@@ -17475,6 +17502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksN8nCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/maisfy-colors': {
+      id: '/api/public/webhooks/maisfy-colors'
+      path: '/api/public/webhooks/maisfy-colors'
+      fullPath: '/api/public/webhooks/maisfy-colors'
+      preLoaderRoute: typeof ApiPublicWebhooksMaisfyColorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/support/create-ticket': {
       id: '/api/public/support/create-ticket'
       path: '/api/public/support/create-ticket'
@@ -18734,6 +18768,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/cliente/$id/paginas/$pageId'
       preLoaderRoute: typeof AuthenticatedCoreClienteIdPaginasPageIdRouteImport
       parentRoute: typeof AuthenticatedCoreClienteIdPaginasRoute
+    }
+    '/_authenticated/admin/clientes/colors/vendas/importar': {
+      id: '/_authenticated/admin/clientes/colors/vendas/importar'
+      path: '/admin/clientes/colors/vendas/importar'
+      fullPath: '/admin/clientes/colors/vendas/importar'
+      preLoaderRoute: typeof AuthenticatedAdminClientesColorsVendasImportarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/core/cliente/$id/modulo/$slug/configurar': {
       id: '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -20015,6 +20056,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
   AuthenticatedAssinaturaCheckoutPlanoRoute: typeof AuthenticatedAssinaturaCheckoutPlanoRoute
   AuthenticatedTenantsSlugHomologacaoRoute: typeof AuthenticatedTenantsSlugHomologacaoRoute
+  AuthenticatedAdminClientesColorsVendasImportarRoute: typeof AuthenticatedAdminClientesColorsVendasImportarRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -20435,6 +20477,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAssinaturaCheckoutPlanoRoute,
   AuthenticatedTenantsSlugHomologacaoRoute:
     AuthenticatedTenantsSlugHomologacaoRoute,
+  AuthenticatedAdminClientesColorsVendasImportarRoute:
+    AuthenticatedAdminClientesColorsVendasImportarRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -21305,6 +21349,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
   ApiPublicRiomedEventsRoute: ApiPublicRiomedEventsRoute,
   ApiPublicSupportCreateTicketRoute: ApiPublicSupportCreateTicketRoute,
+  ApiPublicWebhooksMaisfyColorsRoute: ApiPublicWebhooksMaisfyColorsRoute,
   ApiPublicWebhooksN8nCallbackRoute: ApiPublicWebhooksN8nCallbackRoute,
   ApiPublicWhatsappSendRoute: ApiPublicWhatsappSendRoute,
   DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
