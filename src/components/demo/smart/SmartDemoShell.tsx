@@ -60,6 +60,7 @@ export function SmartDemoShell({ template }: Props) {
         open={leadOpen}
         onOpenChange={setLeadOpen}
         templateId={template.id}
+        template={template}
         businessLabel={template.branding.businessName}
         planLabel={PLAN_LABEL[plan]}
         ctaLabel={template.conversion.primaryCTA}
