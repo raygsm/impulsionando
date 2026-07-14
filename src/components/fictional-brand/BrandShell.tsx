@@ -3,21 +3,47 @@ import { Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useBrand } from "./BrandThemeProvider";
 
-const NAV: { to: "index" | "sobre" | "catalogo" | "contato" | "admin"; label: string }[] = [
-  { to: "index", label: "Início" },
-  { to: "sobre", label: "Sobre" },
-  { to: "catalogo", label: "Catálogo" },
-  { to: "contato", label: "Contato" },
-  { to: "admin", label: "Painel" },
+type NavKey = "index" | "sobre" | "catalogo" | "contato" | "admin";
+const NAV: { key: NavKey; label: string }[] = [
+  { key: "index", label: "Início" },
+  { key: "sobre", label: "Sobre" },
+  { key: "catalogo", label: "Catálogo" },
+  { key: "contato", label: "Contato" },
+  { key: "admin", label: "Painel" },
 ];
 
-export function BrandShell({ children, active }: { children: ReactNode; active: (typeof NAV)[number]["to"] }) {
+function BrandLink({
+  target,
+  slug,
+  className,
+  style,
+  onClick,
+  children,
+  ariaLabel,
+}: {
+  target: NavKey;
+  slug: string;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  children: ReactNode;
+  ariaLabel?: string;
+}) {
+  const params = { brand: slug };
+  const shared = { params, className, style, onClick, "aria-label": ariaLabel } as const;
+  if (target === "index") return <Link to="/templates/$brand" {...shared}>{children}</Link>;
+  if (target === "sobre") return <Link to="/templates/$brand/sobre" {...shared}>{children}</Link>;
+  if (target === "catalogo") return <Link to="/templates/$brand/catalogo" {...shared}>{children}</Link>;
+  if (target === "contato") return <Link to="/templates/$brand/contato" {...shared}>{children}</Link>;
+  return <Link to="/templates/$brand/admin" {...shared}>{children}</Link>;
+}
+
+export function BrandShell({ children, active }: { children: ReactNode; active: NavKey }) {
   const brand = useBrand();
   const [open, setOpen] = useState(false);
 
   return (
     <div style={{ background: brand.palette.surface, color: brand.palette.ink }}>
-      {/* Disclosure bar */}
       <div
         className="text-[11px] px-4 py-1.5 text-center"
         style={{ background: brand.palette.ink, color: brand.palette.primaryFg }}
@@ -33,12 +59,7 @@ export function BrandShell({ children, active }: { children: ReactNode; active: 
         style={{ background: `${brand.palette.surface}ee`, borderBottom: `1px solid ${brand.palette.ink}14` }}
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6 flex items-center gap-6 h-16">
-          <Link
-            to="/templates/$brand"
-            params={{ brand: brand.slug }}
-            className="flex items-center gap-2.5"
-            aria-label={brand.companyName}
-          >
+          <BrandLink target="index" slug={brand.slug} className="flex items-center gap-2.5" ariaLabel={brand.companyName}>
             <span
               className="grid h-9 w-9 place-items-center rounded-lg"
               style={{ background: brand.palette.primary, color: brand.palette.primaryFg }}
@@ -50,17 +71,16 @@ export function BrandShell({ children, active }: { children: ReactNode; active: 
             >
               {brand.logo.wordmark}
             </span>
-          </Link>
+          </BrandLink>
 
           <nav className="hidden md:flex items-center gap-1 ml-auto text-sm">
             {NAV.map((item) => {
-              const isActive = item.to === active;
-              const to = item.to === "index" ? "/templates/$brand" : `/templates/$brand/${item.to}`;
+              const isActive = item.key === active;
               return (
-                <Link
-                  key={item.to}
-                  to={to}
-                  params={{ brand: brand.slug }}
+                <BrandLink
+                  key={item.key}
+                  target={item.key}
+                  slug={brand.slug}
                   className="px-3 py-2 rounded-md font-medium transition"
                   style={{
                     color: isActive ? brand.palette.primary : brand.palette.ink,
@@ -68,20 +88,20 @@ export function BrandShell({ children, active }: { children: ReactNode; active: 
                   }}
                 >
                   {item.label}
-                </Link>
+                </BrandLink>
               );
             })}
           </nav>
 
           <div className="ml-auto md:ml-0 hidden md:block">
-            <Link
-              to="/templates/$brand/contato"
-              params={{ brand: brand.slug }}
+            <BrandLink
+              target="contato"
+              slug={brand.slug}
               className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold"
               style={{ background: brand.palette.primary, color: brand.palette.primaryFg }}
             >
               Fale conosco
-            </Link>
+            </BrandLink>
           </div>
 
           <button
@@ -96,31 +116,25 @@ export function BrandShell({ children, active }: { children: ReactNode; active: 
 
         {open && (
           <div className="md:hidden border-t px-4 py-3 space-y-1" style={{ borderColor: `${brand.palette.ink}14` }}>
-            {NAV.map((item) => {
-              const to = item.to === "index" ? "/templates/$brand" : `/templates/$brand/${item.to}`;
-              return (
-                <Link
-                  key={item.to}
-                  to={to}
-                  params={{ brand: brand.slug }}
-                  onClick={() => setOpen(false)}
-                  className="block px-3 py-2 rounded-md text-sm font-medium"
-                  style={{ color: brand.palette.ink }}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {NAV.map((item) => (
+              <BrandLink
+                key={item.key}
+                target={item.key}
+                slug={brand.slug}
+                onClick={() => setOpen(false)}
+                className="block px-3 py-2 rounded-md text-sm font-medium"
+                style={{ color: brand.palette.ink }}
+              >
+                {item.label}
+              </BrandLink>
+            ))}
           </div>
         )}
       </header>
 
       <main>{children}</main>
 
-      <footer
-        className="mt-16"
-        style={{ background: brand.palette.ink, color: brand.palette.primaryFg }}
-      >
+      <footer className="mt-16" style={{ background: brand.palette.ink, color: brand.palette.primaryFg }}>
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 grid gap-8 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5">
@@ -137,33 +151,28 @@ export function BrandShell({ children, active }: { children: ReactNode; active: 
             <p className="mt-4 text-xs opacity-60">{brand.domainFake}</p>
           </div>
           <div className="text-sm">
-            <div className="font-semibold mb-2" style={{ color: brand.palette.accent }}>
-              Contato
-            </div>
+            <div className="font-semibold mb-2" style={{ color: brand.palette.accent }}>Contato</div>
             <p className="opacity-80">{brand.contact.phone}</p>
             <p className="opacity-80">{brand.contact.email}</p>
             <p className="opacity-80 mt-2">{brand.contact.address}</p>
           </div>
           <div className="text-sm">
-            <div className="font-semibold mb-2" style={{ color: brand.palette.accent }}>
-              Navegação
-            </div>
+            <div className="font-semibold mb-2" style={{ color: brand.palette.accent }}>Navegação</div>
             <ul className="space-y-1 opacity-80">
               {NAV.map((n) => (
-                <li key={n.to}>
-                  <Link
-                    to={n.to === "index" ? "/templates/$brand" : `/templates/$brand/${n.to}`}
-                    params={{ brand: brand.slug }}
-                    className="hover:underline"
-                  >
+                <li key={n.key}>
+                  <BrandLink target={n.key} slug={brand.slug} className="hover:underline">
                     {n.label}
-                  </Link>
+                  </BrandLink>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-        <div className="border-t py-4 text-center text-xs opacity-60" style={{ borderColor: `${brand.palette.primaryFg}20` }}>
+        <div
+          className="border-t py-4 text-center text-xs opacity-60"
+          style={{ borderColor: `${brand.palette.primaryFg}20` }}
+        >
           © {new Date().getFullYear()} {brand.companyName} · Empresa fictícia · Demonstração{" "}
           <Link to="/" className="underline">Impulsionando</Link>
         </div>
