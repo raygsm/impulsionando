@@ -77,7 +77,7 @@ export function CommandShell() {
             return (
               <Link
                 key={item.to}
-                to={item.to}
+                to={item.to as "/command"}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                   active
