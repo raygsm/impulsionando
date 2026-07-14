@@ -49,28 +49,33 @@ function CommandDashboard() {
           value={isLoading ? "…" : fmtBRL(data?.kpis.mrr ?? 0)}
           icon={DollarSign}
           tone="positive"
+          href="/command/financeiro"
         />
         <KpiCard
           label="Clientes ativos"
           value={isLoading ? "…" : (data?.kpis.activeTenants ?? 0)}
           icon={Building2}
+          href="/command/clientes?status=active"
         />
         <KpiCard
           label="Leads 24h"
           value={isLoading ? "…" : (data?.kpis.leads24h ?? 0)}
           hint={data ? `${data.kpis.leads7d} nos últimos 7d` : undefined}
           icon={UserPlus}
+          href="/command/comercial"
         />
         <KpiCard
           label="Propostas 7d"
           value={isLoading ? "…" : (data?.kpis.quotes7d ?? 0)}
           icon={FileText}
+          href="/command/comercial"
         />
         <KpiCard
           label="Suspensões"
           value={isLoading ? "…" : (data?.kpis.suspensions ?? 0)}
           icon={AlertTriangle}
           tone={data && data.kpis.suspensions > 0 ? "warning" : "default"}
+          href="/command/clientes?status=suspended"
         />
         <KpiCard
           label="Tickets abertos"
@@ -78,6 +83,7 @@ function CommandDashboard() {
           hint={data ? `${data.kpis.urgentTickets} urgentes` : undefined}
           icon={Ticket}
           tone={data && data.kpis.urgentTickets > 0 ? "danger" : "default"}
+          href="/command/atendimento"
         />
         <KpiCard
           label="Automações"
@@ -85,12 +91,15 @@ function CommandDashboard() {
           hint={data ? `${data.kpis.automationRuns} execuções · ${data.kpis.automationFailed} falhas` : undefined}
           icon={Workflow}
           tone={data && data.kpis.automationHealth < 90 ? "warning" : "positive"}
+          href="/command/automacoes"
         />
         <KpiCard
           label="Demos 7d"
           value={isLoading ? "…" : (data?.kpis.demos7d ?? 0)}
           icon={Activity}
+          href="/command/comercial"
         />
+
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">

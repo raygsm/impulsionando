@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 export function KpiCard({
@@ -7,12 +8,14 @@ export function KpiCard({
   hint,
   icon: Icon,
   tone = "default",
+  href,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   icon?: LucideIcon;
   tone?: "default" | "positive" | "warning" | "danger";
+  href?: string;
 }) {
   const toneClass =
     tone === "positive"
@@ -22,8 +25,8 @@ export function KpiCard({
         : tone === "danger"
           ? "text-destructive"
           : "text-muted-foreground";
-  return (
-    <div className="rounded-xl border bg-card p-5">
+  const body = (
+    <>
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
@@ -32,6 +35,16 @@ export function KpiCard({
       </div>
       <div className="mt-3 text-2xl font-semibold tracking-tight">{value}</div>
       {hint && <div className={cn("text-xs mt-1", toneClass)}>{hint}</div>}
-    </div>
+    </>
   );
+  const cls = "rounded-xl border bg-card p-5 block transition-colors";
+  if (href) {
+    return (
+      <Link to={href as any} className={cn(cls, "hover:border-foreground/20 hover:bg-accent/30")}>
+        {body}
+      </Link>
+    );
+  }
+  return <div className={cls}>{body}</div>;
 }
+
