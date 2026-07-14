@@ -3,6 +3,7 @@
  * Cada card é uma empresa completa e navegável.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { ArrowRight, Sparkles, Store } from "lucide-react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
@@ -21,6 +22,12 @@ export const Route = createFileRoute("/templates/")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/templates" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Feira de Empresas", path: "/templates" },
+      ]),
+    ],
   }),
   component: FictionalBrandsHub,
 });

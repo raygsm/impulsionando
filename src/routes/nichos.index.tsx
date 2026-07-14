@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { ArrowRight, MessageCircle, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +31,12 @@ export const Route = createFileRoute("/nichos/")({
     
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/nichos" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Nichos", path: "/nichos" },
+      ]),
+    ],
   }),
   component: NichosIndex,
 });

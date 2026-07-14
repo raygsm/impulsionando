@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { MarketingLeadDialog } from "@/components/marketing/ImpulsionandoBrasilFAB";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,13 @@ export const Route = createFileRoute("/marketing")({
       { name: "description", content: "Braço parceiro de marketing da Impulsionando Tecnologia: identidade visual, social media, tráfego pago, lançamentos e assessoria híbrida." },
       { property: "og:title", content: "Impulsionando Brasil — Marketing que escala" },
       { property: "og:description", content: "Marketing sem estrutura não escala. Estrutura sem marketing não cresce." },
+    ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/marketing" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Marketing", path: "/marketing" },
+      ]),
     ],
   }),
   component: MarketingPage,

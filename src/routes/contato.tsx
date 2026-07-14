@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { Loader2, Mail, Send, Sparkles, Layers, Rocket, LifeBuoy } from "lucide-react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
@@ -25,6 +26,12 @@ export const Route = createFileRoute("/contato")({
 
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/contato" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Contato", path: "/contato" },
+      ]),
+    ],
   }),
   component: ContatoPage,
 });

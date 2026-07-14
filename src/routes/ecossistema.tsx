@@ -6,6 +6,7 @@
  * busca: a busca é exclusiva dos Impulsionitos e fica em /busca (gated).
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,12 @@ export const Route = createFileRoute("/ecossistema")({
       { property: "og:url", content: "https://impulsionando.com.br/ecossistema" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/ecossistema" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Ecossistema", path: "/ecossistema" },
+      ]),
+    ],
   }),
   component: EcossistemaCommercialPage,
 });

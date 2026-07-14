@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { ArrowRight, MessageCircle, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,9 +26,15 @@ export const Route = createFileRoute("/modulos/")({
         property: "og:description",
         content: "14 módulos principais que reúnem todos os submódulos, recursos e funcionalidades da plataforma.",
       },
-      { property: "og:url", content: "https://sistemas.impulsionando.com.br/modulos" },
+      { property: "og:url", content: "https://impulsionando.com.br/modulos" },
     ],
-    links: [{ rel: "canonical", href: "https://sistemas.impulsionando.com.br/modulos" }],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/modulos" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Módulos", path: "/modulos" },
+      ]),
+    ],
   }),
   component: ModulosPage,
 });
