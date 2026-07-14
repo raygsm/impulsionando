@@ -29,7 +29,7 @@ export const Route = createFileRoute("/templates/$brand/catalogo")({
 });
 
 function Page() {
-  const { slug } = Route.useLoaderData();
+  const { brand: slug } = Route.useParams();
   const brand = getFictionalBrand(slug)!;
   return (
     <BrandThemeProvider brand={brand}>
