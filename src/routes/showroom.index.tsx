@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,13 @@ export const Route = createFileRoute("/showroom/")({
         property: "og:description",
         content: "Demonstrações navegáveis, sem cadastro, do ecossistema Impulsionando por segmento.",
       },
+    ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/showroom" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Showroom", path: "/showroom" },
+      ]),
     ],
   }),
   component: ShowroomHub,

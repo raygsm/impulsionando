@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
@@ -17,6 +18,12 @@ export const Route = createFileRoute("/sobre")({
     
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/sobre" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Sobre", path: "/sobre" },
+      ]),
+    ],
   }),
   component: SobrePage,
 });

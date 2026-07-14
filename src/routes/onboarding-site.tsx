@@ -4,6 +4,7 @@
  * armazenado em localStorage (frontend-only lock).
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { breadcrumbJsonLd } from "@/lib/seo";
 import { useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
@@ -29,6 +30,12 @@ export const Route = createFileRoute("/onboarding-site")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/onboarding-site" }],
+    scripts: [
+      breadcrumbJsonLd([
+        { name: "Início", path: "/" },
+        { name: "Onboarding de Site", path: "/onboarding-site" },
+      ]),
+    ],
   }),
   component: OnboardingSitePage,
 });
