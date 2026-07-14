@@ -6,10 +6,11 @@ import { z } from "zod";
 
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
-export const LOVABLE_DNS = {
-  aRecordValue: "185.158.133.1",
-  txtName: "_lovable",
-  txtValuePrefix: "lovable_verify=",
+export const INDEPENDENT_DNS = {
+  aRecordValue: process.env.PUBLIC_DNS_A_TARGET ?? "<IP_DA_INFRA_INDEPENDENTE>",
+  cnameValue: process.env.PUBLIC_DNS_CNAME_TARGET ?? new URL(process.env.PUBLIC_APP_URL ?? "https://impulsionando.com.br").hostname,
+  txtName: "_site_verification",
+  txtValuePrefix: "impulsionando_verify=",
 };
 
 export const getMyTenantDomain = createServerFn({ method: "POST" })
@@ -27,7 +28,7 @@ export const getMyTenantDomain = createServerFn({ method: "POST" })
       .eq("company_id", data.companyId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { identity, lovable: LOVABLE_DNS };
+    return { identity, lovable: INDEPENDENT_DNS };
   });
 
 export const requestCustomDomain = createServerFn({ method: "POST" })

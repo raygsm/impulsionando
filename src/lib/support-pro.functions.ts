@@ -199,8 +199,8 @@ export const summarizeRecentTickets = createServerFn({ method: 'POST' })
   .inputValidator((d: { company_id?: string; limit?: number }) =>
     z.object({ company_id: z.string().uuid().optional(), limit: z.number().min(1).max(50).optional() }).parse(d))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY
-    if (!key) return { ok: false, error: 'LOVABLE_API_KEY ausente', processed: 0 }
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY)
+    if (!key) return { ok: false, error: 'OPENAI_API_KEY ausente', processed: 0 }
 
     let q = context.supabase
       .from('support_tickets')

@@ -118,17 +118,17 @@ function TenantDomainPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">DNS esperado (Lovable Hosting)</CardTitle>
+          <CardTitle className="text-base">DNS esperado (infraestrutura independente Hosting)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <Row label="A">
-            <code>{expectedDomain}</code> → <code>185.158.133.1</code>
+            <code>{expectedDomain}</code> → <code>IP_DA_INFRA_INDEPENDENTE</code>
           </Row>
           <Row label="TXT">
-            <code>_lovable.{expectedDomain}</code> → <code>lovable_verify=&lt;token&gt;</code>
+            <code>_site_verification.{expectedDomain}</code> → <code>impulsionando_verify=&lt;token&gt;</code>
           </Row>
           <p className="text-xs text-muted-foreground pt-2">
-            Configure no DNS do registrador. Após propagar, a Lovable provisiona SSL
+            Configure no DNS do registrador. Após propagar, a infraestrutura independente provisiona SSL
             automaticamente (até 72h).
           </p>
         </CardContent>

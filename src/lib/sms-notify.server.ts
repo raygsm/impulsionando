@@ -1,16 +1,16 @@
 /**
- * SMS via Twilio (Connector Gateway) — helper server-only.
+ * SMS via Twilio direto — helper server-only.
  *
  * Requisitos:
- *   - LOVABLE_API_KEY  → autenticação do gateway (auto-provisionado).
- *   - TWILIO_API_KEY   → connection key do Twilio no gateway.
+ *   - TWILIO_API_BASE_URL → endpoint direto Twilio/serviço SMS.
+ *   - TWILIO_AUTH_TOKEN → token direto do provedor SMS.
  *   - TWILIO_FROM_PHONE → número Twilio remetente (E.164: +15551234567).
  *
  * Se algum estiver ausente, o helper retorna `{ ok: false, skipped: ... }`
  * em vez de lançar — não derruba o fluxo principal.
  */
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
+const GATEWAY_URL = process.env.TWILIO_API_BASE_URL;
 
 function digitsOnly(s: string): string {
   return (s || "").replace(/\D/g, "");
@@ -41,10 +41,9 @@ export async function sendSms(args: {
   to: string;
   body: string;
 }): Promise<SmsResult> {
-  const lovableKey = process.env.LOVABLE_API_KEY;
   const twilioKey = process.env.TWILIO_API_KEY;
   const fromPhone = process.env.TWILIO_FROM_PHONE;
-  if (!lovableKey) return { ok: false, skipped: "lovable_api_key_missing" };
+  if (!GATEWAY_URL) return { ok: false, skipped: "twilio_api_base_url_missing" };
   if (!twilioKey) return { ok: false, skipped: "twilio_api_key_missing" };
   if (!fromPhone) return { ok: false, skipped: "twilio_from_missing" };
 
@@ -61,7 +60,7 @@ export async function sendSms(args: {
     const res = await fetch(`${GATEWAY_URL}/Messages.json`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${lovableKey}`,
+        Authorization: `Bearer ${process.env.TWILIO_AUTH_TOKEN ?? ""}`,
         "X-Connection-Api-Key": twilioKey,
         "Content-Type": "application/x-www-form-urlencoded",
       },

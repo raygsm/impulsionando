@@ -7,7 +7,7 @@
  *  - ALERT_EMAIL_TO            → destinatário do e-mail (ex.: ops@impulsionando.com.br)
  *  - ALERT_EMAIL_FROM          → remetente (default: alertas@impulsionando.com.br)
  *  - RESEND_API_KEY            → chave do connector Resend (gateway Lovable)
- *  - LOVABLE_API_KEY           → autenticação do gateway
+ *  - OPENAI_API_KEY           → autenticação do gateway
  */
 import { createServerFn } from "@tanstack/react-start";
 
@@ -70,15 +70,14 @@ async function sendSlack(webhook: string, title: string, body: string) {
 }
 
 async function sendEmail(to: string, from: string, title: string, body: string) {
-  const lovableKey = process.env.LOVABLE_API_KEY;
   const resendKey = process.env.RESEND_API_KEY;
-  if (!lovableKey || !resendKey) throw new Error("RESEND not configured");
-  const r = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+  const resendBaseUrl = process.env.RESEND_API_BASE_URL ?? "https://api.resend.com";
+  if (!resendKey) throw new Error("RESEND not configured");
+  const r = await fetch(`${resendBaseUrl}/emails`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": resendKey,
+      Authorization: `Bearer ${resendKey}`,
     },
     body: JSON.stringify({
       from, to: [to], subject: title, text: body,

@@ -53,7 +53,7 @@ export function TenantHostFallback() {
           <li className="flex gap-2">
             <span className="text-primary">•</span>
             <span>
-              O domínio custom foi conectado no Lovable mas ainda <strong>não foi cadastrado</strong>{" "}
+              O domínio custom foi conectado no infraestrutura independente mas ainda <strong>não foi cadastrado</strong>{" "}
               como tenant no core.
             </span>
           </li>
@@ -62,7 +62,7 @@ export function TenantHostFallback() {
             <span>
               O registro <code className="font-mono text-xs">A</code> /{" "}
               <code className="font-mono text-xs">CNAME</code> aponta para o Impulsionando, mas o{" "}
-              <code className="font-mono text-xs">TXT _lovable</code> ainda está propagando.
+              <code className="font-mono text-xs">TXT _site_verification</code> ainda está propagando.
             </span>
           </li>
           <li className="flex gap-2">

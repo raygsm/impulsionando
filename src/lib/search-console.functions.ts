@@ -1,19 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
+const GATEWAY = process.env.GOOGLE_SEARCH_CONSOLE_API_BASE_URL;
 
 function authHeaders() {
-  const lovableKey = process.env.LOVABLE_API_KEY;
   const gscKey = process.env.GOOGLE_SEARCH_CONSOLE_API_KEY;
-  if (!lovableKey || !gscKey) {
+  if (!GATEWAY || !gscKey) {
     throw new Error(
-      "Search Console não configurado. Conecte o Google Search Console em Connectors.",
+      "Search Console não configurado. Configure GOOGLE_SEARCH_CONSOLE_API_BASE_URL e GOOGLE_SEARCH_CONSOLE_API_KEY no provedor direto.",
     );
   }
   return {
-    Authorization: `Bearer ${lovableKey}`,
-    "X-Connection-Api-Key": gscKey,
+    Authorization: `Bearer ${gscKey}`,
     "Content-Type": "application/json",
   } as Record<string, string>;
 }

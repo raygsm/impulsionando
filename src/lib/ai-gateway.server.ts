@@ -1,17 +1,19 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 /**
- * Lovable AI Gateway provider — usado apenas em código server-only
- * (createServerFn handlers). Lê LOVABLE_API_KEY de process.env no momento
- * da chamada.
+ * Compatibilidade legada: o gateway Lovable fica bloqueado por padrão para
+ * produção não depender da plataforma. Configure OPENAI_COMPATIBLE_BASE_URL
+ * e OPENAI_COMPATIBLE_API_KEY (ou migre chamadas para provedor direto).
  */
-export function createLovableAiGatewayProvider(lovableApiKey: string) {
+export function createLovableAiGatewayProvider(_lovableApiKey: string) {
+  const baseURL = process.env.OPENAI_COMPATIBLE_BASE_URL;
+  const apiKey = process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY;
+  if (!baseURL || !apiKey) {
+    throw new Error("AI provider direto não configurado; Lovable AI Gateway desativado");
+  }
   return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    headers: {
-      "Lovable-API-Key": lovableApiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
+    name: "independent-ai",
+    baseURL,
+    apiKey,
   });
 }

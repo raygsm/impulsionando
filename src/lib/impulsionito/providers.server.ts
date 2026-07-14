@@ -5,7 +5,7 @@
  *   1. Provedor pedido pelo cliente (llm.provider) — se a chave existir.
  *   2. Cadeia de fallback declarada pelo cliente (llm.fallback[]) — em ordem.
  *   3. OpenAI se OPENAI_API_KEY existir.
- *   4. Gemini via Lovable AI Gateway (LOVABLE_API_KEY) — sempre disponível
+ *   4. Gemini via provedor direto de IA (OPENAI_API_KEY) — sempre disponível
  *      neste projeto (chave provisionada pelo Lovable).
  *
  * "Claude" e "Ollama" ficam declarados como IDs mas ainda não instanciam
@@ -46,7 +46,7 @@ function tryProvider(id: LlmProviderId, requestedModel: string | undefined): Res
   }
 
   if (id === "gemini") {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
     if (!key) return null;
     const provider = createLovableAiGatewayProvider(key);
     // Se o cliente pediu "gpt-*", cai no default do Gemini.
@@ -91,7 +91,7 @@ export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
 export function detectAvailableProviders(): Record<LlmProviderId, boolean> {
   return {
     openai: !!process.env.OPENAI_API_KEY,
-    gemini: !!process.env.LOVABLE_API_KEY,
+    gemini: !!(process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY),
     claude: false,
     ollama: false,
   };

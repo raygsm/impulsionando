@@ -45,7 +45,7 @@ export const Route = createFileRoute('/api/public/cron/support-tick')({
         }
 
         // 3) IA — categorização de até 20 tickets sem ai_topic
-        const key = process.env.LOVABLE_API_KEY
+        const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY)
         let aiProcessed = 0
         if (key) {
           const { data: pending } = await supabaseAdmin

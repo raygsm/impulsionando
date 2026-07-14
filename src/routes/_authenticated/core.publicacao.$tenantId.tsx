@@ -70,7 +70,7 @@ function PublicacaoDetail() {
       }
       await approve({ data: { companyId: tenantId, snapshotId } });
       await qc.invalidateQueries({ queryKey: ["tenant-publications"] });
-      toast.success("Publicação aprovada. Rode Publish no Lovable para propagar o build.");
+      toast.success("Publicação aprovada. Rode Publish no infraestrutura independente para propagar o build.");
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao aprovar");
     } finally {
@@ -155,7 +155,7 @@ function PublicacaoDetail() {
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         <PublicationValidationCard title="1. Domínio de destino" result={detail.domain} />
-        <PublicationValidationCard title="2. DNS (A/CNAME + TXT _lovable)" result={detail.dns} />
+        <PublicationValidationCard title="2. DNS (A/CNAME + TXT _site_verification)" result={detail.dns} />
         <PublicationValidationCard title="3. SSL / HTTPS" result={detail.ssl} />
         <PublicationValidationCard title="4. Supabase (resolve_tenant_by_host)" result={detail.supabase} />
         <PublicationValidationCard title="5. GitHub (status main)" result={detail.github} />
@@ -184,7 +184,7 @@ function PublicacaoDetail() {
         <div className="font-medium text-sm">Sobre "Publicar"</div>
         <p className="text-muted-foreground">
           A aprovação registra o snapshot como promovido para este tenant e grava em <code>audit_logs</code>.
-          O deploy físico ainda é disparado pelo botão <strong>Publish</strong> do Lovable (modelo B: um deploy
+          O deploy físico ainda é disparado pelo botão <strong>Publish</strong> do infraestrutura independente (modelo B: um deploy
           serve todos os tenants). Rollback: reverte o snapshot para o anterior e limpa a aprovação.
         </p>
       </Card>

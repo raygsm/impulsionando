@@ -187,7 +187,7 @@ export const probeSubdomain = createServerFn({ method: "POST" })
         headers: {} as Record<string, string>,
         bodyPreview: null,
         diagnosis: isDns
-          ? "DNS não resolveu — falta o registro A wildcard *.impulsionando.com.br → 185.158.133.1."
+          ? "DNS não resolveu — falta o registro A wildcard *.impulsionando.com.br → IP_DA_INFRA_INDEPENDENTE."
           : isCert
             ? "TLS/certificado inválido — o wildcard ainda não foi provisionado (aguarde ou reconecte o domínio)."
             : isTimeout

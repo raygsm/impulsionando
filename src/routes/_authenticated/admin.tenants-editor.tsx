@@ -608,9 +608,9 @@ function SubdomainChecklist({
           <div>
             <div className="font-medium text-foreground mb-1">Requisitos de infra (fora do app)</div>
             <ol className="list-decimal ml-4 space-y-0.5">
-              <li>Registro <code>A</code> wildcard <code>*.impulsionando.com.br → 185.158.133.1</code> no DNS.</li>
-              <li>Domínio wildcard adicionado no Publish/Custom Domain da Lovable.</li>
-              <li>Certificado TLS wildcard emitido automaticamente pela Lovable.</li>
+              <li>Registro <code>A</code> wildcard <code>*.impulsionando.com.br → IP_DA_INFRA_INDEPENDENTE</code> no DNS.</li>
+              <li>Domínio wildcard adicionado no Publish/Custom Domain da infraestrutura independente.</li>
+              <li>Certificado TLS wildcard emitido automaticamente pela infraestrutura independente.</li>
               <li>Este tenant com os 4 itens do checklist acima verdes.</li>
             </ol>
             <p className="mt-2">

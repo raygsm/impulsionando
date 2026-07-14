@@ -56,8 +56,8 @@ export const extractCurriculo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
+    if (!key) throw new Error("OPENAI_API_KEY ausente");
     const gateway = createLovableAiGatewayProvider(key);
     const { output } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
@@ -74,8 +74,8 @@ export const extractCurriculoFromFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractFileInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
+    if (!key) throw new Error("OPENAI_API_KEY ausente");
     const gateway = createLovableAiGatewayProvider(key);
 
     const match = /^data:([^;]+);base64,(.+)$/.exec(data.file_data_url);

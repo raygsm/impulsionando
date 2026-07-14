@@ -39,8 +39,8 @@ export const analyzeProjectPrompt = createServerFn({ method: "POST" })
     const { data: staff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
     if (!staff) throw new Error("Apenas equipe Impulsionando pode usar o gerador de IA.");
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY não configurada");
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
+    if (!key) throw new Error("OPENAI_API_KEY não configurada");
 
     const { data: mods } = await supabase
       .from("modules")

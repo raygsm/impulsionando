@@ -60,8 +60,8 @@ export const getExecutiveBriefing = createServerFn({ method: "GET" })
       automacoes_falharam_7d: runsFailed,
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return { snapshot, briefing: null, error: "LOVABLE_API_KEY ausente" };
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
+    if (!key) return { snapshot, briefing: null, error: "OPENAI_API_KEY ausente" };
 
     try {
       const gateway = createLovableAiGatewayProvider(key);

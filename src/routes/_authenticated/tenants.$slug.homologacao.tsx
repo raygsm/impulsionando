@@ -148,7 +148,7 @@ function TenantHomologacaoPage() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <PublicationValidationCard title="Domínio configurado" result={detail.domain} />
-          <PublicationValidationCard title="DNS (A / CNAME / CAA / TXT _lovable)" result={detail.dns} />
+          <PublicationValidationCard title="DNS (A / CNAME / CAA / TXT _site_verification)" result={detail.dns} />
           <PublicationValidationCard title="SSL / HTTPS" result={detail.ssl} />
           <PublicationValidationCard title="Supabase (resolve_tenant_by_host)" result={detail.supabase} />
           <PublicationValidationCard title="GitHub (workflows)" result={detail.github} />

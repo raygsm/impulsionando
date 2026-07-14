@@ -1,45 +1,48 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, nitro (build-only using cloudflare as a default target),
-//     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
-//     error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
+import { defineConfig } from "vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
 
-// Blindagem de produção: sem sourcemaps + minificação agressiva (terser).
-// Assim o bundle publicado em impulsionando.com.br fica muito mais difícil
-// de reengenhar / copiar. Dev/preview continuam legíveis para debug.
+// Produção independente do Lovable: esta configuração usa apenas plugins
+// open-source do Vite/TanStack/React/Tailwind e não injeta MCP, tagger,
+// HMR gate, bridge de dev-server ou qualquer controle operacional Lovable.
 export default defineConfig({
-  tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+  plugins: [
+    tsConfigPaths(),
+    tanstackStart({
+      server: { entry: "server" },
+    }),
+    viteReact(),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: {
+      "@": new URL("./src", import.meta.url).pathname,
+    },
+    dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-start"],
   },
-  vite: {
-    plugins: [mcpPlugin()],
-    build: {
-      sourcemap: false,
-      cssMinify: "lightningcss",
-      minify: "terser",
-      terserOptions: {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-          passes: 2,
-          ecma: 2020,
-          pure_funcs: ["console.log", "console.info", "console.debug"],
-        },
-        mangle: {
-          toplevel: true,
-        },
-        format: {
-          comments: false,
-        },
+  build: {
+    sourcemap: false,
+    cssMinify: "lightningcss",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        passes: 2,
+        ecma: 2020,
+        pure_funcs: ["console.log", "console.info", "console.debug"],
+      },
+      mangle: {
+        toplevel: true,
+      },
+      format: {
+        comments: false,
       },
     },
-    esbuild: {
-      legalComments: "none",
-    },
+  },
+  esbuild: {
+    legalComments: "none",
   },
 });

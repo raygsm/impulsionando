@@ -10,7 +10,7 @@ const Input = z.object({ companyId: z.string().uuid() });
 /**
  * Tenant Insights (IA) — análise individual de um tenant.
  * Cruza contrato, módulos, tickets, atividade e idade da conta, e usa
- * Lovable AI para gerar 3 blocos: o que está funcionando, o que está em
+ * IA direta para gerar 3 blocos: o que está funcionando, o que está em
  * risco e as 3 próximas ações priorizadas para Customer Success.
  */
 export const getTenantInsights = createServerFn({ method: "POST" })
@@ -55,8 +55,8 @@ export const getTenantInsights = createServerFn({ method: "POST" })
       eventos_runtime_30d: runtimeLast30,
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return { snapshot, insights: null, error: "LOVABLE_API_KEY ausente" };
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
+    if (!key) return { snapshot, insights: null, error: "OPENAI_API_KEY ausente" };
 
     try {
       const gateway = createLovableAiGatewayProvider(key);

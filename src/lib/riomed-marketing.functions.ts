@@ -127,7 +127,7 @@ export const createRiomedCampaignFromStale = createServerFn({ method: "POST" })
     await supabase.from("riomed_campaign_items").insert(itemRows);
 
     // 4. Generate copy with Gemini
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY;
     let headline = data.name;
     let body = `Aproveite descontos especiais de até ${data.discountPct}% em equipamentos médicos selecionados.`;
     let cta = "Solicite seu orçamento agora!";
@@ -148,7 +148,7 @@ ${productList}
 Responda APENAS um JSON válido no formato exato:
 {"headline":"título curto e impactante (até 60 chars)","body":"corpo de mensagem WhatsApp (até 400 chars, usando emojis com moderação)","cta":"call-to-action curto"}`;
 
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiRes = await fetch((process.env.OPENAI_CHAT_COMPLETIONS_URL ?? ""), {
           method: "POST",
           headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({

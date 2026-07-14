@@ -110,16 +110,16 @@ export const runRiomedAgent = createServerFn({ method: "POST" })
       .single();
     if (runErr) throw runErr;
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY;
     if (!apiKey) {
       await context.supabase.from("riomed_ai_runs").update({
-        status: "error", error_message: "LOVABLE_API_KEY ausente", finished_at: new Date().toISOString(),
+        status: "error", error_message: "Provedor direto de IA ausente", finished_at: new Date().toISOString(),
       }).eq("id", run.id);
-      throw new Error("LOVABLE_API_KEY ausente");
+      throw new Error("Provedor direto de IA ausente");
     }
 
     try {
-      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const resp = await fetch((process.env.OPENAI_CHAT_COMPLETIONS_URL ?? ""), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({

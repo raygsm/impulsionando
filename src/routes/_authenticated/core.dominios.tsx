@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_authenticated/core/dominios")({
   component: DominiosPage,
 });
 
-const LOVABLE_IP = "185.158.133.1";
-const LOVABLE_HOST = "impulsionando.lovable.app";
+const INDEPENDENT_A_TARGET = import.meta.env.VITE_DNS_A_TARGET ?? "<IP_DA_INFRA_INDEPENDENTE>";
+const INDEPENDENT_CNAME_TARGET = import.meta.env.VITE_DNS_CNAME_TARGET ?? "impulsionando.com.br";
 
 type DnsAnswer = { name: string; type: number; data: string };
 
@@ -64,7 +64,7 @@ function DnsCheck({ host, expected }: { host: string; expected: string }) {
     staleTime: 60_000,
   });
   const records = [...(data?.a ?? []), ...(data?.c ?? [])].map((r) => r.data.replace(/\.$/, ""));
-  const matches = records.some((r) => r === expected || r === `${expected}.` || r.endsWith(LOVABLE_HOST));
+  const matches = records.some((r) => r === expected || r === `${expected}.` || r.endsWith(INDEPENDENT_CNAME_TARGET));
   const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "incorreto";
   const color =
     status === "ok" ? "bg-emerald-600" : status === "checando" ? "bg-zinc-400" : status === "sem registro" ? "bg-amber-500" : "bg-rose-600";
@@ -111,15 +111,15 @@ function DominiosPage() {
       </header>
 
       <Card className="p-4 bg-muted/30">
-        <div className="text-sm font-medium mb-2">Registros padrão Lovable</div>
+        <div className="text-sm font-medium mb-2">Registros padrão da infraestrutura independente</div>
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div className="space-y-1">
             <div className="text-muted-foreground">Sem proxy (A record)</div>
-            <code className="block bg-background p-2 rounded">A → {LOVABLE_IP}</code>
+            <code className="block bg-background p-2 rounded">A → {INDEPENDENT_A_TARGET}</code>
           </div>
           <div className="space-y-1">
             <div className="text-muted-foreground">Com Cloudflare proxy (CNAME)</div>
-            <code className="block bg-background p-2 rounded">CNAME → {LOVABLE_HOST}</code>
+            <code className="block bg-background p-2 rounded">CNAME → {INDEPENDENT_CNAME_TARGET}</code>
           </div>
         </div>
       </Card>
@@ -127,8 +127,8 @@ function DominiosPage() {
       <div className="space-y-3">
         {(data ?? []).map((t) => {
           const hosts: { label: string; host: string; expected: string }[] = [];
-          if (t.domain) hosts.push({ label: "Domínio customizado", host: t.domain, expected: LOVABLE_IP });
-          if (t.subdomain) hosts.push({ label: "Subdomínio impulsionando", host: `${t.subdomain}.impulsionando.com.br`, expected: LOVABLE_IP });
+          if (t.domain) hosts.push({ label: "Domínio customizado", host: t.domain, expected: INDEPENDENT_A_TARGET });
+          if (t.subdomain) hosts.push({ label: "Subdomínio impulsionando", host: `${t.subdomain}.impulsionando.com.br`, expected: INDEPENDENT_A_TARGET });
           if (hosts.length === 0) hosts.push({ label: "Sem domínio configurado", host: "", expected: "" });
           return (
             <Card key={t.id} className="p-4 space-y-3">

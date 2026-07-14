@@ -173,17 +173,17 @@ export const runAiAgent = createServerFn({ method: "POST" })
     const { data: agent, error } = await supabase.from("riomed_ai_agents").select("*").eq("id", data.agentId).single();
     if (error || !agent) throw new Error("Agente não encontrado");
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY;
     let status = "success";
     let output: any = null;
     let errorMsg: string | null = null;
     let tokensIn = 0, tokensOut = 0;
 
     try {
-      if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      if (!apiKey || !process.env.OPENAI_CHAT_COMPLETIONS_URL) throw new Error("Provedor direto de IA não configurado");
+      const res = await fetch((process.env.OPENAI_CHAT_COMPLETIONS_URL ?? ""), {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({
           model: agent.model,
           messages: [

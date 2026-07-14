@@ -4,20 +4,20 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const EMBEDDING_MODEL = "google/gemini-embedding-001";
 const EMBEDDING_DIMS = 1536;
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
+const GATEWAY_URL = process.env.OPENAI_EMBEDDINGS_URL ?? "";
 
 type GatewayInput =
   | string
   | { content: Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }> };
 
 async function embed(input: GatewayInput): Promise<number[]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("LOVABLE_API_KEY ausente");
+  const key = process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY;
+  if (!GATEWAY_URL || !key) throw new Error("Provedor direto de embeddings ausente");
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": key,
+      Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
       model: EMBEDDING_MODEL,

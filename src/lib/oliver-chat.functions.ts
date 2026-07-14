@@ -226,7 +226,7 @@ Segurança clínica + precisão administrativa + experiência humana + resoluç�
 export const askOliver = createServerFn({ method: 'POST' })
   .inputValidator(validate)
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = (process.env.OPENAI_COMPATIBLE_API_KEY ?? process.env.OPENAI_API_KEY);
     if (!key) {
       return {
         reply:
