@@ -364,6 +364,15 @@ import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as ApiImpulsionitoChatRouteImport } from './routes/api/impulsionito/chat'
+import { Route as CommandCommandIaRouteImport } from './routes/_command.command.ia'
+import { Route as CommandCommandFinanceiroRouteImport } from './routes/_command.command.financeiro'
+import { Route as CommandCommandConfigRouteImport } from './routes/_command.command.config'
+import { Route as CommandCommandComercialRouteImport } from './routes/_command.command.comercial'
+import { Route as CommandCommandClientesRouteImport } from './routes/_command.command.clientes'
+import { Route as CommandCommandCatalogoRouteImport } from './routes/_command.command.catalogo'
+import { Route as CommandCommandAutomacoesRouteImport } from './routes/_command.command.automacoes'
+import { Route as CommandCommandAtendimentoRouteImport } from './routes/_command.command.atendimento'
+import { Route as CommandCommandAprovacoesRouteImport } from './routes/_command.command.aprovacoes'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedWhiteLabelCapacidadeRouteImport } from './routes/_authenticated/white-label.capacidade'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
@@ -2752,6 +2761,55 @@ const ApiImpulsionitoChatRoute = ApiImpulsionitoChatRouteImport.update({
   path: '/api/impulsionito/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommandCommandIaRoute = CommandCommandIaRouteImport.update({
+  id: '/command/ia',
+  path: '/command/ia',
+  getParentRoute: () => CommandRoute,
+} as any)
+const CommandCommandFinanceiroRoute =
+  CommandCommandFinanceiroRouteImport.update({
+    id: '/command/financeiro',
+    path: '/command/financeiro',
+    getParentRoute: () => CommandRoute,
+  } as any)
+const CommandCommandConfigRoute = CommandCommandConfigRouteImport.update({
+  id: '/command/config',
+  path: '/command/config',
+  getParentRoute: () => CommandRoute,
+} as any)
+const CommandCommandComercialRoute = CommandCommandComercialRouteImport.update({
+  id: '/command/comercial',
+  path: '/command/comercial',
+  getParentRoute: () => CommandRoute,
+} as any)
+const CommandCommandClientesRoute = CommandCommandClientesRouteImport.update({
+  id: '/command/clientes',
+  path: '/command/clientes',
+  getParentRoute: () => CommandRoute,
+} as any)
+const CommandCommandCatalogoRoute = CommandCommandCatalogoRouteImport.update({
+  id: '/command/catalogo',
+  path: '/command/catalogo',
+  getParentRoute: () => CommandRoute,
+} as any)
+const CommandCommandAutomacoesRoute =
+  CommandCommandAutomacoesRouteImport.update({
+    id: '/command/automacoes',
+    path: '/command/automacoes',
+    getParentRoute: () => CommandRoute,
+  } as any)
+const CommandCommandAtendimentoRoute =
+  CommandCommandAtendimentoRouteImport.update({
+    id: '/command/atendimento',
+    path: '/command/atendimento',
+    getParentRoute: () => CommandRoute,
+  } as any)
+const CommandCommandAprovacoesRoute =
+  CommandCommandAprovacoesRouteImport.update({
+    id: '/command/aprovacoes',
+    path: '/command/aprovacoes',
+    getParentRoute: () => CommandRoute,
+  } as any)
 const AuthenticatedWhiteLabelCockpitRoute =
   AuthenticatedWhiteLabelCockpitRouteImport.update({
     id: '/white-label/cockpit',
@@ -6796,6 +6854,15 @@ export interface FileRoutesByFullPath {
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/command/aprovacoes': typeof CommandCommandAprovacoesRoute
+  '/command/atendimento': typeof CommandCommandAtendimentoRoute
+  '/command/automacoes': typeof CommandCommandAutomacoesRoute
+  '/command/catalogo': typeof CommandCommandCatalogoRoute
+  '/command/clientes': typeof CommandCommandClientesRoute
+  '/command/comercial': typeof CommandCommandComercialRoute
+  '/command/config': typeof CommandCommandConfigRoute
+  '/command/financeiro': typeof CommandCommandFinanceiroRoute
+  '/command/ia': typeof CommandCommandIaRoute
   '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
@@ -7704,6 +7771,15 @@ export interface FileRoutesByTo {
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/command/aprovacoes': typeof CommandCommandAprovacoesRoute
+  '/command/atendimento': typeof CommandCommandAtendimentoRoute
+  '/command/automacoes': typeof CommandCommandAutomacoesRoute
+  '/command/catalogo': typeof CommandCommandCatalogoRoute
+  '/command/clientes': typeof CommandCommandClientesRoute
+  '/command/comercial': typeof CommandCommandComercialRoute
+  '/command/config': typeof CommandCommandConfigRoute
+  '/command/financeiro': typeof CommandCommandFinanceiroRoute
+  '/command/ia': typeof CommandCommandIaRoute
   '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
@@ -8633,6 +8709,15 @@ export interface FileRoutesById {
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/_command/command/aprovacoes': typeof CommandCommandAprovacoesRoute
+  '/_command/command/atendimento': typeof CommandCommandAtendimentoRoute
+  '/_command/command/automacoes': typeof CommandCommandAutomacoesRoute
+  '/_command/command/catalogo': typeof CommandCommandCatalogoRoute
+  '/_command/command/clientes': typeof CommandCommandClientesRoute
+  '/_command/command/comercial': typeof CommandCommandComercialRoute
+  '/_command/command/config': typeof CommandCommandConfigRoute
+  '/_command/command/financeiro': typeof CommandCommandFinanceiroRoute
+  '/_command/command/ia': typeof CommandCommandIaRoute
   '/api/impulsionito/chat': typeof ApiImpulsionitoChatRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
@@ -9565,6 +9650,15 @@ export interface FileRouteTypes {
     | '/users/corporate'
     | '/white-label/capacidade'
     | '/white-label/cockpit'
+    | '/command/aprovacoes'
+    | '/command/atendimento'
+    | '/command/automacoes'
+    | '/command/catalogo'
+    | '/command/clientes'
+    | '/command/comercial'
+    | '/command/config'
+    | '/command/financeiro'
+    | '/command/ia'
     | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
@@ -10473,6 +10567,15 @@ export interface FileRouteTypes {
     | '/users/corporate'
     | '/white-label/capacidade'
     | '/white-label/cockpit'
+    | '/command/aprovacoes'
+    | '/command/atendimento'
+    | '/command/automacoes'
+    | '/command/catalogo'
+    | '/command/clientes'
+    | '/command/comercial'
+    | '/command/config'
+    | '/command/financeiro'
+    | '/command/ia'
     | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
@@ -11401,6 +11504,15 @@ export interface FileRouteTypes {
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/capacidade'
     | '/_authenticated/white-label/cockpit'
+    | '/_command/command/aprovacoes'
+    | '/_command/command/atendimento'
+    | '/_command/command/automacoes'
+    | '/_command/command/catalogo'
+    | '/_command/command/clientes'
+    | '/_command/command/comercial'
+    | '/_command/command/config'
+    | '/_command/command/financeiro'
+    | '/_command/command/ia'
     | '/api/impulsionito/chat'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
@@ -14401,6 +14513,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/impulsionito/chat'
       preLoaderRoute: typeof ApiImpulsionitoChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_command/command/ia': {
+      id: '/_command/command/ia'
+      path: '/command/ia'
+      fullPath: '/command/ia'
+      preLoaderRoute: typeof CommandCommandIaRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/financeiro': {
+      id: '/_command/command/financeiro'
+      path: '/command/financeiro'
+      fullPath: '/command/financeiro'
+      preLoaderRoute: typeof CommandCommandFinanceiroRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/config': {
+      id: '/_command/command/config'
+      path: '/command/config'
+      fullPath: '/command/config'
+      preLoaderRoute: typeof CommandCommandConfigRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/comercial': {
+      id: '/_command/command/comercial'
+      path: '/command/comercial'
+      fullPath: '/command/comercial'
+      preLoaderRoute: typeof CommandCommandComercialRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/clientes': {
+      id: '/_command/command/clientes'
+      path: '/command/clientes'
+      fullPath: '/command/clientes'
+      preLoaderRoute: typeof CommandCommandClientesRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/catalogo': {
+      id: '/_command/command/catalogo'
+      path: '/command/catalogo'
+      fullPath: '/command/catalogo'
+      preLoaderRoute: typeof CommandCommandCatalogoRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/automacoes': {
+      id: '/_command/command/automacoes'
+      path: '/command/automacoes'
+      fullPath: '/command/automacoes'
+      preLoaderRoute: typeof CommandCommandAutomacoesRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/atendimento': {
+      id: '/_command/command/atendimento'
+      path: '/command/atendimento'
+      fullPath: '/command/atendimento'
+      preLoaderRoute: typeof CommandCommandAtendimentoRouteImport
+      parentRoute: typeof CommandRoute
+    }
+    '/_command/command/aprovacoes': {
+      id: '/_command/command/aprovacoes'
+      path: '/command/aprovacoes'
+      fullPath: '/command/aprovacoes'
+      preLoaderRoute: typeof CommandCommandAprovacoesRouteImport
+      parentRoute: typeof CommandRoute
     }
     '/_authenticated/white-label/cockpit': {
       id: '/_authenticated/white-label/cockpit'
@@ -20123,10 +20298,28 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface CommandRouteChildren {
+  CommandCommandAprovacoesRoute: typeof CommandCommandAprovacoesRoute
+  CommandCommandAtendimentoRoute: typeof CommandCommandAtendimentoRoute
+  CommandCommandAutomacoesRoute: typeof CommandCommandAutomacoesRoute
+  CommandCommandCatalogoRoute: typeof CommandCommandCatalogoRoute
+  CommandCommandClientesRoute: typeof CommandCommandClientesRoute
+  CommandCommandComercialRoute: typeof CommandCommandComercialRoute
+  CommandCommandConfigRoute: typeof CommandCommandConfigRoute
+  CommandCommandFinanceiroRoute: typeof CommandCommandFinanceiroRoute
+  CommandCommandIaRoute: typeof CommandCommandIaRoute
   CommandCommandIndexRoute: typeof CommandCommandIndexRoute
 }
 
 const CommandRouteChildren: CommandRouteChildren = {
+  CommandCommandAprovacoesRoute: CommandCommandAprovacoesRoute,
+  CommandCommandAtendimentoRoute: CommandCommandAtendimentoRoute,
+  CommandCommandAutomacoesRoute: CommandCommandAutomacoesRoute,
+  CommandCommandCatalogoRoute: CommandCommandCatalogoRoute,
+  CommandCommandClientesRoute: CommandCommandClientesRoute,
+  CommandCommandComercialRoute: CommandCommandComercialRoute,
+  CommandCommandConfigRoute: CommandCommandConfigRoute,
+  CommandCommandFinanceiroRoute: CommandCommandFinanceiroRoute,
+  CommandCommandIaRoute: CommandCommandIaRoute,
   CommandCommandIndexRoute: CommandCommandIndexRoute,
 }
 
