@@ -22,26 +22,35 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submitLead = useServerFn(submitMarketingLead);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const key = "demo:leads";
       const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
-      prev.push({
-        templateId,
-        businessLabel,
-        planLabel,
-        name,
-        whatsapp,
-        email,
-        ts: new Date().toISOString(),
-      });
+      prev.push({ templateId, businessLabel, planLabel, name, whatsapp, email, ts: new Date().toISOString() });
       localStorage.setItem(key, JSON.stringify(prev));
-    } catch {
-      /* noop */
+    } catch { /* noop */ }
+    try {
+      await submitLead({
+        data: {
+          name,
+          email,
+          phone: whatsapp,
+          interest: `${businessLabel} · Plano ${planLabel}`,
+          message: `Lead capturado na demo ${templateId}`,
+          page_url: typeof window !== "undefined" ? window.location.href : null,
+        },
+      });
+      setSent(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao enviar. Tente novamente.");
+    } finally {
+      setSubmitting(false);
     }
-    setSent(true);
   }
 
   return (
