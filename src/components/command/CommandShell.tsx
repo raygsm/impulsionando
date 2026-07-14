@@ -135,6 +135,7 @@ export function CommandShell() {
           <Outlet />
         </main>
       </div>
+      <GlobalCommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
 }
