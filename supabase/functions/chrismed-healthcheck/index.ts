@@ -35,11 +35,17 @@ Deno.serve(async (req) => {
   });
 
   // 2. Credencial MP
-  const { data: cred } = await sb
+  // Existem 2 linhas (sandbox+production). Preferimos production ativa; caímos para qualquer ativa; senão, a mais recente.
+  const { data: creds } = await sb
     .from("mpago_credentials")
-    .select("public_key,access_token_secret_name,webhook_secret_name,environment")
+    .select("public_key,access_token_secret_name,webhook_secret_name,environment,active,updated_at")
     .eq("company_id", companyId)
-    .maybeSingle();
+    .order("active", { ascending: false })
+    .order("updated_at", { ascending: false });
+  const cred = (creds ?? []).find((c: any) => c.environment === "production" && c.active)
+    ?? (creds ?? []).find((c: any) => c.active)
+    ?? (creds ?? [])[0]
+    ?? null;
   checks.push({
     id: "credential",
     label: "Credencial Mercado Pago",
@@ -58,7 +64,13 @@ Deno.serve(async (req) => {
   });
 
   // 4. Acesso ao token + probe da chave PIX
-  const accessToken = cred ? Deno.env.get(cred.access_token_secret_name) : null;
+  // Tokens ficam criptografados em core_secret_values (RPC reveal_secret_value);
+  // fallback para Deno.env para compatibilidade com secrets legados.
+  let accessToken: string | null = null;
+  if (cred) {
+    const { data: revealed } = await sb.rpc("reveal_secret_value", { p_name: cred.access_token_secret_name });
+    accessToken = (revealed as string | null) ?? Deno.env.get(cred.access_token_secret_name) ?? null;
+  }
   if (!accessToken) {
     checks.push({
       id: "token",
