@@ -58,6 +58,7 @@ import { Route as CanalOficialRouteImport } from './routes/canal-oficial'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AbrirTicketRouteImport } from './routes/abrir-ticket'
+import { Route as CommandRouteImport } from './routes/_command'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WmpIndexRouteImport } from './routes/wmp.index'
@@ -306,6 +307,7 @@ import { Route as TemplatesBrandIndexRouteImport } from './routes/templates.$bra
 import { Route as MarocasAppIndexRouteImport } from './routes/marocas.app.index'
 import { Route as ColorsRastreioIndexRouteImport } from './routes/colors.rastreio.index'
 import { Route as ColorsMinhaContaIndexRouteImport } from './routes/colors.minha-conta.index'
+import { Route as CommandCommandIndexRouteImport } from './routes/_command.command.index'
 import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSaibaMaisIndexRouteImport } from './routes/_authenticated/saiba-mais.index'
@@ -1181,6 +1183,10 @@ const AppRoute = AppRouteImport.update({
 const AbrirTicketRoute = AbrirTicketRouteImport.update({
   id: '/abrir-ticket',
   path: '/abrir-ticket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommandRoute = CommandRouteImport.update({
+  id: '/_command',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -2440,6 +2446,11 @@ const ColorsMinhaContaIndexRoute = ColorsMinhaContaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ColorsMinhaContaRoute,
+} as any)
+const CommandCommandIndexRoute = CommandCommandIndexRouteImport.update({
+  id: '/command/',
+  path: '/command/',
+  getParentRoute: () => CommandRoute,
 } as any)
 const AuthenticatedTenantsIndexRoute =
   AuthenticatedTenantsIndexRouteImport.update({
@@ -6841,6 +6852,7 @@ export interface FileRoutesByFullPath {
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/command/': typeof CommandCommandIndexRoute
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
@@ -7745,6 +7757,7 @@ export interface FileRoutesByTo {
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
+  '/command': typeof CommandCommandIndexRoute
   '/colors/minha-conta': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio': typeof ColorsRastreioIndexRoute
   '/marocas/app': typeof MarocasAppIndexRoute
@@ -7979,6 +7992,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_command': typeof CommandRouteWithChildren
   '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
@@ -8675,6 +8689,7 @@ export interface FileRoutesById {
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/_command/command/': typeof CommandCommandIndexRoute
   '/colors/minha-conta/': typeof ColorsMinhaContaIndexRoute
   '/colors/rastreio/': typeof ColorsRastreioIndexRoute
   '/marocas/app/': typeof MarocasAppIndexRoute
@@ -9606,6 +9621,7 @@ export interface FileRouteTypes {
     | '/saiba-mais/'
     | '/sales/'
     | '/tenants/'
+    | '/command/'
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
@@ -10510,6 +10526,7 @@ export interface FileRouteTypes {
     | '/saiba-mais'
     | '/sales'
     | '/tenants'
+    | '/command'
     | '/colors/minha-conta'
     | '/colors/rastreio'
     | '/marocas/app'
@@ -10743,6 +10760,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/_command'
     | '/abrir-ticket'
     | '/app'
     | '/auth'
@@ -11439,6 +11457,7 @@ export interface FileRouteTypes {
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
     | '/_authenticated/tenants/'
+    | '/_command/command/'
     | '/colors/minha-conta/'
     | '/colors/rastreio/'
     | '/marocas/app/'
@@ -11674,6 +11693,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  CommandRoute: typeof CommandRouteWithChildren
   AbrirTicketRoute: typeof AbrirTicketRoute
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
@@ -12238,6 +12258,13 @@ declare module '@tanstack/react-router' {
       path: '/abrir-ticket'
       fullPath: '/abrir-ticket'
       preLoaderRoute: typeof AbrirTicketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_command': {
+      id: '/_command'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof CommandRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -13975,6 +14002,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/colors/minha-conta/'
       preLoaderRoute: typeof ColorsMinhaContaIndexRouteImport
       parentRoute: typeof ColorsMinhaContaRoute
+    }
+    '/_command/command/': {
+      id: '/_command/command/'
+      path: '/command'
+      fullPath: '/command/'
+      preLoaderRoute: typeof CommandCommandIndexRouteImport
+      parentRoute: typeof CommandRoute
     }
     '/_authenticated/tenants/': {
       id: '/_authenticated/tenants/'
@@ -20088,6 +20122,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface CommandRouteChildren {
+  CommandCommandIndexRoute: typeof CommandCommandIndexRoute
+}
+
+const CommandRouteChildren: CommandRouteChildren = {
+  CommandCommandIndexRoute: CommandCommandIndexRoute,
+}
+
+const CommandRouteWithChildren =
+  CommandRoute._addFileChildren(CommandRouteChildren)
+
 interface ChrismedOcupacionalRouteChildren {
   ChrismedOcupacionalAgendarRoute: typeof ChrismedOcupacionalAgendarRoute
 }
@@ -20689,6 +20734,7 @@ const ApiPublicStatusRouteWithChildren = ApiPublicStatusRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  CommandRoute: CommandRouteWithChildren,
   AbrirTicketRoute: AbrirTicketRoute,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
