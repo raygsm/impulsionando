@@ -21,7 +21,8 @@ import { signOutSafely } from "@/lib/sign-out";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+const NAV: NavItem[] = [
   { to: "/command", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/command/clientes", label: "Clientes", icon: Users },
   { to: "/command/aprovacoes", label: "Aprovações", icon: CheckCircle2 },
@@ -32,7 +33,7 @@ const NAV = [
   { to: "/command/automacoes", label: "Automações", icon: Workflow },
   { to: "/command/ia", label: "IA", icon: Sparkles },
   { to: "/command/config", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function CommandShell() {
   const { data: me, isLoading } = useCurrentUser();
