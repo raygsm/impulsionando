@@ -90,7 +90,9 @@ export function SmartLeadCapture({ open, onOpenChange, templateId, businessLabel
             <p className="text-[11px] text-muted-foreground">
               Ao enviar, você concorda em receber contato comercial da Impulsionando. Sem spam.
             </p>
-            <Button type="submit" className="w-full">Quero receber a proposta</Button>
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enviando...</>) : "Quero receber a proposta"}
+            </Button>
           </form>
         )}
       </DialogContent>
