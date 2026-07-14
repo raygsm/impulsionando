@@ -10,6 +10,7 @@ import { Mail, MessageCircle, MapPin, CalendarCheck, Briefcase, Stethoscope } fr
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 
 export const Route = createFileRoute('/chrismed/contato')({
   head: () => ({
@@ -23,8 +24,9 @@ export const Route = createFileRoute('/chrismed/contato')({
   component: ContatoPage,
 });
 
-const WHATSAPP = 'https://wa.me/5521000000000?text=Ol%C3%A1%20CrisMed';
-const EMAIL = 'contato@crismed.com.br';
+// Canais oficiais CHRISMED — sem placeholders. Fonte única: chrismed-contact.ts.
+const WHATSAPP = `${CHRISMED_CONTACT.channels.whatsapp}&text=${encodeURIComponent('Olá CrisMed, gostaria de orientação sobre uma consulta.')}`;
+const EMAIL = CHRISMED_CONTACT.channels.emailDisplay;
 
 function ContatoPage() {
   const [nome, setNome] = useState('');
