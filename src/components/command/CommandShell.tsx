@@ -14,12 +14,12 @@ import {
   LogOut,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { signOutSafely } from "@/lib/sign-out";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { GlobalCommandPalette } from "@/components/command/GlobalCommandPalette";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const NAV: NavItem[] = [
@@ -40,7 +40,18 @@ export function CommandShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const qc = useQueryClient();
-  const [q, setQ] = useState("");
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !me) navigate({ to: "/auth" });
@@ -99,15 +110,17 @@ export function CommandShell() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 border-b bg-card/50 backdrop-blur flex items-center gap-3 px-4 sm:px-6">
-          <div className="relative flex-1 max-w-xl">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="relative flex-1 max-w-xl text-left group"
+          >
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Pesquisar cliente, CNPJ, domínio, ticket…"
-              className="pl-9 h-9 bg-background"
-            />
-          </div>
+            <span className="flex items-center h-9 pl-9 pr-3 rounded-md border bg-background text-sm text-muted-foreground group-hover:border-foreground/20">
+              Pesquisar cliente, ticket, automação…
+              <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded border bg-muted font-mono">⌘K</kbd>
+            </span>
+          </button>
           <Button
             variant="ghost"
             size="sm"
