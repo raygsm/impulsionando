@@ -91,3 +91,21 @@ export const querySearchAnalyticsFn = createServerFn({ method: "POST" })
     );
     return (res.rows ?? []) as GscQueryRow[];
   });
+
+export interface UrlInspectInput { siteUrl: string; inspectionUrl: string }
+
+/** URL Inspection API (Google Search Console). */
+export const inspectUrlFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: UrlInspectInput) => {
+    if (!d?.siteUrl || !d?.inspectionUrl) throw new Error("siteUrl e inspectionUrl obrigatórios");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const res = await gwFetch(`/v1/urlInspection/index:inspect`, {
+      method: "POST",
+      body: JSON.stringify({ inspectionUrl: data.inspectionUrl, siteUrl: data.siteUrl }),
+    });
+    return res.inspectionResult ?? res;
+  });
