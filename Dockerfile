@@ -5,14 +5,13 @@ WORKDIR /app
 ENV NITRO_PRESET=node-server
 
 COPY package*.json ./
-COPY pnpm-lock.yaml* ./
+COPY package-lock.json* ./
 
-RUN corepack enable || true
-RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else npm install; fi
+RUN npm ci
 
 COPY . .
 
-RUN if [ -f pnpm-lock.yaml ]; then pnpm run build; else npm run build; fi
+RUN npm run build
 
 FROM node:22-alpine AS runner
 

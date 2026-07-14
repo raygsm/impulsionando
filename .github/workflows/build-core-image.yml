@@ -41,7 +41,7 @@ jobs:
 
       - name: Debug build output
         run: |
-          npm install
+          npm ci
           npm run build
           echo "ROOT:"
           ls -lah
@@ -68,4 +68,5 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
             VITE_PUBLIC_SITE_URL=https://impulsionando.com.br
-            VITE_SUPABASE_URL=https://arygtqrdpcdkwnuwsgmm.supabase.co
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
