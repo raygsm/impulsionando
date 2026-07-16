@@ -114,10 +114,25 @@ jobs:
           sudo systemctl enable impulsionando-core
           sudo systemctl restart impulsionando-core
 
+          echo "== Core service =="
+          sudo systemctl --no-pager --full status impulsionando-core || true
+          curl --fail --silent --show-error --max-time 10 http://127.0.0.1:3000/ >/tmp/core-local.html
+
+          echo "== Public listeners =="
+          sudo ss -ltnp | grep -E ':(80|443|3000)\\b' || true
+          echo "== Active proxy services =="
+          sudo systemctl --no-pager --type=service --state=running | grep -Ei 'nginx|caddy|apache|traefik|docker|coolify|dokploy' || true
+          echo "== Running containers =="
+          sudo docker ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Ports}}' 2>/dev/null || true
+
           sudo install -d -m 0755 /var/www/letsencrypt
           sudo install -m 0644 /tmp/nginx.chrismed.http.conf /etc/nginx/sites-available/chrismed.impulsionando.com.br
           sudo ln -sfn /etc/nginx/sites-available/chrismed.impulsionando.com.br /etc/nginx/sites-enabled/chrismed.impulsionando.com.br
           sudo nginx -t
+          if ! sudo systemctl is-active --quiet nginx; then
+            echo "Nginx is installed but inactive; refusing to replace the active public proxy."
+            exit 42
+          fi
           sudo systemctl reload nginx
 
           if [ ! -f /etc/letsencrypt/live/chrismed.impulsionando.com.br/fullchain.pem ]; then
