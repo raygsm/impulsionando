@@ -2,7 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { tenantLandingTargetForHost } from "./lib/subdomain";
+import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -92,6 +92,17 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+      const canonicalTenantUrl = canonicalTenantHostRedirect({
+        hostname: url.hostname,
+        pathname: url.pathname,
+        search: url.search,
+        hash: url.hash,
+        protocol: url.protocol,
+      });
+      if (canonicalTenantUrl) {
+        return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
+      }
+
       const tenantTarget = tenantLandingTargetForHost(url.host);
       if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;

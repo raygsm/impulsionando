@@ -22,7 +22,12 @@ import { TenantHostFallback } from "@/components/app/TenantHostFallback";
 import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
-import { getTenantSubdomain, tenantSubdomainTarget, deprecatedSubdomainRedirect } from "@/lib/subdomain";
+import {
+  canonicalTenantHostRedirect,
+  getTenantSubdomain,
+  tenantSubdomainTarget,
+  deprecatedSubdomainRedirect,
+} from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
@@ -35,6 +40,11 @@ import { SkipLink } from "@/components/impulsionando/SkipLink";
 function TenantSubdomainRedirect() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const canonical = canonicalTenantHostRedirect(window.location);
+    if (canonical) {
+      window.location.replace(canonical);
+      return;
+    }
     const legacy = deprecatedSubdomainRedirect(window.location);
     if (legacy) {
       // Log e evento GA4 antes do reload cross-origin (best effort).

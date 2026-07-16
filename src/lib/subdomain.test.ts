@@ -5,12 +5,49 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  canonicalTenantHostRedirect,
   deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
 } from "./subdomain";
 
 const base = { protocol: "https:", pathname: "/", search: "", hash: "" };
+
+describe("canonicalTenantHostRedirect", () => {
+  it("moves the CHRISMED landing from the apex to its tenant subdomain", () => {
+    expect(canonicalTenantHostRedirect({
+      ...base,
+      hostname: "impulsionando.com.br",
+      pathname: "/chrismed",
+    })).toBe("https://chrismed.impulsionando.com.br/chrismed");
+  });
+
+  it("preserves CHRISMED nested paths, query and hash", () => {
+    expect(canonicalTenantHostRedirect({
+      ...base,
+      hostname: "www.impulsionando.com.br",
+      pathname: "/chrismed/agendar",
+      search: "?utm_source=email",
+      hash: "#form",
+    })).toBe("https://chrismed.impulsionando.com.br/chrismed/agendar?utm_source=email#form");
+  });
+
+  it("moves the legacy agenda host to the official tenant subdomain", () => {
+    expect(canonicalTenantHostRedirect({
+      ...base,
+      hostname: "agenda.chrismed.com.br",
+      pathname: "/chrismed/contato",
+    })).toBe("https://chrismed.impulsionando.com.br/chrismed/contato");
+  });
+
+  it("does not redirect the canonical CHRISMED host", () => {
+    expect(canonicalTenantHostRedirect({
+      ...base,
+      hostname: "chrismed.impulsionando.com.br",
+      pathname: "/chrismed",
+    })).toBeNull();
+  });
+});
 
 describe("deprecatedSubdomainRedirect", () => {
   it("root do subdomínio legado", () => {

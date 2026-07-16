@@ -37,6 +37,28 @@ export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "colorssaude.lovable.app": "/colors",
 };
 
+/** Canonical host redirects for tenant landings that must not live on the apex. */
+export function canonicalTenantHostRedirect(loc: {
+  hostname: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  protocol: string;
+}): string | null {
+  const host = loc.hostname.toLowerCase().split(":")[0];
+  const path = loc.pathname || "/";
+  const isChrismedPath = path === "/chrismed" || path.startsWith("/chrismed/");
+  const isApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
+  const isLegacyChrismedHost =
+    host === "agenda.chrismed.com.br" || host === "www.agenda.chrismed.com.br";
+
+  if (!isChrismedPath && !isLegacyChrismedHost) return null;
+  if (!isApex && !isLegacyChrismedHost) return null;
+
+  const proto = loc.protocol === "http:" ? "http:" : "https:";
+  return `${proto}//chrismed.impulsionando.com.br${path}${loc.search}${loc.hash}`;
+}
+
 /** Subdomínios que NÃO devem ser tratados como tenant. */
 const RESERVED_SUBDOMAINS = new Set([
   "www",
