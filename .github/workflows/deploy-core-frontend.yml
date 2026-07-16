@@ -116,7 +116,16 @@ jobs:
 
           echo "== Core service =="
           sudo systemctl --no-pager --full status impulsionando-core || true
-          curl --fail --silent --show-error --max-time 10 http://127.0.0.1:3000/ >/tmp/core-local.html
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 5 http://127.0.0.1:3000/ >/tmp/core-local.html; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              sudo journalctl --no-pager -u impulsionando-core -n 100
+              exit 43
+            fi
+            sleep 1
+          done
 
           echo "== Public listeners =="
           sudo ss -ltnp | grep -E ':(80|443|3000)\\b' || true
