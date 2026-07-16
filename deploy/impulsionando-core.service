@@ -11,7 +11,8 @@ Environment=PORT=3000
 Environment=NITRO_HOST=127.0.0.1
 Environment=NITRO_PORT=3000
 EnvironmentFile=-/etc/impulsionando-core.env
-ExecStart=/usr/bin/node .output/server/index.mjs
+# The deployment workflow replaces this with the Node binary discovered on the host.
+ExecStart=/usr/bin/env node .output/server/index.mjs
 Restart=always
 RestartSec=5
 User=www-data
@@ -19,4 +20,3 @@ Group=www-data
 
 [Install]
 WantedBy=multi-user.target
-

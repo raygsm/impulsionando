@@ -109,6 +109,15 @@ jobs:
           npm ci --omit=dev --no-audit --no-fund
           ln -sfn "$RELEASE_DIR" /var/www/impulsionando-core/current
 
+          NODE_BIN="$(command -v node || true)"
+          if [ -z "$NODE_BIN" ]; then
+            echo "Node.js is not available in the deployment shell."
+            exit 41
+          fi
+          echo "Using Node.js: $NODE_BIN"
+          "$NODE_BIN" --version
+          sed -i "s|^ExecStart=.*|ExecStart=${NODE_BIN} .output/server/index.mjs|" /tmp/impulsionando-core.service
+
           sudo install -m 0644 /tmp/impulsionando-core.service /etc/systemd/system/impulsionando-core.service
           sudo systemctl daemon-reload
           sudo systemctl enable impulsionando-core
