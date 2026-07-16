@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { HomePage } from "@/components/marketing/HomePage";
+import { tenantLandingTargetForHost } from "@/lib/subdomain";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 // Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
@@ -34,14 +35,7 @@ const CUSTOM_HOST_LANDING: Record<string, string> = {
 };
 
 function resolveSubdomainRedirect(host: string | null | undefined): string | null {
-  if (!host) return null;
-  const h = host.toLowerCase().split(":")[0];
-  if (CUSTOM_HOST_LANDING[h]) return CUSTOM_HOST_LANDING[h];
-  // Apenas subdomínios do domínio principal (não tocar em *.lovable.app/preview).
-  if (!h.endsWith(".impulsionando.com.br")) return null;
-  const sub = h.replace(/\.impulsionando\.com\.br$/, "");
-  if (!sub || sub === "www") return null;
-  return SUBDOMAIN_LANDING[sub] ?? null;
+  return tenantLandingTargetForHost(host);
 }
 
 export const Route = createFileRoute("/")({

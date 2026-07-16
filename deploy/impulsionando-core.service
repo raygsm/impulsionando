@@ -1,0 +1,22 @@
+[Unit]
+Description=Core Impulsionando frontend (TanStack Start/Nitro)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/impulsionando-core/current
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Environment=NITRO_HOST=127.0.0.1
+Environment=NITRO_PORT=3000
+EnvironmentFile=-/etc/impulsionando-core.env
+ExecStart=/usr/bin/node .output/server/index.mjs
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
+

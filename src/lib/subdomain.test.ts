@@ -4,7 +4,11 @@
  * pathname, search e hash.
  */
 import { describe, expect, it } from "vitest";
-import { deprecatedSubdomainRedirect } from "./subdomain";
+import {
+  deprecatedSubdomainRedirect,
+  tenantLandingTargetForHost,
+  tenantSubdomainTarget,
+} from "./subdomain";
 
 const base = { protocol: "https:", pathname: "/", search: "", hash: "" };
 
@@ -53,5 +57,23 @@ describe("deprecatedSubdomainRedirect", () => {
       protocol: "http:",
       hostname: "colorssaude.impulsionando.com.br",
     })).toBe("http://colors.impulsionando.com.br/");
+  });
+});
+
+describe("tenant landing resolution", () => {
+  it("routes CHRISMED to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("chrismed.impulsionando.com.br")).toBe("/chrismed");
+  });
+
+  it("keeps the legacy CHRISMED domain compatible", () => {
+    expect(tenantLandingTargetForHost("agenda.chrismed.com.br")).toBe("/chrismed");
+  });
+
+  it("uses the storefront for a tenant without a dedicated landing", () => {
+    expect(tenantSubdomainTarget("cliente-novo")).toBe("/vitrine/cliente-novo");
+  });
+
+  it("does not treat the apex domain as a tenant", () => {
+    expect(tenantLandingTargetForHost("impulsionando.com.br")).toBeNull();
   });
 });
