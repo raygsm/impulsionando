@@ -13,6 +13,30 @@
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
 
+/** Dedicated landings that replace the tenant's generic storefront. */
+export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
+  marocas: "/marocas",
+  colors: "/colors",
+  chrismed: "/chrismed",
+  riomed: "/riomed",
+  wmp: "/wmp",
+  garrido: "/garrido",
+  impulsity: "/vitrine/impulsity",
+  dqa: "/vitrine/dqa-panini",
+  "plataforma-saude": "/vitrine/patricia-lenine",
+  relacionamento: "/vitrine/relacionamento",
+  "impulsionando-brasil": "/vitrine/impulsionando-brasil",
+};
+
+/** Legacy custom hosts that still resolve to a Core tenant landing. */
+export const CUSTOM_HOST_LANDING: Record<string, string> = {
+  "agenda.chrismed.com.br": "/chrismed",
+  "www.agenda.chrismed.com.br": "/chrismed",
+  "colors.impulsionando.lovable.app": "/colors",
+  "colorsaude.lovable.app": "/colors",
+  "colorssaude.lovable.app": "/colors",
+};
+
 /** Subdomínios que NÃO devem ser tratados como tenant. */
 const RESERVED_SUBDOMAINS = new Set([
   "www",
@@ -77,7 +101,18 @@ export function getTenantSubdomain(host: string | null | undefined): TenantSubdo
 
 /** Rota destino para um tenant detectado por subdomínio. */
 export function tenantSubdomainTarget(slug: string): string {
-  return `/vitrine/${slug}`;
+  return TENANT_LANDING_BY_SUBDOMAIN[slug] ?? `/vitrine/${slug}`;
+}
+
+/** Resolves a public tenant host to its dedicated or generic landing. */
+export function tenantLandingTargetForHost(host: string | null | undefined): string | null {
+  if (!host) return null;
+  const cleanHost = host.toLowerCase().split(":")[0];
+  const customTarget = CUSTOM_HOST_LANDING[cleanHost];
+  if (customTarget) return customTarget;
+
+  const match = getTenantSubdomain(cleanHost);
+  return match ? tenantSubdomainTarget(match.slug) : null;
 }
 
 /**

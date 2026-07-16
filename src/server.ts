@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { tenantLandingTargetForHost } from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -90,6 +91,13 @@ function applySecurityHeaders(response: Response): Response {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      const tenantTarget = tenantLandingTargetForHost(url.host);
+      if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
+        url.pathname = tenantTarget;
+        return applySecurityHeaders(Response.redirect(url, 307));
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
