@@ -19,7 +19,7 @@ describe("canonicalTenantHostRedirect", () => {
       ...base,
       hostname: "impulsionando.com.br",
       pathname: "/chrismed",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed");
+    })).toBe("https://chrismed.impulsionando.com.br/");
   });
 
   it("preserves CHRISMED nested paths, query and hash", () => {
