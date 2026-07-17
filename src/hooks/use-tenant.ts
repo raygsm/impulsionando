@@ -5,6 +5,7 @@ import {
   resolveTenantByHost,
   type TenantContext,
 } from "@/lib/tenant-resolver.functions";
+import { getTenantSubdomain, TENANT_LANDING_BY_SUBDOMAIN } from "@/lib/subdomain";
 
 /**
  * Hostnames que NÃO devem disparar lookup de tenant — são o CORE/marketing.
@@ -41,18 +42,32 @@ export function useTenant(): {
   }, []);
 
   const core = useMemo(() => isCoreHost(host), [host]);
+  const knownSubdomainTenant = useMemo(() => {
+    const match = getTenantSubdomain(host);
+    if (!match || !TENANT_LANDING_BY_SUBDOMAIN[match.slug]) return null;
+    return {
+      id: `subdomain:${match.slug}`,
+      name: match.slug,
+      subdomain: match.slug,
+      domain: match.host,
+      primary_color: null,
+      secondary_color: null,
+      logo_url: null,
+      is_active: true,
+    } satisfies TenantContext;
+  }, [host]);
   const fetchTenant = useServerFn(resolveTenantByHost);
 
   const { data, isLoading } = useQuery({
     queryKey: ["tenant-by-host", host],
-    enabled: host.length > 0 && !core,
+    enabled: host.length > 0 && !core && !knownSubdomainTenant,
     staleTime: 5 * 60 * 1000,
     queryFn: () => fetchTenant({ data: { host } }),
   });
 
   return {
-    tenant: core ? null : data ?? null,
-    isLoading: !core && isLoading,
+    tenant: core ? null : knownSubdomainTenant ?? data ?? null,
+    isLoading: !core && !knownSubdomainTenant && isLoading,
     isCore: core,
     host,
   };

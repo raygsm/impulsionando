@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { HomePage } from "@/components/marketing/HomePage";
-import { tenantLandingTargetForHost } from "@/lib/subdomain";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 // Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
@@ -34,10 +32,6 @@ const CUSTOM_HOST_LANDING: Record<string, string> = {
   "colorssaude.lovable.app": "/colors",
 };
 
-function resolveSubdomainRedirect(host: string | null | undefined): string | null {
-  return tenantLandingTargetForHost(host);
-}
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -53,16 +47,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeWithSubdomainGuard() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const { hostname, pathname, search, hash } = window.location;
-    if (pathname !== "/") return;
-    const target = resolveSubdomainRedirect(hostname);
-    if (target) {
-      window.location.replace(`${target}${search}${hash}`);
-    }
-  }, []);
   return <HomePage />;
 }
 
-export { resolveSubdomainRedirect, SUBDOMAIN_LANDING, CUSTOM_HOST_LANDING };
+export { SUBDOMAIN_LANDING, CUSTOM_HOST_LANDING };

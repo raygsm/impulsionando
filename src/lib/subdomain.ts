@@ -16,6 +16,7 @@ const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
 /** Dedicated landings that replace the tenant's generic storefront. */
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   marocas: "/marocas",
+  marcoas: "/marocas",
   colors: "/colors",
   chrismed: "/chrismed",
   riomed: "/riomed",
