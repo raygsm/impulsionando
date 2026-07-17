@@ -103,6 +103,16 @@ export default {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
       }
 
+      // The old CHRISMED landing path remains a compatibility URL, but the
+      // canonical public address is the tenant subdomain root.
+      if (
+        url.hostname.toLowerCase() === "chrismed.impulsionando.com.br" &&
+        (url.pathname === "/chrismed" || url.pathname === "/chrismed/")
+      ) {
+        url.pathname = "/";
+        return applySecurityHeaders(Response.redirect(url, 308));
+      }
+
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);

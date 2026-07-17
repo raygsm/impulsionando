@@ -57,7 +57,8 @@ export function canonicalTenantHostRedirect(loc: {
   if (!isApex && !isLegacyChrismedHost) return null;
 
   const proto = loc.protocol === "http:" ? "http:" : "https:";
-  return `${proto}//chrismed.impulsionando.com.br${path}${loc.search}${loc.hash}`;
+  const publicPath = path === "/chrismed" || path === "/chrismed/" ? "/" : path;
+  return `${proto}//chrismed.impulsionando.com.br${publicPath}${loc.search}${loc.hash}`;
 }
 
 /** Subdomínios que NÃO devem ser tratados como tenant. */
