@@ -51,15 +51,50 @@ import { cn } from "@/lib/utils";
 
 // --- Vocabulário oficial das entradas ---------------------------------------
 
-type SolucaoLink = { to: string; label: string; hint: string; icon: React.ComponentType<{ className?: string }> };
+type SolucaoLink = {
+  to: string;
+  label: string;
+  hint: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
 
 const SOLUCOES_POR_OBJETIVO: SolucaoLink[] = [
-  { to: "/modulos", label: "Atrair e vender", hint: "Campanhas, funis, WhatsApp e recompra", icon: Target },
-  { to: "/modulos", label: "Atender e relacionar", hint: "CRM, agenda, pós-venda e comunicação", icon: MessageSquare },
-  { to: "/modulos", label: "Organizar a operação", hint: "Financeiro, estoque, cobrança e documentos", icon: Wallet },
-  { to: "/modulos", label: "Automatizar processos", hint: "Fluxos, integrações e Cérebro IA", icon: Zap },
-  { to: "/modulos", label: "Criar presença digital", hint: "Sites, portais, apps e identidade", icon: Globe },
-  { to: "/modulos", label: "Analisar e crescer", hint: "BI, dashboards e indicadores", icon: BarChart3 },
+  {
+    to: "/modulos",
+    label: "Atrair e vender",
+    hint: "Campanhas, funis, WhatsApp e recompra",
+    icon: Target,
+  },
+  {
+    to: "/modulos",
+    label: "Atender e relacionar",
+    hint: "CRM, agenda, pós-venda e comunicação",
+    icon: MessageSquare,
+  },
+  {
+    to: "/modulos",
+    label: "Organizar a operação",
+    hint: "Financeiro, estoque, cobrança e documentos",
+    icon: Wallet,
+  },
+  {
+    to: "/modulos",
+    label: "Automatizar processos",
+    hint: "Fluxos, integrações e Cérebro IA",
+    icon: Zap,
+  },
+  {
+    to: "/modulos",
+    label: "Criar presença digital",
+    hint: "Sites, portais, apps e identidade",
+    icon: Globe,
+  },
+  {
+    to: "/modulos",
+    label: "Analisar e crescer",
+    hint: "BI, dashboards e indicadores",
+    icon: BarChart3,
+  },
 ];
 
 // Setores — versão enxuta agrupada por macro, 1 clique = página do nicho.
@@ -75,18 +110,46 @@ const SETOR_COLUMNS: SetorCol[] = [
 
 // Demonstrações — 4 destaques ao invés de listar 40 rotas showroom.
 const DEMOS_DESTAQUE = [
-  { to: "/demo", label: "Ver todas as demonstrações", hint: "Hub completo com filtro por objetivo e setor" },
-  { to: "/demo/crm", label: "Jornada CRM completa", hint: "Do lead ao pagamento sem sair da conversa" },
-  { to: "/demo/whatsapp", label: "Atendimento no WhatsApp", hint: "Impulsionito respondendo em contexto real" },
-  { to: "/vitrine", label: "Vitrine de páginas prontas", hint: "Templates aplicáveis ao seu setor" },
+  {
+    to: "/demo",
+    label: "Ver todas as demonstrações",
+    hint: "Hub completo com filtro por objetivo e setor",
+  },
+  {
+    to: "/demo/crm",
+    label: "Jornada CRM completa",
+    hint: "Do lead ao pagamento sem sair da conversa",
+  },
+  {
+    to: "/demo/whatsapp",
+    label: "Atendimento no WhatsApp",
+    hint: "Impulsionito respondendo em contexto real",
+  },
+  {
+    to: "/vitrine",
+    label: "Vitrine de páginas prontas",
+    hint: "Templates aplicáveis ao seu setor",
+  },
 ] as const;
 
 // Conteúdos — sem inventar rotas novas.
 const CONTEUDOS_LINKS = [
-  { to: "/ecossistema", label: "Ecossistema Impulsionando", hint: "Como as empresas se conectam ao Core" },
+  {
+    to: "/ecossistema",
+    label: "Ecossistema Impulsionando",
+    hint: "Como as empresas se conectam ao Core",
+  },
   { to: "/sobre", label: "Sobre a Impulsionando", hint: "Nossa missão e como operamos" },
-  { to: "/central-de-ajuda", label: "Central de ajuda", hint: "Guias, orientações e boas práticas" },
-  { to: "/canal-oficial", label: "Canal oficial único", hint: "Como falamos com você com segurança" },
+  {
+    to: "/central-de-ajuda",
+    label: "Central de ajuda",
+    hint: "Guias, orientações e boas práticas",
+  },
+  {
+    to: "/canal-oficial",
+    label: "Canal oficial único",
+    hint: "Como falamos com você com segurança",
+  },
 ] as const;
 
 // Para clientes — jornada pós-contratação.
@@ -122,11 +185,7 @@ function menuTriggerClass(active: boolean) {
 }
 
 function panelClass(width = "w-[640px]") {
-  return cn(
-    "p-5",
-    width,
-    "max-w-[92vw] motion-rise",
-  );
+  return cn("p-5", width, "max-w-[92vw] motion-rise");
 }
 
 function MenuLinkRow({
@@ -214,7 +273,10 @@ function SetoresMenu() {
               </p>
             </div>
             <NavigationMenuLink asChild>
-              <Link to="/escolher-nicho" className="text-xs font-semibold text-primary hover:underline">
+              <Link
+                to="/escolher-nicho"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
                 Não sei meu setor →
               </Link>
             </NavigationMenuLink>
@@ -249,7 +311,10 @@ function SetoresMenu() {
           </div>
           <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-xs">
             <NavigationMenuLink asChild>
-              <Link to="/nichos" className="text-primary font-semibold hover:underline inline-flex items-center gap-1">
+              <Link
+                to="/nichos"
+                className="text-primary font-semibold hover:underline inline-flex items-center gap-1"
+              >
                 Ver todos os setores <ArrowRight className="h-3 w-3" />
               </Link>
             </NavigationMenuLink>
@@ -269,13 +334,21 @@ function DemonstracoesMenu() {
   const active = useActive("/demo") || useActive("/vitrine");
   return (
     <NavigationMenuItem>
-      <NavigationMenuTrigger className={menuTriggerClass(active)}>Demonstrações</NavigationMenuTrigger>
+      <NavigationMenuTrigger className={menuTriggerClass(active)}>
+        Demonstrações
+      </NavigationMenuTrigger>
       <NavigationMenuContent>
         <div className={panelClass("w-[560px]")}>
           <div className="text-eyebrow mb-3">Veja funcionando antes de contratar</div>
           <div className="grid grid-cols-1 gap-1">
             {DEMOS_DESTAQUE.map((d) => (
-              <MenuLinkRow key={d.to + d.label} to={d.to} label={d.label} hint={d.hint} icon={Sparkles} />
+              <MenuLinkRow
+                key={d.to + d.label}
+                to={d.to}
+                label={d.label}
+                hint={d.hint}
+                icon={Sparkles}
+              />
             ))}
           </div>
         </div>
@@ -285,7 +358,11 @@ function DemonstracoesMenu() {
 }
 
 function ConteudosMenu() {
-  const active = useActive("/ecossistema") || useActive("/sobre") || useActive("/central-de-ajuda") || useActive("/canal-oficial");
+  const active =
+    useActive("/ecossistema") ||
+    useActive("/sobre") ||
+    useActive("/central-de-ajuda") ||
+    useActive("/canal-oficial");
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className={menuTriggerClass(active)}>Conteúdos</NavigationMenuTrigger>
@@ -326,8 +403,12 @@ function ClientesMenu() {
             className="mt-3 w-full flex items-center justify-between gap-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2.5 text-left hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           >
             <span className="min-w-0">
-              <span className="block text-sm font-semibold text-primary">Falar com o Impulsionito</span>
-              <span className="block text-xs text-muted-foreground">Cobrança, plano, onboarding e documentos</span>
+              <span className="block text-sm font-semibold text-primary">
+                Falar com o Impulsionito
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                Cobrança, plano, onboarding e documentos
+              </span>
             </span>
             <MessageCircle className="h-4 w-4 text-primary shrink-0" />
           </button>
@@ -364,7 +445,17 @@ function MobileNav({ onClose }: { onClose: () => void }) {
     </div>
   );
 
-  const Row = ({ to, label, hint, params }: { to: string; label: string; hint?: string; params?: Record<string, string> }) => (
+  const Row = ({
+    to,
+    label,
+    hint,
+    params,
+  }: {
+    to: string;
+    label: string;
+    hint?: string;
+    params?: Record<string, string>;
+  }) => (
     <Link
       to={to}
       params={params as never}
@@ -373,13 +464,25 @@ function MobileNav({ onClose }: { onClose: () => void }) {
     >
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-foreground">{label}</span>
-        {hint ? <span className="block text-xs text-muted-foreground leading-snug">{hint}</span> : null}
+        {hint ? (
+          <span className="block text-xs text-muted-foreground leading-snug">{hint}</span>
+        ) : null}
       </span>
       <ChevronRight className="mt-1 h-4 w-4 text-muted-foreground/60 shrink-0" />
     </Link>
   );
 
-  const SectionButton = ({ id, label, hint, icon: Icon }: { id: MobileSection; label: string; hint: string; icon: React.ComponentType<{ className?: string }> }) => (
+  const SectionButton = ({
+    id,
+    label,
+    hint,
+    icon: Icon,
+  }: {
+    id: MobileSection;
+    label: string;
+    hint: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }) => (
     <button
       type="button"
       onClick={() => setSection(id)}
@@ -399,21 +502,56 @@ function MobileNav({ onClose }: { onClose: () => void }) {
   if (section === "root") {
     return (
       <div className="flex flex-col gap-1">
-        <SectionButton id="solucoes" label="Soluções" hint="O que você quer transformar" icon={Sparkles} />
-        <SectionButton id="setores" label="Setores" hint="Sua realidade, seu segmento" icon={Building2} />
-        <SectionButton id="demos" label="Demonstrações" hint="Veja funcionando antes" icon={Target} />
-        <Link to="/planos" onClick={onClose} className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 hover:bg-accent/60">
+        <SectionButton
+          id="solucoes"
+          label="Soluções"
+          hint="O que você quer transformar"
+          icon={Sparkles}
+        />
+        <SectionButton
+          id="setores"
+          label="Setores"
+          hint="Sua realidade, seu segmento"
+          icon={Building2}
+        />
+        <SectionButton
+          id="demos"
+          label="Demonstrações"
+          hint="Veja funcionando antes"
+          icon={Target}
+        />
+        <Link
+          to="/planos"
+          onClick={onClose}
+          className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 hover:bg-accent/60"
+        >
           <span>
             <span className="block text-sm font-semibold text-foreground">Planos</span>
-            <span className="block text-xs text-muted-foreground">Comparar e escolher o plano ideal</span>
+            <span className="block text-xs text-muted-foreground">
+              Comparar e escolher o plano ideal
+            </span>
           </span>
           <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
         </Link>
-        <SectionButton id="conteudos" label="Conteúdos" hint="Ecossistema, ajuda, canal oficial" icon={Users} />
-        <SectionButton id="cliente" label="Já sou cliente" hint="Entrar no Core, suporte, app" icon={UserRound} />
+        <SectionButton
+          id="conteudos"
+          label="Conteúdos"
+          hint="Ecossistema, ajuda, canal oficial"
+          icon={Users}
+        />
+        <SectionButton
+          id="cliente"
+          label="Já sou cliente"
+          hint="Entrar no Core, suporte, app"
+          icon={UserRound}
+        />
 
         <div className="mt-5 pt-4 border-t border-border flex flex-col gap-2">
-          <Button asChild size="lg" className="w-full gap-2 bg-gradient-primary text-primary-foreground">
+          <Button
+            asChild
+            size="lg"
+            className="w-full gap-2 bg-gradient-primary text-primary-foreground"
+          >
             <Link to="/escolher-nicho" onClick={onClose}>
               <Target className="w-4 h-4" /> Descobrir minha solução
             </Link>
@@ -506,7 +644,9 @@ function MobileNav({ onClose }: { onClose: () => void }) {
           className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2.5 text-left hover:bg-primary/10"
         >
           <span>
-            <span className="block text-sm font-semibold text-primary">Falar com o Impulsionito</span>
+            <span className="block text-sm font-semibold text-primary">
+              Falar com o Impulsionito
+            </span>
             <span className="block text-xs text-muted-foreground">Cobrança, plano, onboarding</span>
           </span>
           <MessageCircle className="h-4 w-4 text-primary" />
@@ -523,16 +663,16 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
+      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 sm:px-6 xl:grid-cols-[1fr_auto_1fr] xl:px-8">
         <Link
           to="/"
-          className="flex items-center shrink-0 [&_img]:!h-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+          className="flex items-center justify-self-start rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Impulsionando — página inicial"
         >
           <LogoImpulsionando variant="light" size="lg" asLink={false} />
         </Link>
 
-        <NavigationMenu className="hidden lg:flex">
+        <NavigationMenu className="hidden xl:flex xl:justify-self-center">
           <NavigationMenuList className="gap-0.5">
             <SolucoesMenu />
             <SetoresMenu />
@@ -558,14 +698,12 @@ export function PublicHeader() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <div className="flex items-center gap-2">
-
-
+        <div className="flex items-center justify-self-end gap-2">
           {/* CTA primário único */}
           <Button
             asChild
             size="sm"
-            className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant btn-alive"
+            className="hidden gap-2 bg-gradient-primary text-primary-foreground shadow-elegant btn-alive md:inline-flex"
           >
             <Link to="/escolher-nicho">
               <Target className="w-4 h-4" /> Descobrir minha solução
@@ -582,7 +720,7 @@ export function PublicHeader() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menu">
+              <Button variant="ghost" size="icon" className="xl:hidden" aria-label="Abrir menu">
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
