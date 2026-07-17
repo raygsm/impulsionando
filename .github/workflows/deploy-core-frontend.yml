@@ -63,6 +63,7 @@ jobs:
             package.json
             package-lock.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
 
   deploy:
@@ -106,6 +107,8 @@ jobs:
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd "$RELEASE_DIR"
+          test -f .output/server/index.mjs
+          test -d .output/public
           npm ci --omit=dev --no-audit --no-fund
           ln -sfn "$RELEASE_DIR" /var/www/impulsionando-core/current
 
