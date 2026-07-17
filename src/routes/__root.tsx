@@ -24,8 +24,6 @@ import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import {
   canonicalTenantHostRedirect,
-  getTenantSubdomain,
-  tenantSubdomainTarget,
   deprecatedSubdomainRedirect,
 } from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
@@ -63,13 +61,8 @@ function TenantSubdomainRedirect() {
       window.location.replace(legacy);
       return;
     }
-    const match = getTenantSubdomain(window.location.hostname);
-    if (!match) return;
-    const target = tenantSubdomainTarget(match.slug);
-    const p = window.location.pathname;
-    if (p === "/" || p === "") {
-      window.location.replace(target + window.location.search + window.location.hash);
-    }
+    // Tenant roots are internally rewritten by the server, keeping the
+    // subdomain URL clean while still rendering the tenant landing page.
   }, []);
   return null;
 }

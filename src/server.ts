@@ -103,14 +103,17 @@ export default {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
       }
 
+      const handler = await getServerEntry();
+      let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
       if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
-        return applySecurityHeaders(Response.redirect(url, 307));
+        // Render the tenant landing page internally so the public URL remains
+        // the clean subdomain root (for example, / rather than /chrismed).
+        routedRequest = new Request(url, request);
       }
 
-      const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await handler.fetch(routedRequest, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
       return applySecurityHeaders(normalized);
     } catch (error) {
