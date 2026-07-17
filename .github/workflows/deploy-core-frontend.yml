@@ -146,6 +146,23 @@ jobs:
           echo "== Running containers =="
           sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}' 2>/dev/null || true
 
+          if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
+            echo "== Updating active Traefik container =="
+            sudo docker cp "$RELEASE_DIR/.output/." impulsionando-core:/app/.output/
+            sudo docker restart impulsionando-core
+            for attempt in $(seq 1 30); do
+              if sudo docker exec impulsionando-core node -e \
+                "fetch('http://127.0.0.1:3000/').then(r => { if (!r.ok) process.exit(1) })"; then
+                exit 0
+              fi
+              if [ "$attempt" -eq 30 ]; then
+                sudo docker logs --tail 100 impulsionando-core
+                exit 44
+              fi
+              sleep 1
+            done
+          fi
+
           sudo install -d -m 0755 /var/www/letsencrypt
           sudo install -m 0644 /tmp/nginx.chrismed.http.conf /etc/nginx/sites-available/chrismed.impulsionando.com.br
           sudo ln -sfn /etc/nginx/sites-available/chrismed.impulsionando.com.br /etc/nginx/sites-enabled/chrismed.impulsionando.com.br
