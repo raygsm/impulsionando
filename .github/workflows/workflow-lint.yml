@@ -1,0 +1,37 @@
+name: Lint & Validate Workflows
+
+# Roda em qualquer PR que toque .github/workflows/**, e também em push na main
+# e por dispatch manual. Falha rápido se algum YAML estiver invalido — assim
+# nenhum workflow "invisivel" chega em main.
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/**']
+  pull_request:
+    paths: ['.github/workflows/**']
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar yamllint + actionlint
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y yamllint
+          bash <(curl -sSf https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv ./actionlint /usr/local/bin/actionlint
+
+      - name: yamllint (sintaxe YAML)
+        run: yamllint -d "{extends: relaxed, rules: {line-length: disable}}" .github/workflows
+
+      - name: actionlint (schema GitHub Actions)
+        run: actionlint -color .github/workflows/*.yml
+
+      - name: Listar workflows detectados
+        run: |
+          echo "Workflows validos publicados na branch:"
+          ls -1 .github/workflows/*.yml
