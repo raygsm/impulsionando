@@ -30,7 +30,7 @@ jobs:
       - name: Smoke Oliver-only (desktop + mobile)
         env:
           CHRISMED_BASE_URL: https://chrismed.impulsionando.com.br
-        run: bunx playwright test tests/e2e/chrismed-oliver-only.spec.ts --reporter=list
+        run: bunx playwright test e2e/chrismed-oliver-only.spec.ts --reporter=list
       - name: Upload artefatos em caso de falha
         if: failure()
         uses: actions/upload-artifact@v4
