@@ -1,0 +1,43 @@
+name: Post-deploy monitor (CHRISMED)
+
+# Roda a cada 15 min e apos cada push em main, executando o smoke
+# Playwright que garante que somente o Oliver aparece na CHRISMED,
+# capturando erros novos de console e falhas de navegacao em desktop
+# e mobile. Falhas quebram o job e disparam alerta do GitHub Actions.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: post-deploy-monitor-chrismed
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - name: Smoke Oliver-only (desktop + mobile)
+        env:
+          CHRISMED_BASE_URL: https://chrismed.impulsionando.com.br
+        run: bunx playwright test tests/e2e/chrismed-oliver-only.spec.ts --reporter=list
+      - name: Upload artefatos em caso de falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-deploy-monitor-${{ github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 14
