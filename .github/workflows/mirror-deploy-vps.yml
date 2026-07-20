@@ -1,0 +1,80 @@
+name: Mirror Deploy Impulsionando → VPS (187)
+
+# Regra inquebrável: TODO build publicado no IP 185 (Lovable) é replicado
+# imutavelmente para o IP 187 (VPS Hostinger) logo após o push em main.
+# Cada release é imutável, versionada por timestamp + SHA, e o symlink
+# `current` só troca depois do build bem-sucedido.
+#
+# Secrets obrigatórios (GitHub → Settings → Secrets → Actions):
+#   VPS_HOST         IP da VPS (187.x.x.x)
+#   VPS_USER         usuário SSH (ex.: deploy)
+#   VPS_SSH_KEY      chave privada ED25519 autorizada na VPS
+#   VPS_PORT         (opcional) porta SSH, padrão 22
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-deploy-impulsionando-vps
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Replicar build na VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          envs: GITHUB_SHA
+          script: |
+            set -euo pipefail
+            export PATH="$HOME/.bun/bin:$PATH"
+
+            APP_ROOT=/var/www/impulsionando
+            RELEASES=$APP_ROOT/releases
+            SHARED=$APP_ROOT/shared
+            TS=$(date +%Y%m%d-%H%M%S)
+            SHA_SHORT=${GITHUB_SHA:0:7}
+            TARGET=$RELEASES/${TS}-${SHA_SHORT}
+
+            mkdir -p $RELEASES $SHARED
+            git clone --depth=1 https://github.com/raygsm/impulsionando.git $TARGET
+            cd $TARGET
+
+            # .env compartilhado (nunca versionado, gerenciado por operador)
+            if [ -f "$SHARED/.env" ]; then ln -sf $SHARED/.env $TARGET/.env; fi
+
+            bun install --frozen-lockfile
+            bun run build
+
+            # Health check pré-troca — se build quebrar, symlink NÃO é atualizado.
+            test -d $TARGET/.output || test -d $TARGET/dist
+
+            ln -sfn $TARGET $APP_ROOT/current
+
+            # Retenção: mantém as 7 releases mais recentes.
+            ls -1dt $RELEASES/*/ | tail -n +8 | xargs -r rm -rf
+
+            pm2 reload impulsionando --update-env || \
+              pm2 start $APP_ROOT/current/deploy/ecosystem.config.cjs --name impulsionando
+            pm2 save
+
+            echo "Mirror ${TS}-${SHA_SHORT} publicado no IP 187."
+
+      - name: Smoke test HTTP na VPS
+        run: |
+          set -e
+          for host in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br; do
+            code=$(curl -sk -o /dev/null -w "%{http_code}" --resolve $host:443:${{ secrets.VPS_HOST }} https://$host/ || echo "000")
+            echo "VPS $host → $code"
+            if [ "$code" != "200" ] && [ "$code" != "301" ] && [ "$code" != "302" ]; then
+              echo "::warning::Host $host respondeu $code na VPS"
+            fi
+          done
