@@ -1,0 +1,49 @@
+name: DNS/IP check → VPS (187)
+
+# Confirma diariamente (e em cada push) que chrismed.impulsionando.com.br
+# e demais subdominios resolvem para o IP oficial da VPS. Se algum host
+# ainda estiver apontando para o IP antigo da Lovable (185.x.x.x),
+# o job falha e o operador recebe alerta imediato.
+#
+# Secrets: VPS_HOST (IP publico esperado da VPS Hostinger).
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"     # a cada 6h
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolver e comparar IPs
+        env:
+          EXPECTED_IP: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EXPECTED_IP" ]; then
+            echo "::error::Secret VPS_HOST nao configurado"; exit 1
+          fi
+
+          HOSTS=(
+            "impulsionando.com.br"
+            "chrismed.impulsionando.com.br"
+            "wmp.impulsionando.com.br"
+            "colorssaude.impulsionando.com.br"
+            "marocas.impulsionando.com.br"
+          )
+
+          fail=0
+          for h in "${HOSTS[@]}"; do
+            ip=$(dig +short "$h" A | tail -n1)
+            code=$(curl -skI --max-time 10 "https://$h" -o /dev/null -w "%{http_code}") || code="000"
+            server=$(curl -skI --max-time 10 "https://$h" | awk -F': ' 'tolower($1)=="server"{print $2}' | tr -d '\r')
+            echo "$h -> DNS=$ip HTTP=$code Server=${server:-?}"
+            if [ "$ip" != "$EXPECTED_IP" ]; then
+              echo "::error::$h resolve para $ip (esperado $EXPECTED_IP)"
+              fail=1
+            fi
+          done
+          exit $fail
