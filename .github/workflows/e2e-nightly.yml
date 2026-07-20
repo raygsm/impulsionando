@@ -1,0 +1,42 @@
+name: E2E multi-hostname
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install
+      - run: bunx playwright install --with-deps chromium
+      - name: Playwright — hostnames públicos
+        run: bunx playwright test tests/e2e/hostnames.spec.ts
+      - name: Playwright — CHRISMED (Oliver only, desktop + mobile)
+        env:
+          CHRISMED_BASE_URL: https://chrismed.impulsionando.com.br
+        run: bunx playwright test tests/e2e/chrismed-oliver-only.spec.ts
+      - name: Playwright — suíte autenticada + export
+        env:
+          E2E_SUPER_ADMIN_EMAIL: ${{ secrets.E2E_SUPER_ADMIN_EMAIL }}
+          E2E_SUPER_ADMIN_PASSWORD: ${{ secrets.E2E_SUPER_ADMIN_PASSWORD }}
+        run: bunx playwright test tests/e2e/authenticated-suite.spec.ts
+      - name: Validação de domínios
+        if: always()
+        run: node scripts/validate-domains.mjs
+      - name: Upload artefatos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts-${{ github.run_id }}
+          path: |
+            artifacts/**
+            reports/**
+          if-no-files-found: warn
+          retention-days: 30
