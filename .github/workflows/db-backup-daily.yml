@@ -1,0 +1,134 @@
+name: Daily Encrypted DB Backup → VPS
+
+# Backup diário do Postgres (Lovable Cloud / Supabase) enviado
+# criptografado para a VPS Hostinger. Retenção rotativa: diários
+# (30d), semanais (12), mensais (12). Verificação de integridade
+# via SHA-256 antes e depois do envio.
+#
+# Secrets obrigatórios no GitHub:
+#   SUPABASE_DB_URL       postgresql://postgres:...@db.<ref>.supabase.co:5432/postgres
+#   BACKUP_ENCRYPTION_KEY chave forte (openssl rand -base64 48) — GUARDAR no Bitwarden.
+#   VPS_HOST / VPS_USER / VPS_SSH_KEY / VPS_PORT (já usados no mirror deploy)
+
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 03:30 UTC = 00:30 BRT
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup-daily
+  cancel-in-progress: false
+
+jobs:
+  dump-and-ship:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Instalar postgresql-client 15
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-15 openssl
+
+      - name: pg_dump + criptografia AES-256
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          ENC_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          set -euo pipefail
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          FILE="impulsionando-${TS}.sql.gz"
+          ENC="${FILE}.enc"
+
+          echo "==> Rodando pg_dump…"
+          pg_dump "$SUPABASE_DB_URL" \
+            --format=plain --no-owner --no-privileges \
+            --exclude-schema=auth --exclude-schema=storage \
+            --exclude-schema=realtime --exclude-schema=supabase_functions \
+            --exclude-schema=vault --exclude-schema=graphql \
+            | gzip -9 > "$FILE"
+
+          RAW_SHA=$(sha256sum "$FILE" | awk '{print $1}')
+          SIZE=$(stat -c%s "$FILE")
+          echo "dump: $FILE size=$SIZE sha256=$RAW_SHA"
+
+          # Sanity check — abaixo de 50 KB provavelmente é dump vazio/erro.
+          if [ "$SIZE" -lt 51200 ]; then
+            echo "::error::Dump suspeito (<50KB)"; exit 1
+          fi
+
+          echo "==> Criptografando (AES-256-CBC + PBKDF2)…"
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -in "$FILE" -out "$ENC" -pass env:ENC_KEY
+
+          ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
+          echo "$ENC_SHA  $ENC" > "${ENC}.sha256"
+          echo "raw_sha=$RAW_SHA" >> "${ENC}.sha256"
+          echo "raw_size=$SIZE" >> "${ENC}.sha256"
+          echo "created_at=$TS" >> "${ENC}.sha256"
+
+          # Verificação local: decripta e compara SHA.
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}' > /tmp/check.sha
+          if ! grep -q "$RAW_SHA" /tmp/check.sha; then
+            echo "::error::Integridade falhou — SHA pós-decrypt não bate"; exit 1
+          fi
+          echo "Integridade OK."
+
+          rm -f "$FILE"
+          echo "ENC_FILE=$ENC" >> $GITHUB_ENV
+          echo "SHA_FILE=${ENC}.sha256" >> $GITHUB_ENV
+
+      - name: Enviar backup para VPS (scp)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "${{ env.ENC_FILE }},${{ env.SHA_FILE }}"
+          target: "/var/backups/impulsionando/incoming/"
+
+      - name: Aplicar retenção + verificar SHA na VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            ROOT=/var/backups/impulsionando
+            mkdir -p $ROOT/daily $ROOT/weekly $ROOT/monthly
+            cd $ROOT/incoming
+
+            # Verifica SHA-256 recebido.
+            for f in *.enc; do
+              [ -f "$f" ] || continue
+              expected=$(head -n1 "${f}.sha256" | awk '{print $1}')
+              actual=$(sha256sum "$f" | awk '{print $1}')
+              if [ "$expected" != "$actual" ]; then
+                echo "SHA divergente para $f — descartando"
+                rm -f "$f" "${f}.sha256"
+                exit 1
+              fi
+              mv "$f" "${f}.sha256" $ROOT/daily/
+            done
+
+            # Rotacionar semanais (domingo) e mensais (dia 1).
+            DOW=$(date +%u); DOM=$(date +%d)
+            LATEST=$(ls -1t $ROOT/daily/*.enc 2>/dev/null | head -n1 || true)
+            if [ -n "$LATEST" ]; then
+              [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" $ROOT/weekly/ 2>/dev/null || true
+              [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" $ROOT/monthly/ 2>/dev/null || true
+            fi
+
+            # Retenção
+            find $ROOT/daily   -type f -mtime +30  -delete
+            find $ROOT/weekly  -type f -mtime +84  -delete   # ~12 semanas
+            find $ROOT/monthly -type f -mtime +366 -delete   # ~12 meses
+
+            echo "Backup diário armazenado. Snapshot atual:"
+            du -sh $ROOT/daily $ROOT/weekly $ROOT/monthly
