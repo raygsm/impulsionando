@@ -21,7 +21,7 @@ jobs:
       - name: Playwright — CHRISMED (Oliver only, desktop + mobile)
         env:
           CHRISMED_BASE_URL: https://chrismed.impulsionando.com.br
-        run: bunx playwright test tests/e2e/chrismed-oliver-only.spec.ts
+        run: bunx playwright test e2e/chrismed-oliver-only.spec.ts
       - name: Playwright — suíte autenticada + export
         env:
           E2E_SUPER_ADMIN_EMAIL: ${{ secrets.E2E_SUPER_ADMIN_EMAIL }}
