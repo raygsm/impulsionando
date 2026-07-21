@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ interface AuthSearch {
   persona?: AuthPersona;
   mode?: AuthMode;
   next?: string;
+  passwordReset?: "success";
 }
 
 /** Sanitiza o `next` como caminho relativo mesma origem. */
@@ -87,6 +88,7 @@ export const Route = createFileRoute("/auth")({
     persona: (s.persona as AuthPersona) || undefined,
     mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
     next: typeof s.next === "string" ? s.next : undefined,
+    passwordReset: s.passwordReset === "success" ? "success" : undefined,
   }),
 
   head: () => ({
@@ -114,6 +116,12 @@ function AuthPage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
+
+  useEffect(() => {
+    if (search.passwordReset === "success") {
+      toast.success("Senha redefinida com sucesso. Faça login com sua nova senha.");
+    }
+  }, [search.passwordReset]);
 
   function goPostAuth() {
     if (nextPath) {
@@ -196,7 +204,7 @@ function AuthPage() {
     setResetLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(target, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: "https://impulsionando.com.br/redefinir-senha",
       });
       if (error) {
         return toast.error("Não foi possível processar a solicitação. Verifique o e-mail e tente novamente.");
