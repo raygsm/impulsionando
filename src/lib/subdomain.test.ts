@@ -40,11 +40,19 @@ describe("canonicalTenantHostRedirect", () => {
     })).toBe("https://chrismed.impulsionando.com.br/chrismed/contato");
   });
 
-  it("does not redirect the canonical CHRISMED host", () => {
+  it("cleans the legacy root path on the canonical CHRISMED host", () => {
     expect(canonicalTenantHostRedirect({
       ...base,
       hostname: "chrismed.impulsionando.com.br",
       pathname: "/chrismed",
+    })).toBe("https://chrismed.impulsionando.com.br/");
+  });
+
+  it("does not loop on nested CHRISMED paths at the canonical host", () => {
+    expect(canonicalTenantHostRedirect({
+      ...base,
+      hostname: "chrismed.impulsionando.com.br",
+      pathname: "/chrismed/agendar",
     })).toBeNull();
   });
 });

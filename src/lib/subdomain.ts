@@ -50,11 +50,14 @@ export function canonicalTenantHostRedirect(loc: {
   const path = loc.pathname || "/";
   const isChrismedPath = path === "/chrismed" || path.startsWith("/chrismed/");
   const isApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
+  const isOfficialChrismedHost = host === "chrismed.impulsionando.com.br";
   const isLegacyChrismedHost =
     host === "agenda.chrismed.com.br" || host === "www.agenda.chrismed.com.br";
+  const isLegacyRootOnOfficialHost =
+    isOfficialChrismedHost && (path === "/chrismed" || path === "/chrismed/");
 
   if (!isChrismedPath && !isLegacyChrismedHost) return null;
-  if (!isApex && !isLegacyChrismedHost) return null;
+  if (!isApex && !isLegacyChrismedHost && !isLegacyRootOnOfficialHost) return null;
 
   const proto = loc.protocol === "http:" ? "http:" : "https:";
   const publicPath = path === "/chrismed" || path === "/chrismed/" ? "/" : path;
