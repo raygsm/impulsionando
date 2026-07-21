@@ -148,6 +148,7 @@ jobs:
 
           if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
             echo "== Updating active Traefik container =="
+            sudo docker exec impulsionando-core sh -c 'rm -rf /app/.output && mkdir -p /app/.output'
             sudo docker cp "$RELEASE_DIR/.output/." impulsionando-core:/app/.output/
             sudo docker restart impulsionando-core
             for attempt in $(seq 1 30); do
