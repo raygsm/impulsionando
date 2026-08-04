@@ -16,7 +16,11 @@ import { assertCoreHealthAccess } from "@/lib/core-rbac.functions";
 const LOVABLE_IP = "185.158.133.1";
 const LOVABLE_HOST = "impulsionando.lovable.app";
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
-const REQUIRED_ENVS = ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
+const REQUIRED_ENVS = [
+  "SUPABASE_URL",
+  "SUPABASE_PUBLISHABLE_KEY",
+  "SUPABASE_SERVICE_ROLE_KEY",
+] as const;
 
 export type CheckResult = { ok: boolean; detail?: string; checked_at: string };
 export type ValidationDetail = {
@@ -35,7 +39,9 @@ async function resolveDns(host: string, type: "A" | "CNAME" | "TXT"): Promise<st
       { headers: { accept: "application/dns-json" } },
     );
     const j: any = await r.json();
-    return (j.Answer ?? []).map((a: any) => String(a.data).replace(/\.$/, "").replace(/^"|"$/g, ""));
+    return (j.Answer ?? []).map((a: any) =>
+      String(a.data).replace(/\.$/, "").replace(/^"|"$/g, ""),
+    );
   } catch {
     return [];
   }
@@ -43,8 +49,14 @@ async function resolveDns(host: string, type: "A" | "CNAME" | "TXT"): Promise<st
 
 async function checkDomain(domain: string | null): Promise<CheckResult> {
   const at = new Date().toISOString();
-  if (!domain) return { ok: false, detail: "Nenhum domínio configurado no cadastro do tenant", checked_at: at };
-  if (!DOMAIN_RE.test(domain)) return { ok: false, detail: `Formato inválido: ${domain}`, checked_at: at };
+  if (!domain)
+    return {
+      ok: false,
+      detail: "Nenhum domínio configurado no cadastro do tenant",
+      checked_at: at,
+    };
+  if (!DOMAIN_RE.test(domain))
+    return { ok: false, detail: `Formato inválido: ${domain}`, checked_at: at };
   return { ok: true, detail: domain, checked_at: at };
 }
 
@@ -63,14 +75,25 @@ async function checkDns(domain: string | null): Promise<CheckResult> {
   // CAA é opcional. Se existir, precisa autorizar letsencrypt.org (SSL Lovable).
   const caaBlocksLE =
     caa.length > 0 &&
-    !caa.some((v) => /issue\s+"?letsencrypt\.org"?/i.test(v) || /issuewild\s+"?letsencrypt\.org"?/i.test(v));
+    !caa.some(
+      (v) => /issue\s+"?letsencrypt\.org"?/i.test(v) || /issuewild\s+"?letsencrypt\.org"?/i.test(v),
+    );
   if (!pointsA && !pointsCname) {
     const seen = [...a, ...c].join(", ") || "nenhum registro";
-    return { ok: false, detail: `A/CNAME não apontam para Lovable (visto: ${seen})`, checked_at: at };
+    return {
+      ok: false,
+      detail: `A/CNAME não apontam para Lovable (visto: ${seen})`,
+      checked_at: at,
+    };
   }
-  if (!hasTxt) return { ok: false, detail: "TXT _lovable ausente ou não propagado", checked_at: at };
+  if (!hasTxt)
+    return { ok: false, detail: "TXT _lovable ausente ou não propagado", checked_at: at };
   if (caaBlocksLE)
-    return { ok: false, detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)", checked_at: at };
+    return {
+      ok: false,
+      detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)",
+      checked_at: at,
+    };
   const caaNote = caa.length > 0 ? " + CAA→LE" : "";
   return {
     ok: true,
@@ -85,10 +108,18 @@ async function checkSsl(domain: string | null): Promise<CheckResult> {
   try {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 8000);
-    const r = await fetch(`https://${domain}/`, { method: "HEAD", signal: controller.signal, redirect: "manual" });
+    const r = await fetch(`https://${domain}/`, {
+      method: "HEAD",
+      signal: controller.signal,
+      redirect: "manual",
+    });
     clearTimeout(t);
     if (r.status === 421 || r.status === 526 || r.status === 525) {
-      return { ok: false, detail: `HTTPS respondeu ${r.status} (SSL/binding pendente)`, checked_at: at };
+      return {
+        ok: false,
+        detail: `HTTPS respondeu ${r.status} (SSL/binding pendente)`,
+        checked_at: at,
+      };
     }
     if (r.status >= 500) return { ok: false, detail: `HTTPS ${r.status}`, checked_at: at };
     return { ok: true, detail: `HTTPS ${r.status}`, checked_at: at };
@@ -107,33 +138,44 @@ async function checkSupabase(
   const { data, error } = await supabase.rpc("resolve_tenant_by_host", { _host: domain });
   if (error) return { ok: false, detail: `RPC erro: ${error.message}`, checked_at: at };
   const row = Array.isArray(data) ? data[0] : data;
-  if (!row) return { ok: false, detail: "RPC não retornou tenant para este domínio", checked_at: at };
-  if (row.id !== companyId) return { ok: false, detail: `RPC devolveu outro tenant (${row.id})`, checked_at: at };
+  if (!row)
+    return { ok: false, detail: "RPC não retornou tenant para este domínio", checked_at: at };
+  if (row.id !== companyId)
+    return { ok: false, detail: `RPC devolveu outro tenant (${row.id})`, checked_at: at };
   return { ok: true, detail: `Resolve → ${row.name}`, checked_at: at };
 }
 
 function checkEnvs(): CheckResult {
   const at = new Date().toISOString();
   const missing = REQUIRED_ENVS.filter((k) => !process.env[k]);
-  if (missing.length > 0) return { ok: false, detail: `Ausentes: ${missing.join(", ")}`, checked_at: at };
+  if (missing.length > 0)
+    return { ok: false, detail: `Ausentes: ${missing.join(", ")}`, checked_at: at };
   return { ok: true, detail: `${REQUIRED_ENVS.length} envs presentes`, checked_at: at };
 }
 
 async function checkGithub(): Promise<CheckResult> {
   const at = new Date().toISOString();
-  const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO; // "owner/name"
-  if (!token || !repo) return { ok: true, detail: "GitHub não configurado (skip)", checked_at: at };
   try {
-    const r = await fetch(`https://api.github.com/repos/${repo}/commits/main/status`, {
-      headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json" },
-    });
-    if (!r.ok) return { ok: false, detail: `GitHub API ${r.status}`, checked_at: at };
-    const j: any = await r.json();
-    if (j.state === "success") return { ok: true, detail: `main: ${j.state}`, checked_at: at };
-    return { ok: false, detail: `main: ${j.state}`, checked_at: at };
+    const { getGitHubAppConfig } = await import("@/lib/github-app/auth.server");
+    const { githubRequest } = await import("@/lib/github-app/client.server");
+    const config = await getGitHubAppConfig();
+    const repo = config.repositoryAllowlist[0];
+    const metadata = await githubRequest<any>(repo, `/repos/${repo}`);
+    const checks = await githubRequest<any>(
+      repo,
+      `/repos/${repo}/commits/${encodeURIComponent(metadata.default_branch)}/check-runs?per_page=100`,
+    );
+    const failing = (checks.check_runs ?? []).filter(
+      (x: any) =>
+        x.status === "completed" && !["success", "neutral", "skipped"].includes(x.conclusion),
+    );
+    return {
+      ok: failing.length === 0,
+      detail: `${metadata.default_branch}: ${failing.length ? `${failing.length} check(s) com falha` : "checks aprovados"}`,
+      checked_at: at,
+    };
   } catch (e: any) {
-    return { ok: false, detail: `GitHub erro: ${e?.message ?? "erro"}`, checked_at: at };
+    return { ok: false, detail: `GitHub App: ${e?.message ?? "erro"}`, checked_at: at };
   }
 }
 
@@ -200,7 +242,12 @@ export const validateTenantPublication = createServerFn({ method: "POST" })
 export const approveTenantPublication = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { companyId: string; snapshotId?: string | null }) =>
-    z.object({ companyId: z.string().uuid(), snapshotId: z.string().max(200).nullable().optional() }).parse(d),
+    z
+      .object({
+        companyId: z.string().uuid(),
+        snapshotId: z.string().max(200).nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertCoreHealthAccess(context);

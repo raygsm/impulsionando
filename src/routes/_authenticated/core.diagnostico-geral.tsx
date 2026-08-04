@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { runFullDiagnostic } from "@/lib/integrations-diagnostic.functions";
 import { checkDiagnosticAccess } from "@/lib/diagnostic-access.functions";
-import { AlertTriangle, CheckCircle2, Loader2, ShieldAlert, RefreshCcw, Download } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  ShieldAlert,
+  RefreshCcw,
+  Download,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/diagnostico-geral")({
   beforeLoad: async () => {
@@ -20,13 +27,34 @@ export const Route = createFileRoute("/_authenticated/core/diagnostico-geral")({
 });
 
 const RISK_MAP: Record<string, { risk: string; next: string }> = {
-  n8n:        { risk: "Automações de workflows não executam, falhas silenciosas em integrações pós-pagamento e onboarding.", next: "Configurar N8N_BASE_URL/N8N_API_KEY e reprocessar runs com erro no painel de automações." },
-  github:     { risk: "Sem geração automática de repositórios e deploy de projetos clonados.", next: "Validar GITHUB_TOKEN com escopo repo e revalidar integração." },
-  supabase:   { risk: "Operações privilegiadas (admin/seed/migrations) falham; auth admin indisponível.", next: "Restaurar SUPABASE_SERVICE_ROLE_KEY e SUPABASE_URL no ambiente." },
-  mercadopago:{ risk: "Cobranças PIX/cartão indisponíveis; faturas ficam pendentes sem baixa.", next: "Configurar MERCADOPAGO_ACCESS_TOKEN e validar webhook de pagamentos." },
-  email:      { risk: "E-mails transacionais (contratos, assinaturas, notificações) não saem da fila.", next: "Verificar domínio em notify.* e processador da fila pgmq; revisar email_send_log." },
-  zapi:       { risk: "WhatsApp outbound parado; alertas e onboardings via Z-API não chegam.", next: "Confirmar ZAPI_INSTANCE_ID/ZAPI_TOKEN e status da sessão no provedor." },
-  webhooks:   { risk: "Execuções de webhook com falha ficam paradas, sem reprocessamento.", next: "Revisar webhook_runs com status=error e usar painel /automacoes para reprocessar." },
+  n8n: {
+    risk: "Automações de workflows não executam, falhas silenciosas em integrações pós-pagamento e onboarding.",
+    next: "Configurar N8N_BASE_URL/N8N_API_KEY e reprocessar runs com erro no painel de automações.",
+  },
+  github: {
+    risk: "Sem leitura segura de repositórios e checks para publicação.",
+    next: "Configurar a GitHub App com privilégio mínimo e os segredos no Vault.",
+  },
+  supabase: {
+    risk: "Operações privilegiadas (admin/seed/migrations) falham; auth admin indisponível.",
+    next: "Restaurar SUPABASE_SERVICE_ROLE_KEY e SUPABASE_URL no ambiente.",
+  },
+  mercadopago: {
+    risk: "Cobranças PIX/cartão indisponíveis; faturas ficam pendentes sem baixa.",
+    next: "Configurar MERCADOPAGO_ACCESS_TOKEN e validar webhook de pagamentos.",
+  },
+  email: {
+    risk: "E-mails transacionais (contratos, assinaturas, notificações) não saem da fila.",
+    next: "Verificar domínio em notify.* e processador da fila pgmq; revisar email_send_log.",
+  },
+  zapi: {
+    risk: "WhatsApp outbound parado; alertas e onboardings via Z-API não chegam.",
+    next: "Confirmar ZAPI_INSTANCE_ID/ZAPI_TOKEN e status da sessão no provedor.",
+  },
+  webhooks: {
+    risk: "Execuções de webhook com falha ficam paradas, sem reprocessamento.",
+    next: "Revisar webhook_runs com status=error e usar painel /automacoes para reprocessar.",
+  },
 };
 
 function DiagnosticoGeralPage() {
@@ -45,15 +73,21 @@ function DiagnosticoGeralPage() {
     const rows = [
       ["slug", "status", "ms", "error", "missing", "checked_at"],
       ...results.map((r: any) => [
-        r.slug, r.ok ? "ok" : "fail", r.duration_ms ?? "", r.error ?? "",
-        (r.missing ?? []).join("|"), r.checked_at ?? "",
+        r.slug,
+        r.ok ? "ok" : "fail",
+        r.duration_ms ?? "",
+        r.error ?? "",
+        (r.missing ?? []).join("|"),
+        r.checked_at ?? "",
       ]),
     ];
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rows
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `diagnostico-integracoes-${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `diagnostico-integracoes-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
   };
 
@@ -68,7 +102,11 @@ function DiagnosticoGeralPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => q.refetch()} disabled={q.isFetching}>
-            {q.isFetching ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCcw className="w-4 h-4 mr-1" />}
+            {q.isFetching ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+            ) : (
+              <RefreshCcw className="w-4 h-4 mr-1" />
+            )}
             Re-executar
           </Button>
           <Button variant="outline" size="sm" onClick={exportCsv} disabled={!results.length}>
@@ -110,22 +148,32 @@ function DiagnosticoGeralPage() {
           </div>
           <div className="space-y-3">
             {failList.map((r: any) => {
-              const info = RISK_MAP[r.slug] ?? { risk: "Impacto não mapeado.", next: "Revisar credenciais e logs." };
+              const info = RISK_MAP[r.slug] ?? {
+                risk: "Impacto não mapeado.",
+                next: "Revisar credenciais e logs.",
+              };
               return (
                 <div key={r.slug} className="rounded-md border bg-white p-3">
                   <div className="flex items-center justify-between">
                     <div className="font-mono text-sm uppercase">{r.slug}</div>
                     <Badge variant="destructive">FAIL</Badge>
                   </div>
-                  <div className="text-sm text-rose-700 mt-1">{r.error || "Falha não detalhada"}</div>
+                  <div className="text-sm text-rose-700 mt-1">
+                    {r.error || "Falha não detalhada"}
+                  </div>
                   {r.missing?.length > 0 && (
                     <div className="text-xs text-muted-foreground mt-1">
-                      Credenciais ausentes: <span className="font-mono">{r.missing.join(", ")}</span>
+                      Credenciais ausentes:{" "}
+                      <span className="font-mono">{r.missing.join(", ")}</span>
                     </div>
                   )}
                   <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                    <div><strong>Risco:</strong> {info.risk}</div>
-                    <div><strong>Próximo passo:</strong> {info.next}</div>
+                    <div>
+                      <strong>Risco:</strong> {info.risk}
+                    </div>
+                    <div>
+                      <strong>Próximo passo:</strong> {info.next}
+                    </div>
                   </div>
                 </div>
               );
@@ -142,7 +190,10 @@ function DiagnosticoGeralPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {okList.map((r: any) => (
-              <div key={r.slug} className="flex items-center justify-between border rounded-md p-2 bg-emerald-50/40">
+              <div
+                key={r.slug}
+                className="flex items-center justify-between border rounded-md p-2 bg-emerald-50/40"
+              >
                 <div className="font-mono text-sm uppercase">{r.slug}</div>
                 <div className="text-xs text-muted-foreground">{r.duration_ms ?? 0} ms</div>
               </div>
@@ -154,11 +205,24 @@ function DiagnosticoGeralPage() {
       <Card className="p-5">
         <div className="font-semibold mb-2">Relatório executivo</div>
         <ul className="list-disc pl-5 text-sm space-y-1">
-          <li>Total avaliadas: <strong>{results.length}</strong></li>
-          <li>OK: <strong>{okList.map((r: any) => r.slug).join(", ") || "—"}</strong></li>
-          <li>Falha: <strong>{failList.map((r: any) => r.slug).join(", ") || "—"}</strong></li>
-          <li>Credenciais ausentes: <strong>{[...new Set(failList.flatMap((r: any) => r.missing ?? []))].join(", ") || "nenhuma"}</strong></li>
-          <li>Gerado em: <strong>{q.data?.summary?.generated_at ?? "—"}</strong></li>
+          <li>
+            Total avaliadas: <strong>{results.length}</strong>
+          </li>
+          <li>
+            OK: <strong>{okList.map((r: any) => r.slug).join(", ") || "—"}</strong>
+          </li>
+          <li>
+            Falha: <strong>{failList.map((r: any) => r.slug).join(", ") || "—"}</strong>
+          </li>
+          <li>
+            Credenciais ausentes:{" "}
+            <strong>
+              {[...new Set(failList.flatMap((r: any) => r.missing ?? []))].join(", ") || "nenhuma"}
+            </strong>
+          </li>
+          <li>
+            Gerado em: <strong>{q.data?.summary?.generated_at ?? "—"}</strong>
+          </li>
         </ul>
       </Card>
     </div>

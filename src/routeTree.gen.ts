@@ -805,6 +805,7 @@ import { Route as ApiPublicHooksMarocasReportRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksMaintenanceNotifierRouteImport } from './routes/api/public/hooks/maintenance-notifier'
 import { Route as ApiPublicHooksImpulsionitoTrainRouteImport } from './routes/api/public/hooks/impulsionito-train'
+import { Route as ApiPublicHooksGithubAppRouteImport } from './routes/api/public/hooks/github-app'
 import { Route as ApiPublicHooksFocusNfeRouteImport } from './routes/api/public/hooks/focus-nfe'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
 import { Route as ApiPublicHooksExpirePremiumTrialsRouteImport } from './routes/api/public/hooks/expire-premium-trials'
@@ -5368,6 +5369,11 @@ const ApiPublicHooksImpulsionitoTrainRoute =
     path: '/api/public/hooks/impulsionito-train',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksGithubAppRoute = ApiPublicHooksGithubAppRouteImport.update({
+  id: '/api/public/hooks/github-app',
+  path: '/api/public/hooks/github-app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksFocusNfeRoute = ApiPublicHooksFocusNfeRouteImport.update({
   id: '/api/public/hooks/focus-nfe',
   path: '/api/public/hooks/focus-nfe',
@@ -7070,6 +7076,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/github-app': typeof ApiPublicHooksGithubAppRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/maintenance-notifier': typeof ApiPublicHooksMaintenanceNotifierRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -7992,6 +7999,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/github-app': typeof ApiPublicHooksGithubAppRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/maintenance-notifier': typeof ApiPublicHooksMaintenanceNotifierRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -8943,6 +8951,7 @@ export interface FileRoutesById {
   '/api/public/hooks/expire-premium-trials': typeof ApiPublicHooksExpirePremiumTrialsRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/github-app': typeof ApiPublicHooksGithubAppRoute
   '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/maintenance-notifier': typeof ApiPublicHooksMaintenanceNotifierRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -9893,6 +9902,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/github-app'
     | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/maintenance-notifier'
     | '/api/public/hooks/marketing-lead-notify'
@@ -10815,6 +10825,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/github-app'
     | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/maintenance-notifier'
     | '/api/public/hooks/marketing-lead-notify'
@@ -11765,6 +11776,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expire-premium-trials'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/github-app'
     | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/maintenance-notifier'
     | '/api/public/hooks/marketing-lead-notify'
@@ -12099,6 +12111,7 @@ export interface RootRouteChildren {
   ApiPublicHooksExpirePremiumTrialsRoute: typeof ApiPublicHooksExpirePremiumTrialsRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
   ApiPublicHooksFocusNfeRoute: typeof ApiPublicHooksFocusNfeRoute
+  ApiPublicHooksGithubAppRoute: typeof ApiPublicHooksGithubAppRoute
   ApiPublicHooksImpulsionitoTrainRoute: typeof ApiPublicHooksImpulsionitoTrainRoute
   ApiPublicHooksMaintenanceNotifierRoute: typeof ApiPublicHooksMaintenanceNotifierRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -17719,6 +17732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksImpulsionitoTrainRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/github-app': {
+      id: '/api/public/hooks/github-app'
+      path: '/api/public/hooks/github-app'
+      fullPath: '/api/public/hooks/github-app'
+      preLoaderRoute: typeof ApiPublicHooksGithubAppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/focus-nfe': {
       id: '/api/public/hooks/focus-nfe'
       path: '/api/public/hooks/focus-nfe'
@@ -21315,6 +21335,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksExpirePremiumTrialsRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
   ApiPublicHooksFocusNfeRoute: ApiPublicHooksFocusNfeRoute,
+  ApiPublicHooksGithubAppRoute: ApiPublicHooksGithubAppRoute,
   ApiPublicHooksImpulsionitoTrainRoute: ApiPublicHooksImpulsionitoTrainRoute,
   ApiPublicHooksMaintenanceNotifierRoute:
     ApiPublicHooksMaintenanceNotifierRoute,
@@ -21370,13 +21391,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
