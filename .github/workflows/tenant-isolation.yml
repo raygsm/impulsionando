@@ -46,7 +46,7 @@ jobs:
         id: isolation
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/tenant-isolation.test.ts \
+          bunx vitest --config vitest.e2e.config.ts run tests/e2e/tenant-isolation.test.ts \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
 
@@ -55,7 +55,7 @@ jobs:
         if: always()
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/chrismed-isolation.test.ts \
+          bunx vitest --config vitest.e2e.config.ts run tests/e2e/chrismed-isolation.test.ts \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/chrismed.junit.xml 2>&1 | tee test-results/chrismed.log
 
@@ -64,7 +64,7 @@ jobs:
         if: always()
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/contract-email-delivery.test.ts \
+          bunx vitest --config vitest.e2e.config.ts run tests/e2e/contract-email-delivery.test.ts \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
 

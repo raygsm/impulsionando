@@ -30,8 +30,8 @@ jobs:
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       # --- E2E credentials (test account on the staging backend) ---
-      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
-      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      E2E_EMAIL: ${{ secrets.E2E_SUPER_ADMIN_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.E2E_SUPER_ADMIN_PASSWORD }}
       # Optional override: point at an external preview deploy instead of
       # building locally. When set, Playwright skips its own webServer.
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}

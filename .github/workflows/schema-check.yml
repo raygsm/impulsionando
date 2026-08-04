@@ -37,47 +37,19 @@ jobs:
           fi
           echo "✅ Todas as migrations seguem o naming correto."
 
-      - name: Instalar Postgres para dry-run
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      - name: Subir Postgres efêmero
-        run: |
-          docker run -d --name pg-test \
-            -e POSTGRES_PASSWORD=test \
-            -e POSTGRES_DB=test \
-            -p 5432:5432 \
-            postgres:15
-          for i in {1..30}; do
-            if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
-              echo "✅ Postgres pronto"
-              break
-            fi
-            sleep 1
-          done
-
-      - name: Aplicar migrations em ordem (dry-run)
-        env:
-          PGPASSWORD: test
-        run: |
-          set -e
-          for f in $(ls supabase/migrations/*.sql | sort); do
-            echo "▶️  Aplicando $(basename $f)..."
-            if ! psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
-              echo "❌ Falha ao aplicar $(basename $f):"
-              cat /tmp/migration.log
-              exit 1
-            fi
-          done
-          echo "✅ Todas as migrations aplicaram limpo em Postgres virgem."
+      - name: Aplicar migrations em ambiente Supabase local
+        run: supabase start
 
       - name: Verificar GRANT em toda tabela public criada
         env:
-          PGPASSWORD: test
+          PGPASSWORD: postgres
         run: |
           set -e
-          missing=$(psql -h localhost -U postgres -d test -tAc "
+          missing=$(psql -h localhost -U postgres -p 54322 -d postgres -tAc "
             SELECT c.relname
             FROM pg_class c
             JOIN pg_namespace n ON n.oid = c.relnamespace
