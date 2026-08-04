@@ -494,7 +494,7 @@ const FOOTER_LINKS_2: Array<{ label: string; to: string }> = [
   { label: 'Especialidades', to: '/chrismed/especialidades' },
   { label: 'Exames e preparo', to: '/chrismed/exames' },
   { label: 'Empresa · Medicina ocupacional', to: '/chrismed/ocupacional' },
-  { label: 'Área dos Médicos', to: '/chrismed/medicos' },
+  { label: 'Área dos Profissionais da Saúde', to: '/alth' },
   { label: 'Baixar o App', to: '/chrismed/app' },
   { label: 'Perguntas frequentes', to: '/chrismed/faq' },
 ];

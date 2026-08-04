@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { ShieldCheck, Layers, Zap } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";
+import { isChrismedHost } from "@/lib/chrismed-professionals";
 
 /** Traduz mensagens comuns do Supabase Auth para PT-BR. */
 function traduzirErroAuth(msg: string | undefined | null): string {
@@ -97,8 +99,16 @@ export const Route = createFileRoute("/auth")({
       { property: "og:url", content: "https://impulsionando.com.br/auth" },
     ],
   }),
-  component: AuthPage,
+  component: AuthEntryPage,
 });
+
+function AuthEntryPage() {
+  const search = Route.useSearch();
+  if (typeof window !== "undefined" && isChrismedHost(window.location.hostname)) {
+    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} />;
+  }
+  return <AuthPage />;
+}
 
 function AuthPage() {
   const search = Route.useSearch();
