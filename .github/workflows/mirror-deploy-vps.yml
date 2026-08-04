@@ -1,7 +1,8 @@
-name: Mirror Deploy Impulsionando → VPS (187)
+name: Legacy disaster recovery deploy to VPS
 
-# Regra inquebrável: TODO build publicado no IP 185 (Lovable) é replicado
-# imutavelmente para o IP 187 (VPS Hostinger) logo após o push em main.
+# Fluxo manual de contingência. Não acompanha Publish do Lovable e não deve
+# operar como segunda origem de produção. O domínio oficial permanece ligado
+# diretamente ao projeto Lovable por registros DNS descobertos dinamicamente.
 # Cada release é imutável, versionada por timestamp + SHA, e o symlink
 # `current` só troca depois do build bem-sucedido.
 #
@@ -12,8 +13,6 @@ name: Mirror Deploy Impulsionando → VPS (187)
 #   VPS_PORT         (opcional) porta SSH, padrão 22
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -66,7 +65,7 @@ jobs:
               pm2 start $APP_ROOT/current/deploy/ecosystem.config.cjs --name impulsionando
             pm2 save
 
-            echo "Mirror ${TS}-${SHA_SHORT} publicado no IP 187."
+            echo "Release de contingência ${TS}-${SHA_SHORT} publicada."
 
       - name: Smoke test HTTP na VPS
         run: |

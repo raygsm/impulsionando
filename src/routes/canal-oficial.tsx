@@ -87,10 +87,10 @@ function CanalOficialPage() {
             Canal oficial único da Impulsionando
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Para sua segurança, toda comunicação, envio de documentos e
-            comprovantes de pagamento deve ser feita exclusivamente pelo
-            WhatsApp oficial <strong>{OFFICIAL_WHATSAPP_PHONE_DISPLAY}</strong>.
-            Contatos por outros canais não serão considerados.
+            Para sua segurança, toda comunicação, envio de documentos e comprovantes de pagamento
+            deve ser feita exclusivamente pelo WhatsApp oficial{" "}
+            <strong>{OFFICIAL_WHATSAPP_PHONE_DISPLAY}</strong>. Contatos por outros canais não serão
+            considerados.
           </p>
 
           <div className="flex flex-wrap justify-center gap-2 pt-2">
@@ -124,7 +124,8 @@ function CanalOficialPage() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                WhatsApp <strong className="text-foreground">{OFFICIAL_WHATSAPP_PHONE_DISPLAY}</strong>
+                WhatsApp{" "}
+                <strong className="text-foreground">{OFFICIAL_WHATSAPP_PHONE_DISPLAY}</strong>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -132,11 +133,15 @@ function CanalOficialPage() {
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                Domínios <code className="text-foreground">impulsionando.com.br</code> e <code className="text-foreground">impulsionando.lovable.app</code>
+                Domínio oficial <code className="text-foreground">impulsionando.com.br</code>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                Formulário em <Link to="/contato" className="underline">/contato</Link> (sem anexos sensíveis)
+                Formulário em{" "}
+                <Link to="/contato" className="underline">
+                  /contato
+                </Link>{" "}
+                (sem anexos sensíveis)
               </li>
             </ul>
           </Card>
@@ -194,12 +199,17 @@ function CanalOficialPage() {
                 {OFFICIAL_WHATSAPP_PHONE_DISPLAY}
               </a>{" "}
               ou pelo e-mail{" "}
-              <a href={`mailto:sac@${OFFICIAL_EMAIL_DOMAIN}`} className="text-primary underline inline-flex items-center gap-1">
+              <a
+                href={`mailto:sac@${OFFICIAL_EMAIL_DOMAIN}`}
+                className="text-primary underline inline-flex items-center gap-1"
+              >
                 <Mail className="w-3.5 h-3.5" /> sac@{OFFICIAL_EMAIL_DOMAIN}
               </a>
               .
             </li>
-            <li>Reporte o perfil como golpe diretamente à plataforma (WhatsApp, Instagram, etc.).</li>
+            <li>
+              Reporte o perfil como golpe diretamente à plataforma (WhatsApp, Instagram, etc.).
+            </li>
           </ol>
         </Card>
 
@@ -219,9 +229,14 @@ function CanalOficialPage() {
 
         <div className="mt-10 text-center text-xs text-muted-foreground">
           Veja também a{" "}
-          <Link to="/privacidade" className="underline">Política de Privacidade</Link> e os{" "}
-          <Link to="/termos" className="underline">Termos de Uso</Link> para a cláusula
-          completa do canal oficial.
+          <Link to="/privacidade" className="underline">
+            Política de Privacidade
+          </Link>{" "}
+          e os{" "}
+          <Link to="/termos" className="underline">
+            Termos de Uso
+          </Link>{" "}
+          para a cláusula completa do canal oficial.
         </div>
       </main>
       <PublicFooter />

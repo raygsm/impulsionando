@@ -35,7 +35,7 @@ export const TENANT_HOMOLOGACAO: Record<string, TenantHomologacaoManifest> = {
       { to: "/chrismed/ocupacional", label: "Medicina Ocupacional" },
       { to: "/chrismed/teleconsulta", label: "Teleconsulta" },
       { to: "/chrismed/internacional", label: "Atendimento Internacional" },
-      { to: "/chrismed/medicos", label: "Corpo Clínico" },
+      { to: "/chrismed/medicos", label: "Rede de Profissionais" },
       { to: "/chrismed/ofertas", label: "Ofertas & Convênios" },
       { to: "/chrismed/agendar", label: "Agendamento" },
       { to: "/chrismed/contato", label: "Contato" },

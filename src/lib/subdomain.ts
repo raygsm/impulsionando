@@ -11,7 +11,7 @@
  * chega até a app.
  */
 
-const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
+const ROOT_DOMAINS = ["impulsionando.com.br"];
 
 /** Dedicated landings that replace the tenant's generic storefront. */
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
@@ -33,9 +33,6 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
 export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
-  "colors.impulsionando.lovable.app": "/colors",
-  "colorsaude.lovable.app": "/colors",
-  "colorssaude.lovable.app": "/colors",
 };
 
 /** Canonical host redirects for tenant landings that must not live on the apex. */

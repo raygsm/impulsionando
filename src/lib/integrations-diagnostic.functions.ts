@@ -39,17 +39,34 @@ async function timed<T>(fn: () => Promise<T>): Promise<{ result?: T; error?: str
 
 async function probeN8N(supabaseAdmin: any): Promise<ProbeResult> {
   const { data: integ } = await supabaseAdmin
-    .from("core_integrations").select("config").eq("slug", "n8n").maybeSingle();
+    .from("core_integrations")
+    .select("config")
+    .eq("slug", "n8n")
+    .maybeSingle();
   const cfg = (integ?.config ?? {}) as any;
   const base = cfg.base_url as string | undefined;
   if (!base) {
-    return { slug: "n8n", name: "N8N", ok: false, configured: false, missing: ["config.base_url"], duration_ms: 0, checked_at: new Date().toISOString(), error: "URL base não configurada" };
+    return {
+      slug: "n8n",
+      name: "N8N",
+      ok: false,
+      configured: false,
+      missing: ["config.base_url"],
+      duration_ms: 0,
+      checked_at: new Date().toISOString(),
+      error: "URL base não configurada",
+    };
   }
   const r = await timed(() => fetch(base, { method: "GET" }));
   const webhooks = cfg.webhooks ?? {};
   const expected = [
-    "new_customer", "payment_confirmed", "invoice_created", "appointment",
-    "lead", "email", "whatsapp",
+    "new_customer",
+    "payment_confirmed",
+    "invoice_created",
+    "appointment",
+    "lead",
+    "email",
+    "whatsapp",
   ];
   const missingHooks = expected.filter((k) => !webhooks[k]);
   return {
@@ -59,33 +76,41 @@ async function probeN8N(supabaseAdmin: any): Promise<ProbeResult> {
     configured: true,
     missing: missingHooks.map((m) => `webhooks.${m}`),
     duration_ms: r.ms,
-    details: { http_status: (r.result as Response | undefined)?.status, webhooks_configured: Object.keys(webhooks) },
+    details: {
+      http_status: (r.result as Response | undefined)?.status,
+      webhooks_configured: Object.keys(webhooks),
+    },
     error: r.error ?? null,
     checked_at: new Date().toISOString(),
   };
 }
 
 async function probeGitHub(): Promise<ProbeResult> {
-  const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO; // owner/name
-  if (!token || !repo) {
-    return { slug: "github", name: "GitHub", ok: false, configured: false, missing: [!token && "GITHUB_TOKEN", !repo && "GITHUB_REPO"].filter(Boolean) as string[], duration_ms: 0, checked_at: new Date().toISOString(), error: "Credenciais ausentes" };
-  }
+  const { getGitHubAppConfig } = await import("@/lib/github-app/auth.server");
+  const { githubRequest } = await import("@/lib/github-app/client.server");
   const r = await timed(async () => {
-    const res = await fetch(`https://api.github.com/repos/${repo}/commits?per_page=1`, {
-      headers: { Authorization: `Bearer ${token}`, "User-Agent": "impulsionando-diag" },
-    });
-    const body = await res.json().catch(() => ({}));
-    return { status: res.status, ok: res.ok, body };
+    const config = await getGitHubAppConfig();
+    const repo = config.repositoryAllowlist[0];
+    const body = await githubRequest<any>(repo, `/repos/${repo}`);
+    return { repo, body };
   });
   const result = r.result as any;
   return {
-    slug: "github", name: "GitHub",
-    ok: !!result?.ok,
-    configured: true, missing: [],
+    slug: "github",
+    name: "GitHub",
+    ok: !r.error,
+    configured: !r.error,
+    missing:
+      r.error === "github_app_not_configured"
+        ? ["core_integrations.github-app", "Supabase Vault"]
+        : [],
     duration_ms: r.ms,
-    details: { repo, last_commit: result?.body?.[0]?.sha?.slice(0, 7) ?? null, message: result?.body?.[0]?.commit?.message ?? null },
-    error: r.error ?? (result?.ok ? null : `HTTP ${result?.status}`),
+    details: {
+      repo: result?.repo,
+      default_branch: result?.body?.default_branch,
+      private: result?.body?.private,
+    },
+    error: r.error ?? null,
     checked_at: new Date().toISOString(),
   };
 }
@@ -93,15 +118,20 @@ async function probeGitHub(): Promise<ProbeResult> {
 async function probeSupabase(supabaseAdmin: any): Promise<ProbeResult> {
   const r = await timed(async () => {
     const { count, error } = await supabaseAdmin
-      .from("companies").select("id", { count: "exact", head: true });
+      .from("companies")
+      .select("id", { count: "exact", head: true });
     if (error) throw error;
     return { count };
   });
   return {
-    slug: "supabase", name: "Supabase / Lovable Cloud",
-    ok: !r.error, configured: true, missing: [],
+    slug: "supabase",
+    name: "Supabase / Lovable Cloud",
+    ok: !r.error,
+    configured: true,
+    missing: [],
     duration_ms: r.ms,
-    details: r.result, error: r.error ?? null,
+    details: r.result,
+    error: r.error ?? null,
     checked_at: new Date().toISOString(),
   };
 }
@@ -110,20 +140,38 @@ async function probeMercadoPago(): Promise<ProbeResult> {
   const { getMpAccessToken } = await import("@/lib/mercadopago-env.server");
   const token = getMpAccessToken();
   if (!token) {
-    return { slug: "mercadopago", name: "Mercado Pago", ok: false, configured: false, missing: ["MPAGO_CORE_SANDBOX_ACCESS_TOKEN|MPAGO_CORE_ACCESS_TOKEN"], duration_ms: 0, checked_at: new Date().toISOString(), error: "Token ausente" };
+    return {
+      slug: "mercadopago",
+      name: "Mercado Pago",
+      ok: false,
+      configured: false,
+      missing: ["MPAGO_CORE_SANDBOX_ACCESS_TOKEN|MPAGO_CORE_ACCESS_TOKEN"],
+      duration_ms: 0,
+      checked_at: new Date().toISOString(),
+      error: "Token ausente",
+    };
   }
   const r = await timed(async () => {
-    const res = await fetch("https://api.mercadopago.com/users/me", { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch("https://api.mercadopago.com/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const body = await res.json().catch(() => ({}));
     return { status: res.status, ok: res.ok, body };
   });
   const result = r.result as any;
   return {
-    slug: "mercadopago", name: "Mercado Pago",
-    ok: !!result?.ok, configured: true, missing: [],
+    slug: "mercadopago",
+    name: "Mercado Pago",
+    ok: !!result?.ok,
+    configured: true,
+    missing: [],
     duration_ms: r.ms,
-    details: { account_id: result?.body?.id, nickname: result?.body?.nickname, site_id: result?.body?.site_id },
-    error: r.error ?? (result?.ok ? null : result?.body?.message ?? `HTTP ${result?.status}`),
+    details: {
+      account_id: result?.body?.id,
+      nickname: result?.body?.nickname,
+      site_id: result?.body?.site_id,
+    },
+    error: r.error ?? (result?.ok ? null : (result?.body?.message ?? `HTTP ${result?.status}`)),
     checked_at: new Date().toISOString(),
   };
 }
@@ -144,9 +192,11 @@ async function probeEmail(supabaseAdmin: any): Promise<ProbeResult> {
   const r2 = r.result as any;
   const failed = (r2?.by_status?.failed ?? 0) + (r2?.by_status?.dlq ?? 0);
   return {
-    slug: "email", name: "E-mail (Lovable)",
+    slug: "email",
+    name: "E-mail (Lovable)",
     ok: !r.error && failed === 0,
-    configured: true, missing: [],
+    configured: true,
+    missing: [],
     duration_ms: r.ms,
     details: r2,
     error: r.error ?? (failed > 0 ? `${failed} falha(s) nas últimas 24h` : null),
@@ -159,7 +209,18 @@ async function probeZapi(supabaseAdmin: any): Promise<ProbeResult> {
   const token = process.env.ZAPI_TOKEN;
   const clientToken = process.env.ZAPI_CLIENT_TOKEN;
   if (!instance || !token) {
-    return { slug: "zapi", name: "WhatsApp / Z-API", ok: false, configured: false, missing: [!instance && "ZAPI_INSTANCE_ID", !token && "ZAPI_TOKEN"].filter(Boolean) as string[], duration_ms: 0, checked_at: new Date().toISOString(), error: "Credenciais Z-API ausentes" };
+    return {
+      slug: "zapi",
+      name: "WhatsApp / Z-API",
+      ok: false,
+      configured: false,
+      missing: [!instance && "ZAPI_INSTANCE_ID", !token && "ZAPI_TOKEN"].filter(
+        Boolean,
+      ) as string[],
+      duration_ms: 0,
+      checked_at: new Date().toISOString(),
+      error: "Credenciais Z-API ausentes",
+    };
   }
   const r = await timed(async () => {
     const url = `https://api.z-api.io/instances/${instance}/token/${token}/status`;
@@ -169,9 +230,11 @@ async function probeZapi(supabaseAdmin: any): Promise<ProbeResult> {
   });
   const result = r.result as any;
   return {
-    slug: "zapi", name: "WhatsApp / Z-API",
-    ok: !!result?.ok && (result?.body?.connected !== false),
-    configured: true, missing: [],
+    slug: "zapi",
+    name: "WhatsApp / Z-API",
+    ok: !!result?.ok && result?.body?.connected !== false,
+    configured: true,
+    missing: [],
     duration_ms: r.ms,
     details: result?.body,
     error: r.error ?? (result?.ok ? null : `HTTP ${result?.status}`),
@@ -195,9 +258,11 @@ async function probeWebhooks(supabaseAdmin: any): Promise<ProbeResult> {
   const r2 = r.result as any;
   const failed = (r2?.by_status?.failed ?? 0) + (r2?.by_status?.error ?? 0);
   return {
-    slug: "webhooks", name: "Webhooks gerais",
+    slug: "webhooks",
+    name: "Webhooks gerais",
     ok: !r.error,
-    configured: true, missing: [],
+    configured: true,
+    missing: [],
     duration_ms: r.ms,
     details: r2,
     error: r.error ?? (failed > 0 ? `${failed} execução(ões) com erro em 7d` : null),
@@ -236,7 +301,9 @@ export const runFullDiagnostic = createServerFn({ method: "POST" })
 
     const summary = {
       ok: results.filter((r) => r.ok).map((r) => r.slug),
-      failed: results.filter((r) => !r.ok).map((r) => ({ slug: r.slug, error: r.error, missing: r.missing })),
+      failed: results
+        .filter((r) => !r.ok)
+        .map((r) => ({ slug: r.slug, error: r.error, missing: r.missing })),
       generated_at: new Date().toISOString(),
     };
 
@@ -246,18 +313,29 @@ export const runFullDiagnostic = createServerFn({ method: "POST" })
 export const probeSingleIntegration = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ slug: z.enum(["n8n", "github", "supabase", "mercadopago", "email", "zapi", "webhooks"]) }).parse(d),
+    z
+      .object({
+        slug: z.enum(["n8n", "github", "supabase", "mercadopago", "email", "zapi", "webhooks"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     switch (data.slug) {
-      case "n8n": return probeN8N(supabaseAdmin);
-      case "github": return probeGitHub();
-      case "supabase": return probeSupabase(supabaseAdmin);
-      case "mercadopago": return probeMercadoPago();
-      case "email": return probeEmail(supabaseAdmin);
-      case "zapi": return probeZapi(supabaseAdmin);
-      case "webhooks": return probeWebhooks(supabaseAdmin);
+      case "n8n":
+        return probeN8N(supabaseAdmin);
+      case "github":
+        return probeGitHub();
+      case "supabase":
+        return probeSupabase(supabaseAdmin);
+      case "mercadopago":
+        return probeMercadoPago();
+      case "email":
+        return probeEmail(supabaseAdmin);
+      case "zapi":
+        return probeZapi(supabaseAdmin);
+      case "webhooks":
+        return probeWebhooks(supabaseAdmin);
     }
   });

@@ -81,6 +81,10 @@ function applySecurityHeaders(response: Response): Response {
   for (const [k, v] of SECURITY_HEADERS) {
     if (!headers.has(k)) headers.set(k, v);
   }
+  const contentType = headers.get("content-type") ?? "";
+  if (contentType.includes("text/html") && !headers.has("cache-control")) {
+    headers.set("cache-control", "no-cache, must-revalidate");
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

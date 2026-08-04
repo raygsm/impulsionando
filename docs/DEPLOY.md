@@ -1,67 +1,45 @@
-# DEPLOY — Impulsionando Core
+# Deploy — Impulsionando Core
 
-## Plataforma canônica
+## Origem canônica
 
-O ecossistema roda em **Lovable** (TanStack Start + Cloudflare Worker
-SSR + Supabase gerenciado pela Lovable Cloud). Não há pipeline paralelo
-obrigatório; qualquer pipeline externo é complementar.
+O snapshot publicado pelo Lovable é a única origem de produção. Todos os domínios oficiais são custom domains conectados ao mesmo projeto; por isso, um `Publish → Update` troca o snapshot uma vez e todos passam a servi-lo sem recompilação intermediária.
 
-## Ambientes / URLs
+GitHub é versionamento, validação e auditoria. Cloudflare/Hostinger são DNS, proxy e contingência. Nenhum deles recompila automaticamente uma segunda produção após push.
 
-- Produção: `https://impulsionando.lovable.app`
-- Preview: `https://id-preview--<project-id>.lovable.app`
-- Custom domains: `impulsionando.com.br`, `wmp.impulsionando.com.br`,
-  `chrismed.impulsionando.com.br`, `riomed.impulsionando.com.br`,
-  `imobiliaria.garrido.impulsionando.com.br`,
-  `marocas.impulsionando.com.br`, e demais listados em `project_urls`.
+## Fluxo
 
-## Comportamento de deploy
+1. Alteração sincronizada com o branch principal no GitHub.
+2. Gates de build, segurança e RLS aprovados.
+3. Operador autorizado executa `Publish → Update` no Lovable.
+4. Os custom domains conectados ao projeto passam a servir o mesmo snapshot.
+5. O monitor descobre os domínios ativos no cadastro de tenants, consulta `/api/public/version`, compara commit e fingerprint de assets e registra um artefato.
+6. Se houver divergência e `CLOUDFLARE_API_TOKEN` estiver no Supabase Vault, o cache das URLs afetadas é invalidado e a prova é repetida.
 
-- **Frontend** (rotas, UI, hubs, cliente 360, hubs 3.5): entram em
-  produção **somente após** clique em **Publish → Update** no editor
-  Lovable. O agente Codex **não publica sozinho**.
-- **Backend** (migrations, server functions, RLS, edge functions):
-  entram em produção **automaticamente** após aprovação da migration ou
-  do deploy backend correspondente.
-- **Migrations da Onda 3** (3.3 e 3.4) já foram aplicadas.
+Não há IP ou hostname Lovable fixo no fluxo. O endpoint operacional é descoberto por DNS; os registros que devem ser configurados são sempre os exibidos em `Lovable → Project → Settings → Domains`.
 
-## Passo a passo para publicar (frontend)
+## Monitoramento
 
-1. Confirmar que os testes de homologação passaram (`docs/TEST_CHECKLIST.md`).
-2. Rodar security scan e resolver findings críticos, se houver.
-3. Editor Lovable → **Publish** → **Update**.
-4. Validar produção: `/core`, `/core/hub-cobranca`, `/core/hub-automacoes`,
-   `/admin/clientes/<slug>` para pelo menos dois clientes reais.
-5. Se houver custom domain novo, configurá-lo em Project Settings →
-   Domains.
+Workflow: `.github/workflows/dns-vps-check.yml`.
 
-## Pipeline externo (opcional)
+- Agenda: a cada cinco minutos, limite mínimo do GitHub Actions.
+- Execução imediata futura: evento `repository_dispatch` do tipo `lovable_published` quando o Lovable oferecer um webhook/API de publicação compatível.
+- Fonte dos domínios: tabela `companies`; `domain` tem prioridade e `subdomain` gera `<subdomain>.impulsionando.com.br`.
+- Prova: contrato de versão, commit, `builtAt`, HTTPS e fingerprint dos assets carregados pela landing de cada tenant.
+- HTML e fingerprints de landings diferentes são registrados, mas não exigidos como idênticos: conteúdo, branding e chunks de rota variam legitimamente. A igualdade obrigatória usa o build ID (`commit` + `builtAt`).
 
-Um pipeline em GitHub Actions pode ser adicionado para:
-- validar `bun install` + typecheck em PRs;
-- rodar `bunx vitest run` quando existirem testes;
-- publicar releases documentais (`docs/`).
+O tempo de atualização não depende da agenda do monitor: domínios ligados diretamente ao mesmo projeto recebem o snapshot no próprio Publish. A agenda mede e alerta, não transporta o build.
 
-Ele **não substitui** o Publish da Lovable — apenas complementa.
+## Cache
 
-## Rollback
+- `/api/public/version`: `no-store`.
+- HTML SSR: `no-cache, must-revalidate`.
+- Assets com nome versionado: podem permanecer em cache; uma nova build produz nomes/fingerprints diferentes.
+- Purge Cloudflare: somente URLs HTML/versão afetadas, com token de privilégio mínimo lido do Vault.
 
-- Frontend: reverter o commit no repositório e re-publicar via Lovable.
-- Backend: migrations são aditivas por padrão; para desfazer o schema
-  da Onda 3, gerar migration reversa (dropar colunas/tabelas na ordem
-  inversa) — todos os dados criados são auditáveis em
-  `core_courtesy_events` / `core_ai_brain_events`.
+## Contingência Hostinger
 
-## Segurança pré-publish
+`.github/workflows/deploy-core-frontend.yml` e `.github/workflows/mirror-deploy-vps.yml` são manuais. Servem para recuperação de desastre e não executam em push, pois uma compilação VPS independente não é o snapshot publicado pelo Lovable.
 
-- `security--get_scan_results` antes de publicar.
-- Nenhum secret deve aparecer no bundle client (`import.meta.env.VITE_*`
-  apenas para valores públicos).
-- Confirmar que `is_impulsionando_staff` filtra as telas sensíveis.
+## Limitação oficial atual
 
-## Limitações conhecidas do handoff
-
-- Codex/agente **não** dispara Publish.
-- Custom domains dependem do usuário confirmar registros DNS.
-- Rotação de `LOVABLE_API_KEY` é feita pela ferramenta dedicada, nunca
-  manualmente.
+A documentação pública do Lovable não oferece webhook ou API estável para o evento `Publish`, nem API pública para conectar custom domains. A conexão inicial de cada domínio é feita uma vez no painel do projeto. Depois de conectado, novos publishes atualizam o domínio diretamente.

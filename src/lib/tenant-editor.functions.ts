@@ -60,7 +60,14 @@ export const listTenants = createServerFn({ method: "GET" })
 
 const updateSchema = z.object({
   id: z.string().uuid(),
-  public_slug: z.string().trim().min(2).max(60).regex(SLUG_RE, "Slug: use apenas a-z, 0-9 e hífen").nullable().optional(),
+  public_slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(60)
+    .regex(SLUG_RE, "Slug: use apenas a-z, 0-9 e hífen")
+    .nullable()
+    .optional(),
   name: z.string().trim().min(1).max(200).optional(),
   trade_name: z.string().trim().max(200).nullable().optional(),
   segment: z.string().trim().max(80).nullable().optional(),
@@ -68,7 +75,14 @@ const updateSchema = z.object({
   address_state: z.string().trim().max(2).nullable().optional(),
   whatsapp: z.string().trim().max(30).nullable().optional(),
   phone: z.string().trim().max(30).nullable().optional(),
-  email: z.string().trim().email("E-mail inválido").max(160).nullable().optional().or(z.literal("")),
+  email: z
+    .string()
+    .trim()
+    .email("E-mail inválido")
+    .max(160)
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   website: z.string().trim().url("URL inválida").max(400).nullable().optional().or(z.literal("")),
   logo_url: z.string().trim().url("URL inválida").max(600).nullable().optional().or(z.literal("")),
   tagline: z.string().trim().max(240).nullable().optional(),
@@ -95,12 +109,12 @@ export const updateTenant = createServerFn({ method: "POST" })
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: updated, error } = await (context.supabase
+    const { data: updated, error } = await context.supabase
       .from("companies")
       .update(patch as any)
       .eq("id", id)
       .select("id,public_slug,domain,vitrine_enabled,logo_url,whatsapp,email,website")
-      .single());
+      .single();
     if (error) throw new Error(error.message);
     return { tenant: updated };
   });
@@ -113,10 +127,12 @@ export const updateTenant = createServerFn({ method: "POST" })
 export const probeSubdomain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
-    z.object({
-      host: z.string().trim().min(3).max(253),
-      path: z.string().trim().max(400).optional(),
-    }).parse(data),
+    z
+      .object({
+        host: z.string().trim().min(3).max(253),
+        path: z.string().trim().max(400).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
@@ -150,7 +166,9 @@ export const probeSubdomain = createServerFn({ method: "POST" })
       try {
         const text = await res.text();
         bodyPreview = text.slice(0, 400);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
 
       const diagnosis =
         res.status >= 200 && res.status < 400
@@ -187,7 +205,7 @@ export const probeSubdomain = createServerFn({ method: "POST" })
         headers: {} as Record<string, string>,
         bodyPreview: null,
         diagnosis: isDns
-          ? "DNS não resolveu — falta o registro A wildcard *.impulsionando.com.br → 185.158.133.1."
+          ? "DNS não resolveu — confira no Lovable os registros atualmente exigidos para este domínio."
           : isCert
             ? "TLS/certificado inválido — o wildcard ainda não foi provisionado (aguarde ou reconecte o domínio)."
             : isTimeout
@@ -270,9 +288,30 @@ function buildSuggestions(t: TenantRow): TenantSuggestion[] {
     });
   }
   // Campos que exigem intervenção humana — apenas marcam o gap.
-  if (!t.whatsapp) suggestions.push({ field: "whatsapp", currentValue: null, suggestedValue: "", reason: "Obrigatório — precisa ser informado manualmente (DDI+DDD).", autoApplyable: false });
-  if (!t.logo_url) suggestions.push({ field: "logo_url", currentValue: null, suggestedValue: "", reason: "Recomendado — fornecer URL do logo (https://…).", autoApplyable: false });
-  if (!t.website) suggestions.push({ field: "website", currentValue: null, suggestedValue: "", reason: "Recomendado — informar site oficial.", autoApplyable: false });
+  if (!t.whatsapp)
+    suggestions.push({
+      field: "whatsapp",
+      currentValue: null,
+      suggestedValue: "",
+      reason: "Obrigatório — precisa ser informado manualmente (DDI+DDD).",
+      autoApplyable: false,
+    });
+  if (!t.logo_url)
+    suggestions.push({
+      field: "logo_url",
+      currentValue: null,
+      suggestedValue: "",
+      reason: "Recomendado — fornecer URL do logo (https://…).",
+      autoApplyable: false,
+    });
+  if (!t.website)
+    suggestions.push({
+      field: "website",
+      currentValue: null,
+      suggestedValue: "",
+      reason: "Recomendado — informar site oficial.",
+      autoApplyable: false,
+    });
 
   return suggestions;
 }
@@ -282,11 +321,15 @@ export const suggestTenantDefaults = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      entity: "companies", entityId: data.id, metadata: { source: "tenants-editor", op: "suggest" },
+      entity: "companies",
+      entityId: data.id,
+      metadata: { source: "tenants-editor", op: "suggest" },
     });
     const { data: row, error } = await context.supabase
       .from("companies")
-      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
+      .select(
+        "id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment",
+      )
       .eq("id", data.id)
       .single();
     if (error) throw new Error(error.message);
@@ -295,18 +338,27 @@ export const suggestTenantDefaults = createServerFn({ method: "POST" })
 
 export const applyTenantDefaults = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({
-    id: z.string().uuid(),
-    fields: z.array(z.string()).min(1),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        fields: z.array(z.string()).min(1),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      entity: "companies", entityId: data.id, metadata: { source: "tenants-editor", op: "apply-defaults", fields: data.fields },
+      entity: "companies",
+      entityId: data.id,
+      metadata: { source: "tenants-editor", op: "apply-defaults", fields: data.fields },
     });
     const { data: row, error: readErr } = await context.supabase
       .from("companies")
-      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
-      .eq("id", data.id).single();
+      .select(
+        "id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment",
+      )
+      .eq("id", data.id)
+      .single();
     if (readErr) throw new Error(readErr.message);
     const suggestions = buildSuggestions(row as TenantRow);
     const allow = new Set(data.fields);
@@ -316,9 +368,13 @@ export const applyTenantDefaults = createServerFn({ method: "POST" })
       if (!allow.has(String(s.field))) continue;
       patch[s.field as string] = s.suggestedValue as string | boolean;
     }
-    if (Object.keys(patch).length === 0) return { applied: 0, patch: {} as Record<string, string | boolean> };
+    if (Object.keys(patch).length === 0)
+      return { applied: 0, patch: {} as Record<string, string | boolean> };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (context.supabase.from("companies").update(patch as any).eq("id", data.id));
+    const { error } = await context.supabase
+      .from("companies")
+      .update(patch as any)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { applied: Object.keys(patch).length, patch };
   });
@@ -349,7 +405,9 @@ export const saveProbeResult = createServerFn({ method: "POST" })
   .inputValidator((d) => probeSaveSchema.parse(d))
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      entity: "tenant_subdomain_probes", entityId: data.companyId, metadata: { source: "tenants-editor", op: "save-probe" },
+      entity: "tenant_subdomain_probes",
+      entityId: data.companyId,
+      metadata: { source: "tenants-editor", op: "save-probe" },
     });
     const { error } = await context.supabase.from("tenant_subdomain_probes").insert({
       company_id: data.companyId,
@@ -374,17 +432,25 @@ export const saveProbeResult = createServerFn({ method: "POST" })
 
 export const listProbeHistory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({
-    companyId: z.string().uuid(),
-    limit: z.number().int().min(1).max(50).default(15),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        companyId: z.string().uuid(),
+        limit: z.number().int().min(1).max(50).default(15),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      entity: "tenant_subdomain_probes", entityId: data.companyId, metadata: { source: "tenants-editor", op: "list-probes" },
+      entity: "tenant_subdomain_probes",
+      entityId: data.companyId,
+      metadata: { source: "tenants-editor", op: "list-probes" },
     });
     const { data: rows, error } = await context.supabase
       .from("tenant_subdomain_probes")
-      .select("id,host,path,url,final_url,status,status_text,ok,elapsed_ms,diagnosis,attempt,triggered_by,created_at")
+      .select(
+        "id,host,path,url,final_url,status,status_text,ok,elapsed_ms,diagnosis,attempt,triggered_by,created_at",
+      )
       .eq("company_id", data.companyId)
       .order("created_at", { ascending: false })
       .limit(data.limit);
@@ -400,21 +466,31 @@ export const exportTenantsDiagnostic = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await requireAdminOrAudit(context.supabase, context.userId, {
-      entity: "companies", metadata: { source: "tenants-editor", op: "export-diagnostic" },
+      entity: "companies",
+      metadata: { source: "tenants-editor", op: "export-diagnostic" },
     });
 
     const { data: tenants, error } = await context.supabase
       .from("companies")
-      .select("id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment")
+      .select(
+        "id,name,trade_name,public_slug,subdomain,domain,segment,address_city,address_state,whatsapp,phone,email,website,logo_url,tagline,vitrine_enabled,status,environment",
+      )
       .neq("status", "archived")
       .order("name");
     if (error) throw new Error(error.message);
 
     const ids = (tenants ?? []).map((t) => t.id);
-    const lastProbes: Record<string, {
-      status: number | null; ok: boolean; elapsed_ms: number | null;
-      diagnosis: string | null; final_url: string | null; created_at: string;
-    }> = {};
+    const lastProbes: Record<
+      string,
+      {
+        status: number | null;
+        ok: boolean;
+        elapsed_ms: number | null;
+        diagnosis: string | null;
+        final_url: string | null;
+        created_at: string;
+      }
+    > = {};
 
     if (ids.length > 0) {
       const { data: probes } = await context.supabase
@@ -488,4 +564,3 @@ export const exportTenantsDiagnostic = createServerFn({ method: "POST" })
 
     return { generatedAt: new Date().toISOString(), rows };
   });
-

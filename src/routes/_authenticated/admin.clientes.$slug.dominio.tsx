@@ -64,11 +64,7 @@ function TenantDomainPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="p-6 text-sm text-muted-foreground">
-        Carregando dossiê de domínio…
-      </div>
-    );
+    return <div className="p-6 text-sm text-muted-foreground">Carregando dossiê de domínio…</div>;
   }
   if (!data?.company) {
     return (
@@ -83,9 +79,7 @@ function TenantDomainPage() {
 
   const { company, identity } = data;
   const expectedDomain =
-    company.domain ??
-    identity?.full_domain ??
-    `${company.subdomain}.impulsionando.com.br`;
+    company.domain ?? identity?.full_domain ?? `${company.subdomain}.impulsionando.com.br`;
   const url = `https://${expectedDomain}`;
 
   return (
@@ -122,14 +116,15 @@ function TenantDomainPage() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <Row label="A">
-            <code>{expectedDomain}</code> → <code>185.158.133.1</code>
+            <code>{expectedDomain}</code> → endpoint exibido atualmente em Lovable → Project →
+            Settings → Domains
           </Row>
           <Row label="TXT">
             <code>_lovable.{expectedDomain}</code> → <code>lovable_verify=&lt;token&gt;</code>
           </Row>
           <p className="text-xs text-muted-foreground pt-2">
-            Configure no DNS do registrador. Após propagar, a Lovable provisiona SSL
-            automaticamente (até 72h).
+            Configure no DNS do registrador. Após propagar, a Lovable provisiona SSL automaticamente
+            (até 72h).
           </p>
         </CardContent>
       </Card>
@@ -155,11 +150,7 @@ function TenantDomainPage() {
         />
         <Stat
           label="Commit publicado"
-          value={
-            identity?.published_commit
-              ? identity.published_commit.slice(0, 7)
-              : "—"
-          }
+          value={identity?.published_commit ? identity.published_commit.slice(0, 7) : "—"}
         />
       </div>
 
@@ -205,9 +196,7 @@ function DeployHistory({ slug }: { slug: string }) {
                     </span>
                   ) : null}
                   {r.user_email ? (
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      {r.user_email}
-                    </span>
+                    <span className="text-xs text-muted-foreground ml-auto">{r.user_email}</span>
                   ) : null}
                 </li>
               );
@@ -219,13 +208,7 @@ function DeployHistory({ slug }: { slug: string }) {
   );
 }
 
-function LiveBuildCheck({
-  url,
-  expectedCommit,
-}: {
-  url: string;
-  expectedCommit: string;
-}) {
+function LiveBuildCheck({ url, expectedCommit }: { url: string; expectedCommit: string }) {
   const [state, setState] = useState<{
     loading: boolean;
     error?: string;
@@ -256,8 +239,7 @@ function LiveBuildCheck({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
-  const inSync =
-    !!state.commit && state.commit.startsWith(expectedCommit.slice(0, 7));
+  const inSync = !!state.commit && state.commit.startsWith(expectedCommit.slice(0, 7));
 
   return (
     <Card>
@@ -289,9 +271,7 @@ function LiveBuildCheck({
               )}
             </Row>
             <Row label="Construído em">
-              {state.builtAt
-                ? new Date(state.builtAt).toLocaleString("pt-BR")
-                : "—"}
+              {state.builtAt ? new Date(state.builtAt).toLocaleString("pt-BR") : "—"}
             </Row>
             <Row label="Latência">{state.latencyMs} ms</Row>
           </>
@@ -309,9 +289,7 @@ function LiveBuildCheck({
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-baseline gap-2">
-      <span className="text-xs uppercase tracking-wide text-muted-foreground w-32">
-        {label}
-      </span>
+      <span className="text-xs uppercase tracking-wide text-muted-foreground w-32">{label}</span>
       <span className="flex-1">{children}</span>
     </div>
   );
@@ -326,13 +304,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MarkPublishedButton({
-  slug,
-  onDone,
-}: {
-  slug: string;
-  onDone: () => void;
-}) {
+function MarkPublishedButton({ slug, onDone }: { slug: string; onDone: () => void }) {
   const mark = useServerFn(markTenantPublished);
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);

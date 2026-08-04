@@ -67,7 +67,9 @@ function EnvDiagnosticsPage() {
   ];
 
   const missingServer =
-    data?.server.filter((c) => ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"].includes(c.name) && !c.present) ?? [];
+    data?.server.filter(
+      (c) => ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"].includes(c.name) && !c.present,
+    ) ?? [];
   const missingClient = clientChecks.filter(
     (c) => ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"].includes(c.name) && !c.present,
   );
@@ -77,11 +79,13 @@ function EnvDiagnosticsPage() {
   useEffect(() => {
     if (!hasCriticalMissing || alertSentRef.current || isLoading) return;
     alertSentRef.current = true;
-    const missing = [
-      ...missingServer.map((c) => c.name),
-      ...missingClient.map((c) => c.name),
-    ];
-    alertFn({ data: { missing, host: data?.host ?? (typeof window !== "undefined" ? window.location.host : null) } })
+    const missing = [...missingServer.map((c) => c.name), ...missingClient.map((c) => c.name)];
+    alertFn({
+      data: {
+        missing,
+        host: data?.host ?? (typeof window !== "undefined" ? window.location.host : null),
+      },
+    })
       .then((r) => {
         setAlertStatus({
           ok: !!r.sent,
@@ -90,7 +94,9 @@ function EnvDiagnosticsPage() {
             : `Alerta não enviado: ${r.reason ?? "desconhecido"}.`,
         });
       })
-      .catch((err) => setAlertStatus({ ok: false, msg: `Falha ao alertar: ${(err as Error).message}` }));
+      .catch((err) =>
+        setAlertStatus({ ok: false, msg: `Falha ao alertar: ${(err as Error).message}` }),
+      );
   }, [hasCriticalMissing, isLoading, missingServer, missingClient, data?.host, alertFn]);
 
   return (
@@ -119,32 +125,32 @@ function EnvDiagnosticsPage() {
               </div>
               <p className="text-muted-foreground">
                 O domínio atual não recebeu as env vars do Lovable Cloud. O app carrega, mas
-                chamadas ao banco falham com{" "}
-                <em>“Missing Supabase environment variable(s)”</em>.
+                chamadas ao banco falham com <em>“Missing Supabase environment variable(s)”</em>.
               </p>
               <div className="text-foreground">Como corrigir:</div>
               <ol className="list-decimal ml-5 space-y-1 text-muted-foreground">
                 <li>
                   Abra <b>Project Settings → Project → Domains</b> e verifique se o domínio
                   customizado está com status <b>Active</b>. Se aparecer <b>Failed</b>,{" "}
-                  <b>Offline</b> ou <b>Setting up</b>, clique em <b>Retry</b> ou remova e
-                  reconecte.
+                  <b>Offline</b> ou <b>Setting up</b>, clique em <b>Retry</b> ou remova e reconecte.
                 </li>
                 <li>
-                  Confirme que <b>Lovable Cloud</b> está habilitado neste projeto{" "}
-                  (Cloud → Overview).
+                  Confirme que <b>Lovable Cloud</b> está habilitado neste projeto (Cloud →
+                  Overview).
                 </li>
                 <li>
-                  Publique novamente pelo botão <b>Publish</b>. As env vars são injetadas
-                  no build da publicação — reconectar o domínio ou republicar reprovisiona.
+                  Publique novamente pelo botão <b>Publish</b>. As env vars são injetadas no build
+                  da publicação — reconectar o domínio ou republicar reprovisiona.
                 </li>
                 <li>
-                  Como alternativa imediata, use a URL nativa{" "}
-                  <code>impulsionando.lovable.app</code>, que sempre recebe as env vars.
+                  Como alternativa imediata, use a URL nativa o domínio oficial conectado ao
+                  projeto, que recebe as variáveis do build publicado.
                 </li>
               </ol>
               {alertStatus && (
-                <div className={`mt-2 text-xs ${alertStatus.ok ? "text-emerald-600" : "text-muted-foreground"}`}>
+                <div
+                  className={`mt-2 text-xs ${alertStatus.ok ? "text-emerald-600" : "text-muted-foreground"}`}
+                >
                   {alertStatus.msg}
                 </div>
               )}
@@ -169,7 +175,11 @@ function EnvDiagnosticsPage() {
         ) : (
           <div className="divide-y">
             {data?.server.map((c) => (
-              <EnvRow key={c.name} check={c} required={["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"].includes(c.name)} />
+              <EnvRow
+                key={c.name}
+                check={c}
+                required={["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"].includes(c.name)}
+              />
             ))}
           </div>
         )}
@@ -196,8 +206,8 @@ function EnvDiagnosticsPage() {
             <code>SERVICE_ROLE_KEY</code> é opcional; use apenas para operações administrativas.
           </li>
           <li>
-            Variáveis <code>VITE_*</code> são incorporadas no bundle no momento do build.
-            Republicar após reconectar o domínio é obrigatório.
+            Variáveis <code>VITE_*</code> são incorporadas no bundle no momento do build. Republicar
+            após reconectar o domínio é obrigatório.
           </li>
         </ul>
       </Card>
@@ -213,7 +223,9 @@ function EnvRow({ check, required }: { check: ServerCheck; required: boolean }) 
         {ok ? (
           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
         ) : (
-          <XCircle className={`w-4 h-4 shrink-0 ${required ? "text-destructive" : "text-muted-foreground"}`} />
+          <XCircle
+            className={`w-4 h-4 shrink-0 ${required ? "text-destructive" : "text-muted-foreground"}`}
+          />
         )}
         <code className="text-sm truncate">{check.name}</code>
         {required && (
