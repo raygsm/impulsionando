@@ -3,7 +3,7 @@
 # Uso: IMPULSIONANDO_WEBHOOK_SECRET=xxx ./scripts/riomed-public-smoke.sh [base_url]
 set -euo pipefail
 
-BASE="${1:-https://riomed.impulsionando.com.br}"
+BASE="${1:-https://impulsionando.lovable.app}"
 SECRET="${IMPULSIONANDO_WEBHOOK_SECRET:?defina IMPULSIONANDO_WEBHOOK_SECRET}"
 
 sign() {
