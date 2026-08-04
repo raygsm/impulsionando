@@ -150,9 +150,9 @@ export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
   },
   medicos: {
     key: 'medicos',
-    eyebrow: 'Área dos Médicos',
+    eyebrow: 'Área dos Profissionais da Saúde',
     greeting:
-      'Esta é a área dos médicos. Posso encaminhar solicitações administrativas para a equipe CHRISMED.',
+      'Esta é a área dos profissionais da saúde. Posso encaminhar solicitações administrativas para a equipe CHRISMED.',
     quickReplies: [
       { label: 'Falar com a equipe', kind: 'info', message: 'Deixe nome, CRM e assunto. A equipe CHRISMED retorna no próximo horário administrativo.' },
     ],

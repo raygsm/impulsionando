@@ -84,7 +84,7 @@ type GlobalAction = {
 
 const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Agendar consulta', hint: 'Sem cadastro para ver horários', icon: Calendar, to: '/chrismed/agendar' },
-  { label: 'Nossos médicos', hint: 'Equipe e especialidades', icon: Users, to: '/chrismed/medicos' },
+  { label: 'Profissionais da saúde', hint: 'Rede e especialidades', icon: Users, to: '/chrismed/medicos' },
   { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
   { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
   { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
