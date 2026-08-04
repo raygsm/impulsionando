@@ -3,7 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertTriangle, RefreshCw, Globe, GitCommit, Clock, ExternalLink } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  Globe,
+  GitCommit,
+  Clock,
+  ExternalLink,
+} from "lucide-react";
 import { BUILD_INFO } from "@/generated/build-info";
 
 export const Route = createFileRoute("/_authenticated/admin/deploy-status")({
@@ -38,7 +46,6 @@ const DOMAINS: { url: string; label: string }[] = [
   { url: "https://impulsionando.com.br", label: "impulsionando.com.br" },
   { url: "https://www.impulsionando.com.br", label: "www.impulsionando.com.br" },
   { url: "https://riomed.impulsionando.com.br", label: "riomed.impulsionando.com.br" },
-  { url: "https://impulsionando.lovable.app", label: "impulsionando.lovable.app" },
 ];
 
 function rel(iso?: string) {
@@ -62,7 +69,8 @@ async function checkDomain(url: string): Promise<Partial<DomainCheck>> {
       headers: { accept: "application/json" },
     });
     const latencyMs = Math.round(performance.now() - start);
-    if (!res.ok) return { error: `HTTP ${res.status}`, latencyMs, fetchedAt: new Date().toISOString() };
+    if (!res.ok)
+      return { error: `HTTP ${res.status}`, latencyMs, fetchedAt: new Date().toISOString() };
     const data = (await res.json()) as VersionResponse;
     return { data, latencyMs, fetchedAt: new Date().toISOString() };
   } catch (e: any) {
@@ -100,8 +108,8 @@ function DeployStatusPage() {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">Status de publicação</h1>
         <p className="text-sm text-muted-foreground">
-          Compara o commit publicado em cada domínio com o build atual (este editor / preview).
-          Útil para confirmar quando uma publicação chega no domínio público.
+          Compara o commit publicado em cada domínio com o build atual (este editor / preview). Útil
+          para confirmar quando uma publicação chega no domínio público.
         </p>
       </header>
 
@@ -209,9 +217,9 @@ function DeployStatusPage() {
                     </div>
                     {stale ? (
                       <div className="col-span-full text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded p-2">
-                        Este domínio ainda está servindo um commit anterior ao build atual.
-                        Aguarde alguns minutos após o <strong>Publish</strong> ou force
-                        refresh (Ctrl+Shift+R). Se persistir, refaça a publicação.
+                        Este domínio ainda está servindo um commit anterior ao build atual. Aguarde
+                        alguns minutos após o <strong>Publish</strong> ou force refresh
+                        (Ctrl+Shift+R). Se persistir, refaça a publicação.
                       </div>
                     ) : null}
                   </div>
@@ -231,9 +239,18 @@ function DeployStatusPage() {
           <CardTitle className="text-sm">Como funciona o cache</CardTitle>
         </CardHeader>
         <CardContent className="text-xs text-muted-foreground space-y-1">
-          <p>• HTML servido com <code>cache-control: no-store</code> — cada navegação busca a versão nova.</p>
-          <p>• JS/CSS em <code>/assets/*</code> têm hash no nome + <code>immutable</code> (cache longo seguro).</p>
-          <p>• Endpoint <code>/api/public/version</code> sempre sem cache, retorna commit + horário do build.</p>
+          <p>
+            • HTML servido com <code>cache-control: no-store</code> — cada navegação busca a versão
+            nova.
+          </p>
+          <p>
+            • JS/CSS em <code>/assets/*</code> têm hash no nome + <code>immutable</code> (cache
+            longo seguro).
+          </p>
+          <p>
+            • Endpoint <code>/api/public/version</code> sempre sem cache, retorna commit + horário
+            do build.
+          </p>
         </CardContent>
       </Card>
     </div>

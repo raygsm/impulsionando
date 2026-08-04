@@ -12,9 +12,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCoreHealthAccess } from "@/lib/core-rbac.functions";
+import {
+  describeDeploymentEndpoint,
+  discoverDeploymentEndpoint,
+} from "@/lib/deployment-endpoint.server";
 
-const LOVABLE_IP = "185.158.133.1";
-const LOVABLE_HOST = "impulsionando.lovable.app";
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 const REQUIRED_ENVS = [
   "SUPABASE_URL",
@@ -32,21 +34,6 @@ export type ValidationDetail = {
   env?: CheckResult;
 };
 
-async function resolveDns(host: string, type: "A" | "CNAME" | "TXT"): Promise<string[]> {
-  try {
-    const r = await fetch(
-      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=${type}`,
-      { headers: { accept: "application/dns-json" } },
-    );
-    const j: any = await r.json();
-    return (j.Answer ?? []).map((a: any) =>
-      String(a.data).replace(/\.$/, "").replace(/^"|"$/g, ""),
-    );
-  } catch {
-    return [];
-  }
-}
-
 async function checkDomain(domain: string | null): Promise<CheckResult> {
   const at = new Date().toISOString();
   if (!domain)
@@ -63,43 +50,20 @@ async function checkDomain(domain: string | null): Promise<CheckResult> {
 async function checkDns(domain: string | null): Promise<CheckResult> {
   const at = new Date().toISOString();
   if (!domain) return { ok: false, detail: "Domínio não configurado", checked_at: at };
-  const [a, c, txt, caa] = await Promise.all([
-    resolveDns(domain, "A"),
-    resolveDns(domain, "CNAME"),
-    resolveDns(`_lovable.${domain}`, "TXT"),
-    resolveDns(domain, "CAA" as any),
-  ]);
-  const pointsA = a.includes(LOVABLE_IP);
-  const pointsCname = c.some((v) => v === LOVABLE_HOST);
-  const hasTxt = txt.some((v) => v.startsWith("lovable_verify="));
-  // CAA é opcional. Se existir, precisa autorizar letsencrypt.org (SSL Lovable).
-  const caaBlocksLE =
-    caa.length > 0 &&
-    !caa.some(
-      (v) => /issue\s+"?letsencrypt\.org"?/i.test(v) || /issuewild\s+"?letsencrypt\.org"?/i.test(v),
-    );
-  if (!pointsA && !pointsCname) {
-    const seen = [...a, ...c].join(", ") || "nenhum registro";
+  try {
+    const endpoint = await discoverDeploymentEndpoint(domain);
+    return {
+      ok: endpoint.resolved,
+      detail: describeDeploymentEndpoint(endpoint),
+      checked_at: at,
+    };
+  } catch (error) {
     return {
       ok: false,
-      detail: `A/CNAME não apontam para Lovable (visto: ${seen})`,
+      detail: error instanceof Error ? error.message : "Falha na descoberta DNS",
       checked_at: at,
     };
   }
-  if (!hasTxt)
-    return { ok: false, detail: "TXT _lovable ausente ou não propagado", checked_at: at };
-  if (caaBlocksLE)
-    return {
-      ok: false,
-      detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)",
-      checked_at: at,
-    };
-  const caaNote = caa.length > 0 ? " + CAA→LE" : "";
-  return {
-    ok: true,
-    detail: (pointsA ? "A → Lovable" : "CNAME (proxy)") + " + TXT ok" + caaNote,
-    checked_at: at,
-  };
 }
 
 async function checkSsl(domain: string | null): Promise<CheckResult> {

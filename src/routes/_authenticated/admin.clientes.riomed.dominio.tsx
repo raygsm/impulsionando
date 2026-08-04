@@ -28,7 +28,9 @@ function Page() {
     },
   });
 
-  const previewUrl = identity?.subdomain ? `https://${identity.subdomain}.impulsionando.com.br` : null;
+  const previewUrl = identity?.subdomain
+    ? `https://${identity.subdomain}.impulsionando.com.br`
+    : null;
   const customUrl = identity?.custom_domain ? `https://${identity.custom_domain}` : null;
 
   return (
@@ -49,7 +51,12 @@ function Page() {
           </CardHeader>
           <CardContent className="space-y-2">
             {previewUrl ? (
-              <a href={previewUrl} target="_blank" rel="noreferrer" className="text-primary underline break-all">
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary underline break-all"
+              >
                 {previewUrl}
               </a>
             ) : (
@@ -68,14 +75,21 @@ function Page() {
           <CardContent className="space-y-2">
             {customUrl ? (
               <>
-                <a href={customUrl} target="_blank" rel="noreferrer" className="text-primary underline break-all">
+                <a
+                  href={customUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline break-all"
+                >
                   {customUrl}
                 </a>
                 <Badge variant="default">Conectado</Badge>
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">Nenhum domínio personalizado vinculado.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum domínio personalizado vinculado.
+                </p>
                 <Badge variant="secondary">Pendente</Badge>
               </>
             )}
@@ -92,7 +106,7 @@ function Page() {
         <CardContent>
           <ul className="space-y-2 text-sm">
             <li>• Identidade visual aprovada e tokens publicados</li>
-            <li>• DNS apontado (CNAME → impulsionando.lovable.app)</li>
+            <li>• DNS apontado para o registro dinâmico exibido pelo Lovable</li>
             <li>• Certificado SSL emitido</li>
             <li>• Páginas públicas (cotizar, hospitales, serviço técnico) validadas</li>
             <li>• Webhooks de pagamento e N8N ativos</li>

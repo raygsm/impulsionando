@@ -6,17 +6,15 @@ import { z } from "zod";
 
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
-export const LOVABLE_DNS = {
-  aRecordValue: "185.158.133.1",
-  txtName: "_lovable",
-  txtValuePrefix: "lovable_verify=",
+export const LOVABLE_DOMAIN_SETUP = {
+  dynamic: true,
+  source: "Lovable → Project → Settings → Domains",
+  note: "Use exatamente os registros exibidos pelo Lovable; nunca copie IPs de outro projeto.",
 };
 
 export const getMyTenantDomain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { companyId: string }) =>
-    z.object({ companyId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { data: identity, error } = await supabase
@@ -27,7 +25,7 @@ export const getMyTenantDomain = createServerFn({ method: "POST" })
       .eq("company_id", data.companyId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { identity, lovable: LOVABLE_DNS };
+    return { identity, lovable: LOVABLE_DOMAIN_SETUP };
   });
 
 export const requestCustomDomain = createServerFn({ method: "POST" })
@@ -85,7 +83,12 @@ export const requestCustomDomain = createServerFn({ method: "POST" })
       await supabase
         .from("onboarding_checklist")
         .upsert(
-          { company_id: data.companyId, item_key: "domain_requested", status: "done", completed_at: new Date().toISOString() },
+          {
+            company_id: data.companyId,
+            item_key: "domain_requested",
+            status: "done",
+            completed_at: new Date().toISOString(),
+          },
           { onConflict: "company_id,item_key" },
         );
     }
@@ -95,9 +98,7 @@ export const requestCustomDomain = createServerFn({ method: "POST" })
 
 export const recheckTenantDns = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { companyId: string }) =>
-    z.object({ companyId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { error } = await supabase

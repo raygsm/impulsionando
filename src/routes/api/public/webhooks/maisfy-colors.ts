@@ -3,7 +3,7 @@
  * URL pública: /api/public/webhooks/maisfy-colors
  *
  * Configuração no painel Maisfy (parâmetro do afiliado/produto Colors):
- *   URL:    https://impulsionando.lovable.app/api/public/webhooks/maisfy-colors
+ *   URL:    https://impulsionando.com.br/api/public/webhooks/maisfy-colors
  *   Header: X-Signature: sha256=<HMAC do corpo com COLORS_MAISFY_WEBHOOK_SECRET>
  *
  * Payload esperado (best-effort; extrai campos comuns de exports Maisfy):
@@ -65,13 +65,16 @@ export const Route = createFileRoute("/api/public/webhooks/maisfy-colors")({
           return new Response("Webhook secret not configured", { status: 424 });
         }
         const body = await request.text();
-        const sig = request.headers.get("x-signature") ?? request.headers.get("x-hub-signature-256");
+        const sig =
+          request.headers.get("x-signature") ?? request.headers.get("x-hub-signature-256");
         if (!verify(secret, body, sig)) {
           return new Response("Invalid signature", { status: 401 });
         }
 
         let payload: any = {};
-        try { payload = body ? JSON.parse(body) : {}; } catch {
+        try {
+          payload = body ? JSON.parse(body) : {};
+        } catch {
           return new Response("Invalid JSON", { status: 400 });
         }
 
@@ -83,8 +86,10 @@ export const Route = createFileRoute("/api/public/webhooks/maisfy-colors")({
 
         const status = String(
           sale.status ??
-          (String(payload.event ?? "").split(".").pop()) ??
-          "pending",
+            String(payload.event ?? "")
+              .split(".")
+              .pop() ??
+            "pending",
         ).toLowerCase();
 
         const customer = sale.customer ?? sale.buyer ?? {};
@@ -99,7 +104,8 @@ export const Route = createFileRoute("/api/public/webhooks/maisfy-colors")({
             platform: "maisfy",
             external_sale_id: externalSaleId,
             external_order_id: sale.order_id ? String(sale.order_id) : undefined,
-            colors_checkout_id: sale.sub_id ?? sale.external_id ?? sale.ref ?? sale.reference ?? undefined,
+            colors_checkout_id:
+              sale.sub_id ?? sale.external_id ?? sale.ref ?? sale.reference ?? undefined,
             external_status: status,
             customer_name: customer.name ?? customer.full_name,
             customer_email: customer.email,

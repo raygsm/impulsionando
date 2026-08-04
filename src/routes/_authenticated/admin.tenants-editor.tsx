@@ -19,13 +19,33 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  listTenants, updateTenant, probeSubdomain, suggestTenantDefaults, applyTenantDefaults,
-  saveProbeResult, listProbeHistory, exportTenantsDiagnostic, type TenantRow,
+  listTenants,
+  updateTenant,
+  probeSubdomain,
+  suggestTenantDefaults,
+  applyTenantDefaults,
+  saveProbeResult,
+  listProbeHistory,
+  exportTenantsDiagnostic,
+  type TenantRow,
 } from "@/lib/tenant-editor.functions";
 import { getTenantSubdomain } from "@/lib/subdomain";
 import {
-  Search, Save, Loader2, ExternalLink, ShieldCheck, AlertTriangle, CheckCircle2, XCircle,
-  Building2, BookOpen, Info, Sparkles, History, Download, RefreshCw,
+  Search,
+  Save,
+  Loader2,
+  ExternalLink,
+  ShieldCheck,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Building2,
+  BookOpen,
+  Info,
+  Sparkles,
+  History,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/tenants-editor")({
@@ -64,13 +84,16 @@ function TenantsEditorPage() {
           </div>
           <h1 className="text-3xl font-bold">Editor de tenants da Vitrine</h1>
           <p className="text-muted-foreground mt-1.5">
-            Preencha slug, contatos, endereço, logo e website. Alimenta a vitrine e o
-            roteamento por subdomínio <code className="text-xs">&lt;slug&gt;.impulsionando.com.br</code>.
+            Preencha slug, contatos, endereço, logo e website. Alimenta a vitrine e o roteamento por
+            subdomínio <code className="text-xs">&lt;slug&gt;.impulsionando.com.br</code>.
           </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/admin/dns-guide"><BookOpen className="w-4 h-4 mr-1.5" />Guia DNS wildcard</Link>
+            <Link to="/admin/dns-guide">
+              <BookOpen className="w-4 h-4 mr-1.5" />
+              Guia DNS wildcard
+            </Link>
           </Button>
           <ExportDiagnosticButton />
           <Button asChild variant="outline" size="sm">
@@ -199,7 +222,14 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
           <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted grid place-items-center">
             {form.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.logo_url} alt="logo" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+              <img
+                src={form.logo_url}
+                alt="logo"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
             ) : (
               <span className="text-lg font-bold text-muted-foreground">
                 {(form.trade_name || form.name).charAt(0).toUpperCase()}
@@ -210,7 +240,9 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
             <h2 className="text-xl font-semibold">{form.trade_name || form.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline">{tenant.environment}</Badge>
-              <Badge variant={tenant.status === "active" ? "default" : "secondary"}>{tenant.status}</Badge>
+              <Badge variant={tenant.status === "active" ? "default" : "secondary"}>
+                {tenant.status}
+              </Badge>
               {form.public_slug && (
                 <Link
                   to="/vitrine/$slug"
@@ -225,17 +257,29 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
           </div>
         </div>
         <Button onClick={() => save.mutate()} disabled={save.isPending}>
-          {save.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+          {save.isPending ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4 mr-2" />
+          )}
           Salvar
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Slug público" hint="a-z 0-9 e hífen. Ex.: chrismed">
-          <Input value={form.public_slug} onChange={(e) => set("public_slug", e.target.value.toLowerCase())} placeholder="chrismed" />
+          <Input
+            value={form.public_slug}
+            onChange={(e) => set("public_slug", e.target.value.toLowerCase())}
+            placeholder="chrismed"
+          />
         </Field>
         <Field label="Domínio/subdomínio" hint="Ex.: chrismed.impulsionando.com.br">
-          <Input value={form.domain} onChange={(e) => set("domain", e.target.value)} placeholder="slug.impulsionando.com.br" />
+          <Input
+            value={form.domain}
+            onChange={(e) => set("domain", e.target.value)}
+            placeholder="slug.impulsionando.com.br"
+          />
         </Field>
 
         <Field label="Nome legal">
@@ -249,38 +293,86 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
           <Input value={form.segment} onChange={(e) => set("segment", e.target.value)} />
         </Field>
         <div className="grid grid-cols-[1fr_100px] gap-3">
-          <Field label="Cidade"><Input value={form.address_city} onChange={(e) => set("address_city", e.target.value)} /></Field>
-          <Field label="UF"><Input maxLength={2} value={form.address_state} onChange={(e) => set("address_state", e.target.value.toUpperCase())} /></Field>
+          <Field label="Cidade">
+            <Input
+              value={form.address_city}
+              onChange={(e) => set("address_city", e.target.value)}
+            />
+          </Field>
+          <Field label="UF">
+            <Input
+              maxLength={2}
+              value={form.address_state}
+              onChange={(e) => set("address_state", e.target.value.toUpperCase())}
+            />
+          </Field>
         </div>
 
         <Field label="WhatsApp" hint="Com DDI+DDD. Ex.: 5521999999999">
-          <Input value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} placeholder="5521999999999" />
+          <Input
+            value={form.whatsapp}
+            onChange={(e) => set("whatsapp", e.target.value)}
+            placeholder="5521999999999"
+          />
         </Field>
         <Field label="Telefone fixo">
           <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} />
         </Field>
 
         <Field label="E-mail">
-          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="contato@empresa.com.br" />
+          <Input
+            type="email"
+            value={form.email}
+            onChange={(e) => set("email", e.target.value)}
+            placeholder="contato@empresa.com.br"
+          />
         </Field>
         <Field label="Website" hint="https://…">
-          <Input type="url" value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://empresa.com.br" />
+          <Input
+            type="url"
+            value={form.website}
+            onChange={(e) => set("website", e.target.value)}
+            placeholder="https://empresa.com.br"
+          />
         </Field>
 
-        <Field label="Logo (URL)" className="md:col-span-2" hint="URL absoluta https://… A vitrine mostra a inicial se ficar vazia.">
-          <Input type="url" value={form.logo_url} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" />
+        <Field
+          label="Logo (URL)"
+          className="md:col-span-2"
+          hint="URL absoluta https://… A vitrine mostra a inicial se ficar vazia."
+        >
+          <Input
+            type="url"
+            value={form.logo_url}
+            onChange={(e) => set("logo_url", e.target.value)}
+            placeholder="https://…/logo.png"
+          />
         </Field>
 
-        <Field label="Tagline" className="md:col-span-2" hint="Uma linha curta que aparece no card.">
-          <Textarea value={form.tagline} onChange={(e) => set("tagline", e.target.value)} rows={2} maxLength={240} />
+        <Field
+          label="Tagline"
+          className="md:col-span-2"
+          hint="Uma linha curta que aparece no card."
+        >
+          <Textarea
+            value={form.tagline}
+            onChange={(e) => set("tagline", e.target.value)}
+            rows={2}
+            maxLength={240}
+          />
         </Field>
 
         <div className="md:col-span-2 flex items-center justify-between rounded-lg border p-3">
           <div>
             <div className="font-medium">Publicado na vitrine</div>
-            <div className="text-xs text-muted-foreground">Quando ligado e com slug preenchido, aparece em /vitrine.</div>
+            <div className="text-xs text-muted-foreground">
+              Quando ligado e com slug preenchido, aparece em /vitrine.
+            </div>
           </div>
-          <Switch checked={form.vitrine_enabled} onCheckedChange={(v) => set("vitrine_enabled", v)} />
+          <Switch
+            checked={form.vitrine_enabled}
+            onCheckedChange={(v) => set("vitrine_enabled", v)}
+          />
         </div>
       </div>
 
@@ -295,8 +387,16 @@ function TenantEditor({ tenant }: { tenant: TenantRow }) {
 }
 
 function Field({
-  label, hint, className, children,
-}: { label: string; hint?: string; className?: string; children: React.ReactNode }) {
+  label,
+  hint,
+  className,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={className}>
       <Label className="text-xs uppercase tracking-wide text-muted-foreground">{label}</Label>
@@ -307,9 +407,19 @@ function Field({
 }
 
 type CardForm = {
-  public_slug: string; name: string; trade_name: string; segment: string;
-  address_city: string; address_state: string; whatsapp: string; phone: string;
-  email: string; website: string; logo_url: string; tagline: string; domain: string;
+  public_slug: string;
+  name: string;
+  trade_name: string;
+  segment: string;
+  address_city: string;
+  address_state: string;
+  whatsapp: string;
+  phone: string;
+  email: string;
+  website: string;
+  logo_url: string;
+  tagline: string;
+  domain: string;
   vitrine_enabled: boolean;
 };
 
@@ -318,33 +428,94 @@ type CardForm = {
  * e mostra exatamente quais campos estão faltando/ideais.
  */
 function VitrineCardValidator({ form }: { form: CardForm }) {
-  type Row = { key: string; label: string; ok: boolean; level: "required" | "recommended" | "optional"; fallback?: string };
+  type Row = {
+    key: string;
+    label: string;
+    ok: boolean;
+    level: "required" | "recommended" | "optional";
+    fallback?: string;
+  };
 
   const rows: Row[] = [
-    { key: "public_slug", label: "Slug público", ok: !!form.public_slug, level: "required",
-      fallback: "Sem slug o card não aparece na vitrine (obrigatório para roteamento)." },
-    { key: "name", label: "Nome legal", ok: !!form.name, level: "required",
-      fallback: "Sem nome o card ficaria em branco." },
-    { key: "trade_name", label: "Nome fantasia", ok: !!form.trade_name, level: "recommended",
-      fallback: `Usa "${form.name || "(nome legal)"}" como título.` },
-    { key: "segment", label: "Segmento", ok: !!form.segment, level: "recommended",
-      fallback: "Card exibe apenas categoria genérica." },
-    { key: "address_city", label: "Cidade", ok: !!form.address_city, level: "recommended",
-      fallback: "Localização não aparece no card." },
-    { key: "address_state", label: "UF", ok: !!form.address_state, level: "recommended",
-      fallback: "Localização não aparece no card." },
-    { key: "whatsapp", label: "WhatsApp", ok: !!form.whatsapp, level: "required",
-      fallback: "Sem WhatsApp o botão principal de contato do card fica oculto." },
+    {
+      key: "public_slug",
+      label: "Slug público",
+      ok: !!form.public_slug,
+      level: "required",
+      fallback: "Sem slug o card não aparece na vitrine (obrigatório para roteamento).",
+    },
+    {
+      key: "name",
+      label: "Nome legal",
+      ok: !!form.name,
+      level: "required",
+      fallback: "Sem nome o card ficaria em branco.",
+    },
+    {
+      key: "trade_name",
+      label: "Nome fantasia",
+      ok: !!form.trade_name,
+      level: "recommended",
+      fallback: `Usa "${form.name || "(nome legal)"}" como título.`,
+    },
+    {
+      key: "segment",
+      label: "Segmento",
+      ok: !!form.segment,
+      level: "recommended",
+      fallback: "Card exibe apenas categoria genérica.",
+    },
+    {
+      key: "address_city",
+      label: "Cidade",
+      ok: !!form.address_city,
+      level: "recommended",
+      fallback: "Localização não aparece no card.",
+    },
+    {
+      key: "address_state",
+      label: "UF",
+      ok: !!form.address_state,
+      level: "recommended",
+      fallback: "Localização não aparece no card.",
+    },
+    {
+      key: "whatsapp",
+      label: "WhatsApp",
+      ok: !!form.whatsapp,
+      level: "required",
+      fallback: "Sem WhatsApp o botão principal de contato do card fica oculto.",
+    },
     { key: "email", label: "E-mail", ok: !!form.email, level: "optional" },
     { key: "phone", label: "Telefone fixo", ok: !!form.phone, level: "optional" },
-    { key: "website", label: "Website", ok: !!form.website, level: "recommended",
-      fallback: "Card não expõe link externo do parceiro." },
-    { key: "logo_url", label: "Logo", ok: !!form.logo_url, level: "recommended",
-      fallback: `Card exibe inicial "${(form.trade_name || form.name || "?").charAt(0).toUpperCase()}" como placeholder.` },
-    { key: "tagline", label: "Tagline", ok: !!form.tagline, level: "recommended",
-      fallback: "Card fica sem a linha descritiva curta." },
-    { key: "vitrine_enabled", label: "Publicado na vitrine (toggle ligado)", ok: !!form.vitrine_enabled, level: "required",
-      fallback: "Enquanto desligado, o tenant não aparece em /vitrine." },
+    {
+      key: "website",
+      label: "Website",
+      ok: !!form.website,
+      level: "recommended",
+      fallback: "Card não expõe link externo do parceiro.",
+    },
+    {
+      key: "logo_url",
+      label: "Logo",
+      ok: !!form.logo_url,
+      level: "recommended",
+      fallback: `Card exibe inicial "${(form.trade_name || form.name || "?").charAt(0).toUpperCase()}" como placeholder.`,
+    },
+    {
+      key: "tagline",
+      label: "Tagline",
+      ok: !!form.tagline,
+      level: "recommended",
+      fallback: "Card fica sem a linha descritiva curta.",
+    },
+    {
+      key: "vitrine_enabled",
+      label: "Publicado na vitrine (toggle ligado)",
+      ok: !!form.vitrine_enabled,
+      level: "required",
+      fallback: "Enquanto desligado, o tenant não aparece em /vitrine.",
+    },
   ];
 
   const missingRequired = rows.filter((r) => !r.ok && r.level === "required");
@@ -352,8 +523,17 @@ function VitrineCardValidator({ form }: { form: CardForm }) {
   const canRender = missingRequired.length === 0;
 
   const badge = canRender
-    ? { text: missingRecommended.length === 0 ? "Card completo — pronto" : `Renderiza com ${missingRecommended.length} placeholder(s)`, tone: "emerald" as const }
-    : { text: `Card não renderiza (${missingRequired.length} campo(s) obrigatório(s))`, tone: "red" as const };
+    ? {
+        text:
+          missingRecommended.length === 0
+            ? "Card completo — pronto"
+            : `Renderiza com ${missingRecommended.length} placeholder(s)`,
+        tone: "emerald" as const,
+      }
+    : {
+        text: `Card não renderiza (${missingRequired.length} campo(s) obrigatório(s))`,
+        tone: "red" as const,
+      };
 
   return (
     <Card className="p-5">
@@ -364,30 +544,41 @@ function VitrineCardValidator({ form }: { form: CardForm }) {
         </div>
         <Badge
           variant="outline"
-          className={badge.tone === "emerald" ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400" : "border-red-500/40 text-red-600 dark:text-red-400"}
+          className={
+            badge.tone === "emerald"
+              ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+              : "border-red-500/40 text-red-600 dark:text-red-400"
+          }
         >
           {badge.text}
         </Badge>
       </div>
 
       <p className="text-xs text-muted-foreground mb-4">
-        A vitrine sempre renderiza um placeholder seguro quando um campo opcional está vazio (inicial no lugar do logo,
-        localização oculta, etc.). Campos obrigatórios abaixo, se ausentes, impedem o card de aparecer.
+        A vitrine sempre renderiza um placeholder seguro quando um campo opcional está vazio
+        (inicial no lugar do logo, localização oculta, etc.). Campos obrigatórios abaixo, se
+        ausentes, impedem o card de aparecer.
       </p>
 
       <ul className="space-y-1.5 text-sm">
         {rows.map((r) => (
           <li key={r.key} className="flex items-start gap-2">
-            {r.ok
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              : r.level === "required"
-                ? <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                : <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />}
+            {r.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+            ) : r.level === "required" ? (
+              <XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+            )}
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className={r.ok ? "" : "font-medium"}>{r.label}</span>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  {r.level === "required" ? "obrigatório" : r.level === "recommended" ? "recomendado" : "opcional"}
+                  {r.level === "required"
+                    ? "obrigatório"
+                    : r.level === "recommended"
+                      ? "recomendado"
+                      : "opcional"}
                 </Badge>
               </div>
               {!r.ok && r.fallback && (
@@ -402,8 +593,14 @@ function VitrineCardValidator({ form }: { form: CardForm }) {
 }
 
 function SubdomainChecklist({
-  tenant, formDomain, formSlug,
-}: { tenant: TenantRow; formDomain: string; formSlug: string }) {
+  tenant,
+  formDomain,
+  formSlug,
+}: {
+  tenant: TenantRow;
+  formDomain: string;
+  formSlug: string;
+}) {
   const expected = formSlug ? `${formSlug}.impulsionando.com.br` : null;
   const domainMatches = !!expected && formDomain.trim().toLowerCase() === expected;
   const parsed = expected ? getTenantSubdomain(expected) : null;
@@ -450,27 +647,41 @@ function SubdomainChecklist({
 
   // Auto-retry com backoff exponencial (5s, 15s, 45s) — dispara quando o probe
   // indica DNS/TLS ausente ou 404 persistente.
-  const [autoRetry, setAutoRetry] = useState<{ running: boolean; step: number; log: string[] }>(
-    { running: false, step: 0, log: [] },
-  );
-  const shouldOfferRetry = !!probe && !probe.ok && (
-    probe.status === 404 ||
-    probe.status === null ||
-    /TLS|certificado|DNS/i.test(probe.diagnosis ?? "")
-  );
+  const [autoRetry, setAutoRetry] = useState<{ running: boolean; step: number; log: string[] }>({
+    running: false,
+    step: 0,
+    log: [],
+  });
+  const shouldOfferRetry =
+    !!probe &&
+    !probe.ok &&
+    (probe.status === 404 ||
+      probe.status === null ||
+      /TLS|certificado|DNS/i.test(probe.diagnosis ?? ""));
 
   const startAutoRetry = async () => {
     if (!expected) return;
     const delays = [5000, 15000, 45000];
-    setAutoRetry({ running: true, step: 0, log: [`Tentativas com backoff: ${delays.map((d) => d/1000+"s").join(" · ")}`] });
+    setAutoRetry({
+      running: true,
+      step: 0,
+      log: [`Tentativas com backoff: ${delays.map((d) => d / 1000 + "s").join(" · ")}`],
+    });
     for (let i = 0; i < delays.length; i++) {
-      setAutoRetry((s) => ({ ...s, step: i + 1, log: [...s.log, `Aguardando ${delays[i]/1000}s antes da tentativa ${i + 2}…`] }));
+      setAutoRetry((s) => ({
+        ...s,
+        step: i + 1,
+        log: [...s.log, `Aguardando ${delays[i] / 1000}s antes da tentativa ${i + 2}…`],
+      }));
       await new Promise((r) => setTimeout(r, delays[i]));
       try {
         const res = await runProbe({ attempt: i + 2, triggeredBy: "auto-retry" });
         setAutoRetry((s) => ({
           ...s,
-          log: [...s.log, `Tentativa ${i + 2}: ${res.status != null ? `HTTP ${res.status}` : "sem resposta"} — ${res.diagnosis}`],
+          log: [
+            ...s.log,
+            `Tentativa ${i + 2}: ${res.status != null ? `HTTP ${res.status}` : "sem resposta"} — ${res.diagnosis}`,
+          ],
         }));
         if (res.ok) {
           toast.success(`Subdomínio respondeu OK na tentativa ${i + 2}`);
@@ -478,18 +689,43 @@ function SubdomainChecklist({
           return;
         }
       } catch (e) {
-        setAutoRetry((s) => ({ ...s, log: [...s.log, `Tentativa ${i + 2}: erro — ${(e as Error).message}`] }));
+        setAutoRetry((s) => ({
+          ...s,
+          log: [...s.log, `Tentativa ${i + 2}: erro — ${(e as Error).message}`],
+        }));
       }
     }
-    setAutoRetry((s) => ({ ...s, running: false, log: [...s.log, "Backoff concluído sem sucesso. Verifique DNS/TLS no provedor."] }));
+    setAutoRetry((s) => ({
+      ...s,
+      running: false,
+      log: [...s.log, "Backoff concluído sem sucesso. Verifique DNS/TLS no provedor."],
+    }));
     toast.warning("Backoff concluído — subdomínio ainda não responde.");
   };
 
   const items = [
-    { ok: !!formSlug, label: "public_slug preenchido", hint: "Slug obrigatório para gerar URL e roteamento." },
-    { ok: domainMatches, label: `domain = ${expected ?? "<slug>.impulsionando.com.br"}`, hint: domainMatches ? "OK" : "Ajuste o campo Domínio acima e salve." },
-    { ok: !!tenant.vitrine_enabled, label: "vitrine_enabled = true", hint: "Deve estar ligado para aparecer publicamente." },
-    { ok: !!parsed, label: "Slug reconhecido pelo detector de subdomínio", hint: parsed ? `Detectado: ${parsed.slug}` : "Slug caiu na lista de reservados (www, app, admin…)." },
+    {
+      ok: !!formSlug,
+      label: "public_slug preenchido",
+      hint: "Slug obrigatório para gerar URL e roteamento.",
+    },
+    {
+      ok: domainMatches,
+      label: `domain = ${expected ?? "<slug>.impulsionando.com.br"}`,
+      hint: domainMatches ? "OK" : "Ajuste o campo Domínio acima e salve.",
+    },
+    {
+      ok: !!tenant.vitrine_enabled,
+      label: "vitrine_enabled = true",
+      hint: "Deve estar ligado para aparecer publicamente.",
+    },
+    {
+      ok: !!parsed,
+      label: "Slug reconhecido pelo detector de subdomínio",
+      hint: parsed
+        ? `Detectado: ${parsed.slug}`
+        : "Slug caiu na lista de reservados (www, app, admin…).",
+    },
   ];
 
   return (
@@ -500,16 +736,21 @@ function SubdomainChecklist({
           <h3 className="font-semibold">Teste e checklist do subdomínio</h3>
         </div>
         <Button asChild variant="ghost" size="sm">
-          <Link to="/admin/dns-guide"><BookOpen className="w-3.5 h-3.5 mr-1.5" />Guia DNS wildcard</Link>
+          <Link to="/admin/dns-guide">
+            <BookOpen className="w-3.5 h-3.5 mr-1.5" />
+            Guia DNS wildcard
+          </Link>
         </Button>
       </div>
 
       <ul className="space-y-2 text-sm mb-4">
         {items.map((i) => (
           <li key={i.label} className="flex items-start gap-2">
-            {i.ok
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              : <XCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />}
+            {i.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+            ) : (
+              <XCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+            )}
             <div>
               <div className={i.ok ? "" : "font-medium"}>{i.label}</div>
               <div className="text-xs text-muted-foreground">{i.hint}</div>
@@ -520,31 +761,54 @@ function SubdomainChecklist({
 
       <div className="pt-4 border-t space-y-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <Button size="sm" onClick={() => probeM.mutate()} disabled={!expected || probeM.isPending}>
-            {probeM.isPending
-              ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              : <ExternalLink className="w-3.5 h-3.5 mr-1.5" />}
+          <Button
+            size="sm"
+            onClick={() => probeM.mutate()}
+            disabled={!expected || probeM.isPending}
+          >
+            {probeM.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+            )}
             Testar {expected ?? "subdomínio"}
           </Button>
           {expected && (
-            <a href={`https://${expected}${targetPath}`} target="_blank" rel="noopener" className="text-xs text-primary hover:underline">
-              abrir {expected}{targetPath} →
+            <a
+              href={`https://${expected}${targetPath}`}
+              target="_blank"
+              rel="noopener"
+              className="text-xs text-primary hover:underline"
+            >
+              abrir {expected}
+              {targetPath} →
             </a>
           )}
           {expected && (
-            <a href={`https://dnschecker.org/#A/${expected}`} target="_blank" rel="noopener" className="text-xs text-muted-foreground hover:text-primary hover:underline">
+            <a
+              href={`https://dnschecker.org/#A/${expected}`}
+              target="_blank"
+              rel="noopener"
+              className="text-xs text-muted-foreground hover:text-primary hover:underline"
+            >
               verificar DNS externamente →
             </a>
           )}
         </div>
 
         {probe && (
-          <div className={`text-xs rounded border p-3 space-y-2 ${probe.ok ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5"}`}>
+          <div
+            className={`text-xs rounded border p-3 space-y-2 ${probe.ok ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5"}`}
+          >
             <div className="flex items-center gap-2 flex-wrap">
               {probe.status != null ? (
-                <Badge variant={probe.ok ? "default" : "destructive"} className="text-[11px]">HTTP {probe.status}</Badge>
+                <Badge variant={probe.ok ? "default" : "destructive"} className="text-[11px]">
+                  HTTP {probe.status}
+                </Badge>
               ) : (
-                <Badge variant="destructive" className="text-[11px]">sem resposta</Badge>
+                <Badge variant="destructive" className="text-[11px]">
+                  sem resposta
+                </Badge>
               )}
               <span className="text-muted-foreground">{probe.elapsedMs}ms</span>
               <span className="text-muted-foreground">→</span>
@@ -555,7 +819,9 @@ function SubdomainChecklist({
               <details className="text-[11px] text-muted-foreground">
                 <summary className="cursor-pointer">Headers recebidos</summary>
                 <pre className="mt-1 whitespace-pre-wrap break-all">
-                  {Object.entries(probe.headers).map(([k, v]) => `${k}: ${v}`).join("\n")}
+                  {Object.entries(probe.headers)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join("\n")}
                 </pre>
               </details>
             )}
@@ -586,11 +852,20 @@ function SubdomainChecklist({
                   : "DNS sem resposta — aguarde a propagação (TTL padrão 5–30 min) e tente novamente."}
             </p>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={startAutoRetry} disabled={autoRetry.running}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={startAutoRetry}
+                disabled={autoRetry.running}
+              >
+                {autoRetry.running ? (
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                )}
                 {autoRetry.running
-                  ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                  : <RefreshCw className="w-3.5 h-3.5 mr-1.5" />}
-                {autoRetry.running ? `Retentando (${autoRetry.step}/3)…` : "Retentar com backoff (5s · 15s · 45s)"}
+                  ? `Retentando (${autoRetry.step}/3)…`
+                  : "Retentar com backoff (5s · 15s · 45s)"}
               </Button>
             </div>
             {autoRetry.log.length > 0 && (
@@ -606,15 +881,23 @@ function SubdomainChecklist({
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
           <div>
-            <div className="font-medium text-foreground mb-1">Requisitos de infra (fora do app)</div>
+            <div className="font-medium text-foreground mb-1">
+              Requisitos de infra (fora do app)
+            </div>
             <ol className="list-decimal ml-4 space-y-0.5">
-              <li>Registro <code>A</code> wildcard <code>*.impulsionando.com.br → 185.158.133.1</code> no DNS.</li>
+              <li>
+                Registros DNS obtidos dinamicamente em Lovable → Project → Settings → Domains.
+              </li>
               <li>Domínio wildcard adicionado no Publish/Custom Domain da Lovable.</li>
               <li>Certificado TLS wildcard emitido automaticamente pela Lovable.</li>
               <li>Este tenant com os 4 itens do checklist acima verdes.</li>
             </ol>
             <p className="mt-2">
-              Passo-a-passo completo por provedor: <Link to="/admin/dns-guide" className="text-primary hover:underline">Guia DNS wildcard</Link>.
+              Passo-a-passo completo por provedor:{" "}
+              <Link to="/admin/dns-guide" className="text-primary hover:underline">
+                Guia DNS wildcard
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -662,7 +945,8 @@ function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
   const toggle = (key: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -675,12 +959,7 @@ function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
           <h3 className="font-semibold">Sugestões automáticas</h3>
         </div>
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => q.refetch()}
-            disabled={q.isFetching}
-          >
+          <Button size="sm" variant="outline" onClick={() => q.refetch()} disabled={q.isFetching}>
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${q.isFetching ? "animate-spin" : ""}`} />
             Reavaliar
           </Button>
@@ -689,9 +968,11 @@ function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
             onClick={() => apply.mutate()}
             disabled={apply.isPending || selected.size === 0}
           >
-            {apply.isPending
-              ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+            {apply.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+            )}
             Preencher {selected.size > 0 ? `(${selected.size})` : ""}
           </Button>
         </div>
@@ -706,8 +987,8 @@ function SuggestionsPanel({ tenant }: { tenant: TenantRow }) {
       ) : (
         <>
           <p className="text-xs text-muted-foreground mb-3">
-            Itens marcáveis são aplicados automaticamente. Campos como WhatsApp/logo/website exigem intervenção manual.
-            Após aplicar, revise e clique em <strong>Salvar</strong> no topo.
+            Itens marcáveis são aplicados automaticamente. Campos como WhatsApp/logo/website exigem
+            intervenção manual. Após aplicar, revise e clique em <strong>Salvar</strong> no topo.
           </p>
           <ul className="space-y-2 text-sm">
             {suggestions.map((s) => {
@@ -791,9 +1072,13 @@ function ProbeHistoryPanel({ companyId }: { companyId: string }) {
             <li key={h.id} className="rounded border p-2.5">
               <div className="flex items-center gap-2 flex-wrap">
                 {h.status != null ? (
-                  <Badge variant={h.ok ? "default" : "destructive"} className="text-[10px]">HTTP {h.status}</Badge>
+                  <Badge variant={h.ok ? "default" : "destructive"} className="text-[10px]">
+                    HTTP {h.status}
+                  </Badge>
                 ) : (
-                  <Badge variant="destructive" className="text-[10px]">sem resposta</Badge>
+                  <Badge variant="destructive" className="text-[10px]">
+                    sem resposta
+                  </Badge>
                 )}
                 <Badge variant="outline" className="text-[10px]">
                   {h.triggered_by === "auto-retry" ? `retry #${h.attempt}` : h.triggered_by}
@@ -808,9 +1093,7 @@ function ProbeHistoryPanel({ companyId }: { companyId: string }) {
               <div className="mt-1 text-muted-foreground truncate">
                 → <code className="text-[11px]">{h.final_url ?? h.url}</code>
               </div>
-              {h.diagnosis && (
-                <div className="mt-1 text-foreground">{h.diagnosis}</div>
-              )}
+              {h.diagnosis && <div className="mt-1 text-foreground">{h.diagnosis}</div>}
             </li>
           ))}
         </ul>
@@ -832,13 +1115,25 @@ function ExportDiagnosticButton() {
       const res = await doExport({ data: undefined });
       const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
       if (format === "json") {
-        const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json;charset=utf-8" });
+        const blob = new Blob([JSON.stringify(res, null, 2)], {
+          type: "application/json;charset=utf-8",
+        });
         triggerDownload(`tenants-diagnostic-${stamp}.json`, blob);
       } else {
         const rows = res.rows ?? [];
         const cols = rows.length
           ? Object.keys(rows[0])
-          : ["id", "name", "public_slug", "domain", "card_ready", "required_missing", "recommended_missing", "last_probe_status", "last_probe_diagnosis"];
+          : [
+              "id",
+              "name",
+              "public_slug",
+              "domain",
+              "card_ready",
+              "required_missing",
+              "recommended_missing",
+              "last_probe_status",
+              "last_probe_diagnosis",
+            ];
         const esc = (v: unknown) => {
           if (v == null) return "";
           const s = Array.isArray(v) ? v.join("|") : String(v);
@@ -862,10 +1157,20 @@ function ExportDiagnosticButton() {
   return (
     <div className="inline-flex gap-1">
       <Button size="sm" variant="outline" onClick={() => run("csv")} disabled={busy}>
-        {busy ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+        {busy ? (
+          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+        ) : (
+          <Download className="w-3.5 h-3.5 mr-1.5" />
+        )}
         Exportar CSV
       </Button>
-      <Button size="sm" variant="ghost" onClick={() => run("json")} disabled={busy} title="Exportar JSON">
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => run("json")}
+        disabled={busy}
+        title="Exportar JSON"
+      >
         JSON
       </Button>
     </div>
@@ -875,6 +1180,8 @@ function ExportDiagnosticButton() {
 function triggerDownload(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
+  a.href = url;
+  a.download = filename;
+  a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

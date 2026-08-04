@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  resolveTenantByHost,
-  type TenantContext,
-} from "@/lib/tenant-resolver.functions";
+import { resolveTenantByHost, type TenantContext } from "@/lib/tenant-resolver.functions";
 import { getTenantSubdomain, TENANT_LANDING_BY_SUBDOMAIN } from "@/lib/subdomain";
 
 /**
@@ -17,14 +14,13 @@ const CORE_HOSTS = new Set<string>([
   "0.0.0.0",
   "impulsionando.com.br",
   "www.impulsionando.com.br",
-  "impulsionando.lovable.app",
 ]);
 
 function isCoreHost(host: string): boolean {
   if (!host) return true;
   if (CORE_HOSTS.has(host)) return true;
   // Subdomínios de preview e edição do Lovable são CORE
-  if (host.endsWith(".lovable.app") && host.includes("-preview--")) return true;
+  if (host.endsWith(".lovable.app")) return true;
   if (host.endsWith(".lovable.dev")) return true;
   return false;
 }
@@ -66,7 +62,7 @@ export function useTenant(): {
   });
 
   return {
-    tenant: core ? null : knownSubdomainTenant ?? data ?? null,
+    tenant: core ? null : (knownSubdomainTenant ?? data ?? null),
     isLoading: !core && !knownSubdomainTenant && isLoading,
     isCore: core,
     host,

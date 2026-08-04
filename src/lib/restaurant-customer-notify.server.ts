@@ -78,8 +78,7 @@ export async function notifyItemReady(itemId: string): Promise<{
     description: `${Number((row as any).quantity)}× ${(row as any).description}`,
     tableNumber: (sess as any)?.table?.number as number | undefined,
     customerName: (sess as any)?.customer_name as string | undefined,
-    companyName:
-      (row as any).company?.trade_name ?? (row as any).company?.name ?? undefined,
+    companyName: (row as any).company?.trade_name ?? (row as any).company?.name ?? undefined,
   };
 }
 
@@ -118,8 +117,7 @@ export async function notifyTableBillClosed(sessionId: string): Promise<{
   const total = Number((sess as any).total ?? 0);
   const tableNumber = (sess as any)?.table?.number as number | undefined;
   const customerName = (sess as any)?.customer_name as string | undefined;
-  const companyName =
-    (sess as any).company?.trade_name ?? (sess as any).company?.name ?? undefined;
+  const companyName = (sess as any).company?.trade_name ?? (sess as any).company?.name ?? undefined;
   const email = ((sess as any).customer_email ?? "").trim();
   const phone = (sess as any).customer_phone as string | undefined;
 
@@ -193,8 +191,7 @@ export async function notifyTablePaymentFailed(args: {
 
   const tableNumber = (sess as any)?.table?.number;
   const token = (sess as any)?.table?.qr_token;
-  const companyName =
-    (sess as any).company?.trade_name ?? (sess as any).company?.name ?? "";
+  const companyName = (sess as any).company?.trade_name ?? (sess as any).company?.name ?? "";
   const reasonText = args.reason === "expired" ? "expirou" : "falhou";
   const link = token ? `${getBaseUrl()}/mesa/${token}` : "";
   const msg = `Seu pagamento ${reasonText}${tableNumber ? ` (Mesa ${tableNumber})` : ""}. ${
@@ -208,8 +205,6 @@ export async function notifyTablePaymentFailed(args: {
 
 function getBaseUrl(): string {
   return (
-    process.env.PUBLIC_APP_URL ||
-    process.env.PUBLIC_SITE_URL ||
-    "https://impulsionando.lovable.app"
+    process.env.PUBLIC_APP_URL || process.env.PUBLIC_SITE_URL || "https://impulsionando.com.br"
   );
 }

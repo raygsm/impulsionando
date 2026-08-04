@@ -20,25 +20,30 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   "impulsionando-brasil": "/vitrine/impulsionando-brasil",
 };
 
-
 // Domínios de clientes (white-label) → rota dedicada.
 const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
-  // Alias Lovable do tenant Colors — resolve para a landing quando o
-  // domínio estiver conectado a este projeto Core.
-  "colors.impulsionando.lovable.app": "/colors",
-  "colorsaude.lovable.app": "/colors",
-  "colorssaude.lovable.app": "/colors",
 };
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Impulsionando Tecnologia — Sistemas modulares e automação" },
-      { name: "description", content: "Plataforma SaaS multiempresa: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque e BI. Tecnologia, automação e sistemas inteligentes para empresas que precisam crescer com controle." },
-      { property: "og:title", content: "Impulsionando Tecnologia — Sistemas modulares e automação" },
-      { property: "og:description", content: "SaaS multiempresa modular: CRM, agenda, WhatsApp, pagamentos, emissão fiscal, estoque e BI." },
+      {
+        name: "description",
+        content:
+          "Plataforma SaaS multiempresa: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque e BI. Tecnologia, automação e sistemas inteligentes para empresas que precisam crescer com controle.",
+      },
+      {
+        property: "og:title",
+        content: "Impulsionando Tecnologia — Sistemas modulares e automação",
+      },
+      {
+        property: "og:description",
+        content:
+          "SaaS multiempresa modular: CRM, agenda, WhatsApp, pagamentos, emissão fiscal, estoque e BI.",
+      },
       { property: "og:url", content: "https://impulsionando.com.br/" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/" }],

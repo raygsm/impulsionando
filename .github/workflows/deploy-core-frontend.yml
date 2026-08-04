@@ -2,19 +2,6 @@ name: Deploy Core Frontend
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - package.json
-      - package-lock.json
-      - src/**
-      - public/**
-      - scripts/**
-      - vite.config.*
-      - tsconfig*.json
-      - deploy/**
-      - .github/workflows/deploy-core-frontend.yml
 
 concurrency:
   group: deploy-core-frontend

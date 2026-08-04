@@ -29,7 +29,9 @@ export const listMpagoEvents = createServerFn({ method: "GET" })
         .limit(50),
       supabaseAdmin
         .from("mpago_payments")
-        .select("id, status, amount_cents, description, payer_email, mp_payment_id, created_at, approved_at, company_id")
+        .select(
+          "id, status, amount_cents, description, payer_email, mp_payment_id, created_at, approved_at, company_id",
+        )
         .order("created_at", { ascending: false })
         .limit(20),
     ]);
@@ -45,17 +47,32 @@ export const Route = createFileRoute("/_authenticated/admin/mpago-eventos")({
   head: () => ({ meta: [{ title: "Mercado Pago — Eventos | Admin" }] }),
 });
 
-const fmtDate = (s?: string | null) =>
-  s ? new Date(s).toLocaleString("pt-BR") : "—";
+const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleString("pt-BR") : "—");
 const brl = (c: number) =>
   (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string; Icon: typeof CheckCircle2 }> = {
-    approved: { label: "Aprovado", cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300", Icon: CheckCircle2 },
-    pending: { label: "Pendente", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300", Icon: Clock },
-    rejected: { label: "Rejeitado", cls: "bg-red-500/15 text-red-700 dark:text-red-300", Icon: AlertTriangle },
-    refunded: { label: "Estornado", cls: "bg-slate-500/15 text-slate-700 dark:text-slate-300", Icon: AlertTriangle },
+    approved: {
+      label: "Aprovado",
+      cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+      Icon: CheckCircle2,
+    },
+    pending: {
+      label: "Pendente",
+      cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+      Icon: Clock,
+    },
+    rejected: {
+      label: "Rejeitado",
+      cls: "bg-red-500/15 text-red-700 dark:text-red-300",
+      Icon: AlertTriangle,
+    },
+    refunded: {
+      label: "Estornado",
+      cls: "bg-slate-500/15 text-slate-700 dark:text-slate-300",
+      Icon: AlertTriangle,
+    },
   };
   const it = map[status] ?? { label: status, cls: "bg-muted text-foreground", Icon: Clock };
   return (
@@ -103,7 +120,10 @@ function MpagoEventsPage() {
             ) : (
               <div className="space-y-2 text-sm">
                 {data.payments.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between border-b border-border/40 py-2">
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between border-b border-border/40 py-2"
+                  >
                     <div className="min-w-0 flex-1">
                       <div className="font-medium truncate">{p.description ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">
@@ -137,14 +157,17 @@ function MpagoEventsPage() {
                   Configure no painel do MP a URL:
                   <br />
                   <code className="text-[10px] break-all">
-                    https://impulsionando.lovable.app/functions/v1/mpago-webhook?company_id=&lt;UUID&gt;
+                    https://impulsionando.com.br/functions/v1/mpago-webhook?company_id=&lt;UUID&gt;
                   </code>
                 </p>
               </div>
             ) : (
               <div className="space-y-1 text-xs max-h-[500px] overflow-y-auto">
                 {data.events.map((e) => (
-                  <div key={e.id} className="flex items-center justify-between border-b border-border/30 py-1.5">
+                  <div
+                    key={e.id}
+                    className="flex items-center justify-between border-b border-border/30 py-1.5"
+                  >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono font-semibold">{e.event_type}</span>
@@ -156,7 +179,10 @@ function MpagoEventsPage() {
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {e.signature_valid === true && (
-                        <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-700">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-emerald-500/10 text-emerald-700"
+                        >
                           ✓ sig
                         </Badge>
                       )}
@@ -166,11 +192,17 @@ function MpagoEventsPage() {
                         </Badge>
                       )}
                       {e.processed ? (
-                        <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-700">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-emerald-500/10 text-emerald-700"
+                        >
                           OK
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-700">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-amber-500/10 text-amber-700"
+                        >
                           ...
                         </Badge>
                       )}
@@ -188,9 +220,21 @@ function MpagoEventsPage() {
           <CardTitle className="text-base">Como testar o webhook</CardTitle>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-          <p>1. No painel do Mercado Pago, em <b>Suas integrações → Webhooks</b>, configure a URL acima.</p>
-          <p>2. Selecione os eventos <b>payment</b>, <b>merchant_order</b>, <b>plan</b> e <b>subscription</b>.</p>
-          <p>3. Gere o segredo de assinatura e salve em <Link to="/admin/billing-health" className="underline">/admin/billing-health</Link> como <code>mpago_webhook_secret_&lt;company&gt;</code>.</p>
+          <p>
+            1. No painel do Mercado Pago, em <b>Suas integrações → Webhooks</b>, configure a URL
+            acima.
+          </p>
+          <p>
+            2. Selecione os eventos <b>payment</b>, <b>merchant_order</b>, <b>plan</b> e{" "}
+            <b>subscription</b>.
+          </p>
+          <p>
+            3. Gere o segredo de assinatura e salve em{" "}
+            <Link to="/admin/billing-health" className="underline">
+              /admin/billing-health
+            </Link>{" "}
+            como <code>mpago_webhook_secret_&lt;company&gt;</code>.
+          </p>
           <p>4. Use o botão "Simular notificação" do próprio painel MP para testar.</p>
         </CardContent>
       </Card>
