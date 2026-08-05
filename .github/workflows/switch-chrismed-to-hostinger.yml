@@ -1,0 +1,129 @@
+name: Switch CHRISMED official domain to Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type SWITCH_CHRISMED_TO_HOSTINGER to authorize the DNS cutover
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrismed-domain-cutover
+  cancel-in-progress: false
+
+jobs:
+  cutover:
+    if: inputs.confirmation == 'SWITCH_CHRISMED_TO_HOSTINGER'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DOMAIN: chrismed.impulsionando.com.br
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Validate required configuration
+        run: |
+          set -euo pipefail
+          for value in DEPLOY_HOST CF_ZONE_ID CF_API_TOKEN; do
+            test -n "${!value}" || { echo "::error::Missing required secret: $value"; exit 1; }
+          done
+
+      - name: Resolve and preflight the Hostinger origin
+        id: origin
+        run: |
+          set -euo pipefail
+          ORIGIN_IP="$(getent ahostsv4 "$DEPLOY_HOST" | awk 'NR == 1 { print $1 }')"
+          test -n "$ORIGIN_IP" || { echo "::error::Could not resolve the Hostinger origin"; exit 1; }
+          curl --fail --silent --show-error --max-time 20 \
+            --resolve "$DOMAIN:443:$ORIGIN_IP" \
+            "https://$DOMAIN/auth" -o /tmp/chrismed-origin-auth.html
+          curl --fail --silent --show-error --max-time 20 \
+            --resolve "$DOMAIN:443:$ORIGIN_IP" \
+            "https://$DOMAIN/" -o /tmp/chrismed-origin-home.html
+          grep -qi "CHRISMED" /tmp/chrismed-origin-home.html
+          echo "origin_ip=$ORIGIN_IP" >> "$GITHUB_OUTPUT"
+
+      - name: Back up current CHRISMED DNS records
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" \
+            -o /tmp/chrismed-dns-before.json
+          jq -e '.success == true' /tmp/chrismed-dns-before.json >/dev/null
+          jq -e '[.result[] | select(.type == "A" or .type == "AAAA" or .type == "CNAME")] | length > 0' /tmp/chrismed-dns-before.json >/dev/null
+
+      - name: Point only CHRISMED to Hostinger
+        id: switch
+        env:
+          ORIGIN_IP: ${{ steps.origin.outputs.origin_ip }}
+        run: |
+          set -euo pipefail
+          jq -r '.result[] | select(.type == "A" or .type == "AAAA" or .type == "CNAME") | .id' /tmp/chrismed-dns-before.json | while read -r RECORD_ID; do
+            curl --fail --silent --show-error -X DELETE \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$RECORD_ID" >/dev/null
+          done
+          jq -nc --arg name "$DOMAIN" --arg content "$ORIGIN_IP" \
+            '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/chrismed-dns-after-payload.json
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data @/tmp/chrismed-dns-after-payload.json \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+            -o /tmp/chrismed-dns-after.json
+          jq -e '.success == true' /tmp/chrismed-dns-after.json >/dev/null
+
+      - name: Verify public route and roll back on failure
+        if: always() && steps.switch.outcome == 'success'
+        run: |
+          set -euo pipefail
+          if curl --retry 6 --retry-delay 5 --fail --silent --show-error --max-time 20 \
+            "https://$DOMAIN/auth" -o /tmp/chrismed-public-auth.html && \
+            curl --retry 6 --retry-delay 5 --fail --silent --show-error --max-time 20 \
+            "https://$DOMAIN/" -o /tmp/chrismed-public-home.html && \
+            grep -qi "CHRISMED" /tmp/chrismed-public-home.html; then
+            exit 0
+          fi
+
+          echo "::error::New origin failed public verification; restoring previous DNS records."
+          NEW_ID="$(jq -r '.result.id' /tmp/chrismed-dns-after.json)"
+          curl --fail --silent --show-error -X DELETE \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$NEW_ID" >/dev/null
+          jq -c '.result[] | select(.type == "A" or .type == "AAAA" or .type == "CNAME") | del(.id, .zone_id, .zone_name, .created_on, .modified_on, .meta, .proxiable, .locked, .comment, .tags, .comment_modified_on, .tags_modified_on)' /tmp/chrismed-dns-before.json | while read -r PAYLOAD; do
+            curl --fail --silent --show-error -X POST \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data "$PAYLOAD" \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" >/dev/null
+          done
+          exit 1
+
+      - name: Purge only CHRISMED auth cache
+        run: |
+          set -euo pipefail
+          jq -nc --arg url "https://$DOMAIN/auth" '{files:[$url]}' >/tmp/purge.json
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data @/tmp/purge.json \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+            -o /tmp/purge-result.json
+          jq -e '.success == true' /tmp/purge-result.json >/dev/null
+
+      - name: Upload DNS backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrismed-dns-backup-${{ github.run_id }}
+          path: /tmp/chrismed-dns-before.json
+          retention-days: 30
