@@ -7,6 +7,14 @@ on:
         description: Type SWITCH_CHRISMED_TO_HOSTINGER to authorize the DNS cutover
         required: true
         type: string
+      mode:
+        description: Run a read-only Cloudflare diagnostic or the DNS cutover
+        required: true
+        default: diagnostic
+        type: choice
+        options:
+          - diagnostic
+          - cutover
 
 permissions:
   contents: read
@@ -29,22 +37,53 @@ jobs:
       - name: Validate required configuration
         run: |
           set -euo pipefail
-          for value in DEPLOY_HOST CF_API_TOKEN; do
+          for value in CF_API_TOKEN CF_ZONE_ID; do
             test -n "${!value}" || { echo "::error::Missing required secret: $value"; exit 1; }
           done
           CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          if [[ ! "$CF_ZONE_ID" =~ ^[[:xdigit:]]{32}$ ]]; then
-            CF_ZONE_ID="$(curl --fail --silent --show-error \
-              -H "Authorization: Bearer $CF_API_TOKEN" \
-              "https://api.cloudflare.com/client/v4/zones?name=impulsionando.com.br&status=active" \
-              | jq -er '.result[0].id')"
-          fi
+          [[ "$CF_ZONE_ID" =~ ^[[:xdigit:]]{32}$ ]] || { echo "::error::CLOUDFLARE_ZONE_ID must be a 32-character hexadecimal Zone ID"; exit 1; }
           printf 'CF_ZONE_ID=%s\n' "$CF_ZONE_ID" >> "$GITHUB_ENV"
+
+      - name: Cloudflare API diagnostic
+        run: |
+          set -euo pipefail
+
+          call_cloudflare() {
+            local name="$1"
+            local endpoint="$2"
+            local response="/tmp/cloudflare-${name}.json"
+            local status
+
+            status="$(curl --silent --show-error --output "$response" --write-out '%{http_code}' \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              "$endpoint" || true)"
+
+            echo "Cloudflare endpoint: $endpoint"
+            echo "HTTP status: $status"
+            if ! jq . "$response"; then
+              echo "::error::Cloudflare returned a non-JSON response for $endpoint"
+              exit 1
+            fi
+
+            if [ "$status" -lt 200 ] || [ "$status" -ge 300 ] || [ "$(jq -r '.success // false' "$response")" != "true" ]; then
+              echo "Cloudflare errors:"
+              jq '{success, errors, messages}' "$response"
+              echo "::error::Cloudflare request failed for $endpoint"
+              exit 1
+            fi
+          }
+
+          call_cloudflare token-verify "https://api.cloudflare.com/client/v4/user/tokens/verify"
+          call_cloudflare zone "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID"
+          call_cloudflare dns-records "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100"
 
       - name: Resolve and preflight the Hostinger origin
         id: origin
+        if: inputs.mode == 'cutover'
         run: |
           set -euo pipefail
+          test -n "$DEPLOY_HOST" || { echo "::error::Missing required secret: DEPLOY_HOST"; exit 1; }
           ORIGIN_IP="$(getent ahostsv4 "$DEPLOY_HOST" | awk 'NR == 1 { print $1 }')"
           test -n "$ORIGIN_IP" || { echo "::error::Could not resolve the Hostinger origin"; exit 1; }
           curl --fail --silent --show-error --max-time 20 \
@@ -57,6 +96,7 @@ jobs:
           echo "origin_ip=$ORIGIN_IP" >> "$GITHUB_OUTPUT"
 
       - name: Back up current CHRISMED DNS records
+        if: inputs.mode == 'cutover'
         run: |
           set -euo pipefail
           curl --fail --silent --show-error \
@@ -69,6 +109,7 @@ jobs:
 
       - name: Point only CHRISMED to Hostinger
         id: switch
+        if: inputs.mode == 'cutover'
         env:
           ORIGIN_IP: ${{ steps.origin.outputs.origin_ip }}
         run: |
@@ -90,7 +131,7 @@ jobs:
           jq -e '.success == true' /tmp/chrismed-dns-after.json >/dev/null
 
       - name: Verify public route and roll back on failure
-        if: always() && steps.switch.outcome == 'success'
+        if: always() && inputs.mode == 'cutover' && steps.switch.outcome == 'success'
         run: |
           set -euo pipefail
           if curl --retry 6 --retry-delay 5 --fail --silent --show-error --max-time 20 \
@@ -117,6 +158,7 @@ jobs:
           exit 1
 
       - name: Purge only CHRISMED auth cache
+        if: inputs.mode == 'cutover'
         run: |
           set -euo pipefail
           jq -nc --arg url "https://$DOMAIN/auth" '{files:[$url]}' >/tmp/purge.json
@@ -129,7 +171,7 @@ jobs:
           jq -e '.success == true' /tmp/purge-result.json >/dev/null
 
       - name: Upload DNS backup
-        if: always()
+        if: always() && inputs.mode == 'cutover'
         uses: actions/upload-artifact@v4
         with:
           name: chrismed-dns-backup-${{ github.run_id }}
