@@ -92,13 +92,6 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
-ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes "${DEPLOY_USER}@${DEPLOY_HOST}" "mkdir -p '${RELEASE_DIR}'"          scp deploy/impulsionando-core.service "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-core.service"
-rsync -e "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" -az --delete release/ "${DEPLOY_USER}@${DEPLOY_HOST}:${RELEASE_DIR}/"          scp deploy/nginx.chrismed.conf "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/nginx.chrismed.conf"
-scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes deploy/impulsionando-core.service "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-core.service"
-scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes deploy/nginx.chrismed.http.conf "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/nginx.chrismed.http.conf"        env:
-scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes deploy/nginx.chrismed.conf "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/nginx.chrismed.conf"          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd "$RELEASE_DIR"
