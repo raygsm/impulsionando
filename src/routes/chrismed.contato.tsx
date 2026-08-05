@@ -89,7 +89,7 @@ function ContatoPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] gap-1.5"><Link to="/chrismed/agendar"><CalendarCheck className="h-4 w-4" />Agendar</Link></Button>
             <Button asChild variant="outline" className="border-[var(--chrismed-sand)] gap-1.5"><Link to="/chrismed/ocupacional"><Briefcase className="h-4 w-4" />Empresa</Link></Button>
-            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] gap-1.5"><Link to="/chrismed/medicos"><Stethoscope className="h-4 w-4" />Médicos</Link></Button>
+            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] gap-1.5"><Link to="/chrismed/medicos"><Stethoscope className="h-4 w-4" />Profissionais da saúde</Link></Button>
           </div>
         </div>
 
