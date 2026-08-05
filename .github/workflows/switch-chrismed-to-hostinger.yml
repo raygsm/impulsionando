@@ -23,17 +23,19 @@ jobs:
     env:
       DOMAIN: chrismed.impulsionando.com.br
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Validate required configuration
         run: |
           set -euo pipefail
-          CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          printf 'CF_ZONE_ID=%s\n' "$CF_ZONE_ID" >> "$GITHUB_ENV"
-          for value in DEPLOY_HOST CF_ZONE_ID CF_API_TOKEN; do
+          for value in DEPLOY_HOST CF_API_TOKEN; do
             test -n "${!value}" || { echo "::error::Missing required secret: $value"; exit 1; }
           done
+          CF_ZONE_ID="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=impulsionando.com.br&status=active" \
+            | jq -er '.result[0].id')"
+          printf 'CF_ZONE_ID=%s\n' "$CF_ZONE_ID" >> "$GITHUB_ENV"
 
       - name: Resolve and preflight the Hostinger origin
         id: origin
