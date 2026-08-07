@@ -20,7 +20,9 @@ export const getRouter = () => {
         // Applying the same rewrite there makes React Start redirect the public
         // URL to itself. The browser alone needs this translation for hydration.
         if (typeof window === "undefined") return url;
-        const internalPath = tenantInternalPathForPublicPath(url.hostname, url.pathname);
+        // TanStack builds relative URLs with a synthetic hostname. The actual
+        // browser hostname is authoritative for dedicated tenant routing.
+        const internalPath = tenantInternalPathForPublicPath(window.location.hostname, url.pathname);
         if (internalPath) url.pathname = internalPath;
         return url;
       },
@@ -29,7 +31,7 @@ export const getRouter = () => {
         // route prefixes remain an implementation detail and never flash in
         // the address bar (for example /chrismed/agendar -> /agendar).
         if (typeof window === "undefined") return url;
-        const publicPath = tenantPublicPathForInternalPath(url.hostname, url.pathname);
+        const publicPath = tenantPublicPathForInternalPath(window.location.hostname, url.pathname);
         if (publicPath) url.pathname = publicPath;
         return url;
       },
