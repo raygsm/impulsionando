@@ -1,6 +1,7 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Rocket } from "lucide-react";
+import { tenantPublicPathForInternalPath } from "@/lib/subdomain";
 
 const CHRISMED_CREST_URL = "/brand/chrismed/crest.jpeg";
 
@@ -20,6 +21,45 @@ export function RocketRouteLoader() {
   const [visible, setVisible] = useState(false);
   const showTimer = useRef<number | null>(null);
   const hideTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    // TanStack's output rewrite canonicalizes browser navigation, but Link can
+    // still render its internal route prefix in the DOM. Keep hrefs clean for
+    // every dedicated tenant, including links mounted after async renders.
+    const canonicalize = (root: ParentNode) => {
+      const anchors = root instanceof HTMLAnchorElement
+        ? [root]
+        : Array.from(root.querySelectorAll<HTMLAnchorElement>("a[href]"));
+      for (const anchor of anchors) {
+        const raw = anchor.getAttribute("href");
+        if (!raw || raw.startsWith("#")) continue;
+        const parsed = new URL(raw, window.location.origin);
+        if (parsed.origin !== window.location.origin) continue;
+        const publicPath = tenantPublicPathForInternalPath(
+          window.location.hostname,
+          parsed.pathname,
+        );
+        if (publicPath) anchor.setAttribute("href", `${publicPath}${parsed.search}${parsed.hash}`);
+      }
+    };
+
+    canonicalize(document);
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === "attributes") canonicalize(mutation.target as ParentNode);
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLElement) canonicalize(node);
+        }
+      }
+    });
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["href"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (active) {
