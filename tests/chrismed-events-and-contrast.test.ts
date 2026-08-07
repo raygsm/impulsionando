@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const shell = readFileSync('src/components/chrismed/ChrismedShell.tsx', 'utf8');
 const route = readFileSync('src/routes/chrismed.eventos.tsx', 'utf8');
-const eventFunctions = readFileSync('src/lib/chrismed-events.functions.ts', 'utf8');
+const eventFunctions = readFileSync('src/lib/chrismed-events.ts', 'utf8');
 const migration = readFileSync('supabase/migrations/20260807212613_chrismed_events_registration.sql', 'utf8');
 const tokens = readFileSync('src/styles/tokens-tenants.css', 'utf8');
 

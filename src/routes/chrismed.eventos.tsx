@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ArrowRight, CalendarDays, CheckCircle2, Clock3, MapPin, Ticket, Users } from 'lucide-react';
 import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
-import { listPublicChrismedEvents, registerForChrismedEvent, type PublicChrismedEvent } from '@/lib/chrismed-events.functions';
+import { listPublicChrismedEvents, registerForChrismedEvent, type PublicChrismedEvent } from '@/lib/chrismed-events';
 
 export const Route = createFileRoute('/chrismed/eventos')({
   head: () => ({ meta: [
