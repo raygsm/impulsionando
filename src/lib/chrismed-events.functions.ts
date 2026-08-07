@@ -29,16 +29,16 @@ export type PublicChrismedEvent = {
 };
 
 export const listPublicChrismedEvents = createServerFn({ method: 'GET' }).handler(async () => {
-  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { supabase } = await import('@/integrations/supabase/client');
   const now = new Date().toISOString();
   const [{ data: events, error }, { data: registrations, error: registrationsError }] = await Promise.all([
-    supabaseAdmin
+    supabase
       .from('chrismed_events' as never)
       .select('id,slug,title,summary,description,cover_url,venue_name,venue_address,city,starts_at,ends_at,registration_opens_at,registration_closes_at,capacity,price_cents,status' as never)
       .eq('status' as never, 'published' as never)
       .gte('ends_at' as never, now as never)
       .order('starts_at' as never, { ascending: true }),
-    supabaseAdmin
+    supabase
       .from('chrismed_event_registrations' as never)
       .select('event_id,quantity' as never)
       .eq('status' as never, 'confirmed' as never),
@@ -76,8 +76,8 @@ export const registerForChrismedEvent = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => RegistrationInput.parse(input))
   .handler(async ({ data }) => {
     if (data.website) throw new Error('Solicitação inválida.');
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: result, error } = await supabaseAdmin.rpc('chrismed_register_event' as never, {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: result, error } = await supabase.rpc('chrismed_register_event' as never, {
       p_event_id: data.eventId,
       p_attendee_name: data.name,
       p_attendee_email: data.email,
