@@ -649,7 +649,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
 
         <footer className="text-center text-xs text-muted-foreground">
           © 2026 CHRISMED Saúde Integrada ·{" "}
-          <a href="/chrismed/privacidade" className="text-[#087f7b]">
+          <a href="/privacidade" className="text-[#087f7b]">
             Política de Privacidade
           </a>{" "}
           · LGPD

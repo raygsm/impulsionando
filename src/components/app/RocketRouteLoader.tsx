@@ -1,7 +1,7 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Rocket } from "lucide-react";
-import chrismedLogo from "@/assets/chrismed-logo.png.asset.json";
+import chrismedShield from "@/assets/chrismed-shield-csa.jpg.asset.json";
 
 /**
  * Overlay de carregamento entre rotas.
@@ -71,8 +71,11 @@ export function RocketRouteLoader() {
           100% { transform: translateX(100%); }
         }
         @keyframes chrismedMarkPulse {
-          0%,100% { transform: translate(-50%, 0) scale(1); opacity: 0.95; }
-          50%     { transform: translate(-50%, -6px) scale(1.04); opacity: 1; }
+          0%,100% { transform: translate(-50%, 0) scale(.96); opacity: 0.92; }
+          50%     { transform: translate(-50%, -5px) scale(1.04); opacity: 1; }
+        }
+        @keyframes chrismedRouteOrbit {
+          to { transform: rotate(360deg); }
         }
       `}</style>
 
@@ -100,13 +103,21 @@ export function RocketRouteLoader() {
               transform: "translate(-50%, 0)",
             }}
           >
-            <div className="grid place-items-center rounded-full bg-[var(--chrismed-forest-deep)] p-5 shadow-[var(--chrismed-shadow-lg)] ring-1 ring-white/10">
-              <img
-                src={chrismedLogo.url}
-                alt=""
-                className="h-14 w-14 select-none brightness-0 invert md:h-16 md:w-16"
-                draggable={false}
+            <div className="relative grid size-24 place-items-center rounded-full bg-[var(--chrismed-forest-deep)] shadow-[0_14px_46px_rgba(0,0,0,.32),0_0_30px_rgba(198,157,80,.22)] md:size-28">
+              <div
+                className="absolute inset-0 rounded-full bg-[conic-gradient(transparent_0_28%,var(--chrismed-amber)_42%,transparent_58%_78%,rgba(255,255,255,.7)_90%,transparent)]"
+                style={{ animation: visible ? "chrismedRouteOrbit 1.5s linear infinite" : "none" }}
               />
+              <div className="absolute inset-[4px] rounded-full bg-[var(--chrismed-forest-deep)]" />
+              <div className="relative size-[4.5rem] overflow-hidden rounded-full border border-white/20 bg-white md:size-20">
+                <img
+                  src={chrismedShield.url}
+                  alt=""
+                  className="h-full w-full select-none object-cover"
+                  draggable={false}
+                />
+                <div className="absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,.24),transparent_42%,rgba(198,157,80,.12))]" />
+              </div>
             </div>
           </div>
         ) : (

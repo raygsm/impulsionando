@@ -74,7 +74,7 @@ export const Route = createFileRoute('/chrismed/dra-cristiane')({
       { property: 'og:type', content: 'profile' },
       {
         property: 'og:url',
-        content: 'https://chrismed.impulsionando.com.br/chrismed/dra-cristiane',
+        content: 'https://chrismed.impulsionando.com.br/dra-cristiane',
       },
       { property: 'og:site_name', content: 'CHRISMED' },
       { name: 'twitter:card', content: 'summary_large_image' },
@@ -87,7 +87,7 @@ export const Route = createFileRoute('/chrismed/dra-cristiane')({
     links: [
       {
         rel: 'canonical',
-        href: 'https://chrismed.impulsionando.com.br/chrismed/dra-cristiane',
+        href: 'https://chrismed.impulsionando.com.br/dra-cristiane',
       },
     ],
     scripts: [

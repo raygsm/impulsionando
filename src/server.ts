@@ -4,7 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import {
   canonicalTenantHostRedirect,
-  chrismedInternalPathForPublicPath,
+  tenantInternalPathForPublicPath,
   tenantLandingTargetForHost,
 } from "./lib/subdomain";
 
@@ -120,11 +120,9 @@ export default {
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      const chrismedInternalPath = url.hostname.toLowerCase() === "chrismed.impulsionando.com.br"
-        ? chrismedInternalPathForPublicPath(url.pathname)
-        : null;
-      if (chrismedInternalPath) {
-        url.pathname = chrismedInternalPath;
+      const tenantInternalPath = tenantInternalPathForPublicPath(url.hostname, url.pathname);
+      if (tenantInternalPath) {
+        url.pathname = tenantInternalPath;
         routedRequest = new Request(url, request);
       } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;

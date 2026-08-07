@@ -81,6 +81,56 @@ export function chrismedInternalPathForPublicPath(pathname: string): string | nu
   return `/chrismed${path}`;
 }
 
+const TENANT_REWRITE_EXCLUSIONS = [
+  "/alth",
+  "/auth",
+  "/api",
+  "/_build",
+  "/.well-known",
+];
+
+function isStandalonePublicPath(pathname: string): boolean {
+  return TENANT_REWRITE_EXCLUSIONS.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  ) || /\.[a-z0-9]{2,8}$/i.test(pathname);
+}
+
+/**
+ * Returns the internal route prefix owned by a dedicated tenant host.
+ * Generic `/vitrine/:slug` tenants keep their storefront routing unchanged;
+ * once a new tenant receives a dedicated landing entry above, clean nested
+ * URLs work automatically without tenant-specific router code.
+ */
+export function tenantRoutePrefixForHost(host: string | null | undefined): string | null {
+  const target = tenantLandingTargetForHost(host);
+  if (!target || target.startsWith("/vitrine/")) return null;
+  return target.replace(/\/$/, "");
+}
+
+/** Maps `tenant.impulsionando.com.br/path` to the existing internal tree. */
+export function tenantInternalPathForPublicPath(
+  host: string | null | undefined,
+  pathname: string,
+): string | null {
+  const prefix = tenantRoutePrefixForHost(host);
+  const path = pathname || "/";
+  if (!prefix || isStandalonePublicPath(path)) return null;
+  if (path === prefix || path.startsWith(`${prefix}/`)) return null;
+  return path === "/" ? prefix : `${prefix}${path}`;
+}
+
+/** Maps an internal tenant route back to its clean, canonical public path. */
+export function tenantPublicPathForInternalPath(
+  host: string | null | undefined,
+  pathname: string,
+): string | null {
+  const prefix = tenantRoutePrefixForHost(host);
+  if (!prefix) return null;
+  if (pathname === prefix) return "/";
+  if (!pathname.startsWith(`${prefix}/`)) return null;
+  return pathname.slice(prefix.length) || "/";
+}
+
 /** Subdomínios que NÃO devem ser tratados como tenant. */
 const RESERVED_SUBDOMAINS = new Set([
   "www",
@@ -179,7 +229,9 @@ export function deprecatedSubdomainRedirect(loc: {
     const canonical = DEPRECATED_SUBDOMAIN_ALIAS[firstSeg];
     if (!canonical) return null;
     const proto = loc.protocol === "http:" ? "http:" : "https:";
-    return `${proto}//${canonical}.${root}${loc.pathname}${loc.search}${loc.hash}`;
+    const canonicalHost = `${canonical}.${root}`;
+    const publicPath = tenantPublicPathForInternalPath(canonicalHost, loc.pathname) ?? loc.pathname;
+    return `${proto}//${canonicalHost}${publicPath}${loc.search}${loc.hash}`;
   }
   return null;
 }

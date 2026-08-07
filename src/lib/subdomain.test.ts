@@ -8,7 +8,9 @@ import {
   canonicalTenantHostRedirect,
   chrismedInternalPathForPublicPath,
   deprecatedSubdomainRedirect,
+  tenantInternalPathForPublicPath,
   tenantLandingTargetForHost,
+  tenantPublicPathForInternalPath,
   tenantSubdomainTarget,
 } from "./subdomain";
 
@@ -72,6 +74,48 @@ describe("chrismedInternalPathForPublicPath", () => {
   });
 });
 
+describe("dedicated tenant clean paths", () => {
+  it("maps clean CHRISMED pages to the internal route tree", () => {
+    expect(tenantInternalPathForPublicPath(
+      "chrismed.impulsionando.com.br",
+      "/agendar",
+    )).toBe("/chrismed/agendar");
+    expect(tenantPublicPathForInternalPath(
+      "chrismed.impulsionando.com.br",
+      "/chrismed/agendar",
+    )).toBe("/agendar");
+  });
+
+  it("applies the same invariant to other dedicated clients", () => {
+    expect(tenantInternalPathForPublicPath(
+      "colors.impulsionando.com.br",
+      "/entrar",
+    )).toBe("/colors/entrar");
+    expect(tenantPublicPathForInternalPath(
+      "wmp.impulsionando.com.br",
+      "/wmp/eventos",
+    )).toBe("/eventos");
+  });
+
+  it("never rewrites infrastructure or standalone authentication paths", () => {
+    expect(tenantInternalPathForPublicPath(
+      "chrismed.impulsionando.com.br",
+      "/api/public/health",
+    )).toBeNull();
+    expect(tenantInternalPathForPublicPath(
+      "colors.impulsionando.com.br",
+      "/auth",
+    )).toBeNull();
+  });
+
+  it("does not invent nested routes for generic storefront tenants", () => {
+    expect(tenantInternalPathForPublicPath(
+      "cliente-novo.impulsionando.com.br",
+      "/produto",
+    )).toBeNull();
+  });
+});
+
 describe("deprecatedSubdomainRedirect", () => {
   it("root do subdomínio legado", () => {
     expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br" }))
@@ -83,7 +127,7 @@ describe("deprecatedSubdomainRedirect", () => {
       ...base,
       hostname: "colorssaude.impulsionando.com.br",
       pathname: "/colors/super-green-black",
-    })).toBe("https://colors.impulsionando.com.br/colors/super-green-black");
+    })).toBe("https://colors.impulsionando.com.br/super-green-black");
   });
 
   it("preserva query e hash", () => {
@@ -93,7 +137,7 @@ describe("deprecatedSubdomainRedirect", () => {
       pathname: "/colors",
       search: "?utm_source=email&utm_campaign=x",
       hash: "#produtos",
-    })).toBe("https://colors.impulsionando.com.br/colors?utm_source=email&utm_campaign=x#produtos");
+    })).toBe("https://colors.impulsionando.com.br/?utm_source=email&utm_campaign=x#produtos");
   });
 
   it("cobre também o alias colors-saude", () => {

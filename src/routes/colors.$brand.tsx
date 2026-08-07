@@ -18,7 +18,7 @@ export const Route = createFileRoute("/colors/$brand")({
     if (!meta) return { meta: [{ title: "Colors Saúde" }] };
     const title = `Linha ${meta.label} — Colors Saúde`;
     const desc = `${meta.description} Produtos oficiais da linha ${meta.label} com canais autorizados de compra.`;
-    const url = `https://colors.impulsionando.com.br/colors/${brand}`;
+    const url = `https://colors.impulsionando.com.br/${brand}`;
     return {
       meta: [
         { title },

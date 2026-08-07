@@ -8,7 +8,7 @@ export const Route = createFileRoute("/colors/rastreio/")({
       { title: "Rastrear pedido — Colors Saúde" },
       { name: "description", content: "Acompanhe seu pedido Colors Saúde em tempo real. Entregas Correios e Melhor Envio." },
     ],
-    links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/colors/rastreio" }],
+    links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/rastreio" }],
   }),
   component: RastreioSearchPage,
 });

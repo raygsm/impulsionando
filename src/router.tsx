@@ -1,9 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
-import { chrismedInternalPathForPublicPath } from "./lib/subdomain";
+import {
+  tenantInternalPathForPublicPath,
+  tenantPublicPathForInternalPath,
+} from "./lib/subdomain";
 import { routeTree } from "./routeTree.gen";
-
-const CHRISMED_HOST = "chrismed.impulsionando.com.br";
 
 export const getRouter = () => {
   const queryClient = new QueryClient();
@@ -19,9 +20,17 @@ export const getRouter = () => {
         // Applying the same rewrite there makes React Start redirect the public
         // URL to itself. The browser alone needs this translation for hydration.
         if (typeof window === "undefined") return url;
-        if (url.hostname.toLowerCase() !== CHRISMED_HOST) return url;
-        const internalPath = chrismedInternalPathForPublicPath(url.pathname);
+        const internalPath = tenantInternalPathForPublicPath(url.hostname, url.pathname);
         if (internalPath) url.pathname = internalPath;
+        return url;
+      },
+      output: ({ url }) => {
+        // Keep every dedicated tenant URL clean at navigation time. Internal
+        // route prefixes remain an implementation detail and never flash in
+        // the address bar (for example /chrismed/agendar -> /agendar).
+        if (typeof window === "undefined") return url;
+        const publicPath = tenantPublicPathForInternalPath(url.hostname, url.pathname);
+        if (publicPath) url.pathname = publicPath;
         return url;
       },
     },

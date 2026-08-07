@@ -76,7 +76,7 @@ export const Route = createFileRoute('/chrismed/ocupacional')({
       {
         property: 'og:url',
         content:
-          'https://chrismed.impulsionando.com.br/chrismed/ocupacional',
+          'https://chrismed.impulsionando.com.br/ocupacional',
       },
       { property: 'og:site_name', content: 'CHRISMED' },
       { name: 'twitter:card', content: 'summary_large_image' },
@@ -90,7 +90,7 @@ export const Route = createFileRoute('/chrismed/ocupacional')({
     links: [
       {
         rel: 'canonical',
-        href: 'https://chrismed.impulsionando.com.br/chrismed/ocupacional',
+        href: 'https://chrismed.impulsionando.com.br/ocupacional',
       },
     ],
   }),

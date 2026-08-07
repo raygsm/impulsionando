@@ -10,6 +10,7 @@ const monday = new Date('2026-07-13T12:00:00');
 function dayFor(modality: ChrismedModality, offset: number, durations?: Partial<Record<ChrismedModality, number>>) {
   return buildChrismedMockCalendar({
     startDate: monday,
+    now: monday,
     modality,
     durationMinutesByModality: durations,
   })[offset];
