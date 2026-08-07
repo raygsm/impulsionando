@@ -60,7 +60,7 @@ export const Route = createFileRoute('/chrismed/')({
           'Medicina privada, contínua e discreta. Teleconsulta, presencial em Copacabana e visita domiciliar.',
       },
       { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: 'https://chrismed.impulsionando.com.br/chrismed' },
+      { property: 'og:url', content: 'https://chrismed.impulsionando.com.br/' },
       { property: 'og:site_name', content: 'CHRISMED' },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: 'CHRISMED — Dra. Christiane Alencar' },
@@ -69,7 +69,7 @@ export const Route = createFileRoute('/chrismed/')({
         content: 'Medicina privada, contínua e discreta com a Dra. Christiane Alencar.',
       },
     ],
-    links: [{ rel: 'canonical', href: 'https://chrismed.impulsionando.com.br/chrismed' }],
+    links: [{ rel: 'canonical', href: 'https://chrismed.impulsionando.com.br/' }],
   }),
   component: ChrismedHomePage,
 });
@@ -81,7 +81,7 @@ function openOliver() {
   }
 }
 
-function ChrismedHomePage() {
+export function ChrismedHomePage() {
   const lang = useLang();
   const t = COPY[lang];
   return (

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
+import { ChrismedHomePage } from "./chrismed.index";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 // Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
@@ -47,6 +48,12 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeWithSubdomainGuard() {
+  if (
+    typeof window !== "undefined" &&
+    window.location.hostname.toLowerCase() === "chrismed.impulsionando.com.br"
+  ) {
+    return <ChrismedHomePage />;
+  }
   return <HomePage />;
 }
 
