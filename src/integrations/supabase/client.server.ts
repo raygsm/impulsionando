@@ -4,10 +4,37 @@
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { readFileSync } from 'node:fs';
+
+let runtimeFileEnv: Record<string, string> | undefined;
+
+function readRuntimeFileEnv(): Record<string, string> {
+  if (runtimeFileEnv) return runtimeFileEnv;
+  runtimeFileEnv = {};
+  for (const path of ['/app/impulsionando-core.env', '/etc/impulsionando-core.env']) {
+    try {
+      const content = readFileSync(path, 'utf8');
+      for (const line of content.split(/\r?\n/)) {
+        if (!line || line.startsWith('#')) continue;
+        const separator = line.indexOf('=');
+        if (separator <= 0) continue;
+        runtimeFileEnv[line.slice(0, separator)] = line.slice(separator + 1);
+      }
+      break;
+    } catch {
+      // The file is optional when the process already receives environment variables.
+    }
+  }
+  return runtimeFileEnv;
+}
+
+function serverEnv(name: string): string | undefined {
+  return process.env[name] || readRuntimeFileEnv()[name];
+}
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_URL = serverEnv('SUPABASE_URL');
+  const SUPABASE_SERVICE_ROLE_KEY = serverEnv('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [
