@@ -16,6 +16,7 @@ import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, 
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { askOliver } from '@/lib/oliver-chat.functions';
+import { isChrismedHumanOnline } from '@/lib/chrismed/time';
 import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
@@ -66,13 +67,6 @@ const C = CHRISMED_CONTACT.channels;
 
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
 // sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
-function isHumanOnline(now: Date = new Date()): boolean {
-  const day = now.getDay();
-  const hour = now.getHours();
-  if (day === 0) return false;
-  if (day === 6) return hour >= 9 && hour < 13;
-  return hour >= 9 && hour < 19;
-}
 
 type GlobalAction = {
   label: string;
@@ -175,7 +169,7 @@ export function ChrismedOliverPanel() {
     if (a.info) setChrismedOliverInfo(a.info);
   };
 
-  const humanOnline = isHumanOnline();
+  const humanOnline = isChrismedHumanOnline();
 
 
 

@@ -1,3 +1,5 @@
+import { isFutureChrismedSlot } from '@/lib/chrismed/time';
+
 /**
  * Mocks visuais CrisMed — Wave 1 (frontend-only).
  *
@@ -184,12 +186,13 @@ function hashCode(str: string): number {
 export function buildChrismedMockCalendar(
   options: {
     startDate?: Date;
+    now?: Date;
     modality?: ChrismedModality | null;
     specialtySlug?: string | null;
     durationMinutesByModality?: Partial<Record<ChrismedModality, number>>;
   } = {},
 ): ChrismedDay[] {
-  const { startDate = new Date(), modality = null, durationMinutesByModality = {} } = options;
+  const { startDate = new Date(), now = new Date(), modality = null, durationMinutesByModality = {} } = options;
   const durationByModality = { ...CHRISMED_DEFAULT_DURATION_MINUTES, ...durationMinutesByModality };
   const days: ChrismedDay[] = [];
   const base = new Date(startDate);
@@ -226,7 +229,9 @@ export function buildChrismedMockCalendar(
       const start = slot.startsAtMinutes;
       const end = start + durationByModality[modality];
       const blockingInterval = occupiedIntervals.find((interval) => overlaps(start, end, interval.start, interval.end));
-      const state: ChrismedSlotState = blockingInterval
+      const state: ChrismedSlotState = !isFutureChrismedSlot(iso, slot.time, now)
+        ? 'past'
+        : blockingInterval
         ? (blockingInterval.start === start && blockingInterval.state === 'held' ? 'held' : 'unavailable')
         : 'available';
       return {
@@ -249,5 +254,3 @@ export function buildChrismedMockCalendar(
 
   return days;
 }
-
-

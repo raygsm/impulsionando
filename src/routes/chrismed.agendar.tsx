@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
+import { isFutureChrismedSlot } from '@/lib/chrismed/time';
 import {
   CHRISMED_SPECIALTIES, CHRISMED_DOCTORS, CHRISMED_UNITS,
   buildChrismedMockCalendar, CHRISMED_MOCK_NOTICE,
@@ -145,6 +146,12 @@ function ChrismedAgendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
+  const [clockTick, setClockTick] = useState(() => Date.now());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setClockTick(Date.now()), 15_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   // Aplica "Atendimento 360°" (tele + domiciliar) — 1 médico, 3 especialidades.
   function applyCare360(mod: 'telemedicina' | 'domiciliar') {
@@ -206,11 +213,12 @@ function ChrismedAgendarPage() {
   // Agenda dinâmica: recalcula quando modalidade/especialidade/duração real mudam.
   const calendar = useMemo(
     () => buildChrismedMockCalendar({
+      now: new Date(clockTick),
       modality,
       specialtySlug: specialty?.slug ?? null,
       durationMinutesByModality,
     }),
-    [durationMinutesByModality, modality, specialty?.slug],
+    [clockTick, durationMinutesByModality, modality, specialty?.slug],
   );
 
   // Ao trocar modalidade/especialidade, limpa data/horário selecionados para forçar nova escolha
@@ -268,6 +276,12 @@ function ChrismedAgendarPage() {
   const selectedSlotLabel = selectedSlot ? formatSlotLabel(selectedSlot) : selectedTime ?? '—';
 
   async function handlePay() {
+    if (!selectedDayIso || !selectedTime || !isFutureChrismedSlot(selectedDayIso, selectedTime)) {
+      toast.error('Este horário não está mais disponível. Escolha outro horário.');
+      setClockTick(Date.now());
+      setStep('schedule');
+      return;
+    }
     if (!currentOffering) {
       toast.error('Selecione uma modalidade com preço configurado.');
       return;
