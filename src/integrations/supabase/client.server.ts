@@ -4,16 +4,19 @@
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
-import { readFileSync } from 'node:fs';
 
 let runtimeFileEnv: Record<string, string> | undefined;
 
 function readRuntimeFileEnv(): Record<string, string> {
   if (runtimeFileEnv) return runtimeFileEnv;
   runtimeFileEnv = {};
+  const fs = process.getBuiltinModule?.('fs') as
+    | { readFileSync(path: string, encoding: 'utf8'): string }
+    | undefined;
+  if (!fs) return runtimeFileEnv;
   for (const path of ['/app/impulsionando-core.env', '/etc/impulsionando-core.env']) {
     try {
-      const content = readFileSync(path, 'utf8');
+      const content = fs.readFileSync(path, 'utf8');
       for (const line of content.split(/\r?\n/)) {
         if (!line || line.startsWith('#')) continue;
         const separator = line.indexOf('=');
