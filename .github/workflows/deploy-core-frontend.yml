@@ -41,22 +41,6 @@ jobs:
       - name: Test tenant domain routing
         run: npx vitest run src/lib/subdomain.test.ts
 
-      - name: Verify CHRISMED events backend
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          test -n "$SUPABASE_URL"
-          test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          curl --fail-with-body --silent --show-error --max-time 20 \
-            "$SUPABASE_URL/rest/v1/chrismed_events?select=id&limit=1" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Accept: application/json" \
-            >/tmp/chrismed-events.json
-          grep -Eq '^\[[^]]*\]$' /tmp/chrismed-events.json
-          echo "CHRISMED events backend is reachable."
-
       - name: Build
         run: npm run build
         env:
@@ -106,19 +90,9 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          umask 077
-          {
-            printf 'SUPABASE_URL=%s\n' "$SUPABASE_URL"
-            printf 'SUPABASE_PUBLISHABLE_KEY=%s\n' "$SUPABASE_PUBLISHABLE_KEY"
-            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
-          } > /tmp/impulsionando-core.env
           tar -C release -czf /tmp/impulsionando-core-release.tgz .
           scp /tmp/impulsionando-core-release.tgz \
-            /tmp/impulsionando-core.env \
             deploy/impulsionando-core.service \
             deploy/nginx.chrismed.http.conf \
             deploy/nginx.chrismed.conf \
@@ -149,7 +123,6 @@ jobs:
           "$NODE_BIN" --version
           sed -i "s|^ExecStart=.*|ExecStart=${NODE_BIN} .output/server/index.mjs|" /tmp/impulsionando-core.service
 
-          sudo install -o root -g root -m 0600 /tmp/impulsionando-core.env /etc/impulsionando-core.env
           sudo install -m 0644 /tmp/impulsionando-core.service /etc/systemd/system/impulsionando-core.service
           sudo systemctl daemon-reload
           sudo systemctl enable impulsionando-core
@@ -179,8 +152,6 @@ jobs:
             echo "== Updating active Traefik container =="
             sudo docker exec impulsionando-core sh -c 'rm -rf /app/.output && mkdir -p /app/.output'
             sudo docker cp "$RELEASE_DIR/.output/." impulsionando-core:/app/.output/
-            sudo docker cp /tmp/impulsionando-core.env impulsionando-core:/app/impulsionando-core.env
-            sudo docker exec impulsionando-core chmod 0600 /app/impulsionando-core.env
             sudo docker restart impulsionando-core
             for attempt in $(seq 1 30); do
               if sudo docker exec impulsionando-core node -e \
