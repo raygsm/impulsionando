@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
+import { useEffect } from "react";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 // Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
@@ -52,9 +53,32 @@ function HomeWithSubdomainGuard() {
     typeof window !== "undefined" &&
     window.location.hostname.toLowerCase() === "chrismed.impulsionando.com.br"
   ) {
-    return <ChrismedHomePage />;
+    return (
+      <>
+        <ChrismedRootMetadata />
+        <ChrismedHomePage />
+      </>
+    );
   }
   return <HomePage />;
+}
+
+function ChrismedRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://chrismed.impulsionando.com.br/";
+    document.title = "CHRISMED — Medicina privada com a Dra. Christiane Alencar";
+
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    canonical?.setAttribute("href", canonicalUrl);
+
+    const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
+    ogUrl?.setAttribute("content", canonicalUrl);
+
+    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    ogTitle?.setAttribute("content", "CHRISMED — Dra. Christiane Alencar");
+  }, []);
+
+  return null;
 }
 
 export { SUBDOMAIN_LANDING, CUSTOM_HOST_LANDING };
