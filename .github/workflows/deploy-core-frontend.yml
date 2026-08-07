@@ -90,9 +90,19 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          umask 077
+          {
+            printf 'SUPABASE_URL=%s\n' "$SUPABASE_URL"
+            printf 'SUPABASE_PUBLISHABLE_KEY=%s\n' "$SUPABASE_PUBLISHABLE_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+          } > /tmp/impulsionando-core.env
           tar -C release -czf /tmp/impulsionando-core-release.tgz .
           scp /tmp/impulsionando-core-release.tgz \
+            /tmp/impulsionando-core.env \
             deploy/impulsionando-core.service \
             deploy/nginx.chrismed.http.conf \
             deploy/nginx.chrismed.conf \
@@ -123,6 +133,7 @@ jobs:
           "$NODE_BIN" --version
           sed -i "s|^ExecStart=.*|ExecStart=${NODE_BIN} .output/server/index.mjs|" /tmp/impulsionando-core.service
 
+          sudo install -o root -g root -m 0600 /tmp/impulsionando-core.env /etc/impulsionando-core.env
           sudo install -m 0644 /tmp/impulsionando-core.service /etc/systemd/system/impulsionando-core.service
           sudo systemctl daemon-reload
           sudo systemctl enable impulsionando-core
