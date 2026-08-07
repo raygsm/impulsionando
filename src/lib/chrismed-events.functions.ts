@@ -30,30 +30,12 @@ export type PublicChrismedEvent = {
 
 export const listPublicChrismedEvents = createServerFn({ method: 'GET' }).handler(async () => {
   const { supabase } = await import('@/integrations/supabase/client');
-  const now = new Date().toISOString();
-  const [{ data: events, error }, { data: registrations, error: registrationsError }] = await Promise.all([
-    supabase
-      .from('chrismed_events' as never)
-      .select('id,slug,title,summary,description,cover_url,venue_name,venue_address,city,starts_at,ends_at,registration_opens_at,registration_closes_at,capacity,price_cents,status' as never)
-      .eq('status' as never, 'published' as never)
-      .gte('ends_at' as never, now as never)
-      .order('starts_at' as never, { ascending: true }),
-    supabase
-      .from('chrismed_event_registrations' as never)
-      .select('event_id,quantity' as never)
-      .eq('status' as never, 'confirmed' as never),
-  ]);
+  const { data: events, error } = await supabase.rpc('chrismed_list_public_events' as never);
   if (error) throw new Error('Não foi possível carregar a agenda de eventos.');
-  if (registrationsError) throw new Error('Não foi possível calcular a disponibilidade dos eventos.');
-
-  const reserved = new Map<string, number>();
-  for (const row of (registrations ?? []) as unknown as Array<{ event_id: string; quantity: number }>) {
-    reserved.set(row.event_id, (reserved.get(row.event_id) ?? 0) + Number(row.quantity));
-  }
 
   return ((events ?? []) as unknown as Array<Record<string, unknown>>).map((event) => {
     const capacity = Number(event.capacity);
-    const seatsRemaining = Math.max(0, capacity - (reserved.get(String(event.id)) ?? 0));
+    const seatsRemaining = Number(event.seats_remaining);
     const opensAt = event.registration_opens_at ? new Date(String(event.registration_opens_at)).getTime() : null;
     const closesAt = event.registration_closes_at ? new Date(String(event.registration_closes_at)).getTime() : null;
     const current = Date.now();
