@@ -3,7 +3,8 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, MapPin, Clock, RefreshCw, CreditCard } from 'lucide-react';
-import consultorioComposite from '@/assets/chrismed/consultorio-composite.jpg.asset.json';
+
+const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio.jpeg';
 
 export const Route = createFileRoute('/chrismed/consultorio')({
   head: () => ({
@@ -39,7 +40,7 @@ function ConsultorioPage() {
           </div>
           <div className="relative">
             <img
-              src={consultorioComposite.url}
+              src={CHRISMED_CONSULTORIO_URL}
               alt="Consultório CHRISMED em Copacabana — sala de espera reservada e sala clínica"
               className="w-full object-cover border border-[var(--chrismed-sand)] shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]"
               loading="eager"

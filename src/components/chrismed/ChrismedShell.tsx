@@ -6,7 +6,7 @@ import { ChrismedOliverProvider } from './ChrismedOliverProvider';
 import { ChrismedPreloader } from './ChrismedPreloader';
 import { openChrismedOliver } from './oliver-store';
 
-const CHRISMED_HORIZONTAL_LOGO_URL = '/brand/chrismed/logo-horizontal.png';
+const CHRISMED_HORIZONTAL_LOGO_URL = '/brand/chrismed/logo-horizontal.webp';
 
 /**
  * Wordmark CHRISMED V4 — logo oficial CDN (upscale fiel da arte enviada

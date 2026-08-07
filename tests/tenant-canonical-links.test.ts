@@ -40,6 +40,8 @@ describe("tenant canonical links", () => {
       "src/components/chrismed/ChrismedShell.tsx",
       "src/components/chrismed/ChrismedPreloader.tsx",
       "src/components/app/RocketRouteLoader.tsx",
+      "src/routes/chrismed.index.tsx",
+      "src/routes/chrismed.consultorio.tsx",
     ];
     const violations = files.filter((file) => {
       const source = readFileSync(file, "utf8");
