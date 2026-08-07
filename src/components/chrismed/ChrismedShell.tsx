@@ -77,9 +77,9 @@ type NavItem = NavLeaf | NavGroup;
 
 const isGroup = (i: NavItem): i is NavGroup => 'children' in i;
 
-// Arquitetura definitiva do menu (2026-07): 6 pontos de entrada na ordem
+// Arquitetura definitiva do menu (2026-08): 7 pontos de entrada na ordem
 // pedida pela cliente — Dra. Christiane (Home) · Medicina Ambulatorial ▾ ·
-// Medicina Ocupacional · Contato · GMS ▾ (com bandeiras BR/UK/ES) · Agendar.
+// Medicina Ocupacional · Eventos · Contato · GMS ▾ (com bandeiras BR/UK/ES) · Agendar.
 const NAV: NavItem[] = [
   {
     to: '/chrismed',
@@ -122,6 +122,7 @@ const NAV: NavItem[] = [
     to: '/chrismed/ocupacional',
     labels: { pt: 'Medicina Ocupacional', en: 'Occupational Medicine', es: 'Medicina Ocupacional' },
   },
+  { to: '/chrismed/eventos', labels: { pt: 'Eventos', en: 'Events', es: 'Eventos' } },
   { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
   {
     key: 'gms',
@@ -494,6 +495,7 @@ const FOOTER_LINKS: Array<{ label: string; to: string }> = [
 const FOOTER_LINKS_2: Array<{ label: string; to: string }> = [
   { label: 'Especialidades', to: '/chrismed/especialidades' },
   { label: 'Exames e preparo', to: '/chrismed/exames' },
+  { label: 'Eventos', to: '/chrismed/eventos' },
   { label: 'Empresa · Medicina ocupacional', to: '/chrismed/ocupacional' },
   { label: 'Área dos Profissionais da Saúde', to: '/alth' },
   { label: 'Baixar o App', to: '/chrismed/app' },

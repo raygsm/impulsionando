@@ -128,7 +128,7 @@
      ============================================================ */
   --chrismed-ivory:      #FDFCFB;
   --chrismed-bone:       #F3F1ED;
-  --chrismed-sand:       #E8E4DF;
+  --chrismed-sand:       #D9D3CB;
 
   --chrismed-forest:        #0B2A24;
   --chrismed-forest-deep:   #071C18;
@@ -144,7 +144,7 @@
 
   --chrismed-ink:        #0E1A17;
   --chrismed-graphite:   #3F4A47;
-  --chrismed-mist:       #7B857F;
+  --chrismed-mist:       #596660;
   --chrismed-noir:       #05100D;
 
   --chrismed-font-serif: "Cormorant Garamond", "Times New Roman", serif;
@@ -242,7 +242,7 @@
 [data-tenant="chrismed"] .chrismed-page-forest .chrismed-lede,
 [data-tenant="chrismed"] .chrismed-page-forest p,
 [data-tenant="chrismed"] .chrismed-page-forest li,
-[data-tenant="chrismed"] .chrismed-page-forest dd { color: rgba(255,255,255,0.86); }
+[data-tenant="chrismed"] .chrismed-page-forest dd { color: rgba(255,255,255,0.94); }
 [data-tenant="chrismed"] .chrismed-page-forest a:not(.chrismed-cta):not([class*="bg-"]) {
   color: var(--chrismed-amber);
   text-decoration-color: rgba(228,181,74,0.35);
@@ -258,7 +258,9 @@
 [data-tenant="chrismed"] .chrismed-page-mustard h1,
 [data-tenant="chrismed"] .chrismed-page-mustard h2,
 [data-tenant="chrismed"] .chrismed-page-mustard h3 { color: var(--chrismed-forest-deep); }
-[data-tenant="chrismed"] .chrismed-page-mustard p { color: #2A3B36; }
+[data-tenant="chrismed"] .chrismed-page-mustard p,
+[data-tenant="chrismed"] .chrismed-page-mustard li,
+[data-tenant="chrismed"] .chrismed-page-mustard dd { color: #20312C; }
 
 /* Bandas escuras (verde-floresta) DENTRO de qualquer página: recuperam
    contraste claro. Evita o bug de texto verde sobre fundo verde quando
@@ -271,7 +273,7 @@
 [data-tenant="chrismed"] .chrismed-band-forest h4 { color: var(--chrismed-amber) !important; }
 [data-tenant="chrismed"] .chrismed-band-forest p,
 [data-tenant="chrismed"] .chrismed-band-forest li,
-[data-tenant="chrismed"] .chrismed-band-forest dd { color: rgba(255,255,255,0.86) !important; }
+[data-tenant="chrismed"] .chrismed-band-forest dd { color: rgba(255,255,255,0.94) !important; }
 
 /* CTA invertido para páginas mostarda: fundo verde, texto branco/amarelo */
 [data-tenant="chrismed"] .chrismed-page-mustard .chrismed-cta {
