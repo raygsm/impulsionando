@@ -96,12 +96,13 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+      const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
       const canonicalTenantUrl = canonicalTenantHostRedirect({
         hostname: url.hostname,
         pathname: url.pathname,
         search: url.search,
         hash: url.hash,
-        protocol: url.protocol,
+        protocol: forwardedProto === "https" ? "https:" : url.protocol,
       });
       if (canonicalTenantUrl) {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
