@@ -2,6 +2,12 @@ name: Apply Supabase Migrations
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Somente planejar, sem alterar o banco"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   apply:
@@ -33,5 +39,11 @@ jobs:
         run: node scripts/verify-supabase-pooler.mjs
 
       - name: Apply migrations
+        if: ${{ !inputs.dry_run }}
         run: |
           supabase db push --include-all --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+
+      - name: Plan migrations (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          supabase db push --include-all --dry-run --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"

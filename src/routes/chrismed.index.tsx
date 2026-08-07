@@ -38,6 +38,7 @@ import {
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 
 const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio.jpeg';
+const CHRISMED_DRA_CHRISTIANE_URL = '/brand/chrismed/dra-christiane-alencar.png';
 const CHRISMED_GMS_LOGO_URL = '/brand/chrismed/gms.jpg';
 
 
@@ -149,21 +150,21 @@ export function ChrismedHomePage() {
             </ul>
           </div>
 
-          {/* Consultório real — imagem institucional fornecida pela CHRISMED. */}
+          {/* Retrato oficial fornecido pela Dra. Christiane para a primeira imagem da Home. */}
           <div className="chrismed-rise chrismed-rise-delay-4 relative">
             <div className="absolute -inset-6 -z-10 border border-[var(--chrismed-amber)]/30" aria-hidden />
             <div className="absolute -top-4 -left-4 h-16 w-16 border-l border-t border-[var(--chrismed-amber)]" aria-hidden />
             <div className="absolute -bottom-4 -right-4 h-16 w-16 border-r border-b border-[var(--chrismed-amber)]" aria-hidden />
             <figure className="relative aspect-[4/5] overflow-hidden bg-[var(--chrismed-forest-soft)] ring-1 ring-[var(--chrismed-amber)]/25">
               <img
-                src={CHRISMED_CONSULTORIO_URL}
-                alt="Consultório CHRISMED em Copacabana — sala clínica e recepção reservada"
-                className="h-full w-full object-cover"
+                src={CHRISMED_DRA_CHRISTIANE_URL}
+                alt="Dra. Christiane Alencar no consultório CHRISMED"
+                className="h-full w-full object-cover object-top"
                 loading="eager"
                 fetchPriority="high"
               />
               <figcaption className="chrismed-sans absolute inset-x-0 bottom-0 bg-gradient-to-t from-[var(--chrismed-forest-deep)] via-[var(--chrismed-forest-deep)]/75 to-transparent px-6 pb-5 pt-14 text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]">
-                Consultório CHRISMED · Copacabana
+                Dra. Christiane Alencar · CHRISMED
               </figcaption>
             </figure>
           </div>

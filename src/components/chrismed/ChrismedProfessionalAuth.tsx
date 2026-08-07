@@ -61,6 +61,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   const [specialties, setSpecialties] = useState<SpecialtyRow[]>([]);
   const [specialtySearch, setSpecialtySearch] = useState("");
   const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>([]);
+  const [primarySpecialtyId, setPrimarySpecialtyId] = useState<string | null>(null);
   const [otherSpecialty, setOtherSpecialty] = useState("");
   const [otherSpecialtyDetails, setOtherSpecialtyDetails] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -139,7 +140,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
         councilNumber,
         councilRegion,
         primaryArea,
-        primarySpecialtyId: selectedSpecialtyIds[0] ?? null,
+        primarySpecialtyId,
         specialtyIds: selectedSpecialtyIds,
         secondaryAreas: selectedSpecialties.slice(1).map((item) => item.name),
         otherSpecialty: otherSpecialty.trim() || null,
@@ -197,7 +198,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
           council_number: councilNumber.trim() || null,
           council_region: councilRegion.trim().toUpperCase() || null,
           primary_area: primaryArea,
-          primary_specialty_id: selectedSpecialtyIds[0] ?? null,
+          primary_specialty_id: primarySpecialtyId,
           specialty_ids: selectedSpecialtyIds,
           secondary_areas: selectedSpecialties.slice(1).map((item) => item.name),
         },
@@ -431,6 +432,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                         setCouncilNumber("");
                         setPrimaryArea("");
                         setSelectedSpecialtyIds([]);
+                        setPrimarySpecialtyId(null);
                         setOtherSpecialty("");
                       }}
                       placeholder="Pesquise sua profissão"
@@ -477,9 +479,55 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                     </div>
                   )}
                   <div className="space-y-2">
-                    <Label htmlFor="cm-specialty-search">
-                      Especialidades e subespecialidades *
-                    </Label>
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="cm-specialty-search">Especialidades e subespecialidades *</Label>
+                      <span className="text-xs font-semibold text-[#087f7b]" aria-live="polite">
+                        {selectedSpecialtyIds.length} selecionada{selectedSpecialtyIds.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                    {selectedSpecialties.length > 0 && (
+                      <div className="flex flex-wrap gap-2 rounded-xl border border-[#078f8b]/20 bg-[#f4fbfa] p-3" aria-label="Especialidades selecionadas">
+                        {selectedSpecialties.map((item) => (
+                          <span key={item.id} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#078f8b]/30 bg-white pl-3 pr-1 text-sm text-[#075f5c]">
+                            <button
+                              type="button"
+                              className="font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#078f8b]"
+                              onClick={() => {
+                                setPrimarySpecialtyId(item.id);
+                                setPrimaryArea(item.name);
+                              }}
+                              aria-label={`Definir ${item.name} como especialidade principal`}
+                              title="Definir como principal"
+                            >
+                              {primarySpecialtyId === item.id ? "★ " : "☆ "}{item.name}
+                            </button>
+                            <button
+                              type="button"
+                              className="grid h-7 w-7 place-items-center rounded-full text-lg hover:bg-[#dff3f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#078f8b]"
+                              aria-label={`Remover ${item.name}`}
+                              onClick={() => {
+                                const next = selectedSpecialtyIds.filter((id) => id !== item.id);
+                                setSelectedSpecialtyIds(next);
+                                if (primarySpecialtyId === item.id) {
+                                  const nextPrimary = specialties.find((specialty) => specialty.id === next[0]);
+                                  setPrimarySpecialtyId(nextPrimary?.id ?? null);
+                                  setPrimaryArea(nextPrimary?.name ?? "");
+                                }
+                              }}
+                            >×</button>
+                          </span>
+                        ))}
+                        <button
+                          type="button"
+                          className="min-h-9 px-2 text-xs font-semibold text-[#087f7b] underline underline-offset-4"
+                          onClick={() => {
+                            setSelectedSpecialtyIds([]);
+                            setPrimarySpecialtyId(null);
+                            setPrimaryArea("");
+                          }}
+                        >Limpar seleção</button>
+                      </div>
+                    )}
                     <Input
                       id="cm-specialty-search"
                       value={specialtySearch}
@@ -498,13 +546,14 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                                 ? selectedSpecialtyIds.filter((id) => id !== item.id)
                                 : [...selectedSpecialtyIds, item.id];
                               setSelectedSpecialtyIds(next);
-                              const primary = specialties.find(
-                                (specialty) => specialty.id === next[0],
-                              );
-                              setPrimaryArea(
-                                primary?.name ??
-                                  (otherSpecialty.trim() ? otherSpecialty.trim() : ""),
-                              );
+                              if (!active && !primarySpecialtyId) {
+                                setPrimarySpecialtyId(item.id);
+                                setPrimaryArea(item.name);
+                              } else if (active && primarySpecialtyId === item.id) {
+                                const nextPrimary = specialties.find((specialty) => specialty.id === next[0]);
+                                setPrimarySpecialtyId(nextPrimary?.id ?? null);
+                                setPrimaryArea(nextPrimary?.name ?? (otherSpecialty.trim() || ""));
+                              }
                             }}
                             className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${active ? "bg-[#dff3f1] text-[#067b78]" : "hover:bg-muted"}`}
                           >
@@ -524,8 +573,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Você pode selecionar duas ou mais opções. A primeira será considerada sua área
-                      principal.
+                      Selecione quantas forem necessárias. Use a estrela para definir opcionalmente a principal.
                     </p>
                   </div>
                   <div className="space-y-2 rounded-xl border border-dashed border-[#078f8b]/40 bg-[#f4fbfa] p-4">
