@@ -1,5 +1,5 @@
-import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 const RegistrationInput = z.object({
   eventId: z.string().uuid(),
@@ -28,8 +28,7 @@ export type PublicChrismedEvent = {
   registrationOpen: boolean;
 };
 
-export const listPublicChrismedEvents = createServerFn({ method: 'GET' }).handler(async () => {
-  const { supabase } = await import('@/integrations/supabase/client');
+export async function listPublicChrismedEvents() {
   const { data: events, error } = await supabase.rpc('chrismed_list_public_events' as never);
   if (error) throw new Error('Não foi possível carregar a agenda de eventos.');
 
@@ -52,13 +51,11 @@ export const listPublicChrismedEvents = createServerFn({ method: 'GET' }).handle
       registrationOpen: (opensAt === null || current >= opensAt) && (closesAt === null || current <= closesAt),
     } satisfies PublicChrismedEvent;
   });
-});
+}
 
-export const registerForChrismedEvent = createServerFn({ method: 'POST' })
-  .inputValidator((input: unknown) => RegistrationInput.parse(input))
-  .handler(async ({ data }) => {
+export async function registerForChrismedEvent(input: unknown) {
+    const data = RegistrationInput.parse(input);
     if (data.website) throw new Error('Solicitação inválida.');
-    const { supabase } = await import('@/integrations/supabase/client');
     const { data: result, error } = await supabase.rpc('chrismed_register_event' as never, {
       p_event_id: data.eventId,
       p_attendee_name: data.name,
@@ -77,4 +74,4 @@ export const registerForChrismedEvent = createServerFn({ method: 'POST' })
     }>)[0];
     if (!row) throw new Error('A inscrição não retornou confirmação.');
     return { id: row.registration_id, code: row.registration_code, status: row.registration_status };
-  });
+}

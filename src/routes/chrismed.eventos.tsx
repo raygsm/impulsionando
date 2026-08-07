@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
 import { ArrowRight, CalendarDays, CheckCircle2, Clock3, MapPin, Ticket, Users } from 'lucide-react';
 import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
@@ -25,8 +24,7 @@ const COPY = {
 function EventosPage() {
   const lang = useLang();
   const t = COPY[lang];
-  const list = useServerFn(listPublicChrismedEvents);
-  const { data: events = [], isLoading, isError } = useQuery({ queryKey: ['chrismed-public-events'], queryFn: () => list() });
+  const { data: events = [], isLoading, isError } = useQuery({ queryKey: ['chrismed-public-events'], queryFn: listPublicChrismedEvents });
 
   return <ChrismedShell><main className="chrismed-page-mustard min-h-[70vh]">
     <section className="border-b border-[var(--chrismed-mustard-deep)]/20"><div className="container max-w-5xl py-20 md:py-28">
@@ -53,12 +51,11 @@ function EmptyState({ title, text, contact }: { title: string; text: string; con
 }
 
 function EventCard({ event, copy, lang }: { event: PublicChrismedEvent; copy: typeof COPY[keyof typeof COPY]; lang: 'pt' | 'en' | 'es' }) {
-  const register = useServerFn(registerForChrismedEvent);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', quantity: 1, website: '' });
   const mutation = useMutation({
-    mutationFn: () => register({ data: { eventId: event.id, ...form } }),
+    mutationFn: () => registerForChrismedEvent({ eventId: event.id, ...form }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chrismed-public-events'] }),
   });
   const locale = lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : 'pt-BR';
