@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import chrismedShield from '@/assets/chrismed-shield-csa.jpg.asset.json';
+
+const CHRISMED_CREST_URL = '/brand/chrismed/crest.jpeg';
 
 /**
  * ChrismedPreloader — splash inicial no padrão Impulsionando:
@@ -39,7 +40,7 @@ export function ChrismedPreloader() {
         <div className="chrismed-preloader-halo absolute inset-[13px] rounded-full border border-[var(--chrismed-amber)]/45" />
         <div className="relative size-24 overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_36px_rgba(0,0,0,.38)] md:size-28">
           <img
-            src={chrismedShield.url}
+            src={CHRISMED_CREST_URL}
             alt=""
             className="h-full w-full select-none object-cover"
             draggable={false}

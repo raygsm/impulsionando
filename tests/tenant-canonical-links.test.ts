@@ -34,4 +34,18 @@ describe("tenant canonical links", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("keeps the CHRISMED shell and loaders independent from Lovable assets", () => {
+    const files = [
+      "src/components/chrismed/ChrismedShell.tsx",
+      "src/components/chrismed/ChrismedPreloader.tsx",
+      "src/components/app/RocketRouteLoader.tsx",
+    ];
+    const violations = files.filter((file) => {
+      const source = readFileSync(file, "utf8");
+      return source.includes(".asset.json") || source.includes("/__l5e/");
+    });
+
+    expect(violations).toEqual([]);
+  });
 });

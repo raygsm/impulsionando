@@ -1,7 +1,8 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Rocket } from "lucide-react";
-import chrismedShield from "@/assets/chrismed-shield-csa.jpg.asset.json";
+
+const CHRISMED_CREST_URL = "/brand/chrismed/crest.jpeg";
 
 /**
  * Overlay de carregamento entre rotas.
@@ -111,7 +112,7 @@ export function RocketRouteLoader() {
               <div className="absolute inset-[4px] rounded-full bg-[var(--chrismed-forest-deep)]" />
               <div className="relative size-[4.5rem] overflow-hidden rounded-full border border-white/20 bg-white md:size-20">
                 <img
-                  src={chrismedShield.url}
+                  src={CHRISMED_CREST_URL}
                   alt=""
                   className="h-full w-full select-none object-cover"
                   draggable={false}
