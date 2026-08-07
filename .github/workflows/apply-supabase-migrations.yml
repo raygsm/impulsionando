@@ -40,9 +40,9 @@ jobs:
           test "$SUPABASE_PROJECT_ID" = "$VITE_SUPABASE_PROJECT_ID"
           test "$SUPABASE_URL" = "https://${SUPABASE_PROJECT_ID}.supabase.co"
           test "$VITE_SUPABASE_URL" = "$SUPABASE_URL"
-          case "$PGUSER" in
+          case "${PGUSER}@${PGHOST}" in
             *"$SUPABASE_PROJECT_ID"*) ;;
-            *) echo "::error::PGUSER não pertence ao projeto esperado"; exit 1 ;;
+            *) echo "::error::Conexão Postgres não identifica o projeto esperado"; exit 1 ;;
           esac
           echo "Destino Supabase validado sem exibir credenciais."
 
