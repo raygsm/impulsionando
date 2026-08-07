@@ -1,0 +1,27 @@
+name: Verify CHRISMED Events Backend
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production event tables through Data API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          curl --fail-with-body --silent --show-error --max-time 20 \
+            "$SUPABASE_URL/rest/v1/chrismed_events?select=id&limit=1" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Accept: application/json" \
+            >/tmp/chrismed-events.json
+          grep -Eq '^\[[^]]*\]$' /tmp/chrismed-events.json
+          echo "CHRISMED events backend is reachable."
