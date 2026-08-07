@@ -36,6 +36,7 @@ import { SkipLink } from "@/components/impulsionando/SkipLink";
 
 
 function TenantSubdomainRedirect() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     if (typeof window === "undefined") return;
     const canonical = canonicalTenantHostRedirect(window.location);
@@ -63,7 +64,7 @@ function TenantSubdomainRedirect() {
     }
     // Tenant roots are internally rewritten by the server, keeping the
     // subdomain URL clean while still rendering the tenant landing page.
-  }, []);
+  }, [pathname]);
   return null;
 }
 

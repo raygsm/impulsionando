@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
+  chrismedInternalPathForPublicPath,
   deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
@@ -29,7 +30,7 @@ describe("canonicalTenantHostRedirect", () => {
       pathname: "/chrismed/agendar",
       search: "?utm_source=email",
       hash: "#form",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/agendar?utm_source=email#form");
+    })).toBe("https://chrismed.impulsionando.com.br/agendar?utm_source=email#form");
   });
 
   it("moves the legacy agenda host to the official tenant subdomain", () => {
@@ -37,7 +38,7 @@ describe("canonicalTenantHostRedirect", () => {
       ...base,
       hostname: "agenda.chrismed.com.br",
       pathname: "/chrismed/contato",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/contato");
+    })).toBe("https://chrismed.impulsionando.com.br/contato");
   });
 
   it("cleans the internal CHRISMED route from the canonical host", () => {
@@ -48,12 +49,26 @@ describe("canonicalTenantHostRedirect", () => {
     })).toBe("https://chrismed.impulsionando.com.br/");
   });
 
-  it("does not loop on nested CHRISMED paths at the canonical host", () => {
+  it("removes the internal prefix from nested paths at the canonical host", () => {
     expect(canonicalTenantHostRedirect({
       ...base,
       hostname: "chrismed.impulsionando.com.br",
       pathname: "/chrismed/agendar",
-    })).toBeNull();
+    })).toBe("https://chrismed.impulsionando.com.br/agendar");
+  });
+});
+
+describe("chrismedInternalPathForPublicPath", () => {
+  it("maps clean public paths to the internal CHRISMED route tree", () => {
+    expect(chrismedInternalPathForPublicPath("/internacional")).toBe("/chrismed/internacional");
+    expect(chrismedInternalPathForPublicPath("/agendar")).toBe("/chrismed/agendar");
+  });
+
+  it("keeps standalone and infrastructure paths untouched", () => {
+    expect(chrismedInternalPathForPublicPath("/auth")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/alth")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/_build/app.js")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/api/public/health")).toBeNull();
   });
 });
 

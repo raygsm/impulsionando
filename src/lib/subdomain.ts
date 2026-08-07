@@ -53,15 +53,32 @@ export function canonicalTenantHostRedirect(loc: {
   const isOfficialChrismedHost = host === "chrismed.impulsionando.com.br";
   const isLegacyChrismedHost =
     host === "agenda.chrismed.com.br" || host === "www.agenda.chrismed.com.br";
-  const isLegacyRootOnOfficialHost =
-    isOfficialChrismedHost && (path === "/chrismed" || path === "/chrismed/");
+  const isInternalPathOnOfficialHost = isOfficialChrismedHost && isChrismedPath;
 
   if (!isChrismedPath && !isLegacyChrismedHost) return null;
-  if (!isApex && !isLegacyChrismedHost && !isLegacyRootOnOfficialHost) return null;
+  if (!isApex && !isLegacyChrismedHost && !isInternalPathOnOfficialHost) return null;
 
   const proto = loc.protocol === "http:" ? "http:" : "https:";
-  const publicPath = path === "/chrismed" || path === "/chrismed/" ? "/" : path;
+  const strippedPath = isChrismedPath ? path.slice("/chrismed".length) : path;
+  const publicPath = strippedPath === "" || strippedPath === "/" ? "/" : strippedPath;
   return `${proto}//chrismed.impulsionando.com.br${publicPath}${loc.search}${loc.hash}`;
+}
+
+/**
+ * Maps clean CHRISMED subdomain URLs to the existing internal route tree.
+ * Static assets, APIs and standalone authentication routes remain untouched.
+ */
+export function chrismedInternalPathForPublicPath(pathname: string): string | null {
+  const path = pathname || "/";
+  if (path === "/") return "/chrismed";
+  if (path === "/chrismed" || path.startsWith("/chrismed/")) return null;
+  if (
+    path === "/alth" || path.startsWith("/alth/") ||
+    path === "/auth" || path.startsWith("/auth/") ||
+    path.startsWith("/api/") || path.startsWith("/_build/") ||
+    path.startsWith("/.well-known/") || /\.[a-z0-9]{2,8}$/i.test(path)
+  ) return null;
+  return `/chrismed${path}`;
 }
 
 /** Subdomínios que NÃO devem ser tratados como tenant. */
