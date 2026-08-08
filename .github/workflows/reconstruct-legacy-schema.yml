@@ -34,7 +34,9 @@ jobs:
           # confined to this disposable reconstruction database.
           cat > supabase/migrations/20260616232527_reconstruction_tenant_fixtures.sql <<'SQL'
           INSERT INTO public.companies (id, name)
-          VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliaria Garrido')
+          VALUES
+            ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliaria Garrido'),
+            ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED')
           ON CONFLICT (id) DO NOTHING;
           SQL
           cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
