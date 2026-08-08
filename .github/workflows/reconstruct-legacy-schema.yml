@@ -43,6 +43,10 @@ jobs:
           INSERT INTO public.niches (id, slug, name)
           VALUES ('a6696010-9178-4082-9a17-32e4378fc0b8', 'saude-colors-fixture', 'Saude Colors fixture')
           ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.billing_plans (code, name, recurring_amount)
+          VALUES ('full', 'Full fixture', 0)
+          ON CONFLICT (code) DO NOTHING;
           SQL
           cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
           INSERT INTO public.profiles (id, slug, name)
