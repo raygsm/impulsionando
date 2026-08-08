@@ -53,6 +53,14 @@ jobs:
             '{}'::jsonb, '{}'::jsonb, now(), now()
           ) ON CONFLICT (id) DO NOTHING;
 
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'legacy-consumer-fixture@example.invalid', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
           INSERT INTO public.companies (id, name, is_master)
           VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando legacy reference', false)
           ON CONFLICT (id) DO NOTHING;
