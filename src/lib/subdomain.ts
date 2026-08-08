@@ -38,41 +38,6 @@ export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "colorssaude.lovable.app": "/colors",
 };
 
-const CHRISMED_PUBLIC_ROUTE_ROOTS = new Set([
-  "agendar",
-  "app",
-  "checkout",
-  "clinica",
-  "consultorio",
-  "contato",
-  "domiciliar",
-  "dra-cristiane",
-  "especialidades",
-  "eventos",
-  "exames",
-  "faq",
-  "internacional",
-  "medicos",
-  "minha-conta",
-  "ocupacional",
-  "ofertas",
-  "privacidade",
-  "teleconsulta",
-]);
-
-/** Maps clean public CHRISMED paths to the internal TanStack route tree. */
-export function chrismedInternalPathForHost(hostname: string, pathname: string): string | null {
-  const host = hostname.toLowerCase().split(":")[0];
-  if (host !== "chrismed.impulsionando.com.br") return null;
-
-  const path = pathname || "/";
-  if (path === "/") return "/chrismed";
-  if (path === "/chrismed" || path.startsWith("/chrismed/")) return null;
-
-  const routeRoot = path.split("/")[1];
-  return CHRISMED_PUBLIC_ROUTE_ROOTS.has(routeRoot) ? `/chrismed${path}` : null;
-}
-
 /** Canonical host redirects for tenant landings that must not live on the apex. */
 export function canonicalTenantHostRedirect(loc: {
   hostname: string;
@@ -88,11 +53,14 @@ export function canonicalTenantHostRedirect(loc: {
   const isOfficialChrismedHost = host === "chrismed.impulsionando.com.br";
   const isLegacyChrismedHost =
     host === "agenda.chrismed.com.br" || host === "www.agenda.chrismed.com.br";
+  const isLegacyRootOnOfficialHost =
+    isOfficialChrismedHost && (path === "/chrismed" || path === "/chrismed/");
+
   if (!isChrismedPath && !isLegacyChrismedHost) return null;
-  if (!isApex && !isLegacyChrismedHost && !isOfficialChrismedHost) return null;
+  if (!isApex && !isLegacyChrismedHost && !isLegacyRootOnOfficialHost) return null;
 
   const proto = loc.protocol === "http:" ? "http:" : "https:";
-  const publicPath = isChrismedPath ? path.replace(/^\/chrismed(?=\/|$)/, "") || "/" : path;
+  const publicPath = path === "/chrismed" || path === "/chrismed/" ? "/" : path;
   return `${proto}//chrismed.impulsionando.com.br${publicPath}${loc.search}${loc.hash}`;
 }
 
