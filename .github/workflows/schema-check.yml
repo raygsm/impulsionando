@@ -80,6 +80,16 @@ jobs:
           CREATE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
           CREATE PUBLICATION supabase_realtime;
+          CREATE SCHEMA storage;
+          CREATE TABLE storage.objects (
+            id uuid PRIMARY KEY,
+            bucket_id text,
+            name text,
+            owner uuid,
+            metadata jsonb
+          );
+          CREATE FUNCTION storage.foldername(text) RETURNS text[]
+          LANGUAGE sql IMMUTABLE AS 'SELECT string_to_array($1, ''/'')[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
           SQL
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
             echo "▶️  Aplicando $(basename $f)..."
