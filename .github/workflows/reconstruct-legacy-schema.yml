@@ -29,6 +29,14 @@ jobs:
           mv supabase/migrations supabase/migrations_canonical
           mv supabase/migrations_legacy supabase/migrations
           rm -f supabase/migrations/README.md
+          # Reconstruct only the schema that predates the canonical production
+          # baseline. Later quarantined/duplicate files are audited separately.
+          for file in supabase/migrations/*.sql; do
+            base="$(basename "$file")"
+            if [[ "$base" > "20260730123239_" ]]; then
+              rm -f "$file"
+            fi
+          done
           # Legacy data seeds reference tenants that existed in the source
           # database but are not created by its migration history. Fixtures are
           # confined to this disposable reconstruction database.
