@@ -11,3 +11,10 @@ The active migration directory contains:
 - no duplicate CHRISMED migration versions.
 
 Do not move files back into the active directory without a reviewed schema diff and a successful remote dry-run.
+
+`20260804143000_chrismed_multiprofessional_onboarding.sql` is additionally
+quarantined because the official production schema does not contain its base
+tables (`companies`, `user_roles`, `agenda_professionals`, `agenda_schedules`
+and `agenda_blocks`) and its seed strings contain mojibake. Applying it before
+a reviewed, canonical foundation migration would fail or create an incomplete
+CHRISMED data model.
