@@ -1,0 +1,50 @@
+name: Reconstruct legacy schema (disposable)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Prepare isolated legacy migration set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mv supabase/migrations supabase/migrations_canonical
+          mv supabase/migrations_legacy supabase/migrations
+          rm -f supabase/migrations/README.md
+          echo "Legacy migrations to validate: $(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)"
+
+      - name: Reconstruct schema in disposable Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase start
+
+      - name: Inventory reconstructed schema
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase db dump --local --schema public --file reconstructed-public-schema.sql
+          grep -c '^CREATE TABLE' reconstructed-public-schema.sql | xargs -I{} echo "Public tables reconstructed: {}"
+
+      - name: Upload reconstructed schema
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconstructed-public-schema
+          path: reconstructed-public-schema.sql
+          if-no-files-found: error
+          retention-days: 3
