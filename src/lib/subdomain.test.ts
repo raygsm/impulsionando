@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
+  chrismedInternalPathForHost,
   deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
@@ -29,7 +30,7 @@ describe("canonicalTenantHostRedirect", () => {
       pathname: "/chrismed/agendar",
       search: "?utm_source=email",
       hash: "#form",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/agendar?utm_source=email#form");
+    })).toBe("https://chrismed.impulsionando.com.br/agendar?utm_source=email#form");
   });
 
   it("moves the legacy agenda host to the official tenant subdomain", () => {
@@ -37,7 +38,7 @@ describe("canonicalTenantHostRedirect", () => {
       ...base,
       hostname: "agenda.chrismed.com.br",
       pathname: "/chrismed/contato",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/contato");
+    })).toBe("https://chrismed.impulsionando.com.br/contato");
   });
 
   it("cleans the internal CHRISMED route from the canonical host", () => {
@@ -48,12 +49,27 @@ describe("canonicalTenantHostRedirect", () => {
     })).toBe("https://chrismed.impulsionando.com.br/");
   });
 
-  it("does not loop on nested CHRISMED paths at the canonical host", () => {
+  it("cleans nested internal CHRISMED paths at the canonical host", () => {
     expect(canonicalTenantHostRedirect({
       ...base,
       hostname: "chrismed.impulsionando.com.br",
       pathname: "/chrismed/agendar",
-    })).toBeNull();
+    })).toBe("https://chrismed.impulsionando.com.br/agendar");
+  });
+});
+
+describe("clean CHRISMED public routes", () => {
+  it("internally maps clean nested paths on the official host", () => {
+    expect(chrismedInternalPathForHost("chrismed.impulsionando.com.br", "/eventos"))
+      .toBe("/chrismed/eventos");
+    expect(chrismedInternalPathForHost("chrismed.impulsionando.com.br", "/ocupacional/agendar"))
+      .toBe("/chrismed/ocupacional/agendar");
+  });
+
+  it("keeps auth, admin and APIs outside the tenant route tree", () => {
+    expect(chrismedInternalPathForHost("chrismed.impulsionando.com.br", "/auth")).toBeNull();
+    expect(chrismedInternalPathForHost("chrismed.impulsionando.com.br", "/admin")).toBeNull();
+    expect(chrismedInternalPathForHost("chrismed.impulsionando.com.br", "/api/health")).toBeNull();
   });
 });
 

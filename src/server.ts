@@ -2,7 +2,11 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
+import {
+  canonicalTenantHostRedirect,
+  chrismedInternalPathForHost,
+  tenantLandingTargetForHost,
+} from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -114,11 +118,14 @@ export default {
 
       const handler = await getServerEntry();
       let routedRequest = request;
+      const chrismedInternalPath = chrismedInternalPathForHost(url.host, url.pathname);
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
-        url.pathname = tenantTarget;
+      const internalTarget = chrismedInternalPath ??
+        ((url.pathname === "/" || url.pathname === "") ? tenantTarget : null);
+      if (internalTarget) {
+        url.pathname = internalTarget;
         // Render the tenant landing page internally so the public URL remains
-        // the clean subdomain root (for example, / rather than /chrismed).
+        // clean (for example, /agendar rather than /chrismed/agendar).
         routedRequest = new Request(url, request);
       }
 
