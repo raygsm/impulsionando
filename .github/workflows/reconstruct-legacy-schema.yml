@@ -141,8 +141,22 @@ jobs:
           grep -c '^CREATE TABLE' reconstructed-public-schema-hardened.sql \
             | xargs -I{} echo "Public tables reconstructed: {}"
 
-      - name: Upload reconstructed schema
+      - name: Validate hardened candidate after canonical production baseline
         if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase stop --no-backup
+          mv supabase/migrations supabase/migrations_reconstruction_run
+          mv supabase/migrations_canonical supabase/migrations
+          supabase start
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file reconstructed-public-schema-hardened.sql \
+            > reconstructed-canonical-compatibility.txt 2>&1
+
+      - name: Upload reconstructed schema
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: reconstructed-public-schema
@@ -151,5 +165,6 @@ jobs:
             reconstructed-public-schema-hardened.sql
             reconstructed-security-before.txt
             reconstructed-security-after.txt
+            reconstructed-canonical-compatibility.txt
           if-no-files-found: error
           retention-days: 3
