@@ -2,6 +2,12 @@ name: Apply Supabase Migrations
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Somente validar o alvo e planejar as migracoes"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   apply:
@@ -27,11 +33,48 @@ jobs:
           version: latest
 
       - name: Verify Supabase target
-        run: node scripts/verify-supabase-target.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_PROJECT_ID"
+          test "$SUPABASE_PROJECT_ID" = "$VITE_SUPABASE_PROJECT_ID"
+          test "$SUPABASE_URL" = "https://${SUPABASE_PROJECT_ID}.supabase.co"
+          test "$VITE_SUPABASE_URL" = "$SUPABASE_URL"
+          case "${PGUSER}@${PGHOST}" in
+            *"$SUPABASE_PROJECT_ID"*) ;;
+            *)
+              echo "::error::O pooler configurado nao pertence ao projeto Supabase esperado."
+              exit 1
+              ;;
+          esac
 
       - name: Verify Supabase pooler connection
-        run: node scripts/verify-supabase-pooler.mjs
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const net = require('node:net');
+          const host = process.env.PGHOST;
+          const port = Number(process.env.PGPORT || 5432);
+          const socket = net.createConnection({ host, port });
+          const timer = setTimeout(() => socket.destroy(new Error('timeout')), 10000);
+          socket.once('connect', () => {
+            clearTimeout(timer);
+            console.log(`Conexao TCP validada em ${host}:${port}`);
+            socket.end();
+          });
+          socket.once('error', (error) => {
+            clearTimeout(timer);
+            console.error(`Falha ao conectar em ${host}:${port}: ${error.message}`);
+            process.exitCode = 1;
+          });
+          NODE
 
       - name: Apply migrations
+        if: ${{ !inputs.dry_run }}
         run: |
           supabase db push --include-all --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+
+      - name: Dry-run summary
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "Alvo e conectividade validados. Nenhuma migracao foi aplicada (dry_run=true)."
