@@ -53,14 +53,11 @@ export function canonicalTenantHostRedirect(loc: {
   const isOfficialChrismedHost = host === "chrismed.impulsionando.com.br";
   const isLegacyChrismedHost =
     host === "agenda.chrismed.com.br" || host === "www.agenda.chrismed.com.br";
-  const isLegacyRootOnOfficialHost =
-    isOfficialChrismedHost && (path === "/chrismed" || path === "/chrismed/");
-
   if (!isChrismedPath && !isLegacyChrismedHost) return null;
-  if (!isApex && !isLegacyChrismedHost && !isLegacyRootOnOfficialHost) return null;
+  if (!isApex && !isLegacyChrismedHost && !isOfficialChrismedHost) return null;
 
   const proto = loc.protocol === "http:" ? "http:" : "https:";
-  const publicPath = path === "/chrismed" || path === "/chrismed/" ? "/" : path;
+  const publicPath = isChrismedPath ? path.replace(/^\/chrismed(?=\/|$)/, "") || "/" : path;
   return `${proto}//chrismed.impulsionando.com.br${publicPath}${loc.search}${loc.hash}`;
 }
 
