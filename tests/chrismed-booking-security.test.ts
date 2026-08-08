@@ -6,6 +6,7 @@ const createPayment = readFileSync('supabase/functions/mpago-create-payment/inde
 const webhook = readFileSync('supabase/functions/mpago-webhook/index.ts', 'utf8');
 const booking = readFileSync('src/routes/chrismed.agendar.tsx', 'utf8');
 const professionalAuth = readFileSync('src/components/chrismed/ChrismedProfessionalAuth.tsx', 'utf8');
+const server = readFileSync('src/server.ts', 'utf8');
 
 describe('CHRISMED secure booking gate', () => {
   it('prevents concurrent bookings for the same professional and interval', () => {
@@ -46,5 +47,11 @@ describe('CHRISMED secure booking gate', () => {
     expect(professionalAuth).toContain('chrismed_terms_version');
     expect(professionalAuth).toContain('minLength={12}');
     expect(migration).toContain('capture_chrismed_professional_consent');
+  });
+
+  it('serves clean CHRISMED subdomain paths through internal tenant routes', () => {
+    expect(server).toContain('`/chrismed${url.pathname}`');
+    expect(server).toContain('url.pathname.slice("/chrismed".length)');
+    expect(server).toContain('/alth(?:\\/|$)');
   });
 });

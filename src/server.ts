@@ -106,16 +106,25 @@ export default {
       // Keep the CHRISMED public URL canonical at the subdomain root.
       if (
         url.hostname.toLowerCase() === "chrismed.impulsionando.com.br" &&
-        (url.pathname === "/chrismed" || url.pathname === "/chrismed/")
+        (url.pathname === "/chrismed" || url.pathname === "/chrismed/" || url.pathname.startsWith("/chrismed/"))
       ) {
-        url.pathname = "/";
+        url.pathname = url.pathname === "/chrismed" || url.pathname === "/chrismed/"
+          ? "/"
+          : url.pathname.slice("/chrismed".length);
         return applySecurityHeaders(Response.redirect(url, 308));
       }
 
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
+      const isChrismedHost = url.hostname.toLowerCase() === "chrismed.impulsionando.com.br";
+      const globalPath = /^(\/_build|\/assets|\/api|\/auth(?:\/|$)|\/alth(?:\/|$)|\/dashboard(?:\/|$)|\/agenda(?:\/|$)|\/favicon|\/robots\.txt$|\/sitemap\.xml$)/.test(url.pathname);
+      if (isChrismedHost && !globalPath) {
+        url.pathname = url.pathname === "/" || url.pathname === ""
+          ? "/chrismed"
+          : `/chrismed${url.pathname}`;
+        routedRequest = new Request(url, request);
+      } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
         // Render the tenant landing page internally so the public URL remains
         // the clean subdomain root (for example, / rather than /chrismed).
