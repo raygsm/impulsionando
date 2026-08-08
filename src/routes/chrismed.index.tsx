@@ -39,9 +39,8 @@ import {
 import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
 import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
-import consultorioComposite from '@/assets/chrismed/consultorio-composite.jpg.asset.json';
-
 const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
+const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio-corrected.png';
 
 
 export const Route = createFileRoute('/chrismed/')({
@@ -231,7 +230,7 @@ export function ChrismedHomePage() {
           </div>
           <figure className="overflow-hidden rounded-sm">
             <img
-              src={consultorioComposite.url}
+              src={CHRISMED_CONSULTORIO_URL}
               alt="Consultório CHRISMED em Copacabana — sala de espera reservada e sala clínica"
               className="w-full object-cover shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
               loading="lazy"
