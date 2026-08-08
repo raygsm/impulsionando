@@ -54,7 +54,7 @@ jobs:
           ) ON CONFLICT (id) DO NOTHING;
 
           INSERT INTO public.companies (id, name, is_master)
-          VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando', true)
+          VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando legacy reference', false)
           ON CONFLICT (id) DO NOTHING;
 
           INSERT INTO public.profiles (id, slug, name, is_master_profile)
