@@ -37,7 +37,7 @@ import {
 } from '@/components/chrismed/primitives';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 
-const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio.jpeg';
+const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio-corrected.png';
 const CHRISMED_DRA_CHRISTIANE_URL = '/brand/chrismed/dra-christiane-alencar.png';
 const CHRISMED_GMS_LOGO_URL = '/brand/chrismed/gms.jpg';
 

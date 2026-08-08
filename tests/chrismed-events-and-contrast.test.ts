@@ -21,7 +21,7 @@ describe('CHRISMED events and contrast contract', () => {
   });
 
   it('keeps event registrations isolated from clinical scheduling', () => {
-    expect(eventFunctions).toContain("from('chrismed_events' as never)");
+    expect(eventFunctions).toContain("rpc('chrismed_list_public_events' as never)");
     expect(eventFunctions).toContain("rpc('chrismed_register_event' as never");
     expect(eventFunctions).not.toMatch(/agenda_|appointment|patient|prontu/i);
     expect(migration).toContain('create table public.chrismed_events');

@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, MapPin, Clock, RefreshCw, CreditCard } from 'lucide-react';
 
-const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio.jpeg';
+const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio-corrected.png';
 
 export const Route = createFileRoute('/chrismed/consultorio')({
   head: () => ({
     meta: [
-      { title: 'Consulta no consultório — Copacabana · CrisMed' },
+      { title: 'Consulta no consultório — Copacabana · CHRISMED' },
       { name: 'description', content: 'Consulta presencial com a Dra. Cristiane Alencar em Copacabana, Rio de Janeiro. Agendamento online com pagamento via Mercado Pago.' },
-      { property: 'og:title', content: 'Consulta no consultório · CrisMed' },
+      { property: 'og:title', content: 'Consulta no consultório · CHRISMED' },
       { property: 'og:description', content: 'Atendimento presencial em consultório próprio em Copacabana, com agendamento e pagamento online.' },
     ],
   }),
