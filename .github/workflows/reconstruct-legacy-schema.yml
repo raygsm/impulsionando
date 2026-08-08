@@ -36,12 +36,17 @@ jobs:
           INSERT INTO public.companies (id, name)
           VALUES
             ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliaria Garrido'),
-            ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED')
+            ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED'),
+            ('5bdcdef4-f0dc-4453-b935-a192ad514938', 'RioMed')
           ON CONFLICT (id) DO NOTHING;
           SQL
           cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
           INSERT INTO public.profiles (id, slug, name)
           VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor')
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.profiles (id, slug, name)
+          VALUES ('cb7c1e7f-9083-4451-a132-b8b320e81b85', 'operador-riomed-fixture', 'Operador RioMed fixture')
           ON CONFLICT (id) DO NOTHING;
           SQL
           cat > supabase/migrations/20260621141708_reconstruction_master_fixtures.sql <<'SQL'
