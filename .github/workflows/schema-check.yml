@@ -62,6 +62,23 @@ jobs:
           PGPASSWORD: test
         run: |
           set -e
+          # Minimal Supabase-owned objects required to validate project SQL on
+          # a disposable upstream PostgreSQL container. Project migrations must
+          # never create or own these objects.
+          psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE anon NOLOGIN;
+          CREATE ROLE authenticated NOLOGIN;
+          CREATE ROLE service_role NOLOGIN;
+          CREATE SCHEMA auth;
+          CREATE TABLE auth.users (
+            id uuid PRIMARY KEY,
+            email text,
+            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
+          );
+          CREATE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          SQL
           for f in $(ls supabase/migrations/*.sql | sort); do
             echo "▶️  Aplicando $(basename $f)..."
             if ! psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
