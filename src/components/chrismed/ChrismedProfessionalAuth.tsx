@@ -182,7 +182,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
       metadata.is_impulsionando_staff === true ||
       metadata.platform_role === "super_admin";
     if (isMaster) {
-      window.location.assign("/admin");
+      window.location.assign("/chrismed/admin");
       return;
     }
     navigate({ to: "/dashboard" });
