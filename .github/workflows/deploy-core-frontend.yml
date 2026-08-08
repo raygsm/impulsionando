@@ -86,6 +86,32 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Sync server-only OpenAI secret
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$OPENAI_API_KEY"
+          key_file="$(mktemp)"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s' "$OPENAI_API_KEY" >"$key_file"
+          chmod 0600 "$key_file"
+          scp "$key_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-openai-key"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          key="$(cat /tmp/impulsionando-openai-key)"
+          rm -f /tmp/impulsionando-openai-key
+          tmp="$(mktemp)"
+          if sudo test -f /etc/impulsionando-core.env; then
+            sudo grep -v '^OPENAI_API_KEY=' /etc/impulsionando-core.env >"$tmp" || true
+          fi
+          printf 'OPENAI_API_KEY=%s\n' "$key" >>"$tmp"
+          sudo install -o root -g root -m 0600 "$tmp" /etc/impulsionando-core.env
+          rm -f "$tmp"
+          REMOTE
+
       - name: Upload release artifact and server configuration
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
@@ -104,8 +130,11 @@ jobs:
           DEPLOY_USER: ${{ secrets.VPS_USER }}
         run: |
           RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
+          # shellcheck disable=SC2029 # RELEASE_DIR is intentionally expanded locally.
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
           set -euo pipefail
+          PREVIOUS_RELEASE="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
+          printf '%s\n' "$PREVIOUS_RELEASE" | sudo tee /var/www/impulsionando-core/.previous-release >/dev/null
           mkdir -p "$RELEASE_DIR"
           tar -xzf /tmp/impulsionando-core-release.tgz -C "$RELEASE_DIR"
           cd "$RELEASE_DIR"
@@ -197,3 +226,38 @@ jobs:
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
           grep -qi "CHRISMED" /tmp/chrismed.html
+
+      - name: Roll back failed release
+        if: failure()
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          PREVIOUS_RELEASE="$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
+          if [ -z "$PREVIOUS_RELEASE" ] || [ ! -f "$PREVIOUS_RELEASE/.output/server/index.mjs" ]; then
+            echo "No valid previous release is available for rollback."
+            exit 45
+          fi
+
+          sudo ln -sfn "$PREVIOUS_RELEASE" /var/www/impulsionando-core/current
+          sudo systemctl restart impulsionando-core
+
+          if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
+            sudo docker exec impulsionando-core sh -c 'rm -rf /app/.output && mkdir -p /app/.output'
+            sudo docker cp "$PREVIOUS_RELEASE/.output/." impulsionando-core:/app/.output/
+            sudo docker restart impulsionando-core
+          fi
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 5 http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              sudo journalctl --no-pager -u impulsionando-core -n 100
+              exit 46
+            fi
+            sleep 1
+          done
+          REMOTE
