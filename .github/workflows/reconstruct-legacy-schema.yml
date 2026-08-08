@@ -1,0 +1,170 @@
+name: Reconstruct legacy schema (disposable)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/chrismed-phase1-stabilization
+    paths:
+      - .github/workflows/reconstruct-legacy-schema.yml
+      - scripts/audits/reconstructed-schema-hardening.sql
+      - scripts/audits/reconstructed-schema-security.sql
+
+permissions:
+  contents: read
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Prepare isolated legacy migration set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mv supabase/migrations supabase/migrations_canonical
+          mv supabase/migrations_legacy supabase/migrations
+          rm -f supabase/migrations/README.md
+          # Reconstruct only the schema that predates the canonical production
+          # baseline. Later quarantined/duplicate files are audited separately.
+          for file in supabase/migrations/*.sql; do
+            base="$(basename "$file")"
+            if [[ "$base" > "20260730123239_" ]]; then
+              rm -f "$file"
+            fi
+          done
+          # Legacy data seeds reference tenants that existed in the source
+          # database but are not created by its migration history. Fixtures are
+          # confined to this disposable reconstruction database.
+          cat > supabase/migrations/20260616232527_reconstruction_tenant_fixtures.sql <<'SQL'
+          INSERT INTO public.companies (id, name)
+          VALUES
+            ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliaria Garrido'),
+            ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED'),
+            ('5bdcdef4-f0dc-4453-b935-a192ad514938', 'RioMed')
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.niches (id, slug, name)
+          VALUES ('a6696010-9178-4082-9a17-32e4378fc0b8', 'saude-colors-fixture', 'Saude Colors fixture')
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.billing_plans (code, name, recurring_amount)
+          VALUES ('full', 'Full fixture', 0)
+          ON CONFLICT (code) DO NOTHING;
+          SQL
+          cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
+          INSERT INTO public.profiles (id, slug, name)
+          VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor')
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.profiles (id, slug, name)
+          VALUES ('cb7c1e7f-9083-4451-a132-b8b320e81b85', 'operador-riomed-fixture', 'Operador RioMed fixture')
+          ON CONFLICT (id) DO NOTHING;
+          SQL
+          cat > supabase/migrations/20260621141708_reconstruction_master_fixtures.sql <<'SQL'
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '3f2e2101-190d-44f2-8102-57dddfd34c91', 'raygs@hotmail.com', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'legacy-consumer-fixture@example.invalid', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '73285c6d-7c8a-421d-b94c-7f24a59f54a0', 'legacy-colors-admin-fixture@example.invalid', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.companies (id, name, is_master)
+          VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando legacy reference', false)
+          ON CONFLICT (id) DO NOTHING;
+
+          UPDATE public.profiles
+          SET slug = 'legacy-super-admin-' || substr(replace(id::text, '-', ''), 1, 8),
+              is_master_profile = false
+          WHERE slug = 'super-admin-impulsionando'
+            AND id <> '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4'::uuid;
+
+          INSERT INTO public.profiles (id, slug, name, is_master_profile)
+          VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true)
+          ON CONFLICT (id) DO NOTHING;
+          SQL
+          echo "Legacy migrations to validate: $(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)"
+
+      - name: Reconstruct schema in disposable Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase start
+
+      - name: Inventory reconstructed schema
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase db dump --local --schema public --file reconstructed-public-schema-raw.sql
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-security.sql \
+            > reconstructed-security-before.txt
+
+      - name: Harden candidate baseline
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-hardening.sql
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-security.sql \
+            > reconstructed-security-after.txt
+          supabase db dump --local --schema public --file reconstructed-public-schema-hardened.sql
+          grep -c '^CREATE TABLE' reconstructed-public-schema-hardened.sql \
+            | xargs -I{} echo "Public tables reconstructed: {}"
+
+      - name: Validate hardened candidate after canonical production baseline
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase stop --no-backup
+          mv supabase/migrations supabase/migrations_reconstruction_run
+          mv supabase/migrations_canonical supabase/migrations
+          supabase start
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file reconstructed-public-schema-hardened.sql \
+            > reconstructed-canonical-compatibility.txt 2>&1
+
+      - name: Upload reconstructed schema
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconstructed-public-schema
+          path: |
+            reconstructed-public-schema-raw.sql
+            reconstructed-public-schema-hardened.sql
+            reconstructed-security-before.txt
+            reconstructed-security-after.txt
+            reconstructed-canonical-compatibility.txt
+          if-no-files-found: error
+          retention-days: 3

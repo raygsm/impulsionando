@@ -74,8 +74,8 @@ jobs:
 
       - name: Start preview server
         run: |
-          (bun run preview --port 8080 > test-results/preview.log 2>&1 &) 
-          for i in $(seq 1 30); do
+          (bun run preview --port 8080 > test-results/preview.log 2>&1 &)
+          for _ in $(seq 1 30); do
             curl -sf http://localhost:8080 >/dev/null && break
             sleep 1
           done

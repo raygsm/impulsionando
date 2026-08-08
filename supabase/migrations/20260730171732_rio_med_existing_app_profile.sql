@@ -1,0 +1,1 @@
+update public.communication_tenants set timezone='America/La_Paz', updated_at=now() where slug='rio-med'; update public.communication_brands set domain='riomed.impulsionando.com.br', support_url='https://riomed.impulsionando.com.br/riomed/soporte', updated_at=now() where tenant_id=(select id from public.communication_tenants where slug='rio-med');

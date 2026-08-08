@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai';
-import { createLovableAiGatewayProvider } from './ai-gateway.server';
 
 type OliverMessage = { role: 'user' | 'assistant'; content: string };
 
@@ -226,7 +226,7 @@ Segurança clínica + precisão administrativa + experiência humana + resoluç�
 export const askOliver = createServerFn({ method: 'POST' })
   .inputValidator(validate)
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env.OPENAI_API_KEY;
     if (!key) {
       return {
         reply:
@@ -235,14 +235,18 @@ export const askOliver = createServerFn({ method: 'POST' })
       };
     }
 
-    const gateway = createLovableAiGatewayProvider(key);
+    const openai = createOpenAICompatible({
+      name: 'openai',
+      baseURL: 'https://api.openai.com/v1',
+      headers: { Authorization: `Bearer ${key}` },
+    });
     const contextNote = data.pathname
       ? `\n\n[Contexto: usuário está agora em ${data.pathname}. Idioma preferido: ${data.lang ?? 'pt'}.]`
       : '';
 
     try {
       const { text } = await generateText({
-        model: gateway('google/gemini-3-flash-preview'),
+        model: openai(process.env.CHRISMED_OLIVER_MODEL?.trim() || 'gpt-4o-mini'),
         system: SYSTEM_PROMPT + contextNote,
         messages: data.messages,
       });

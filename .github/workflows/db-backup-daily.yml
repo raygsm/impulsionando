@@ -63,10 +63,12 @@ jobs:
             -in "$FILE" -out "$ENC" -pass env:ENC_KEY
 
           ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
-          echo "$ENC_SHA  $ENC" > "${ENC}.sha256"
-          echo "raw_sha=$RAW_SHA" >> "${ENC}.sha256"
-          echo "raw_size=$SIZE" >> "${ENC}.sha256"
-          echo "created_at=$TS" >> "${ENC}.sha256"
+          {
+            echo "$ENC_SHA  $ENC"
+            echo "raw_sha=$RAW_SHA"
+            echo "raw_size=$SIZE"
+            echo "created_at=$TS"
+          } > "${ENC}.sha256"
 
           # Verificação local: decripta e compara SHA.
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
@@ -77,8 +79,8 @@ jobs:
           echo "Integridade OK."
 
           rm -f "$FILE"
-          echo "ENC_FILE=$ENC" >> $GITHUB_ENV
-          echo "SHA_FILE=${ENC}.sha256" >> $GITHUB_ENV
+          echo "ENC_FILE=$ENC" >> "$GITHUB_ENV"
+          echo "SHA_FILE=${ENC}.sha256" >> "$GITHUB_ENV"
 
       - name: Enviar backup para VPS (scp)
         uses: appleboy/scp-action@v0.1.7

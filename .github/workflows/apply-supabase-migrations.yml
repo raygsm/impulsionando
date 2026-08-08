@@ -18,9 +18,10 @@ jobs:
       PGHOST: ${{ secrets.PGHOST }}
       PGPORT: ${{ secrets.PGPORT }}
       PGUSER: ${{ secrets.PGUSER }}
-      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       PGDATABASE: ${{ secrets.PGDATABASE }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -72,9 +73,12 @@ jobs:
       - name: Apply migrations
         if: ${{ !inputs.dry_run }}
         run: |
-          supabase db push --include-all --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$PGPASSWORD"
+          supabase db push --linked --include-all
 
       - name: Dry-run summary
         if: ${{ inputs.dry_run }}
         run: |
-          echo "Alvo e conectividade validados. Nenhuma migracao foi aplicada (dry_run=true)."
+          supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$PGPASSWORD"
+          supabase db push --linked --dry-run --include-all
+          echo "Alvo, conectividade e plano de migracoes validados. Nenhuma migracao foi aplicada (dry_run=true)."
