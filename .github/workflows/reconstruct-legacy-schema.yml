@@ -117,14 +117,37 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          supabase db dump --local --schema public --file reconstructed-public-schema.sql
-          grep -c '^CREATE TABLE' reconstructed-public-schema.sql | xargs -I{} echo "Public tables reconstructed: {}"
+          supabase db dump --local --schema public --file reconstructed-public-schema-raw.sql
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-security.sql \
+            > reconstructed-security-before.txt
+
+      - name: Harden candidate baseline
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-hardening.sql
+          psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' \
+            --set ON_ERROR_STOP=1 \
+            --file scripts/audits/reconstructed-schema-security.sql \
+            > reconstructed-security-after.txt
+          supabase db dump --local --schema public --file reconstructed-public-schema-hardened.sql
+          grep -c '^CREATE TABLE' reconstructed-public-schema-hardened.sql \
+            | xargs -I{} echo "Public tables reconstructed: {}"
 
       - name: Upload reconstructed schema
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: reconstructed-public-schema
-          path: reconstructed-public-schema.sql
+          path: |
+            reconstructed-public-schema-raw.sql
+            reconstructed-public-schema-hardened.sql
+            reconstructed-security-before.txt
+            reconstructed-security-after.txt
           if-no-files-found: error
           retention-days: 3
