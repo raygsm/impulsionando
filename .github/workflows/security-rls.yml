@@ -52,10 +52,11 @@ jobs:
         run: |
           set -o pipefail
           bunx supabase@latest --version
-          # ERROR level fails the job; WARN is informational
-          bunx supabase@latest db lint --project-id "$SUPABASE_PROJECT_ID" --level error \
+          bunx supabase@latest link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+          # ERROR level fails the job; WARNING is informational.
+          bunx supabase@latest db lint --linked --level error --fail-on error \
             2>&1 | tee test-results/db-lint-errors.txt
-          bunx supabase@latest db lint --project-id "$SUPABASE_PROJECT_ID" --level warn \
+          bunx supabase@latest db lint --linked --level warning --fail-on none \
             2>&1 | tee test-results/db-lint-warn.txt || true
 
       - name: RLS regression suite (vitest)

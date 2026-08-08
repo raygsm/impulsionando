@@ -50,7 +50,7 @@ jobs:
             -p 5432:5432 \
             supabase/postgres:15.8.1.085
           for attempt in {1..30}; do
-            if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
+            if PGPASSWORD="test" psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
               echo "✅ Postgres pronto"
               break
             fi
