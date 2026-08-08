@@ -68,6 +68,19 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [technicalSupportEmail, setTechnicalSupportEmail] = useState("ti@chrismed.com.br");
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { data, error } = await supabase.rpc("get_chrismed_contact_emails" as never);
+      const row = (data as unknown as { technical_support_email?: string }[] | null)?.[0];
+      if (active && !error && row?.technical_support_email) {
+        setTechnicalSupportEmail(row.technical_support_email);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -340,7 +353,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
             className="h-12 w-auto object-contain lg:hidden"
           />
           <a
-            href="mailto:atendimento@chrismed.com.br"
+            href={`mailto:${technicalSupportEmail}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#087f7b]"
           >
             <HelpCircle className="h-4 w-4" />

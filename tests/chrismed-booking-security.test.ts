@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const migration = readFileSync('supabase/migrations/20260808213000_chrismed_secure_booking.sql', 'utf8');
+const communicationSettings = readFileSync('supabase/migrations/20260808223000_chrismed_communication_settings.sql', 'utf8');
 const createPayment = readFileSync('supabase/functions/mpago-create-payment/index.ts', 'utf8');
 const webhook = readFileSync('supabase/functions/mpago-webhook/index.ts', 'utf8');
 const booking = readFileSync('src/routes/chrismed.agendar.tsx', 'utf8');
 const professionalAuth = readFileSync('src/components/chrismed/ChrismedProfessionalAuth.tsx', 'utf8');
 const server = readFileSync('src/server.ts', 'utf8');
+const setup = readFileSync('src/routes/_authenticated/chrismed.setup.tsx', 'utf8');
 
 describe('CHRISMED secure booking gate', () => {
   it('prevents concurrent bookings for the same professional and interval', () => {
@@ -53,5 +55,18 @@ describe('CHRISMED secure booking gate', () => {
     expect(server).toContain('`/chrismed${url.pathname}`');
     expect(server).toContain('url.pathname.slice("/chrismed".length)');
     expect(server).toContain('/alth(?:\\/|$)');
+  });
+
+  it('routes patient and technical communication through tenant-editable settings', () => {
+    expect(communicationSettings).toContain("'comms.patient_email'");
+    expect(communicationSettings).toContain("'comms.technical_support_email'");
+    expect(communicationSettings).toContain('sac@chrismed.com.br');
+    expect(communicationSettings).toContain('ti@chrismed.com.br');
+    expect(communicationSettings).toContain('get_chrismed_contact_emails');
+    expect(webhook).toContain("rpc('get_chrismed_contact_emails')");
+    expect(webhook).toContain('from_email: patientChannelEmail');
+    expect(setup).toContain("settingKeys={['comms.patient_email', 'comms.technical_support_email']}");
+    expect(professionalAuth).toContain('technicalSupportEmail');
+    expect(professionalAuth).not.toContain('atendimento@chrismed.com.br');
   });
 });

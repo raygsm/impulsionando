@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, XCircle, RefreshCw, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { ClientSettingsPanel } from '@/components/core/ClientSettingsPanel';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -135,6 +136,19 @@ function ChrismedSetup() {
           </div>
         </CardContent>
       </Card>
+
+      <section className="space-y-3" aria-labelledby="communication-settings-title">
+        <div>
+          <h2 id="communication-settings-title" className="text-xl font-semibold">Canais de comunicação</h2>
+          <p className="text-sm text-muted-foreground">
+            Pacientes respondem ao SAC. Acesso, aplicativo e senhas são direcionados ao suporte técnico.
+          </p>
+        </div>
+        <ClientSettingsPanel
+          companyId={CHRISMED_COMPANY_ID}
+          settingKeys={['comms.patient_email', 'comms.technical_support_email']}
+        />
+      </section>
 
       <div className="space-y-3">
         {report?.checks.map((c) => (

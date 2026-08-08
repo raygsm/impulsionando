@@ -184,6 +184,8 @@ Deno.serve(async (req) => {
             if (appointmentError) throw appointmentError;
 
             if (appointment && nextAppointmentStatus === 'confirmed') {
+              const { data: contactRows } = await supabase.rpc('get_chrismed_contact_emails');
+              const patientChannelEmail = contactRows?.[0]?.patient_email ?? 'sac@chrismed.com.br';
               const basePayload = {
                 appointment_id: appointment.id,
                 first_name: appointment.patient_name.split(' ')[0] || 'cliente',
@@ -194,12 +196,14 @@ Deno.serve(async (req) => {
                 { event_code: 'appointment_confirmed', recipient: appointment.patient_email, available_at: new Date().toISOString(), idempotency_key: `appointment:${appointment.id}:confirmed:email` },
                 { event_code: 'appointment_reminder_24h', recipient: appointment.patient_email, available_at: new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 86400000)).toISOString(), idempotency_key: `appointment:${appointment.id}:reminder-24h:email` },
                 { event_code: 'appointment_reminder_2h', recipient: appointment.patient_email, available_at: new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 7200000)).toISOString(), idempotency_key: `appointment:${appointment.id}:reminder-2h:email` },
-                { event_code: 'appointment_confirmed_management', recipient: 'sac@chrismed.com.br', available_at: new Date().toISOString(), idempotency_key: `appointment:${appointment.id}:management:email` },
+                { event_code: 'appointment_confirmed_management', recipient: patientChannelEmail, available_at: new Date().toISOString(), idempotency_key: `appointment:${appointment.id}:management:email` },
               ];
               for (const job of jobs) {
                 await supabase.from('chrismed_communication_outbox').upsert({
                   company_id: CHRISMED_COMPANY_ID,
                   channel: 'email',
+                  from_email: patientChannelEmail,
+                  reply_to_email: patientChannelEmail,
                   payload: basePayload,
                   status: 'pending',
                   ...job,
