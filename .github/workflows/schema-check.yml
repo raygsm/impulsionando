@@ -89,7 +89,7 @@ jobs:
             metadata jsonb
           );
           CREATE FUNCTION storage.foldername(text) RETURNS text[]
-          LANGUAGE sql IMMUTABLE AS 'SELECT string_to_array($1, ''/'')[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
+          LANGUAGE sql IMMUTABLE AS 'SELECT (string_to_array($1, ''/''))[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
           SQL
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
             echo "▶️  Aplicando $(basename $f)..."
