@@ -1,15 +1,12 @@
 /**
- * /chrismed/agendar — Wave 1 (fluxo invertido, frontend-only).
+ * /chrismed/agendar — fluxo público com reserva transacional antes da cobrança.
  *
  * Ordem oficial: 1) Especialidade → 2) Médico → 3) Modalidade → 4) Unidade
  * → 5) Data + Horário (SEM login) → 6) Identificação → 7) Confirmação
  * → 8) Pagamento PIX (Mercado Pago, único ponto real hoje) → 9) Sucesso.
  *
- * Wave 1 usa dados-mock explicitados (`src/data/chrismed-mock.ts`) para
- * especialidade / médico / unidade / calendário / horário. Pagamento PIX
- * segue chamando `mpago-create-payment` real. Reserva transacional de
- * slot, lock, webhook idempotente e persistência de agendamento continuam
- * como Pendências Codex — marcadas no rodapé de cada passo.
+ * O backend sempre revalida profissional, oferta, agenda, bloqueios, preço,
+ * consentimentos e concorrência. Nenhuma cobrança é criada sem um hold válido.
  */
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -30,7 +27,6 @@ import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 import {
   CHRISMED_SPECIALTIES, CHRISMED_DOCTORS, CHRISMED_UNITS,
-  buildChrismedMockCalendar, CHRISMED_MOCK_NOTICE,
   type ChrismedModality, type ChrismedSpecialty, type ChrismedDoctor, type ChrismedUnit, type ChrismedDay, type ChrismedSlot,
 } from '@/data/chrismed-mock';
 
@@ -142,8 +138,11 @@ function ChrismedAgendarPage() {
   const [patient, setPatient] = useState({ first_name: '', last_name: '', email: '', doc: '', phone: '', cep: '' });
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loadingOfferings, setLoadingOfferings] = useState(true);
+  const [calendar, setCalendar] = useState<ChrismedDay[]>([]);
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
+  const [holdToken, setHoldToken] = useState<string | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -199,20 +198,56 @@ function ChrismedAgendarPage() {
     () => modality ? offerings.find((o) => o.modality === modality) ?? null : null,
     [modality, offerings],
   );
-  const durationMinutesByModality = useMemo(
-    () => Object.fromEntries(offerings.map((o) => [o.modality, o.duration_minutes])) as Partial<Record<ChrismedModality, number>>,
-    [offerings],
-  );
-
-  // Agenda dinâmica: recalcula quando modalidade/especialidade/duração real mudam.
-  const calendar = useMemo(
-    () => buildChrismedMockCalendar({
-      modality,
-      specialtySlug: specialty?.slug ?? null,
-      durationMinutesByModality,
-    }),
-    [durationMinutesByModality, modality, specialty?.slug],
-  );
+  // Disponibilidade real: somente horários derivados da agenda persistida.
+  useEffect(() => {
+    if (!doctor || !currentOffering) {
+      setCalendar([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingCalendar(true);
+    (async () => {
+      const from = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+      const { data, error } = await (supabase as any).rpc('list_chrismed_available_slots', {
+        p_professional_slug: doctor.slug,
+        p_offering_id: currentOffering.id,
+        p_from: from,
+        p_days: 42,
+      });
+      if (cancelled) return;
+      if (error) {
+        setCalendar([]);
+        toast.error('A agenda está temporariamente indisponível. Nenhuma cobrança será realizada.');
+        setLoadingCalendar(false);
+        return;
+      }
+      const byDay = new Map<string, ChrismedSlot[]>();
+      for (const row of (data ?? []) as Array<{ starts_at: string; ends_at: string }>) {
+        const starts = new Date(row.starts_at);
+        const ends = new Date(row.ends_at);
+        const iso = starts.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+        const time = starts.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = ends.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hour12: false });
+        const [slotHour, slotMinute] = time.split(':').map(Number);
+        const startsAtMinutes = slotHour * 60 + slotMinute;
+        const list = byDay.get(iso) ?? [];
+        list.push({ id: row.starts_at, time, endTime, state: 'available', occurrence: 1, startsAtMinutes, endsAtMinutes: startsAtMinutes + currentOffering.duration_minutes });
+        byDay.set(iso, list);
+      }
+      const days: ChrismedDay[] = [];
+      const base = new Date(`${from}T12:00:00`);
+      for (let offset = 0; offset < 42; offset += 1) {
+        const date = new Date(base);
+        date.setDate(base.getDate() + offset);
+        const iso = date.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+        const slots = byDay.get(iso) ?? [];
+        days.push({ iso, slots, state: slots.length ? 'available' : 'empty' });
+      }
+      setCalendar(days);
+      setLoadingCalendar(false);
+    })();
+    return () => { cancelled = true; };
+  }, [currentOffering, doctor]);
 
   // Ao trocar modalidade/especialidade, limpa data/horário selecionados para forçar nova escolha
   // dentro da nova agenda.
@@ -233,18 +268,19 @@ function ChrismedAgendarPage() {
     return { availableDays, availableSlots };
   }, [calendar]);
 
-  // PIX polling
+  // Polling do agendamento; a confirmação só vem do webhook assinado do MP.
   useEffect(() => {
-    if (!pixResult || pollStatus === 'approved') return;
+    if (!holdToken || pollStatus === 'approved') return;
     const interval = setInterval(async () => {
-      const { data } = await supabase.from('mpago_payments').select('status').eq('id', pixResult.payment_id).maybeSingle();
-      if (data?.status) {
-        setPollStatus(data.status);
-        if (data.status === 'approved') { clearInterval(interval); setStep('done'); toast.success('Pagamento confirmado!'); }
+      const { data } = await (supabase as any).rpc('get_chrismed_booking_status', { p_hold_token: holdToken });
+      const booking = Array.isArray(data) ? data[0] : data;
+      if (booking?.status) {
+        setPollStatus(booking.status);
+        if (booking.status === 'confirmed') { clearInterval(interval); setStep('done'); toast.success('Pagamento e consulta confirmados!'); }
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [pixResult, pollStatus]);
+  }, [holdToken, pollStatus]);
 
   // Filtros por escolha
   const doctorsForSpecialty = specialty
@@ -269,31 +305,45 @@ function ChrismedAgendarPage() {
   const selectedSlotLabel = selectedSlot ? formatSlotLabel(selectedSlot) : selectedTime ?? '—';
 
   async function handlePay() {
-    if (!currentOffering) {
-      toast.error('Selecione uma modalidade com preço configurado.');
+    if (!currentOffering || !doctor || !selectedDayIso || !selectedTime || !selectedSlot || !acceptedTerms) {
+      toast.error('Revise horário, profissional e aceite dos termos antes de continuar.');
       return;
     }
     setSubmitting(true);
     try {
+      const startsAt = selectedSlot.id;
+      const requestId = crypto.randomUUID();
+      const { data: holdData, error: holdError } = await (supabase as any).rpc('create_chrismed_booking_hold', {
+        p_request: {
+          offeringId: currentOffering.id,
+          professionalSlug: doctor.slug,
+          startsAt,
+          patientName: `${patient.first_name} ${patient.last_name}`.trim(),
+          patientEmail: patient.email,
+          patientPhone: patient.phone,
+          patientDocument: patient.doc,
+          accepted: true,
+          termsVersion: '2026-08-08',
+          privacyVersion: '2026-08-08',
+          locale: 'pt-BR',
+          requestId,
+        },
+      });
+      if (holdError) throw new Error(holdError.message);
+      const hold = Array.isArray(holdData) ? holdData[0] : holdData;
+      if (!hold?.hold_token) throw new Error('Não foi possível reservar esse horário.');
+      setHoldToken(hold.hold_token);
+
       const { data, error } = await supabase.functions.invoke('mpago-create-payment', {
         body: {
           company_id: CHRISMED_COMPANY_ID,
           payment_method: 'pix',
-          amount_cents: currentOffering.price_cents,
-          description: `CrisMed — ${specialty?.name} · ${doctor?.name} · ${selectedDayIso} ${selectedSlotLabel}`,
+          hold_token: hold.hold_token,
           payer: {
             email: patient.email,
             first_name: patient.first_name,
             last_name: patient.last_name || undefined,
             identification: patient.doc ? { type: 'CPF', number: patient.doc.replace(/\D/g, '') } : undefined,
-          },
-          context_type: 'chrismed_service_offering',
-          context_id: currentOffering.id,
-          metadata: {
-            offering_slug: currentOffering.slug, modality: currentOffering.modality,
-            wave1_mock: true, specialty: specialty?.slug, doctor: doctor?.slug, unit: unit?.slug,
-            requested_day: selectedDayIso, requested_time: selectedTime, requested_slot_id: selectedSlotId,
-            requested_end_time: selectedSlot?.endTime, requested_window_minutes: currentOffering.duration_minutes,
           },
         },
       });
@@ -814,7 +864,7 @@ function ChrismedAgendarPage() {
           </section>
         )}
 
-        <p className="mt-12 text-center text-[11px] text-[var(--chrismed-ink)]/50">{CHRISMED_MOCK_NOTICE}</p>
+        {loadingCalendar && <p className="mt-12 text-center text-sm text-[var(--chrismed-ink)]/70">Consultando disponibilidade segura…</p>}
       </div>
 
       {/* Sticky CTA bar mobile — contexto persistente + voltar + Oliver */}

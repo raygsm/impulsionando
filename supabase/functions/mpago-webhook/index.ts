@@ -6,6 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-signature, x-request-id',
 };
+const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
 async function verifySignature(secret: string, dataId: string, requestId: string, ts: string, v1: string): Promise<boolean> {
   try {
@@ -16,7 +17,10 @@ async function verifySignature(secret: string, dataId: string, requestId: string
     );
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(manifest));
     const hex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-    return hex === v1;
+    if (hex.length !== v1.length) return false;
+    let difference = 0;
+    for (let i = 0; i < hex.length; i += 1) difference |= hex.charCodeAt(i) ^ v1.charCodeAt(i);
+    return difference === 0;
   } catch { return false; }
 }
 
@@ -71,6 +75,13 @@ Deno.serve(async (req) => {
 
     if (signatureValid === false) {
       await logEvent('warn', 'assinatura inválida', { eventType, resourceId, mpEventId }, companyId);
+    }
+
+    if (companyId === CHRISMED_COMPANY_ID && signatureValid !== true) {
+      return new Response(JSON.stringify({ error: 'invalid webhook signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // 3. Persiste evento (idempotente)
@@ -156,6 +167,46 @@ Deno.serve(async (req) => {
             .eq('mp_payment_id', resourceId)
             .select()
             .maybeSingle();
+
+          if (updatedRows?.context_type === 'chrismed_appointment' && updatedRows.context_id) {
+            const nextAppointmentStatus = mpData.status === 'approved'
+              ? 'confirmed'
+              : ['rejected', 'cancelled', 'refunded', 'charged_back'].includes(mpData.status)
+                ? 'cancelled'
+                : 'pending_payment';
+            const { data: appointment, error: appointmentError } = await supabase
+              .from('chrismed_appointments')
+              .update({ status: nextAppointmentStatus, updated_at: new Date().toISOString() })
+              .eq('id', updatedRows.context_id)
+              .eq('payment_id', updatedRows.id)
+              .select('id,patient_name,patient_email,patient_phone,starts_at,ends_at,status')
+              .maybeSingle();
+            if (appointmentError) throw appointmentError;
+
+            if (appointment && nextAppointmentStatus === 'confirmed') {
+              const basePayload = {
+                appointment_id: appointment.id,
+                first_name: appointment.patient_name.split(' ')[0] || 'cliente',
+                starts_at: appointment.starts_at,
+                ends_at: appointment.ends_at,
+              };
+              const jobs = [
+                { event_code: 'appointment_confirmed', recipient: appointment.patient_email, available_at: new Date().toISOString(), idempotency_key: `appointment:${appointment.id}:confirmed:email` },
+                { event_code: 'appointment_reminder_24h', recipient: appointment.patient_email, available_at: new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 86400000)).toISOString(), idempotency_key: `appointment:${appointment.id}:reminder-24h:email` },
+                { event_code: 'appointment_reminder_2h', recipient: appointment.patient_email, available_at: new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 7200000)).toISOString(), idempotency_key: `appointment:${appointment.id}:reminder-2h:email` },
+                { event_code: 'appointment_confirmed_management', recipient: 'sac@chrismed.com.br', available_at: new Date().toISOString(), idempotency_key: `appointment:${appointment.id}:management:email` },
+              ];
+              for (const job of jobs) {
+                await supabase.from('chrismed_communication_outbox').upsert({
+                  company_id: CHRISMED_COMPANY_ID,
+                  channel: 'email',
+                  payload: basePayload,
+                  status: 'pending',
+                  ...job,
+                }, { onConflict: 'idempotency_key', ignoreDuplicates: true });
+              }
+            }
+          }
 
           // 4b. Se aprovado, enfileira confirmação por e-mail (e WhatsApp se houver telefone)
           if (mpData.status === 'approved' && updatedRows && companyId) {
@@ -250,8 +301,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error('Webhook error:', e);
     await logEvent('error', (e as Error)?.message ?? 'erro desconhecido', { stack: (e as Error)?.stack?.slice(0, 4000) ?? null }, null);
-    return new Response(JSON.stringify({ error: String(e) }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    // 200 para MP não reenviar infinitamente
+    return new Response(JSON.stringify({ error: 'webhook processing failed' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
 
