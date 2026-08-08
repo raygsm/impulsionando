@@ -13,6 +13,7 @@ import { ShieldCheck, Layers, Zap } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";
 import { isChrismedHost } from "@/lib/chrismed-professionals";
+import type { User } from "@supabase/supabase-js";
 
 /** Traduz mensagens comuns do Supabase Auth para PT-BR. */
 function traduzirErroAuth(msg: string | undefined | null): string {
@@ -125,9 +126,15 @@ function AuthPage() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
-  function goPostAuth() {
+  function goPostAuth(user?: User | null) {
     if (nextPath) {
       window.location.assign(nextPath);
+    } else if (
+      user?.app_metadata?.is_super_admin === true ||
+      user?.app_metadata?.is_impulsionando_staff === true ||
+      user?.app_metadata?.platform_role === "super_admin"
+    ) {
+      window.location.assign("/core");
     } else {
       navigate({ to: "/dashboard" });
     }
@@ -136,11 +143,11 @@ function AuthPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(traduzirErroAuth(error.message));
     toast.success("Bem-vindo!");
-    goPostAuth();
+    goPostAuth(data.user);
   }
 
 
@@ -160,7 +167,8 @@ function AuthPage() {
       if (result.redirected) return; // browser redireciona para Google
       // Token recebido e sessão setada
       toast.success("Bem-vindo!");
-      goPostAuth();
+      const { data } = await supabase.auth.getUser();
+      goPostAuth(data.user);
     } catch {
       toast.error("Erro de conexão. Tente novamente.");
     } finally {

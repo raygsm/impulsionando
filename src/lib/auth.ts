@@ -38,6 +38,14 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return null;
 
+  // app_metadata is issued by Auth and cannot be edited by the browser user.
+  // It keeps the master account operational even while tenant profile tables
+  // are being provisioned or recovered.
+  const metadata = userData.user.app_metadata ?? {};
+  const metadataSuperAdmin =
+    metadata.is_super_admin === true || metadata.platform_role === "super_admin";
+  const metadataStaff = metadataSuperAdmin || metadata.is_impulsionando_staff === true;
+
   const { data: memberships, error } = await supabase
     .from("user_profiles")
     .select(
@@ -46,11 +54,11 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
     .eq("user_id", userData.user.id)
     .eq("is_active", true);
 
-  if (error) throw error;
+  if (error && !metadataStaff) throw error;
 
   const list = (memberships ?? []) as unknown as MyMembership[];
-  const isSuperAdmin = list.some((m) => m.profiles?.slug === "super-admin-impulsionando");
-  const isImpulsionandoStaff = list.some((m) => m.profiles?.is_master_profile);
+  const isSuperAdmin = metadataSuperAdmin || list.some((m) => m.profiles?.slug === "super-admin-impulsionando");
+  const isImpulsionandoStaff = metadataStaff || list.some((m) => m.profiles?.is_master_profile);
 
   return { user: userData.user, memberships: list, isSuperAdmin, isImpulsionandoStaff };
 }
