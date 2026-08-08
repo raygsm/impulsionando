@@ -130,6 +130,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.VPS_USER }}
         run: |
           RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
+          # shellcheck disable=SC2029 # RELEASE_DIR is intentionally expanded locally.
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
           set -euo pipefail
           PREVIOUS_RELEASE="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
