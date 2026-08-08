@@ -11,7 +11,7 @@
  * slot, lock, webhook idempotente e persistência de agendamento continuam
  * como Pendências Codex — marcadas no rodapé de cada passo.
  */
-import { createFileRoute, useSearch } from '@tanstack/react-router';
+import { createFileRoute, Link, useSearch } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { zodValidator, fallback } from '@tanstack/zod-adapter';
 import { z } from 'zod';
@@ -145,6 +145,7 @@ function ChrismedAgendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);
   const [pollStatus, setPollStatus] = useState<string>('pending');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Aplica "Atendimento 360°" (tele + domiciliar) — 1 médico, 3 especialidades.
   function applyCare360(mod: 'telemedicina' | 'domiciliar') {
@@ -675,10 +676,26 @@ function ChrismedAgendarPage() {
                 ) : (
                   <p className="text-xs text-amber-700">Preço não configurado para esta modalidade. Fale com Oliver.</p>
                 )}
-                <p className="text-xs text-[var(--chrismed-mist)]">
-                  Ao continuar, você concorda com a política de cancelamento (reembolso integral com mais de 24h de antecedência). Termos completos e política de LGPD: <strong>versionamento Pendente Codex</strong>.
-                </p>
-                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={submitting || !currentOffering} onClick={handlePay}>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--chrismed-sand)] bg-white p-4 text-sm text-[var(--chrismed-graphite)]">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(event) => setAcceptedTerms(event.target.checked)}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--chrismed-forest)]"
+                  />
+                  <span>
+                    Li e aceito os{' '}
+                    <Link to="/chrismed/termos" target="_blank" className="font-semibold text-[var(--chrismed-forest-deep)] underline">
+                      Termos de Uso e Atendimento
+                    </Link>
+                    , a política de cancelamento e a{' '}
+                    <Link to="/chrismed/privacidade" target="_blank" className="font-semibold text-[var(--chrismed-forest-deep)] underline">
+                      Política de Privacidade e LGPD
+                    </Link>
+                    . Versão vigente: 2026-08-08.
+                  </span>
+                </label>
+                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={submitting || !currentOffering || !acceptedTerms} onClick={handlePay}>
                   {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
                   {currentOffering && currentOffering.price_cents === 0 ? 'Confirmar reserva (cortesia)' : 'Ir para pagamento PIX'}
                 </Button>
