@@ -34,11 +34,9 @@ jobs:
           echo "$changed"
           riomed=$(echo "$changed" | grep -E '(^|/)(riomed[._-]|.*riomed_)' || true)
           if [ -n "$riomed" ]; then
-            {
-              echo "riomed_files<<EOF"
-              echo "$riomed"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "riomed_files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$riomed" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Enforce policy
