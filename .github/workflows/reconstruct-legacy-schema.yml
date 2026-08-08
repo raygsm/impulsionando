@@ -57,6 +57,12 @@ jobs:
           VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando legacy reference', false)
           ON CONFLICT (id) DO NOTHING;
 
+          UPDATE public.profiles
+          SET slug = 'legacy-super-admin-' || substr(replace(id::text, '-', ''), 1, 8),
+              is_master_profile = false
+          WHERE slug = 'super-admin-impulsionando'
+            AND id <> '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4'::uuid;
+
           INSERT INTO public.profiles (id, slug, name, is_master_profile)
           VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true)
           ON CONFLICT (id) DO NOTHING;
