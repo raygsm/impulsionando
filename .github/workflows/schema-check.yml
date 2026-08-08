@@ -45,6 +45,7 @@ jobs:
       - name: Subir Postgres efêmero
         run: |
           docker run -d --name pg-test \
+            -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=test \
             -e POSTGRES_DB=test \
             -p 5432:5432 \
