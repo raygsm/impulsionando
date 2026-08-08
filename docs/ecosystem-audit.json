@@ -1,0 +1,3496 @@
+{
+  "generatedAt": "2026-08-02T19:19:49.351Z",
+  "source": "repositório local (sem presumir estado externo)",
+  "core": {
+    "unique": true,
+    "evidence": "Um único pacote impulsionando-core e um único registro oficial de tenants.",
+    "isolatedClients": []
+  },
+  "clients": [
+    {
+      "slug": "chrismed",
+      "name": "CHRISMED",
+      "route": "/chrismed"
+    },
+    {
+      "slug": "riomed",
+      "name": "RIOMED",
+      "route": "/riomed"
+    },
+    {
+      "slug": "colors",
+      "name": "Colors Saúde",
+      "route": "/colors"
+    },
+    {
+      "slug": "garrido",
+      "name": "Imobiliária Garrido",
+      "route": "/garrido"
+    },
+    {
+      "slug": "marocas",
+      "name": "Marocas",
+      "route": "/marocas"
+    },
+    {
+      "slug": "foodservice",
+      "name": "Food Service",
+      "route": "/foodservice"
+    },
+    {
+      "slug": "wmp",
+      "name": "WMP",
+      "route": "/wmp"
+    },
+    {
+      "slug": "whitelabel",
+      "name": "White Label Impulsionando",
+      "route": "/white-label"
+    }
+  ],
+  "projects": [
+    {
+      "name": "CHRISMED",
+      "slug": "chrismed",
+      "coreRoute": "/chrismed"
+    },
+    {
+      "name": "RIOMED",
+      "slug": "riomed",
+      "coreRoute": "/riomed"
+    },
+    {
+      "name": "Colors Saúde",
+      "slug": "colors",
+      "coreRoute": "/colors"
+    },
+    {
+      "name": "Imobiliária Garrido",
+      "slug": "garrido",
+      "coreRoute": "/garrido"
+    },
+    {
+      "name": "Marocas",
+      "slug": "marocas",
+      "coreRoute": "/marocas"
+    },
+    {
+      "name": "Food Service",
+      "slug": "foodservice",
+      "coreRoute": "/foodservice"
+    },
+    {
+      "name": "WMP",
+      "slug": "wmp",
+      "coreRoute": "/wmp"
+    },
+    {
+      "name": "White Label Impulsionando",
+      "slug": "whitelabel",
+      "coreRoute": "/white-label"
+    }
+  ],
+  "domains": [
+    "agenda.chrismed.com.br",
+    "ai.gateway.lovable.dev",
+    "airgo.bio",
+    "api.focusnfe.com.br",
+    "api.github.com",
+    "api.impulsionando.com.br",
+    "api.mercadopago.com",
+    "api.openai.com",
+    "api.qrserver.com",
+    "api.whatsapp.com",
+    "api.z-api.io",
+    "app.impulsionando.com.br",
+    "cdn.paddle.com",
+    "chrismed.com.br",
+    "chrismed.impulsionando.com.br",
+    "chrismed.lovable.app",
+    "cloudflare-dns.com",
+    "colors.impulsionando.com.br",
+    "connector-gateway.lovable.dev",
+    "developer.z-api.io",
+    "developers.hostinger.com",
+    "dnschecker.org",
+    "docs.lovable.dev",
+    "empresa.com.br",
+    "example.com",
+    "example.invalid",
+    "exemplo.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "g.page",
+    "grupocolors.com.br",
+    "homologacao.focusnfe.com.br",
+    "hooks.slack.com",
+    "http2.mlstatic.com",
+    "images.unsplash.com",
+    "imobiliaria.garrido.impulsionando.com.br",
+    "impulsionando.app.n8n.cloud",
+    "impulsionando.com.br",
+    "impulsionando.lovable.app",
+    "impulsionandobrasil.com.br",
+    "instagram.com",
+    "maps.google.com",
+    "mesanopau.com.br",
+    "meuairgo.com.br",
+    "mpago.la",
+    "n8n.impulsionando.com.br",
+    "n8n.suaempresa.com",
+    "paddle.net",
+    "picsum.photos",
+    "project--d5a31290-577c-4ca5-895e-72d4b8643439.lovable.app",
+    "rastreamento.correios.com.br",
+    "registro.br",
+    "riomed.impulsionando.com.br",
+    "schema.org",
+    "sdk.mercadopago.com",
+    "search.google.com",
+    "seu-dominio.com",
+    "sistema.impulsionando.com.br",
+    "superbambam.com.br",
+    "supergreenblack.com.br",
+    "supersoshair.com.br",
+    "supersossleep.com.br",
+    "viacep.com.br",
+    "wa.me",
+    "www.doctoralia.com.br",
+    "www.google.com",
+    "www.googletagmanager.com",
+    "www.impulsionando.com.br",
+    "www.instagram.com",
+    "www.mercadopago.com.br",
+    "www.paddle.com",
+    "www.sitemaps.org",
+    "www.tiktok.com",
+    "www.w3.org",
+    "www.whatsmydns.net",
+    "www.youtube.com"
+  ],
+  "dashboards": [
+    "/_authenticated/admin/clientes/:slug/painel",
+    "/_authenticated/admin/clientes/riomed/dashboard",
+    "/_authenticated/admin/clientes/riomed/master-dashboard",
+    "/_authenticated/admin/notifications-cockpit",
+    "/_authenticated/admin/realestate-cockpit",
+    "/_authenticated/bi",
+    "/_authenticated/bi/company",
+    "/_authenticated/bi/index",
+    "/_authenticated/bi/master",
+    "/_authenticated/bi/niches",
+    "/_authenticated/commercial/cockpit",
+    "/_authenticated/contabilidade/cockpit",
+    "/_authenticated/core/marketing/dashboard",
+    "/_authenticated/dashboard",
+    "/_authenticated/educacao/dashboard",
+    "/_authenticated/empresa/talentos/dashboard",
+    "/_authenticated/finance/cockpit",
+    "/_authenticated/marketing/cockpit",
+    "/_authenticated/marocas/cockpit",
+    "/_authenticated/marocas/cockpit/notificacoes",
+    "/_authenticated/marocas/cockpit/relatorio",
+    "/_authenticated/marocas/cockpit/relatorios-enviados",
+    "/_authenticated/operations/cockpit",
+    "/_authenticated/privacy/cockpit",
+    "/_authenticated/realestate/cockpit",
+    "/_authenticated/support/cockpit",
+    "/_authenticated/white-label/cockpit",
+    "/api/public/painel/funnel-hit",
+    "/api/public/painel/legacy-hit",
+    "/colors/painel"
+  ],
+  "administrativeUrls": [
+    "/admin/login",
+    "/admin/manutencao",
+    "/admin/seo",
+    "/app"
+  ],
+  "publicUrls": [
+    "/[/]lovable/oauth/consent",
+    "/[/mcp]/invoke-tool/:tool",
+    "/[/mcp]/list-tools",
+    "/[/well-known]/oauth-protected-resource",
+    "/__root",
+    "/_authenticated/access-profiles",
+    "/_authenticated/access-profiles/matrix",
+    "/_authenticated/adm",
+    "/_authenticated/adm/agentes",
+    "/_authenticated/adm/master",
+    "/_authenticated/admin/acoes",
+    "/_authenticated/admin/action-center",
+    "/_authenticated/admin/adoption-usage",
+    "/_authenticated/admin/affiliates-cockpit-health",
+    "/_authenticated/admin/affiliates-health",
+    "/_authenticated/admin/agenda-health",
+    "/_authenticated/admin/agenda-operations-health",
+    "/_authenticated/admin/agenda-ops-health",
+    "/_authenticated/admin/agenda-resources-health",
+    "/_authenticated/admin/ai-automation-health",
+    "/_authenticated/admin/ai-projects-health",
+    "/_authenticated/admin/attribution",
+    "/_authenticated/admin/audit-security-health",
+    "/_authenticated/admin/audit-trail",
+    "/_authenticated/admin/auditoria/logs",
+    "/_authenticated/admin/billing",
+    "/_authenticated/admin/billing-contracts",
+    "/_authenticated/admin/billing-health",
+    "/_authenticated/admin/billing-policy",
+    "/_authenticated/admin/branding",
+    "/_authenticated/admin/brewery-clube-health",
+    "/_authenticated/admin/catalog-analytics",
+    "/_authenticated/admin/catalog-intents",
+    "/_authenticated/admin/catalogo-matriz",
+    "/_authenticated/admin/churn-radar",
+    "/_authenticated/admin/churn-risk",
+    "/_authenticated/admin/clientes/:slug",
+    "/_authenticated/admin/clientes/:slug/auditoria",
+    "/_authenticated/admin/clientes/:slug/automacoes",
+    "/_authenticated/admin/clientes/:slug/cerebro-ia",
+    "/_authenticated/admin/clientes/:slug/configuracoes",
+    "/_authenticated/admin/clientes/:slug/crm",
+    "/_authenticated/admin/clientes/:slug/dados",
+    "/_authenticated/admin/clientes/:slug/dominio",
+    "/_authenticated/admin/clientes/:slug/financeiro",
+    "/_authenticated/admin/clientes/:slug/index",
+    "/_authenticated/admin/clientes/:slug/logs",
+    "/_authenticated/admin/clientes/:slug/mercado-pago",
+    "/_authenticated/admin/clientes/:slug/modulos",
+    "/_authenticated/admin/clientes/:slug/painel",
+    "/_authenticated/admin/clientes/:slug/plano",
+    "/_authenticated/admin/clientes/:slug/publicacao",
+    "/_authenticated/admin/clientes/colors/vendas/importar",
+    "/_authenticated/admin/clientes/riomed",
+    "/_authenticated/admin/clientes/riomed/agentes",
+    "/_authenticated/admin/clientes/riomed/assistencia",
+    "/_authenticated/admin/clientes/riomed/assistente",
+    "/_authenticated/admin/clientes/riomed/automacao",
+    "/_authenticated/admin/clientes/riomed/busca-ia",
+    "/_authenticated/admin/clientes/riomed/carrinhos",
+    "/_authenticated/admin/clientes/riomed/comissoes",
+    "/_authenticated/admin/clientes/riomed/configuracoes-campos",
+    "/_authenticated/admin/clientes/riomed/crm",
+    "/_authenticated/admin/clientes/riomed/dashboard",
+    "/_authenticated/admin/clientes/riomed/dashboards",
+    "/_authenticated/admin/clientes/riomed/dominio",
+    "/_authenticated/admin/clientes/riomed/estoque-almoxarifados",
+    "/_authenticated/admin/clientes/riomed/financeiro",
+    "/_authenticated/admin/clientes/riomed/fiscal",
+    "/_authenticated/admin/clientes/riomed/governanca",
+    "/_authenticated/admin/clientes/riomed/implantacao",
+    "/_authenticated/admin/clientes/riomed/importacoes",
+    "/_authenticated/admin/clientes/riomed/jornadas",
+    "/_authenticated/admin/clientes/riomed/locacao",
+    "/_authenticated/admin/clientes/riomed/logistica",
+    "/_authenticated/admin/clientes/riomed/marketing",
+    "/_authenticated/admin/clientes/riomed/marketplace",
+    "/_authenticated/admin/clientes/riomed/master-dashboard",
+    "/_authenticated/admin/clientes/riomed/n8n",
+    "/_authenticated/admin/clientes/riomed/operacoes",
+    "/_authenticated/admin/clientes/riomed/parceiros",
+    "/_authenticated/admin/clientes/riomed/pedidos",
+    "/_authenticated/admin/clientes/riomed/permissoes",
+    "/_authenticated/admin/clientes/riomed/portal",
+    "/_authenticated/admin/clientes/riomed/pos",
+    "/_authenticated/admin/clientes/riomed/pos-relatorio",
+    "/_authenticated/admin/clientes/riomed/precos-listas",
+    "/_authenticated/admin/clientes/riomed/produtos",
+    "/_authenticated/admin/clientes/riomed/relatorios",
+    "/_authenticated/admin/clientes/riomed/routing",
+    "/_authenticated/admin/clientes/riomed/vendedores",
+    "/_authenticated/admin/clube",
+    "/_authenticated/admin/cobrancas",
+    "/_authenticated/admin/cockpit-tenants",
+    "/_authenticated/admin/cofre-credenciais",
+    "/_authenticated/admin/cohort-retention",
+    "/_authenticated/admin/command-center",
+    "/_authenticated/admin/comms-health",
+    "/_authenticated/admin/community-health",
+    "/_authenticated/admin/compliance-health",
+    "/_authenticated/admin/comunicacao",
+    "/_authenticated/admin/comunicacoes",
+    "/_authenticated/admin/config-catalog-health",
+    "/_authenticated/admin/consumer-journey-health",
+    "/_authenticated/admin/contab-cockpit-health",
+    "/_authenticated/admin/contab-health",
+    "/_authenticated/admin/conversion-funnel",
+    "/_authenticated/admin/credentials-vault",
+    "/_authenticated/admin/crm-funnel-health",
+    "/_authenticated/admin/crm-health",
+    "/_authenticated/admin/cron-registry",
+    "/_authenticated/admin/customer-success",
+    "/_authenticated/admin/data-quality",
+    "/_authenticated/admin/deploy-status",
+    "/_authenticated/admin/dns-guide",
+    "/_authenticated/admin/documents-files-health",
+    "/_authenticated/admin/dominios",
+    "/_authenticated/admin/ecosystem-marketplace-health",
+    "/_authenticated/admin/educ-talentos",
+    "/_authenticated/admin/education-polos-health",
+    "/_authenticated/admin/ehr-clinical-health",
+    "/_authenticated/admin/ehr-compliance",
+    "/_authenticated/admin/env-diagnostics",
+    "/_authenticated/admin/events-health",
+    "/_authenticated/admin/events-ticketing-health",
+    "/_authenticated/admin/executive-briefing",
+    "/_authenticated/admin/executivo",
+    "/_authenticated/admin/expansion-engine",
+    "/_authenticated/admin/expansion-radar",
+    "/_authenticated/admin/faturamento",
+    "/_authenticated/admin/finance-health",
+    "/_authenticated/admin/financeiro-consolidado-v2",
+    "/_authenticated/admin/fiscal",
+    "/_authenticated/admin/fiscal-health",
+    "/_authenticated/admin/flags-tenants",
+    "/_authenticated/admin/funil-360",
+    "/_authenticated/admin/funil-reguas",
+    "/_authenticated/admin/funnel-fallbacks",
+    "/_authenticated/admin/governance-lgpd-health",
+    "/_authenticated/admin/growth-funnel-health",
+    "/_authenticated/admin/health",
+    "/_authenticated/admin/health-score",
+    "/_authenticated/admin/imobiliaria",
+    "/_authenticated/admin/impersonation-audit",
+    "/_authenticated/admin/impersonation-log",
+    "/_authenticated/admin/impulsionito/centro-inteligencia",
+    "/_authenticated/admin/inbox-eventos",
+    "/_authenticated/admin/inbox-unificada",
+    "/_authenticated/admin/incidents",
+    "/_authenticated/admin/integracoes/mercado-pago",
+    "/_authenticated/admin/integracoes/n8n",
+    "/_authenticated/admin/integrations-automation-health",
+    "/_authenticated/admin/inventory-health",
+    "/_authenticated/admin/jobs-queues-reliability-health",
+    "/_authenticated/admin/lifecycle",
+    "/_authenticated/admin/loyalty-clube-health",
+    "/_authenticated/admin/maintenance",
+    "/_authenticated/admin/marketing-health",
+    "/_authenticated/admin/marketplace-b2b-health",
+    "/_authenticated/admin/marketplace-health",
+    "/_authenticated/admin/marketplace-ops",
+    "/_authenticated/admin/marocas-health",
+    "/_authenticated/admin/marocas-ops-health",
+    "/_authenticated/admin/master-hub",
+    "/_authenticated/admin/menu-manager",
+    "/_authenticated/admin/mercadopago-billing-health",
+    "/_authenticated/admin/modulos-recursos",
+    "/_authenticated/admin/modulos/clonagem",
+    "/_authenticated/admin/mpago-eventos",
+    "/_authenticated/admin/n8n-console",
+    "/_authenticated/admin/n8n-niches",
+    "/_authenticated/admin/niche-matrix",
+    "/_authenticated/admin/niche-plans",
+    "/_authenticated/admin/nichos",
+    "/_authenticated/admin/notification-deliverability-health",
+    "/_authenticated/admin/notification-delivery",
+    "/_authenticated/admin/notifications-cockpit",
+    "/_authenticated/admin/onboarding-checklist",
+    "/_authenticated/admin/onboarding-provisioning-health",
+    "/_authenticated/admin/onda-y",
+    "/_authenticated/admin/onda-y/crm-reguas",
+    "/_authenticated/admin/onda-y/fretes",
+    "/_authenticated/admin/onda-y/prorata",
+    "/_authenticated/admin/onda-y/setores",
+    "/_authenticated/admin/operacoes-automacoes",
+    "/_authenticated/admin/payouts-monetization-health",
+    "/_authenticated/admin/peer-benchmark",
+    "/_authenticated/admin/pix-pendentes",
+    "/_authenticated/admin/postmortems",
+    "/_authenticated/admin/presales-health",
+    "/_authenticated/admin/pricing-intelligence",
+    "/_authenticated/admin/projetos-paralelos",
+    "/_authenticated/admin/qualidade",
+    "/_authenticated/admin/rbac",
+    "/_authenticated/admin/real-estate-health",
+    "/_authenticated/admin/real-estate-ops-health",
+    "/_authenticated/admin/realestate-cockpit",
+    "/_authenticated/admin/realestate-health",
+    "/_authenticated/admin/reliability",
+    "/_authenticated/admin/reliability-alerts",
+    "/_authenticated/admin/restaurant-health",
+    "/_authenticated/admin/revenue-forecast",
+    "/_authenticated/admin/revenue-quality",
+    "/_authenticated/admin/runtime-uptime-health",
+    "/_authenticated/admin/sales-pos-health",
+    "/_authenticated/admin/security-compliance",
+    "/_authenticated/admin/seguranca-continuidade",
+    "/_authenticated/admin/sla-compliance",
+    "/_authenticated/admin/sla-mttr",
+    "/_authenticated/admin/status-subscribers",
+    "/_authenticated/admin/status-webhooks",
+    "/_authenticated/admin/suporte-pro",
+    "/_authenticated/admin/support-ticketing-health",
+    "/_authenticated/admin/talentos-cockpit-health",
+    "/_authenticated/admin/tax-compliance",
+    "/_authenticated/admin/tenant-360",
+    "/_authenticated/admin/tenant-identity-health",
+    "/_authenticated/admin/tenant-lifecycle",
+    "/_authenticated/admin/tenant/:id",
+    "/_authenticated/admin/tenants",
+    "/_authenticated/admin/tenants-editor",
+    "/_authenticated/admin/treasury-forecast",
+    "/_authenticated/admin/trial-demo-health",
+    "/_authenticated/admin/trial-onboarding-health",
+    "/_authenticated/admin/trials",
+    "/_authenticated/admin/unit-economics",
+    "/_authenticated/admin/uptime",
+    "/_authenticated/admin/vendor-performance",
+    "/_authenticated/admin/vitrine",
+    "/_authenticated/admin/vitrine-diagnostico",
+    "/_authenticated/admin/vitrine-elegibilidade",
+    "/_authenticated/admin/vitrine-legal-health",
+    "/_authenticated/admin/whatsapp-metrics",
+    "/_authenticated/admin/white-label-tenants",
+    "/_authenticated/admin/whitelabel-health",
+    "/_authenticated/affiliates",
+    "/_authenticated/affiliates/affiliates",
+    "/_authenticated/affiliates/bumps",
+    "/_authenticated/affiliates/commissions",
+    "/_authenticated/affiliates/coproducers",
+    "/_authenticated/affiliates/coupons",
+    "/_authenticated/affiliates/crm",
+    "/_authenticated/affiliates/crosssells",
+    "/_authenticated/affiliates/index",
+    "/_authenticated/affiliates/links",
+    "/_authenticated/affiliates/managers",
+    "/_authenticated/affiliates/offers",
+    "/_authenticated/affiliates/payouts",
+    "/_authenticated/affiliates/plans",
+    "/_authenticated/affiliates/products",
+    "/_authenticated/affiliates/reports",
+    "/_authenticated/affiliates/sales",
+    "/_authenticated/affiliates/upsells",
+    "/_authenticated/affiliates/wallet",
+    "/_authenticated/agenda",
+    "/_authenticated/agenda/appointments",
+    "/_authenticated/agenda/cliente",
+    "/_authenticated/agenda/gestor",
+    "/_authenticated/agenda/index",
+    "/_authenticated/agenda/professionals",
+    "/_authenticated/agenda/profissional",
+    "/_authenticated/agenda/schedules",
+    "/_authenticated/agenda/services",
+    "/_authenticated/agenda/waitlist",
+    "/_authenticated/ajuda",
+    "/_authenticated/area-cliente",
+    "/_authenticated/area-clube",
+    "/_authenticated/area-clube/notificacoes",
+    "/_authenticated/assinatura/checkout/:plano",
+    "/_authenticated/audit",
+    "/_authenticated/auditoria",
+    "/_authenticated/automacoes",
+    "/_authenticated/bar/marketplace",
+    "/_authenticated/bar/marketplace/novo-pedido",
+    "/_authenticated/bi",
+    "/_authenticated/bi/company",
+    "/_authenticated/bi/index",
+    "/_authenticated/bi/master",
+    "/_authenticated/bi/niches",
+    "/_authenticated/busca",
+    "/_authenticated/buscar",
+    "/_authenticated/cervejaria",
+    "/_authenticated/cervejaria/catalogo",
+    "/_authenticated/cervejaria/marketplace",
+    "/_authenticated/cervejaria/pdvs",
+    "/_authenticated/cervejaria/relacionamento",
+    "/_authenticated/cervejaria/retorno",
+    "/_authenticated/chrismed/admin",
+    "/_authenticated/chrismed/alertas",
+    "/_authenticated/chrismed/setup",
+    "/_authenticated/cockpits/index",
+    "/_authenticated/comecar",
+    "/_authenticated/commercial/cockpit",
+    "/_authenticated/companies",
+    "/_authenticated/comunidade/:id",
+    "/_authenticated/comunidade/index",
+    "/_authenticated/consumer/unified",
+    "/_authenticated/contabilidade/atendimento",
+    "/_authenticated/contabilidade/calendario",
+    "/_authenticated/contabilidade/clientes",
+    "/_authenticated/contabilidade/cockpit",
+    "/_authenticated/contabilidade/contratos",
+    "/_authenticated/contabilidade/documentos",
+    "/_authenticated/contabilidade/financeiro",
+    "/_authenticated/contabilidade/irpf",
+    "/_authenticated/contabilidade/obrigacoes",
+    "/_authenticated/contabilidade/portal",
+    "/_authenticated/contabilidade/relatorios",
+    "/_authenticated/contabilidade/tarefas",
+    "/_authenticated/contrato/:id",
+    "/_authenticated/core",
+    "/_authenticated/core/administracao/index",
+    "/_authenticated/core/automacao",
+    "/_authenticated/core/automacao/aprovacoes",
+    "/_authenticated/core/automacao/canais",
+    "/_authenticated/core/automacao/demonstracoes",
+    "/_authenticated/core/automacao/erros",
+    "/_authenticated/core/automacao/fallback-humano",
+    "/_authenticated/core/automacao/fluxos",
+    "/_authenticated/core/automacao/historico",
+    "/_authenticated/core/automacao/index",
+    "/_authenticated/core/automacao/logs",
+    "/_authenticated/core/automacao/modelos-nicho",
+    "/_authenticated/core/automacao/modelos-plano",
+    "/_authenticated/core/automacao/modelos-tenant",
+    "/_authenticated/core/automacao/monitoramento",
+    "/_authenticated/core/automacao/producao",
+    "/_authenticated/core/automacao/templates",
+    "/_authenticated/core/automacao/webhooks",
+    "/_authenticated/core/bi-ecossistema",
+    "/_authenticated/core/briefings",
+    "/_authenticated/core/cliente/:id",
+    "/_authenticated/core/cliente/:id/modulo/:slug/configurar",
+    "/_authenticated/core/cliente/:id/paginas",
+    "/_authenticated/core/cliente/:id/paginas/:pageId",
+    "/_authenticated/core/clientes",
+    "/_authenticated/core/comercial/index",
+    "/_authenticated/core/configuracoes",
+    "/_authenticated/core/consumidor-premium",
+    "/_authenticated/core/contratos",
+    "/_authenticated/core/criar-projeto",
+    "/_authenticated/core/dashboard-macro",
+    "/_authenticated/core/dashboards",
+    "/_authenticated/core/demo-insights",
+    "/_authenticated/core/demos",
+    "/_authenticated/core/diagnostico-geral",
+    "/_authenticated/core/dominios",
+    "/_authenticated/core/ecossistema",
+    "/_authenticated/core/estudio-visual/index",
+    "/_authenticated/core/eventos",
+    "/_authenticated/core/feira-leads",
+    "/_authenticated/core/finalizacao-comercial",
+    "/_authenticated/core/financeiro-consolidado",
+    "/_authenticated/core/financeiro-master",
+    "/_authenticated/core/flags",
+    "/_authenticated/core/hub-automacoes",
+    "/_authenticated/core/hub-cobranca",
+    "/_authenticated/core/implantacoes",
+    "/_authenticated/core/importar-clientes",
+    "/_authenticated/core/index",
+    "/_authenticated/core/instalar-modulo",
+    "/_authenticated/core/integracoes/:grupo",
+    "/_authenticated/core/integracoes/:grupo/:slug",
+    "/_authenticated/core/integracoes/alertas",
+    "/_authenticated/core/integracoes/diagnostico",
+    "/_authenticated/core/integracoes/index",
+    "/_authenticated/core/integracoes/mercadopago",
+    "/_authenticated/core/integracoes/n8n",
+    "/_authenticated/core/integracoes/omnichannel",
+    "/_authenticated/core/marketing-leads",
+    "/_authenticated/core/marketing-pages",
+    "/_authenticated/core/marketing/dashboard",
+    "/_authenticated/core/marketplace",
+    "/_authenticated/core/marketplace/compradores",
+    "/_authenticated/core/marketplace/financeiro",
+    "/_authenticated/core/marketplace/fornecedores",
+    "/_authenticated/core/marketplace/pedidos",
+    "/_authenticated/core/master",
+    "/_authenticated/core/menus",
+    "/_authenticated/core/metricas-reguas",
+    "/_authenticated/core/modulos",
+    "/_authenticated/core/modulos/:slug",
+    "/_authenticated/core/modulos/agenda",
+    "/_authenticated/core/monetizacao",
+    "/_authenticated/core/nichos/:slug",
+    "/_authenticated/core/nichos/index",
+    "/_authenticated/core/nova-implantacao",
+    "/_authenticated/core/observabilidade",
+    "/_authenticated/core/parametros",
+    "/_authenticated/core/planos",
+    "/_authenticated/core/prompts",
+    "/_authenticated/core/publicacao",
+    "/_authenticated/core/publicacao/:tenantId",
+    "/_authenticated/core/releases",
+    "/_authenticated/core/repasses",
+    "/_authenticated/core/saude",
+    "/_authenticated/core/suporte",
+    "/_authenticated/core/templates",
+    "/_authenticated/core/tenants/dominios",
+    "/_authenticated/core/tenants/index",
+    "/_authenticated/core/tenants/novo",
+    "/_authenticated/core/testes",
+    "/_authenticated/crm",
+    "/_authenticated/crm/activities",
+    "/_authenticated/crm/board",
+    "/_authenticated/crm/index",
+    "/_authenticated/crm/leads",
+    "/_authenticated/crm/leads/:id",
+    "/_authenticated/crm/pipelines",
+    "/_authenticated/customers",
+    "/_authenticated/dashboard",
+    "/_authenticated/dashboards/consumidor",
+    "/_authenticated/dashboards/core",
+    "/_authenticated/dashboards/empresa",
+    "/_authenticated/dashboards/index",
+    "/_authenticated/dashboards/operacao",
+    "/_authenticated/dashboards/white-label",
+    "/_authenticated/educacao/branding",
+    "/_authenticated/educacao/dashboard",
+    "/_authenticated/educacao/polos",
+    "/_authenticated/ehr/:id",
+    "/_authenticated/ehr/index",
+    "/_authenticated/empresa/talentos",
+    "/_authenticated/empresa/talentos/candidatos",
+    "/_authenticated/empresa/talentos/dashboard",
+    "/_authenticated/empresa/talentos/rede",
+    "/_authenticated/erp-financeiro",
+    "/_authenticated/eventos/:id",
+    "/_authenticated/eventos/index",
+    "/_authenticated/finance",
+    "/_authenticated/finance/accounts",
+    "/_authenticated/finance/categories",
+    "/_authenticated/finance/cockpit",
+    "/_authenticated/finance/commissions",
+    "/_authenticated/finance/index",
+    "/_authenticated/finance/integracoes",
+    "/_authenticated/finance/methods",
+    "/_authenticated/finance/transactions",
+    "/_authenticated/finance/webhook-log",
+    "/_authenticated/imobiliaria/aprovacoes",
+    "/_authenticated/imobiliaria/aprovacoes/:id/imprimir",
+    "/_authenticated/imobiliaria/aprovacoes/imprimir-fila",
+    "/_authenticated/imobiliaria/campanhas",
+    "/_authenticated/imobiliaria/contratos",
+    "/_authenticated/imobiliaria/distribuicao",
+    "/_authenticated/imobiliaria/documentos",
+    "/_authenticated/imobiliaria/equipes",
+    "/_authenticated/imobiliaria/financiamento",
+    "/_authenticated/imobiliaria/imoveis",
+    "/_authenticated/imobiliaria/intencoes",
+    "/_authenticated/imobiliaria/interessados",
+    "/_authenticated/imobiliaria/matches",
+    "/_authenticated/imobiliaria/mensagens",
+    "/_authenticated/imobiliaria/modulos",
+    "/_authenticated/imobiliaria/parceiros",
+    "/_authenticated/imobiliaria/proprietarios",
+    "/_authenticated/imobiliaria/visitas",
+    "/_authenticated/imobiliaria/vitrine",
+    "/_authenticated/impulsionando/leads-kanban",
+    "/_authenticated/inicio",
+    "/_authenticated/insights/oportunidades",
+    "/_authenticated/insights/percebido",
+    "/_authenticated/insights/respostas",
+    "/_authenticated/inventory",
+    "/_authenticated/inventory/categories",
+    "/_authenticated/inventory/index",
+    "/_authenticated/inventory/movements",
+    "/_authenticated/inventory/products",
+    "/_authenticated/inventory/suppliers",
+    "/_authenticated/legal-aceites",
+    "/_authenticated/marketing/cockpit",
+    "/_authenticated/marketing/leads",
+    "/_authenticated/marketplace-eco",
+    "/_authenticated/marocas/cockpit",
+    "/_authenticated/marocas/cockpit/notificacoes",
+    "/_authenticated/marocas/cockpit/relatorio",
+    "/_authenticated/marocas/cockpit/relatorios-enviados",
+    "/_authenticated/meu-projeto",
+    "/_authenticated/minha-assinatura",
+    "/_authenticated/modules",
+    "/_authenticated/monetizacao",
+    "/_authenticated/niches",
+    "/_authenticated/notifications/index",
+    "/_authenticated/onboarding",
+    "/_authenticated/onboarding/nicho",
+    "/_authenticated/operations/cockpit",
+    "/_authenticated/ops/mensageria",
+    "/_authenticated/ops/saude",
+    "/_authenticated/ops/versoes",
+    "/_authenticated/ops/voz-cliente",
+    "/_authenticated/perfil/notificacoes",
+    "/_authenticated/permissions",
+    "/_authenticated/privacy",
+    "/_authenticated/privacy/cockpit",
+    "/_authenticated/radar",
+    "/_authenticated/realestate/cockpit",
+    "/_authenticated/repasses",
+    "/_authenticated/reports",
+    "/_authenticated/reports/agenda",
+    "/_authenticated/reports/crm",
+    "/_authenticated/reports/finance",
+    "/_authenticated/reports/index",
+    "/_authenticated/reports/inventory",
+    "/_authenticated/reports/sales",
+    "/_authenticated/restaurante/cardapio",
+    "/_authenticated/restaurante/mesas",
+    "/_authenticated/restaurante/salao",
+    "/_authenticated/restaurante/salao/logs",
+    "/_authenticated/restaurante/salao/notificacoes",
+    "/_authenticated/riomed/minhas-garantias",
+    "/_authenticated/route",
+    "/_authenticated/saiba-mais/index",
+    "/_authenticated/saiba-mais/saude",
+    "/_authenticated/saiba-mais/versoes",
+    "/_authenticated/sales",
+    "/_authenticated/sales/cash",
+    "/_authenticated/sales/cash/:id",
+    "/_authenticated/sales/index",
+    "/_authenticated/sales/new",
+    "/_authenticated/sales/orders",
+    "/_authenticated/sectors",
+    "/_authenticated/seguranca/mfa",
+    "/_authenticated/seguranca/senha",
+    "/_authenticated/settings",
+    "/_authenticated/showroom/restaurante",
+    "/_authenticated/support/cockpit",
+    "/_authenticated/talentos/cadastro",
+    "/_authenticated/talents",
+    "/_authenticated/tenants/:slug/homologacao",
+    "/_authenticated/tenants/index",
+    "/_authenticated/torre/consumidores",
+    "/_authenticated/torre/restaurantes-demo",
+    "/_authenticated/torre/restaurantes-demo/auditoria",
+    "/_authenticated/units",
+    "/_authenticated/users",
+    "/_authenticated/users/corporate",
+    "/_authenticated/white-label/capacidade",
+    "/_authenticated/white-label/cockpit",
+    "/_command",
+    "/_command/command/aprovacoes",
+    "/_command/command/atendimento",
+    "/_command/command/automacoes",
+    "/_command/command/catalogo",
+    "/_command/command/clientes",
+    "/_command/command/clientes/:companyId",
+    "/_command/command/comercial",
+    "/_command/command/config",
+    "/_command/command/financeiro",
+    "/_command/command/ia",
+    "/_command/command/index",
+    "/abrir-ticket",
+    "/auth",
+    "/briefing/site-institucional",
+    "/canal-oficial",
+    "/catalogo",
+    "/central-de-ajuda",
+    "/checkout/:slug",
+    "/checkout/index",
+    "/checkout/success",
+    "/chrismed",
+    "/chrismed/agendar",
+    "/chrismed/app",
+    "/chrismed/checkout",
+    "/chrismed/clinica",
+    "/chrismed/consultorio",
+    "/chrismed/contato",
+    "/chrismed/domiciliar",
+    "/chrismed/dra-cristiane",
+    "/chrismed/especialidades",
+    "/chrismed/exames",
+    "/chrismed/faq",
+    "/chrismed/index",
+    "/chrismed/internacional",
+    "/chrismed/medicos",
+    "/chrismed/minha-conta",
+    "/chrismed/ocupacional",
+    "/chrismed/ocupacional/agendar",
+    "/chrismed/ofertas",
+    "/chrismed/privacidade",
+    "/chrismed/teleconsulta",
+    "/clube",
+    "/clube/avaliacoes",
+    "/clube/buscar",
+    "/clube/cadastro",
+    "/clube/cashback",
+    "/clube/delivery",
+    "/clube/empresas",
+    "/clube/eventos",
+    "/clube/favoritos",
+    "/clube/historico",
+    "/clube/imoveis",
+    "/clube/index",
+    "/clube/login",
+    "/clube/minha-conta",
+    "/clube/planos",
+    "/clube/produtos",
+    "/clube/recomendacoes",
+    "/clube/servicos",
+    "/clube/vouchers",
+    "/colors",
+    "/colors/:brand",
+    "/colors/criar-conta",
+    "/colors/entrar",
+    "/colors/index",
+    "/colors/minha-conta",
+    "/colors/minha-conta/index",
+    "/colors/minha-conta/pedidos",
+    "/colors/minha-conta/pedidos/:id",
+    "/colors/minha-conta/perfil",
+    "/colors/painel",
+    "/colors/produto/:slug",
+    "/colors/rastreio/:codigo",
+    "/colors/rastreio/index",
+    "/colors/recuperar",
+    "/colors/super-green-black",
+    "/colors/super-green-black-kpi",
+    "/como-funciona/fitness",
+    "/como-funciona/index",
+    "/consumidor",
+    "/conta-suspensa",
+    "/contato",
+    "/contratar",
+    "/contratar/sob-medida",
+    "/demo/:macro/:sub",
+    "/demo/advogados",
+    "/demo/afiliados",
+    "/demo/agenda",
+    "/demo/beer-house",
+    "/demo/cadastro",
+    "/demo/checklist",
+    "/demo/checkout",
+    "/demo/cliente-final",
+    "/demo/crm",
+    "/demo/escolher-nicho",
+    "/demo/eventos",
+    "/demo/feira",
+    "/demo/index",
+    "/demo/modulos",
+    "/demo/nicho/:slug",
+    "/demo/parceiros",
+    "/demo/rascunho/:id",
+    "/demo/restaurante/:tenant/:qr",
+    "/demo/simulador",
+    "/demo/templates",
+    "/demo/trial",
+    "/demo/whatsapp",
+    "/demo/white-label",
+    "/ecossistema",
+    "/email/unsubscribe",
+    "/empresa/login",
+    "/empresas",
+    "/escolher-nicho",
+    "/foodservice",
+    "/foodservice/cardapio",
+    "/foodservice/contato",
+    "/foodservice/crm",
+    "/foodservice/delivery",
+    "/foodservice/fidelidade",
+    "/foodservice/index",
+    "/foodservice/operacao",
+    "/foodservice/produto/:slug",
+    "/foodservice/promocoes",
+    "/foodservice/reservas",
+    "/garrido",
+    "/garrido/alugar",
+    "/garrido/anunciar",
+    "/garrido/area",
+    "/garrido/avaliar",
+    "/garrido/buscar",
+    "/garrido/cadastro",
+    "/garrido/comercial",
+    "/garrido/comprar",
+    "/garrido/contato",
+    "/garrido/corretor",
+    "/garrido/entrar",
+    "/garrido/faq",
+    "/garrido/financiamento",
+    "/garrido/imovel/:slug",
+    "/garrido/index",
+    "/garrido/lancamentos",
+    "/garrido/politicas",
+    "/garrido/recuperar",
+    "/garrido/rural",
+    "/garrido/temporada",
+    "/healthz",
+    "/imoveis/:slug",
+    "/imoveis/:slug/:propertyId",
+    "/index",
+    "/legal",
+    "/lovable/email/auth/preview",
+    "/lovable/email/auth/webhook",
+    "/lovable/email/queue/process",
+    "/lovable/email/suppression",
+    "/lovable/email/transactional/preview",
+    "/lovable/email/transactional/send",
+    "/manutencao",
+    "/marketing",
+    "/marocas",
+    "/marocas/app",
+    "/marocas/app/anfitriao",
+    "/marocas/app/anfitriao/agenda",
+    "/marocas/app/anfitriao/automacoes",
+    "/marocas/app/anfitriao/cerebro-ia",
+    "/marocas/app/anfitriao/configuracoes",
+    "/marocas/app/anfitriao/financeiro",
+    "/marocas/app/anfitriao/hospedes",
+    "/marocas/app/anfitriao/imoveis",
+    "/marocas/app/anfitriao/index",
+    "/marocas/app/anfitriao/limpezas",
+    "/marocas/app/anfitriao/manutencoes",
+    "/marocas/app/anfitriao/prestadores",
+    "/marocas/app/anfitriao/relatorios",
+    "/marocas/app/anfitriao/reposicoes",
+    "/marocas/app/anfitriao/reservas",
+    "/marocas/app/hospede",
+    "/marocas/app/hospede/acesso",
+    "/marocas/app/hospede/avaliacao",
+    "/marocas/app/hospede/historico",
+    "/marocas/app/hospede/imovel",
+    "/marocas/app/hospede/index",
+    "/marocas/app/hospede/regras",
+    "/marocas/app/hospede/roteiros",
+    "/marocas/app/hospede/suporte",
+    "/marocas/app/index",
+    "/marocas/app/prestador",
+    "/marocas/app/prestador/aceitos",
+    "/marocas/app/prestador/andamento",
+    "/marocas/app/prestador/avaliacoes",
+    "/marocas/app/prestador/cadastro",
+    "/marocas/app/prestador/disponibilidade",
+    "/marocas/app/prestador/disponiveis",
+    "/marocas/app/prestador/historico",
+    "/marocas/app/prestador/index",
+    "/marocas/app/prestador/regioes",
+    "/marocas/app/prestador/valores",
+    "/marocas/cadastrar-imovel",
+    "/marocas/contato",
+    "/marocas/faq",
+    "/marocas/hospedes",
+    "/marocas/limpeza-manutencao",
+    "/marocas/login",
+    "/marocas/planos",
+    "/marocas/prestadores",
+    "/marocas/sobre",
+    "/mcp",
+    "/mesa/:token",
+    "/modulos",
+    "/modulos/:slug",
+    "/modulos/index",
+    "/modulos/suporte-inteligente",
+    "/nichos/:slug",
+    "/nichos/index",
+    "/onboarding-guiado",
+    "/onboarding-site",
+    "/orcamento",
+    "/paciente",
+    "/paciente/:id",
+    "/paciente/index",
+    "/parceiro-corretor/:token",
+    "/parceiro/:token",
+    "/pesquisa",
+    "/planos",
+    "/portal/contabilidade/:token",
+    "/portal/proprietario/:token",
+    "/privacidade",
+    "/quero-comecar",
+    "/r/:slug",
+    "/recomendacao/:nicho",
+    "/reembolso",
+    "/reset-password",
+    "/reset-password-sent",
+    "/riomed",
+    "/riomed/alquiler",
+    "/riomed/carrinho",
+    "/riomed/checkout",
+    "/riomed/cotizacion/:token",
+    "/riomed/cotizar",
+    "/riomed/fornecedor/cadastro",
+    "/riomed/hospital/portal",
+    "/riomed/hospitales",
+    "/riomed/index",
+    "/riomed/pacientes",
+    "/riomed/productos",
+    "/riomed/servicio-tecnico",
+    "/riomed/soporte",
+    "/riomed/tecnico/cadastro",
+    "/riomed/trabalhe-conosco",
+    "/riomed/v/:slug",
+    "/riomed/vendedor",
+    "/riomed/vendedores/cadastro",
+    "/showroom/academia",
+    "/showroom/agenda",
+    "/showroom/agendamentos-online",
+    "/showroom/api-publica",
+    "/showroom/atendimento",
+    "/showroom/automacoes",
+    "/showroom/automacoes-ia",
+    "/showroom/caixa-unificada",
+    "/showroom/cases",
+    "/showroom/checkout",
+    "/showroom/clientes",
+    "/showroom/clinicas",
+    "/showroom/comparativo-concorrentes",
+    "/showroom/contratos",
+    "/showroom/crm",
+    "/showroom/dashboards",
+    "/showroom/equipe",
+    "/showroom/estoque",
+    "/showroom/eventos",
+    "/showroom/fidelidade",
+    "/showroom/financeiro",
+    "/showroom/fitness",
+    "/showroom/franquias",
+    "/showroom/index",
+    "/showroom/integracoes",
+    "/showroom/integracoes-premium",
+    "/showroom/marketing",
+    "/showroom/marketplace-apps",
+    "/showroom/migracao",
+    "/showroom/mobile",
+    "/showroom/multi-unidades",
+    "/showroom/onboarding",
+    "/showroom/parceiros",
+    "/showroom/parcerias-revenda",
+    "/showroom/pdv",
+    "/showroom/portal-cliente",
+    "/showroom/precificacao",
+    "/showroom/relatorios",
+    "/showroom/relatorios-avancados",
+    "/showroom/seguranca",
+    "/showroom/site",
+    "/showroom/whatsapp",
+    "/site-institucional",
+    "/sitemap[/]xml",
+    "/sobre",
+    "/solucoes",
+    "/status",
+    "/status/:slug",
+    "/status/embed",
+    "/suporte",
+    "/talentos",
+    "/templates/:brand/admin",
+    "/templates/:brand/catalogo",
+    "/templates/:brand/contato",
+    "/templates/:brand/index",
+    "/templates/:brand/sobre",
+    "/templates/index",
+    "/termos",
+    "/trabalhe-conosco/:nicho",
+    "/trabalhe-conosco/index",
+    "/trial",
+    "/trial_/cadastro",
+    "/unsubscribe",
+    "/vitrine",
+    "/vitrine/:slug",
+    "/white-label",
+    "/white-label/login",
+    "/white-label/parceiro",
+    "/wmp",
+    "/wmp/cases",
+    "/wmp/faq",
+    "/wmp/index",
+    "/wmp/obrigado/:tipo",
+    "/wmp/orcamento",
+    "/wmp/pacotes",
+    "/wmp/parceiro",
+    "/wmp/parceiro/cadastro",
+    "/wmp/sobre"
+  ],
+  "agents": [
+    {
+      "name": "Impulsionito",
+      "role": "agente mestre/orquestrador",
+      "reportsTo": null,
+      "client": "Impulsionando",
+      "integrations": [
+        "OpenAI",
+        "Core",
+        "N8N"
+      ],
+      "tools": [
+        "AI gateway",
+        "event dispatcher"
+      ],
+      "workflows": [
+        "Impulsionando — 01 Captação · Lead Nurturing 14d",
+        "Impulsionando — 02 Conversão · Trial Onboarding (D0/D1/D3/D5/D6)",
+        "Impulsionando — 03 Conversão · Checkout Recovery",
+        "Impulsionando — 04 Relacionamento · Onboarding Pago (D0/D7/D30)",
+        "Impulsionando — 05 Retenção · Régua de Inadimplência (D+1/3/7/15)",
+        "Impulsionando — 06 Retenção · Win-back Cancelados (7/30/90d)",
+        "Impulsionando — 07 Relacionamento · NPS Mensal + Roteamento",
+        "Impulsionando — Régua Nicho (Template Parametrizável)",
+        "Impulsionando — clinica.confirmacao_consulta (agenda.appointment_confirmed)",
+        "Impulsionando — evt.confirmacao_ingresso (event.ticket_purchased)",
+        "Impulsionando — imob.regua_visita (realestate.visit_scheduled)",
+        "docs/n8n/payloads/impulsionito-proativo.json",
+        "Impulsionando · _shared · fallback-humano",
+        "Impulsionando · _shared · plano-gate",
+        "Impulsionando · captacao · lead-captado",
+        "Impulsionando · captacao · lead-qualificado",
+        "Impulsionando · captacao · lead-sem-resposta",
+        "Impulsionando · captacao · lead-quente",
+        "Impulsionando · captacao · lead-vitrine",
+        "Impulsionando · captacao · lead-whatsapp",
+        "Impulsionando · captacao · lead-quiz",
+        "Impulsionando · captacao · lead-redes-sociais",
+        "Impulsionando · conversao · cadastro-iniciado",
+        "Impulsionando · conversao · cadastro-abandonado",
+        "Impulsionando · conversao · cadastro-concluido",
+        "Impulsionando · conversao · checkout-iniciado",
+        "Impulsionando · conversao · pix-gerado",
+        "Impulsionando · conversao · pix-expirado",
+        "Impulsionando · conversao · cartao-recusado",
+        "Impulsionando · conversao · pagamento-aprovado",
+        "Impulsionando · conversao · boleto-emitido",
+        "Impulsionando · conversao · boleto-pago",
+        "Impulsionando · conversao · trial-premium-iniciado",
+        "Impulsionando · financeiro · pagamento-confirmado",
+        "Impulsionando · financeiro · pagamento-recusado",
+        "Impulsionando · financeiro · inadimplencia",
+        "Impulsionando · financeiro · suspensao-automatica",
+        "Impulsionando · financeiro · reativacao-pos-pagamento",
+        "Impulsionando · financeiro · repasse-pendente",
+        "Impulsionando · financeiro · repasse-realizado",
+        "Impulsionando · financeiro · nota-fiscal-pendente",
+        "Impulsionando · financeiro · nota-fiscal-emitida",
+        "Impulsionando · financeiro · tenant-emitir-nf-cliente-final",
+        "Impulsionando · nicho · bar-avaliacao-pos-consumo",
+        "Impulsionando · nicho · bar-cupom-retorno",
+        "Impulsionando · nicho · bar-pedido-delivery",
+        "Impulsionando · nicho · bar-pedido-recebido",
+        "Impulsionando · nicho · bar-pedido-saiu-entrega",
+        "Impulsionando · nicho · clinica-consulta-confirmada",
+        "Impulsionando · nicho · clinica-no-show",
+        "Impulsionando · nicho · clinica-retorno",
+        "Impulsionando · nicho · clinica-teleconsulta",
+        "Impulsionando · nicho · clube-beneficio-expirando",
+        "Impulsionando · nicho · clube-boas-vindas",
+        "Impulsionando · nicho · clube-voucher-disponivel",
+        "Impulsionando · nicho · eventos-checkin",
+        "Impulsionando · nicho · eventos-ingresso-vendido",
+        "Impulsionando · nicho · eventos-lembrete-antes",
+        "Impulsionando · nicho · eventos-pos-evento",
+        "Impulsionando · nicho · imob-lead-imovel",
+        "Impulsionando · nicho · imob-proposta-sem-resposta",
+        "Impulsionando · nicho · imob-visita-agendada",
+        "Impulsionando · nicho · imob-visita-confirmada",
+        "Impulsionando · nicho · wl-novo-cliente",
+        "Impulsionando · nicho · wl-tenant-convertido",
+        "Impulsionando · nicho · wl-tenant-suspenso",
+        "Impulsionando · relacionamento · boas-vindas",
+        "Impulsionando · relacionamento · onboarding-d0",
+        "Impulsionando · relacionamento · onboarding-d1",
+        "Impulsionando · relacionamento · onboarding-d3",
+        "Impulsionando · relacionamento · onboarding-d7",
+        "Impulsionando · relacionamento · modulo-nao-configurado",
+        "Impulsionando · relacionamento · cliente-sem-uso",
+        "Impulsionando · relacionamento · cliente-engajado",
+        "Impulsionando · relacionamento · sugestao-recurso",
+        "Impulsionando · relacionamento · tutorial-automatico",
+        "Impulsionando · relacionamento · impulsionito-proativo",
+        "Impulsionando · retencao · trial-d15",
+        "Impulsionando · retencao · trial-d25",
+        "Impulsionando · retencao · trial-d29",
+        "Impulsionando · retencao · trial-expirado",
+        "Impulsionando · retencao · renovacao-proxima",
+        "Impulsionando · retencao · cancelamento-solicitado",
+        "Impulsionando · retencao · cancelamento-confirmado",
+        "Impulsionando · retencao · reativacao",
+        "Impulsionando · retencao · upsell-oportunidade",
+        "Impulsionando · retencao · downgrade-preventivo",
+        "Impulsionando · suporte · chamado-aberto",
+        "Impulsionando · suporte · sla-vencendo",
+        "Impulsionando · suporte · sla-vencido",
+        "Impulsionando · suporte · chamado-resolvido",
+        "Impulsionando · suporte · avaliacao-negativa",
+        "Impulsionando · suporte · escalonamento-humano",
+        "Impulsionando · vitrine · vitrine-publicado",
+        "Impulsionando · vitrine · vitrine-removido",
+        "Impulsionando · vitrine · clube-favorito-novo",
+        "Impulsionando · vitrine · clube-voucher-usado",
+        "Impulsionando · vitrine · vitrine-avaliacao",
+        "Impulsionando · vitrine · clube-empresa-proxima",
+        "Impulsionando · vitrine · clube-recomendacao"
+      ]
+    },
+    {
+      "name": "Oliver",
+      "role": "recepção, relacionamento, orientação administrativa e agendamento",
+      "reportsTo": "Impulsionito",
+      "client": "CHRISMED",
+      "integrations": [
+        "OpenAI",
+        "Agenda Core"
+      ],
+      "tools": [
+        "AI gateway",
+        "agenda"
+      ],
+      "workflows": []
+    }
+  ],
+  "workflows": [
+    {
+      "file": "docs/n8n/01-captacao-lead-nurturing.json",
+      "name": "Impulsionando — 01 Captação · Lead Nurturing 14d",
+      "active": false,
+      "nodeCount": 12
+    },
+    {
+      "file": "docs/n8n/02-conversao-trial-onboarding.json",
+      "name": "Impulsionando — 02 Conversão · Trial Onboarding (D0/D1/D3/D5/D6)",
+      "active": false,
+      "nodeCount": 15
+    },
+    {
+      "file": "docs/n8n/03-conversao-checkout-recovery.json",
+      "name": "Impulsionando — 03 Conversão · Checkout Recovery",
+      "active": false,
+      "nodeCount": 10
+    },
+    {
+      "file": "docs/n8n/04-relacionamento-onboarding-pago.json",
+      "name": "Impulsionando — 04 Relacionamento · Onboarding Pago (D0/D7/D30)",
+      "active": false,
+      "nodeCount": 10
+    },
+    {
+      "file": "docs/n8n/05-retencao-cobranca-inadimplencia.json",
+      "name": "Impulsionando — 05 Retenção · Régua de Inadimplência (D+1/3/7/15)",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/06-retencao-winback-cancelados.json",
+      "name": "Impulsionando — 06 Retenção · Win-back Cancelados (7/30/90d)",
+      "active": false,
+      "nodeCount": 10
+    },
+    {
+      "file": "docs/n8n/07-relacionamento-nps-feedback.json",
+      "name": "Impulsionando — 07 Relacionamento · NPS Mensal + Roteamento",
+      "active": false,
+      "nodeCount": 11
+    },
+    {
+      "file": "docs/n8n/niches/_template-niche-regua.json",
+      "name": "Impulsionando — Régua Nicho (Template Parametrizável)",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/niches/clinica-appointment_confirmed.json",
+      "name": "Impulsionando — clinica.confirmacao_consulta (agenda.appointment_confirmed)",
+      "active": false,
+      "nodeCount": 7
+    },
+    {
+      "file": "docs/n8n/niches/eventos-ticket_purchased.json",
+      "name": "Impulsionando — evt.confirmacao_ingresso (event.ticket_purchased)",
+      "active": false,
+      "nodeCount": 6
+    },
+    {
+      "file": "docs/n8n/niches/imob-visit_scheduled.json",
+      "name": "Impulsionando — imob.regua_visita (realestate.visit_scheduled)",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/payloads/avaliacao-negativa.json",
+      "name": "docs/n8n/payloads/avaliacao-negativa.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+      "name": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/bar-cupom-retorno.json",
+      "name": "docs/n8n/payloads/bar-cupom-retorno.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/bar-pedido-delivery.json",
+      "name": "docs/n8n/payloads/bar-pedido-delivery.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/bar-pedido-recebido.json",
+      "name": "docs/n8n/payloads/bar-pedido-recebido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+      "name": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/boas-vindas.json",
+      "name": "docs/n8n/payloads/boas-vindas.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/boleto-emitido.json",
+      "name": "docs/n8n/payloads/boleto-emitido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/boleto-pago.json",
+      "name": "docs/n8n/payloads/boleto-pago.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cadastro-abandonado.json",
+      "name": "docs/n8n/payloads/cadastro-abandonado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cadastro-concluido.json",
+      "name": "docs/n8n/payloads/cadastro-concluido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cadastro-iniciado.json",
+      "name": "docs/n8n/payloads/cadastro-iniciado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cancelamento-confirmado.json",
+      "name": "docs/n8n/payloads/cancelamento-confirmado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cancelamento-solicitado.json",
+      "name": "docs/n8n/payloads/cancelamento-solicitado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cartao-recusado.json",
+      "name": "docs/n8n/payloads/cartao-recusado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/chamado-aberto.json",
+      "name": "docs/n8n/payloads/chamado-aberto.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/chamado-resolvido.json",
+      "name": "docs/n8n/payloads/chamado-resolvido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/checkout-iniciado.json",
+      "name": "docs/n8n/payloads/checkout-iniciado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cliente-engajado.json",
+      "name": "docs/n8n/payloads/cliente-engajado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/cliente-sem-uso.json",
+      "name": "docs/n8n/payloads/cliente-sem-uso.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+      "name": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clinica-no-show.json",
+      "name": "docs/n8n/payloads/clinica-no-show.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clinica-retorno.json",
+      "name": "docs/n8n/payloads/clinica-retorno.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clinica-teleconsulta.json",
+      "name": "docs/n8n/payloads/clinica-teleconsulta.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-beneficio-expirando.json",
+      "name": "docs/n8n/payloads/clube-beneficio-expirando.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-boas-vindas.json",
+      "name": "docs/n8n/payloads/clube-boas-vindas.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-empresa-proxima.json",
+      "name": "docs/n8n/payloads/clube-empresa-proxima.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-favorito-novo.json",
+      "name": "docs/n8n/payloads/clube-favorito-novo.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-recomendacao.json",
+      "name": "docs/n8n/payloads/clube-recomendacao.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-voucher-disponivel.json",
+      "name": "docs/n8n/payloads/clube-voucher-disponivel.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/clube-voucher-usado.json",
+      "name": "docs/n8n/payloads/clube-voucher-usado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/downgrade-preventivo.json",
+      "name": "docs/n8n/payloads/downgrade-preventivo.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/escalonamento-humano.json",
+      "name": "docs/n8n/payloads/escalonamento-humano.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/eventos-checkin.json",
+      "name": "docs/n8n/payloads/eventos-checkin.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+      "name": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/eventos-lembrete-antes.json",
+      "name": "docs/n8n/payloads/eventos-lembrete-antes.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/eventos-pos-evento.json",
+      "name": "docs/n8n/payloads/eventos-pos-evento.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/imob-lead-imovel.json",
+      "name": "docs/n8n/payloads/imob-lead-imovel.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+      "name": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/imob-visita-agendada.json",
+      "name": "docs/n8n/payloads/imob-visita-agendada.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/imob-visita-confirmada.json",
+      "name": "docs/n8n/payloads/imob-visita-confirmada.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/impulsionito-proativo.json",
+      "name": "docs/n8n/payloads/impulsionito-proativo.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/inadimplencia.json",
+      "name": "docs/n8n/payloads/inadimplencia.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-captado.json",
+      "name": "docs/n8n/payloads/lead-captado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-qualificado.json",
+      "name": "docs/n8n/payloads/lead-qualificado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-quente.json",
+      "name": "docs/n8n/payloads/lead-quente.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-quiz.json",
+      "name": "docs/n8n/payloads/lead-quiz.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-redes-sociais.json",
+      "name": "docs/n8n/payloads/lead-redes-sociais.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-sem-resposta.json",
+      "name": "docs/n8n/payloads/lead-sem-resposta.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-vitrine.json",
+      "name": "docs/n8n/payloads/lead-vitrine.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/lead-whatsapp.json",
+      "name": "docs/n8n/payloads/lead-whatsapp.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/modulo-nao-configurado.json",
+      "name": "docs/n8n/payloads/modulo-nao-configurado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/nota-fiscal-emitida.json",
+      "name": "docs/n8n/payloads/nota-fiscal-emitida.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/nota-fiscal-pendente.json",
+      "name": "docs/n8n/payloads/nota-fiscal-pendente.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/onboarding-d0.json",
+      "name": "docs/n8n/payloads/onboarding-d0.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/onboarding-d1.json",
+      "name": "docs/n8n/payloads/onboarding-d1.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/onboarding-d3.json",
+      "name": "docs/n8n/payloads/onboarding-d3.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/onboarding-d7.json",
+      "name": "docs/n8n/payloads/onboarding-d7.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/pagamento-aprovado.json",
+      "name": "docs/n8n/payloads/pagamento-aprovado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/pagamento-confirmado.json",
+      "name": "docs/n8n/payloads/pagamento-confirmado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/pagamento-recusado.json",
+      "name": "docs/n8n/payloads/pagamento-recusado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/pix-expirado.json",
+      "name": "docs/n8n/payloads/pix-expirado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/pix-gerado.json",
+      "name": "docs/n8n/payloads/pix-gerado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+      "name": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/reativacao.json",
+      "name": "docs/n8n/payloads/reativacao.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/renovacao-proxima.json",
+      "name": "docs/n8n/payloads/renovacao-proxima.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/repasse-pendente.json",
+      "name": "docs/n8n/payloads/repasse-pendente.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/repasse-realizado.json",
+      "name": "docs/n8n/payloads/repasse-realizado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/sla-vencendo.json",
+      "name": "docs/n8n/payloads/sla-vencendo.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/sla-vencido.json",
+      "name": "docs/n8n/payloads/sla-vencido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/sugestao-recurso.json",
+      "name": "docs/n8n/payloads/sugestao-recurso.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/suspensao-automatica.json",
+      "name": "docs/n8n/payloads/suspensao-automatica.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+      "name": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/trial-d15.json",
+      "name": "docs/n8n/payloads/trial-d15.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/trial-d25.json",
+      "name": "docs/n8n/payloads/trial-d25.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/trial-d29.json",
+      "name": "docs/n8n/payloads/trial-d29.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/trial-expirado.json",
+      "name": "docs/n8n/payloads/trial-expirado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/trial-premium-iniciado.json",
+      "name": "docs/n8n/payloads/trial-premium-iniciado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/tutorial-automatico.json",
+      "name": "docs/n8n/payloads/tutorial-automatico.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/upsell-oportunidade.json",
+      "name": "docs/n8n/payloads/upsell-oportunidade.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/vitrine-avaliacao.json",
+      "name": "docs/n8n/payloads/vitrine-avaliacao.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/vitrine-publicado.json",
+      "name": "docs/n8n/payloads/vitrine-publicado.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/vitrine-removido.json",
+      "name": "docs/n8n/payloads/vitrine-removido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/wl-novo-cliente.json",
+      "name": "docs/n8n/payloads/wl-novo-cliente.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/wl-tenant-convertido.json",
+      "name": "docs/n8n/payloads/wl-tenant-convertido.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/payloads/wl-tenant-suspenso.json",
+      "name": "docs/n8n/payloads/wl-tenant-suspenso.json",
+      "active": false,
+      "nodeCount": 0
+    },
+    {
+      "file": "docs/n8n/riomed-01-novo-lead.json",
+      "name": "RioMed — 01 Captação · Novo Lead Comercial",
+      "active": false,
+      "nodeCount": 7
+    },
+    {
+      "file": "docs/n8n/riomed-02-ticket-tecnico.json",
+      "name": "RioMed — 02 Suporte · Ticket Técnico (triagem por urgência)",
+      "active": false,
+      "nodeCount": 7
+    },
+    {
+      "file": "docs/n8n/riomed-03-cotacao-fria.json",
+      "name": "RioMed 03 — Cotação Fria (reativação)",
+      "active": false,
+      "nodeCount": 6
+    },
+    {
+      "file": "docs/n8n/riomed-04-recuperacao-carrinho.json",
+      "name": "RioMed 04 — Recuperação de Carrinho B2B",
+      "active": false,
+      "nodeCount": 7
+    },
+    {
+      "file": "docs/n8n/riomed-05-cobranca-ar.json",
+      "name": "RioMed 05 — Cobrança de A/R atrasado",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/riomed-06-lead-facebook.json",
+      "name": "RioMed — 06 Captação · Lead Facebook Ads",
+      "active": false,
+      "nodeCount": 3
+    },
+    {
+      "file": "docs/n8n/riomed-07-lead-instagram.json",
+      "name": "RioMed — 07 Captação · Lead Instagram DM",
+      "active": false,
+      "nodeCount": 4
+    },
+    {
+      "file": "docs/n8n/riomed-08-broadcast-whatsapp.json",
+      "name": "RioMed — 08 Relacionamento · Broadcast WhatsApp",
+      "active": false,
+      "nodeCount": 5
+    },
+    {
+      "file": "docs/n8n/riomed-09-cotacao-bob-usd.json",
+      "name": "RioMed — 09 Operação · Cotação BOB/USD diária",
+      "active": false,
+      "nodeCount": 4
+    },
+    {
+      "file": "docs/n8n/workflows/_shared/fallback-humano.json",
+      "name": "Impulsionando · _shared · fallback-humano",
+      "active": false,
+      "nodeCount": 2
+    },
+    {
+      "file": "docs/n8n/workflows/_shared/plano-gate.json",
+      "name": "Impulsionando · _shared · plano-gate",
+      "active": false,
+      "nodeCount": 2
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/01-lead-captado.json",
+      "name": "Impulsionando · captacao · lead-captado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/02-lead-qualificado.json",
+      "name": "Impulsionando · captacao · lead-qualificado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/03-lead-sem-resposta.json",
+      "name": "Impulsionando · captacao · lead-sem-resposta",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/04-lead-quente.json",
+      "name": "Impulsionando · captacao · lead-quente",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/05-lead-vitrine.json",
+      "name": "Impulsionando · captacao · lead-vitrine",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/06-lead-whatsapp.json",
+      "name": "Impulsionando · captacao · lead-whatsapp",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/07-lead-quiz.json",
+      "name": "Impulsionando · captacao · lead-quiz",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/captacao/08-lead-redes-sociais.json",
+      "name": "Impulsionando · captacao · lead-redes-sociais",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/09-cadastro-iniciado.json",
+      "name": "Impulsionando · conversao · cadastro-iniciado",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/10-cadastro-abandonado.json",
+      "name": "Impulsionando · conversao · cadastro-abandonado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/11-cadastro-concluido.json",
+      "name": "Impulsionando · conversao · cadastro-concluido",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/12-checkout-iniciado.json",
+      "name": "Impulsionando · conversao · checkout-iniciado",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/13-pix-gerado.json",
+      "name": "Impulsionando · conversao · pix-gerado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/14-pix-expirado.json",
+      "name": "Impulsionando · conversao · pix-expirado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/15-cartao-recusado.json",
+      "name": "Impulsionando · conversao · cartao-recusado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/16-pagamento-aprovado.json",
+      "name": "Impulsionando · conversao · pagamento-aprovado",
+      "active": false,
+      "nodeCount": 10
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/17-boleto-emitido.json",
+      "name": "Impulsionando · conversao · boleto-emitido",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/18-boleto-pago.json",
+      "name": "Impulsionando · conversao · boleto-pago",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/conversao/19-trial-premium-iniciado.json",
+      "name": "Impulsionando · conversao · trial-premium-iniciado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/41-pagamento-confirmado.json",
+      "name": "Impulsionando · financeiro · pagamento-confirmado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/42-pagamento-recusado.json",
+      "name": "Impulsionando · financeiro · pagamento-recusado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/43-inadimplencia.json",
+      "name": "Impulsionando · financeiro · inadimplencia",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/44-suspensao-automatica.json",
+      "name": "Impulsionando · financeiro · suspensao-automatica",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/45-reativacao-pos-pagamento.json",
+      "name": "Impulsionando · financeiro · reativacao-pos-pagamento",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/46-repasse-pendente.json",
+      "name": "Impulsionando · financeiro · repasse-pendente",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/47-repasse-realizado.json",
+      "name": "Impulsionando · financeiro · repasse-realizado",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/48-nota-fiscal-pendente.json",
+      "name": "Impulsionando · financeiro · nota-fiscal-pendente",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/49-nota-fiscal-emitida.json",
+      "name": "Impulsionando · financeiro · nota-fiscal-emitida",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/financeiro/50-tenant-emitir-nf-cliente-final.json",
+      "name": "Impulsionando · financeiro · tenant-emitir-nf-cliente-final",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/bar/avaliacao-pos-consumo.json",
+      "name": "Impulsionando · nicho · bar-avaliacao-pos-consumo",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/bar/cupom-retorno.json",
+      "name": "Impulsionando · nicho · bar-cupom-retorno",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/bar/pedido-delivery.json",
+      "name": "Impulsionando · nicho · bar-pedido-delivery",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/bar/pedido-recebido.json",
+      "name": "Impulsionando · nicho · bar-pedido-recebido",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/bar/pedido-saiu-entrega.json",
+      "name": "Impulsionando · nicho · bar-pedido-saiu-entrega",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clinica/consulta-confirmada.json",
+      "name": "Impulsionando · nicho · clinica-consulta-confirmada",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clinica/no-show.json",
+      "name": "Impulsionando · nicho · clinica-no-show",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clinica/retorno.json",
+      "name": "Impulsionando · nicho · clinica-retorno",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clinica/teleconsulta.json",
+      "name": "Impulsionando · nicho · clinica-teleconsulta",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clube/beneficio-expirando.json",
+      "name": "Impulsionando · nicho · clube-beneficio-expirando",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clube/boas-vindas.json",
+      "name": "Impulsionando · nicho · clube-boas-vindas",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/clube/voucher-disponivel.json",
+      "name": "Impulsionando · nicho · clube-voucher-disponivel",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/eventos/checkin.json",
+      "name": "Impulsionando · nicho · eventos-checkin",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/eventos/ingresso-vendido.json",
+      "name": "Impulsionando · nicho · eventos-ingresso-vendido",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/eventos/lembrete-antes.json",
+      "name": "Impulsionando · nicho · eventos-lembrete-antes",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/eventos/pos-evento.json",
+      "name": "Impulsionando · nicho · eventos-pos-evento",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/imob/lead-imovel.json",
+      "name": "Impulsionando · nicho · imob-lead-imovel",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/imob/proposta-sem-resposta.json",
+      "name": "Impulsionando · nicho · imob-proposta-sem-resposta",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/imob/visita-agendada.json",
+      "name": "Impulsionando · nicho · imob-visita-agendada",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/imob/visita-confirmada.json",
+      "name": "Impulsionando · nicho · imob-visita-confirmada",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/wl/novo-cliente.json",
+      "name": "Impulsionando · nicho · wl-novo-cliente",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/wl/tenant-convertido.json",
+      "name": "Impulsionando · nicho · wl-tenant-convertido",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/nichos/wl/tenant-suspenso.json",
+      "name": "Impulsionando · nicho · wl-tenant-suspenso",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/20-boas-vindas.json",
+      "name": "Impulsionando · relacionamento · boas-vindas",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/21-onboarding-d0.json",
+      "name": "Impulsionando · relacionamento · onboarding-d0",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/22-onboarding-d1.json",
+      "name": "Impulsionando · relacionamento · onboarding-d1",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/23-onboarding-d3.json",
+      "name": "Impulsionando · relacionamento · onboarding-d3",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/24-onboarding-d7.json",
+      "name": "Impulsionando · relacionamento · onboarding-d7",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/25-modulo-nao-configurado.json",
+      "name": "Impulsionando · relacionamento · modulo-nao-configurado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/26-cliente-sem-uso.json",
+      "name": "Impulsionando · relacionamento · cliente-sem-uso",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/27-cliente-engajado.json",
+      "name": "Impulsionando · relacionamento · cliente-engajado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/28-sugestao-recurso.json",
+      "name": "Impulsionando · relacionamento · sugestao-recurso",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/29-tutorial-automatico.json",
+      "name": "Impulsionando · relacionamento · tutorial-automatico",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/30-impulsionito-proativo.json",
+      "name": "Impulsionando · relacionamento · impulsionito-proativo",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/relacionamento/31-pos-demo-nurture.json",
+      "name": "31 — Pós-demo Nurture (P6.8-E)",
+      "active": false,
+      "nodeCount": 12
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/31-trial-d15.json",
+      "name": "Impulsionando · retencao · trial-d15",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/32-trial-d25.json",
+      "name": "Impulsionando · retencao · trial-d25",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/33-trial-d29.json",
+      "name": "Impulsionando · retencao · trial-d29",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/34-trial-expirado.json",
+      "name": "Impulsionando · retencao · trial-expirado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/35-renovacao-proxima.json",
+      "name": "Impulsionando · retencao · renovacao-proxima",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/36-cancelamento-solicitado.json",
+      "name": "Impulsionando · retencao · cancelamento-solicitado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/37-cancelamento-confirmado.json",
+      "name": "Impulsionando · retencao · cancelamento-confirmado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/38-reativacao.json",
+      "name": "Impulsionando · retencao · reativacao",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/39-upsell-oportunidade.json",
+      "name": "Impulsionando · retencao · upsell-oportunidade",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/retencao/40-downgrade-preventivo.json",
+      "name": "Impulsionando · retencao · downgrade-preventivo",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/51-chamado-aberto.json",
+      "name": "Impulsionando · suporte · chamado-aberto",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/52-sla-vencendo.json",
+      "name": "Impulsionando · suporte · sla-vencendo",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/53-sla-vencido.json",
+      "name": "Impulsionando · suporte · sla-vencido",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/54-chamado-resolvido.json",
+      "name": "Impulsionando · suporte · chamado-resolvido",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/55-avaliacao-negativa.json",
+      "name": "Impulsionando · suporte · avaliacao-negativa",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/suporte/56-escalonamento-humano.json",
+      "name": "Impulsionando · suporte · escalonamento-humano",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/57-vitrine-publicado.json",
+      "name": "Impulsionando · vitrine · vitrine-publicado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/58-vitrine-removido.json",
+      "name": "Impulsionando · vitrine · vitrine-removido",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/59-clube-favorito-novo.json",
+      "name": "Impulsionando · vitrine · clube-favorito-novo",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/60-clube-voucher-usado.json",
+      "name": "Impulsionando · vitrine · clube-voucher-usado",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/61-vitrine-avaliacao.json",
+      "name": "Impulsionando · vitrine · vitrine-avaliacao",
+      "active": false,
+      "nodeCount": 8
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/62-clube-empresa-proxima.json",
+      "name": "Impulsionando · vitrine · clube-empresa-proxima",
+      "active": false,
+      "nodeCount": 9
+    },
+    {
+      "file": "docs/n8n/workflows/vitrine/63-clube-recomendacao.json",
+      "name": "Impulsionando · vitrine · clube-recomendacao",
+      "active": false,
+      "nodeCount": 9
+    }
+  ],
+  "integrations": {
+    "Supabase": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "GitHub": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "N8N": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "OpenAI": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "WhatsApp": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "Mercado Pago": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "Google": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "SMTP": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    },
+    "APIs externas": {
+      "status": "parcialmente ativa",
+      "evidence": "Implementação encontrada; credencial e saúde em produção exigem validação externa."
+    }
+  },
+  "seo": {
+    "analytics": "encontrado",
+    "tagManager": "encontrado",
+    "searchConsole": "encontrado",
+    "ads": "encontrado",
+    "conversions": "encontrado",
+    "events": "encontrado",
+    "pixels": "encontrado",
+    "utm": "encontrado",
+    "sitemap": "encontrado",
+    "robots": "encontrado",
+    "schemaOrg": "encontrado",
+    "metatags": "encontrado",
+    "openGraph": "encontrado",
+    "canonical": "encontrado"
+  },
+  "authentication": {
+    "masterEmail": "raygs@hotmail.com",
+    "customerSwitcher": "implementado no Core; autorização efetiva depende do vínculo e da função is_impulsionando_staff no banco de produção",
+    "reauthenticationRequired": false
+  },
+  "findings": {
+    "duplicateClients": [],
+    "invalidWorkflows": [
+      {
+        "file": "docs/n8n/payloads/avaliacao-negativa.json",
+        "name": "docs/n8n/payloads/avaliacao-negativa.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+        "name": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-cupom-retorno.json",
+        "name": "docs/n8n/payloads/bar-cupom-retorno.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-delivery.json",
+        "name": "docs/n8n/payloads/bar-pedido-delivery.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-recebido.json",
+        "name": "docs/n8n/payloads/bar-pedido-recebido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+        "name": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boas-vindas.json",
+        "name": "docs/n8n/payloads/boas-vindas.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boleto-emitido.json",
+        "name": "docs/n8n/payloads/boleto-emitido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boleto-pago.json",
+        "name": "docs/n8n/payloads/boleto-pago.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-abandonado.json",
+        "name": "docs/n8n/payloads/cadastro-abandonado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-concluido.json",
+        "name": "docs/n8n/payloads/cadastro-concluido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-iniciado.json",
+        "name": "docs/n8n/payloads/cadastro-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cancelamento-confirmado.json",
+        "name": "docs/n8n/payloads/cancelamento-confirmado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cancelamento-solicitado.json",
+        "name": "docs/n8n/payloads/cancelamento-solicitado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cartao-recusado.json",
+        "name": "docs/n8n/payloads/cartao-recusado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/chamado-aberto.json",
+        "name": "docs/n8n/payloads/chamado-aberto.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/chamado-resolvido.json",
+        "name": "docs/n8n/payloads/chamado-resolvido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/checkout-iniciado.json",
+        "name": "docs/n8n/payloads/checkout-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cliente-engajado.json",
+        "name": "docs/n8n/payloads/cliente-engajado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cliente-sem-uso.json",
+        "name": "docs/n8n/payloads/cliente-sem-uso.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+        "name": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-no-show.json",
+        "name": "docs/n8n/payloads/clinica-no-show.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-retorno.json",
+        "name": "docs/n8n/payloads/clinica-retorno.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-teleconsulta.json",
+        "name": "docs/n8n/payloads/clinica-teleconsulta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-beneficio-expirando.json",
+        "name": "docs/n8n/payloads/clube-beneficio-expirando.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-boas-vindas.json",
+        "name": "docs/n8n/payloads/clube-boas-vindas.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-empresa-proxima.json",
+        "name": "docs/n8n/payloads/clube-empresa-proxima.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-favorito-novo.json",
+        "name": "docs/n8n/payloads/clube-favorito-novo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-recomendacao.json",
+        "name": "docs/n8n/payloads/clube-recomendacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-voucher-disponivel.json",
+        "name": "docs/n8n/payloads/clube-voucher-disponivel.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-voucher-usado.json",
+        "name": "docs/n8n/payloads/clube-voucher-usado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/downgrade-preventivo.json",
+        "name": "docs/n8n/payloads/downgrade-preventivo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/escalonamento-humano.json",
+        "name": "docs/n8n/payloads/escalonamento-humano.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-checkin.json",
+        "name": "docs/n8n/payloads/eventos-checkin.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+        "name": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-lembrete-antes.json",
+        "name": "docs/n8n/payloads/eventos-lembrete-antes.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-pos-evento.json",
+        "name": "docs/n8n/payloads/eventos-pos-evento.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-lead-imovel.json",
+        "name": "docs/n8n/payloads/imob-lead-imovel.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+        "name": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-visita-agendada.json",
+        "name": "docs/n8n/payloads/imob-visita-agendada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-visita-confirmada.json",
+        "name": "docs/n8n/payloads/imob-visita-confirmada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/impulsionito-proativo.json",
+        "name": "docs/n8n/payloads/impulsionito-proativo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/inadimplencia.json",
+        "name": "docs/n8n/payloads/inadimplencia.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-captado.json",
+        "name": "docs/n8n/payloads/lead-captado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-qualificado.json",
+        "name": "docs/n8n/payloads/lead-qualificado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-quente.json",
+        "name": "docs/n8n/payloads/lead-quente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-quiz.json",
+        "name": "docs/n8n/payloads/lead-quiz.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-redes-sociais.json",
+        "name": "docs/n8n/payloads/lead-redes-sociais.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-sem-resposta.json",
+        "name": "docs/n8n/payloads/lead-sem-resposta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-vitrine.json",
+        "name": "docs/n8n/payloads/lead-vitrine.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-whatsapp.json",
+        "name": "docs/n8n/payloads/lead-whatsapp.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/modulo-nao-configurado.json",
+        "name": "docs/n8n/payloads/modulo-nao-configurado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/nota-fiscal-emitida.json",
+        "name": "docs/n8n/payloads/nota-fiscal-emitida.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/nota-fiscal-pendente.json",
+        "name": "docs/n8n/payloads/nota-fiscal-pendente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d0.json",
+        "name": "docs/n8n/payloads/onboarding-d0.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d1.json",
+        "name": "docs/n8n/payloads/onboarding-d1.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d3.json",
+        "name": "docs/n8n/payloads/onboarding-d3.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d7.json",
+        "name": "docs/n8n/payloads/onboarding-d7.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-aprovado.json",
+        "name": "docs/n8n/payloads/pagamento-aprovado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-confirmado.json",
+        "name": "docs/n8n/payloads/pagamento-confirmado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-recusado.json",
+        "name": "docs/n8n/payloads/pagamento-recusado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pix-expirado.json",
+        "name": "docs/n8n/payloads/pix-expirado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pix-gerado.json",
+        "name": "docs/n8n/payloads/pix-gerado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+        "name": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/reativacao.json",
+        "name": "docs/n8n/payloads/reativacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/renovacao-proxima.json",
+        "name": "docs/n8n/payloads/renovacao-proxima.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/repasse-pendente.json",
+        "name": "docs/n8n/payloads/repasse-pendente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/repasse-realizado.json",
+        "name": "docs/n8n/payloads/repasse-realizado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sla-vencendo.json",
+        "name": "docs/n8n/payloads/sla-vencendo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sla-vencido.json",
+        "name": "docs/n8n/payloads/sla-vencido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sugestao-recurso.json",
+        "name": "docs/n8n/payloads/sugestao-recurso.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/suspensao-automatica.json",
+        "name": "docs/n8n/payloads/suspensao-automatica.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+        "name": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d15.json",
+        "name": "docs/n8n/payloads/trial-d15.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d25.json",
+        "name": "docs/n8n/payloads/trial-d25.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d29.json",
+        "name": "docs/n8n/payloads/trial-d29.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-expirado.json",
+        "name": "docs/n8n/payloads/trial-expirado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-premium-iniciado.json",
+        "name": "docs/n8n/payloads/trial-premium-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/tutorial-automatico.json",
+        "name": "docs/n8n/payloads/tutorial-automatico.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/upsell-oportunidade.json",
+        "name": "docs/n8n/payloads/upsell-oportunidade.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-avaliacao.json",
+        "name": "docs/n8n/payloads/vitrine-avaliacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-publicado.json",
+        "name": "docs/n8n/payloads/vitrine-publicado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-removido.json",
+        "name": "docs/n8n/payloads/vitrine-removido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-novo-cliente.json",
+        "name": "docs/n8n/payloads/wl-novo-cliente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-tenant-convertido.json",
+        "name": "docs/n8n/payloads/wl-tenant-convertido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-tenant-suspenso.json",
+        "name": "docs/n8n/payloads/wl-tenant-suspenso.json",
+        "active": false,
+        "nodeCount": 0
+      }
+    ],
+    "orphanWorkflows": [
+      {
+        "file": "docs/n8n/payloads/avaliacao-negativa.json",
+        "name": "docs/n8n/payloads/avaliacao-negativa.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+        "name": "docs/n8n/payloads/bar-avaliacao-pos-consumo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-cupom-retorno.json",
+        "name": "docs/n8n/payloads/bar-cupom-retorno.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-delivery.json",
+        "name": "docs/n8n/payloads/bar-pedido-delivery.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-recebido.json",
+        "name": "docs/n8n/payloads/bar-pedido-recebido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+        "name": "docs/n8n/payloads/bar-pedido-saiu-entrega.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boas-vindas.json",
+        "name": "docs/n8n/payloads/boas-vindas.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boleto-emitido.json",
+        "name": "docs/n8n/payloads/boleto-emitido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/boleto-pago.json",
+        "name": "docs/n8n/payloads/boleto-pago.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-abandonado.json",
+        "name": "docs/n8n/payloads/cadastro-abandonado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-concluido.json",
+        "name": "docs/n8n/payloads/cadastro-concluido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cadastro-iniciado.json",
+        "name": "docs/n8n/payloads/cadastro-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cancelamento-confirmado.json",
+        "name": "docs/n8n/payloads/cancelamento-confirmado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cancelamento-solicitado.json",
+        "name": "docs/n8n/payloads/cancelamento-solicitado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cartao-recusado.json",
+        "name": "docs/n8n/payloads/cartao-recusado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/chamado-aberto.json",
+        "name": "docs/n8n/payloads/chamado-aberto.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/chamado-resolvido.json",
+        "name": "docs/n8n/payloads/chamado-resolvido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/checkout-iniciado.json",
+        "name": "docs/n8n/payloads/checkout-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cliente-engajado.json",
+        "name": "docs/n8n/payloads/cliente-engajado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/cliente-sem-uso.json",
+        "name": "docs/n8n/payloads/cliente-sem-uso.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+        "name": "docs/n8n/payloads/clinica-consulta-confirmada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-no-show.json",
+        "name": "docs/n8n/payloads/clinica-no-show.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-retorno.json",
+        "name": "docs/n8n/payloads/clinica-retorno.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clinica-teleconsulta.json",
+        "name": "docs/n8n/payloads/clinica-teleconsulta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-beneficio-expirando.json",
+        "name": "docs/n8n/payloads/clube-beneficio-expirando.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-boas-vindas.json",
+        "name": "docs/n8n/payloads/clube-boas-vindas.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-empresa-proxima.json",
+        "name": "docs/n8n/payloads/clube-empresa-proxima.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-favorito-novo.json",
+        "name": "docs/n8n/payloads/clube-favorito-novo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-recomendacao.json",
+        "name": "docs/n8n/payloads/clube-recomendacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-voucher-disponivel.json",
+        "name": "docs/n8n/payloads/clube-voucher-disponivel.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/clube-voucher-usado.json",
+        "name": "docs/n8n/payloads/clube-voucher-usado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/downgrade-preventivo.json",
+        "name": "docs/n8n/payloads/downgrade-preventivo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/escalonamento-humano.json",
+        "name": "docs/n8n/payloads/escalonamento-humano.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-checkin.json",
+        "name": "docs/n8n/payloads/eventos-checkin.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+        "name": "docs/n8n/payloads/eventos-ingresso-vendido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-lembrete-antes.json",
+        "name": "docs/n8n/payloads/eventos-lembrete-antes.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/eventos-pos-evento.json",
+        "name": "docs/n8n/payloads/eventos-pos-evento.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-lead-imovel.json",
+        "name": "docs/n8n/payloads/imob-lead-imovel.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+        "name": "docs/n8n/payloads/imob-proposta-sem-resposta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-visita-agendada.json",
+        "name": "docs/n8n/payloads/imob-visita-agendada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/imob-visita-confirmada.json",
+        "name": "docs/n8n/payloads/imob-visita-confirmada.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/impulsionito-proativo.json",
+        "name": "docs/n8n/payloads/impulsionito-proativo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/inadimplencia.json",
+        "name": "docs/n8n/payloads/inadimplencia.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-captado.json",
+        "name": "docs/n8n/payloads/lead-captado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-qualificado.json",
+        "name": "docs/n8n/payloads/lead-qualificado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-quente.json",
+        "name": "docs/n8n/payloads/lead-quente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-quiz.json",
+        "name": "docs/n8n/payloads/lead-quiz.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-redes-sociais.json",
+        "name": "docs/n8n/payloads/lead-redes-sociais.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-sem-resposta.json",
+        "name": "docs/n8n/payloads/lead-sem-resposta.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-vitrine.json",
+        "name": "docs/n8n/payloads/lead-vitrine.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/lead-whatsapp.json",
+        "name": "docs/n8n/payloads/lead-whatsapp.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/modulo-nao-configurado.json",
+        "name": "docs/n8n/payloads/modulo-nao-configurado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/nota-fiscal-emitida.json",
+        "name": "docs/n8n/payloads/nota-fiscal-emitida.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/nota-fiscal-pendente.json",
+        "name": "docs/n8n/payloads/nota-fiscal-pendente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d0.json",
+        "name": "docs/n8n/payloads/onboarding-d0.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d1.json",
+        "name": "docs/n8n/payloads/onboarding-d1.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d3.json",
+        "name": "docs/n8n/payloads/onboarding-d3.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/onboarding-d7.json",
+        "name": "docs/n8n/payloads/onboarding-d7.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-aprovado.json",
+        "name": "docs/n8n/payloads/pagamento-aprovado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-confirmado.json",
+        "name": "docs/n8n/payloads/pagamento-confirmado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pagamento-recusado.json",
+        "name": "docs/n8n/payloads/pagamento-recusado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pix-expirado.json",
+        "name": "docs/n8n/payloads/pix-expirado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/pix-gerado.json",
+        "name": "docs/n8n/payloads/pix-gerado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+        "name": "docs/n8n/payloads/reativacao-pos-pagamento.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/reativacao.json",
+        "name": "docs/n8n/payloads/reativacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/renovacao-proxima.json",
+        "name": "docs/n8n/payloads/renovacao-proxima.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/repasse-pendente.json",
+        "name": "docs/n8n/payloads/repasse-pendente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/repasse-realizado.json",
+        "name": "docs/n8n/payloads/repasse-realizado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sla-vencendo.json",
+        "name": "docs/n8n/payloads/sla-vencendo.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sla-vencido.json",
+        "name": "docs/n8n/payloads/sla-vencido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/sugestao-recurso.json",
+        "name": "docs/n8n/payloads/sugestao-recurso.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/suspensao-automatica.json",
+        "name": "docs/n8n/payloads/suspensao-automatica.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+        "name": "docs/n8n/payloads/tenant-emitir-nf-cliente-final.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d15.json",
+        "name": "docs/n8n/payloads/trial-d15.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d25.json",
+        "name": "docs/n8n/payloads/trial-d25.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-d29.json",
+        "name": "docs/n8n/payloads/trial-d29.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-expirado.json",
+        "name": "docs/n8n/payloads/trial-expirado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/trial-premium-iniciado.json",
+        "name": "docs/n8n/payloads/trial-premium-iniciado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/tutorial-automatico.json",
+        "name": "docs/n8n/payloads/tutorial-automatico.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/upsell-oportunidade.json",
+        "name": "docs/n8n/payloads/upsell-oportunidade.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-avaliacao.json",
+        "name": "docs/n8n/payloads/vitrine-avaliacao.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-publicado.json",
+        "name": "docs/n8n/payloads/vitrine-publicado.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/vitrine-removido.json",
+        "name": "docs/n8n/payloads/vitrine-removido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-novo-cliente.json",
+        "name": "docs/n8n/payloads/wl-novo-cliente.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-tenant-convertido.json",
+        "name": "docs/n8n/payloads/wl-tenant-convertido.json",
+        "active": false,
+        "nodeCount": 0
+      },
+      {
+        "file": "docs/n8n/payloads/wl-tenant-suspenso.json",
+        "name": "docs/n8n/payloads/wl-tenant-suspenso.json",
+        "active": false,
+        "nodeCount": 0
+      }
+    ]
+  },
+  "blockers": [
+    "Credenciais de produção e consultas administrativas do Supabase",
+    "API e credenciais da instância N8N",
+    "OAuth/contas Google e GitHub",
+    "tokens OpenAI, WhatsApp, Mercado Pago e APIs externas",
+    "credenciais SMTP e DNS SPF/DKIM/DMARC",
+    "testes autenticados de dashboards e URLs privadas"
+  ],
+  "completion": {
+    "percent": 96,
+    "passed": 161,
+    "externallyBlocked": 6
+  }
+}
