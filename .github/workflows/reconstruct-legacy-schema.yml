@@ -2,6 +2,11 @@ name: Reconstruct legacy schema (disposable)
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - agent/chrismed-phase1-stabilization
+    paths:
+      - .github/workflows/reconstruct-legacy-schema.yml
 
 permissions:
   contents: read
