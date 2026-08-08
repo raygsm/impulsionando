@@ -77,4 +77,6 @@ jobs:
       - name: Dry-run summary
         if: ${{ inputs.dry_run }}
         run: |
-          echo "Alvo e conectividade validados. Nenhuma migracao foi aplicada (dry_run=true)."
+          supabase db push --dry-run --include-all \
+            --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          echo "Alvo, conectividade e plano de migracoes validados. Nenhuma migracao foi aplicada (dry_run=true)."
