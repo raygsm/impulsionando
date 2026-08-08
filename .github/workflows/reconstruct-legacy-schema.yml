@@ -44,6 +44,23 @@ jobs:
           VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor')
           ON CONFLICT (id) DO NOTHING;
           SQL
+          cat > supabase/migrations/20260621141708_reconstruction_master_fixtures.sql <<'SQL'
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '3f2e2101-190d-44f2-8102-57dddfd34c91', 'raygs@hotmail.com', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.companies (id, name, is_master)
+          VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando', true)
+          ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.profiles (id, slug, name, is_master_profile)
+          VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true)
+          ON CONFLICT (id) DO NOTHING;
+          SQL
           echo "Legacy migrations to validate: $(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)"
 
       - name: Reconstruct schema in disposable Supabase
