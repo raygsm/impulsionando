@@ -26,7 +26,7 @@ jobs:
           sudo mv ./actionlint /usr/local/bin/actionlint
 
       - name: yamllint (sintaxe YAML)
-        run: yamllint -d "{extends: relaxed, rules: {line-length: disable}}" .github/workflows
+        run: 'yamllint -d "{extends: relaxed, rules: {line-length: disable}}" .github/workflows'
 
       - name: actionlint (schema GitHub Actions)
         run: actionlint -color .github/workflows/*.yml
