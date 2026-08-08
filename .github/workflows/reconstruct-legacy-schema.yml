@@ -39,6 +39,10 @@ jobs:
             ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED'),
             ('5bdcdef4-f0dc-4453-b935-a192ad514938', 'RioMed')
           ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO public.niches (id, slug, name)
+          VALUES ('a6696010-9178-4082-9a17-32e4378fc0b8', 'saude-colors-fixture', 'Saude Colors fixture')
+          ON CONFLICT (id) DO NOTHING;
           SQL
           cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
           INSERT INTO public.profiles (id, slug, name)
@@ -63,6 +67,14 @@ jobs:
             raw_app_meta_data, raw_user_meta_data, created_at, updated_at
           ) VALUES (
             '907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'legacy-consumer-fixture@example.invalid', '', now(),
+            '{}'::jsonb, '{}'::jsonb, now(), now()
+          ) ON CONFLICT (id) DO NOTHING;
+
+          INSERT INTO auth.users (
+            id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+          ) VALUES (
+            '73285c6d-7c8a-421d-b94c-7f24a59f54a0', 'legacy-colors-admin-fixture@example.invalid', '', now(),
             '{}'::jsonb, '{}'::jsonb, now(), now()
           ) ON CONFLICT (id) DO NOTHING;
 
