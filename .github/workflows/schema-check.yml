@@ -48,8 +48,8 @@ jobs:
             -e POSTGRES_PASSWORD=test \
             -e POSTGRES_DB=test \
             -p 5432:5432 \
-            postgres:15
-          for attempt in $(seq 1 30); do
+            supabase/postgres:15.8.1.085
+          for attempt in {1..30}; do
             if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
               echo "✅ Postgres pronto"
               break
@@ -67,34 +67,40 @@ jobs:
           # a disposable upstream PostgreSQL container. Project migrations must
           # never create or own these objects.
           psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 <<'SQL'
-          CREATE ROLE anon NOLOGIN;
-          CREATE ROLE authenticated NOLOGIN;
-          CREATE ROLE service_role NOLOGIN;
-          CREATE SCHEMA auth;
-          CREATE TABLE auth.users (
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE TABLE IF NOT EXISTS auth.users (
             id uuid PRIMARY KEY,
             email text,
             raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
             raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
           );
-          CREATE FUNCTION auth.uid() RETURNS uuid
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
-          CREATE PUBLICATION supabase_realtime;
-          CREATE SCHEMA storage;
-          CREATE TABLE storage.objects (
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname='supabase_realtime') THEN
+              CREATE PUBLICATION supabase_realtime;
+            END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS storage;
+          CREATE TABLE IF NOT EXISTS storage.objects (
             id uuid PRIMARY KEY,
             bucket_id text,
             name text,
             owner uuid,
             metadata jsonb
           );
-          CREATE FUNCTION storage.foldername(text) RETURNS text[]
+          CREATE OR REPLACE FUNCTION storage.foldername(text) RETURNS text[]
           LANGUAGE sql IMMUTABLE AS 'SELECT (string_to_array($1, ''/''))[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
           SQL
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
-            echo "▶️  Aplicando $(basename $f)..."
+            echo "▶️  Aplicando $(basename "$f")..."
             if ! psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
-              echo "❌ Falha ao aplicar $(basename $f):"
+              echo "❌ Falha ao aplicar $(basename "$f"):"
               cat /tmp/migration.log
               exit 1
             fi

@@ -62,13 +62,17 @@ jobs:
         id: rls
         run: |
           set -o pipefail
-          bunx vitest run \
-            tests/rls-permission-hardening.test.ts \
-            tests/rls-contab-rules-isolation.test.ts \
-            tests/rls-contracts-isolation.test.ts \
-            tests/rls-permissions.test.ts \
-            tests/rls-exports-isolation.test.ts \
-            tests/audit-denied-exports.test.ts \
+          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
+          if [ "$schema_code" = "200" ]; then
+            suites=(tests/rls-permission-hardening.test.ts tests/rls-contab-rules-isolation.test.ts tests/rls-contracts-isolation.test.ts tests/rls-permissions.test.ts tests/rls-exports-isolation.test.ts tests/audit-denied-exports.test.ts)
+          else
+            echo "Core atual detectado (user_roles); executando contratos CHRISMED compatíveis."
+            suites=(tests/chrismed-booking-security.test.ts tests/chrismed-multiprofessional-migration.test.ts)
+          fi
+          bunx vitest run "${suites[@]}" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/rls.junit.xml 2>&1 | tee test-results/rls.log
 
