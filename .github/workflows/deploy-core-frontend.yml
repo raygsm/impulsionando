@@ -86,6 +86,32 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Sync server-only OpenAI secret
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$OPENAI_API_KEY"
+          key_file="$(mktemp)"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s' "$OPENAI_API_KEY" >"$key_file"
+          chmod 0600 "$key_file"
+          scp "$key_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-openai-key"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          key="$(cat /tmp/impulsionando-openai-key)"
+          rm -f /tmp/impulsionando-openai-key
+          tmp="$(mktemp)"
+          if sudo test -f /etc/impulsionando-core.env; then
+            sudo grep -v '^OPENAI_API_KEY=' /etc/impulsionando-core.env >"$tmp" || true
+          fi
+          printf 'OPENAI_API_KEY=%s\n' "$key" >>"$tmp"
+          sudo install -o root -g root -m 0600 "$tmp" /etc/impulsionando-core.env
+          rm -f "$tmp"
+          REMOTE
+
       - name: Upload release artifact and server configuration
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
