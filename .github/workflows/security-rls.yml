@@ -53,9 +53,9 @@ jobs:
           set -o pipefail
           bunx supabase@latest --version
           # ERROR level fails the job; WARN is informational
-          bunx supabase@latest db lint --project-id "$SUPABASE_PROJECT_ID" --level error \
+          bunx supabase@latest db lint --project-ref "$SUPABASE_PROJECT_ID" --level error \
             2>&1 | tee test-results/db-lint-errors.txt
-          bunx supabase@latest db lint --project-id "$SUPABASE_PROJECT_ID" --level warn \
+          bunx supabase@latest db lint --project-ref "$SUPABASE_PROJECT_ID" --level warn \
             2>&1 | tee test-results/db-lint-warn.txt || true
 
       - name: RLS regression suite (vitest)
