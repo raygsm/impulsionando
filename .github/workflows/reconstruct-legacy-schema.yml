@@ -37,6 +37,11 @@ jobs:
           VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliaria Garrido')
           ON CONFLICT (id) DO NOTHING;
           SQL
+          cat > supabase/migrations/20260617202256_reconstruction_profile_fixtures.sql <<'SQL'
+          INSERT INTO public.profiles (id, slug, name)
+          VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor')
+          ON CONFLICT (id) DO NOTHING;
+          SQL
           echo "Legacy migrations to validate: $(find supabase/migrations -maxdepth 1 -name '*.sql' | wc -l)"
 
       - name: Reconstruct schema in disposable Supabase
