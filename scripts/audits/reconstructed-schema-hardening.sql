@@ -36,6 +36,30 @@ BEGIN
       trigger_function.signature
     );
   END LOOP;
+
+  -- PostgreSQL grants EXECUTE to PUBLIC by default. Keep every application RPC
+  -- opt-in via the explicit anon/authenticated grants already in migrations.
+  FOR trigger_function IN
+    SELECT p.oid::regprocedure AS signature
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+  LOOP
+    EXECUTE format(
+      'REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC',
+      trigger_function.signature
+    );
+  END LOOP;
 END
 $hardening$;
 
+-- These helpers accept arbitrary user IDs. Policies use them only for signed-in
+-- requests, so anonymous RPC execution is unnecessary and leaks authorization
+-- membership as a boolean oracle. Host resolution remains anonymously callable.
+REVOKE EXECUTE ON FUNCTION public.is_super_admin(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.is_impulsionando_staff(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.user_belongs_to_company(uuid, uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.user_has_permission(uuid, uuid, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.core_user_belongs_to_company(uuid, uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.mp_user_in_company(uuid, uuid) FROM anon;

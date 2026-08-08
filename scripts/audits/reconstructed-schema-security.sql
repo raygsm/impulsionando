@@ -80,5 +80,8 @@ FROM pg_class c
 JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public'
   AND c.relkind = 'v'
-  AND NOT (coalesce(c.reloptions, ARRAY[]::text[]) @> ARRAY['security_invoker=true'])
+  AND NOT (
+    coalesce(c.reloptions, ARRAY[]::text[]) @> ARRAY['security_invoker=true']
+    OR coalesce(c.reloptions, ARRAY[]::text[]) @> ARRAY['security_invoker=on']
+  )
 ORDER BY c.relname;
