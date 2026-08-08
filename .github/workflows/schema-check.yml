@@ -49,6 +49,7 @@ jobs:
             -e POSTGRES_DB=test \
             -p 5432:5432 \
             postgres:15
+          # shellcheck disable=SC2209 # Brace expansion provides literal retry counters.
           for attempt in {1..30}; do
             if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
               echo "✅ Postgres pronto"
