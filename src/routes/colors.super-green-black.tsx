@@ -44,12 +44,12 @@ export const Route = createFileRoute("/colors/super-green-black")({
       { property: "og:title", content: "Super Green Black — Colors Saúde" },
       { property: "og:description", content: "Suplemento alimentar premium da linha Green. Comprado apenas pelos canais oficiais Colors Saúde." },
       { property: "og:type", content: "product" },
-      { property: "og:url", content: "https://colors.impulsionando.com.br/colors/super-green-black" },
+      { property: "og:url", content: "https://colors.impulsionando.com.br/super-green-black" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Super Green Black — Colors Saúde" },
       { name: "twitter:description", content: "Suplemento alimentar premium da linha Green." },
     ],
-    links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/colors/super-green-black" }],
+    links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/super-green-black" }],
     scripts: [{
       type: "application/ld+json",
       children: JSON.stringify({

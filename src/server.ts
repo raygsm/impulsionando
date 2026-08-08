@@ -2,7 +2,11 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
+import {
+  canonicalTenantHostRedirect,
+  tenantInternalPathForPublicPath,
+  tenantLandingTargetForHost,
+} from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -92,12 +96,13 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+      const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
       const canonicalTenantUrl = canonicalTenantHostRedirect({
         hostname: url.hostname,
         pathname: url.pathname,
         search: url.search,
         hash: url.hash,
-        protocol: url.protocol,
+        protocol: forwardedProto === "https" ? "https:" : url.protocol,
       });
       if (canonicalTenantUrl) {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
@@ -115,7 +120,11 @@ export default {
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
+      const tenantInternalPath = tenantInternalPathForPublicPath(url.hostname, url.pathname);
+      if (tenantInternalPath) {
+        url.pathname = tenantInternalPath;
+        routedRequest = new Request(url, request);
+      } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
         // Render the tenant landing page internally so the public URL remains
         // the clean subdomain root (for example, / rather than /chrismed).

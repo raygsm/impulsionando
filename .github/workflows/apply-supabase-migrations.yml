@@ -2,6 +2,12 @@ name: Apply Supabase Migrations
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Somente planejar, sem alterar o banco"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   apply:
@@ -27,11 +33,30 @@ jobs:
           version: latest
 
       - name: Verify Supabase target
-        run: node scripts/verify-supabase-target.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_PROJECT_ID"
+          test "$SUPABASE_PROJECT_ID" = "$VITE_SUPABASE_PROJECT_ID"
+          test "$SUPABASE_URL" = "https://${SUPABASE_PROJECT_ID}.supabase.co"
+          test "$VITE_SUPABASE_URL" = "$SUPABASE_URL"
+          case "${PGUSER}@${PGHOST}" in
+            *"$SUPABASE_PROJECT_ID"*) ;;
+            *) echo "::error::Conexão Postgres não identifica o projeto esperado"; exit 1 ;;
+          esac
+          echo "Destino Supabase validado sem exibir credenciais."
 
       - name: Verify Supabase pooler connection
-        run: node scripts/verify-supabase-pooler.mjs
+        shell: bash
+        run: |
+          node -e "const net=require('net');const s=net.createConnection({host:process.env.PGHOST,port:Number(process.env.PGPORT)},()=>{console.log('Pooler acessível.');s.end();});s.setTimeout(10000);s.on('timeout',()=>{console.error('Timeout no pooler.');process.exit(1)});s.on('error',e=>{console.error('Pooler indisponível:',e.code);process.exit(1)});"
 
       - name: Apply migrations
+        if: ${{ !inputs.dry_run }}
         run: |
           supabase db push --include-all --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+
+      - name: Plan migrations (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          supabase db push --include-all --dry-run --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"

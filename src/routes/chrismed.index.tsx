@@ -30,18 +30,16 @@ import {
   ChrismedEyebrow,
   ChrismedButton,
   ChrismedCard,
-  ChrismedPortrait,
   ChrismedModalityCard,
   ChrismedOliverLauncher,
   ChrismedTrustBar,
   ChrismedFollowUpCard,
 } from '@/components/chrismed/primitives';
-import { CHRISMED_DOCTOR } from '@/content/chrismed/identity';
-import { DRA_CHRISTIANE_PORTRAIT_SRC } from '@/content/chrismed/portrait';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
-import consultorioComposite from '@/assets/chrismed/consultorio-composite.jpg.asset.json';
 
-const hasPortrait = Boolean(DRA_CHRISTIANE_PORTRAIT_SRC);
+const CHRISMED_CONSULTORIO_URL = '/brand/chrismed/consultorio-corrected.png';
+const CHRISMED_DRA_CHRISTIANE_URL = '/brand/chrismed/dra-christiane-alencar.png';
+const CHRISMED_GMS_LOGO_URL = '/brand/chrismed/gms.jpg';
 
 
 export const Route = createFileRoute('/chrismed/')({
@@ -152,41 +150,23 @@ export function ChrismedHomePage() {
             </ul>
           </div>
 
-          {/* Coluna do retrato — sempre presente para preservar composição editorial;
-              renderiza fallback silencioso quando o asset ainda não foi publicado. */}
+          {/* Retrato oficial fornecido pela Dra. Christiane para a primeira imagem da Home. */}
           <div className="chrismed-rise chrismed-rise-delay-4 relative">
             <div className="absolute -inset-6 -z-10 border border-[var(--chrismed-amber)]/30" aria-hidden />
             <div className="absolute -top-4 -left-4 h-16 w-16 border-l border-t border-[var(--chrismed-amber)]" aria-hidden />
             <div className="absolute -bottom-4 -right-4 h-16 w-16 border-r border-b border-[var(--chrismed-amber)]" aria-hidden />
-            {hasPortrait ? (
-              <ChrismedPortrait
-                src={DRA_CHRISTIANE_PORTRAIT_SRC}
-                ratio="4/5"
-                alt={t.hero.portraitAlt}
-                eyebrow={t.hero.portraitEyebrow}
-                className="w-full"
+            <figure className="relative aspect-[4/5] overflow-hidden bg-[var(--chrismed-forest-soft)] ring-1 ring-[var(--chrismed-amber)]/25">
+              <img
+                src={CHRISMED_DRA_CHRISTIANE_URL}
+                alt="Dra. Christiane Alencar no consultório CHRISMED"
+                className="h-full w-full object-cover object-top"
+                loading="eager"
+                fetchPriority="high"
               />
-            ) : (
-              <div className="aspect-[4/5] w-full bg-gradient-to-br from-[var(--chrismed-forest-soft)] to-[var(--chrismed-forest-deep)] p-8 ring-1 ring-[var(--chrismed-amber)]/25">
-                <div className="flex h-full w-full flex-col justify-between">
-                  <div className="chrismed-sans text-[10px] uppercase tracking-[0.32em] text-[var(--chrismed-amber)]/70">
-                    {t.hero.portraitEyebrow}
-                  </div>
-                  <div>
-                    <div className="chrismed-serif text-3xl italic text-[var(--chrismed-amber)] md:text-4xl">
-                      {CHRISMED_DOCTOR.shortName}
-                    </div>
-                    <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.3em] text-white/60">
-                      {t.hero.portraitRole}
-                    </div>
-                    <div className="mt-6 h-px w-16 bg-[var(--chrismed-amber)]" />
-                    <div className="chrismed-sans mt-3 text-[10px] uppercase tracking-[0.28em] text-white/50">
-                      CRM/RJ · 52.58575-0
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+              <figcaption className="chrismed-sans absolute inset-x-0 bottom-0 bg-gradient-to-t from-[var(--chrismed-forest-deep)] via-[var(--chrismed-forest-deep)]/75 to-transparent px-6 pb-5 pt-14 text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-amber-soft)]">
+                Dra. Christiane Alencar · CHRISMED
+              </figcaption>
+            </figure>
           </div>
         </div>
       </ChrismedSection>
@@ -231,7 +211,7 @@ export function ChrismedHomePage() {
           </div>
           <figure className="overflow-hidden rounded-sm">
             <img
-              src={consultorioComposite.url}
+              src={CHRISMED_CONSULTORIO_URL}
               alt="Consultório CHRISMED em Copacabana — sala de espera reservada e sala clínica"
               className="w-full object-cover shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
               loading="lazy"
@@ -436,6 +416,14 @@ export function ChrismedHomePage() {
           </div>
 
           <ul className="grid gap-4 sm:grid-cols-2">
+            <li className="flex min-h-40 items-center justify-center border border-[var(--chrismed-forest-deep)]/15 bg-white/80 p-6 sm:col-span-2">
+              <img
+                src={CHRISMED_GMS_LOGO_URL}
+                alt="CHRISMED CSA · GMS Global Medical Support"
+                className="h-auto w-full max-w-[18rem] object-contain"
+                loading="lazy"
+              />
+            </li>
             {t.gms.audience.map((a, i) => (
               <li
                 key={a}

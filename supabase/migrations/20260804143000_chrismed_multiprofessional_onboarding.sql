@@ -93,6 +93,39 @@ SELECT p.id, seed.specialty_name, seed.sort_order
 FROM seed JOIN public.health_professions p ON p.slug = seed.profession_slug
 ON CONFLICT (profession_id, name) DO UPDATE SET sort_order = EXCLUDED.sort_order;
 
+-- Catálogo médico amplo para busca e multiseleção. Mantido no banco, nunca no componente.
+WITH medical_specialties(name, sort_order) AS (VALUES
+  ('Alergia e Imunologia',60), ('Anestesiologia',70), ('Angiologia',80),
+  ('Cancerologia',90), ('Cardiologia',100), ('Cirurgia Cardiovascular',110),
+  ('Cirurgia da Mão',120), ('Cirurgia de Cabeça e Pescoço',130),
+  ('Cirurgia do Aparelho Digestivo',140), ('Cirurgia Geral',150),
+  ('Cirurgia Oncológica',160), ('Cirurgia Pediátrica',170),
+  ('Cirurgia Plástica',180), ('Cirurgia Torácica',190), ('Cirurgia Vascular',200),
+  ('Clínica Médica',210), ('Coloproctologia',220), ('Dermatologia',230),
+  ('Endocrinologia e Metabologia',240), ('Endoscopia',250),
+  ('Gastroenterologia',260), ('Genética Médica',270), ('Geriatria',280),
+  ('Ginecologia e Obstetrícia',290), ('Hematologia e Hemoterapia',300),
+  ('Hepatologia',310), ('Homeopatia',320), ('Infectologia',330),
+  ('Mastologia',340), ('Medicina de Emergência',350),
+  ('Medicina de Família e Comunidade',360), ('Medicina do Trabalho',370),
+  ('Medicina do Tráfego',380), ('Medicina Esportiva',390),
+  ('Medicina Física e Reabilitação',400), ('Medicina Intensiva',410),
+  ('Medicina Legal e Perícia Médica',420), ('Medicina Nuclear',430),
+  ('Medicina Preventiva e Social',440), ('Nefrologia',450),
+  ('Neurocirurgia',460), ('Neurologia',470), ('Nutrologia',480),
+  ('Oftalmologia',490), ('Oncologia Clínica',500),
+  ('Ortopedia e Traumatologia',510), ('Otorrinolaringologia',520),
+  ('Patologia',530), ('Patologia Clínica/Medicina Laboratorial',540),
+  ('Pediatria',550), ('Pneumologia',560), ('Psiquiatria',570),
+  ('Radiologia e Diagnóstico por Imagem',580), ('Radioterapia',590),
+  ('Reumatologia',600), ('Urologia',610)
+)
+INSERT INTO public.health_specialties(profession_id, name, sort_order)
+SELECT p.id, m.name, m.sort_order
+FROM medical_specialties m
+JOIN public.health_professions p ON p.slug = 'medico'
+ON CONFLICT (profession_id, name) DO UPDATE SET sort_order = EXCLUDED.sort_order;
+
 ALTER TABLE public.agenda_professionals
   ADD COLUMN IF NOT EXISTS profession_id uuid REFERENCES public.health_professions(id),
   ADD COLUMN IF NOT EXISTS council_number text,
@@ -111,6 +144,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS agenda_professionals_public_slug_unique
   ON public.agenda_professionals(public_slug) WHERE public_slug IS NOT NULL;
 CREATE INDEX IF NOT EXISTS health_specialties_profession_idx
   ON public.health_specialties(profession_id, sort_order) WHERE is_active;
+CREATE UNIQUE INDEX IF NOT EXISTS health_professional_one_primary_specialty
+  ON public.health_professional_specialties(professional_id) WHERE is_primary;
 
 ALTER TABLE public.health_professions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.health_specialties ENABLE ROW LEVEL SECURITY;
@@ -204,6 +239,20 @@ BEGIN
     primary_area = COALESCE(EXCLUDED.primary_area, agenda_professionals.primary_area),
     secondary_areas = CASE WHEN cardinality(EXCLUDED.secondary_areas) > 0 THEN EXCLUDED.secondary_areas ELSE agenda_professionals.secondary_areas END
   RETURNING id INTO v_profile_id;
+  DELETE FROM public.health_professional_specialties
+   WHERE professional_id = v_profile_id
+     AND specialty_id NOT IN (
+       SELECT s.id
+       FROM public.health_specialties s
+       WHERE s.profession_id = v_profession.id
+         AND s.is_active
+         AND s.id::text IN (
+           SELECT jsonb_array_elements_text(COALESCE(p_registration->'specialtyIds', '[]'::jsonb))
+         )
+     );
+  UPDATE public.health_professional_specialties
+     SET is_primary = false
+   WHERE professional_id = v_profile_id;
   INSERT INTO public.health_professional_specialties(professional_id, specialty_id, is_primary)
   SELECT v_profile_id, s.id, (s.id::text = p_registration->>'primarySpecialtyId')
   FROM public.health_specialties s

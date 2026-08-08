@@ -6,8 +6,11 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
+  chrismedInternalPathForPublicPath,
   deprecatedSubdomainRedirect,
+  tenantInternalPathForPublicPath,
   tenantLandingTargetForHost,
+  tenantPublicPathForInternalPath,
   tenantSubdomainTarget,
 } from "./subdomain";
 
@@ -29,7 +32,7 @@ describe("canonicalTenantHostRedirect", () => {
       pathname: "/chrismed/agendar",
       search: "?utm_source=email",
       hash: "#form",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/agendar?utm_source=email#form");
+    })).toBe("https://chrismed.impulsionando.com.br/agendar?utm_source=email#form");
   });
 
   it("moves the legacy agenda host to the official tenant subdomain", () => {
@@ -37,7 +40,7 @@ describe("canonicalTenantHostRedirect", () => {
       ...base,
       hostname: "agenda.chrismed.com.br",
       pathname: "/chrismed/contato",
-    })).toBe("https://chrismed.impulsionando.com.br/chrismed/contato");
+    })).toBe("https://chrismed.impulsionando.com.br/contato");
   });
 
   it("cleans the internal CHRISMED route from the canonical host", () => {
@@ -48,12 +51,68 @@ describe("canonicalTenantHostRedirect", () => {
     })).toBe("https://chrismed.impulsionando.com.br/");
   });
 
-  it("does not loop on nested CHRISMED paths at the canonical host", () => {
+  it("removes the internal prefix from nested paths at the canonical host", () => {
     expect(canonicalTenantHostRedirect({
       ...base,
       hostname: "chrismed.impulsionando.com.br",
       pathname: "/chrismed/agendar",
-    })).toBeNull();
+    })).toBe("https://chrismed.impulsionando.com.br/agendar");
+  });
+});
+
+describe("chrismedInternalPathForPublicPath", () => {
+  it("maps clean public paths to the internal CHRISMED route tree", () => {
+    expect(chrismedInternalPathForPublicPath("/internacional")).toBe("/chrismed/internacional");
+    expect(chrismedInternalPathForPublicPath("/agendar")).toBe("/chrismed/agendar");
+  });
+
+  it("keeps standalone and infrastructure paths untouched", () => {
+    expect(chrismedInternalPathForPublicPath("/auth")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/alth")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/_build/app.js")).toBeNull();
+    expect(chrismedInternalPathForPublicPath("/api/public/health")).toBeNull();
+  });
+});
+
+describe("dedicated tenant clean paths", () => {
+  it("maps clean CHRISMED pages to the internal route tree", () => {
+    expect(tenantInternalPathForPublicPath(
+      "chrismed.impulsionando.com.br",
+      "/agendar",
+    )).toBe("/chrismed/agendar");
+    expect(tenantPublicPathForInternalPath(
+      "chrismed.impulsionando.com.br",
+      "/chrismed/agendar",
+    )).toBe("/agendar");
+  });
+
+  it("applies the same invariant to other dedicated clients", () => {
+    expect(tenantInternalPathForPublicPath(
+      "colors.impulsionando.com.br",
+      "/entrar",
+    )).toBe("/colors/entrar");
+    expect(tenantPublicPathForInternalPath(
+      "wmp.impulsionando.com.br",
+      "/wmp/eventos",
+    )).toBe("/eventos");
+  });
+
+  it("never rewrites infrastructure or standalone authentication paths", () => {
+    expect(tenantInternalPathForPublicPath(
+      "chrismed.impulsionando.com.br",
+      "/api/public/health",
+    )).toBeNull();
+    expect(tenantInternalPathForPublicPath(
+      "colors.impulsionando.com.br",
+      "/auth",
+    )).toBeNull();
+  });
+
+  it("does not invent nested routes for generic storefront tenants", () => {
+    expect(tenantInternalPathForPublicPath(
+      "cliente-novo.impulsionando.com.br",
+      "/produto",
+    )).toBeNull();
   });
 });
 
@@ -68,7 +127,7 @@ describe("deprecatedSubdomainRedirect", () => {
       ...base,
       hostname: "colorssaude.impulsionando.com.br",
       pathname: "/colors/super-green-black",
-    })).toBe("https://colors.impulsionando.com.br/colors/super-green-black");
+    })).toBe("https://colors.impulsionando.com.br/super-green-black");
   });
 
   it("preserva query e hash", () => {
@@ -78,7 +137,7 @@ describe("deprecatedSubdomainRedirect", () => {
       pathname: "/colors",
       search: "?utm_source=email&utm_campaign=x",
       hash: "#produtos",
-    })).toBe("https://colors.impulsionando.com.br/colors?utm_source=email&utm_campaign=x#produtos");
+    })).toBe("https://colors.impulsionando.com.br/?utm_source=email&utm_campaign=x#produtos");
   });
 
   it("cobre também o alias colors-saude", () => {

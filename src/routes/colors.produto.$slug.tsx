@@ -14,7 +14,7 @@ export const Route = createFileRoute("/colors/produto/$slug")({
     if (!p) return { meta: [{ title: "Produto — Colors Saúde" }] };
     const title = `${p.name} — ${p.brandLabel} · Colors Saúde`;
     const desc = `${p.tagline}. ${p.short}`;
-    const url = `https://colors.impulsionando.com.br/colors/produto/${p.slug}`;
+    const url = `https://colors.impulsionando.com.br/produto/${p.slug}`;
     const productLd: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",

@@ -37,6 +37,22 @@ interface CreatePaymentBody {
   back_urls?: { success: string; pending: string; failure: string };
 }
 
+function brasiliaNowKey(now = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now);
+  const part = (type: string) => parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:${part('second')}`;
+}
+
+function requestedSlotKey(metadata?: Record<string, unknown>): string | null {
+  const date = typeof metadata?.requested_day === 'string' ? metadata.requested_day : '';
+  const time = typeof metadata?.requested_time === 'string' ? metadata.requested_time : '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}(:\d{2})?$/.test(time)) return null;
+  return `${date}T${time.length === 5 ? `${time}:00` : time}`;
+}
+
 // Cálculo do fee — espelha src/lib/payouts.ts (cents + bps).
 function calcFee(
   gross: number,
@@ -63,6 +79,16 @@ Deno.serve(async (req) => {
     const body: CreatePaymentBody = await req.json();
     if (!body.company_id || !body.payment_method || !body.amount_cents || !body.description || !body.payer?.email) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    if (body.context_type === 'chrismed_appointment' || body.context_type === 'chrismed_service_offering') {
+      const slotKey = requestedSlotKey(body.metadata);
+      if (!slotKey || slotKey <= brasiliaNowKey()) {
+        return new Response(JSON.stringify({
+          error: 'slot_expired',
+          message: 'Este horário não está mais disponível. Escolha outro horário.',
+        }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
     }
 
     // 1. Carrega credenciais da empresa
