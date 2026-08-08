@@ -53,6 +53,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [catalog, setCatalog] = useState<HealthProfession[]>(DEFAULT_HEALTH_PROFESSIONS);
   const [professionId, setProfessionId] = useState("");
   const [councilNumber, setCouncilNumber] = useState("");
@@ -172,10 +173,30 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   async function login(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(authError(error.message));
+    const metadata = data.user?.app_metadata ?? {};
+    const isMaster =
+      metadata.is_super_admin === true ||
+      metadata.is_impulsionando_staff === true ||
+      metadata.platform_role === "super_admin";
+    if (isMaster) {
+      window.location.assign("/admin");
+      return;
+    }
     navigate({ to: "/dashboard" });
+  }
+
+  async function resetPassword() {
+    if (!email.trim()) return toast.error("Informe seu e-mail antes de solicitar a nova senha.");
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth?mode=signin`,
+    });
+    setResetLoading(false);
+    if (error) return toast.error(authError(error.message));
+    toast.success("Enviamos as instruções de redefinição para o seu e-mail.");
   }
 
   async function signup(event: React.FormEvent) {
@@ -376,9 +397,14 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label htmlFor="cm-password">Senha</Label>
-                    <a href="/auth?persona=core" className="text-xs text-[#087f7b]">
+                    <button
+                      type="button"
+                      onClick={resetPassword}
+                      disabled={resetLoading}
+                      className="text-xs text-[#087f7b] underline-offset-4 hover:underline disabled:opacity-60"
+                    >
                       Esqueci a senha
-                    </a>
+                    </button>
                   </div>
                   <Input
                     id="cm-password"
