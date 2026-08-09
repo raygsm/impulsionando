@@ -46,18 +46,18 @@ jobs:
         run: |
           docker run -d --name pg-test \
             -e POSTGRES_PASSWORD=test \
-            -e POSTGRES_DB=test \
+            -e POSTGRES_DB=postgres \
             -p 5432:5432 \
             supabase/postgres:15.8.1.085
           for attempt in {1..30}; do
-            if PGPASSWORD="test" psql -h localhost -U supabase_admin -d test -c "SELECT 1" &>/dev/null; then
+            if PGPASSWORD="test" psql -h localhost -U supabase_admin -d postgres -c "SELECT 1" &>/dev/null; then
               echo "✅ Postgres pronto"
               break
             fi
             echo "Waiting for Postgres (${attempt}/30)..."
             sleep 1
           done
-          PGPASSWORD="test" psql -h localhost -U supabase_admin -d test -c "SELECT 1" || { docker logs pg-test; exit 1; }
+          PGPASSWORD="test" psql -h localhost -U supabase_admin -d postgres -c "SELECT 1" || { docker logs pg-test; exit 1; }
 
       - name: Aplicar migrations em ordem (dry-run)
         env:
@@ -67,7 +67,7 @@ jobs:
           # Minimal Supabase-owned objects required to validate project SQL on
           # a disposable upstream PostgreSQL container. Project migrations must
           # never create or own these objects.
-          psql -h localhost -U supabase_admin -d test -v ON_ERROR_STOP=1 <<'SQL'
+          psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
           DO $bootstrap$ BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
@@ -101,7 +101,7 @@ jobs:
           SQL
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
             echo "▶️  Aplicando $(basename "$f")..."
-            if ! psql -h localhost -U supabase_admin -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
+            if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
               echo "❌ Falha ao aplicar $(basename "$f"):"
               cat /tmp/migration.log
               exit 1
@@ -114,7 +114,7 @@ jobs:
           PGPASSWORD: test
         run: |
           set -e
-          missing=$(psql -h localhost -U supabase_admin -d test -tAc "
+          missing=$(psql -h localhost -U supabase_admin -d postgres -tAc "
             SELECT c.relname
             FROM pg_class c
             JOIN pg_namespace n ON n.oid = c.relnamespace
