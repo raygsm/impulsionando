@@ -4,4 +4,4 @@ project_id = "arygtqrdpcdkwnuwsgmm"
 verify_jwt = false
 
 [functions.chrismed-healthcheck]
-verify_jwt = false
+verify_jwt = true

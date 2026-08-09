@@ -64,7 +64,12 @@ Deno.serve(async (req) => {
         const sigHeader = req.headers.get('x-signature') ?? '';
         const tsMatch = sigHeader.match(/ts=([^,]+)/);
         const v1Match = sigHeader.match(/v1=([^,]+)/);
-        const secret = Deno.env.get(cred.webhook_secret_name);
+        const { data: revealedWebhookSecret } = await supabase.rpc('reveal_secret_value', {
+          p_name: cred.webhook_secret_name,
+        });
+        const secret = (revealedWebhookSecret as string | null)
+          ?? Deno.env.get(cred.webhook_secret_name)
+          ?? null;
         if (secret && tsMatch && v1Match) {
           signatureValid = await verifySignature(secret, resourceId, mpEventId, tsMatch[1], v1Match[1]);
         } else {
@@ -109,7 +114,14 @@ Deno.serve(async (req) => {
       if (companyId) {
         const { data: cred } = await supabase
           .from('mpago_credentials').select('access_token_secret_name').eq('company_id', companyId).eq('active', true).maybeSingle();
-        if (cred) accessToken = Deno.env.get(cred.access_token_secret_name) ?? null;
+        if (cred) {
+          const { data: revealedAccessToken } = await supabase.rpc('reveal_secret_value', {
+            p_name: cred.access_token_secret_name,
+          });
+          accessToken = (revealedAccessToken as string | null)
+            ?? Deno.env.get(cred.access_token_secret_name)
+            ?? null;
+        }
       }
       // Fallback: tenta achar a credencial via mp_payments existente
       if (!accessToken) {
@@ -119,7 +131,14 @@ Deno.serve(async (req) => {
           companyId = existing.company_id;
           const { data: cred } = await supabase
             .from('mpago_credentials').select('access_token_secret_name').eq('company_id', companyId).eq('active', true).maybeSingle();
-          if (cred) accessToken = Deno.env.get(cred.access_token_secret_name) ?? null;
+          if (cred) {
+            const { data: revealedAccessToken } = await supabase.rpc('reveal_secret_value', {
+              p_name: cred.access_token_secret_name,
+            });
+            accessToken = (revealedAccessToken as string | null)
+              ?? Deno.env.get(cred.access_token_secret_name)
+              ?? null;
+          }
         }
       }
 

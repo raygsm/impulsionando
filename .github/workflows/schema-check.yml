@@ -46,12 +46,23 @@ jobs:
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
           END $bootstrap$;
           CREATE SCHEMA IF NOT EXISTS auth;
-          CREATE TABLE IF NOT EXISTS auth.users (
-            id uuid PRIMARY KEY,
-            email text,
-            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
-            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
-          );
+            CREATE TABLE IF NOT EXISTS auth.users (
+              id uuid PRIMARY KEY,
+              email text,
+              raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+              raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
+            );
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS instance_id uuid;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS aud varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS role varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS encrypted_password varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_confirmed_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS created_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS confirmation_token varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change_token_new varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS recovery_token varchar(255) DEFAULT '';
           CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
           SQL
@@ -159,6 +170,28 @@ jobs:
             raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
             raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
           );
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS instance_id uuid;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS aud varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS role varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS encrypted_password varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_confirmed_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS created_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS confirmation_token varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change_token_new varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS recovery_token varchar(255) DEFAULT '';
+          CREATE TABLE IF NOT EXISTS auth.identities (
+            id uuid PRIMARY KEY,
+            user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+            identity_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            provider text NOT NULL,
+            provider_id text NOT NULL,
+            last_sign_in_at timestamptz,
+            created_at timestamptz,
+            updated_at timestamptz,
+            UNIQUE (provider_id, provider)
+          );
           CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
           DO $bootstrap$ BEGIN
@@ -197,6 +230,17 @@ jobs:
             if [ "$(basename "$f")" = "20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
                 -c "INSERT INTO public.companies (id, name, email, subdomain, is_active, status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED', 'sac@chrismed.com.br', 'chrismed', true, 'active') ON CONFLICT (id) DO NOTHING;"
+            fi
+            # The master-access migration intentionally requires the external
+            # Auth identity and canonical Impulsionando master records.
+            if [ "$(basename "$f")" = "20260621141709_1922ea87-bfb7-4ec2-ac05-6ff2d9cf202a.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('3f2e2101-190d-44f2-8102-57dddfd34c91', 'raygs@hotmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING; INSERT INTO public.companies (id, name, subdomain, is_master, is_active, status) VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando fixture', 'app-fixture', false, true, 'active') ON CONFLICT (id) DO NOTHING; DELETE FROM public.user_profiles WHERE profile_id IN (SELECT id FROM public.profiles WHERE slug='super-admin-impulsionando'); DELETE FROM public.profiles WHERE slug='super-admin-impulsionando'; INSERT INTO public.profiles (id, slug, name, is_master_profile, is_system) VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true, true);"
+            fi
+            # Legacy consumer seed references an externally provisioned Auth user.
+            if [ "$(basename "$f")" = "20260621142541_6cc27d3e-c6c5-4a2a-96fd-b912794e8589.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'raygsmonnerat@gmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING;"
             fi
             echo "▶️  Aplicando $(basename "$f")..."
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then

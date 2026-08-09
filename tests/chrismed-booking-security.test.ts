@@ -3,12 +3,16 @@ import { describe, expect, it } from 'vitest';
 
 const migration = readFileSync('supabase/migrations/20260808213000_chrismed_secure_booking.sql', 'utf8');
 const communicationSettings = readFileSync('supabase/migrations/20260808223000_chrismed_communication_settings.sql', 'utf8');
+const occupationalMigration = readFileSync('supabase/migrations/20260809124500_chrismed_offerings_and_occupational_intake.sql', 'utf8');
 const createPayment = readFileSync('supabase/functions/mpago-create-payment/index.ts', 'utf8');
 const webhook = readFileSync('supabase/functions/mpago-webhook/index.ts', 'utf8');
+const healthcheck = readFileSync('supabase/functions/chrismed-healthcheck/index.ts', 'utf8');
+const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const booking = readFileSync('src/routes/chrismed.agendar.tsx', 'utf8');
 const professionalAuth = readFileSync('src/components/chrismed/ChrismedProfessionalAuth.tsx', 'utf8');
 const server = readFileSync('src/server.ts', 'utf8');
 const setup = readFileSync('src/routes/_authenticated/chrismed.setup.tsx', 'utf8');
+const occupationalBooking = readFileSync('src/routes/chrismed.ocupacional.agendar.tsx', 'utf8');
 
 describe('CHRISMED secure booking gate', () => {
   it('prevents concurrent bookings for the same professional and interval', () => {
@@ -25,11 +29,45 @@ describe('CHRISMED secure booking gate', () => {
     expect(booking).not.toContain('buildChrismedMockCalendar');
   });
 
+  it('reconciles official prices and persists occupational requests before success', () => {
+    expect(occupationalMigration).toContain("'presencial',120000");
+    expect(occupationalMigration).toContain("'telemedicina',60000");
+    expect(occupationalMigration).toContain("'domiciliar',240000");
+    expect(occupationalMigration).toContain("'ocupacional',11000");
+    expect(occupationalMigration).toContain('CREATE TABLE IF NOT EXISTS public.chrismed_occupational_intakes');
+    expect(occupationalMigration).toContain("'occupational_intake_management'");
+    expect(occupationalMigration).toContain("'occupational_intake_received'");
+    expect(occupationalBooking).toContain("supabase.rpc('submit_chrismed_occupational_intake'");
+    expect(occupationalBooking.indexOf('if (error)')).toBeLessThan(occupationalBooking.indexOf('setSent(true)'));
+  });
+
   it('fails closed when the Mercado Pago webhook is not authenticated', () => {
     expect(createPayment).toContain('mpago-webhook?company_id=');
+    expect(createPayment).toContain('/functions/v1/mpago-webhook');
+    expect(createPayment).not.toContain("replace('.supabase.co', '.functions.supabase.co')");
+    expect(healthcheck).toContain('/functions/v1/mpago-webhook');
+    expect(healthcheck).not.toContain('fpywvlhsfdtztkbncmdt');
+    expect(createPayment).toContain("rpc('reveal_secret_value'");
+    expect(webhook).toContain("rpc('reveal_secret_value'");
     expect(webhook).toContain('signatureValid !== true');
     expect(webhook).toContain("status: 401");
     expect(webhook).toContain("status: 500");
+  });
+
+  it('keeps the Mercado Pago healthcheck read-only', () => {
+    expect(healthcheck).toContain('https://api.mercadopago.com/users/me');
+    expect(healthcheck).not.toContain('transaction_amount: 0.01');
+    expect(healthcheck).not.toContain('X-Idempotency-Key');
+  });
+
+  it('restricts the CHRISMED healthcheck to authorized management users', () => {
+    expect(supabaseConfig).toContain('[functions.chrismed-healthcheck]\nverify_jwt = true');
+    expect(healthcheck).toContain('sb.auth.getUser(accessJwt)');
+    expect(healthcheck).toContain('.in("role", ["admin", "gestor"])');
+    expect(healthcheck).toContain('status: 401');
+    expect(healthcheck).toContain('status: 403');
+    expect(setup).toContain('supabase.auth.getSession()');
+    expect(setup).toContain('Authorization: `Bearer ${sessionData.session.access_token}`');
   });
 
   it('confirms appointments and queues idempotent reminders only from the webhook', () => {
@@ -53,7 +91,8 @@ describe('CHRISMED secure booking gate', () => {
 
   it('serves clean CHRISMED subdomain paths through internal tenant routes', () => {
     expect(server).toContain('`/chrismed${url.pathname}`');
-    expect(server).toContain('url.pathname.slice("/chrismed".length)');
+    expect(server).toContain('canonicalTenantHostRedirect({');
+    expect(server).toContain('Response.redirect(canonicalTenantUrl, 308)');
     expect(server).toContain('/alth(?:\\/|$)');
   });
 

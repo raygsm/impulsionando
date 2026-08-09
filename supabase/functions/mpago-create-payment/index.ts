@@ -40,6 +40,12 @@ interface CreatePaymentBody {
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
+function mercadoPagoWebhookUrl(companyId: string): string {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  if (!supabaseUrl) throw new Error('SUPABASE_URL is not configured');
+  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/mpago-webhook?company_id=${encodeURIComponent(companyId)}`;
+}
+
 // Cálculo do fee — espelha src/lib/payouts.ts (cents + bps).
 function calcFee(
   gross: number,
@@ -133,7 +139,12 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Mercado Pago credentials not configured for this company' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const accessToken = Deno.env.get(cred.access_token_secret_name);
+    const { data: revealedAccessToken } = await supabase.rpc('reveal_secret_value', {
+      p_name: cred.access_token_secret_name,
+    });
+    const accessToken = (revealedAccessToken as string | null)
+      ?? Deno.env.get(cred.access_token_secret_name)
+      ?? null;
     if (!accessToken) {
       return new Response(JSON.stringify({ error: `Secret ${cred.access_token_secret_name} not found` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -199,7 +210,7 @@ Deno.serve(async (req) => {
         external_reference: externalRef,
         back_urls: body.back_urls,
         auto_return: 'approved',
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook?company_id=${encodeURIComponent(body.company_id)}`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
     } else if (body.payment_method === 'pix') {
@@ -209,7 +220,7 @@ Deno.serve(async (req) => {
         description: body.description,
         payment_method_id: 'pix',
         external_reference: externalRef,
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook?company_id=${encodeURIComponent(body.company_id)}`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         payer: { email: body.payer.email, first_name: body.payer.first_name, last_name: body.payer.last_name, identification: body.payer.identification },
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
@@ -227,7 +238,7 @@ Deno.serve(async (req) => {
         payment_method_id: body.payment_method_id,
         issuer_id: body.issuer_id,
         external_reference: externalRef,
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook?company_id=${encodeURIComponent(body.company_id)}`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         payer: { email: body.payer.email, identification: body.payer.identification },
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };

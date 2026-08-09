@@ -103,17 +103,6 @@ export default {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
       }
 
-      // Keep the CHRISMED public URL canonical at the subdomain root.
-      if (
-        url.hostname.toLowerCase() === "chrismed.impulsionando.com.br" &&
-        (url.pathname === "/chrismed" || url.pathname === "/chrismed/" || url.pathname.startsWith("/chrismed/"))
-      ) {
-        url.pathname = url.pathname === "/chrismed" || url.pathname === "/chrismed/"
-          ? "/"
-          : url.pathname.slice("/chrismed".length);
-        return applySecurityHeaders(Response.redirect(url, 308));
-      }
-
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);

@@ -47,21 +47,20 @@ function ChrismedSetup() {
   async function run() {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('chrismed-healthcheck', {
-        method: 'GET',
-        // edge function lê company_id da querystring
-        body: undefined,
-        headers: {},
-      });
-      if (error) throw error;
-      // supabase-js .invoke não passa querystring; usar fetch direto
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session?.access_token) {
+        throw new Error('Sessão administrativa ausente ou expirada');
+      }
       const projUrl = (supabase as unknown as { supabaseUrl: string }).supabaseUrl;
       const res = await fetch(`${projUrl}/functions/v1/chrismed-healthcheck?company_id=${CHRISMED_COMPANY_ID}`, {
-        headers: { apikey: (supabase as unknown as { supabaseKey: string }).supabaseKey },
+        headers: {
+          apikey: (supabase as unknown as { supabaseKey: string }).supabaseKey,
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
       });
-      const json = (await res.json()) as Report;
+      const json = (await res.json()) as Report & { error?: string };
+      if (!res.ok) throw new Error(json.error ?? `Healthcheck recusado (${res.status})`);
       setReport(json);
-      void data;
     } catch (e) {
       toast.error('Falha no healthcheck: ' + (e instanceof Error ? e.message : String(e)));
     } finally {
