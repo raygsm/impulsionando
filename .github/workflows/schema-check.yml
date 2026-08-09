@@ -104,11 +104,8 @@ jobs:
             # outside migrations. Reproduce that declared prerequisite in the
             # disposable database without weakening coverage of any migration.
             if [ "$(basename "$f")" = "20260616232528_4bc16d9f-c66f-4835-af12-f15ad3222b32.sql" ]; then
-              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
-              INSERT INTO public.companies (id, name, subdomain, is_active)
-              VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliária Garrido', 'garrido', true)
-              ON CONFLICT (id) DO NOTHING;
-              SQL
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.companies (id, name, subdomain, is_active) VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliária Garrido', 'garrido', true) ON CONFLICT (id) DO NOTHING;"
             fi
             echo "▶️  Aplicando $(basename "$f")..."
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
