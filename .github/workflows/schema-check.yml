@@ -186,6 +186,12 @@ jobs:
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
                 -c "INSERT INTO public.companies (id, name, subdomain, is_active) VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliária Garrido', 'garrido', true) ON CONFLICT (id) DO NOTHING;"
             fi
+            # The legacy permission hardening assumes the system gestor profile
+            # was provisioned by application bootstrap rather than a migration.
+            if [ "$(basename "$f")" = "20260617202257_8827c23a-1491-4c90-818e-d03f6c99c308.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.profiles (id, slug, name, is_system) VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor', true) ON CONFLICT (id) DO NOTHING;"
+            fi
             echo "▶️  Aplicando $(basename "$f")..."
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
               echo "❌ Falha ao aplicar $(basename "$f"):"
