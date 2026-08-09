@@ -11,6 +11,117 @@ on:
       - "supabase/migrations/**"
 
 jobs:
+  validate-chrismed-production-schema:
+    name: Validar migrations CHRISMED contra schema de produção
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U supabase_admin -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar credenciais do snapshot estrutural
+        env:
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          test -n "$SUPABASE_DB_HOST" || { echo "::error::SUPABASE_DB_HOST ausente"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::SUPABASE_DB_PASSWORD ausente"; exit 1; }
+
+      - name: Instalar cliente Postgres
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Copiar somente o schema public de produção
+        env:
+          PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+          PGPORT: "5432"
+          PGDATABASE: postgres
+          PGUSER: postgres
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGSSLMODE: require
+        run: |
+          pg_dump --schema=public --schema-only --clean --if-exists \
+            --no-owner --no-privileges --file=/tmp/chrismed-production-schema.sql
+          test -s /tmp/chrismed-production-schema.sql
+
+      - name: Restaurar snapshot em banco descartável
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id uuid PRIMARY KEY,
+            email text,
+            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            created_at timestamptz,
+            updated_at timestamptz
+          );
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          SQL
+          psql -h localhost -p 55432 -U supabase_admin -d postgres \
+            -v ON_ERROR_STOP=1 -f /tmp/chrismed-production-schema.sql
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+            -c "INSERT INTO public.companies (id,name,email,subdomain,is_active,status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2','CHRISMED','sac@chrismed.com.br','chrismed',true,'active');"
+
+      - name: Aplicar somente migrations pendentes da CHRISMED
+        env:
+          PGPASSWORD: test
+        run: |
+          set -euo pipefail
+          migrations=(
+            supabase/migrations/20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql
+            supabase/migrations/20260808213000_chrismed_secure_booking.sql
+            supabase/migrations/20260808223000_chrismed_communication_settings.sql
+            supabase/migrations/20260809111500_fix_current_core_staff_functions.sql
+            supabase/migrations/20260809124500_chrismed_offerings_and_occupational_intake.sql
+          )
+          for migration in "${migrations[@]}"; do
+            test -f "$migration" || { echo "::error::Migration ausente: $migration"; exit 1; }
+            echo "Aplicando $(basename "$migration") no snapshot descartável"
+            psql -h localhost -p 55432 -U supabase_admin -d postgres \
+              -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
+      - name: Verificar contratos críticos resultantes
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $verify$ BEGIN
+            IF to_regclass('public.mpago_credentials') IS NULL
+              OR to_regclass('public.chrismed_appointments') IS NULL
+              OR to_regclass('public.chrismed_communication_outbox') IS NULL
+              OR to_regclass('public.company_settings') IS NULL
+              OR to_regclass('public.chrismed_occupational_intakes') IS NULL THEN
+              RAISE EXCEPTION 'Contrato CHRISMED incompleto após migrations';
+            END IF;
+            IF to_regprocedure('public.create_chrismed_booking_hold(jsonb)') IS NULL
+              OR to_regprocedure('public.submit_chrismed_occupational_intake(jsonb)') IS NULL THEN
+              RAISE EXCEPTION 'RPC crítica CHRISMED ausente após migrations';
+            END IF;
+          END $verify$;
+          SQL
+
   validate-chrismed-core:
     name: Validar autorização atual CHRISMED/Core
     runs-on: ubuntu-latest
