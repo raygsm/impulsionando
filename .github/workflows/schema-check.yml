@@ -48,7 +48,7 @@ jobs:
           PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
           PGPORT: "5432"
           PGDATABASE: postgres
-          PGUSER: postgres
+          PGUSER: postgres.${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           PGSSLMODE: require
         run: |

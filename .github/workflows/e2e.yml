@@ -96,7 +96,16 @@ jobs:
       # Inclui specs de funil (e2e/nichos-funnel.spec.ts), visual regression
       # (e2e/hero-cta-visual.spec.ts, e2e/escolher-nicho-visual.spec.ts) e
       # auditoria axe (e2e/nichos-a11y.spec.ts — falha em violação critical).
-      - name: Run Playwright suite (all engines · desktop+mobile)
+      - name: Run CHRISMED PR suite (all engines · desktop+mobile)
+        if: github.event_name == 'pull_request'
+        run: >-
+          bun run test:e2e --
+          e2e/chrismed-header-fixed.spec.ts
+          e2e/chrismed-oliver-only.spec.ts
+          --shard=${{ matrix.shard }}
+
+      - name: Run full ecosystem suite on main/manual
+        if: github.event_name != 'pull_request'
         run: bun run test:e2e -- --shard=${{ matrix.shard }}
 
       - name: Upload Playwright report
