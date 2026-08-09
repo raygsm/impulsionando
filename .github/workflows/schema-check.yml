@@ -12,7 +12,7 @@ on:
 
 jobs:
   validate-chrismed-core:
-    name: Validar cadeia ativa CHRISMED/Core
+    name: Validar autorização atual CHRISMED/Core
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -56,7 +56,7 @@ jobs:
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
           SQL
 
-      - name: Aplicar cadeia ativa em banco virgem
+      - name: Aplicar contrato atual de autorização em banco virgem
         env:
           PGPASSWORD: test
         run: |
@@ -64,8 +64,6 @@ jobs:
           migrations=(
             supabase/migrations/20260808120000_activate_raygs_master_auth.sql
             supabase/migrations/20260808130000_chrismed_operational_core.sql
-            supabase/migrations/20260808213000_chrismed_secure_booking.sql
-            supabase/migrations/20260808223000_chrismed_communication_settings.sql
             supabase/migrations/20260809111500_fix_current_core_staff_functions.sql
           )
           for migration in "${migrations[@]}"; do
