@@ -192,6 +192,12 @@ jobs:
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
                 -c "INSERT INTO public.profiles (id, slug, name, is_system) VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor', true) ON CONFLICT (id) DO NOTHING;"
             fi
+            # CHRISMED offerings were originally added after the tenant had
+            # been provisioned by application bootstrap.
+            if [ "$(basename "$f")" = "20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.companies (id, name, email, subdomain, is_active, status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED', 'sac@chrismed.com.br', 'chrismed', true, 'active') ON CONFLICT (id) DO NOTHING;"
+            fi
             echo "▶️  Aplicando $(basename "$f")..."
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
               echo "❌ Falha ao aplicar $(basename "$f"):"

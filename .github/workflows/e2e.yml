@@ -15,7 +15,9 @@ jobs:
   playwright:
     name: Playwright E2E + a11y + visual (Chromium / Firefox / WebKit · desktop+mobile)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Six browser/device projects exercise the complete suite. The previous
+    # 20-minute ceiling cancelled healthy runs during the final project.
+    timeout-minutes: 40
     permissions:
       contents: read
       pull-requests: write
