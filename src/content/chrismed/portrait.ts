@@ -16,8 +16,6 @@
  * não existir, os componentes reorganizam a composição editorial em vez
  * de renderizar moldura vazia.
  */
-import draCristianePortrait from '@/assets/chrismed/dra-cristiane-portrait.jpg.asset.json';
-
 const PORTRAIT_MODULES = import.meta.glob(
   '/src/assets/chrismed/dra-christiane.{avif,webp,jpg,jpeg,png}',
   { eager: true, query: '?url', import: 'default' },
@@ -35,9 +33,9 @@ function pickPortrait(): string | undefined {
   return entries[0]?.[1];
 }
 
-// Prioridade: CDN oficial (Lovable Assets) > arquivo local legado.
-export const DRA_CHRISTIANE_PORTRAIT_SRC: string | undefined =
-  draCristianePortrait?.url ?? pickPortrait();
+// Arquivo definitivo versionado no repositório: não depende de CDN externa.
+export const DRA_CHRISTIANE_PORTRAIT_SRC: string =
+  pickPortrait() ?? '/brand/chrismed/dra-christiane-alencar.png';
 
 /** Caminho recomendado para o asset final (documentação). */
 export const DRA_CHRISTIANE_PORTRAIT_TARGET_PATH =

@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, XCircle, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { requireChrismedManagement } from '@/lib/chrismed-management';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
 export const Route = createFileRoute('/_authenticated/chrismed/alertas')({
+  beforeLoad: requireChrismedManagement,
   head: () => ({
     meta: [
       { title: 'CHRISMED — Central de Alertas' },

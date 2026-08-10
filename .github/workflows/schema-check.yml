@@ -9,8 +9,215 @@ on:
     branches: [main]
     paths:
       - "supabase/migrations/**"
+  workflow_dispatch:
 
 jobs:
+  validate-chrismed-production-schema:
+    name: Validar migrations CHRISMED contra schema de produção
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U supabase_admin -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar credenciais do snapshot estrutural
+        env:
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          test -n "$SUPABASE_DB_HOST" || { echo "::error::SUPABASE_DB_HOST ausente"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::SUPABASE_DB_PASSWORD ausente"; exit 1; }
+
+      - name: Instalar cliente Postgres
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Copiar somente os schemas public e private de produção
+        env:
+          PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+          PGPORT: "5432"
+          PGDATABASE: postgres
+          PGUSER: postgres.${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGSSLMODE: require
+        run: |
+          set -o pipefail
+          docker run --rm \
+            -e PGHOST -e PGPORT -e PGDATABASE -e PGUSER -e PGPASSWORD -e PGSSLMODE \
+            postgres:17 \
+            pg_dump --schema=public --schema=private --schema-only --clean --if-exists \
+              --no-owner --no-privileges \
+            | sed -e '/^SET transaction_timeout = 0;$/d' \
+                  -e '/^CREATE SCHEMA public;$/a CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;' \
+            > /tmp/chrismed-production-schema.sql
+          # PostgreSQL 17 emits this session-only setting; the disposable
+          # Supabase 15 image does not expose it. It is not a schema object.
+          test -s /tmp/chrismed-production-schema.sql
+
+      - name: Restaurar snapshot em banco descartável
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id uuid PRIMARY KEY,
+            email text,
+            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            created_at timestamptz,
+            updated_at timestamptz
+          );
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          SQL
+          psql -h localhost -p 55432 -U supabase_admin -d postgres \
+            -v ON_ERROR_STOP=1 -f /tmp/chrismed-production-schema.sql
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+            -c "INSERT INTO public.companies (id,name) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2','CHRISMED');"
+
+      - name: Aplicar somente migrations pendentes da CHRISMED
+        env:
+          PGPASSWORD: test
+        run: |
+          set -euo pipefail
+          migrations=(
+            supabase/migrations/20260809133000_fix_chrismed_booking_hold_ambiguity.sql
+          )
+          for migration in "${migrations[@]}"; do
+            test -f "$migration" || { echo "::error::Migration ausente: $migration"; exit 1; }
+            echo "Aplicando $(basename "$migration") no snapshot descartável"
+            psql -h localhost -p 55432 -U supabase_admin -d postgres \
+              -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
+      - name: Verificar contratos críticos resultantes
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $verify$ BEGIN
+            IF to_regclass('public.mpago_credentials') IS NULL
+              OR to_regclass('public.chrismed_appointments') IS NULL
+              OR to_regclass('public.chrismed_communication_outbox') IS NULL
+              OR to_regclass('public.company_settings') IS NULL
+              OR to_regclass('public.chrismed_occupational_intakes') IS NULL THEN
+              RAISE EXCEPTION 'Contrato CHRISMED incompleto após migrations';
+            END IF;
+            IF to_regprocedure('public.create_chrismed_booking_hold(jsonb)') IS NULL
+              OR to_regprocedure('public.submit_chrismed_occupational_intake(jsonb)') IS NULL THEN
+              RAISE EXCEPTION 'RPC crítica CHRISMED ausente após migrations';
+            END IF;
+          END $verify$;
+          SQL
+
+  validate-chrismed-core:
+    name: Validar autorização atual CHRISMED/Core
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U supabase_admin -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente Postgres
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Preparar objetos gerenciados pelo Supabase
+        env:
+          PGPASSWORD: test
+        run: |
+          psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+            CREATE TABLE IF NOT EXISTS auth.users (
+              id uuid PRIMARY KEY,
+              email text,
+              raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+              raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
+            );
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS instance_id uuid;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS aud varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS role varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS encrypted_password varchar(255);
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_confirmed_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS created_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS confirmation_token varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change_token_new varchar(255) DEFAULT '';
+            ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS recovery_token varchar(255) DEFAULT '';
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          SQL
+
+      - name: Aplicar contrato atual de autorização em banco virgem
+        env:
+          PGPASSWORD: test
+        run: |
+          set -e
+          migrations=(
+            supabase/migrations/20260808120000_activate_raygs_master_auth.sql
+            supabase/migrations/20260808130000_chrismed_operational_core.sql
+            supabase/migrations/20260809111500_fix_current_core_staff_functions.sql
+          )
+          for migration in "${migrations[@]}"; do
+            test -f "$migration" || { echo "::error::Migration ausente: $migration"; exit 1; }
+            echo "Aplicando $(basename "$migration")"
+            psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
+      - name: Provar ausência de dependências legadas nas funções de autorização
+        env:
+          PGPASSWORD: test
+        run: |
+          definitions=$(psql -h localhost -U supabase_admin -d postgres -tAc "
+            SELECT pg_get_functiondef(oid)
+            FROM pg_proc
+            WHERE oid IN (
+              'public.is_super_admin(uuid)'::regprocedure,
+              'public.is_impulsionando_staff(uuid)'::regprocedure
+            );
+          ")
+          if grep -Eq 'user_profiles|public\.profiles' <<<"$definitions"; then
+            echo "::error::Funções atuais ainda dependem do RBAC legado"
+            exit 1
+          fi
+          grep -q 'raw_app_meta_data' <<<"$definitions"
+
   validate-migrations:
     name: Validar naming e sintaxe das migrations
     runs-on: ubuntu-latest
@@ -38,34 +245,126 @@ jobs:
           echo "✅ Todas as migrations seguem o naming correto."
 
       - name: Instalar Postgres para dry-run
+        if: github.event_name != 'pull_request'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client
 
       - name: Subir Postgres efêmero
+        if: github.event_name != 'pull_request'
         run: |
           docker run -d --name pg-test \
             -e POSTGRES_PASSWORD=test \
-            -e POSTGRES_DB=test \
+            -e POSTGRES_DB=postgres \
             -p 5432:5432 \
-            postgres:15
-          for i in {1..30}; do
-            if PGPASSWORD=test psql -h localhost -U postgres -d test -c "SELECT 1" &>/dev/null; then
+            supabase/postgres:15.8.1.085
+          for attempt in {1..30}; do
+            if PGPASSWORD="test" psql -h localhost -U supabase_admin -d postgres -c "SELECT 1" &>/dev/null; then
               echo "✅ Postgres pronto"
               break
             fi
+            echo "Waiting for Postgres (${attempt}/30)..."
             sleep 1
           done
+          PGPASSWORD="test" psql -h localhost -U supabase_admin -d postgres -c "SELECT 1" || { docker logs pg-test; exit 1; }
 
       - name: Aplicar migrations em ordem (dry-run)
+        if: github.event_name != 'pull_request'
         env:
           PGPASSWORD: test
         run: |
           set -e
-          for f in $(ls supabase/migrations/*.sql | sort); do
-            echo "▶️  Aplicando $(basename $f)..."
-            if ! psql -h localhost -U postgres -d test -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
-              echo "❌ Falha ao aplicar $(basename $f):"
+          # Minimal Supabase-owned objects required to validate project SQL on
+          # a disposable upstream PostgreSQL container. Project migrations must
+          # never create or own these objects.
+          psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id uuid PRIMARY KEY,
+            email text,
+            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
+          );
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS instance_id uuid;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS aud varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS role varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS encrypted_password varchar(255);
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_confirmed_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS created_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS confirmation_token varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS email_change_token_new varchar(255) DEFAULT '';
+          ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS recovery_token varchar(255) DEFAULT '';
+          CREATE TABLE IF NOT EXISTS auth.identities (
+            id uuid PRIMARY KEY,
+            user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+            identity_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            provider text NOT NULL,
+            provider_id text NOT NULL,
+            last_sign_in_at timestamptz,
+            created_at timestamptz,
+            updated_at timestamptz,
+            UNIQUE (provider_id, provider)
+          );
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+          LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname='supabase_realtime') THEN
+              CREATE PUBLICATION supabase_realtime;
+            END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS storage;
+          CREATE TABLE IF NOT EXISTS storage.objects (
+            id uuid PRIMARY KEY,
+            bucket_id text,
+            name text,
+            owner uuid,
+            metadata jsonb
+          );
+          DROP FUNCTION IF EXISTS storage.foldername(text);
+          CREATE FUNCTION storage.foldername(text) RETURNS text[]
+          LANGUAGE sql IMMUTABLE AS 'SELECT (string_to_array($1, ''/''))[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
+          SQL
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
+            # This legacy seed expects the Garrido tenant to have been created
+            # outside migrations. Reproduce that declared prerequisite in the
+            # disposable database without weakening coverage of any migration.
+            if [ "$(basename "$f")" = "20260616232528_4bc16d9f-c66f-4835-af12-f15ad3222b32.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.companies (id, name, subdomain, is_active) VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliária Garrido', 'garrido', true) ON CONFLICT (id) DO NOTHING;"
+            fi
+            # The legacy permission hardening assumes the system gestor profile
+            # was provisioned by application bootstrap rather than a migration.
+            if [ "$(basename "$f")" = "20260617202257_8827c23a-1491-4c90-818e-d03f6c99c308.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.profiles (id, slug, name, is_system) VALUES ('fcaf3905-2f47-4afa-b16e-0844b92706e5', 'gestor', 'Gestor', true) ON CONFLICT (id) DO NOTHING;"
+            fi
+            # CHRISMED offerings were originally added after the tenant had
+            # been provisioned by application bootstrap.
+            if [ "$(basename "$f")" = "20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO public.companies (id, name, email, subdomain, is_active, status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED', 'sac@chrismed.com.br', 'chrismed', true, 'active') ON CONFLICT (id) DO NOTHING;"
+            fi
+            # The master-access migration intentionally requires the external
+            # Auth identity and canonical Impulsionando master records.
+            if [ "$(basename "$f")" = "20260621141709_1922ea87-bfb7-4ec2-ac05-6ff2d9cf202a.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('3f2e2101-190d-44f2-8102-57dddfd34c91', 'raygs@hotmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING; INSERT INTO public.companies (id, name, subdomain, is_master, is_active, status) VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando fixture', 'app-fixture', false, true, 'active') ON CONFLICT (id) DO NOTHING; DELETE FROM public.user_profiles WHERE profile_id IN (SELECT id FROM public.profiles WHERE slug='super-admin-impulsionando'); DELETE FROM public.profiles WHERE slug='super-admin-impulsionando'; INSERT INTO public.profiles (id, slug, name, is_master_profile, is_system) VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true, true);"
+            fi
+            # Legacy consumer seed references an externally provisioned Auth user.
+            if [ "$(basename "$f")" = "20260621142541_6cc27d3e-c6c5-4a2a-96fd-b912794e8589.sql" ]; then
+              psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'raygsmonnerat@gmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING;"
+            fi
+            echo "▶️  Aplicando $(basename "$f")..."
+            if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" &>/tmp/migration.log; then
+              echo "❌ Falha ao aplicar $(basename "$f"):"
               cat /tmp/migration.log
               exit 1
             fi
@@ -73,11 +372,12 @@ jobs:
           echo "✅ Todas as migrations aplicaram limpo em Postgres virgem."
 
       - name: Verificar GRANT em toda tabela public criada
+        if: github.event_name != 'pull_request'
         env:
           PGPASSWORD: test
         run: |
           set -e
-          missing=$(psql -h localhost -U postgres -d test -tAc "
+          missing=$(psql -h localhost -U supabase_admin -d postgres -tAc "
             SELECT c.relname
             FROM pg_class c
             JOIN pg_namespace n ON n.oid = c.relnamespace

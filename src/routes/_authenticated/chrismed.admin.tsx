@@ -1,22 +1,16 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
-import { fetchCurrentUser } from "@/lib/auth";
+import { requireChrismedManagement } from "@/lib/chrismed-management";
 
 const CHRISMED_COMPANY_ID = "642096b5-a9ff-4521-a82a-c004f6d2e2d2";
 
 export const Route = createFileRoute("/_authenticated/chrismed/admin")({
-  beforeLoad: async () => {
-    const current = await fetchCurrentUser();
-    if (!current) throw redirect({ to: "/auth" });
-    if (!current.isSuperAdmin && !current.isImpulsionandoStaff) {
-      throw redirect({ to: "/dashboard" });
-    }
-  },
+  beforeLoad: requireChrismedManagement,
   component: ChrismedAdmin,
   head: () => ({
     meta: [
@@ -141,17 +135,28 @@ function ChrismedAdmin() {
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Core Impulsionando", "https://impulsionando.com.br/core"],
-              [
-                "Cliente CHRISMED 360",
-                "https://impulsionando.com.br/admin/clientes/chrismed/painel",
-              ],
+              ["Visão CHRISMED 360", "/admin/clientes/chrismed/painel"],
               ["Profissionais", "/agenda/professionals"],
-              ["Agenda", "/agenda"],
+              ["Agenda e consultas", "/agenda/appointments"],
+              ["Escalas e horários", "/agenda/schedules"],
+              ["Serviços", "/agenda/services"],
+              ["Lista de espera", "/agenda/waitlist"],
               ["Eventos", "/eventos"],
-              ["CRM", "/crm"],
-              ["Configurações", "/setup"],
-              ["Alertas", "/alertas"],
+              ["CRM · Funil", "/crm/board"],
+              ["CRM · Leads", "/crm/leads"],
+              ["CRM · Pipelines", "/crm/pipelines"],
+              ["ERP financeiro", "/erp-financeiro"],
+              ["Financeiro", "/finance"],
+              ["Transações", "/finance/transactions"],
+              ["Integrações financeiras", "/finance/integracoes"],
+              ["Webhooks de cobrança", "/finance/webhook-log"],
+              ["Contratos e cobranças", "/admin/billing-contracts"],
+              ["Planos", "/core/planos"],
+              ["Usuários", "/users"],
+              ["Permissões", "/permissions"],
+              ["Configurações CHRISMED", "/setup"],
+              ["Alertas operacionais", "/alertas"],
+              ["Core Impulsionando", "https://impulsionando.com.br/core"],
             ].map(([label, href]) => (
               <Button
                 key={href}

@@ -35,6 +35,15 @@ interface CreatePaymentBody {
   // Preferência
   items?: Array<{ title: string; quantity: number; unit_price: number }>;
   back_urls?: { success: string; pending: string; failure: string };
+  hold_token?: string;
+}
+
+const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
+
+function mercadoPagoWebhookUrl(companyId: string): string {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  if (!supabaseUrl) throw new Error('SUPABASE_URL is not configured');
+  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/mpago-webhook?company_id=${encodeURIComponent(companyId)}`;
 }
 
 // Cálculo do fee — espelha src/lib/payouts.ts (cents + bps).
@@ -61,7 +70,58 @@ Deno.serve(async (req) => {
     );
 
     const body: CreatePaymentBody = await req.json();
-    if (!body.company_id || !body.payment_method || !body.amount_cents || !body.description || !body.payer?.email) {
+    if (!body.company_id || !body.payment_method || !body.payer?.email) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // CHRISMED is fail-closed: the browser never defines price, description,
+    // professional or slot. A valid server-side hold is the sole source of truth.
+    let chrismedAppointment: Record<string, any> | null = null;
+    if (body.company_id === CHRISMED_COMPANY_ID) {
+      if (!body.hold_token) {
+        return new Response(JSON.stringify({ error: 'A valid CHRISMED booking hold is required' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const { data: appointment, error: appointmentError } = await supabase
+        .from('chrismed_appointments')
+        .select('id,offering_id,patient_name,patient_email,patient_phone,starts_at,ends_at,status,hold_expires_at,payment_id')
+        .eq('company_id', CHRISMED_COMPANY_ID)
+        .eq('hold_token', body.hold_token)
+        .maybeSingle();
+      if (appointmentError || !appointment || !['held', 'pending_payment'].includes(appointment.status) || new Date(appointment.hold_expires_at) <= new Date()) {
+        return new Response(JSON.stringify({ error: 'CHRISMED booking hold is invalid or expired' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (appointment.payment_id) {
+        const { data: existingPayment } = await supabase.from('mpago_payments').select('*').eq('id', appointment.payment_id).maybeSingle();
+        if (existingPayment) {
+          return new Response(JSON.stringify({
+            payment: existingPayment,
+            mp: { id: existingPayment.mp_payment_id, status: existingPayment.status, qr_code: existingPayment.pix_qr_code, qr_code_base64: existingPayment.pix_qr_code_base64 },
+          }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+      }
+      const { data: offering } = await supabase
+        .from('chrismed_service_offerings')
+        .select('id,name,slug,modality,price_cents,active')
+        .eq('id', appointment.offering_id)
+        .eq('company_id', CHRISMED_COMPANY_ID)
+        .eq('active', true)
+        .maybeSingle();
+      if (!offering || offering.price_cents <= 0) {
+        return new Response(JSON.stringify({ error: 'CHRISMED offering is unavailable for payment' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      chrismedAppointment = appointment;
+      body.amount_cents = offering.price_cents;
+      body.description = `CHRISMED - ${offering.name}`;
+      body.external_reference = `chrismed:${appointment.id}`;
+      body.context_type = 'chrismed_appointment';
+      body.context_id = appointment.id;
+      body.payer.email = appointment.patient_email;
+      body.payer.first_name = appointment.patient_name.split(' ')[0];
+      body.payer.last_name = appointment.patient_name.split(' ').slice(1).join(' ') || undefined;
+      body.metadata = { appointment_id: appointment.id, offering_slug: offering.slug, modality: offering.modality };
+    }
+
+    if (!body.amount_cents || !body.description) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -79,13 +139,18 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Mercado Pago credentials not configured for this company' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const accessToken = Deno.env.get(cred.access_token_secret_name);
+    const { data: revealedAccessToken } = await supabase.rpc('reveal_secret_value', {
+      p_name: cred.access_token_secret_name,
+    });
+    const accessToken = (revealedAccessToken as string | null)
+      ?? Deno.env.get(cred.access_token_secret_name)
+      ?? null;
     if (!accessToken) {
       return new Response(JSON.stringify({ error: `Secret ${cred.access_token_secret_name} not found` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const externalRef = body.external_reference ?? crypto.randomUUID();
-    const idempotencyKey = crypto.randomUUID();
+    const idempotencyKey = chrismedAppointment ? `chrismed-${chrismedAppointment.id}` : crypto.randomUUID();
 
     // === Motor de monetização (split) ===========================================
     // Resolve modelo ativo + taxa do evento. Para revshare/hybrid aplicamos
@@ -145,7 +210,7 @@ Deno.serve(async (req) => {
         external_reference: externalRef,
         back_urls: body.back_urls,
         auto_return: 'approved',
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
     } else if (body.payment_method === 'pix') {
@@ -155,7 +220,7 @@ Deno.serve(async (req) => {
         description: body.description,
         payment_method_id: 'pix',
         external_reference: externalRef,
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         payer: { email: body.payer.email, first_name: body.payer.first_name, last_name: body.payer.last_name, identification: body.payer.identification },
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
@@ -173,7 +238,7 @@ Deno.serve(async (req) => {
         payment_method_id: body.payment_method_id,
         issuer_id: body.issuer_id,
         external_reference: externalRef,
-        notification_url: `${Deno.env.get('SUPABASE_URL')!.replace('.supabase.co', '.functions.supabase.co')}/mpago-webhook`,
+        notification_url: mercadoPagoWebhookUrl(body.company_id),
         payer: { email: body.payer.email, identification: body.payer.identification },
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
@@ -235,6 +300,19 @@ Deno.serve(async (req) => {
     if (insErr) {
       console.error('Insert error:', insErr);
       return new Response(JSON.stringify({ error: 'Failed to persist payment', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    if (chrismedAppointment) {
+      const { error: appointmentUpdateError } = await supabase
+        .from('chrismed_appointments')
+        .update({ payment_id: payment.id, status: 'pending_payment', updated_at: new Date().toISOString() })
+        .eq('id', chrismedAppointment.id)
+        .eq('hold_token', body.hold_token)
+        .in('status', ['held', 'pending_payment']);
+      if (appointmentUpdateError) {
+        console.error('CHRISMED appointment/payment link failed:', appointmentUpdateError);
+        return new Response(JSON.stringify({ error: 'Payment created but booking linkage requires reconciliation' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
     }
 
     // === Registra evento de monetização (pending) ============================

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import chrismedLogo from '@/assets/chrismed-logo.png.asset.json';
 
 /**
  * ChrismedPreloader — splash inicial no padrão Impulsionando:
@@ -33,12 +32,15 @@ export function ChrismedPreloader() {
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[var(--chrismed-forest-deep)] transition-opacity duration-300"
       style={{ opacity: fading ? 0 : 1, pointerEvents: fading ? 'none' : 'auto' }}
     >
-      <img
-        src={chrismedLogo.url}
-        alt="CHRISMED"
-        className="h-20 w-auto select-none drop-shadow-[0_4px_18px_rgba(0,0,0,0.35)] md:h-24"
-        draggable={false}
-      />
+      <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-[var(--chrismed-amber)]/70 bg-white p-2 shadow-[0_0_0_10px_rgba(228,181,74,0.08),0_24px_70px_rgba(0,0,0,0.45)] md:h-32 md:w-32">
+        <div className="absolute inset-[-8px] rounded-full border border-[var(--chrismed-amber)]/30 motion-safe:animate-pulse" />
+        <img
+          src="/brand/chrismed/brasao.jpg"
+          alt=""
+          className="h-full w-full select-none rounded-full object-cover"
+          draggable={false}
+        />
+      </div>
       <div className="mt-6 h-[3px] w-40 overflow-hidden rounded-full bg-white/15">
         <div className="chrismed-preloader-bar h-full w-1/3 rounded-full bg-[var(--chrismed-amber)]" />
       </div>

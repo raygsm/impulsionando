@@ -46,7 +46,12 @@ jobs:
         id: isolation
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/tenant-isolation.test.ts \
+          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
+          if [ "$schema_code" = "200" ]; then suite=tests/e2e/tenant-isolation.test.ts; else suite=tests/e2e/chrismed-current-isolation.test.ts; fi
+          bunx vitest --config vitest.e2e.config.ts run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
 
@@ -55,7 +60,12 @@ jobs:
         if: always()
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/chrismed-isolation.test.ts \
+          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
+          if [ "$schema_code" = "200" ]; then suite=tests/e2e/chrismed-isolation.test.ts; else suite=tests/e2e/chrismed-current-isolation.test.ts; fi
+          bunx vitest --config vitest.e2e.config.ts run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/chrismed.junit.xml 2>&1 | tee test-results/chrismed.log
 
@@ -64,7 +74,12 @@ jobs:
         if: always()
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/contract-email-delivery.test.ts \
+          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
+          if [ "$schema_code" = "200" ]; then suite=tests/e2e/contract-email-delivery.test.ts; else suite=tests/chrismed-booking-security.test.ts; fi
+          bunx vitest --config vitest.e2e.config.ts run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
 

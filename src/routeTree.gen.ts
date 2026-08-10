@@ -135,6 +135,7 @@ import { Route as ChrismedOcupacionalRouteImport } from './routes/chrismed.ocupa
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as ChrismedPrivacidadeRouteImport } from './routes/chrismed.privacidade'
 import { Route as ChrismedTeleconsultaRouteImport } from './routes/chrismed.teleconsulta'
+import { Route as ChrismedTermosRouteImport } from './routes/chrismed.termos'
 import { Route as ClubeIndexRouteImport } from './routes/clube.index'
 import { Route as ClubeAvaliacoesRouteImport } from './routes/clube.avaliacoes'
 import { Route as ClubeBuscarRouteImport } from './routes/clube.buscar'
@@ -1600,6 +1601,11 @@ const ChrismedPrivacidadeRoute = ChrismedPrivacidadeRouteImport.update({
 const ChrismedTeleconsultaRoute = ChrismedTeleconsultaRouteImport.update({
   id: '/teleconsulta',
   path: '/teleconsulta',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedTermosRoute = ChrismedTermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ClubeIndexRoute = ClubeIndexRouteImport.update({
@@ -6427,6 +6433,7 @@ export interface FileRoutesByFullPath {
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/chrismed/termos': typeof ChrismedTermosRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -7362,6 +7369,7 @@ export interface FileRoutesByTo {
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/chrismed/termos': typeof ChrismedTermosRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -8310,6 +8318,7 @@ export interface FileRoutesById {
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/chrismed/privacidade': typeof ChrismedPrivacidadeRoute
   '/chrismed/teleconsulta': typeof ChrismedTeleconsultaRoute
+  '/chrismed/termos': typeof ChrismedTermosRoute
   '/clube/avaliacoes': typeof ClubeAvaliacoesRoute
   '/clube/buscar': typeof ClubeBuscarRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -9265,6 +9274,7 @@ export interface FileRouteTypes {
     | '/chrismed/ofertas'
     | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
+    | '/chrismed/termos'
     | '/clube/avaliacoes'
     | '/clube/buscar'
     | '/clube/cadastro'
@@ -10200,6 +10210,7 @@ export interface FileRouteTypes {
     | '/chrismed/ofertas'
     | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
+    | '/chrismed/termos'
     | '/clube/avaliacoes'
     | '/clube/buscar'
     | '/clube/cadastro'
@@ -11147,6 +11158,7 @@ export interface FileRouteTypes {
     | '/chrismed/ofertas'
     | '/chrismed/privacidade'
     | '/chrismed/teleconsulta'
+    | '/chrismed/termos'
     | '/clube/avaliacoes'
     | '/clube/buscar'
     | '/clube/cadastro'
@@ -13093,6 +13105,13 @@ declare module '@tanstack/react-router' {
       path: '/teleconsulta'
       fullPath: '/chrismed/teleconsulta'
       preLoaderRoute: typeof ChrismedTeleconsultaRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/termos': {
+      id: '/chrismed/termos'
+      path: '/termos'
+      fullPath: '/chrismed/termos'
+      preLoaderRoute: typeof ChrismedTermosRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/clube/': {
@@ -20662,6 +20681,7 @@ interface ChrismedRouteChildren {
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
   ChrismedPrivacidadeRoute: typeof ChrismedPrivacidadeRoute
   ChrismedTeleconsultaRoute: typeof ChrismedTeleconsultaRoute
+  ChrismedTermosRoute: typeof ChrismedTermosRoute
   ChrismedIndexRoute: typeof ChrismedIndexRoute
 }
 
@@ -20685,6 +20705,7 @@ const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedOfertasRoute: ChrismedOfertasRoute,
   ChrismedPrivacidadeRoute: ChrismedPrivacidadeRoute,
   ChrismedTeleconsultaRoute: ChrismedTeleconsultaRoute,
+  ChrismedTermosRoute: ChrismedTermosRoute,
   ChrismedIndexRoute: ChrismedIndexRoute,
 }
 

@@ -172,7 +172,7 @@ function ProfessionalOnboardingPage() {
     setSaving(false);
     if (error) return toast.error(error.message);
     sessionStorage.removeItem("chrismed-professional-signup");
-    toast.success("Agenda configurada. Seu perfil está pronto para receber agendamentos.");
+    toast.success("Cadastro e agenda enviados para análise da gestão CHRISMED.");
     navigate({ to: "/agenda/profissional" });
   }
 
