@@ -312,7 +312,7 @@ function DesktopDropdown({
     >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
         aria-expanded={open}
         className={cn(
           "inline-flex items-center gap-1 whitespace-nowrap px-3 py-2 text-[13px] font-medium transition-colors",
@@ -533,7 +533,16 @@ function MobileDrawer({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Menu">
-          {NAV.map((item) =>
+          <section className="mb-5 rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-2" aria-labelledby="chrismed-mobile-access-title">
+            <div id="chrismed-mobile-access-title" className="chrismed-sans px-2 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
+              Áreas de acesso
+            </div>
+            <Link to="/chrismed/agendar" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Pacientes · Agendar</Link>
+            <Link to="/alth" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Profissionais da Saúde</Link>
+            <Link to="/chrismed/ocupacional" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Empresas</Link>
+            <a href="https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Gestão CHRISMED</a>
+          </section>
+          {NAV.filter((item) => !(isGroup(item) && item.key === "acessos")).map((item) =>
             isGroup(item) ? (
               <div key={item.key} className="mb-3">
                 <div className="chrismed-sans px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">

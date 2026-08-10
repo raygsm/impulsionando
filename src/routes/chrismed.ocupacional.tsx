@@ -155,6 +155,10 @@ function ChrismedOcupacionalPage() {
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <a
               href="/chrismed/agendar?service=aso"
+              onClick={(event) => {
+                event.preventDefault();
+                window.location.assign(event.currentTarget.href);
+              }}
               className="chrismed-sans inline-flex items-center justify-center gap-2 bg-[var(--chrismed-ink)] px-8 py-4 text-[12px] font-medium uppercase tracking-[0.2em] text-[var(--chrismed-ivory)] transition-colors duration-500 hover:bg-[var(--chrismed-noir)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
             >
               {t.hero.ctaPrimary}
@@ -185,7 +189,7 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Admissional · Periódico · Retorno · Mudança de função · Demissional.
               </p>
-              <a href="/chrismed/agendar?service=aso" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+              <a href="/chrismed/agendar?service=aso" onClick={(event) => { event.preventDefault(); window.location.assign(event.currentTarget.href); }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
                 Agendar ASO →
               </a>
             </div>
@@ -195,7 +199,7 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Entrega em até <strong>15 dias corridos</strong>, contados a partir da entrevista técnica e do recebimento integral da documentação.
               </p>
-              <a href="/chrismed/agendar?service=pericia" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+              <a href="/chrismed/agendar?service=pericia" onClick={(event) => { event.preventDefault(); window.location.assign(event.currentTarget.href); }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
                 Agendar entrevista para laudo →
               </a>
             </div>
@@ -348,6 +352,10 @@ function ChrismedOcupacionalPage() {
             ) : (
               <a
                 href="/chrismed/agendar?service=aso"
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.location.assign(event.currentTarget.href);
+                }}
                 className="chrismed-sans inline-flex items-center justify-center gap-2 bg-[var(--chrismed-ink)] px-8 py-4 text-[12px] font-medium uppercase tracking-[0.2em] text-[var(--chrismed-ivory)] transition-colors duration-500 hover:bg-[var(--chrismed-noir)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
               >
                 {t.journeyEmployee.cta}
