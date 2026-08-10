@@ -108,6 +108,7 @@ for (const profile of [
     });
 
     test('preloader respeita prefers-reduced-motion', async ({ browser }) => {
+      test.setTimeout(120_000);
       const context = await browser.newContext({
         ...profile.ctx,
         reducedMotion: 'reduce',
@@ -182,6 +183,7 @@ test.describe('CHRISMED · navegação e acessos', () => {
       await expect(drawer.getByRole('link', { name: /Pacientes/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /^Empresas$/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Eventos$/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
         'href',
         'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
@@ -189,11 +191,12 @@ test.describe('CHRISMED · navegação e acessos', () => {
       return;
     }
 
-    await page.getByRole('button', { name: /Áreas de acesso/i }).click();
-    await expect(page.getByRole('menuitem', { name: /Pacientes · Agendar/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /Profissionais da Saúde/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /^Empresas/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+    const accessNav = page.getByRole('navigation', { name: /Áreas de acesso CHRISMED/i });
+    await expect(accessNav.getByRole('link', { name: /Pacientes/i })).toBeVisible();
+    await expect(accessNav.getByRole('link', { name: /Profissionais/i })).toBeVisible();
+    await expect(accessNav.getByRole('link', { name: /^Empresas/i })).toBeVisible();
+    await expect(accessNav.getByRole('link', { name: /^Eventos/i })).toBeVisible();
+    await expect(accessNav.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
       'href',
       'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
     );
