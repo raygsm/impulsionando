@@ -132,3 +132,46 @@ for (const profile of [
     });
   });
 }
+
+test.describe('CHRISMED · navegação e acessos', () => {
+  test('ASO e Perícia entram na agenda transacional compartilhada', async ({ page }) => {
+    await page.route('**/rest/v1/chrismed_service_offerings?**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: '00000000-0000-0000-0000-000000000001', slug: 'aso', name: 'Consulta Ocupacional / ASO', modality: 'ocupacional', price_cents: 11000, duration_minutes: 30 },
+          { id: '00000000-0000-0000-0000-000000000002', slug: 'pericia-medica', name: 'Perícia médica', modality: 'pericia', price_cents: 240000, duration_minutes: 60 },
+        ]),
+      }),
+    );
+
+    await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
+
+    const aso = page.getByRole('link', { name: /Agendar ASO →/i });
+    const pericia = page.getByRole('link', { name: /Agendar entrevista para laudo/i });
+    await expect(aso).toHaveAttribute('href', /\/agendar\?service=aso$/);
+    await expect(pericia).toHaveAttribute('href', /\/agendar\?service=pericia$/);
+
+    await aso.click();
+    await expect(page).toHaveURL(/\/agendar\?service=aso$/);
+    await expect(page.getByText(/ASO|Medicina Ocupacional/i).first()).toBeVisible();
+
+    await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: /Agendar entrevista para laudo/i }).click();
+    await expect(page).toHaveURL(/\/agendar\?service=pericia$/);
+    await expect(page.getByText(/Perícia médica/i).first()).toBeVisible();
+  });
+
+  test('menu expõe áreas de acesso para todos os públicos', async ({ page }) => {
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /Áreas de acesso/i }).click();
+    await expect(page.getByRole('menuitem', { name: /Pacientes · Agendar/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Profissionais da Saúde/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /^Empresas/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+      'href',
+      'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+    );
+  });
+});

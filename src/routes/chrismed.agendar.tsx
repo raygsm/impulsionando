@@ -46,6 +46,8 @@ const MODALITY_META: Record<ChrismedModality, { icon: typeof Stethoscope; label:
   telemedicina: { icon: Video, label: 'Teleconsulta', sub: 'Consulta por vídeo, onde estiver' },
   domiciliar: { icon: Home, label: 'Domiciliar', sub: 'Médico no seu endereço' },
   retorno: { icon: RefreshCw, label: 'Retorno', sub: 'Continuidade de tratamento' },
+  ocupacional: { icon: Briefcase, label: 'ASO', sub: 'Atendimento ocupacional em Copacabana' },
+  pericia: { icon: Briefcase, label: 'Perícia médica', sub: 'Entrevista técnica para laudo' },
 };
 
 const SPECIALTY_ICON = { stethoscope: Stethoscope, heart: Heart, briefcase: Briefcase, baby: Baby, brain: Brain, plane: Plane } as const;
@@ -67,7 +69,8 @@ const CARE_360: ChrismedSpecialty = {
 
 
 const searchSchema = z.object({
-  modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
+  modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno', 'ocupacional', 'pericia']).optional(), undefined),
+  service: fallback(z.enum(['aso', 'pericia']).optional(), undefined),
   specialty: fallback(z.string().optional(), undefined),
   doctor: fallback(z.string().optional(), undefined),
 });
@@ -159,6 +162,17 @@ function ChrismedAgendarPage() {
 
   // Pré-seleção via querystring — fluxo invertido: modalidade primeiro.
   useEffect(() => {
+    if (search.service === 'aso' || search.service === 'pericia') {
+      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+      const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === 'medicina-do-trabalho');
+      const office = CHRISMED_UNITS.find((u) => u.slug === 'copacabana');
+      if (doc) setDoctor(doc);
+      if (sp) setSpecialty(sp);
+      if (office) setUnit(office);
+      setModality(search.service === 'aso' ? 'ocupacional' : 'pericia');
+      setStep('schedule');
+      return;
+    }
     if (search.modality === 'telemedicina' || search.modality === 'domiciliar') {
       applyCare360(search.modality);
       return;
@@ -176,7 +190,7 @@ function ChrismedAgendarPage() {
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === search.specialty);
       if (sp) { setSpecialty(sp); }
     }
-  }, [search.specialty, search.doctor, search.modality]);
+  }, [search.specialty, search.doctor, search.modality, search.service]);
 
 
 
@@ -296,7 +310,9 @@ function ChrismedAgendarPage() {
     ? CHRISMED_UNITS.filter((u) => u.slug === 'telemedicina')
     : modality === 'domiciliar'
       ? CHRISMED_UNITS.filter((u) => u.slug === 'domiciliar')
-      : CHRISMED_UNITS.filter((u) => doctor?.unitSlugs.includes(u.slug) ?? true);
+      : modality === 'ocupacional' || modality === 'pericia'
+        ? CHRISMED_UNITS.filter((u) => u.slug === 'copacabana')
+        : CHRISMED_UNITS.filter((u) => doctor?.unitSlugs.includes(u.slug) ?? true);
 
   const selectedDay: ChrismedDay | null = selectedDayIso ? calendar.find((d) => d.iso === selectedDayIso) ?? null : null;
   const selectedSlot = selectedDay && selectedSlotId

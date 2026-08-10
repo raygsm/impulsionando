@@ -14,7 +14,13 @@
 export const CHRISMED_MOCK_NOTICE =
   'Dados de demonstração — agenda, médicos e horários definitivos serão fornecidos pelo backend (Codex).';
 
-export type ChrismedModality = 'presencial' | 'telemedicina' | 'domiciliar' | 'retorno';
+export type ChrismedModality =
+  | 'presencial'
+  | 'telemedicina'
+  | 'domiciliar'
+  | 'retorno'
+  | 'ocupacional'
+  | 'pericia';
 
 export type ChrismedSpecialty = {
   slug: string;
@@ -87,7 +93,7 @@ export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
     crm: 'CRM/RJ 52.58575-0',
     bio: 'Médica formada pela UFRJ, +30 anos de experiência e +80.000 atendimentos. Direção técnica da CHRISMED, atendimento pericial (laudos para Justiça e Previdência) e emissão de ASO presencial.',
     specialtySlugs: ['gastroenterologia', 'hepatologia', 'clinica-medica', 'medicina-do-trabalho', 'medicina-internacional'],
-    modalities: ['presencial', 'telemedicina', 'domiciliar', 'retorno'],
+    modalities: ['presencial', 'telemedicina', 'domiciliar', 'retorno', 'ocupacional', 'pericia'],
     unitSlugs: ['copacabana', 'telemedicina', 'domiciliar'],
   },
 ];
@@ -125,6 +131,8 @@ export const CHRISMED_DEFAULT_DURATION_MINUTES: Record<ChrismedModality, number>
   telemedicina: 30,
   domiciliar: 60,
   retorno: 30,
+  ocupacional: 30,
+  pericia: 60,
 };
 
 export const CHRISMED_OFFICIAL_TELE_GRID: Record<number, string[]> = {
