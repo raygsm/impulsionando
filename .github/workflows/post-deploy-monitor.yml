@@ -1,6 +1,6 @@
 name: Post-deploy monitor (CHRISMED)
 
-# Roda a cada 15 min e apos cada push em main, executando o smoke
+# Roda a cada 15 min e apos o espelho para a VPS concluir, executando o smoke
 # Playwright que garante que somente o Oliver aparece na CHRISMED,
 # capturando erros novos de console e falhas de navegacao em desktop
 # e mobile. Falhas quebram o job e disparam alerta do GitHub Actions.
@@ -8,8 +8,9 @@ name: Post-deploy monitor (CHRISMED)
 on:
   schedule:
     - cron: "*/15 * * * *"
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Mirror Deploy Impulsionando → VPS (187)"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -18,6 +19,7 @@ concurrency:
 
 jobs:
   smoke:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,7 +32,9 @@ jobs:
       - name: Smoke Oliver-only (desktop + mobile)
         env:
           CHRISMED_BASE_URL: https://chrismed.impulsionando.com.br
-        run: bunx playwright test e2e/chrismed-oliver-only.spec.ts --reporter=list
+        run: >-
+          bunx playwright test e2e/chrismed-oliver-only.spec.ts
+          --project=desktop-chromium --project=mobile-chromium --reporter=list
       - name: Upload artefatos em caso de falha
         if: failure()
         uses: actions/upload-artifact@v4
