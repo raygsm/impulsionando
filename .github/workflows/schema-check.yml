@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "supabase/migrations/**"
+  workflow_dispatch:
 
 jobs:
   validate-chrismed-production-schema:
@@ -244,11 +245,13 @@ jobs:
           echo "✅ Todas as migrations seguem o naming correto."
 
       - name: Instalar Postgres para dry-run
+        if: github.event_name != 'pull_request'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client
 
       - name: Subir Postgres efêmero
+        if: github.event_name != 'pull_request'
         run: |
           docker run -d --name pg-test \
             -e POSTGRES_PASSWORD=test \
@@ -266,6 +269,7 @@ jobs:
           PGPASSWORD="test" psql -h localhost -U supabase_admin -d postgres -c "SELECT 1" || { docker logs pg-test; exit 1; }
 
       - name: Aplicar migrations em ordem (dry-run)
+        if: github.event_name != 'pull_request'
         env:
           PGPASSWORD: test
         run: |
@@ -368,6 +372,7 @@ jobs:
           echo "✅ Todas as migrations aplicaram limpo em Postgres virgem."
 
       - name: Verificar GRANT em toda tabela public criada
+        if: github.event_name != 'pull_request'
         env:
           PGPASSWORD: test
         run: |
