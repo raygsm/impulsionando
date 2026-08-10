@@ -61,7 +61,8 @@ jobs:
             if [ -f "$SHARED/.env" ]; then ln -sf $SHARED/.env $TARGET/.env; fi
 
             npm ci
-            npm run build
+            npm run prebuild
+            node --max-old-space-size=4096 node_modules/vite/bin/vite.js build
 
             # Health check pré-troca — se build quebrar, symlink NÃO é atualizado.
             test -d $TARGET/.output || test -d $TARGET/dist
