@@ -1,4 +1,4 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Valida a regra CHRISMED:
@@ -25,7 +25,7 @@ function assertNoImpulsionito(html: string, requests: string[]) {
 
 for (const profile of [
   { name: 'desktop', ctx: { viewport: { width: 1440, height: 900 } } },
-  { name: 'mobile',  ctx: { ...devices['iPhone 13'] } },
+  { name: 'mobile', ctx: { viewport: { width: 390, height: 844 }, hasTouch: true } },
 ]) {
   test.describe(`CHRISMED · ${profile.name}`, () => {
     test('sem Impulsionito, apenas Oliver, sem duplicações', async ({ browser }) => {
