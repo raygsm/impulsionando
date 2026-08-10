@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
 import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
 
 type ServerEntry = {
@@ -115,7 +116,11 @@ export default {
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
+      const internalChrismedPathname = toChrismedInternalPathname(url.hostname, url.pathname);
+      if (internalChrismedPathname !== url.pathname) {
+        url.pathname = internalChrismedPathname;
+        routedRequest = new Request(url, request);
+      } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
         // Render the tenant landing page internally so the public URL remains
         // the clean subdomain root (for example, / rather than /chrismed).

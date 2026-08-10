@@ -195,5 +195,9 @@ jobs:
         run: |
           curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agendar >/tmp/chrismed-agendar.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/eventos >/tmp/chrismed-eventos.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
           grep -qi "CHRISMED" /tmp/chrismed.html
+          grep -qi "Agendar consulta" /tmp/chrismed-agendar.html
+          grep -qi "Eventos" /tmp/chrismed-eventos.html

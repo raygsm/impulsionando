@@ -125,6 +125,7 @@ import { Route as ChrismedContatoRouteImport } from './routes/chrismed.contato'
 import { Route as ChrismedDomiciliarRouteImport } from './routes/chrismed.domiciliar'
 import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-cristiane'
 import { Route as ChrismedEspecialidadesRouteImport } from './routes/chrismed.especialidades'
+import { Route as ChrismedEventosRouteImport } from './routes/chrismed.eventos'
 import { Route as ChrismedExamesRouteImport } from './routes/chrismed.exames'
 import { Route as ChrismedFaqRouteImport } from './routes/chrismed.faq'
 import { Route as ChrismedInternacionalRouteImport } from './routes/chrismed.internacional'
@@ -1549,6 +1550,11 @@ const ChrismedDraCristianeRoute = ChrismedDraCristianeRouteImport.update({
 const ChrismedEspecialidadesRoute = ChrismedEspecialidadesRouteImport.update({
   id: '/especialidades',
   path: '/especialidades',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedEventosRoute = ChrismedEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ChrismedExamesRoute = ChrismedExamesRouteImport.update({
@@ -6411,6 +6417,7 @@ export interface FileRoutesByFullPath {
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/eventos': typeof ChrismedEventosRoute
   '/chrismed/exames': typeof ChrismedExamesRoute
   '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
@@ -7345,6 +7352,7 @@ export interface FileRoutesByTo {
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/eventos': typeof ChrismedEventosRoute
   '/chrismed/exames': typeof ChrismedExamesRoute
   '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
@@ -8292,6 +8300,7 @@ export interface FileRoutesById {
   '/chrismed/domiciliar': typeof ChrismedDomiciliarRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/especialidades': typeof ChrismedEspecialidadesRoute
+  '/chrismed/eventos': typeof ChrismedEventosRoute
   '/chrismed/exames': typeof ChrismedExamesRoute
   '/chrismed/faq': typeof ChrismedFaqRoute
   '/chrismed/internacional': typeof ChrismedInternacionalRoute
@@ -9246,6 +9255,7 @@ export interface FileRouteTypes {
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
     | '/chrismed/especialidades'
+    | '/chrismed/eventos'
     | '/chrismed/exames'
     | '/chrismed/faq'
     | '/chrismed/internacional'
@@ -10180,6 +10190,7 @@ export interface FileRouteTypes {
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
     | '/chrismed/especialidades'
+    | '/chrismed/eventos'
     | '/chrismed/exames'
     | '/chrismed/faq'
     | '/chrismed/internacional'
@@ -11126,6 +11137,7 @@ export interface FileRouteTypes {
     | '/chrismed/domiciliar'
     | '/chrismed/dra-cristiane'
     | '/chrismed/especialidades'
+    | '/chrismed/eventos'
     | '/chrismed/exames'
     | '/chrismed/faq'
     | '/chrismed/internacional'
@@ -13011,6 +13023,13 @@ declare module '@tanstack/react-router' {
       path: '/especialidades'
       fullPath: '/chrismed/especialidades'
       preLoaderRoute: typeof ChrismedEspecialidadesRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/eventos': {
+      id: '/chrismed/eventos'
+      path: '/eventos'
+      fullPath: '/chrismed/eventos'
+      preLoaderRoute: typeof ChrismedEventosRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/chrismed/exames': {
@@ -20633,6 +20652,7 @@ interface ChrismedRouteChildren {
   ChrismedDomiciliarRoute: typeof ChrismedDomiciliarRoute
   ChrismedDraCristianeRoute: typeof ChrismedDraCristianeRoute
   ChrismedEspecialidadesRoute: typeof ChrismedEspecialidadesRoute
+  ChrismedEventosRoute: typeof ChrismedEventosRoute
   ChrismedExamesRoute: typeof ChrismedExamesRoute
   ChrismedFaqRoute: typeof ChrismedFaqRoute
   ChrismedInternacionalRoute: typeof ChrismedInternacionalRoute
@@ -20655,6 +20675,7 @@ const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedDomiciliarRoute: ChrismedDomiciliarRoute,
   ChrismedDraCristianeRoute: ChrismedDraCristianeRoute,
   ChrismedEspecialidadesRoute: ChrismedEspecialidadesRoute,
+  ChrismedEventosRoute: ChrismedEventosRoute,
   ChrismedExamesRoute: ChrismedExamesRoute,
   ChrismedFaqRoute: ChrismedFaqRoute,
   ChrismedInternacionalRoute: ChrismedInternacionalRoute,

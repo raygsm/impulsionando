@@ -12,7 +12,7 @@ import { test, expect, devices } from '@playwright/test';
  */
 
 const BASE = process.env.CHRISMED_BASE_URL || 'https://chrismed.impulsionando.com.br';
-const ROUTES = ['/', '/chrismed/agendar', '/chrismed/consultorio', '/chrismed/faq'];
+const ROUTES = ['/', '/agendar', '/consultorio', '/faq', '/eventos', '/internacional'];
 
 function assertNoImpulsionito(html: string, requests: string[]) {
   const bad = /impulsionito(?!\.png)/i;
@@ -41,6 +41,11 @@ for (const profile of [
         errors.length = 0;
         await page.goto(BASE + path, { waitUntil: 'networkidle' });
         const html = await page.content();
+
+        expect(new URL(page.url()).pathname, `URL pública deve permanecer limpa em ${path}`).toBe(path);
+        expect(new URL(page.url()).pathname, `URL pública não pode repetir /chrismed em ${path}`).not.toContain(
+          '/chrismed',
+        );
 
         assertNoImpulsionito(html, reqs);
 
