@@ -13,6 +13,11 @@ on:
         required: true
         default: false
         type: boolean
+      booking_hotfix_only:
+        description: "Aplicar somente o hotfix da funcao de reserva CHRISMED"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   apply:
@@ -62,7 +67,7 @@ jobs:
             --command "select current_database(), current_user;"
 
       - name: Apply migrations
-        if: ${{ !inputs.dry_run && !inputs.verify_only }}
+        if: ${{ !inputs.dry_run && !inputs.verify_only && !inputs.booking_hotfix_only }}
         shell: bash
         run: |
           set -euo pipefail
@@ -93,6 +98,24 @@ jobs:
 
           psql "${args[@]}"
 
+      - name: Apply CHRISMED booking hotfix only
+        if: ${{ !inputs.dry_run && inputs.booking_hotfix_only }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          db_url="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          psql -X --no-psqlrc --single-transaction --set ON_ERROR_STOP=1 "$db_url" \
+            --file supabase/migrations/20260809133000_fix_chrismed_booking_hold_ambiguity.sql \
+            --command "
+              insert into supabase_migrations.schema_migrations(version, name, statements)
+              values (
+                '20260809133000',
+                'fix_chrismed_booking_hold_ambiguity',
+                array[]::text[]
+              )
+              on conflict (version) do nothing;
+            "
+
       - name: Post-apply CHRISMED gate
         if: ${{ !inputs.dry_run }}
         shell: bash
@@ -121,7 +144,7 @@ jobs:
           from supabase_migrations.schema_migrations
           where version in (
             '20260808210000', '20260808213000', '20260808223000',
-            '20260809111500', '20260809124500'
+            '20260809111500', '20260809124500', '20260809133000'
           )
           order by version;
           SQL
