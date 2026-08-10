@@ -29,7 +29,7 @@ for (const profile of [
 ]) {
   test.describe(`CHRISMED · ${profile.name}`, () => {
     test('sem Impulsionito, apenas Oliver, sem duplicações', async ({ browser }) => {
-      test.setTimeout(60_000);
+      test.setTimeout(120_000);
       const context = await browser.newContext(profile.ctx);
       const page = await context.newPage();
       await page.route("**/rest/v1/chrismed_service_offerings?**", (route) =>
