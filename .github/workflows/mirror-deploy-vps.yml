@@ -33,6 +33,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 20m
           script_stop: true
           envs: GITHUB_SHA,OPENAI_API_KEY
           script: |
