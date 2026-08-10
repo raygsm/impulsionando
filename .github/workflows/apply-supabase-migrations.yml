@@ -15,11 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      PGHOST: ${{ secrets.PGHOST }}
-      PGPORT: ${{ secrets.PGPORT }}
-      PGUSER: ${{ secrets.PGUSER }}
-      PGPASSWORD: ${{ secrets.PGPASSWORD }}
-      PGDATABASE: ${{ secrets.PGDATABASE }}
+      PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPORT: "5432"
+      PGUSER: postgres.${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PGDATABASE: postgres
+      PGSSLMODE: require
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -51,23 +52,9 @@ jobs:
       - name: Verify Supabase pooler connection
         shell: bash
         run: |
-          node - <<'NODE'
-          const net = require('node:net');
-          const host = process.env.PGHOST;
-          const port = Number(process.env.PGPORT || 5432);
-          const socket = net.createConnection({ host, port });
-          const timer = setTimeout(() => socket.destroy(new Error('timeout')), 10000);
-          socket.once('connect', () => {
-            clearTimeout(timer);
-            console.log(`Conexao TCP validada em ${host}:${port}`);
-            socket.end();
-          });
-          socket.once('error', (error) => {
-            clearTimeout(timer);
-            console.error(`Falha ao conectar em ${host}:${port}: ${error.message}`);
-            process.exitCode = 1;
-          });
-          NODE
+          set -euo pipefail
+          psql -X --no-psqlrc --set ON_ERROR_STOP=1 \
+            --command "select current_database(), current_user;"
 
       - name: Apply migrations
         if: ${{ !inputs.dry_run }}
