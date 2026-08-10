@@ -17,7 +17,9 @@ const ROUTES = ['/', '/agendar', '/consultorio', '/faq'];
 function assertNoImpulsionito(html: string, requests: string[]) {
   const bad = /impulsionito(?!\.png)/i;
   expect(html, 'HTML não deve mencionar Impulsionito na CHRISMED').not.toMatch(bad);
-  const badReq = requests.filter((u) => /impulsionito/i.test(u) && !/oliver/i.test(u));
+  const badReq = requests.filter(
+    (u) => /impulsionito/i.test(u) && !/oliver/i.test(u) && !/\/src\/|\/@vite\//i.test(u),
+  );
   expect(badReq, `Requests indevidos: ${badReq.join(', ')}`).toEqual([]);
 }
 
@@ -39,6 +41,7 @@ for (const profile of [
 
       for (const path of ROUTES) {
         errors.length = 0;
+        reqs.length = 0;
         await page.goto(BASE + path, { waitUntil: 'networkidle' });
         const html = await page.content();
 

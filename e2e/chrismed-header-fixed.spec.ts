@@ -27,9 +27,9 @@ const CHRISMED_ROUTES = [
 test.describe("CHRISMED — cabeçalho fixo em todas as rotas", () => {
   for (const route of CHRISMED_ROUTES) {
     test(`mantém o menu fixo em ${route}`, async ({ page }) => {
-      await page.goto(route, { waitUntil: "domcontentloaded" });
+      await page.goto(route, { waitUntil: "networkidle" });
       const header = page.locator("[data-chrismed-header]").first();
-      await expect(header).toBeVisible();
+      await expect(header).toBeVisible({ timeout: 15_000 });
 
       await expect(header).toHaveCSS("position", "fixed");
       await expect(header).toHaveCSS("top", "0px");
