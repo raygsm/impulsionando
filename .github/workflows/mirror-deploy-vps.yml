@@ -37,8 +37,6 @@ jobs:
           envs: GITHUB_SHA,OPENAI_API_KEY
           script: |
             set -euo pipefail
-            export PATH="$HOME/.bun/bin:$PATH"
-
             APP_ROOT=/var/www/impulsionando
             RELEASES=$APP_ROOT/releases
             SHARED=$APP_ROOT/shared
@@ -61,8 +59,8 @@ jobs:
             # .env compartilhado (nunca versionado, gerenciado por operador)
             if [ -f "$SHARED/.env" ]; then ln -sf $SHARED/.env $TARGET/.env; fi
 
-            bun install --frozen-lockfile
-            bun run build
+            npm ci
+            npm run build
 
             # Health check pré-troca — se build quebrar, symlink NÃO é atualizado.
             test -d $TARGET/.output || test -d $TARGET/dist
