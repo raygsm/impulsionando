@@ -58,7 +58,8 @@ jobs:
             postgres:17 \
             pg_dump --schema=public --schema=private --schema-only --clean --if-exists \
               --no-owner --no-privileges \
-            | sed '/^SET transaction_timeout = 0;$/d' \
+            | sed -e '/^SET transaction_timeout = 0;$/d' \
+                  -e '/^CREATE SCHEMA public;$/a CREATE EXTENSION IF NOT EXISTS btree_gist;' \
             > /tmp/chrismed-production-schema.sql
           # PostgreSQL 17 emits this session-only setting; the disposable
           # Supabase 15 image does not expose it. It is not a schema object.
@@ -85,7 +86,6 @@ jobs:
           );
           CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
-          CREATE EXTENSION IF NOT EXISTS btree_gist;
           SQL
           psql -h localhost -p 55432 -U supabase_admin -d postgres \
             -v ON_ERROR_STOP=1 -f /tmp/chrismed-production-schema.sql
