@@ -12,8 +12,8 @@ name: Mirror Deploy Impulsionando → VPS (187)
 #   VPS_PORT         (opcional) porta SSH, padrão 22
 
 on:
-  push:
-    branches: [main]
+  # Legado preservado somente para recuperação manual. O deploy automático
+  # oficial é o workflow Deploy Core Frontend, que publica artefatos prontos.
   workflow_dispatch:
 
 concurrency:

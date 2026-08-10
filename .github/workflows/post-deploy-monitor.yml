@@ -1,6 +1,6 @@
 name: Post-deploy monitor (CHRISMED)
 
-# Roda a cada 15 min e apos o espelho para a VPS concluir, executando o smoke
+# Roda a cada 15 min e apos o deploy oficial concluir, executando o smoke
 # Playwright que garante que somente o Oliver aparece na CHRISMED,
 # capturando erros novos de console e falhas de navegacao em desktop
 # e mobile. Falhas quebram o job e disparam alerta do GitHub Actions.
@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_run:
-    workflows: ["Mirror Deploy Impulsionando → VPS (187)"]
+    workflows: ["Deploy Core Frontend"]
     types: [completed]
   workflow_dispatch:
 
