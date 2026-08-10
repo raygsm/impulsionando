@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, XCircle, RefreshCw, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientSettingsPanel } from '@/components/core/ClientSettingsPanel';
+import { requireChrismedManagement } from '@/lib/chrismed-management';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
 export const Route = createFileRoute('/_authenticated/chrismed/setup')({
+  beforeLoad: requireChrismedManagement,
   component: ChrismedSetup,
   head: () => ({
     meta: [
@@ -145,7 +147,6 @@ function ChrismedSetup() {
         </div>
         <ClientSettingsPanel
           companyId={CHRISMED_COMPANY_ID}
-          settingKeys={['comms.patient_email', 'comms.technical_support_email']}
         />
       </section>
 
