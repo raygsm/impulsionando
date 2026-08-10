@@ -43,6 +43,8 @@ function applyConsentMode(c: ConsentState | null) {
 
 function injectGtagScript(id: string) {
   if (scriptInjected || typeof document === "undefined") return;
+  // Development and E2E must be deterministic and must not emit real telemetry.
+  if (import.meta.env.DEV) return;
   scriptInjected = true;
   const s = document.createElement("script");
   s.async = true;
