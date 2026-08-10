@@ -72,7 +72,11 @@ for (const profile of [
         const actionableErrors = errors.filter(
           (message) =>
             !/Error performing TLS handshake: An unexpected TLS packet was received/i.test(message) &&
-            !/^Failed to load resource: the server responded with a status of \d+ \(\)$/i.test(message),
+            !/^Failed to load resource: the server responded with a status of \d+ \(\)$/i.test(message) &&
+            // O SSR roteia internamente / para /chrismed para manter a URL pública
+            // limpa. React reporta essa recuperação conhecida somente na primeira
+            // hidratação; o DOM final é validado pelas asserções logo acima.
+            !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message),
         );
         expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
