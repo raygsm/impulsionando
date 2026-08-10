@@ -102,6 +102,7 @@ jobs:
             supabase/migrations/20260808223000_chrismed_communication_settings.sql
             supabase/migrations/20260809111500_fix_current_core_staff_functions.sql
             supabase/migrations/20260809124500_chrismed_offerings_and_occupational_intake.sql
+            supabase/migrations/20260809133000_fix_chrismed_booking_hold_ambiguity.sql
           )
           for migration in "${migrations[@]}"; do
             test -f "$migration" || { echo "::error::Migration ausente: $migration"; exit 1; }
