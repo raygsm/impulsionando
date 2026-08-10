@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Instalar yamllint + actionlint
         run: |
@@ -26,10 +28,30 @@ jobs:
           sudo mv ./actionlint /usr/local/bin/actionlint
 
       - name: yamllint (sintaxe YAML)
-        run: yamllint -d "{extends: relaxed, rules: {line-length: disable}}" .github/workflows
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
+          else
+            mapfile -t files < <(find .github/workflows -maxdepth 1 -type f -name '*.yml' | sort)
+          fi
+          [ "${#files[@]}" -eq 0 ] || yamllint -d "{extends: relaxed, rules: {line-length: disable}}" "${files[@]}"
 
       - name: actionlint (schema GitHub Actions)
-        run: actionlint -color .github/workflows/*.yml
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
+          else
+            mapfile -t files < <(find .github/workflows -maxdepth 1 -type f -name '*.yml' | sort)
+          fi
+          [ "${#files[@]}" -eq 0 ] || actionlint -color "${files[@]}"
 
       - name: Listar workflows detectados
         run: |

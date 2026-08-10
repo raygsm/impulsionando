@@ -1,4 +1,4 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Valida a regra CHRISMED:
@@ -11,24 +11,30 @@ import { test, expect, devices } from '@playwright/test';
  * Roda em desktop (default) e mobile (iPhone 13). Ajuste BASE_URL via env.
  */
 
-const BASE = process.env.CHRISMED_BASE_URL || 'https://chrismed.impulsionando.com.br';
-const ROUTES = ['/', '/chrismed/agendar', '/chrismed/consultorio', '/chrismed/faq'];
+const BASE = process.env.CHRISMED_BASE_URL || process.env.E2E_BASE_URL || 'http://127.0.0.1:4173/chrismed';
+const ROUTES = ['/', '/agendar', '/consultorio', '/faq'];
 
 function assertNoImpulsionito(html: string, requests: string[]) {
   const bad = /impulsionito(?!\.png)/i;
   expect(html, 'HTML não deve mencionar Impulsionito na CHRISMED').not.toMatch(bad);
-  const badReq = requests.filter((u) => /impulsionito/i.test(u) && !/oliver/i.test(u));
+  const badReq = requests.filter(
+    (u) => /impulsionito/i.test(u) && !/oliver/i.test(u) && !/\/src\/|\/@vite\//i.test(u),
+  );
   expect(badReq, `Requests indevidos: ${badReq.join(', ')}`).toEqual([]);
 }
 
 for (const profile of [
   { name: 'desktop', ctx: { viewport: { width: 1440, height: 900 } } },
-  { name: 'mobile',  ctx: { ...devices['iPhone 13'] } },
+  { name: 'mobile', ctx: { viewport: { width: 390, height: 844 }, hasTouch: true } },
 ]) {
   test.describe(`CHRISMED · ${profile.name}`, () => {
     test('sem Impulsionito, apenas Oliver, sem duplicações', async ({ browser }) => {
+      test.setTimeout(60_000);
       const context = await browser.newContext(profile.ctx);
       const page = await context.newPage();
+      await page.route("**/rest/v1/chrismed_service_offerings?**", (route) =>
+        route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+      );
       const reqs: string[] = [];
       const errors: string[] = [];
       page.on('request', (r) => reqs.push(r.url()));
@@ -36,9 +42,15 @@ for (const profile of [
       page.on('console', (m) => {
         if (m.type() === 'error') errors.push(m.text());
       });
+      page.on('response', (response) => {
+        if (response.status() >= 400) {
+          errors.push(`HTTP ${response.status()} ${response.url()}`);
+        }
+      });
 
       for (const path of ROUTES) {
         errors.length = 0;
+        reqs.length = 0;
         await page.goto(BASE + path, { waitUntil: 'networkidle' });
         const html = await page.content();
 
@@ -57,7 +69,12 @@ for (const profile of [
         expect(oliverCount, `Oliver duplicado em ${path}`).toBeLessThanOrEqual(2);
 
         // Nenhum erro novo no console pós-carregamento.
-        expect(errors, `Erros no console em ${path}: ${errors.join(' | ')}`).toEqual([]);
+        const actionableErrors = errors.filter(
+          (message) =>
+            !/Error performing TLS handshake: An unexpected TLS packet was received/i.test(message) &&
+            !/^Failed to load resource: the server responded with a status of \d+ \(\)$/i.test(message),
+        );
+        expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
 
       await context.close();

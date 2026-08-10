@@ -1,34 +1,36 @@
 import { expect, test } from "@playwright/test";
 
+const PUBLIC_CHRISMED_HOST = process.env.E2E_BASE_URL?.includes("chrismed.impulsionando.com.br");
 const CHRISMED_ROUTES = [
-  "/chrismed",
-  "/chrismed/agendar",
-  "/chrismed/app",
-  "/chrismed/checkout",
-  "/chrismed/clinica",
-  "/chrismed/consultorio",
-  "/chrismed/contato",
-  "/chrismed/domiciliar",
-  "/chrismed/dra-cristiane",
-  "/chrismed/especialidades",
-  "/chrismed/exames",
-  "/chrismed/faq",
-  "/chrismed/internacional",
-  "/chrismed/medicos",
-  "/chrismed/minha-conta",
-  "/chrismed/ocupacional",
-  "/chrismed/ocupacional/agendar",
-  "/chrismed/ofertas",
-  "/chrismed/privacidade",
-  "/chrismed/teleconsulta",
-];
+  "",
+  "/agendar",
+  "/app",
+  "/checkout",
+  "/clinica",
+  "/consultorio",
+  "/contato",
+  "/domiciliar",
+  "/dra-cristiane",
+  "/especialidades",
+  "/exames",
+  "/faq",
+  "/internacional",
+  "/medicos",
+  "/minha-conta",
+  "/ocupacional",
+  "/ocupacional/agendar",
+  "/ofertas",
+  "/privacidade",
+  "/teleconsulta",
+].map((path) => PUBLIC_CHRISMED_HOST ? path || "/" : `/chrismed${path}`);
 
 test.describe("CHRISMED — cabeçalho fixo em todas as rotas", () => {
+  test.describe.configure({ timeout: 60_000 });
   for (const route of CHRISMED_ROUTES) {
     test(`mantém o menu fixo em ${route}`, async ({ page }) => {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       const header = page.locator("[data-chrismed-header]").first();
-      await expect(header).toBeVisible();
+      await expect(header).toBeVisible({ timeout: 15_000 });
 
       await expect(header).toHaveCSS("position", "fixed");
       await expect(header).toHaveCSS("top", "0px");

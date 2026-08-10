@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, XCircle, RefreshCw, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { ClientSettingsPanel } from '@/components/core/ClientSettingsPanel';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -46,21 +47,20 @@ function ChrismedSetup() {
   async function run() {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('chrismed-healthcheck', {
-        method: 'GET',
-        // edge function lê company_id da querystring
-        body: undefined,
-        headers: {},
-      });
-      if (error) throw error;
-      // supabase-js .invoke não passa querystring; usar fetch direto
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session?.access_token) {
+        throw new Error('Sessão administrativa ausente ou expirada');
+      }
       const projUrl = (supabase as unknown as { supabaseUrl: string }).supabaseUrl;
       const res = await fetch(`${projUrl}/functions/v1/chrismed-healthcheck?company_id=${CHRISMED_COMPANY_ID}`, {
-        headers: { apikey: (supabase as unknown as { supabaseKey: string }).supabaseKey },
+        headers: {
+          apikey: (supabase as unknown as { supabaseKey: string }).supabaseKey,
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
       });
-      const json = (await res.json()) as Report;
+      const json = (await res.json()) as Report & { error?: string };
+      if (!res.ok) throw new Error(json.error ?? `Healthcheck recusado (${res.status})`);
       setReport(json);
-      void data;
     } catch (e) {
       toast.error('Falha no healthcheck: ' + (e instanceof Error ? e.message : String(e)));
     } finally {
@@ -135,6 +135,19 @@ function ChrismedSetup() {
           </div>
         </CardContent>
       </Card>
+
+      <section className="space-y-3" aria-labelledby="communication-settings-title">
+        <div>
+          <h2 id="communication-settings-title" className="text-xl font-semibold">Canais de comunicação</h2>
+          <p className="text-sm text-muted-foreground">
+            Pacientes respondem ao SAC. Acesso, aplicativo e senhas são direcionados ao suporte técnico.
+          </p>
+        </div>
+        <ClientSettingsPanel
+          companyId={CHRISMED_COMPANY_ID}
+          settingKeys={['comms.patient_email', 'comms.technical_support_email']}
+        />
+      </section>
 
       <div className="space-y-3">
         {report?.checks.map((c) => (

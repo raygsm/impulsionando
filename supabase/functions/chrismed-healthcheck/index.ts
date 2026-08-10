@@ -23,6 +23,36 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: "company_id obrigatório" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
   }
 
+  const authorization = req.headers.get("authorization") ?? "";
+  const accessJwt = authorization.replace(/^Bearer\s+/i, "").trim();
+  const { data: authData, error: authError } = await sb.auth.getUser(accessJwt);
+  const user = authData.user;
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  const appMetadata = user.app_metadata ?? {};
+  const isPlatformStaff = appMetadata.is_super_admin === true
+    || appMetadata.is_impulsionando_staff === true;
+  if (!isPlatformStaff) {
+    const { data: role } = await sb
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("company_id", companyId)
+      .in("role", ["admin", "gestor"])
+      .maybeSingle();
+    if (!role) {
+      return new Response(JSON.stringify({ error: "forbidden" }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   const checks: Check[] = [];
 
   // 1. Empresa
@@ -79,56 +109,39 @@ Deno.serve(async (req) => {
       detail: `Secret ${cred?.access_token_secret_name ?? "?"} não encontrado no ambiente`,
     });
   } else {
-    // Probe: tenta criar pagamento PIX inválido propositalmente para inspecionar erro
-    const probe = await fetch("https://api.mercadopago.com/v1/payments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        "X-Idempotency-Key": crypto.randomUUID(),
-      },
-      body: JSON.stringify({
-        transaction_amount: 0.01,
-        description: "Healthcheck CHRISMED",
-        payment_method_id: "pix",
-        payer: { email: "healthcheck@impulsionando.com.br", first_name: "Health", last_name: "Check" },
-      }),
+    // Read-only credential probe. A health check must never create a payment.
+    const probe = await fetch("https://api.mercadopago.com/users/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data = await probe.json().catch(() => ({}));
 
     if (probe.ok) {
-      checks.push({ id: "token", label: "Token de acesso", status: "ok", detail: "Autenticado no MP" });
+      checks.push({ id: "token", label: "Token de acesso", status: "ok", detail: "Autenticado no Mercado Pago" });
       checks.push({
         id: "pix_key",
         label: "Chave PIX da conta vendedora",
-        status: "ok",
-        detail: `Pagamento de teste criado (id ${data.id}) — chave PIX ativa`,
+        status: "warn",
+        detail: "Credencial válida; disponibilidade PIX exige pagamento controlado separado",
+        action: "Executar pagamento PIX controlado em homologação antes de liberar produção",
       });
     } else {
-      const code = data?.cause?.[0]?.code;
-      const msg = data?.message ?? "erro desconhecido";
-      checks.push({ id: "token", label: "Token de acesso", status: "ok", detail: "Autenticado no MP" });
-      if (code === 13253 || /key enabled for QR/i.test(msg)) {
-        checks.push({
-          id: "pix_key",
-          label: "Chave PIX da conta vendedora",
-          status: "error",
-          detail: "Conta MP do CHRISMED sem chave PIX cadastrada (cód. 13253)",
-          action: "No painel MP do CHRISMED → Seu perfil → Suas chaves Pix → cadastrar CNPJ ou chave aleatória",
-        });
-      } else {
-        checks.push({
-          id: "pix_key",
-          label: "Chave PIX da conta vendedora",
-          status: "warn",
-          detail: `MP devolveu ${probe.status}: ${msg}`,
-        });
-      }
+      checks.push({
+        id: "token",
+        label: "Token de acesso",
+        status: "error",
+        detail: `Mercado Pago recusou a credencial (${probe.status}: ${data?.message ?? "erro desconhecido"})`,
+      });
+      checks.push({
+        id: "pix_key",
+        label: "Chave PIX da conta vendedora",
+        status: "warn",
+        detail: "Não validada porque a credencial foi recusada",
+      });
     }
   }
 
   // 5. Webhook URL esperada
-  const webhookUrl = `https://fpywvlhsfdtztkbncmdt.supabase.co/functions/v1/mpago-webhook?company_id=${companyId}`;
+  const webhookUrl = `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/mpago-webhook?company_id=${encodeURIComponent(companyId)}`;
   const { data: lastWh } = await sb
     .from("mpago_webhook_events")
     .select("created_at,event_type")

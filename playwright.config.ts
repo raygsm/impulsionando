@@ -1,8 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const externalBaseUrl = process.env.E2E_BASE_URL?.trim();
+const localBaseUrl = "http://127.0.0.1:4173";
+
 /**
  * Playwright config para a suíte de jornada nicho-primeiro.
- * Roda contra o dev server local (Vite/TanStack Start na porta 8080).
+ * Roda contra o dev server local (Vite/TanStack Start na porta 4173),
+ * ou contra E2E_BASE_URL quando uma URL externa não vazia for informada.
  *
  * Execute com:
  *   bunx playwright test
@@ -22,7 +26,7 @@ export default defineConfig({
     ["html", { outputFolder: "playwright-report", open: "never" }],
   ],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:8080",
+    baseURL: externalBaseUrl || localBaseUrl,
     // Ao falhar, retemos: trace completo (DOM snapshots + network + console),
     // screenshot do estado final e video da execução. Tudo é coletado pelo
     // workflow e disponibilizado como artifacts.
@@ -30,6 +34,14 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
+  webServer: externalBaseUrl
+    ? undefined
+    : {
+        command: "bun run dev --host 127.0.0.1 --port 4173",
+        url: localBaseUrl,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 
   /**
    * Matriz de projetos: cobrimos os 3 engines (Chromium, Firefox, WebKit)

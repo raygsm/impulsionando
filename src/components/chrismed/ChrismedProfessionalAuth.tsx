@@ -44,7 +44,7 @@ function authError(message?: string) {
   if (normalized.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
   if (normalized.includes("already registered")) return "Já existe uma conta com este e-mail.";
   if (normalized.includes("password should be"))
-    return "A senha precisa ter pelo menos 6 caracteres.";
+    return "A senha precisa ter pelo menos 12 caracteres.";
   return message || "Não foi possível concluir. Tente novamente.";
 }
 
@@ -67,6 +67,20 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [technicalSupportEmail, setTechnicalSupportEmail] = useState("ti@chrismed.com.br");
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { data, error } = await supabase.rpc("get_chrismed_contact_emails" as never);
+      const row = (data as unknown as { technical_support_email?: string }[] | null)?.[0];
+      if (active && !error && row?.technical_support_email) {
+        setTechnicalSupportEmail(row.technical_support_email);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -203,6 +217,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
     event.preventDefault();
     const validation = validateProfessionalRegistration({ profession, councilNumber, primaryArea });
     if (validation) return toast.error(validation);
+    if (!acceptedTerms) return toast.error("Aceite os termos e a política de privacidade para continuar.");
     saveDraft();
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
@@ -221,6 +236,9 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
           primary_specialty_id: selectedSpecialtyIds[0] ?? null,
           specialty_ids: selectedSpecialtyIds,
           secondary_areas: selectedSpecialties.slice(1).map((item) => item.name),
+          chrismed_terms_accepted: true,
+          chrismed_terms_version: "2026-08-08",
+          chrismed_privacy_version: "2026-08-08",
         },
       },
     });
@@ -335,7 +353,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
             className="h-12 w-auto object-contain lg:hidden"
           />
           <a
-            href="mailto:atendimento@chrismed.com.br"
+            href={`mailto:${technicalSupportEmail}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#087f7b]"
           >
             <HelpCircle className="h-4 w-4" />
@@ -618,12 +636,26 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                     <Input
                       id="cm-signup-password"
                       type="password"
-                      minLength={6}
+                      minLength={12}
+                      autoComplete="new-password"
                       required
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                     />
+                    <p className="text-xs text-[#59656b]">Use ao menos 12 caracteres.</p>
                   </div>
+                  <label className="flex items-start gap-3 rounded-lg border border-[#d8e6e5] p-3 text-sm text-[#425158]">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(event) => setAcceptedTerms(event.target.checked)}
+                      className="mt-1 h-4 w-4 accent-[#087f7b]"
+                      required
+                    />
+                    <span>
+                      Li e aceito os <a className="font-semibold text-[#087f7b] underline" href="/chrismed/termos" target="_blank" rel="noreferrer">Termos CHRISMED</a> e a <a className="font-semibold text-[#087f7b] underline" href="/chrismed/privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>.
+                    </span>
+                  </label>
                 </form>
               )}
 

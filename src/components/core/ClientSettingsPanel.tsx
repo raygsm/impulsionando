@@ -40,7 +40,7 @@ function jsonValue(v: unknown): unknown {
   return v;
 }
 
-export function ClientSettingsPanel({ companyId }: { companyId: string }) {
+export function ClientSettingsPanel({ companyId, settingKeys }: { companyId: string; settingKeys?: string[] }) {
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -82,7 +82,7 @@ export function ClientSettingsPanel({ companyId }: { companyId: string }) {
 
   if (isLoading) return <Card className="p-4">Carregando parâmetros…</Card>;
 
-  const defs = data?.definitions ?? [];
+  const defs = (data?.definitions ?? []).filter((definition) => !settingKeys || settingKeys.includes(definition.key));
   const values = data?.values ?? new Map();
 
   const grouped = defs.reduce<Record<string, SettingDef[]>>((acc, d) => {
@@ -130,9 +130,16 @@ export function ClientSettingsPanel({ companyId }: { companyId: string }) {
                     )}
                     {d.value_type === "text" && (
                       <Input
+                        type={d.key.includes("email") ? "email" : "text"}
                         defaultValue={String(current ?? "")}
                         className="w-56"
-                        onBlur={(e) => upsert.mutate({ def: d, value: e.target.value })}
+                        onBlur={(e) => {
+                          if (!e.currentTarget.checkValidity()) {
+                            toast.error("Informe um e-mail válido");
+                            return;
+                          }
+                          upsert.mutate({ def: d, value: e.target.value.trim().toLowerCase() });
+                        }}
                       />
                     )}
                   </div>

@@ -13,9 +13,23 @@ concurrency:
 
 jobs:
   playwright:
-    name: Playwright E2E + a11y + visual (Chromium / Firefox / WebKit · desktop+mobile)
+    name: Playwright shard ${{ matrix.artifact }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Six browser/device projects exercise the complete suite. Keep enough
+    # headroom for browser setup, report generation and artifact upload.
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: 1/4
+            artifact: 1-of-4
+          - shard: 2/4
+            artifact: 2-of-4
+          - shard: 3/4
+            artifact: 3-of-4
+          - shard: 4/4
+            artifact: 4-of-4
     permissions:
       contents: read
       pull-requests: write
@@ -30,8 +44,8 @@ jobs:
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       # --- E2E credentials (test account on the staging backend) ---
-      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
-      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL || secrets.E2E_SUPER_ADMIN_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD || secrets.E2E_SUPER_ADMIN_PASSWORD }}
       # Optional override: point at an external preview deploy instead of
       # building locally. When set, Playwright skips its own webServer.
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
@@ -82,14 +96,26 @@ jobs:
       # Inclui specs de funil (e2e/nichos-funnel.spec.ts), visual regression
       # (e2e/hero-cta-visual.spec.ts, e2e/escolher-nicho-visual.spec.ts) e
       # auditoria axe (e2e/nichos-a11y.spec.ts — falha em violação critical).
-      - name: Run Playwright suite (all engines · desktop+mobile)
-        run: bun run test:e2e
+      - name: Run CHRISMED PR suite (all engines · desktop+mobile)
+        if: github.event_name == 'pull_request'
+        env:
+          # Validate the checked-out PR commit instead of the old production bundle.
+          E2E_BASE_URL: ""
+        run: >-
+          bun run test:e2e --
+          e2e/chrismed-header-fixed.spec.ts
+          e2e/chrismed-oliver-only.spec.ts
+          --shard=${{ matrix.shard }}
+
+      - name: Run full ecosystem suite on main/manual
+        if: github.event_name != 'pull_request'
+        run: bun run test:e2e -- --shard=${{ matrix.shard }}
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.artifact }}
           path: |
             playwright-report
             test-results
@@ -105,7 +131,7 @@ jobs:
         id: upload-visual-diffs
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-visual-diffs
+          name: playwright-visual-diffs-${{ matrix.artifact }}
           path: |
             test-results/**/*-expected.png
             test-results/**/*-actual.png
@@ -124,7 +150,7 @@ jobs:
           #  - test-failed-*.png  → screenshot do estado final
           #  - error-context.md   → contexto de DOM ao redor do locator falho
           #  - *.html             → dumps de DOM eventualmente anexados
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.artifact }}
           path: |
             test-results/**/trace.zip
             test-results/**/video.webm
@@ -197,4 +223,20 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
+
+  e2e-gate:
+    name: Playwright E2E + a11y + visual (Chromium / Firefox / WebKit · desktop+mobile)
+    if: always()
+    needs: playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consolidate full-suite result
+        env:
+          SHARDS_RESULT: ${{ needs.playwright.result }}
+        run: |
+          if [ "$SHARDS_RESULT" != "success" ]; then
+            echo "::error::At least one Playwright shard failed or was cancelled."
+            exit 1
+          fi
+          echo "All Playwright shards passed."
 

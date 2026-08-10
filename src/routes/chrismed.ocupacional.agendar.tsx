@@ -17,6 +17,7 @@ import { zodValidator, fallback } from '@tanstack/zod-adapter';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 import { openChrismedOliver } from '@/components/chrismed/oliver-store';
 import { Briefcase, FileText, ShieldCheck, ChevronLeft, CheckCircle2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 type Service = 'aso' | 'pericia';
 
@@ -74,6 +75,8 @@ function OcupacionalAgendarPage() {
   const search = Route.useSearch();
   const [service, setService] = useState<Service | undefined>(search.service);
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({
     company: '',
     cnpj: '',
@@ -87,12 +90,20 @@ function OcupacionalAgendarPage() {
 
   const selected = useMemo(() => SERVICES.find((s) => s.id === service), [service]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Pendência Codex: persistir em `occupational_intakes` + notificar equipe.
-    // Enquanto isso, capturamos localmente e abrimos Oliver para follow-up.
+    if (!service || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    const { error } = await supabase.rpc('submit_chrismed_occupational_intake' as never, {
+      p_request: { requestId: crypto.randomUUID(), service, ...form },
+    } as never);
+    setSubmitting(false);
+    if (error) {
+      setSubmitError('Não foi possível registrar a solicitação. Revise os dados e tente novamente.');
+      return;
+    }
     setSent(true);
-    if (typeof window !== 'undefined') openChrismedOliver();
   }
 
   return (
@@ -203,9 +214,10 @@ function OcupacionalAgendarPage() {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <button
                     type="submit"
-                    className="chrismed-sans chrismed-cta-glow inline-flex items-center justify-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] hover:bg-[var(--chrismed-amber-deep)] hover:text-white"
+                    disabled={submitting}
+                    className="chrismed-sans chrismed-cta-glow inline-flex items-center justify-center gap-3 bg-[var(--chrismed-amber)] px-8 py-4 text-[12px] uppercase tracking-[0.25em] text-[var(--chrismed-forest-deep)] shadow-[0_20px_60px_-20px_rgba(228,181,74,0.55)] hover:bg-[var(--chrismed-amber-deep)] hover:text-white disabled:cursor-wait disabled:opacity-60"
                   >
-                    Enviar solicitação <span aria-hidden>→</span>
+                    {submitting ? 'Registrando…' : 'Enviar solicitação'} <span aria-hidden>→</span>
                   </button>
                   <button
                     type="button"
@@ -215,6 +227,7 @@ function OcupacionalAgendarPage() {
                     Falar com Oliver antes
                   </button>
                 </div>
+                {submitError && <p role="alert" className="chrismed-sans text-sm text-red-200">{submitError}</p>}
                 <p className="chrismed-sans text-[11px] text-white/55">
                   Dados usados exclusivamente para retorno consultivo — em conformidade com a LGPD.
                 </p>

@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ChrismedOliverProvider } from "./ChrismedOliverProvider";
 import { ChrismedPreloader } from "./ChrismedPreloader";
 import { openChrismedOliver } from "./oliver-store";
-import chrismedHorizontal from "@/assets/chrismed-horizontal.png.asset.json";
 
 /**
  * Wordmark CHRISMED V4 — logo oficial CDN (upscale fiel da arte enviada
@@ -17,7 +16,7 @@ function ChrismedWordmark({ variant = "default" }: { variant?: "default" | "sm" 
   const height = variant === "sm" ? "h-8 md:h-9" : "h-10 md:h-12";
   return (
     <img
-      src={chrismedHorizontal.url}
+      src="/brand/chrismed/logo-horizontal.webp"
       alt="CHRISMED"
       className={cn(
         "w-auto object-contain select-none",
@@ -568,6 +567,7 @@ const FOOTER_LINKS_2: Array<{ label: string; to: string }> = [
   { label: "Área dos Profissionais da Saúde", to: "/alth" },
   { label: "Baixar o App", to: "/chrismed/app" },
   { label: "Perguntas frequentes", to: "/chrismed/faq" },
+  { label: "Termos de uso e atendimento", to: "/chrismed/termos" },
 ];
 
 export function ChrismedFooter() {
@@ -613,6 +613,11 @@ export function ChrismedFooter() {
               <li>
                 <Link to="/chrismed/privacidade" className="hover:text-[var(--chrismed-amber)]">
                   Privacidade · LGPD
+                </Link>
+              </li>
+              <li>
+                <Link to="/chrismed/termos" className="hover:text-[var(--chrismed-amber)]">
+                  Termos · Contratação
                 </Link>
               </li>
             </ul>
