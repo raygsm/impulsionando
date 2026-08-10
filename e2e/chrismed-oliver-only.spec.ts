@@ -31,6 +31,9 @@ for (const profile of [
     test('sem Impulsionito, apenas Oliver, sem duplicações', async ({ browser }) => {
       const context = await browser.newContext(profile.ctx);
       const page = await context.newPage();
+      await page.route("**/rest/v1/chrismed_service_offerings?**", (route) =>
+        route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+      );
       const reqs: string[] = [];
       const errors: string[] = [];
       page.on('request', (r) => reqs.push(r.url()));
