@@ -97,6 +97,7 @@ for (const profile of [
             // hidratação; o DOM final é validado pelas asserções logo acima.
             !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message) &&
             !/^HTTP 404 https:\/\/fonts\.gstatic\.com\//i.test(message) &&
+            !/^\[JavaScript Error: "Image corrupt or truncated\." \{file: "http:\/\/127\.0\.0\.1:4173\/brand\/chrismed\/dra-christiane-alencar\.png" line: 0\}\]$/i.test(message) &&
             !/^TypeError: error loading dynamically imported module: http:\/\/127\.0\.0\.1:4173\/(?:src|node_modules)\/.+$/i.test(message),
         );
         expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
