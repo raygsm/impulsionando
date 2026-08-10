@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/alth")({
   ssr: false,
+  beforeLoad: () => {
+    throw redirect({ to: "/auth", search: { mode: "signup" } });
+  },
   head: () => ({
     meta: [
       { title: "Área dos Profissionais da Saúde — CHRISMED" },
@@ -14,5 +16,4 @@ export const Route = createFileRoute("/alth")({
       { property: "og:url", content: "https://chrismed.impulsionando.com.br/alth" },
     ],
   }),
-  component: () => <ChrismedProfessionalAuth initialMode="signup" />,
 });

@@ -2,6 +2,7 @@ export const CHRISMED_HOST = "chrismed.impulsionando.com.br";
 
 const PUBLIC_ROUTE_ROOTS = new Set([
   "agendar",
+  "admin",
   "app",
   "checkout",
   "clinica",

@@ -25,7 +25,6 @@ import {
   type HealthProfession,
   validateProfessionalRegistration,
 } from "@/lib/chrismed-professionals";
-import logoAsset from "@/assets/chrismed-logo.webp.asset.json";
 
 type AuthMode = "login" | "signup";
 type CatalogRow = {
@@ -306,7 +305,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
         <div className="absolute inset-0 bg-gradient-to-t from-[#071c18] via-transparent to-[#071c18]/45" />
         <div className="relative z-10 flex items-center justify-between p-10 xl:p-12">
           <img
-            src={logoAsset.url}
+            src="/brand/chrismed/logo-horizontal.webp"
             alt="CHRISMED"
             className="h-16 w-auto brightness-0 invert xl:h-20"
           />
@@ -368,7 +367,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
         <div className="pointer-events-none absolute -bottom-32 -left-32 h-72 w-72 rounded-full bg-[#f6e8be]/50 blur-3xl" />
         <div className="flex items-center justify-between lg:justify-end">
           <img
-            src={logoAsset.url}
+            src="/brand/chrismed/logo-horizontal.webp"
             alt="CHRISMED"
             className="h-12 w-auto object-contain lg:hidden"
           />

@@ -172,9 +172,9 @@ const NAV: NavItem[] = [
     },
     children: [
       {
-        to: "/chrismed",
+        to: "/chrismed/internacional",
         labels: { pt: "Português (Brasil)", en: "Portuguese (Brazil)", es: "Portugués (Brasil)" },
-        desc: { pt: "Atendimento nacional", en: "Nationwide care", es: "Atención nacional" },
+        desc: { pt: "GMS para brasileiros em viagem", en: "GMS in Portuguese", es: "GMS en portugués" },
         icon: "br",
         setLang: "pt",
       },
@@ -218,7 +218,7 @@ const CTA = {
 
 const ACCESS_LINKS = [
   { to: "/chrismed/agendar", label: "Pacientes", detail: "Agendar", icon: CircleUserRound },
-  { to: "/chrismed/alth", label: "Profissionais", detail: "Área da saúde", icon: Stethoscope },
+  { to: "/auth", label: "Profissionais", detail: "Área da saúde", icon: Stethoscope },
   { to: "/chrismed/ocupacional", label: "Empresas", detail: "Saúde corporativa", icon: Building2 },
   {
     to: "/chrismed/eventos",
@@ -513,7 +513,7 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
               })}
             </div>
             <a
-              href="https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin"
+              href="/auth?persona=admin&next=%2Fchrismed%2Fadmin"
               className="group flex shrink-0 items-center gap-2 border-l border-white/15 bg-[var(--chrismed-forest)] px-5 text-white transition-colors hover:bg-[var(--chrismed-forest-soft)]"
             >
               <ShieldCheck
@@ -598,9 +598,10 @@ function MobileDrawer({
               Áreas de acesso
             </div>
             <Link to="/chrismed/agendar" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Pacientes · Agendar</Link>
-            <Link to="/alth" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Profissionais da Saúde</Link>
+            <Link to="/auth" search={{ mode: "signup" }} onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Profissionais da Saúde</Link>
             <Link to="/chrismed/ocupacional" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Empresas</Link>
-            <a href="https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Gestão CHRISMED</a>
+            <Link to="/chrismed/eventos" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Eventos</Link>
+            <a href="/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Gestão CHRISMED</a>
           </section>
           {NAV.filter((item) => !(isGroup(item) && item.key === "acessos")).map((item) =>
             isGroup(item) ? (
@@ -707,7 +708,7 @@ const FOOTER_LINKS_2: Array<{ label: string; to: string }> = [
   { label: "Exames e preparo", to: "/chrismed/exames" },
   { label: "Eventos", to: "/chrismed/eventos" },
   { label: "Empresa · Medicina ocupacional", to: "/chrismed/ocupacional" },
-  { label: "Área dos Profissionais da Saúde", to: "/alth" },
+  { label: "Área dos Profissionais da Saúde", to: "/auth" },
   { label: "Baixar o App", to: "/chrismed/app" },
   { label: "Perguntas frequentes", to: "/chrismed/faq" },
   { label: "Termos de uso e atendimento", to: "/chrismed/termos" },

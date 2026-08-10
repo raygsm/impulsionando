@@ -32,28 +32,26 @@ export function ChrismedPreloader() {
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[var(--chrismed-forest-deep)] transition-opacity duration-300"
       style={{ opacity: fading ? 0 : 1, pointerEvents: fading ? 'none' : 'auto' }}
     >
-      <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-[var(--chrismed-amber)]/70 bg-white p-2 shadow-[0_0_0_10px_rgba(228,181,74,0.08),0_24px_70px_rgba(0,0,0,0.45)] md:h-32 md:w-32">
-        <div className="absolute inset-[-8px] rounded-full border border-[var(--chrismed-amber)]/30 motion-safe:animate-pulse" />
-        <img
-          src="/brand/chrismed/brasao.jpg"
-          alt=""
-          className="h-full w-full select-none rounded-full object-cover"
-          draggable={false}
-        />
-      </div>
-      <div className="mt-6 h-[3px] w-40 overflow-hidden rounded-full bg-white/15">
-        <div className="chrismed-preloader-bar h-full w-1/3 rounded-full bg-[var(--chrismed-amber)]" />
+      <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-white shadow-[0_0_0_10px_rgba(228,181,74,0.08),0_24px_70px_rgba(0,0,0,0.45)] md:h-36 md:w-36">
+        <div className="chrismed-preloader-ring absolute inset-[-9px] rounded-full border-[3px] border-white/15 border-t-[var(--chrismed-amber)] border-r-[var(--chrismed-amber)]" />
+        <div className="h-[86%] w-[86%] overflow-hidden rounded-full bg-white">
+          <img
+            src="/brand/chrismed/brasao.jpg"
+            alt=""
+            className="h-[125%] w-full select-none object-cover object-top"
+            draggable={false}
+          />
+        </div>
       </div>
       <style>{`
-        @keyframes chrismedPreloaderSlide {
-          0% { transform: translateX(-120%); }
-          100% { transform: translateX(320%); }
+        @keyframes chrismedPreloaderSpin {
+          to { transform: rotate(360deg); }
         }
-        .chrismed-preloader-bar {
-          animation: chrismedPreloaderSlide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        .chrismed-preloader-ring {
+          animation: chrismedPreloaderSpin 1.05s linear infinite;
         }
         @media (prefers-reduced-motion: reduce) {
-          .chrismed-preloader-bar { animation: none; }
+          .chrismed-preloader-ring { animation: none; }
         }
       `}</style>
     </div>

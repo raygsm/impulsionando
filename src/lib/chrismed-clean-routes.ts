@@ -19,8 +19,12 @@ export function createChrismedBrowserHistory(): RouterHistory | undefined {
 
   return createBrowserHistory({
     parseLocation: (): HistoryLocation => {
-      const pathname = toChrismedInternalPathname(window.location.hostname, window.location.pathname);
       const search = window.location.search;
+      const explicitPortugueseGms =
+        window.location.pathname === "/" && new URLSearchParams(search).get("lang") === "pt";
+      const pathname = explicitPortugueseGms
+        ? "/chrismed/internacional"
+        : toChrismedInternalPathname(window.location.hostname, window.location.pathname);
       const hash = window.location.hash;
       return {
         href: `${pathname}${search}${hash}`,

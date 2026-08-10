@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { readFileSync } from 'node:fs';
 import { generateText } from 'ai';
 
 type OliverMessage = { role: 'user' | 'assistant'; content: string };
@@ -226,7 +227,14 @@ Segurança clínica + precisão administrativa + experiência humana + resoluç�
 export const askOliver = createServerFn({ method: 'POST' })
   .inputValidator(validate)
   .handler(async ({ data }) => {
-    const key = process.env.OPENAI_API_KEY;
+    let key = process.env.OPENAI_API_KEY?.trim();
+    if (!key) {
+      try {
+        key = readFileSync('/run/secrets/openai_api_key', 'utf8').trim();
+      } catch {
+        key = undefined;
+      }
+    }
     if (!key) {
       return {
         reply:
