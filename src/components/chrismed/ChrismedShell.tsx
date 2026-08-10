@@ -68,6 +68,7 @@ type FlagKey = keyof typeof FLAG_MAP;
 
 type NavLeaf = {
   to: string;
+  externalHref?: string;
   labels: Record<Lang, string>;
   desc?: Record<Lang, string>;
   icon?: FlagKey;
@@ -141,6 +142,33 @@ const NAV: NavItem[] = [
   },
   { to: "/chrismed/eventos", labels: { pt: "Eventos", en: "Events", es: "Eventos" } },
   { to: "/chrismed/contato", labels: { pt: "Contato", en: "Contact", es: "Contacto" } },
+  {
+    key: "acessos",
+    labels: { pt: "Áreas de acesso", en: "Access areas", es: "Áreas de acceso" },
+    children: [
+      {
+        to: "/chrismed/agendar",
+        labels: { pt: "Pacientes · Agendar", en: "Patients · Book", es: "Pacientes · Agendar" },
+        desc: { pt: "Consultas, horários e pagamento", en: "Appointments and payment", es: "Consultas y pago" },
+      },
+      {
+        to: "/alth",
+        labels: { pt: "Profissionais da Saúde", en: "Health professionals", es: "Profesionales de salud" },
+        desc: { pt: "Cadastro e acesso profissional", en: "Professional registration", es: "Registro profesional" },
+      },
+      {
+        to: "/chrismed/ocupacional",
+        labels: { pt: "Empresas", en: "Companies", es: "Empresas" },
+        desc: { pt: "Medicina ocupacional, ASO e perícia", en: "Occupational health", es: "Salud ocupacional" },
+      },
+      {
+        to: "/auth",
+        externalHref: "https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin",
+        labels: { pt: "Gestão CHRISMED", en: "CHRISMED management", es: "Gestión CHRISMED" },
+        desc: { pt: "Acesso administrativo protegido", en: "Protected admin access", es: "Acceso administrativo" },
+      },
+    ],
+  },
   {
     key: "gms",
     labels: {
@@ -284,7 +312,7 @@ function DesktopDropdown({
     >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
         aria-expanded={open}
         className={cn(
           "inline-flex items-center gap-1 whitespace-nowrap px-3 py-2 text-[13px] font-medium transition-colors",
@@ -308,7 +336,20 @@ function DesktopDropdown({
             {group.children.map((leaf) => {
               const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
               return (
-                <Link
+                leaf.externalHref ? (
+                  <a
+                    key={leaf.externalHref}
+                    href={leaf.externalHref}
+                    role="menuitem"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 border-b border-[var(--chrismed-sand)]/60 px-5 py-3 last:border-b-0 hover:bg-[var(--chrismed-bone)]"
+                  >
+                    <div className="min-w-0">
+                      <div className="chrismed-sans text-[13px] font-medium text-[var(--chrismed-forest-deep)]">{leaf.labels[lang]}</div>
+                      {leaf.desc && <div className="mt-0.5 text-[12px] leading-snug text-[var(--chrismed-mist)]">{leaf.desc[lang]}</div>}
+                    </div>
+                  </a>
+                ) : <Link
                   key={`${leaf.to}-${leaf.labels.pt}`}
                   to={leaf.to}
                   search={
@@ -492,7 +533,16 @@ function MobileDrawer({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Menu">
-          {NAV.map((item) =>
+          <section className="mb-5 rounded-lg border border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)] p-2" aria-labelledby="chrismed-mobile-access-title">
+            <div id="chrismed-mobile-access-title" className="chrismed-sans px-2 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
+              Áreas de acesso
+            </div>
+            <Link to="/chrismed/agendar" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Pacientes · Agendar</Link>
+            <Link to="/alth" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Profissionais da Saúde</Link>
+            <Link to="/chrismed/ocupacional" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Empresas</Link>
+            <a href="https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Gestão CHRISMED</a>
+          </section>
+          {NAV.filter((item) => !(isGroup(item) && item.key === "acessos")).map((item) =>
             isGroup(item) ? (
               <div key={item.key} className="mb-3">
                 <div className="chrismed-sans px-3 pb-1 text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">
@@ -501,7 +551,16 @@ function MobileDrawer({
                 {item.children.map((leaf) => {
                   const Flag = leaf.icon ? FLAG_MAP[leaf.icon] : null;
                   return (
-                    <Link
+                    leaf.externalHref ? (
+                      <a
+                        key={leaf.externalHref}
+                        href={leaf.externalHref}
+                        onClick={onClose}
+                        className="flex items-center gap-3 rounded-md px-3 py-2.5 text-[15px] text-[var(--chrismed-graphite)] hover:bg-[var(--chrismed-bone)]"
+                      >
+                        <span className="min-w-0 truncate">{leaf.labels[lang]}</span>
+                      </a>
+                    ) : <Link
                       key={`${leaf.to}-${leaf.labels.pt}`}
                       to={leaf.to}
                       search={

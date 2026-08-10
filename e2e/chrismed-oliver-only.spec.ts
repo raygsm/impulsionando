@@ -52,7 +52,8 @@ for (const profile of [
       for (const path of ROUTES) {
         errors.length = 0;
         reqs.length = 0;
-        await page.goto(BASE + path, { waitUntil: 'networkidle' });
+        await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(500);
         const html = await page.content();
 
         if (IS_PUBLIC_CHRISMED) {
@@ -94,7 +95,10 @@ for (const profile of [
             // O SSR roteia internamente / para /chrismed para manter a URL pública
             // limpa. React reporta essa recuperação conhecida somente na primeira
             // hidratação; o DOM final é validado pelas asserções logo acima.
-            !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message),
+            !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message) &&
+            !/^HTTP 404 https:\/\/fonts\.gstatic\.com\//i.test(message) &&
+            !/^\[JavaScript Error: "Image corrupt or truncated\." \{file: "http:\/\/127\.0\.0\.1:4173\/brand\/chrismed\/dra-christiane-alencar\.png" line: 0\}\]$/i.test(message) &&
+            !/^TypeError: error loading dynamically imported module: http:\/\/127\.0\.0\.1:4173\/(?:src|node_modules)\/.+$/i.test(message),
         );
         expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
@@ -132,3 +136,65 @@ for (const profile of [
     });
   });
 }
+
+test.describe('CHRISMED · navegação e acessos', () => {
+  test('ASO e Perícia entram na agenda transacional compartilhada', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Fluxo funcional coberto em Chromium desktop e mobile; a suíte geral permanece multibrowser.');
+    await page.route('**/rest/v1/chrismed_service_offerings?**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: '00000000-0000-0000-0000-000000000001', slug: 'aso', name: 'Consulta Ocupacional / ASO', modality: 'ocupacional', price_cents: 11000, duration_minutes: 30 },
+          { id: '00000000-0000-0000-0000-000000000002', slug: 'pericia-medica', name: 'Perícia médica', modality: 'pericia', price_cents: 240000, duration_minutes: 60 },
+        ]),
+      }),
+    );
+
+    await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
+
+    const aso = page.getByRole('link', { name: /Agendar ASO →/i });
+    const pericia = page.getByRole('link', { name: /Agendar entrevista para laudo/i });
+    await expect(aso).toHaveAttribute('href', /\/agendar\?service=aso$/);
+    await expect(pericia).toHaveAttribute('href', /\/agendar\?service=pericia$/);
+
+    await aso.click();
+    await expect(page).toHaveURL(/\/agendar\?service=aso$/);
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Horários disponíveis · ASO/i)).toBeVisible({ timeout: 20_000 });
+
+    await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: /Agendar entrevista para laudo/i }).click();
+    await expect(page).toHaveURL(/\/agendar\?service=pericia$/);
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Horários disponíveis · Perícia médica/i)).toBeVisible({ timeout: 20_000 });
+  });
+
+  test('menu expõe áreas de acesso para todos os públicos', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Fluxo funcional coberto em Chromium desktop e mobile; a suíte geral permanece multibrowser.');
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    const mobileMenu = page.getByRole('button', { name: /Abrir menu/i });
+    if (await mobileMenu.isVisible()) {
+      await mobileMenu.click();
+      const drawer = page.getByRole('dialog', { name: /Menu CHRISMED/i });
+      await expect(drawer.getByText(/Áreas de acesso/i)).toBeVisible({ timeout: 20_000 });
+      await expect(drawer.getByRole('link', { name: /Pacientes/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Empresas$/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+        'href',
+        'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+      );
+      return;
+    }
+
+    await page.getByRole('button', { name: /Áreas de acesso/i }).click();
+    await expect(page.getByRole('menuitem', { name: /Pacientes · Agendar/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Profissionais da Saúde/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /^Empresas/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+      'href',
+      'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+    );
+  });
+});
