@@ -11,6 +11,8 @@ const supabaseConfig = readFileSync('supabase/config.toml', 'utf8');
 const booking = readFileSync('src/routes/chrismed.agendar.tsx', 'utf8');
 const professionalAuth = readFileSync('src/components/chrismed/ChrismedProfessionalAuth.tsx', 'utf8');
 const server = readFileSync('src/server.ts', 'utf8');
+const cleanPaths = readFileSync('src/lib/chrismed-clean-paths.ts', 'utf8');
+const cleanRoutes = readFileSync('src/lib/chrismed-clean-routes.ts', 'utf8');
 const setup = readFileSync('src/routes/_authenticated/chrismed.setup.tsx', 'utf8');
 const occupationalBooking = readFileSync('src/routes/chrismed.ocupacional.agendar.tsx', 'utf8');
 
@@ -61,7 +63,9 @@ describe('CHRISMED secure booking gate', () => {
   });
 
   it('restricts the CHRISMED healthcheck to authorized management users', () => {
-    expect(supabaseConfig).toContain('[functions.chrismed-healthcheck]\nverify_jwt = true');
+    expect(supabaseConfig.replace(/\r\n/g, '\n')).toContain(
+      '[functions.chrismed-healthcheck]\nverify_jwt = true',
+    );
     expect(healthcheck).toContain('sb.auth.getUser(accessJwt)');
     expect(healthcheck).toContain('.in("role", ["admin", "gestor"])');
     expect(healthcheck).toContain('status: 401');
@@ -90,10 +94,13 @@ describe('CHRISMED secure booking gate', () => {
   });
 
   it('serves clean CHRISMED subdomain paths through internal tenant routes', () => {
-    expect(server).toContain('`/chrismed${url.pathname}`');
+    expect(server).toContain('toChrismedInternalPathname(url.hostname, url.pathname)');
     expect(server).toContain('canonicalTenantHostRedirect({');
     expect(server).toContain('Response.redirect(canonicalTenantUrl, 308)');
-    expect(server).toContain('/alth(?:\\/|$)');
+    expect(cleanPaths).toContain('PUBLIC_ROUTE_ROOTS');
+    expect(cleanPaths).not.toContain('"alth"');
+    expect(cleanRoutes).toContain('createBrowserHistory({');
+    expect(cleanRoutes).toContain('toChrismedPublicPathname');
   });
 
   it('routes patient and technical communication through tenant-editable settings', () => {

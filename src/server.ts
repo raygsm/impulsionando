@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
 import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
 
 type ServerEntry = {
@@ -106,12 +107,9 @@ export default {
       const handler = await getServerEntry();
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
-      const isChrismedHost = url.hostname.toLowerCase() === "chrismed.impulsionando.com.br";
-      const globalPath = /^(\/_build|\/assets|\/api|\/auth(?:\/|$)|\/alth(?:\/|$)|\/dashboard(?:\/|$)|\/agenda(?:\/|$)|\/favicon|\/robots\.txt$|\/sitemap\.xml$)/.test(url.pathname);
-      if (isChrismedHost && !globalPath) {
-        url.pathname = url.pathname === "/" || url.pathname === ""
-          ? "/chrismed"
-          : `/chrismed${url.pathname}`;
+      const internalChrismedPathname = toChrismedInternalPathname(url.hostname, url.pathname);
+      if (internalChrismedPathname !== url.pathname) {
+        url.pathname = internalChrismedPathname;
         routedRequest = new Request(url, request);
       } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;

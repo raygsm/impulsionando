@@ -12,7 +12,8 @@ import { test, expect } from '@playwright/test';
  */
 
 const BASE = process.env.CHRISMED_BASE_URL || process.env.E2E_BASE_URL || 'http://127.0.0.1:4173/chrismed';
-const ROUTES = ['/', '/agendar', '/consultorio', '/faq'];
+const IS_PUBLIC_CHRISMED = Boolean(process.env.CHRISMED_BASE_URL);
+const ROUTES = ['/', '/agendar', '/consultorio', '/faq', '/eventos', '/internacional'];
 
 function assertNoImpulsionito(html: string, requests: string[]) {
   const bad = /impulsionito(?!\.png)/i;
@@ -53,6 +54,14 @@ for (const profile of [
         reqs.length = 0;
         await page.goto(BASE + path, { waitUntil: 'networkidle' });
         const html = await page.content();
+
+        if (IS_PUBLIC_CHRISMED) {
+          expect(new URL(page.url()).pathname, `URL pública deve permanecer limpa em ${path}`).toBe(path);
+          expect(
+            new URL(page.url()).pathname,
+            `URL pública não pode repetir /chrismed em ${path}`,
+          ).not.toContain('/chrismed');
+        }
 
         assertNoImpulsionito(html, reqs);
 
