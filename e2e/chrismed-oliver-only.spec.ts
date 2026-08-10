@@ -155,16 +155,32 @@ test.describe('CHRISMED · navegação e acessos', () => {
 
     await aso.click();
     await expect(page).toHaveURL(/\/agendar\?service=aso$/);
-    await expect(page.getByText(/ASO|Medicina Ocupacional/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible();
+    await expect(page.getByText(/Horários disponíveis · ASO/i)).toBeVisible();
 
     await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: /Agendar entrevista para laudo/i }).click();
     await expect(page).toHaveURL(/\/agendar\?service=pericia$/);
-    await expect(page.getByText(/Perícia médica/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible();
+    await expect(page.getByText(/Horários disponíveis · Perícia médica/i)).toBeVisible();
   });
 
   test('menu expõe áreas de acesso para todos os públicos', async ({ page }) => {
     await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    const mobileMenu = page.getByRole('button', { name: /Abrir menu/i });
+    if (await mobileMenu.isVisible()) {
+      await mobileMenu.click();
+      const drawer = page.getByRole('dialog', { name: /Menu CHRISMED/i });
+      await expect(drawer.getByRole('link', { name: /Pacientes · Agendar/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Empresas/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+        'href',
+        'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+      );
+      return;
+    }
+
     await page.getByRole('button', { name: /Áreas de acesso/i }).click();
     await expect(page.getByRole('menuitem', { name: /Pacientes · Agendar/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /Profissionais da Saúde/i })).toBeVisible();
