@@ -71,8 +71,70 @@ jobs:
 
       - name: Apply migrations
         if: ${{ !inputs.dry_run }}
+        shell: bash
         run: |
-          supabase db push --include-all --db-url "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          set -euo pipefail
+          db_url="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          migrations=(
+            "20260808210000_chrismed_mercado_pago_current_core"
+            "20260808213000_chrismed_secure_booking"
+            "20260808223000_chrismed_communication_settings"
+            "20260809111500_fix_current_core_staff_functions"
+            "20260809124500_chrismed_offerings_and_occupational_intake"
+          )
+
+          args=(-X --no-psqlrc --single-transaction --set ON_ERROR_STOP=1 "$db_url")
+          for migration in "${migrations[@]}"; do
+            args+=(--file "supabase/migrations/${migration}.sql")
+          done
+
+          args+=(--command "
+            insert into supabase_migrations.schema_migrations(version, name, statements)
+            values
+              ('20260808210000', 'chrismed_mercado_pago_current_core', array[]::text[]),
+              ('20260808213000', 'chrismed_secure_booking', array[]::text[]),
+              ('20260808223000', 'chrismed_communication_settings', array[]::text[]),
+              ('20260809111500', 'fix_current_core_staff_functions', array[]::text[]),
+              ('20260809124500', 'chrismed_offerings_and_occupational_intake', array[]::text[])
+            on conflict (version) do nothing;
+          ")
+
+          psql "${args[@]}"
+
+      - name: Post-apply CHRISMED gate
+        if: ${{ !inputs.dry_run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          db_url="postgresql://${PGUSER}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+          psql -X --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align "$db_url" <<'SQL'
+          do $$
+          begin
+            if to_regclass('public.chrismed_service_offerings') is null then
+              raise exception 'chrismed_service_offerings ausente';
+            end if;
+            if to_regclass('public.chrismed_occupational_intake_requests') is null then
+              raise exception 'chrismed_occupational_intake_requests ausente';
+            end if;
+            if to_regprocedure('public.is_super_admin(uuid)') is null then
+              raise exception 'is_super_admin(uuid) ausente';
+            end if;
+            if to_regprocedure('public.is_impulsionando_staff(uuid)') is null then
+              raise exception 'is_impulsionando_staff(uuid) ausente';
+            end if;
+          end
+          $$;
+
+          select version
+          from supabase_migrations.schema_migrations
+          where version in (
+            '20260808210000', '20260808213000', '20260808223000',
+            '20260809111500', '20260809124500'
+          )
+          order by version;
+          SQL
+
+          supabase db lint --db-url "$db_url" --level error --fail-on error
 
       - name: Dry-run summary
         if: ${{ inputs.dry_run }}
