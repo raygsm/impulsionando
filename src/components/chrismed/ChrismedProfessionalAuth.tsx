@@ -26,7 +26,6 @@ import {
   validateProfessionalRegistration,
 } from "@/lib/chrismed-professionals";
 import logoAsset from "@/assets/chrismed-logo.webp.asset.json";
-import portraitAsset from "@/assets/chrismed/dra-cristiane-portrait.jpg.asset.json";
 
 type AuthMode = "login" | "signup";
 type CatalogRow = {
@@ -79,7 +78,9 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
         setTechnicalSupportEmail(row.technical_support_email);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -217,7 +218,8 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
     event.preventDefault();
     const validation = validateProfessionalRegistration({ profession, councilNumber, primaryArea });
     if (validation) return toast.error(validation);
-    if (!acceptedTerms) return toast.error("Aceite os termos e a política de privacidade para continuar.");
+    if (!acceptedTerms)
+      return toast.error("Aceite os termos e a política de privacidade para continuar.");
     saveDraft();
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
@@ -293,21 +295,43 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   }
 
   return (
-    <main className="min-h-screen bg-[#f7fbfb] lg:grid lg:grid-cols-[1.08fr_0.92fr]">
-      <section className="relative hidden min-h-screen overflow-hidden border-r border-[#0b918d]/20 bg-gradient-to-br from-white via-[#eef8f7] to-[#dcefed] p-10 lg:flex lg:flex-col">
-        <img src={logoAsset.url} alt="CHRISMED" className="h-20 w-auto self-start object-contain" />
-        <div className="relative z-10 mt-9 max-w-xl">
-          <h1 className="text-4xl font-black leading-tight tracking-tight text-[#18252c] xl:text-5xl">
-            <span className="text-[#088e8a]">A saúde conecta.</span>
+    <main className="min-h-screen bg-[#f3f1ed] lg:grid lg:grid-cols-[1.04fr_0.96fr]">
+      <section className="relative hidden min-h-screen overflow-hidden bg-[#071c18] lg:flex lg:flex-col">
+        <img
+          src="/brand/chrismed/dra-christiane-alencar.png"
+          alt="Dra. Christiane Alencar, diretora técnica da CHRISMED"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-75"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071c18]/96 via-[#071c18]/72 to-[#071c18]/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071c18] via-transparent to-[#071c18]/45" />
+        <div className="relative z-10 flex items-center justify-between p-10 xl:p-12">
+          <img
+            src={logoAsset.url}
+            alt="CHRISMED"
+            className="h-16 w-auto brightness-0 invert xl:h-20"
+          />
+          <a
+            href="/chrismed"
+            className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-[#e4b54a] hover:bg-[#e4b54a] hover:text-[#071c18]"
+          >
+            Voltar ao site
+          </a>
+        </div>
+        <div className="relative z-10 mt-auto max-w-2xl p-10 pb-12 xl:p-12 xl:pb-16">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#e4b54a]/45 bg-[#071c18]/55 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#f6e8be] backdrop-blur">
+            <ShieldCheck className="h-4 w-4" /> Ambiente seguro CHRISMED
+          </div>
+          <h1 className="text-4xl font-black leading-tight tracking-tight text-white xl:text-5xl 2xl:text-6xl">
+            <span className="text-[#e4b54a]">A saúde conecta.</span>
             <br />A CHRISMED organiza.
             <br />
             Você transforma vidas.
           </h1>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-[#516067]">
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-white/78">
             Uma plataforma completa para profissionais da saúde gerenciarem agendas, atendimentos e
             pacientes com segurança e praticidade.
           </p>
-          <div className="mt-7 grid gap-4 text-sm">
+          <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
             {[
               [CalendarDays, "Agenda inteligente", "Disponibilidade, pausas e múltiplos locais."],
               [
@@ -322,30 +346,26 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                 "Dados protegidos e práticas alinhadas à LGPD.",
               ],
             ].map(([Icon, title, description]) => (
-              <div key={String(title)} className="flex items-start gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#d9f1ef] text-[#078d89]">
+              <div
+                key={String(title)}
+                className="flex items-start gap-3 rounded-xl border border-white/12 bg-white/[0.07] p-3 backdrop-blur-sm"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#e4b54a] text-[#071c18]">
                   <Icon className="h-5 w-5" />
                 </span>
                 <span>
-                  <strong className="block text-[#087e7a]">{String(title)}</strong>
-                  <span className="text-[#526169]">{String(description)}</span>
+                  <strong className="block text-white">{String(title)}</strong>
+                  <span className="text-xs leading-snug text-white/60">{String(description)}</span>
                 </span>
               </div>
             ))}
           </div>
         </div>
-        <img
-          src={portraitAsset.url}
-          alt="Profissional da saúde CHRISMED"
-          className="pointer-events-none absolute bottom-0 right-[-4%] h-[67%] max-w-[58%] object-contain object-bottom drop-shadow-2xl"
-        />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#007b79] via-[#007b79]/70 to-transparent" />
-        <p className="relative z-10 mt-auto text-xs font-medium tracking-wide text-white">
-          CHRISMED · REDE MULTIPROFISSIONAL DE SAÚDE
-        </p>
       </section>
 
-      <section className="flex min-h-screen flex-col bg-white px-5 py-6 sm:px-10 lg:px-14 xl:px-20">
+      <section className="relative flex min-h-screen flex-col overflow-hidden bg-[#fdfcfb] px-5 py-6 sm:px-10 lg:px-14 xl:px-20">
+        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#e7edeb] blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 h-72 w-72 rounded-full bg-[#f6e8be]/50 blur-3xl" />
         <div className="flex items-center justify-between lg:justify-end">
           <img
             src={logoAsset.url}
@@ -354,18 +374,21 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
           />
           <a
             href={`mailto:${technicalSupportEmail}`}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#087f7b]"
+            className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"
           >
             <HelpCircle className="h-4 w-4" />
             Precisa de ajuda?
           </a>
         </div>
 
-        <div className="mx-auto my-auto w-full max-w-xl py-10">
-          <h2 className="text-3xl font-bold tracking-tight text-[#087f7b]">
+        <div className="relative z-10 mx-auto my-auto w-full max-w-xl rounded-3xl border border-[#d9d3cb]/80 bg-white/85 p-6 shadow-[0_24px_70px_rgba(7,28,24,0.10)] backdrop-blur sm:p-9">
+          <div className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#b8892b]">
+            <LockKeyhole className="h-4 w-4" /> Área protegida
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-[#0b2a24]">
             {mode === "login" ? "Acesse sua conta" : "Área dos Profissionais da Saúde"}
           </h2>
-          <p className="mt-2 text-[#59656b]">
+          <p className="mt-2 text-[#52605c]">
             {mode === "login"
               ? "Use seu e-mail para continuar."
               : "Você é um profissional da saúde? Crie sua conta para acessar sua área exclusiva e configurar sua agenda de atendimento."}
@@ -379,7 +402,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
             }}
             className="mt-7"
           >
-            <TabsList className="grid h-12 w-full grid-cols-2 bg-[#f4f7f7]">
+            <TabsList className="grid h-12 w-full grid-cols-2 rounded-xl bg-[#e7edeb] p-1">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar conta</TabsTrigger>
             </TabsList>
@@ -436,7 +459,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-12 w-full bg-[#078f8b] hover:bg-[#067b78]"
+                  className="h-12 w-full rounded-xl bg-[#0b2a24] font-semibold text-white shadow-lg shadow-[#0b2a24]/15 transition hover:-translate-y-0.5 hover:bg-[#12403a]"
                 >
                   {loading ? "Entrando…" : "Entrar"}
                 </Button>
@@ -653,7 +676,25 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
                       required
                     />
                     <span>
-                      Li e aceito os <a className="font-semibold text-[#087f7b] underline" href="/chrismed/termos" target="_blank" rel="noreferrer">Termos CHRISMED</a> e a <a className="font-semibold text-[#087f7b] underline" href="/chrismed/privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>.
+                      Li e aceito os{" "}
+                      <a
+                        className="font-semibold text-[#087f7b] underline"
+                        href="/chrismed/termos"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Termos CHRISMED
+                      </a>{" "}
+                      e a{" "}
+                      <a
+                        className="font-semibold text-[#087f7b] underline"
+                        href="/chrismed/privacidade"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Política de Privacidade
+                      </a>
+                      .
                     </span>
                   </label>
                 </form>

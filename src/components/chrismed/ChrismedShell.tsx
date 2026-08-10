@@ -1,5 +1,17 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Globe, Menu, X, CalendarCheck, ChevronDown, Phone } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  Building2,
+  CalendarCheck,
+  ChevronDown,
+  CircleUserRound,
+  Globe,
+  Menu,
+  Phone,
+  ShieldCheck,
+  Stethoscope,
+  X,
+} from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChrismedOliverProvider } from "./ChrismedOliverProvider";
@@ -12,8 +24,17 @@ import { openChrismedOliver } from "./oliver-store";
  * institucional em header, drawer e footer. A altura escala responsivo
  * para respeitar o shell mobile/desktop.
  */
-function ChrismedWordmark({ variant = "default" }: { variant?: "default" | "sm" | "onDark" }) {
-  const height = variant === "sm" ? "h-8 md:h-9" : "h-10 md:h-12";
+function ChrismedWordmark({
+  variant = "default",
+}: {
+  variant?: "default" | "sm" | "onDark" | "header";
+}) {
+  const height =
+    variant === "sm"
+      ? "h-8 md:h-9"
+      : variant === "header"
+        ? "h-11 md:h-12 xl:h-[4.7rem]"
+        : "h-10 md:h-12";
   return (
     <img
       src="/brand/chrismed/logo-horizontal.webp"
@@ -193,6 +214,18 @@ const CTA = {
   book: { pt: "Agendar", en: "Book", es: "Agendar" },
 } as const;
 
+const ACCESS_LINKS = [
+  { to: "/chrismed/agendar", label: "Pacientes", detail: "Agendar", icon: CircleUserRound },
+  { to: "/chrismed/alth", label: "Profissionais", detail: "Área da saúde", icon: Stethoscope },
+  { to: "/chrismed/ocupacional", label: "Empresas", detail: "Saúde corporativa", icon: Building2 },
+  {
+    to: "/chrismed/eventos",
+    label: "Eventos",
+    detail: "Gestão e operação",
+    icon: BriefcaseBusiness,
+  },
+] as const;
+
 const ChrismedShellContext = createContext(false);
 
 export function useLang(): Lang {
@@ -263,7 +296,7 @@ function DesktopDropdown({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         className={cn(
-          "inline-flex items-center gap-1 whitespace-nowrap px-3 py-2 text-[13px] font-medium transition-colors",
+          "group relative inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 hover:bg-[var(--chrismed-forest-mist)]",
           active
             ? "text-[var(--chrismed-forest-deep)]"
             : "text-[var(--chrismed-graphite)] hover:text-[var(--chrismed-forest-deep)]",
@@ -324,7 +357,7 @@ function DesktopLeaf({ leaf, lang, pathname }: { leaf: NavLeaf; lang: Lang; path
     <Link
       to={leaf.to}
       className={cn(
-        "whitespace-nowrap px-3 py-2 text-[13px] font-medium transition-colors",
+        "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-[var(--chrismed-amber-deep)] after:transition-transform hover:bg-[var(--chrismed-forest-mist)] hover:after:scale-x-100",
         active
           ? "text-[var(--chrismed-forest-deep)]"
           : "text-[var(--chrismed-graphite)] hover:text-[var(--chrismed-forest-deep)]",
@@ -377,33 +410,87 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
     <header
       data-chrismed-header
       style={{ position: "fixed", top: 0, left: 0, right: 0, width: "100vw", zIndex: 80 }}
-      className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/92 backdrop-blur"
+      className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)]/96 shadow-[0_12px_34px_rgba(7,28,24,0.10)] backdrop-blur-xl"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 md:px-6 md:py-4 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)]">
+      <div className="mx-auto grid max-w-[92rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 md:px-6 xl:grid-cols-[16.5rem_minmax(0,1fr)] xl:gap-0 xl:py-0">
         {/* Logo */}
         <Link
           to="/chrismed"
-          className="min-w-0 shrink-0 truncate"
+          className="group min-w-0 shrink-0 truncate xl:flex xl:h-[7.25rem] xl:items-center xl:border-r xl:border-[var(--chrismed-sand)] xl:pr-8"
           aria-label="CHRISMED — Dra. Cristiane Alencar"
         >
-          <ChrismedWordmark />
+          <span className="transition-transform duration-500 ease-out group-hover:scale-[1.025]">
+            <ChrismedWordmark variant="header" />
+          </span>
         </Link>
 
         {/* Nav desktop — só a partir de lg (≥1024px) */}
-        <nav className="hidden justify-center lg:flex" aria-label="Navegação principal">
-          <div className="flex items-center gap-1">
-            {NAV.map((item) =>
-              isGroup(item) ? (
-                <DesktopDropdown key={item.key} group={item} lang={lang} pathname={pathname} />
-              ) : (
-                <DesktopLeaf key={item.to} leaf={item} lang={lang} pathname={pathname} />
-              ),
-            )}
-          </div>
-        </nav>
+        <div className="hidden min-w-0 xl:block">
+          <nav
+            className="flex h-[4.05rem] items-stretch justify-between gap-3 border-b border-[var(--chrismed-sand)] pl-7"
+            aria-label="Navegação principal"
+          >
+            <div className="flex min-w-0 items-center gap-0.5">
+              {NAV.map((item) =>
+                isGroup(item) ? (
+                  <DesktopDropdown key={item.key} group={item} lang={lang} pathname={pathname} />
+                ) : (
+                  <DesktopLeaf key={item.to} leaf={item} lang={lang} pathname={pathname} />
+                ),
+              )}
+            </div>
+          </nav>
+
+          <nav
+            className="flex h-[3.2rem] items-stretch bg-[var(--chrismed-forest-deep)] pl-7"
+            aria-label="Áreas de acesso CHRISMED"
+          >
+            <div className="flex min-w-0 flex-1 items-stretch">
+              {ACCESS_LINKS.map(({ to, label, detail, icon: Icon }) => {
+                const active = pathname === to || pathname.startsWith(`${to}/`);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={cn(
+                      "group relative flex min-w-0 flex-1 items-center justify-center gap-2 border-l border-white/10 px-3 text-white transition-all duration-300 first:border-l-0 hover:bg-white/10",
+                      active && "bg-white/12",
+                    )}
+                  >
+                    <Icon
+                      className="h-4 w-4 shrink-0 text-[var(--chrismed-amber)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-110"
+                      aria-hidden
+                    />
+                    <span className="min-w-0 leading-tight">
+                      <strong className="block truncate text-[12px] font-semibold tracking-wide">
+                        {label}
+                      </strong>
+                      <span className="hidden truncate text-[9px] uppercase tracking-[0.16em] text-white/55 2xl:block">
+                        {detail}
+                      </span>
+                    </span>
+                    <span className="absolute inset-x-3 bottom-0 h-0.5 origin-left scale-x-0 bg-[var(--chrismed-amber)] transition-transform duration-300 group-hover:scale-x-100" />
+                  </Link>
+                );
+              })}
+            </div>
+            <a
+              href="https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin"
+              className="group flex shrink-0 items-center gap-2 border-l border-white/15 bg-[var(--chrismed-forest)] px-5 text-white transition-colors hover:bg-[var(--chrismed-forest-soft)]"
+            >
+              <ShieldCheck
+                className="h-4 w-4 text-[var(--chrismed-amber)] transition-transform duration-300 group-hover:scale-110"
+                aria-hidden
+              />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.13em]">
+                Gestão CHRISMED
+              </span>
+            </a>
+          </nav>
+        </div>
 
         {/* Ações */}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 xl:hidden">
           {/* Barra de idiomas removida por decisão editorial — CHRISMED opera em PT no header. */}
           <Link
             to="/chrismed/agendar"
@@ -415,7 +502,7 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)] lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-[var(--chrismed-forest-deep)] transition-colors hover:bg-[var(--chrismed-bone)]"
             aria-label="Abrir menu"
             aria-expanded={open}
             aria-controls="chrismed-mobile-drawer"
@@ -443,7 +530,7 @@ function MobileDrawer({
   return (
     <div
       id="chrismed-mobile-drawer"
-      className="fixed inset-0 z-[60] lg:hidden"
+      className="fixed inset-0 z-[60] xl:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Menu CHRISMED"
@@ -701,7 +788,7 @@ export function ChrismedShell({
           <ChrismedHeader variant={variant} />
           <main
             id="chrismed-main"
-            className="mx-auto w-full max-w-7xl pt-16 pb-28 md:pt-20 md:pb-24"
+            className="mx-auto w-full max-w-7xl pt-16 pb-28 md:pt-20 md:pb-24 xl:pt-[7.25rem]"
           >
             {children}
           </main>
