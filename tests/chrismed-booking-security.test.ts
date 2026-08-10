@@ -104,7 +104,9 @@ describe('CHRISMED secure booking gate', () => {
     expect(communicationSettings).toContain('get_chrismed_contact_emails');
     expect(webhook).toContain("rpc('get_chrismed_contact_emails')");
     expect(webhook).toContain('from_email: patientChannelEmail');
-    expect(setup).toContain("settingKeys={['comms.patient_email', 'comms.technical_support_email']}");
+    expect(setup).toContain('<ClientSettingsPanel');
+    expect(setup).toContain('companyId={CHRISMED_COMPANY_ID}');
+    expect(setup).not.toContain('settingKeys=');
     expect(professionalAuth).toContain('technicalSupportEmail');
     expect(professionalAuth).not.toContain('atendimento@chrismed.com.br');
   });
