@@ -1,6 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Globe, Menu, X, CalendarCheck, ChevronDown, Phone } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
+import { isOfficialChrismedHost, toChrismedPublicPathname } from "@/lib/chrismed-clean-paths";
 import { cn } from "@/lib/utils";
 import { ChrismedOliverProvider } from "./ChrismedOliverProvider";
 import { ChrismedPreloader } from "./ChrismedPreloader";
@@ -194,6 +195,29 @@ const CTA = {
 } as const;
 
 const ChrismedShellContext = createContext(false);
+
+function ChrismedCleanLinkBridge() {
+  useEffect(() => {
+    if (!isOfficialChrismedHost(window.location.hostname)) return;
+
+    const cleanLinks = () => {
+      document.querySelectorAll<HTMLAnchorElement>('a[href^="/chrismed"]').forEach((anchor) => {
+        const url = new URL(anchor.href, window.location.origin);
+        const pathname = toChrismedPublicPathname(window.location.hostname, url.pathname);
+        if (pathname !== url.pathname) {
+          anchor.setAttribute("href", `${pathname}${url.search}${url.hash}`);
+        }
+      });
+    };
+
+    cleanLinks();
+    const observer = new MutationObserver(cleanLinks);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return null;
+}
 
 export function useLang(): Lang {
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
@@ -686,6 +710,7 @@ export function ChrismedShell({
 
   return (
     <ChrismedShellContext.Provider value>
+      <ChrismedCleanLinkBridge />
       <div
         data-tenant="chrismed"
         className="chrismed-brand min-h-dvh bg-[var(--chrismed-forest-deep)] text-[var(--chrismed-ivory)]"

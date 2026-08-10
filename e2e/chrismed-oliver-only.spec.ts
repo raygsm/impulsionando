@@ -61,6 +61,7 @@ for (const profile of [
             new URL(page.url()).pathname,
             `URL pública não pode repetir /chrismed em ${path}`,
           ).not.toContain('/chrismed');
+          await expect(page.locator('a[href^="/chrismed"]')).toHaveCount(0);
         }
 
         assertNoImpulsionito(html, reqs);

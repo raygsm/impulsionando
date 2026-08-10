@@ -10,6 +10,9 @@ describe("CHRISMED clean route mapping", () => {
     expect(
       toChrismedInternalPathname("chrismed.impulsionando.com.br", "/ocupacional/agendar"),
     ).toBe("/chrismed/ocupacional/agendar");
+    expect(toChrismedInternalPathname("chrismed.impulsionando.com.br", "/termos")).toBe(
+      "/chrismed/termos",
+    );
   });
 
   it("keeps auth, APIs and management routes outside the public mapping", () => {
