@@ -164,33 +164,6 @@ const NAV: NavItem[] = [
   { to: "/chrismed/eventos", labels: { pt: "Eventos", en: "Events", es: "Eventos" } },
   { to: "/chrismed/contato", labels: { pt: "Contato", en: "Contact", es: "Contacto" } },
   {
-    key: "acessos",
-    labels: { pt: "Áreas de acesso", en: "Access areas", es: "Áreas de acceso" },
-    children: [
-      {
-        to: "/chrismed/agendar",
-        labels: { pt: "Pacientes · Agendar", en: "Patients · Book", es: "Pacientes · Agendar" },
-        desc: { pt: "Consultas, horários e pagamento", en: "Appointments and payment", es: "Consultas y pago" },
-      },
-      {
-        to: "/alth",
-        labels: { pt: "Profissionais da Saúde", en: "Health professionals", es: "Profesionales de salud" },
-        desc: { pt: "Cadastro e acesso profissional", en: "Professional registration", es: "Registro profesional" },
-      },
-      {
-        to: "/chrismed/ocupacional",
-        labels: { pt: "Empresas", en: "Companies", es: "Empresas" },
-        desc: { pt: "Medicina ocupacional, ASO e perícia", en: "Occupational health", es: "Salud ocupacional" },
-      },
-      {
-        to: "/auth",
-        externalHref: "https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin",
-        labels: { pt: "Gestão CHRISMED", en: "CHRISMED management", es: "Gestión CHRISMED" },
-        desc: { pt: "Acesso administrativo protegido", en: "Protected admin access", es: "Acceso administrativo" },
-      },
-    ],
-  },
-  {
     key: "gms",
     labels: {
       pt: "GMS · Global Medical Support",
