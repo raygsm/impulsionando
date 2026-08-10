@@ -600,7 +600,7 @@ function MobileDrawer({
             <Link to="/chrismed/agendar" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Pacientes · Agendar</Link>
             <Link to="/auth" search={{ mode: "signup" }} onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Profissionais da Saúde</Link>
             <Link to="/chrismed/ocupacional" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Empresas</Link>
-            <Link to="/chrismed/eventos" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Eventos</Link>
+            <Link to="/chrismed/eventos" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Área de Eventos</Link>
             <a href="/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="block rounded-md px-2 py-2 text-[14px] font-medium text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-ivory)]">Gestão CHRISMED</a>
           </section>
           {NAV.filter((item) => !(isGroup(item) && item.key === "acessos")).map((item) =>

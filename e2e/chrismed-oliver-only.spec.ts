@@ -183,10 +183,10 @@ test.describe('CHRISMED · navegação e acessos', () => {
       await expect(drawer.getByRole('link', { name: /Pacientes/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /^Empresas$/i })).toBeVisible();
-      await expect(drawer.getByRole('link', { name: /^Eventos$/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Área de Eventos$/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
         'href',
-        'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+        '/auth?persona=admin&next=%2Fchrismed%2Fadmin',
       );
       return;
     }
@@ -198,7 +198,7 @@ test.describe('CHRISMED · navegação e acessos', () => {
     await expect(accessNav.getByRole('link', { name: /^Eventos/i })).toBeVisible();
     await expect(accessNav.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
       'href',
-      'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+      '/auth?persona=admin&next=%2Fchrismed%2Fadmin',
     );
   });
 });

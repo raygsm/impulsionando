@@ -38,7 +38,9 @@ test.describe("CHRISMED — cabeçalho fixo em todas as rotas", () => {
       await page.evaluate(() => window.scrollTo(0, 1400));
       await page.waitForTimeout(100);
 
+      await expect(header).toBeVisible({ timeout: 15_000 });
       const box = await header.boundingBox();
+      expect(box).not.toBeNull();
       expect(box?.y).toBe(0);
       await expect(header).toHaveCSS("position", "fixed");
     });
