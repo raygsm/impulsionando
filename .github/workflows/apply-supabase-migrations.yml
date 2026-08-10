@@ -8,6 +8,11 @@ on:
         required: true
         default: true
         type: boolean
+      verify_only:
+        description: "Executar somente o pos-gate, sem reaplicar SQL"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   apply:
@@ -57,7 +62,7 @@ jobs:
             --command "select current_database(), current_user;"
 
       - name: Apply migrations
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && !inputs.verify_only }}
         shell: bash
         run: |
           set -euo pipefail
@@ -100,8 +105,8 @@ jobs:
             if to_regclass('public.chrismed_service_offerings') is null then
               raise exception 'chrismed_service_offerings ausente';
             end if;
-            if to_regclass('public.chrismed_occupational_intake_requests') is null then
-              raise exception 'chrismed_occupational_intake_requests ausente';
+            if to_regclass('public.chrismed_occupational_intakes') is null then
+              raise exception 'chrismed_occupational_intakes ausente';
             end if;
             if to_regprocedure('public.is_super_admin(uuid)') is null then
               raise exception 'is_super_admin(uuid) ausente';
