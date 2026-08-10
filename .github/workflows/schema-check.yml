@@ -59,7 +59,7 @@ jobs:
             pg_dump --schema=public --schema=private --schema-only --clean --if-exists \
               --no-owner --no-privileges \
             | sed -e '/^SET transaction_timeout = 0;$/d' \
-                  -e '/^CREATE SCHEMA public;$/a CREATE EXTENSION IF NOT EXISTS btree_gist;' \
+                  -e '/^CREATE SCHEMA public;$/a CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;' \
             > /tmp/chrismed-production-schema.sql
           # PostgreSQL 17 emits this session-only setting; the disposable
           # Supabase 15 image does not expose it. It is not a schema object.
