@@ -153,10 +153,12 @@ function ChrismedOcupacionalPage() {
             {t.hero.lead}
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <Link to="/chrismed/agendar" search={{ service: 'aso' }} className="inline-flex">
-
-              <ChrismedButton size="lg">{t.hero.ctaPrimary}</ChrismedButton>
-            </Link>
+            <a
+              href="/chrismed/agendar?service=aso"
+              className="chrismed-sans inline-flex items-center justify-center gap-2 bg-[var(--chrismed-ink)] px-8 py-4 text-[12px] font-medium uppercase tracking-[0.2em] text-[var(--chrismed-ivory)] transition-colors duration-500 hover:bg-[var(--chrismed-noir)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+            >
+              {t.hero.ctaPrimary}
+            </a>
             <ChrismedButton
               size="lg"
               variant="ghost"
@@ -183,10 +185,9 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Admissional · Periódico · Retorno · Mudança de função · Demissional.
               </p>
-              <Link to="/chrismed/agendar" search={{ service: 'aso' }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
-
+              <a href="/chrismed/agendar?service=aso" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
                 Agendar ASO →
-              </Link>
+              </a>
             </div>
             <div className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5">
               <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--chrismed-mist)]">Perícia · Laudo judicial ou previdenciário</div>
@@ -194,9 +195,9 @@ function ChrismedOcupacionalPage() {
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)]">
                 Entrega em até <strong>15 dias corridos</strong>, contados a partir da entrevista técnica e do recebimento integral da documentação.
               </p>
-              <Link to="/chrismed/agendar" search={{ service: 'pericia' }} className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
+              <a href="/chrismed/agendar?service=pericia" className="mt-4 inline-flex text-[12px] uppercase tracking-[0.24em] text-[var(--chrismed-forest-deep)] underline-offset-4 hover:underline">
                 Agendar entrevista para laudo →
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -345,9 +346,12 @@ function ChrismedOcupacionalPage() {
                 {t.journeyCompany.cta}
               </ChrismedButton>
             ) : (
-              <Link to="/chrismed/agendar" search={{ service: 'aso' }} className="inline-flex">
-                <ChrismedButton size="lg">{t.journeyEmployee.cta}</ChrismedButton>
-              </Link>
+              <a
+                href="/chrismed/agendar?service=aso"
+                className="chrismed-sans inline-flex items-center justify-center gap-2 bg-[var(--chrismed-ink)] px-8 py-4 text-[12px] font-medium uppercase tracking-[0.2em] text-[var(--chrismed-ivory)] transition-colors duration-500 hover:bg-[var(--chrismed-noir)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chrismed-champagne-deep)]"
+              >
+                {t.journeyEmployee.cta}
+              </a>
             )}
             <ChrismedButton size="lg" variant="ghost" onClick={openOliver}>
               {t.journeyShared.oliverCta}

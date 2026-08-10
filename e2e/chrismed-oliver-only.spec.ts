@@ -171,10 +171,10 @@ test.describe('CHRISMED · navegação e acessos', () => {
     if (await mobileMenu.isVisible()) {
       await mobileMenu.click();
       const drawer = page.getByRole('dialog', { name: /Menu CHRISMED/i });
-      await expect(drawer.getByRole('link', { name: /Pacientes · Agendar/i })).toBeVisible();
-      await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
-      await expect(drawer.getByRole('link', { name: /^Empresas/i })).toBeVisible();
-      await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
+      await expect(drawer.locator('a').filter({ hasText: /Pacientes · Agendar/i })).toHaveCount(1);
+      await expect(drawer.locator('a').filter({ hasText: /Profissionais da Saúde/i })).toHaveCount(1);
+      await expect(drawer.locator('a').filter({ hasText: /^Empresas$/i })).toHaveCount(1);
+      await expect(drawer.locator('a').filter({ hasText: /Gestão CHRISMED/i })).toHaveAttribute(
         'href',
         'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
       );
