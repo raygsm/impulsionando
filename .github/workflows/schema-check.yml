@@ -85,6 +85,7 @@ jobs:
           );
           CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
           LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          CREATE EXTENSION IF NOT EXISTS btree_gist;
           SQL
           psql -h localhost -p 55432 -U supabase_admin -d postgres \
             -v ON_ERROR_STOP=1 -f /tmp/chrismed-production-schema.sql
