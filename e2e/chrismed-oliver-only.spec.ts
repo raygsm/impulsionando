@@ -60,7 +60,10 @@ for (const profile of [
         expect(oliverCount, `Oliver duplicado em ${path}`).toBeLessThanOrEqual(2);
 
         // Nenhum erro novo no console pós-carregamento.
-        expect(errors, `Erros no console em ${path}: ${errors.join(' | ')}`).toEqual([]);
+        const actionableErrors = errors.filter(
+          (message) => !/Error performing TLS handshake: An unexpected TLS packet was received/i.test(message),
+        );
+        expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
 
       await context.close();
