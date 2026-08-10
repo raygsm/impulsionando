@@ -97,7 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           migrations=(
-            supabase/migrations/20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql
+            supabase/migrations/20260808210000_chrismed_mercado_pago_current_core.sql
             supabase/migrations/20260808213000_chrismed_secure_booking.sql
             supabase/migrations/20260808223000_chrismed_communication_settings.sql
             supabase/migrations/20260809111500_fix_current_core_staff_functions.sql
