@@ -89,7 +89,7 @@ jobs:
           psql -h localhost -p 55432 -U supabase_admin -d postgres \
             -v ON_ERROR_STOP=1 -f /tmp/chrismed-production-schema.sql
           psql -h localhost -p 55432 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-            -c "INSERT INTO public.companies (id,name,email,subdomain,is_active,status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2','CHRISMED','sac@chrismed.com.br','chrismed',true,'active');"
+            -c "INSERT INTO public.companies (id,name) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2','CHRISMED');"
 
       - name: Aplicar somente migrations pendentes da CHRISMED
         env:
