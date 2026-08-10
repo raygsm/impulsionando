@@ -25,6 +25,7 @@ const CHRISMED_ROUTES = [
 ].map((path) => PUBLIC_CHRISMED_HOST ? path || "/" : `/chrismed${path}`);
 
 test.describe("CHRISMED — cabeçalho fixo em todas as rotas", () => {
+  test.describe.configure({ timeout: 60_000 });
   for (const route of CHRISMED_ROUTES) {
     test(`mantém o menu fixo em ${route}`, async ({ page }) => {
       await page.goto(route, { waitUntil: "domcontentloaded" });

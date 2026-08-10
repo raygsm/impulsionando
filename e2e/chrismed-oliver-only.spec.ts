@@ -38,6 +38,11 @@ for (const profile of [
       page.on('console', (m) => {
         if (m.type() === 'error') errors.push(m.text());
       });
+      page.on('response', (response) => {
+        if (response.status() >= 400) {
+          errors.push(`HTTP ${response.status()} ${response.url()}`);
+        }
+      });
 
       for (const path of ROUTES) {
         errors.length = 0;
@@ -61,7 +66,9 @@ for (const profile of [
 
         // Nenhum erro novo no console pós-carregamento.
         const actionableErrors = errors.filter(
-          (message) => !/Error performing TLS handshake: An unexpected TLS packet was received/i.test(message),
+          (message) =>
+            !/Error performing TLS handshake: An unexpected TLS packet was received/i.test(message) &&
+            !/^Failed to load resource: the server responded with a status of \d+ \(\)$/i.test(message),
         );
         expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
