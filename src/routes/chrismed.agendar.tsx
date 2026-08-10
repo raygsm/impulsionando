@@ -129,11 +129,25 @@ function formatSlotLabel(slot: Pick<ChrismedSlot, 'time' | 'occurrence' | 'endTi
 
 function ChrismedAgendarPage() {
   const search = useSearch({ from: '/chrismed/agendar' });
-  const [step, setStep] = useState<Step>('modality');
-  const [specialty, setSpecialty] = useState<ChrismedSpecialty | null>(null);
-  const [doctor, setDoctor] = useState<ChrismedDoctor | null>(null);
-  const [modality, setModality] = useState<ChrismedModality | null>(null);
-  const [unit, setUnit] = useState<ChrismedUnit | null>(null);
+  const occupationalService = search.service === 'aso' || search.service === 'pericia';
+  const initialOccupationalSpecialty = occupationalService
+    ? CHRISMED_SPECIALTIES.find((item) => item.slug === 'medicina-do-trabalho') ?? null
+    : null;
+  const initialOccupationalDoctor = occupationalService
+    ? CHRISMED_DOCTORS.find((item) => item.slug === 'dra-cristiane-alencar') ?? null
+    : null;
+  const initialOccupationalUnit = occupationalService
+    ? CHRISMED_UNITS.find((item) => item.slug === 'copacabana') ?? null
+    : null;
+  // A query de ASO/Perícia já nasce no calendário. Isso evita um quadro
+  // intermediário de "modalidade" durante hidratação e navegação por link.
+  const [step, setStep] = useState<Step>(occupationalService ? 'schedule' : 'modality');
+  const [specialty, setSpecialty] = useState<ChrismedSpecialty | null>(initialOccupationalSpecialty);
+  const [doctor, setDoctor] = useState<ChrismedDoctor | null>(initialOccupationalDoctor);
+  const [modality, setModality] = useState<ChrismedModality | null>(
+    occupationalService ? (search.service === 'aso' ? 'ocupacional' : 'pericia') : null,
+  );
+  const [unit, setUnit] = useState<ChrismedUnit | null>(initialOccupationalUnit);
   const [monthOffset, setMonthOffset] = useState(0);
   const [selectedDayIso, setSelectedDayIso] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);

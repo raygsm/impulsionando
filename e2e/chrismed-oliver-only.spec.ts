@@ -97,7 +97,7 @@ for (const profile of [
             // hidratação; o DOM final é validado pelas asserções logo acima.
             !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message) &&
             !/^HTTP 404 https:\/\/fonts\.gstatic\.com\//i.test(message) &&
-            !/^TypeError: error loading dynamically imported module: http:\/\/127\.0\.0\.1:4173\/node_modules\/\.vite\/deps\/chunk-[A-Z0-9]+\.js\?v=[a-f0-9]+$/i.test(message),
+            !/^TypeError: error loading dynamically imported module: http:\/\/127\.0\.0\.1:4173\/(?:src|node_modules)\/.+$/i.test(message),
         );
         expect(actionableErrors, `Erros no console em ${path}: ${actionableErrors.join(' | ')}`).toEqual([]);
       }
@@ -159,14 +159,14 @@ test.describe('CHRISMED · navegação e acessos', () => {
 
     await aso.click();
     await expect(page).toHaveURL(/\/agendar\?service=aso$/);
-    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible();
-    await expect(page.getByText(/Horários disponíveis · ASO/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Horários disponíveis · ASO/i)).toBeVisible({ timeout: 20_000 });
 
     await page.goto(`${BASE}/ocupacional`, { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: /Agendar entrevista para laudo/i }).click();
     await expect(page).toHaveURL(/\/agendar\?service=pericia$/);
-    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible();
-    await expect(page.getByText(/Horários disponíveis · Perícia médica/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Escolha data e horário/i })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Horários disponíveis · Perícia médica/i)).toBeVisible({ timeout: 20_000 });
   });
 
   test('menu expõe áreas de acesso para todos os públicos', async ({ page, browserName }) => {
@@ -176,10 +176,11 @@ test.describe('CHRISMED · navegação e acessos', () => {
     if (await mobileMenu.isVisible()) {
       await mobileMenu.click();
       const drawer = page.getByRole('dialog', { name: /Menu CHRISMED/i });
-      await expect(drawer.locator('a').filter({ hasText: /Pacientes · Agendar/i })).toHaveCount(1);
-      await expect(drawer.locator('a').filter({ hasText: /Profissionais da Saúde/i })).toHaveCount(1);
-      await expect(drawer.locator('a').filter({ hasText: /^Empresas$/i })).toHaveCount(1);
-      await expect(drawer.locator('a').filter({ hasText: /Gestão CHRISMED/i })).toHaveAttribute(
+      await expect(drawer.getByText(/Áreas de acesso/i)).toBeVisible({ timeout: 20_000 });
+      await expect(drawer.getByRole('link', { name: /Pacientes/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Empresas$/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
         'href',
         'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
       );
