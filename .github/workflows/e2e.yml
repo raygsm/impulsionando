@@ -98,6 +98,9 @@ jobs:
       # auditoria axe (e2e/nichos-a11y.spec.ts — falha em violação critical).
       - name: Run CHRISMED PR suite (all engines · desktop+mobile)
         if: github.event_name == 'pull_request'
+        env:
+          # Validate the checked-out PR commit instead of the old production bundle.
+          E2E_BASE_URL: ""
         run: >-
           bun run test:e2e --
           e2e/chrismed-header-fixed.spec.ts

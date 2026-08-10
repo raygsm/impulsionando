@@ -11,7 +11,7 @@ import { test, expect, devices } from '@playwright/test';
  * Roda em desktop (default) e mobile (iPhone 13). Ajuste BASE_URL via env.
  */
 
-const BASE = process.env.CHRISMED_BASE_URL || 'https://chrismed.impulsionando.com.br';
+const BASE = process.env.CHRISMED_BASE_URL || process.env.E2E_BASE_URL || 'http://127.0.0.1:4173/chrismed';
 const ROUTES = ['/', '/agendar', '/consultorio', '/faq'];
 
 function assertNoImpulsionito(html: string, requests: string[]) {
