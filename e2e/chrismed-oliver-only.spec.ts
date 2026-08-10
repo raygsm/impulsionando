@@ -12,7 +12,7 @@ import { test, expect, devices } from '@playwright/test';
  */
 
 const BASE = process.env.CHRISMED_BASE_URL || 'https://chrismed.impulsionando.com.br';
-const ROUTES = ['/', '/chrismed/agendar', '/chrismed/consultorio', '/chrismed/faq'];
+const ROUTES = ['/', '/agendar', '/consultorio', '/faq'];
 
 function assertNoImpulsionito(html: string, requests: string[]) {
   const bad = /impulsionito(?!\.png)/i;

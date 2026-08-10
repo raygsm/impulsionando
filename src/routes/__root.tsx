@@ -420,7 +420,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isChrismedRoute = pathname.startsWith("/chrismed");
+  const isChrismedRoute =
+    pathname.startsWith("/chrismed") ||
+    (typeof window !== "undefined" &&
+      ["chrismed.impulsionando.com.br", "agenda.chrismed.com.br", "www.agenda.chrismed.com.br"].includes(
+        window.location.hostname.toLowerCase(),
+      ));
   return (
     <QueryClientProvider client={queryClient}>
       <SkipLink />
