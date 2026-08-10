@@ -20,6 +20,7 @@ const PUBLIC_ROUTE_ROOTS = new Set([
   "ofertas",
   "privacidade",
   "teleconsulta",
+  "termos",
 ]);
 
 export function isOfficialChrismedHost(hostname: string): boolean {
