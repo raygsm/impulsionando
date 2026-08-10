@@ -41,7 +41,7 @@ jobs:
       - name: Instalar cliente Postgres
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17
+          sudo apt-get install -y -qq postgresql-client
 
       - name: Copiar somente o schema public de produção
         env:
@@ -52,8 +52,11 @@ jobs:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           PGSSLMODE: require
         run: |
-          pg_dump --schema=public --schema-only --clean --if-exists \
-            --no-owner --no-privileges --file=/tmp/chrismed-production-schema.sql
+          docker run --rm \
+            -e PGHOST -e PGPORT -e PGDATABASE -e PGUSER -e PGPASSWORD -e PGSSLMODE \
+            -v /tmp:/dump postgres:17 \
+            pg_dump --schema=public --schema-only --clean --if-exists \
+              --no-owner --no-privileges --file=/dump/chrismed-production-schema.sql
           test -s /tmp/chrismed-production-schema.sql
 
       - name: Restaurar snapshot em banco descartável
