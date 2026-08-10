@@ -57,6 +57,9 @@ jobs:
             -v /tmp:/dump postgres:17 \
             pg_dump --schema=public --schema-only --clean --if-exists \
               --no-owner --no-privileges --file=/dump/chrismed-production-schema.sql
+          # PostgreSQL 17 emits this session-only setting; the disposable
+          # Supabase 15 image does not expose it. It is not a schema object.
+          sed -i '/^SET transaction_timeout = 0;$/d' /tmp/chrismed-production-schema.sql
           test -s /tmp/chrismed-production-schema.sql
 
       - name: Restaurar snapshot em banco descartável
