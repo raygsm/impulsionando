@@ -64,6 +64,7 @@ for (const profile of [
         const oliver = page.locator(
           '[data-oliver], [aria-label*="Oliver" i], [id*="oliver" i]',
         );
+        await expect(oliver.first(), `Oliver deve montar em ${path}`).toBeVisible({ timeout: 15_000 });
         const oliverCount = await oliver.count();
         expect(oliverCount, `Oliver deve aparecer 1x em ${path}`).toBeGreaterThanOrEqual(1);
         expect(oliverCount, `Oliver duplicado em ${path}`).toBeLessThanOrEqual(2);
