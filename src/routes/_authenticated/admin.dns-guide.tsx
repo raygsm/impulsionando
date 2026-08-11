@@ -3,6 +3,7 @@
  * *.impulsionando.com.br apontando para a infraestrutura Impulsionando, com exemplos por provedor e troubleshooting de 404.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,6 @@ export const Route = createFileRoute("/_authenticated/admin/dns-guide")({
 
 const APEX_A_TARGET = "187.77.232.52";
 const WILDCARD_HOST = "*.impulsionando.com.br";
-const IMPULSIONANDO_PROXY_MODE = "cloudflare";
 
 function CopyBtn({ value, label }: { value: string; label?: string }) {
   return (
@@ -130,8 +130,7 @@ function DnsGuidePage() {
             <ol className="list-decimal ml-5 space-y-1.5">
               <li>Cloudflare Dashboard → domínio <code>impulsionando.com.br</code> → <strong>DNS &gt; Records</strong>.</li>
               <li><strong>Add record</strong>: Type <code>A</code>, Name <code>*</code>, IPv4 <code>{APEX_A_TARGET}</code>.</li>
-              <li>
-                <li>
+               <li>
   Proxy status: pode permanecer <Badge variant="outline">Proxied</Badge> (nuvem laranja).
   A origem continua sendo a VPS Impulsionando em <code>{APEX_A_TARGET}</code>; com o proxy ativo,
   o DNS público exibirá os IPs da Cloudflare.
