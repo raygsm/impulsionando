@@ -27,8 +27,8 @@ export const getMyTenantDomain = createServerFn({ method: "POST" })
       .eq("company_id", data.companyId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-return { identity, impulsionando: IMPULSIONANDO_DNS };  });
-
+    return { identity, impulsionando: IMPULSIONANDO_DNS };
+  });
 export const requestCustomDomain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { companyId: string; customDomain: string | null }) =>
