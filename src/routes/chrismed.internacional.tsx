@@ -92,10 +92,8 @@ function openOliver() {
 
 function ChrismedGmsPage() {
   const shellLang = useLang();
-  // GMS opera apenas em EN e ES. Se o usuário estiver com PT selecionado
-  // no shell, exibimos o conteúdo em EN por padrão e mantemos o português
-  // apenas na chamada inicial (título) logo abaixo.
-  const lang: Lang = shellLang === 'es' ? 'es' : 'en';
+  // O GMS preserva a mesma jornada e o mesmo conteúdo nos três idiomas.
+  const lang: Lang = shellLang;
   const t = COPY[lang];
 
   useEffect(() => {
