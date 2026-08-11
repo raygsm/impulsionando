@@ -134,7 +134,25 @@ Deno.serve(async (req: Request) => {
     return json({});
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown_error";
-    console.error("auth-email-hook failure", { message });
-    return json({ error: "email_delivery_failed" }, 500);
+    const category = message.startsWith("missing_secret:")
+      ? message
+      : /signature|webhook|timestamp/i.test(message)
+      ? "webhook_signature_invalid"
+      : /auth|login|credential|535/i.test(message)
+      ? "smtp_authentication_failed"
+      : /connect|socket|timeout|network|tls/i.test(message)
+      ? "smtp_connection_failed"
+      : "email_delivery_failed";
+    console.error("auth-email-hook failure", { category, message });
+    const status = category.startsWith("missing_secret:")
+      ? 501
+      : category === "smtp_authentication_failed"
+      ? 503
+      : category === "smtp_connection_failed"
+      ? 504
+      : category === "webhook_signature_invalid"
+      ? 401
+      : 500;
+    return json({ error: category }, status);
   }
 });
