@@ -134,7 +134,7 @@ function ChrismedAgendarPage() {
     ? CHRISMED_SPECIALTIES.find((item) => item.slug === 'medicina-do-trabalho') ?? null
     : null;
   const initialOccupationalDoctor = occupationalService
-    ? CHRISMED_DOCTORS.find((item) => item.slug === 'dra-cristiane-alencar') ?? null
+    ? CHRISMED_DOCTORS.find((item) => item.slug === 'dra-christiane-alencar') ?? null
     : null;
   const initialOccupationalUnit = occupationalService
     ? CHRISMED_UNITS.find((item) => item.slug === 'copacabana') ?? null
