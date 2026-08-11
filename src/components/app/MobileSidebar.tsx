@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarNav } from "./SidebarNav";
 import type { CurrentUser } from "@/lib/auth";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
-
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
   const [open, setOpen] = useState(false);
   return (
@@ -27,13 +26,11 @@ export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
             aria-label="Ir para a home Impulsionando (abre em nova aba)"
             className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 focus-ring transition-opacity"
           >
-            <img
-              src={logoAsset.url}
-              alt="Impulsionando Tecnologia"
-              className="max-h-full max-w-full object-contain"
-              draggable={false}
-            />
-          </a>
+            <LogoImpulsionando
+  variant="dark"
+  size="xl"
+  asLink={false}
+/>          </a>
         </div>
 
         <SidebarNav currentUser={currentUser} onNavigate={() => setOpen(false)} />
