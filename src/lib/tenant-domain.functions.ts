@@ -6,10 +6,10 @@ import { z } from "zod";
 
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
-export const LOVABLE_DNS = {
-  aRecordValue: "185.158.133.1",
-  txtName: "_lovable",
-  txtValuePrefix: "lovable_verify=",
+export const IMPULSIONANDO_DNS = {
+  aRecordValue: "187.77.232.52",
+  txtName: "_impulsionando",
+  txtValuePrefix: "impulsionando_verify=",
 };
 
 export const getMyTenantDomain = createServerFn({ method: "POST" })
@@ -27,8 +27,7 @@ export const getMyTenantDomain = createServerFn({ method: "POST" })
       .eq("company_id", data.companyId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { identity, lovable: LOVABLE_DNS };
-  });
+return { identity, impulsionando: IMPULSIONANDO_DNS };  });
 
 export const requestCustomDomain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
