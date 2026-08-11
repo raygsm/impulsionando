@@ -25,19 +25,21 @@ const escapeHtml = (value: string) => value
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
 
+const hasBrokenEncoding = (value: string) => /(?:\u00c3.|\u00c2.|\ufffd|\u00e2\u20ac)/u.test(value);
+
 const labels = (brand: string): Record<string, { subject: string; title: string; cta: string }> => ({
   signup: {
-    subject: `Confirme seu cadastro — ${brand}`,
-    title: "Confirme seu endereço de e-mail",
+    subject: `Confirme seu cadastro \u2014 ${brand}`,
+    title: "Confirme seu endere\u00e7o de e-mail",
     cta: "Confirmar cadastro",
   },
   recovery: {
-    subject: `Redefinição de senha — ${brand}`,
+    subject: `Redefini\u00e7\u00e3o de senha \u2014 ${brand}`,
     title: "Redefina sua senha",
     cta: "Redefinir senha",
   },
   magiclink: {
-    subject: `Seu acesso seguro — ${brand}`,
+    subject: `Seu acesso seguro \u2014 ${brand}`,
     title: `Acesse sua conta ${brand}`,
     cta: "Acessar com segurança",
   },
@@ -47,9 +49,9 @@ const labels = (brand: string): Record<string, { subject: string; title: string;
     cta: "Aceitar convite",
   },
   email_change: {
-    subject: `Confirme a alteração de e-mail — ${brand}`,
-    title: "Confirme seu novo endereço de e-mail",
-    cta: "Confirmar alteração",
+    subject: `Confirme a altera\u00e7\u00e3o de e-mail \u2014 ${brand}`,
+    title: "Confirme seu novo endere\u00e7o de e-mail",
+    cta: "Confirmar altera\u00e7\u00e3o",
   },
 });
 
@@ -122,13 +124,30 @@ Deno.serve(async (req: Request) => {
     });
 
     const safeUrl = escapeHtml(actionUrl.toString());
+    const subject = copy.subject;
+    const plainText = [
+      brand,
+      "",
+      copy.title,
+      "",
+      "Recebemos uma solicita\u00e7\u00e3o relacionada ao acesso da sua conta.",
+      `${copy.cta}: ${actionUrl.toString()}`,
+      "",
+      "Este link \u00e9 pessoal e tempor\u00e1rio. N\u00e3o o compartilhe.",
+      "Se voc\u00ea n\u00e3o solicitou esta a\u00e7\u00e3o, ignore esta mensagem. Sua conta permanecer\u00e1 protegida.",
+      "",
+      `Precisa de ajuda? ${replyTo}`,
+    ].join("\n");
+    if (hasBrokenEncoding(subject) || hasBrokenEncoding(plainText)) {
+      throw new Error("template_encoding_validation_failed");
+    }
     await transporter.sendMail({
       from: `"${brand}" <${senderEmail}>`,
       to: recipient,
       replyTo,
-      subject: copy.subject,
-      text: `${copy.title}\n\n${copy.cta}: ${actionUrl.toString()}\n\nSe você não solicitou esta ação, ignore esta mensagem.`,
-      html: `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#f4f7f7;font-family:Arial,sans-serif;color:#153b3a"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" style="max-width:560px;background:#fff;border-radius:16px;border:1px solid #dbe7e6"><tr><td style="padding:32px"><div style="font-size:24px;font-weight:700;color:#006b68">${escapeHtml(brand)}</div><h1 style="font-size:22px;margin:24px 0 12px">${escapeHtml(copy.title)}</h1><p style="line-height:1.6">Use o botão abaixo para concluir esta ação com segurança.</p><p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;background:#006b68;color:#fff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:700">${escapeHtml(copy.cta)}</a></p><p style="font-size:13px;line-height:1.5;color:#526665">Se você não solicitou esta ação, ignore esta mensagem.</p><p style="font-size:12px;color:#71807f;margin-top:28px">${escapeHtml(brand)} · ${escapeHtml(replyTo)}</p></td></tr></table></td></tr></table></body></html>`,
+      subject,
+      text: plainText,
+      html: `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eef4f3;font-family:Arial,Helvetica,sans-serif;color:#173a39"><div style="display:none;max-height:0;overflow:hidden">A&ccedil;&atilde;o segura de acesso &agrave; sua conta ${escapeHtml(brand)}.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f3"><tr><td align="center" style="padding:36px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border:1px solid #d8e5e3;border-radius:20px;overflow:hidden"><tr><td style="height:8px;background:#006b68;font-size:0">&nbsp;</td></tr><tr><td style="padding:34px 36px 14px"><div style="font-size:26px;line-height:1;font-weight:800;letter-spacing:.04em;color:#006b68">${escapeHtml(brand)}</div><div style="margin-top:8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6a7f7d">Cuidado, confian&ccedil;a e seguran&ccedil;a</div></td></tr><tr><td style="padding:14px 36px 34px"><h1 style="margin:0 0 16px;font-size:25px;line-height:1.25;color:#143c3a">${escapeHtml(copy.title)}</h1><p style="margin:0 0 12px;font-size:16px;line-height:1.65;color:#385654">Recebemos uma solicita&ccedil;&atilde;o relacionada ao acesso da sua conta.</p><p style="margin:0 0 26px;font-size:16px;line-height:1.65;color:#385654">Clique no bot&atilde;o abaixo para continuar em ambiente seguro:</p><p style="margin:0 0 28px"><a href="${safeUrl}" style="display:inline-block;background:#006b68;color:#ffffff;text-decoration:none;padding:15px 24px;border-radius:999px;font-size:16px;font-weight:700">${escapeHtml(copy.cta)}</a></p><div style="padding:16px 18px;background:#f4f8f7;border-left:4px solid #f5b642;border-radius:8px"><p style="margin:0;font-size:14px;line-height:1.55;color:#405c5a"><strong>Seguran&ccedil;a:</strong> este link &eacute; pessoal e tempor&aacute;rio. N&atilde;o o compartilhe. Se voc&ecirc; n&atilde;o solicitou esta a&ccedil;&atilde;o, ignore esta mensagem; sua conta permanecer&aacute; protegida.</p></div><p style="margin:24px 0 8px;font-size:13px;line-height:1.5;color:#627775">Se o bot&atilde;o n&atilde;o funcionar, copie e cole este endere&ccedil;o no navegador:</p><p style="margin:0;word-break:break-all;font-size:12px;line-height:1.5"><a href="${safeUrl}" style="color:#006b68">${safeUrl}</a></p></td></tr><tr><td style="padding:22px 36px;background:#f7faf9;border-top:1px solid #e1eae9"><p style="margin:0 0 6px;font-size:13px;color:#4e6664">Precisa de ajuda? <a href="mailto:${escapeHtml(replyTo)}" style="color:#006b68;font-weight:700">${escapeHtml(replyTo)}</a></p><p style="margin:0;font-size:11px;line-height:1.5;color:#7a8d8b">Mensagem transacional autom&aacute;tica da ${escapeHtml(brand)}. Por seguran&ccedil;a, nunca solicitamos sua senha por e-mail.</p></td></tr></table></td></tr></table></body></html>`,
     });
 
     return json({});
