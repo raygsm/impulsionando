@@ -1,3 +1,6 @@
+blication.functions.corrected.ts
+
+
 /**
  * Módulo Core → Publicação — server fns.
  *
@@ -13,8 +16,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCoreHealthAccess } from "@/lib/core-rbac.functions";
 
-const LOVABLE_IP = "185.158.133.1";
-const LOVABLE_HOST = "impulsionando.lovable.app";
+const IMPULSIONANDO_ORIGIN_IP = "187.77.232.52";
+const IMPULSIONANDO_VERIFY_PREFIX = "impulsionando_verify=";
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 const REQUIRED_ENVS = ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const;
 
@@ -50,31 +53,68 @@ async function checkDomain(domain: string | null): Promise<CheckResult> {
 
 async function checkDns(domain: string | null): Promise<CheckResult> {
   const at = new Date().toISOString();
-  if (!domain) return { ok: false, detail: "Domínio não configurado", checked_at: at };
+
+  if (!domain) {
+    return {
+      ok: false,
+      detail: "Domínio não configurado",
+      checked_at: at,
+    };
+  }
+
   const [a, c, txt, caa] = await Promise.all([
     resolveDns(domain, "A"),
     resolveDns(domain, "CNAME"),
-    resolveDns(`_lovable.${domain}`, "TXT"),
+    resolveDns(`_impulsionando.${domain}`, "TXT"),
     resolveDns(domain, "CAA" as any),
   ]);
-  const pointsA = a.includes(LOVABLE_IP);
-  const pointsCname = c.some((v) => v === LOVABLE_HOST);
-  const hasTxt = txt.some((v) => v.startsWith("lovable_verify="));
-  // CAA é opcional. Se existir, precisa autorizar letsencrypt.org (SSL Lovable).
+
+  const pointsA = a.includes(IMPULSIONANDO_ORIGIN_IP);
+  const hasPublicDns = a.length > 0 || c.length > 0;
+  const hasTxt = txt.some((v) => v.startsWith(IMPULSIONANDO_VERIFY_PREFIX));
+
+  // CAA é opcional. Se existir, precisa autorizar letsencrypt.org para emissão do SSL.
   const caaBlocksLE =
     caa.length > 0 &&
-    !caa.some((v) => /issue\s+"?letsencrypt\.org"?/i.test(v) || /issuewild\s+"?letsencrypt\.org"?/i.test(v));
-  if (!pointsA && !pointsCname) {
+    !caa.some(
+      (v) =>
+        /issue\s+"?letsencrypt\.org"?/i.test(v) ||
+        /issuewild\s+"?letsencrypt\.org"?/i.test(v),
+    );
+
+  if (!pointsA && !hasPublicDns) {
     const seen = [...a, ...c].join(", ") || "nenhum registro";
-    return { ok: false, detail: `A/CNAME não apontam para Lovable (visto: ${seen})`, checked_at: at };
+    return {
+      ok: false,
+      detail: `A/CNAME não apontam para a infraestrutura Impulsionando (visto: ${seen})`,
+      checked_at: at,
+    };
   }
-  if (!hasTxt) return { ok: false, detail: "TXT _lovable ausente ou não propagado", checked_at: at };
-  if (caaBlocksLE)
-    return { ok: false, detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)", checked_at: at };
+
+  if (!hasTxt) {
+    return {
+      ok: false,
+      detail: "TXT _impulsionando ausente ou não propagado",
+      checked_at: at,
+    };
+  }
+
+  if (caaBlocksLE) {
+    return {
+      ok: false,
+      detail: "CAA presente mas não autoriza letsencrypt.org (bloqueia SSL)",
+      checked_at: at,
+    };
+  }
+
   const caaNote = caa.length > 0 ? " + CAA→LE" : "";
+
   return {
     ok: true,
-    detail: (pointsA ? "A → Lovable" : "CNAME (proxy)") + " + TXT ok" + caaNote,
+    detail:
+      (pointsA ? "A → VPS Impulsionando" : "DNS público/proxy ativo") +
+      " + TXT Impulsionando ok" +
+      caaNote,
     checked_at: at,
   };
 }
