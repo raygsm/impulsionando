@@ -104,6 +104,12 @@ Deno.serve(async (req: Request) => {
     const copy = labels(brand)[actionType];
     if (!copy) return json({ error: "unsupported_email_action" }, 422);
 
+    // Password recovery must always land on the dedicated password form,
+    // even if an older caller still supplies /auth as its redirect target.
+    const effectiveRedirect = actionType === "recovery"
+      ? new URL("/reset-password", redirect.origin)
+      : redirect;
+
     const tokenHash = actionType === "email_change" && emailData.token_hash_new
       ? emailData.token_hash_new
       : emailData.token_hash;
@@ -111,7 +117,7 @@ Deno.serve(async (req: Request) => {
     const actionUrl = new URL("/auth/v1/verify", supabaseUrl);
     actionUrl.searchParams.set("token", tokenHash);
     actionUrl.searchParams.set("type", actionType);
-    actionUrl.searchParams.set("redirect_to", redirect.toString());
+    actionUrl.searchParams.set("redirect_to", effectiveRedirect.toString());
 
     const transporter = nodemailer.createTransport({
       host: "smtp.hostinger.com",

@@ -207,7 +207,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
     if (!email.trim()) return toast.error("Informe seu e-mail antes de solicitar a nova senha.");
     setResetLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth?mode=signin`,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     setResetLoading(false);
     if (error) return toast.error(authError(error.message));

@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { isChrismedHost } from "@/lib/chrismed-professionals";
+import chrismedLogo from "@/assets/chrismed-logo.webp.asset.json";
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function ResetPasswordPage() {
+  const isChrismed = typeof window !== "undefined" && isChrismedHost(window.location.hostname);
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
@@ -51,13 +54,19 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-      <Card className="w-full max-w-md p-8 shadow-elegant">
+    <div className={isChrismed ? "min-h-screen flex items-center justify-center p-6 bg-[#f3f1ed]" : "min-h-screen flex items-center justify-center p-6 bg-background"}>
+      <Card className={isChrismed ? "w-full max-w-md border-[#d8e5e3] p-8 shadow-xl" : "w-full max-w-md p-8 shadow-elegant"}>
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <span className="font-semibold tracking-tight">Impulsionando</span>
+          {isChrismed ? (
+            <img src={chrismedLogo.url} alt="CHRISMED" className="h-12 w-auto" />
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <span className="font-semibold tracking-tight">Impulsionando</span>
+            </>
+          )}
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">Definir nova senha</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -75,7 +84,7 @@ function ResetPasswordPage() {
             <Label htmlFor="cp">Confirmar nova senha</Label>
             <Input id="cp" type="password" required minLength={6} value={confirm} onChange={(e) => setConfirm(e.target.value)} disabled={!ready} />
           </div>
-          <Button type="submit" className="w-full bg-gradient-primary shadow-elegant" disabled={!ready || loading}>
+          <Button type="submit" className={isChrismed ? "w-full bg-[#063d35] text-white shadow-lg hover:bg-[#0a574b]" : "w-full bg-gradient-primary shadow-elegant"} disabled={!ready || loading}>
             {loading ? "Salvando..." : "Salvar nova senha"}
           </Button>
           <button
