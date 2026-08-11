@@ -1,5 +1,5 @@
 /**
- * Mocks visuais CrisMed — Wave 1 (frontend-only).
+ * Mocks visuais ChrisMed — Wave 1 (frontend-only).
  *
  * ATENÇÃO: dados aqui são apresentados APENAS para viabilizar a UX
  * do fluxo público de agendamento (especialidade → médico → modalidade →
@@ -87,7 +87,7 @@ export const CHRISMED_UNITS: ChrismedUnit[] = [
 
 export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
   {
-    slug: 'dra-cristiane-alencar',
+    slug: 'dra-christiane-alencar',
     name: 'Dra. Christiane Alencar',
     title: 'Gastroenterologia · Hepatologia · Clínica Médica · Medicina Ocupacional · GMS',
     crm: 'CRM/RJ 52.58575-0',
