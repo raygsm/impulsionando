@@ -422,6 +422,7 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isChrismedRoute =
     pathname.startsWith("/chrismed") ||
+    pathname === "/alth" ||
     (typeof window !== "undefined" &&
       ["chrismed.impulsionando.com.br", "agenda.chrismed.com.br", "www.agenda.chrismed.com.br"].includes(
         window.location.hostname.toLowerCase(),
