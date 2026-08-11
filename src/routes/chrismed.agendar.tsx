@@ -165,7 +165,7 @@ function ChrismedAgendarPage() {
 
   // Aplica "Atendimento 360°" (tele + domiciliar) — 1 médico, 3 especialidades.
   function applyCare360(mod: 'telemedicina' | 'domiciliar') {
-    const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+    const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-christiane-alencar');
     const targetUnit = CHRISMED_UNITS.find((u) => u.slug === mod);
     setSpecialty(CARE_360);
     if (doc) setDoctor(doc);
@@ -177,7 +177,7 @@ function ChrismedAgendarPage() {
   // Pré-seleção via querystring — fluxo invertido: modalidade primeiro.
   useEffect(() => {
     if (search.service === 'aso' || search.service === 'pericia') {
-      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-cristiane-alencar');
+      const doc = CHRISMED_DOCTORS.find((d) => d.slug === 'dra-christiane-alencar');
       const sp = CHRISMED_SPECIALTIES.find((s) => s.slug === 'medicina-do-trabalho');
       const office = CHRISMED_UNITS.find((u) => u.slug === 'copacabana');
       if (doc) setDoctor(doc);
