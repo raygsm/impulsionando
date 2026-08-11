@@ -62,7 +62,8 @@ function DnsCheck({ host, expected }: { host: string; expected: string }) {
     },
     staleTime: 60_000,
   });
-   const matches = records.some((r) => r === expected || r === `${expected}.`);
+   const records = [...(data?.a ?? []), ...(data?.c ?? [])].map((r) => r.data.replace(/\.$/, ""));
+  const matches = records.some((r) => r === expected || r === `${expected}.`);
   const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "proxy_ou_externo";
    const color = status === "ok" ? "bg-emerald-600" : status === "checando" ? "bg-zinc-400" : status === "sem registro" ? "bg-amber-500" : "bg-blue-600";
   return (
