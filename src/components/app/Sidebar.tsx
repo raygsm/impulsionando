@@ -1,6 +1,5 @@
 import type { CurrentUser } from "@/lib/auth";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
-
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { SidebarNav } from "./SidebarNav";
 import { AuditStatusPill } from "./AuditStatusPill";
 import { useImpersonation } from "@/hooks/use-impersonation";
@@ -21,12 +20,11 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
           aria-label="Ir para a home Impulsionando (abre em nova aba)"
           className="aspect-square w-40 rounded-xl bg-card ring-1 ring-border shadow-sm flex items-center justify-center p-3 hover:opacity-90 hover-lift focus-ring transition-opacity"
         >
-          <img
-            src={logoAsset.url}
-            alt="Impulsionando Tecnologia"
-            className="max-h-full max-w-full object-contain"
-            draggable={false}
-          />
+         <LogoImpulsionando
+  variant="dark"
+  size="xl"
+  asLink={false}
+/>
         </a>
       </div>
 
