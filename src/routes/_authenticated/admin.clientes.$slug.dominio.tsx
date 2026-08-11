@@ -118,18 +118,18 @@ function TenantDomainPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">DNS esperado (Lovable Hosting)</CardTitle>
+          <CardTitle className="text-base">DNS esperado (Infraestrutura Impulsionando)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <Row label="A">
-            <code>{expectedDomain}</code> → <code>185.158.133.1</code>
+          <code>{expectedDomain}</code> → <code>187.77.232.52</code>
           </Row>
           <Row label="TXT">
-            <code>_lovable.{expectedDomain}</code> → <code>lovable_verify=&lt;token&gt;</code>
+          <code>_impulsionando.{expectedDomain}</code> → <code>impulsionando_verify=&lt;token&gt;</code>
           </Row>
           <p className="text-xs text-muted-foreground pt-2">
-            Configure no DNS do registrador. Após propagar, a Lovable provisiona SSL
-            automaticamente (até 72h).
+            Configure no DNS do registrador. Após a propagação, valide o domínio na infraestrutura Impulsionando.
+            O SSL deve estar provisionado e válido na origem/Cloudflare.
           </p>
         </CardContent>
       </Card>
