@@ -109,6 +109,9 @@ jobs:
           fi
           printf 'OPENAI_API_KEY=%s\n' "$key" >>"$tmp"
           sudo install -o root -g root -m 0600 "$tmp" /etc/impulsionando-core.env
+          sudo install -d -o root -g root -m 0700 /var/lib/impulsionando-core
+          printf '%s' "$key" | sudo tee /var/lib/impulsionando-core/openai_api_key >/dev/null
+          sudo chmod 0400 /var/lib/impulsionando-core/openai_api_key
           rm -f "$tmp"
           REMOTE
 
@@ -179,6 +182,10 @@ jobs:
 
           if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
             echo "== Updating active Traefik container =="
+            sudo docker exec --user 0 impulsionando-core mkdir -p /run/secrets
+            sudo docker cp /var/lib/impulsionando-core/openai_api_key impulsionando-core:/run/secrets/openai_api_key
+            sudo docker exec --user 0 impulsionando-core chmod 0400 /run/secrets/openai_api_key
+            sudo docker exec --user 0 impulsionando-core test -s /run/secrets/openai_api_key
             sudo docker exec impulsionando-core sh -c 'rm -rf /app/.output && mkdir -p /app/.output'
             sudo docker cp "$RELEASE_DIR/.output/." impulsionando-core:/app/.output/
             sudo docker restart impulsionando-core

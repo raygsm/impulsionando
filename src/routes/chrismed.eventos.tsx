@@ -108,7 +108,7 @@ function EventosPage() {
     <ChrismedShell>
       <main className="chrismed-page-mustard min-h-[70vh]">
         <section className="border-b border-[var(--chrismed-mustard-deep)]/20">
-          <div className="container max-w-5xl py-20 md:py-28">
+          <div className="mx-auto w-full max-w-5xl px-5 py-20 sm:px-6 md:py-28">
             <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[var(--chrismed-forest-deep)]">
               {t.eyebrow}
             </p>
@@ -118,7 +118,7 @@ function EventosPage() {
             <p className="chrismed-lede mt-6 max-w-3xl text-lg leading-relaxed">{t.lead}</p>
           </div>
         </section>
-        <section className="container max-w-5xl py-14 md:py-20">
+        <section className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-6 md:py-20">
           {isLoading && (
             <div className="rounded-[2rem] bg-white/70 p-10 text-[var(--chrismed-forest-deep)]">
               Carregando agenda de eventos…

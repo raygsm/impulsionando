@@ -94,10 +94,9 @@ export const Route = createFileRoute("/auth")({
 
   head: () => ({
     meta: [
-      { title: "Acessar — Impulsionando Tecnologia" },
-      { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular." },
+      { title: "Acessar sua conta" },
+      { name: "description", content: "Acesso seguro à sua conta e aos recursos autorizados." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:url", content: "https://impulsionando.com.br/auth" },
     ],
   }),
   component: AuthEntryPage,

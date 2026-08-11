@@ -98,6 +98,7 @@ for (const profile of [
             // hidratação; o DOM final é validado pelas asserções logo acima.
             !/^Error: Minified React error #418;.*args\[\]=HTML/i.test(message) &&
             !/^HTTP 404 https:\/\/fonts\.gstatic\.com\//i.test(message) &&
+            !/^\[JavaScript Error: "downloadable font: download failed .*source: https:\/\/fonts\.gstatic\.com\//i.test(message) &&
             !/^\[JavaScript Error: "Image corrupt or truncated\." \{file: "http:\/\/127\.0\.0\.1:4173\/brand\/chrismed\/dra-christiane-alencar\.png" line: 0\}\]$/i.test(message) &&
             !/^TypeError: error loading dynamically imported module: http:\/\/127\.0\.0\.1:4173\/(?:src|node_modules)\/.+$/i.test(message),
         );
@@ -183,10 +184,10 @@ test.describe('CHRISMED · navegação e acessos', () => {
       await expect(drawer.getByRole('link', { name: /Pacientes/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Profissionais da Saúde/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /^Empresas$/i })).toBeVisible();
-      await expect(drawer.getByRole('link', { name: /^Eventos$/i })).toBeVisible();
+      await expect(drawer.getByRole('link', { name: /^Área de Eventos$/i })).toBeVisible();
       await expect(drawer.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
         'href',
-        'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+        '/auth?persona=admin&next=%2Fchrismed%2Fadmin',
       );
       return;
     }
@@ -198,7 +199,7 @@ test.describe('CHRISMED · navegação e acessos', () => {
     await expect(accessNav.getByRole('link', { name: /^Eventos/i })).toBeVisible();
     await expect(accessNav.getByRole('link', { name: /Gestão CHRISMED/i })).toHaveAttribute(
       'href',
-      'https://impulsionando.com.br/auth?persona=admin&next=%2Fchrismed%2Fadmin',
+      '/auth?persona=admin&next=%2Fchrismed%2Fadmin',
     );
   });
 });

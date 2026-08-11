@@ -442,7 +442,7 @@ function RootComponent() {
       <CoreCopyGuard />
       
       <Outlet />
-      {!isChrismedRoute && <PoweredByImpulsionando />}
+      {!isChrismedRoute && pathname !== "/auth" && <PoweredByImpulsionando />}
       <LGPDBanner />
       {/* Concierge Impulsionito — oculto na CHRISMED para não concorrer com Oliver. */}
       {!isChrismedRoute && <ImpulsionitoConcierge />}
