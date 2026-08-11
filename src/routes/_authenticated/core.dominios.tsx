@@ -62,12 +62,12 @@ function DnsCheck({ host, expected }: { host: string; expected: string }) {
     },
     staleTime: 60_000,
   });
-  const records = [...(data?.a ?? []), ...(data?.c ?? [])].map((r) => r.data.replace(/\.$/, ""));
-const matches = records.some((r) => r === expected || r === `${expected}.`);  const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "incorreto";
+   const matches = records.some((r) => r === expected || r === `${expected}.`);
   const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "proxy_ou_externo";
    const color = status === "ok" ? "bg-emerald-600" : status === "checando" ? "bg-zinc-400" : status === "sem registro" ? "bg-amber-500" : "bg-blue-600";
   return (
     <div className="flex items-center gap-2 text-xs">
+      <span className={`h-2 w-2 rounded-full ${color}`} /> 
       <span className="text-muted-foreground">
 {status === "ok" ? "DNS propagado" : status === "sem registro" ? "DNS ausente" : status === "proxy_ou_externo" ? "DNS ativo via proxy ou destino externo — origem não verificável pelo DNS público" : "verificando…"}      </span>
       <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => refetch()} disabled={isFetching}>
