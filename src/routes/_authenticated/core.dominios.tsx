@@ -19,8 +19,7 @@ export const Route = createFileRoute("/_authenticated/core/dominios")({
   component: DominiosPage,
 });
 
-const LOVABLE_IP = "185.158.133.1";
-const LOVABLE_HOST = "impulsionando.lovable.app";
+const IMPULSIONANDO_ORIGIN_IP = "187.77.232.52";
 
 type DnsAnswer = { name: string; type: number; data: string };
 
@@ -64,16 +63,13 @@ function DnsCheck({ host, expected }: { host: string; expected: string }) {
     staleTime: 60_000,
   });
   const records = [...(data?.a ?? []), ...(data?.c ?? [])].map((r) => r.data.replace(/\.$/, ""));
-  const matches = records.some((r) => r === expected || r === `${expected}.` || r.endsWith(LOVABLE_HOST));
-  const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "incorreto";
-  const color =
-    status === "ok" ? "bg-emerald-600" : status === "checando" ? "bg-zinc-400" : status === "sem registro" ? "bg-amber-500" : "bg-rose-600";
+const matches = records.some((r) => r === expected || r === `${expected}.`);  const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "incorreto";
+  const status = !data ? "checando" : records.length === 0 ? "sem registro" : matches ? "ok" : "proxy_ou_externo";
+   const color = status === "ok" ? "bg-emerald-600" : status === "checando" ? "bg-zinc-400" : status === "sem registro" ? "bg-amber-500" : "bg-blue-600";
   return (
     <div className="flex items-center gap-2 text-xs">
-      <span className={`h-2 w-2 rounded-full ${color}`} />
       <span className="text-muted-foreground">
-        {status === "ok" ? "DNS propagado" : status === "sem registro" ? "DNS ausente" : status === "incorreto" ? `aponta para ${records[0]}` : "verificando…"}
-      </span>
+{status === "ok" ? "DNS propagado" : status === "sem registro" ? "DNS ausente" : status === "proxy_ou_externo" ? "DNS ativo via proxy ou destino externo — origem não verificável pelo DNS público" : "verificando…"}      </span>
       <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => refetch()} disabled={isFetching}>
         <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
       </Button>
@@ -111,24 +107,24 @@ function DominiosPage() {
       </header>
 
       <Card className="p-4 bg-muted/30">
-        <div className="text-sm font-medium mb-2">Registros padrão Lovable</div>
+        <div className="text-sm font-medium mb-2">Registros padrão Impulsionando</div>
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div className="space-y-1">
             <div className="text-muted-foreground">Sem proxy (A record)</div>
-            <code className="block bg-background p-2 rounded">A → {LOVABLE_IP}</code>
+            <code className="block bg-background p-2 rounded">A → {IMPULSIONANDO_ORIGIN_IP}</code>
           </div>
-          <div className="space-y-1">
-            <div className="text-muted-foreground">Com Cloudflare proxy (CNAME)</div>
-            <code className="block bg-background p-2 rounded">CNAME → {LOVABLE_HOST}</code>
-          </div>
+        <div className="space-y-1">
+  <div className="text-muted-foreground">Com Cloudflare proxy</div>
+  <code className="block bg-background p-2 rounded">Origem → {IMPULSIONANDO_ORIGIN_IP} · DNS público exibirá IPs Cloudflare</code>
+</div>
         </div>
       </Card>
 
       <div className="space-y-3">
         {(data ?? []).map((t) => {
           const hosts: { label: string; host: string; expected: string }[] = [];
-          if (t.domain) hosts.push({ label: "Domínio customizado", host: t.domain, expected: LOVABLE_IP });
-          if (t.subdomain) hosts.push({ label: "Subdomínio impulsionando", host: `${t.subdomain}.impulsionando.com.br`, expected: LOVABLE_IP });
+          if (t.domain) hosts.push({ label: "Domínio customizado", host: t.domain, expected: IMPULSIONANDO_ORIGIN_IP });
+          if (t.subdomain) hosts.push({ label: "Subdomínio impulsionando", host: `${t.subdomain}.impulsionando.com.br`, expected: IMPULSIONANDO_ORIGIN_IP });
           if (hosts.length === 0) hosts.push({ label: "Sem domínio configurado", host: "", expected: "" });
           return (
             <Card key={t.id} className="p-4 space-y-3">
