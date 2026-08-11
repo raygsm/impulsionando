@@ -1,10 +1,8 @@
 /**
  * /admin/dns-guide — Guia visual para configurar o DNS wildcard
- * *.impulsionando.com.br apontando para a app da Lovable, com exemplos
- * por provedor e troubleshooting de 404.
+ * *.impulsionando.com.br apontando para a infraestrutura Impulsionando, com exemplos por provedor e troubleshooting de 404.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,9 +24,9 @@ export const Route = createFileRoute("/_authenticated/admin/dns-guide")({
   component: DnsGuidePage,
 });
 
-const APEX_A_TARGET = "185.158.133.1";
+const APEX_A_TARGET = "187.77.232.52";
 const WILDCARD_HOST = "*.impulsionando.com.br";
-const LOVABLE_PROXY_TARGET = "lovable.app"; // fallback CNAME target quando proxy
+const IMPULSIONANDO_PROXY_MODE = "cloudflare";
 
 function CopyBtn({ value, label }: { value: string; label?: string }) {
   return (
@@ -91,7 +89,7 @@ function DnsGuidePage() {
             </thead>
             <tbody>
               <DnsRow type="A" name="*" value={APEX_A_TARGET} />
-              <DnsRow type="TXT" name="_lovable" value="lovable_verify=<código do painel>" />
+<DnsRow type="TXT" name="_impulsionando" value="impulsionando_verify=<código>" />
             </tbody>
           </table>
         </div>
@@ -123,7 +121,7 @@ function DnsGuidePage() {
               <li>Acesse <a className="text-primary hover:underline" href="https://registro.br/" target="_blank" rel="noopener">registro.br</a> → login → domínio <code>impulsionando.com.br</code>.</li>
               <li>Vá em <strong>DNS &gt; Editar zona</strong>.</li>
               <li>Adicione registro: Tipo <code>A</code>, Nome <code>*</code>, Dados <code>{APEX_A_TARGET}</code>.</li>
-              <li>Adicione registro: Tipo <code>TXT</code>, Nome <code>_lovable</code>, Dados <code>lovable_verify=&lt;seu código&gt;</code>.</li>
+             <li>Adicione registro: Tipo <code>TXT</code>, Nome <code>_impulsionando</code>, Dados <code>impulsionando_verify=&lt;seu código&gt;</code>.</li>              
               <li>Salvar e aguardar propagação (5–30 min normalmente, até 72h no pior caso).</li>
             </ol>
           </TabsContent>
@@ -133,12 +131,15 @@ function DnsGuidePage() {
               <li>Cloudflare Dashboard → domínio <code>impulsionando.com.br</code> → <strong>DNS &gt; Records</strong>.</li>
               <li><strong>Add record</strong>: Type <code>A</code>, Name <code>*</code>, IPv4 <code>{APEX_A_TARGET}</code>.</li>
               <li>
-                Proxy status: <Badge variant="outline">DNS only</Badge> (nuvem cinza) —{" "}
-                <strong>não</strong> ative proxy laranja no wildcard, pois a Lovable emite o TLS.
-                Se precisar do proxy, use CNAME apontando para <code>{LOVABLE_PROXY_TARGET}</code> e marque
-                <em> "Domain uses Cloudflare or a similar proxy" </em> ao conectar no painel Lovable.
-              </li>
-              <li>Adicione TXT <code>_lovable</code> = <code>lovable_verify=&lt;código&gt;</code>.</li>
+                <li>
+  Proxy status: pode permanecer <Badge variant="outline">Proxied</Badge> (nuvem laranja).
+  A origem continua sendo a VPS Impulsionando em <code>{APEX_A_TARGET}</code>; com o proxy ativo,
+  o DNS público exibirá os IPs da Cloudflare.
+</li>
+<li>
+  Para verificação de domínio, quando solicitado pelo ecossistema Impulsionando,
+  adicione TXT <code>_impulsionando</code> = <code>impulsionando_verify=&lt;código&gt;</code>.
+</li>
             </ol>
           </TabsContent>
 
@@ -146,7 +147,7 @@ function DnsGuidePage() {
             <ol className="list-decimal ml-5 space-y-1.5">
               <li>Meus produtos → <strong>DNS</strong> ao lado do domínio.</li>
               <li>Adicionar → Tipo <code>A</code> → Host <code>*</code> → Aponta para <code>{APEX_A_TARGET}</code> → TTL 1 hora.</li>
-              <li>Adicionar → Tipo <code>TXT</code> → Host <code>_lovable</code> → Valor <code>lovable_verify=&lt;código&gt;</code>.</li>
+<li>Adicionar → Tipo <code>TXT</code> → Host <code>_impulsionando</code> → Valor <code>impulsionando_verify=&lt;código&gt;</code>.</li>
             </ol>
           </TabsContent>
 
@@ -154,7 +155,7 @@ function DnsGuidePage() {
             <ol className="list-decimal ml-5 space-y-1.5">
               <li>cPanel → <strong>Zone Editor</strong> → Manage no domínio.</li>
               <li>+ A Record → Name <code>*.impulsionando.com.br</code> → Address <code>{APEX_A_TARGET}</code>.</li>
-              <li>+ TXT Record → Name <code>_lovable.impulsionando.com.br</code> → Record <code>lovable_verify=&lt;código&gt;</code>.</li>
+<li>+ TXT Record → Name <code>_impulsionando.impulsionando.com.br</code> → Record <code>impulsionando_verify=&lt;código&gt;</code>.</li>
             </ol>
           </TabsContent>
 
@@ -162,8 +163,7 @@ function DnsGuidePage() {
             <ol className="list-decimal ml-5 space-y-1.5">
               <li>Route 53 → Hosted zones → <code>impulsionando.com.br</code>.</li>
               <li><strong>Create record</strong> → Record name <code>*</code> → Type <code>A</code> → Value <code>{APEX_A_TARGET}</code> → TTL 300.</li>
-              <li>Create record → Name <code>_lovable</code> → Type <code>TXT</code> → Value <code>"lovable_verify=&lt;código&gt;"</code>.</li>
-            </ol>
+<li>Create record → Name <code>_impulsionando</code> → Type <code>TXT</code> → Value <code>"impulsionando_verify=&lt;código&gt;"</code>.</li>            </ol>
           </TabsContent>
         </Tabs>
       </Card>
@@ -216,9 +216,8 @@ function DnsGuidePage() {
         </div>
         <div className="space-y-4 text-sm">
           <Issue
-            title="1. O DNS já resolve, mas retorna 404 da Lovable"
-            body="Isso é o mais comum. O DNS está OK, mas o wildcard *.impulsionando.com.br não foi adicionado no Publish → Custom Domain do projeto na Lovable. Adicione o domínio wildcard lá; a plataforma vai emitir o TLS e passar a rotear."
-          />
+title="1. O DNS já resolve, mas retorna 404 da aplicação"
+body="Isso significa que o DNS está resolvendo, mas a infraestrutura Impulsionando ainda não está aceitando corretamente esse host. Confirme na VPS que o wildcard *.impulsionando.com.br está roteado para a aplicação/container correto e que o TLS do domínio está provisionado."          />
           <Issue
             title="2. Erro de certificado (NET::ERR_CERT_COMMON_NAME_INVALID)"
             body="O DNS resolve, mas o TLS wildcard ainda não foi provisionado. Aguarde a emissão (Let's Encrypt, alguns minutos) ou verifique se existe um registro CAA bloqueando Let's Encrypt."
@@ -229,12 +228,10 @@ function DnsGuidePage() {
           />
           <Issue
             title="4. Resolve para outro IP (ex.: 76.76.x.x)"
-            body="Existe um registro específico sobrescrevendo o wildcard (ex.: um A record explícito para 'chrismed'). Remova o registro específico ou aponte-o também para 185.158.133.1."
-          />
+body="Existe um registro específico sobrescrevendo o wildcard (ex.: um A record explícito para 'chrismed'). Remova o registro específico ou aponte-o também para 187.77.232.52."          />
           <Issue
             title="5. Cloudflare com proxy laranja ativo no wildcard"
-            body="Sem o modo proxy configurado no painel Lovable, o Cloudflare intercepta o TLS e quebra a validação. Ou desligue o proxy no wildcard (nuvem cinza) ou marque 'Domain uses Cloudflare or a similar proxy' ao conectar."
-          />
+body="Com o proxy Cloudflare ativo, o TLS é encerrado na própria Cloudflare e o DNS público exibirá IPs da rede Cloudflare. Confirme que a origem está apontando para 187.77.232.52 e que o modo SSL/TLS da zona está configurado corretamente para a infraestrutura Impulsionando."            />
           <Issue
             title="6. Página abre mas mostra outro tenant / vitrine errada"
             body="O wildcard funciona, mas o tenant não está com public_slug batendo o subdomínio. Ajuste no /admin/tenants-editor: public_slug = 'chrismed' faz chrismed.impulsionando.com.br redirecionar para /vitrine/chrismed."
