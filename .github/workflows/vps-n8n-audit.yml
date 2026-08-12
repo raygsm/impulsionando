@@ -19,4 +19,59 @@ jobs:
         run: |
           set -euo pipefail
           echo "== Public n8n =="
-          for
+          for url in \
+            "https://n8n-umlg.n8n.impulsionando.com.br/healthz" \
+            "https://n8n-umlg.n8n.impulsionando.com.br/healthz/readiness" \
+            "https://n8n-umlg.n8n.impulsionando.com.br/"; do
+            code=$(curl -ksS -o /tmp/n8n-body -w "%{http_code}" --max-time 15 "$url" || true)
+            echo "$url -> HTTP $code"
+            head -c 200 /tmp/n8n-body 2>/dev/null | tr '\n' ' ' || true
+            echo
+          done
+
+      - name: Check required VPS secrets without exposing values
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$VPS_HOST" || { echo "VPS_HOST=MISSING"; exit 1; }
+          test -n "$VPS_USER" || { echo "VPS_USER=MISSING"; exit 1; }
+          test -n "$VPS_SSH_KEY" || { echo "VPS_SSH_KEY=MISSING"; exit 1; }
+          echo "VPS SSH secrets=PRESENT"
+
+      - name: Audit runtime on Hostinger VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 3m
+          script_stop: true
+          script: |
+            set -eu
+            echo "== Host =="
+            hostname
+            uptime
+            echo "== n8n processes =="
+            (docker ps --format '{{.Names}}|{{.Image}}|{{.Status}}' 2>/dev/null | grep -Ei 'n8n|wpp|whatsapp' || true)
+            (pm2 jlist 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const a=JSON.parse(s);for(const x of a){if(/n8n|wpp|whatsapp/i.test(x.name||'')) console.log((x.name||'')+'|'+(x.pm2_env?.status||''))}}catch{}})" || true)
+            (systemctl list-units --type=service --all 2>/dev/null | grep -Ei 'n8n|wpp|whatsapp' || true)
+            echo "== listeners =="
+            (ss -lntp 2>/dev/null | grep -E ':(5678|3000|8080|21465)\b' || true)
+            echo "== candidate paths =="
+            for p in /opt/n8n /srv/n8n /var/lib/n8n /root/.n8n /home/*/.n8n /opt/wppconnect /srv/wppconnect; do
+              [ -e "$p" ] && echo "$p=PRESENT" || true
+            done
+            echo "== safe env presence =="
+            for f in /opt/n8n/.env /srv/n8n/.env /var/lib/n8n/.env /root/.n8n/.env /var/www/impulsionando/shared/.env; do
+              if [ -f "$f" ]; then
+                echo "$f=PRESENT"
+                for k in N8N_API_KEY N8N_BASE_URL N8N_HOST N8N_PROTOCOL N8N_EDITOR_BASE_URL N8N_WEBHOOK_URL OPENAI_API_KEY N8N_OLIVER_BRIDGE_TOKEN ZAPI_INSTANCE_ID ZAPI_INSTANCE_TOKEN ZAPI_CLIENT_TOKEN; do
+                  if grep -q "^${k}=" "$f" 2>/dev/null; then echo "$k=PRESENT"; else echo "$k=ABSENT"; fi
+                done
+              fi
+            done
