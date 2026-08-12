@@ -1,0 +1,45 @@
+name: VPS n8n Post Repair Verify
+
+on:
+  push:
+    branches:
+      - agent/core-impulsionando-operational-foundation
+    paths:
+      - .github/workflows/vps-n8n-post-repair-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify n8n runtime on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 3m
+          script_stop: true
+          script: |
+            set -eu
+            cd /docker/n8n-umlg
+            C=$(docker ps --format '{{.Names}}' | grep -E '^n8n-.*-n8n-1$' | head -n1)
+            test -n "$C"
+            echo "container=$C"
+            docker inspect "$C" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^WEBHOOK_URL=' || true
+            echo "container_status=$(docker inspect "$C" --format '{{.State.Status}}')"
+            echo "restart_count=$(docker inspect "$C" --format '{{.RestartCount}}')"
+            echo "recent_logs="
+            docker logs --tail 20 "$C" 2>&1 | grep -Ei 'ready|started|error|failed|editor|webhook|port' | tail -n 20 || true
+            ok=0
+            i=0
+            while [ $i -lt 12 ]; do
+              if curl -fsS --max-time 10 https://n8n.impulsionando.com.br/healthz 2>/dev/null | grep -q 'ok'; then ok=1; break; fi
+              i=$((i+1)); sleep 5
+            done
+            echo "public_health=$ok"
+            test "$ok" = "1"
+            grep -q 'WEBHOOK_URL=${WEBHOOK_URL}' docker-compose.yml && echo "compose_source=CANONICAL_ENV" || echo "compose_source=OTHER"
