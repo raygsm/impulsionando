@@ -102,13 +102,18 @@ begin
       last_error = null,
       sent_at = null,
       updated_at = v_now;
-  elsif tg_op = 'UPDATE' and old.status is distinct from new.status and new.status = 'cancelled' then
+  elsif tg_op = 'UPDATE'
+    and old.status is distinct from new.status
+    and new.status in ('waitlisted','cancelled') then
     update public.chrismed_communication_outbox
        set status = 'dead_letter',
-           last_error = 'registration_cancelled',
+           last_error = case
+             when new.status = 'cancelled' then 'registration_cancelled'
+             else 'registration_waitlisted'
+           end,
            updated_at = v_now
      where idempotency_key like 'event-registration:'||new.id||':%:email'
-       and status = 'pending';
+       and status in ('pending','failed');
   end if;
 
   return new;
@@ -120,9 +125,13 @@ grant execute on function public.enqueue_chrismed_event_registration_communicati
 
 update public.chrismed_communication_outbox o
    set status = 'dead_letter',
-       last_error = 'registration_not_confirmed',
+       last_error = case
+         when r.status = 'cancelled' then 'registration_cancelled'
+         when r.status = 'waitlisted' then 'registration_waitlisted'
+         else 'registration_not_confirmed'
+       end,
        updated_at = now()
   from public.chrismed_event_registrations r
  where o.idempotency_key like 'event-registration:'||r.id||':%:email'
    and r.status <> 'confirmed'
-   and o.status = 'pending';
+   and o.status in ('pending','failed');
