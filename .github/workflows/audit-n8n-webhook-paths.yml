@@ -1,4 +1,4 @@
-name: Audit n8n webhook paths
+name: Audit n8n registered webhooks
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Extract public webhook metadata from live n8n
+      - name: Verify registered webhook routes in live n8n
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -27,6 +27,4 @@ jobs:
             set -euo pipefail
             CONTAINER=n8n-umlg-n8n-1
             docker ps --format '{{.Names}}' | grep -Fx "$CONTAINER" >/dev/null
-            docker exec "$CONTAINER" sh -lc 'rm -f /tmp/impulsionando-workflows.json && n8n export:workflow --all --output=/tmp/impulsionando-workflows.json >/dev/null'
-            docker exec "$CONTAINER" node -e 'const fs=require("fs");const x=JSON.parse(fs.readFileSync("/tmp/impulsionando-workflows.json","utf8"));const a=Array.isArray(x)?x:[x];for(const w of a){for(const n of (w.nodes||[])){if(n.type==="n8n-nodes-base.webhook"){const p=n.parameters||{};console.log([w.id,w.name,w.active?"ACTIVE":"INACTIVE",String(p.httpMethod||"GET").toUpperCase(),String(p.path||"")].join("\t"));}}}'
-            docker exec "$CONTAINER" rm -f /tmp/impulsionando-workflows.json
+            docker exec "$CONTAINER" sh -lc 'if command -v sqlite3 >/dev/null 2>&1; then echo REGISTERED_WEBHOOKS; sqlite3 -separator "|" /home/node/.n8n/database.sqlite "select workflowId,method,webhookPath from webhook_entity order by workflowId,webhookPath;"; else echo SQLITE3_NOT_AVAILABLE; fi'
