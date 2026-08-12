@@ -111,6 +111,18 @@ function ChrismedTeleconsultRoom() {
     await loadRoom();
   }
 
+  async function confirmConversation() {
+    setBusy(true);
+    const { error } = await supabase.rpc("chrismed_patient_confirm_professional_present", {
+      p_appointment_id: appointmentId,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setJoined(true);
+    toast.success("Perfeito. Registramos que a teleconsulta está em andamento e os alertas de ausência foram encerrados.");
+    await loadRoom();
+  }
+
   async function requestReplacement() {
     setBusy(true);
     const { data, error } = await supabase.rpc("chrismed_patient_request_live_replacement", {
@@ -176,7 +188,7 @@ function ChrismedTeleconsultRoom() {
     return <div className="mx-auto max-w-5xl p-8 text-center">Não foi possível abrir esta teleconsulta.</div>;
   }
 
-  const waitingProfessional = room.role === "patient" && sinceStart >= 0 && !room.professional_ready_at && room.status !== "replacement_search";
+  const waitingProfessional = room.role === "patient" && sinceStart >= 0 && !joined && !room.professional_ready_at && !["replacement_search", "in_progress", "reschedule_required"].includes(room.status);
   const searchRemaining = room.replacement_deadline_at ? Math.max(0, new Date(room.replacement_deadline_at).getTime() - now) : 0;
 
   return (
@@ -227,7 +239,7 @@ function ChrismedTeleconsultRoom() {
             <CardContent className="space-y-4">
               <p className="text-sm text-amber-950/80">Algo pode ter acontecido com o profissional. Você já está conversando com ele nesta sala?</p>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={() => void markPresence()} disabled={busy}><CheckCircle2 className="mr-2 h-4 w-4" /> Sim, já estamos conversando</Button>
+                <Button onClick={() => void confirmConversation()} disabled={busy}><CheckCircle2 className="mr-2 h-4 w-4" /> Sim, já estamos conversando</Button>
                 <Button variant="outline" onClick={() => void requestReplacement()} disabled={busy || replacementRequested}>Não. Buscar outro profissional</Button>
                 <Button variant="ghost" onClick={() => void requestReschedule()} disabled={busy}>Prefiro remarcar</Button>
               </div>
