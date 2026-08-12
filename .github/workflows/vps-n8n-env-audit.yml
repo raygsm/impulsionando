@@ -1,0 +1,37 @@
+name: VPS n8n Env Audit
+
+on:
+  push:
+    branches:
+      - agent/core-impulsionando-operational-foundation
+    paths:
+      - .github/workflows/vps-n8n-env-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect selected n8n env and compose fields
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 3m
+          script_stop: true
+          script: |
+            set -eu
+            cd /docker/n8n-umlg
+            echo "== selected .env values =="
+            for k in WEBHOOK_URL N8N_HOST N8N_PROTOCOL N8N_EDITOR_BASE_URL N8N_PORT N8N_SECURE_COOKIE; do
+              v=$(sed -n "s/^${k}=//p" .env 2>/dev/null | tail -n1 || true)
+              if [ -n "$v" ]; then echo "$k=$v"; else echo "$k=ABSENT"; fi
+            done
+            echo "== compose references only =="
+            grep -nE 'WEBHOOK_URL|N8N_HOST|N8N_PROTOCOL|N8N_EDITOR_BASE_URL|N8N_PORT|N8N_SECURE_COOKIE|env_file|environment' docker-compose.yml 2>/dev/null || true
+            echo "== resolved compose selected environment =="
+            docker compose config 2>/dev/null | grep -E '^\s+(WEBHOOK_URL|N8N_HOST|N8N_PROTOCOL|N8N_EDITOR_BASE_URL|N8N_PORT|N8N_SECURE_COOKIE):' || true
