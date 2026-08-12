@@ -1,0 +1,54 @@
+name: VPS n8n Canonical URL Repair
+
+on:
+  push:
+    branches:
+      - agent/core-impulsionando-operational-foundation
+    paths:
+      - .github/workflows/vps-n8n-repair.yml
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repair n8n compose and validate
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 5m
+          script_stop: true
+          script: |
+            set -eu
+            cd /docker/n8n-umlg
+            TS=$(date +%Y%m%d%H%M%S)
+            cp docker-compose.yml "docker-compose.yml.bak.$TS"
+            rollback() {
+              echo "validation_failed=ROLLBACK"
+              cp "docker-compose.yml.bak.$TS" docker-compose.yml
+              docker compose up -d n8n >/dev/null
+            }
+            trap rollback ERR
+
+            python3 -c "from pathlib import Path; p=Path('docker-compose.yml'); s=p.read_text(); old='- WEBHOOK_URL=https://\${COMPOSE_PROJECT_NAME}.\${TRAEFIK_HOST}/'; new='- WEBHOOK_URL=\${WEBHOOK_URL}'; assert old in s, 'expected WEBHOOK_URL pattern not found'; p.write_text(s.replace(old,new,1))"
+
+            echo "compose_change=APPLIED"
+            docker compose config >/tmp/n8n-compose-resolved.yml
+            grep -q 'WEBHOOK_URL: https://n8n.impulsionando.com.br/' /tmp/n8n-compose-resolved.yml
+            echo "resolved_webhook_url=CANONICAL"
+
+            docker compose up -d n8n >/dev/null
+            sleep 8
+            C=$(docker ps --format '{{.Names}}' | grep -E '^n8n-.*-n8n-1$' | head -n1)
+            test -n "$C"
+            docker inspect "$C" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -q '^WEBHOOK_URL=https://n8n.impulsionando.com.br/$'
+            echo "container_webhook_url=CANONICAL"
+            curl -fsS --max-time 20 https://n8n.impulsionando.com.br/healthz | grep -q 'ok'
+            echo "public_health=OK"
+            trap - ERR
+            echo "repair=SUCCESS"
