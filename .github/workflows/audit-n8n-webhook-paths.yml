@@ -27,4 +27,4 @@ jobs:
             set -euo pipefail
             CONTAINER=n8n-umlg-n8n-1
             docker ps --format '{{.Names}}' | grep -Fx "$CONTAINER" >/dev/null
-            docker exec "$CONTAINER" sh -lc 'if command -v sqlite3 >/dev/null 2>&1; then echo REGISTERED_WEBHOOKS; sqlite3 -separator "|" /home/node/.n8n/database.sqlite "select workflowId,method,webhookPath from webhook_entity order by workflowId,webhookPath;"; else echo SQLITE3_NOT_AVAILABLE; fi'
+            docker exec "$CONTAINER" sh -lc 'cd /usr/local/lib/node_modules/n8n && node -e '\''let D;try{D=require("better-sqlite3")}catch(e){console.log("BETTER_SQLITE3_NOT_AVAILABLE");process.exit(0)};const db=new D("/home/node/.n8n/database.sqlite",{readonly:true});const rows=db.prepare("select workflowId,method,webhookPath from webhook_entity order by workflowId,webhookPath").all();console.log("REGISTERED_WEBHOOKS");for(const r of rows)console.log([r.workflowId,r.method,r.webhookPath].join("|"));db.close();'\'''
