@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -271,13 +271,16 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
     }
     setLoading(true);
     const redirect = mode === "signup" ? CHRISMED_ONBOARDING_PATH : "/dashboard";
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}${redirect}`,
-    });
-    if (result.error) {
-      setLoading(false);
-      toast.error("Não foi possível continuar com o Google.");
-    }
+    const { error } = await supabase.auth.signInWithOAuth({
+  provider: "google",
+  options: {
+    redirectTo: `${window.location.origin}${redirect}`,
+  },
+});
+if (error) {
+  setLoading(false);
+  toast.error("Não foi possível continuar com o Google.");
+}
   }
 
   function advance() {
