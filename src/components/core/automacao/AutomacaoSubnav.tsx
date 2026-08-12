@@ -2,28 +2,21 @@ import { Link, useLocation, useSearch } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import {
-  LayoutDashboard, Workflow, LayersIcon, ShieldCheck, Users,
-  PlayCircle, Rocket, Webhook, ScrollText, AlertTriangle,
-  FileText, Radio, ClipboardCheck, History, Activity, LifeBuoy,
+  LayoutDashboard, Workflow, LayersIcon, FileText, ClipboardCheck, Server,
 } from "lucide-react";
 
+/**
+ * Navegação operacional: só expõe áreas que não simulam estado de produção.
+ * Painéis antigos baseados em mocks/tabelas removidas ficam fora da navegação
+ * até serem reconectados a fontes reais do Core.
+ */
 export const AUTOMACAO_NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
-  { to: "/core/automacao",                 label: "Visão geral",       icon: LayoutDashboard },
-  { to: "/core/automacao/fluxos",          label: "Fluxos",            icon: Workflow },
-  { to: "/core/automacao/modelos-nicho",   label: "Modelos por Nicho", icon: LayersIcon },
-  { to: "/core/automacao/modelos-plano",   label: "Modelos por Plano", icon: ShieldCheck },
-  { to: "/core/automacao/modelos-tenant",  label: "Modelos por Tenant",icon: Users },
-  { to: "/core/automacao/demonstracoes",   label: "Demonstrações",     icon: PlayCircle },
-  { to: "/core/automacao/producao",        label: "Produção",          icon: Rocket },
-  { to: "/core/automacao/webhooks",        label: "Webhooks",          icon: Webhook },
-  { to: "/core/automacao/logs",            label: "Logs",              icon: ScrollText },
-  { to: "/core/automacao/erros",           label: "Erros",             icon: AlertTriangle },
-  { to: "/core/automacao/templates",       label: "Templates",         icon: FileText },
-  { to: "/core/automacao/canais",          label: "Canais",            icon: Radio },
-  { to: "/core/automacao/aprovacoes",      label: "Aprovações",        icon: ClipboardCheck },
-  { to: "/core/automacao/historico",       label: "Histórico",         icon: History },
-  { to: "/core/automacao/monitoramento",   label: "Monitoramento",     icon: Activity },
-  { to: "/core/automacao/fallback-humano", label: "Fallback Humano",   icon: LifeBuoy },
+  { to: "/core/automacao",                label: "Visão geral",       icon: LayoutDashboard },
+  { to: "/core/automacao/fluxos",         label: "Catálogo de fluxos",icon: Workflow },
+  { to: "/core/automacao/modelos-nicho",  label: "Modelos por nicho", icon: LayersIcon },
+  { to: "/core/automacao/templates",      label: "Templates",         icon: FileText },
+  { to: "/core/automacao/aprovacoes",     label: "Aprovações",        icon: ClipboardCheck },
+  { to: "/admin/integracoes/n8n",         label: "Runtime n8n",       icon: Server },
 ];
 
 export function AutomacaoSubnav() {
@@ -41,7 +34,7 @@ export function AutomacaoSubnav() {
           <Link
             key={to}
             to={to}
-            search={scoped}
+            search={to.startsWith("/core/automacao") ? scoped : undefined}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               active
