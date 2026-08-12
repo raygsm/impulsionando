@@ -1,47 +1,124 @@
-// n8n workflows — server functions
-// Central de disparo dos fluxos n8n conectados às jornadas Impulsionando.
+// n8n workflows — server functions backed by the production registry.
+// Business rules stay in the Core; n8n is only the execution/orchestration layer.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type N8nWorkflow = {
   id: string;
-  funil: "captacao" | "conversao" | "relacionamento";
-  event_code: string;
-  label: string;
-  webhook_url: string | null;
-  is_active: boolean;
-  notes: string | null;
-  last_dispatched_at: string | null;
+  workflow_slug: string;
+  version: number;
+  category: string;
+  description: string | null;
+  n8n_workflow_id: string | null;
+  registry_status: string;
+  tenant_status: string | null;
+  last_execution_at: string | null;
+  last_error: unknown | null;
+  config: Record<string, unknown>;
 };
 
 async function ensureStaff(context: any) {
-  const { data: staff } = await context.supabase.rpc("is_impulsionando_staff", {
+  const { data: staff, error } = await context.supabase.rpc("is_impulsionando_staff", {
     _user: context.userId,
   });
-  if (!staff) throw new Error("Apenas equipe Impulsionando.");
+  if (error || !staff) throw new Error("Apenas equipe Impulsionando.");
 }
 
-// ---------- Listagem ----------
+async function getImpulsionandoTenant(context: any) {
+  const { data, error } = await context.supabase
+    .from("communication_tenants")
+    .select("id,slug,display_name")
+    .eq("slug", "impulsionando")
+    .eq("active", true)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Cliente Core Impulsionando não encontrado.");
+  return data as { id: string; slug: string; display_name: string | null };
+}
+
+export const getN8nHealth = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureStaff(context);
+    const baseUrl = (process.env.N8N_BASE_URL || "https://n8n.impulsionando.com.br").replace(/\/$/, "");
+    const started = Date.now();
+    try {
+      const response = await fetch(`${baseUrl}/healthz`, {
+        signal: AbortSignal.timeout(8_000),
+        headers: { accept: "application/json" },
+      });
+      const body = (await response.text()).slice(0, 300);
+      return {
+        ok: response.ok,
+        status: response.status,
+        latency_ms: Date.now() - started,
+        base_url: baseUrl,
+        body,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: 0,
+        latency_ms: Date.now() - started,
+        base_url: baseUrl,
+        body: error instanceof Error ? error.message : String(error),
+      };
+    }
+  });
+
 export const listN8nWorkflows = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await ensureStaff(context);
-    const { data, error } = await context.supabase
-      .from("n8n_workflows")
-      .select("*")
-      .order("funil", { ascending: true })
-      .order("label", { ascending: true });
-    if (error) throw new Error(error.message);
-    return (data ?? []) as N8nWorkflow[];
+    const tenant = await getImpulsionandoTenant(context);
+
+    const [{ data: registry, error: registryError }, { data: states, error: stateError }] =
+      await Promise.all([
+        context.supabase
+          .from("n8n_workflow_registry")
+          .select("id,workflow_slug,version,category,description,n8n_workflow_id,status,config")
+          .like("workflow_slug", "impulsionando.%")
+          .order("category", { ascending: true })
+          .order("workflow_slug", { ascending: true }),
+        context.supabase
+          .from("tenant_workflow_state")
+          .select("registry_id,status,last_execution_at,last_error,config")
+          .eq("tenant_id", tenant.id),
+      ]);
+
+    if (registryError) throw new Error(registryError.message);
+    if (stateError) throw new Error(stateError.message);
+
+    const stateByRegistry = new Map(
+      ((states ?? []) as any[]).map((row) => [row.registry_id, row]),
+    );
+
+    return ((registry ?? []) as any[]).map((row) => {
+      const state = stateByRegistry.get(row.id) as any | undefined;
+      return {
+        id: row.id,
+        workflow_slug: row.workflow_slug,
+        version: row.version,
+        category: row.category,
+        description: row.description,
+        n8n_workflow_id: row.n8n_workflow_id,
+        registry_status: row.status,
+        tenant_status: state?.status ?? null,
+        last_execution_at: state?.last_execution_at ?? null,
+        last_error: state?.last_error ?? null,
+        config: { ...(row.config ?? {}), ...(state?.config ?? {}) },
+      } satisfies N8nWorkflow;
+    });
   });
 
-// ---------- Atualização ----------
+// Editing a label/note in the dashboard is allowed, but this function deliberately
+// does not pretend to activate/deactivate the real n8n runtime. Runtime state must
+// be changed through an authenticated n8n control-plane operation.
 const UpdateInput = z.object({
   id: z.string().uuid(),
-  webhook_url: z.string().url().nullable().or(z.literal("")),
-  is_active: z.boolean().optional(),
-  notes: z.string().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
 });
 
 export const updateN8nWorkflow = createServerFn({ method: "POST" })
@@ -49,107 +126,95 @@ export const updateN8nWorkflow = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UpdateInput.parse(d))
   .handler(async ({ data, context }) => {
     await ensureStaff(context);
-    const patch: {
-      webhook_url: string | null;
-      is_active?: boolean;
-      notes?: string | null;
-    } = {
-      webhook_url: data.webhook_url === "" ? null : data.webhook_url,
-    };
-    if (typeof data.is_active === "boolean") patch.is_active = data.is_active;
-    if (data.notes !== undefined) patch.notes = data.notes;
+    const { data: current, error: readError } = await context.supabase
+      .from("n8n_workflow_registry")
+      .select("id,config")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!current) throw new Error("Workflow não encontrado.");
 
+    const config = {
+      ...((current as any).config ?? {}),
+      dashboard_notes: data.notes ?? null,
+    };
     const { error } = await context.supabase
-      .from("n8n_workflows")
-      .update(patch)
+      .from("n8n_workflow_registry")
+      .update({ config, updated_at: new Date().toISOString() })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-// ---------- Disparo (usado por outras server fns e pelo botão "testar") ----------
 const DispatchInput = z.object({
-  event_code: z.string(),
-  company_id: z.string().uuid().nullable().optional(),
+  workflow_slug: z.string().min(1),
   payload: z.record(z.unknown()).optional(),
 });
 
-async function doDispatch(
-  supabase: any,
-  event_code: string,
-  company_id: string | null,
-  payload: Record<string, unknown>,
-) {
-  const { data: wf, error } = await supabase
-    .from("n8n_workflows")
-    .select("id, webhook_url, is_active")
-    .eq("event_code", event_code)
-    .maybeSingle();
-
-  if (error) throw new Error(error.message);
-  if (!wf) throw new Error(`Fluxo n8n não cadastrado: ${event_code}`);
-  if (!wf.is_active || !wf.webhook_url) {
-    return { skipped: true, reason: !wf.is_active ? "inactive" : "no_url" };
-  }
-
-  const body = JSON.stringify({
-    event_code,
-    company_id,
-    dispatched_at: new Date().toISOString(),
-    data: payload,
-  });
-
-  let status_code: number | null = null;
-  let response_body = "";
-  let errorMsg: string | null = null;
-
-  try {
-    const res = await fetch(wf.webhook_url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
-    status_code = res.status;
-    response_body = (await res.text()).slice(0, 2000);
-  } catch (e: any) {
-    errorMsg = e?.message ?? String(e);
-  }
-
-  await supabase.from("n8n_dispatch_log").insert({
-    event_code,
-    company_id,
-    payload,
-    status_code,
-    response_body,
-    error: errorMsg,
-  });
-
-  if (!errorMsg && status_code && status_code < 400) {
-    await supabase
-      .from("n8n_workflows")
-      .update({ last_dispatched_at: new Date().toISOString() })
-      .eq("id", wf.id);
-  }
-
-  return { skipped: false, status_code, error: errorMsg };
-}
-
-// Disparo autenticado (usado por telas admin / botão "testar")
 export const dispatchN8nEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => DispatchInput.parse(d))
   .handler(async ({ data, context }) => {
-    return await doDispatch(
-      context.supabase,
-      data.event_code,
-      data.company_id ?? null,
-      data.payload ?? {},
-    );
+    await ensureStaff(context);
+    const { data: workflow, error } = await context.supabase
+      .from("n8n_workflow_registry")
+      .select("workflow_slug,n8n_workflow_id,status,config")
+      .eq("workflow_slug", data.workflow_slug)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!workflow) throw new Error("Workflow não cadastrado.");
+    if ((workflow as any).status !== "ACTIVE") {
+      return { skipped: true, reason: "inactive_registry" };
+    }
+
+    const config = ((workflow as any).config ?? {}) as Record<string, unknown>;
+    const webhookPath = typeof config.webhook_path === "string" ? config.webhook_path.trim() : "";
+    if (!webhookPath) {
+      return {
+        skipped: true,
+        reason: "no_verified_webhook_path",
+        workflow_id: (workflow as any).n8n_workflow_id ?? null,
+      };
+    }
+
+    const baseUrl = (process.env.N8N_BASE_URL || "https://n8n.impulsionando.com.br").replace(/\/$/, "");
+    const target = `${baseUrl}/webhook/${webhookPath.replace(/^\/+/, "")}`;
+    const started = Date.now();
+    try {
+      const response = await fetch(target, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          workflow_slug: data.workflow_slug,
+          source: "core_dashboard",
+          test: true,
+          dispatched_at: new Date().toISOString(),
+          data: data.payload ?? {},
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const responseBody = (await response.text()).slice(0, 1000);
+      return {
+        skipped: false,
+        ok: response.ok,
+        status_code: response.status,
+        duration_ms: Date.now() - started,
+        response: responseBody,
+      };
+    } catch (error) {
+      return {
+        skipped: false,
+        ok: false,
+        status_code: 0,
+        duration_ms: Date.now() - started,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   });
 
-// ---------- Logs recentes ----------
 const LogsInput = z.object({
-  event_code: z.string().optional(),
   limit: z.number().min(1).max(200).default(50),
 });
 
@@ -158,13 +223,13 @@ export const listN8nLogs = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => LogsInput.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await ensureStaff(context);
-    let q = context.supabase
-      .from("n8n_dispatch_log")
-      .select("*")
-      .order("dispatched_at", { ascending: false })
+    const tenant = await getImpulsionandoTenant(context);
+    const { data: rows, error } = await context.supabase
+      .from("communication_workflow_runs")
+      .select("id,workflow_id,n8n_execution_id,correlation_id,status,started_at,finished_at,duration_ms,error,created_at")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: false })
       .limit(data.limit);
-    if (data.event_code) q = q.eq("event_code", data.event_code);
-    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
