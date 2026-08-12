@@ -1,0 +1,68 @@
+name: VPS n8n Runtime Audit
+
+on:
+  push:
+    branches:
+      - agent/core-impulsionando-operational-foundation
+    paths:
+      - .github/workflows/vps-n8n-runtime-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect n8n runtime safely
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 5m
+          script_stop: true
+          script: |
+            set -eu
+            C=$(docker ps --format '{{.Names}}' | grep -E '^n8n-.*-n8n-1$' | head -n1)
+            test -n "$C"
+            echo "container=$C"
+            echo "== version =="
+            docker exec "$C" n8n --version || true
+            echo "== safe environment =="
+            docker inspect "$C" --format '{{range .Config.Env}}{{println .}}{{end}}' | while IFS= read -r line; do
+              key=${line%%=*}
+              case "$key" in
+                N8N_HOST|N8N_PROTOCOL|N8N_PORT|N8N_PATH|N8N_EDITOR_BASE_URL|WEBHOOK_URL|N8N_ENDPOINT_WEBHOOK|DB_TYPE|EXECUTIONS_MODE|N8N_ENCRYPTION_KEY|N8N_SECURE_COOKIE|N8N_PROXY_HOPS|N8N_DIAGNOSTICS_ENABLED|N8N_PUBLIC_API_DISABLED|N8N_PUBLIC_API_ENDPOINT)
+                  if [ "$key" = "N8N_ENCRYPTION_KEY" ]; then echo "$key=PRESENT"; else echo "$line"; fi
+                  ;;
+              esac
+            done
+            echo "== mounts =="
+            docker inspect "$C" --format '{{range .Mounts}}{{println .Destination}}{{end}}'
+            echo "== workflow catalog =="
+            rm -rf /tmp/n8n-audit && mkdir -p /tmp/n8n-audit
+            docker exec "$C" sh -lc 'rm -rf /tmp/n8n-audit && mkdir -p /tmp/n8n-audit && n8n export:workflow --all --output=/tmp/n8n-audit/workflows.json >/dev/null 2>&1' || true
+            docker cp "$C":/tmp/n8n-audit/workflows.json /tmp/n8n-workflows.json 2>/dev/null || true
+            if [ -s /tmp/n8n-workflows.json ]; then
+              node - <<'NODE'
+            const fs=require('fs');
+            const raw=JSON.parse(fs.readFileSync('/tmp/n8n-workflows.json','utf8'));
+            const a=Array.isArray(raw)?raw:[raw];
+            console.log('workflow_count='+a.length);
+            for(const w of a){console.log([w.id||'',w.name||'',w.active===true?'ACTIVE':'INACTIVE'].join('|'))}
+            NODE
+            else
+              echo "workflow_count=0_or_export_failed"
+            fi
+            echo "== credential catalog names only =="
+            docker exec "$C" sh -lc 'n8n export:credentials --all --decrypted=false --output=/tmp/n8n-audit/credentials.json >/dev/null 2>&1' || true
+            docker cp "$C":/tmp/n8n-audit/credentials.json /tmp/n8n-credentials.json 2>/dev/null || true
+            if [ -s /tmp/n8n-credentials.json ]; then
+              node - <<'NODE'
+            const fs=require('fs'); const raw=JSON.parse(fs.readFileSync('/tmp/n8n-credentials.json','utf8')); const a=Array.isArray(raw)?raw:[raw]; console.log('credential_count='+a.length); for(const c of a){console.log([c.id||'',c.name||'',c.type||''].join('|'))}
+            NODE
+            else
+              echo "credential_count=0_or_export_failed"
+            fi
