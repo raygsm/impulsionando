@@ -7,11 +7,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  * Callback de auditoria do n8n.
  *
  * Segurança:
- * - padrão: HMAC-SHA256 do body cru em `x-impulsionando-signature`;
- * - fallback com chave anon é DESABILITADO por padrão e só existe durante
- *   migração controlada se N8N_ALLOW_LEGACY_ANON_HOOK=true;
- * - persistência ocorre por RPC service-role no ledger único
- *   `communication_workflow_runs`.
+ * - exige HMAC-SHA256 do body cru em `x-impulsionando-signature`;
+ * - não aceita chave anônima/publicável do Supabase como autenticação;
+ * - persiste por RPC service-role no ledger único `communication_workflow_runs`.
  */
 const BodySchema = z.object({
   workflow_name: z.string().min(1).max(240),
@@ -38,18 +36,9 @@ function verifySignature(rawBody: string, signature: string | null, secret: stri
   const normalized = signature.startsWith("sha256=") ? signature.slice(7) : signature;
   if (!/^[a-f0-9]{64}$/i.test(normalized)) return false;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(normalized, "hex");
-  const b = Buffer.from(expected, "hex");
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-function legacyApiKeyAllowed(request: Request): boolean {
-  if (process.env.N8N_ALLOW_LEGACY_ANON_HOOK !== "true") return false;
-  const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
-  if (!anon) return false;
-  const apiKey = request.headers.get("apikey") ?? request.headers.get("x-apikey") ?? "";
-  const auth = request.headers.get("authorization") ?? "";
-  return apiKey === anon || auth === `Bearer ${anon}`;
+  const actual = Buffer.from(normalized, "hex");
+  const wanted = Buffer.from(expected, "hex");
+  return actual.length === wanted.length && timingSafeEqual(actual, wanted);
 }
 
 function ledgerStatus(status: z.infer<typeof BodySchema>["status"]) {
@@ -71,9 +60,10 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
       POST: async ({ request }) => {
         const raw = await request.text();
         const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
+        if (!secret) return new Response("Webhook secret not configured", { status: 503 });
+
         const signature = request.headers.get("x-impulsionando-signature");
-        const authenticated = verifySignature(raw, signature, secret) || legacyApiKeyAllowed(request);
-        if (!authenticated) return new Response("Unauthorized", { status: 401 });
+        if (!verifySignature(raw, signature, secret)) return new Response("Unauthorized", { status: 401 });
 
         let parsed: z.infer<typeof BodySchema>;
         try {
