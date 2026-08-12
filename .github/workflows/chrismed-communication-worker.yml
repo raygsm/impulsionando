@@ -1,0 +1,47 @@
+name: CHRISMED Communication Worker
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: chrismed-communication-worker
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Deliver due CHRISMED transactional emails
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Verify required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL" || { echo "::error::Missing SUPABASE_URL"; exit 1; }
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo "::error::Missing SUPABASE_SERVICE_ROLE_KEY"; exit 1; }
+
+      - name: Process due transactional emails
+        shell: bash
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code=$(curl --silent --show-error --retry 2 --retry-all-errors \
+            --output "$response_file" --write-out '%{http_code}' \
+            --request POST "$SUPABASE_URL/functions/v1/chrismed-communication-worker" \
+            --header "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            --header "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            --header 'content-type: application/json' \
+            --data '{}')
+          cat "$response_file"
+          echo
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::CHRISMED communication worker returned HTTP $http_code"
+            exit 1
+          fi
