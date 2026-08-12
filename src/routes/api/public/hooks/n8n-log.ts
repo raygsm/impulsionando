@@ -1,57 +1,68 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 /**
- * Endpoint público chamado pelos workflows N8N a cada step para registrar
- * trilha de auditoria (eventos, HMAC, chamadas de API/Z-API, sucessos e falhas).
+ * Callback de auditoria do n8n.
  *
- * Auth: HMAC-SHA256 sobre o body cru, header `x-impulsionando-signature`,
- * chave em `IMPULSIONANDO_WEBHOOK_SECRET`. Fallback: apikey anon (compatível
- * com nosso padrão de hooks internos).
- *
- * Idempotência: `idempotency_key` (workflow_name + step + key) evita duplicar
- * quando o N8N reexecuta o mesmo node.
+ * Segurança:
+ * - padrão: HMAC-SHA256 do body cru em `x-impulsionando-signature`;
+ * - fallback com chave anon é DESABILITADO por padrão e só existe durante
+ *   migração controlada se N8N_ALLOW_LEGACY_ANON_HOOK=true;
+ * - persistência ocorre por RPC service-role no ledger único
+ *   `communication_workflow_runs`.
  */
-
 const BodySchema = z.object({
-  workflow_name: z.string().min(1).max(200),
+  workflow_name: z.string().min(1).max(240),
   workflow_version: z.string().max(50).optional(),
-  regua: z.enum(["captacao", "conversao", "relacionamento", "retencao", "outro"]),
-  event_name: z.string().min(1).max(200),
-  step: z.string().min(1).max(200),
-  status: z.enum(["received", "ok", "retry", "failed", "skipped", "suppressed"]),
+  tenant_slug: z.string().min(1).max(120).default("impulsionando"),
+  n8n_execution_id: z.string().max(200).optional(),
+  regua: z.enum(["captacao", "conversao", "relacionamento", "retencao", "outro"]).optional(),
+  event_name: z.string().max(200).optional(),
+  step: z.string().max(200).optional(),
+  status: z.enum(["received", "running", "ok", "retry", "failed", "skipped", "suppressed"]),
   channel: z.enum(["email", "whatsapp", "slack", "internal", "api", "sms"]).optional(),
-  http_status: z.number().int().min(0).max(599).optional(),
-  latency_ms: z.number().int().min(0).max(600000).optional(),
-  contact_email: z.string().email().max(320).optional(),
-  contact_phone: z.string().max(40).optional(),
-  lead_id: z.string().uuid().optional(),
-  tenant_id: z.string().uuid().optional(),
   entity_type: z.string().max(50).optional(),
   entity_id: z.string().max(120).optional(),
   payload: z.record(z.unknown()).default({}),
-  error: z.string().max(2000).optional(),
-  idempotency_key: z.string().max(200).optional(),
+  error: z.string().max(4000).optional(),
+  idempotency_key: z.string().max(240).optional(),
+  correlation_id: z.string().max(240).optional(),
   started_at: z.string().datetime().optional(),
   finished_at: z.string().datetime().optional(),
 });
 
 function verifySignature(rawBody: string, signature: string | null, secret: string): boolean {
-  if (!signature) return false;
+  if (!signature || !secret) return false;
+  const normalized = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!/^[a-f0-9]{64}$/i.test(normalized)) return false;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expected);
+  const a = Buffer.from(normalized, "hex");
+  const b = Buffer.from(expected, "hex");
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function fallbackApiKey(request: Request): boolean {
+function legacyApiKeyAllowed(request: Request): boolean {
+  if (process.env.N8N_ALLOW_LEGACY_ANON_HOOK !== "true") return false;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
   if (!anon) return false;
-  const apikey = request.headers.get("apikey") ?? request.headers.get("x-apikey");
-  const auth = request.headers.get("authorization");
-  return apikey === anon || (auth?.toLowerCase() === `bearer ${anon.toLowerCase()}`);
+  const apiKey = request.headers.get("apikey") ?? request.headers.get("x-apikey") ?? "";
+  const auth = request.headers.get("authorization") ?? "";
+  return apiKey === anon || auth === `Bearer ${anon}`;
+}
+
+function ledgerStatus(status: z.infer<typeof BodySchema>["status"]) {
+  switch (status) {
+    case "ok": return "SUCCEEDED";
+    case "failed": return "FAILED";
+    case "skipped":
+    case "suppressed": return "CANCELLED";
+    case "received":
+    case "running":
+    case "retry":
+    default: return "RUNNING";
+  }
 }
 
 export const Route = createFileRoute("/api/public/hooks/n8n-log")({
@@ -60,97 +71,68 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
       POST: async ({ request }) => {
         const raw = await request.text();
         const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
-        const sig = request.headers.get("x-impulsionando-signature");
-        const okHmac = !!secret && verifySignature(raw, sig, secret);
-        const okKey = !okHmac && fallbackApiKey(request);
-        if (!okHmac && !okKey) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const signature = request.headers.get("x-impulsionando-signature");
+        const authenticated = verifySignature(raw, signature, secret) || legacyApiKeyAllowed(request);
+        if (!authenticated) return new Response("Unauthorized", { status: 401 });
 
-        let parsed;
+        let parsed: z.infer<typeof BodySchema>;
         try {
           parsed = BodySchema.parse(JSON.parse(raw));
-        } catch (e) {
+        } catch (error) {
+          return Response.json({ ok: false, error: "invalid_body", detail: (error as Error).message }, { status: 422 });
+        }
+
+        const correlationId = parsed.correlation_id
+          ?? parsed.idempotency_key
+          ?? parsed.n8n_execution_id
+          ?? `${parsed.workflow_name}:${parsed.step ?? parsed.event_name ?? "run"}:${randomUUID()}`;
+
+        const status = ledgerStatus(parsed.status);
+        const finishedAt = parsed.finished_at
+          ?? (status === "SUCCEEDED" || status === "FAILED" || status === "CANCELLED" ? new Date().toISOString() : null);
+        const errorPayload = parsed.error
+          ? { message: parsed.error, step: parsed.step ?? null, event_name: parsed.event_name ?? null }
+          : null;
+
+        const { data: runId, error } = await supabaseAdmin.rpc("record_n8n_registry_run" as never, {
+          p_tenant_slug: parsed.tenant_slug,
+          p_workflow_slug: parsed.workflow_name,
+          p_correlation_id: correlationId,
+          p_n8n_execution_id: parsed.n8n_execution_id ?? null,
+          p_status: status,
+          p_started_at: parsed.started_at ?? new Date().toISOString(),
+          p_finished_at: finishedAt,
+          p_error: errorPayload,
+        } as never);
+
+        if (error) {
+          const notFound = /workflow|registry|tenant/i.test(error.message) && /not|missing|found/i.test(error.message);
           return Response.json(
-            { ok: false, error: "invalid_body", detail: (e as Error).message },
-            { status: 422 },
+            { ok: false, error: notFound ? "workflow_not_registered" : "ledger_write_failed" },
+            { status: notFound ? 404 : 500 },
           );
         }
 
-        try {
-          const row = {
-            workflow_name: parsed.workflow_name,
-            workflow_version: parsed.workflow_version ?? null,
-            regua: parsed.regua,
-            event_name: parsed.event_name,
-            step: parsed.step,
-            status: parsed.status,
-            channel: parsed.channel ?? null,
-            http_status: parsed.http_status ?? null,
-            latency_ms: parsed.latency_ms ?? null,
-            contact_email: parsed.contact_email?.toLowerCase() ?? null,
-            contact_phone: parsed.contact_phone ?? null,
-            lead_id: parsed.lead_id ?? null,
-            tenant_id: parsed.tenant_id ?? null,
-            entity_type: parsed.entity_type ?? null,
-            entity_id: parsed.entity_id ?? null,
-            payload: parsed.payload as Record<string, unknown>,
-            error: parsed.error ?? null,
-            idempotency_key: parsed.idempotency_key ?? null,
-            started_at: parsed.started_at ?? new Date().toISOString(),
-            finished_at: parsed.finished_at ?? null,
-          };
-
-          // Idempotência: se vier idempotency_key, checa existência antes de inserir
-          // (o índice único é parcial, então não dá pra usar upsert via PostgREST).
-          if (parsed.idempotency_key) {
-            const { data: existing, error: selErr } = await supabaseAdmin
-              .from("n8n_workflow_runs")
-              .select("id")
-              .eq("workflow_name", parsed.workflow_name)
-              .eq("step", parsed.step)
-              .eq("idempotency_key", parsed.idempotency_key)
-              .maybeSingle();
-            if (selErr) throw selErr;
-            if (existing) {
-              return Response.json({ ok: true, duplicate: true, id: existing.id });
-            }
+        if (status === "FAILED") {
+          try {
+            await supabaseAdmin.rpc("notify_user" as never, {
+              p_user_id: null,
+              p_company_id: null,
+              p_category: "system",
+              p_severity: "error",
+              p_title: `n8n falhou: ${parsed.workflow_name}`,
+              p_message: `${parsed.step ?? parsed.event_name ?? "execução"} • ${parsed.error ?? "erro sem detalhe"}`,
+              p_action_url: "/admin/integracoes/n8n",
+              p_action_label: "Abrir execuções",
+            } as never);
+          } catch {
+            // A falha de notificação não invalida o registro já persistido.
           }
-          const { error } = await supabaseAdmin.from("n8n_workflow_runs").insert(row as never);
-          if (error) throw error;
-
-          // Alerta de falha crítica → notifica staff (in-app) quando step terminou em failed.
-          if (parsed.status === "failed") {
-            try {
-              await supabaseAdmin.rpc("notify_user" as never, {
-                p_user_id: null,
-                p_company_id: null,
-                p_category: "system",
-                p_severity: "error",
-                p_title: `N8N falhou: ${parsed.workflow_name}`,
-                p_message: `${parsed.step} • ${parsed.error ?? "erro desconhecido"}`,
-                p_action_url: "/core/integracoes/n8n",
-                p_action_label: "Abrir trilha",
-              } as never);
-            } catch {
-              // notify_user pode não estar disponível para broadcast — ignoramos.
-            }
-          }
-
-          return Response.json({ ok: true });
-        } catch (e) {
-          return Response.json(
-            { ok: false, error: (e as Error).message },
-            { status: 500 },
-          );
         }
+
+        return Response.json({ ok: true, run_id: runId, status });
       },
-      GET: async () =>
-        Response.json({
-          ok: true,
-          usage:
-            "POST with x-impulsionando-signature (HMAC-SHA256 over raw body) and the schema documented in docs/n8n/README.md",
-        }),
+      GET: async () => Response.json({ ok: true, auth: "hmac", ledger: "communication_workflow_runs" }),
     },
   },
 });
