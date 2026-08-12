@@ -1,0 +1,22 @@
+name: VPS n8n Safe Audit
+
+on:
+  push:
+    branches:
+      - agent/core-impulsionando-operational-foundation
+    paths:
+      - .github/workflows/vps-n8n-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Public n8n health
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "== Public n8n =="
+          for
