@@ -20,8 +20,6 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -40,11 +38,9 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 }
 
 /**
- * Cabeçalhos de segurança aplicados no servidor/CDN — reforço do que já
- * declaramos via <meta http-equiv> no __root. Cabeçalhos HTTP têm prioridade
- * sobre meta e cobrem diretivas que meta não aceita (frame-ancestors, HSTS,
- * X-Frame-Options, Cross-Origin-*). CSP mantém allowlist para GA4, Lovable e
- * Supabase; use 'report-only' temporariamente se precisar depurar bloqueios.
+ * Cabeçalhos de segurança aplicados no servidor/CDN.
+ * A teleconsulta CHRISMED usa um player Jitsi embutido no próprio portal.
+ * Câmera/microfone permanecem restritos ao próprio origin e ao host do player.
  */
 const CSP_DIRECTIVES = [
   "default-src 'self' https: data: blob:",
@@ -54,7 +50,7 @@ const CSP_DIRECTIVES = [
   "font-src 'self' data: https:",
   "connect-src 'self' https: wss: data: blob:",
   "media-src 'self' https: data: blob:",
-  "frame-src 'self' https:",
+  "frame-src 'self' https://meet.jit.si https:",
   "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev",
   "object-src 'none'",
   "base-uri 'self'",
@@ -68,7 +64,7 @@ const SECURITY_HEADERS: Array<[string, string]> = [
   ["x-content-type-options", "nosniff"],
   ["x-frame-options", "SAMEORIGIN"],
   ["referrer-policy", "strict-origin-when-cross-origin"],
-  ["permissions-policy", "camera=(), microphone=(), geolocation=(self), interest-cohort=()"],
+  ["permissions-policy", 'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=(self), interest-cohort=()'],
   ["cross-origin-opener-policy", "same-origin"],
   ["cross-origin-resource-policy", "same-site"],
   ["x-dns-prefetch-control", "on"],
@@ -76,8 +72,6 @@ const SECURITY_HEADERS: Array<[string, string]> = [
 ];
 
 function applySecurityHeaders(response: Response): Response {
-  // Não sobrescreve respostas já emitidas com headers específicos (webhooks,
-  // downloads, redirects) — só adiciona quando ausentes.
   const headers = new Headers(response.headers);
   for (const [k, v] of SECURITY_HEADERS) {
     if (!headers.has(k)) headers.set(k, v);
@@ -113,8 +107,6 @@ export default {
         routedRequest = new Request(url, request);
       } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
-        // Render the tenant landing page internally so the public URL remains
-        // the clean subdomain root (for example, / rather than /chrismed).
         routedRequest = new Request(url, request);
       }
 
