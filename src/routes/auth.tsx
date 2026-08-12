@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -148,29 +147,22 @@ function AuthPage() {
     toast.success("Bem-vindo!");
     goPostAuth(data.user);
   }
-
-
   async function handleGoogleSignIn() {
     setLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: nextPath
-          ? `${window.location.origin}/auth?next=${encodeURIComponent(nextPath)}`
-          : window.location.origin,
-      });
-      if (result.error) {
-        toast.error("Falha no login com Google. Tente novamente.");
-        setLoading(false);
-        return;
-      }
-      if (result.redirected) return; // browser redireciona para Google
-      // Token recebido e sessão setada
-      toast.success("Bem-vindo!");
-      const { data } = await supabase.auth.getUser();
-      goPostAuth(data.user);
-    } catch {
-      toast.error("Erro de conexão. Tente novamente.");
-    } finally {
+
+    const redirectTo = nextPath
+      ? `${window.location.origin}/auth?next=${encodeURIComponent(nextPath)}`
+      : window.location.origin;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) {
+      toast.error("Falha no login com Google. Tente novamente.");
       setLoading(false);
     }
   }
