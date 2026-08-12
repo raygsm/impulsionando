@@ -2,9 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
- * Webhooks, Integrations & Automation Cockpit — Fase 77.
- * Webhooks (genérico + Mercado Pago), integrações cadastradas, logs,
- * runs de N8N, eventos WhatsApp e eventos de catálogo/runtime.
+ * Operational automation health using only production-backed sources.
+ * No metric below depends on legacy/demo tables.
  */
 export const getIntegrationsAutomationHealth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -12,161 +11,197 @@ export const getIntegrationsAutomationHealth = createServerFn({ method: "POST" }
   .handler(async ({ context, data }) => {
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
-    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+    const { data: staff, error: staffError } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
+    if (staffError || !staff) throw new Error("Apenas equipe Impulsionando.");
 
-    const sinceIso = new Date(Date.now() - data.days * 86400000).toISOString();
+    const sinceIso = new Date(Date.now() - data.days * 86_400_000).toISOString();
+    const { data: tenant, error: tenantError } = await supabaseAdmin
+      .from("communication_tenants")
+      .select("id")
+      .eq("slug", "impulsionando")
+      .eq("active", true)
+      .limit(1)
+      .maybeSingle();
+    if (tenantError) throw new Error(tenantError.message);
+    if (!tenant) throw new Error("Cliente Core Impulsionando não encontrado.");
 
-    const [intRes, intLogRes, whRunRes, whEvtRes, mpWhRes, mpagoWhRes, n8nRes, waRes, runRes] = await Promise.all([
-      supabaseAdmin.from("core_integrations").select("id, slug, environment, status, is_active, last_test_at, last_error").limit(2000),
-      supabaseAdmin.from("core_integration_logs").select("id, integration_slug, event_type, status, duration_ms, created_at").gte("created_at", sinceIso).limit(50000),
-      supabaseAdmin.from("webhook_runs").select("id, workflow, event, status, response_status, attempts, started_at, finished_at, created_at").gte("created_at", sinceIso).limit(50000),
-      supabaseAdmin.from("webhook_event_log").select("id, source, target_kind, status, replay_count, processed_at").gte("processed_at", sinceIso).limit(50000),
-      supabaseAdmin.from("mp_webhook_log").select("id, topic, processed, error, received_at").gte("received_at", sinceIso).limit(50000),
-      supabaseAdmin.from("mpago_webhook_events").select("id, event_type, signature_valid, processed, processing_error, received_at").gte("received_at", sinceIso).limit(50000),
-      supabaseAdmin.from("n8n_workflow_runs").select("id, workflow_name, regua, status, channel, http_status, latency_ms, started_at, finished_at, created_at").gte("created_at", sinceIso).limit(50000),
-      supabaseAdmin.from("whatsapp_message_events").select("id, status, error_code, received_at").gte("received_at", sinceIso).limit(50000),
-      supabaseAdmin.from("runtime_events").select("id, level, scope, occurred_at").gte("occurred_at", sinceIso).limit(50000),
+    const [registryRes, stateRes, n8nRes, mpagoRes, waRes, endpointRes, providerRes] = await Promise.all([
+      supabaseAdmin
+        .from("n8n_workflow_registry")
+        .select("id,workflow_slug,category,n8n_workflow_id,status,config")
+        .like("workflow_slug", "impulsionando.%")
+        .limit(5000),
+      supabaseAdmin
+        .from("tenant_workflow_state")
+        .select("registry_id,status,last_execution_at,last_error")
+        .eq("tenant_id", tenant.id)
+        .limit(5000),
+      supabaseAdmin
+        .from("communication_workflow_runs")
+        .select("id,registry_id,automation_id,n8n_execution_id,correlation_id,status,started_at,finished_at,duration_ms,error,created_at")
+        .eq("tenant_id", tenant.id)
+        .gte("created_at", sinceIso)
+        .limit(50_000),
+      supabaseAdmin
+        .from("mpago_webhook_events")
+        .select("id,event_type,signature_valid,processed,processing_error,received_at")
+        .gte("received_at", sinceIso)
+        .limit(50_000),
+      supabaseAdmin
+        .from("whatsapp_message_events")
+        .select("id,status,error_code,created_at")
+        .gte("created_at", sinceIso)
+        .limit(50_000),
+      supabaseAdmin
+        .from("communication_channel_endpoints")
+        .select("id,channel,provider,status,last_error,last_healthcheck_at,address,display_address")
+        .eq("tenant_id", tenant.id)
+        .limit(5000),
+      supabaseAdmin
+        .from("communication_provider_accounts")
+        .select("id,provider,active,config")
+        .eq("tenant_id", tenant.id)
+        .limit(5000),
     ]);
 
-    const err = intRes.error || intLogRes.error || whRunRes.error || whEvtRes.error || mpWhRes.error || mpagoWhRes.error || n8nRes.error || waRes.error || runRes.error;
-    if (err) throw new Error(err.message);
+    const firstError = registryRes.error || stateRes.error || n8nRes.error || mpagoRes.error || waRes.error || endpointRes.error || providerRes.error;
+    if (firstError) throw new Error(firstError.message);
 
-    const integrations = intRes.data ?? [];
-    const intLogs = intLogRes.data ?? [];
-    const whRuns = whRunRes.data ?? [];
-    const whEvents = whEvtRes.data ?? [];
-    const mpWh = mpWhRes.data ?? [];
-    const mpagoWh = mpagoWhRes.data ?? [];
-    const n8n = n8nRes.data ?? [];
-    const wa = waRes.data ?? [];
-    const runtime = runRes.data ?? [];
+    const registry = (registryRes.data ?? []) as any[];
+    const states = (stateRes.data ?? []) as any[];
+    const n8n = (n8nRes.data ?? []) as any[];
+    const mpago = (mpagoRes.data ?? []) as any[];
+    const wa = (waRes.data ?? []) as any[];
+    const endpoints = (endpointRes.data ?? []) as any[];
+    const providers = (providerRes.data ?? []) as any[];
 
-    // Integrations
-    const intActive = integrations.filter((i) => i.is_active).length;
-    const intWithError = integrations.filter((i) => i.last_error).length;
-    const envMap = new Map<string, number>();
-    for (const i of integrations) { const k = i.environment || "—"; envMap.set(k, (envMap.get(k) ?? 0) + 1); }
-    const envBreakdown = Array.from(envMap, ([env, count]) => ({ env, count })).sort((a, b) => b.count - a.count);
+    const stateByRegistry = new Map(states.map((row) => [row.registry_id, row]));
+    const registryById = new Map(registry.map((row) => [row.id, row]));
 
-    // Integration logs
-    const intLogSuccess = intLogs.filter((l) => l.status === "success" || l.status === "ok").length;
-    const intLogFailed = intLogs.filter((l) => l.status === "failed" || l.status === "error").length;
-    const intLogAvgMs = intLogs.length ? intLogs.reduce((s, l) => s + Number(l.duration_ms || 0), 0) / intLogs.length : 0;
-    const intSlugMap = new Map<string, { total: number; failed: number }>();
-    for (const l of intLogs) {
-      const k = l.integration_slug || "—";
-      const cur = intSlugMap.get(k) ?? { total: 0, failed: 0 };
-      cur.total++;
-      if (l.status === "failed" || l.status === "error") cur.failed++;
-      intSlugMap.set(k, cur);
+    const activeRegistry = registry.filter((row) => row.status === "ACTIVE" && row.n8n_workflow_id).length;
+    const runtimeErrors = states.filter((row) => row.status === "ERROR" || row.last_error).length;
+    const registryWithoutId = registry.filter((row) => !row.n8n_workflow_id).length;
+
+    const n8nSuccess = n8n.filter((run) => run.status === "SUCCEEDED").length;
+    const n8nFailed = n8n.filter((run) => run.status === "FAILED").length;
+    const n8nAvgLatency = n8n.length
+      ? n8n.reduce((sum, run) => sum + Number(run.duration_ms || 0), 0) / n8n.length
+      : 0;
+
+    const categoryMap = new Map<string, { total: number; failed: number }>();
+    for (const run of n8n) {
+      const workflow = run.registry_id ? registryById.get(run.registry_id) : null;
+      const key = workflow?.category || "automacao";
+      const current = categoryMap.get(key) ?? { total: 0, failed: 0 };
+      current.total += 1;
+      if (run.status === "FAILED") current.failed += 1;
+      categoryMap.set(key, current);
     }
-    const topIntegrations = Array.from(intSlugMap, ([slug, v]) => ({ slug, ...v })).sort((a, b) => b.total - a.total).slice(0, 12);
+    const topReguas = Array.from(categoryMap, ([regua, values]) => ({ regua, ...values }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 12);
 
-    // Webhook runs
-    const whSuccess = whRuns.filter((w) => w.status === "success" || w.status === "completed" || (w.response_status && w.response_status < 400)).length;
-    const whFailed = whRuns.filter((w) => w.status === "failed" || w.status === "error" || (w.response_status && w.response_status >= 400)).length;
-    const whRetried = whRuns.filter((w) => Number(w.attempts || 0) > 1).length;
-    const whWorkflowMap = new Map<string, { total: number; failed: number }>();
-    for (const w of whRuns) {
-      const k = w.workflow || "—";
-      const cur = whWorkflowMap.get(k) ?? { total: 0, failed: 0 };
-      cur.total++;
-      if (w.status === "failed" || w.status === "error") cur.failed++;
-      whWorkflowMap.set(k, cur);
-    }
-    const topWorkflows = Array.from(whWorkflowMap, ([workflow, v]) => ({ workflow, ...v })).sort((a, b) => b.total - a.total).slice(0, 10);
-
-    // Webhook event log
-    const whEvtProcessed = whEvents.filter((e) => e.status === "processed" || e.status === "completed").length;
-    const whEvtReplayed = whEvents.filter((e) => Number(e.replay_count || 0) > 0).length;
-    const sourceMap = new Map<string, number>();
-    for (const e of whEvents) { const k = e.source || "—"; sourceMap.set(k, (sourceMap.get(k) ?? 0) + 1); }
-    const sources = Array.from(sourceMap, ([source, count]) => ({ source, count })).sort((a, b) => b.count - a.count).slice(0, 10);
-
-    // Mercado Pago webhooks (legacy mp_webhook_log + mpago_webhook_events)
-    const mpProcessed = mpWh.filter((m) => m.processed).length;
-    const mpErrors = mpWh.filter((m) => m.error).length;
-    const mpagoProcessed = mpagoWh.filter((m) => m.processed).length;
-    const mpagoBadSig = mpagoWh.filter((m) => m.signature_valid === false).length;
-    const mpagoErrors = mpagoWh.filter((m) => m.processing_error).length;
-    const mpagoTypeMap = new Map<string, number>();
-    for (const m of mpagoWh) { const k = m.event_type || "—"; mpagoTypeMap.set(k, (mpagoTypeMap.get(k) ?? 0) + 1); }
-    const mpagoTypes = Array.from(mpagoTypeMap, ([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 10);
-
-    // N8N
-    const n8nSuccess = n8n.filter((r) => r.status === "success" || r.status === "completed" || (r.http_status && r.http_status < 400)).length;
-    const n8nFailed = n8n.filter((r) => r.status === "failed" || r.status === "error" || (r.http_status && r.http_status >= 400)).length;
-    const n8nAvgLatency = n8n.length ? n8n.reduce((s, r) => s + Number(r.latency_ms || 0), 0) / n8n.length : 0;
-    const reguaMap = new Map<string, { total: number; failed: number }>();
-    for (const r of n8n) {
-      const k = r.regua || "—";
-      const cur = reguaMap.get(k) ?? { total: 0, failed: 0 };
-      cur.total++;
-      if (r.status === "failed" || r.status === "error") cur.failed++;
-      reguaMap.set(k, cur);
-    }
-    const topReguas = Array.from(reguaMap, ([regua, v]) => ({ regua, ...v })).sort((a, b) => b.total - a.total).slice(0, 12);
     const channelMap = new Map<string, number>();
-    for (const r of n8n) {
-      const ch = r.channel;
-      const list = Array.isArray(ch) ? ch : ch ? [ch] : ["—"];
-      for (const c of list) {
-        const k = String(c);
-        channelMap.set(k, (channelMap.get(k) ?? 0) + 1);
-      }
+    for (const endpoint of endpoints) {
+      const key = endpoint.channel || "outro";
+      channelMap.set(key, (channelMap.get(key) ?? 0) + 1);
     }
-    const channels = Array.from(channelMap, ([channel, count]) => ({ channel, count })).sort((a, b) => b.count - a.count);
+    const channels = Array.from(channelMap, ([channel, count]) => ({ channel, count }))
+      .sort((a, b) => b.count - a.count);
 
-    // WhatsApp events
     const waStatusMap = new Map<string, number>();
-    for (const w of wa) { const k = w.status || "—"; waStatusMap.set(k, (waStatusMap.get(k) ?? 0) + 1); }
-    const waStatuses = Array.from(waStatusMap, ([status, count]) => ({ status, count })).sort((a, b) => b.count - a.count);
-    const waErrors = wa.filter((w) => w.error_code).length;
+    for (const event of wa) {
+      const key = event.status || "UNKNOWN";
+      waStatusMap.set(key, (waStatusMap.get(key) ?? 0) + 1);
+    }
+    const waStatuses = Array.from(waStatusMap, ([status, count]) => ({ status, count }))
+      .sort((a, b) => b.count - a.count);
+    const waErrors = wa.filter((event) => event.error_code).length;
 
-    // Runtime events
-    const rtLevelMap = new Map<string, number>();
-    for (const r of runtime) { const k = r.level || "info"; rtLevelMap.set(k, (rtLevelMap.get(k) ?? 0) + 1); }
-    const rtLevels = Array.from(rtLevelMap, ([level, count]) => ({ level, count })).sort((a, b) => b.count - a.count);
-    const rtErrors = runtime.filter((r) => r.level === "error" || r.level === "fatal").length;
+    const mpagoProcessed = mpago.filter((event) => event.processed).length;
+    const mpagoBadSig = mpago.filter((event) => event.signature_valid === false).length;
+    const mpagoErrors = mpago.filter((event) => event.processing_error).length;
+    const mpagoTypeMap = new Map<string, number>();
+    for (const event of mpago) {
+      const key = event.event_type || "—";
+      mpagoTypeMap.set(key, (mpagoTypeMap.get(key) ?? 0) + 1);
+    }
+    const mpagoTypes = Array.from(mpagoTypeMap, ([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const endpointErrors = endpoints.filter((endpoint) => endpoint.last_error || endpoint.status === "ERROR").length;
+    const endpointActive = endpoints.filter((endpoint) => endpoint.status === "ACTIVE").length;
+    const providerActive = providers.filter((provider) => provider.active).length;
+    const pendingEndpoints = endpoints.filter((endpoint) => endpoint.status !== "ACTIVE").map((endpoint) => ({
+      id: endpoint.id,
+      slug: `${endpoint.channel}:${endpoint.provider}`,
+      environment: endpoint.display_address || endpoint.address || "—",
+      status: endpoint.status,
+      is_active: false,
+      last_error: endpoint.last_error ?? null,
+    }));
+
+    const topWorkflowMap = new Map<string, { total: number; failed: number }>();
+    for (const run of n8n) {
+      const workflow = run.registry_id ? registryById.get(run.registry_id) : null;
+      const key = workflow?.workflow_slug || "automacao-sem-registry";
+      const current = topWorkflowMap.get(key) ?? { total: 0, failed: 0 };
+      current.total += 1;
+      if (run.status === "FAILED") current.failed += 1;
+      topWorkflowMap.set(key, current);
+    }
+    const topWorkflows = Array.from(topWorkflowMap, ([workflow, values]) => ({ workflow, ...values }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    const webhooksReceived = mpago.length + wa.length;
+    const webhooksFailed = mpagoErrors + mpagoBadSig + waErrors;
 
     return {
       window: { days: data.days },
       integrations: {
-        total: integrations.length,
-        active: intActive,
-        withError: intWithError,
-        environments: envBreakdown,
+        total: endpoints.length + providers.length,
+        active: endpointActive + providerActive,
+        withError: endpointErrors,
+        environments: channels.map((item) => ({ env: item.channel, count: item.count })),
+        pending: pendingEndpoints,
       },
       integrationLogs: {
-        total: intLogs.length,
-        success: intLogSuccess,
-        failed: intLogFailed,
-        avgMs: intLogAvgMs,
-        topIntegrations,
+        total: n8n.length,
+        success: n8nSuccess,
+        failed: n8nFailed,
+        avgMs: n8nAvgLatency,
+        topIntegrations: topWorkflows.map((item) => ({ slug: item.workflow, total: item.total, failed: item.failed })),
       },
       webhooks: {
-        runs: whRuns.length,
-        success: whSuccess,
-        failed: whFailed,
-        retried: whRetried,
+        runs: n8n.length,
+        success: n8nSuccess,
+        failed: n8nFailed,
+        retried: 0,
         topWorkflows,
-        events: whEvents.length,
-        eventsProcessed: whEvtProcessed,
-        eventsReplayed: whEvtReplayed,
-        sources,
+        events: webhooksReceived,
+        eventsProcessed: mpagoProcessed + Math.max(0, wa.length - waErrors),
+        eventsReplayed: 0,
+        sources: [
+          { source: "mercado_pago", count: mpago.length },
+          { source: "whatsapp", count: wa.length },
+        ].filter((item) => item.count > 0),
       },
       mercadoPago: {
-        legacyTotal: mpWh.length,
-        legacyProcessed: mpProcessed,
-        legacyErrors: mpErrors,
-        total: mpagoWh.length,
+        legacyTotal: 0,
+        legacyProcessed: 0,
+        legacyErrors: 0,
+        total: mpago.length,
         processed: mpagoProcessed,
         invalidSignatures: mpagoBadSig,
         errors: mpagoErrors,
         eventTypes: mpagoTypes,
       },
       n8n: {
+        registry: registry.length,
+        activeRegistry,
+        registryWithoutId,
         runs: n8n.length,
         success: n8nSuccess,
         failed: n8nFailed,
@@ -180,9 +215,13 @@ export const getIntegrationsAutomationHealth = createServerFn({ method: "POST" }
         statuses: waStatuses,
       },
       runtime: {
-        events: runtime.length,
-        errors: rtErrors,
-        levels: rtLevels,
+        events: states.length,
+        errors: runtimeErrors,
+        levels: [
+          { level: "active", count: states.filter((row) => row.status === "ACTIVE").length },
+          { level: "ready", count: states.filter((row) => row.status === "READY").length },
+          { level: "error", count: runtimeErrors },
+        ].filter((item) => item.count > 0),
       },
       generatedAt: new Date().toISOString(),
     };
