@@ -1,69 +1,109 @@
 /**
- * Dispatcher server-only por event_code.
- * Lê webhook_url da tabela n8n_workflows (configurada em /admin/integracoes/n8n)
- * e faz POST com o payload. Registra em n8n_dispatch_log.
- *
- * Usado por webhooks do Mercado Pago, triggers de DB (via server fns) e
- * qualquer server logic que precise disparar réguas do funil Impulsionando.
+ * Dispatcher server-only por evento.
+ * Fonte de verdade: n8n_workflow_registry + tenant_workflow_state.
+ * Nunca fabrica URL: sem webhook sincronizado, retorna skipped=no_webhook_verified.
  */
+import { createHmac, randomUUID } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+const CANONICAL_N8N = "https://n8n.impulsionando.com.br/";
+
+function normalizeWorkflowSlug(eventCode: string) {
+  const trimmed = eventCode.trim();
+  return trimmed.startsWith("impulsionando.") ? trimmed : `impulsionando.${trimmed}`;
+}
 
 export async function dispatchN8nByEvent(
   event_code: string,
   payload: Record<string, unknown>,
   company_id: string | null = null,
-): Promise<{ ok: boolean; skipped?: boolean; status?: number; error?: string }> {
-  const { data: wf, error } = await supabaseAdmin
-    .from("n8n_workflows")
-    .select("id, webhook_url, is_active")
-    .eq("event_code", event_code)
-    .maybeSingle();
+): Promise<{ ok: boolean; skipped?: boolean; status?: number; error?: string; workflow_slug?: string }> {
+  const workflowSlug = normalizeWorkflowSlug(event_code);
 
-  if (error) return { ok: false, error: error.message };
-  if (!wf) return { ok: false, error: `event_code não cadastrado: ${event_code}` };
-  if (!wf.is_active || !wf.webhook_url) {
-    return { ok: true, skipped: true, error: !wf.is_active ? "inactive" : "no_url" };
+  const { data: tenant, error: tenantError } = await supabaseAdmin
+    .from("communication_tenants" as never)
+    .select("id" as never)
+    .eq("slug" as never, "impulsionando")
+    .eq("active" as never, true)
+    .limit(1)
+    .maybeSingle();
+  if (tenantError) return { ok: false, error: tenantError.message, workflow_slug: workflowSlug };
+  if (!tenant) return { ok: false, error: "impulsionando_tenant_not_found", workflow_slug: workflowSlug };
+
+  const { data: registry, error: registryError } = await supabaseAdmin
+    .from("n8n_workflow_registry" as never)
+    .select("id,workflow_slug,status,config" as never)
+    .eq("workflow_slug" as never, workflowSlug)
+    .order("version" as never, { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (registryError) return { ok: false, error: registryError.message, workflow_slug: workflowSlug };
+  if (!registry) return { ok: false, error: `workflow_not_registered:${workflowSlug}`, workflow_slug: workflowSlug };
+
+  const reg = registry as any;
+  const { data: state, error: stateError } = await supabaseAdmin
+    .from("tenant_workflow_state" as never)
+    .select("status,config" as never)
+    .eq("tenant_id" as never, (tenant as any).id)
+    .eq("registry_id" as never, reg.id)
+    .maybeSingle();
+  if (stateError) return { ok: false, error: stateError.message, workflow_slug: workflowSlug };
+
+  if (reg.status !== "ACTIVE" || (state as any)?.status !== "ACTIVE") {
+    return { ok: true, skipped: true, error: "inactive", workflow_slug: workflowSlug };
   }
 
+  const regConfig = reg.config && typeof reg.config === "object" ? reg.config : {};
+  const stateConfig = (state as any)?.config && typeof (state as any).config === "object" ? (state as any).config : {};
+  const webhookUrl = String(stateConfig.webhook_url ?? regConfig.webhook_url ?? "");
+  if (!webhookUrl.startsWith(CANONICAL_N8N)) {
+    return { ok: true, skipped: true, error: "no_webhook_verified", workflow_slug: workflowSlug };
+  }
+
+  const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
+  if (!secret) return { ok: false, error: "IMPULSIONANDO_WEBHOOK_SECRET not set", workflow_slug: workflowSlug };
+
+  const correlationId = `${workflowSlug}:${randomUUID()}`;
+  const startedAt = new Date().toISOString();
   const body = JSON.stringify({
+    workflow_name: workflowSlug,
     event_code,
+    correlation_id: correlationId,
     company_id,
-    dispatched_at: new Date().toISOString(),
+    dispatched_at: startedAt,
     data: payload,
   });
+  const signature = createHmac("sha256", secret).update(body).digest("hex");
 
-  let status_code: number | null = null;
-  let response_body = "";
-  let errorMsg: string | null = null;
-
+  let status = 0;
+  let errorMessage: string | null = null;
   try {
-    const res = await fetch(wf.webhook_url, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-impulsionando-signature": signature,
+      },
       body,
     });
-    status_code = res.status;
-    response_body = (await res.text().catch(() => "")).slice(0, 2000);
-  } catch (e: any) {
-    errorMsg = e?.message ?? String(e);
+    status = response.status;
+    if (!response.ok) errorMessage = (await response.text().catch(() => "")).slice(0, 2000) || `HTTP ${response.status}`;
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
   }
 
-  await supabaseAdmin.from("n8n_dispatch_log").insert({
-    event_code,
-    company_id,
-    payload,
-    status_code,
-    response_body,
-    error: errorMsg,
+  const finalStatus = !errorMessage && status > 0 && status < 400 ? "SUCCEEDED" : "FAILED";
+  await supabaseAdmin.rpc("record_n8n_registry_run" as never, {
+    p_tenant_slug: "impulsionando",
+    p_workflow_slug: workflowSlug,
+    p_correlation_id: correlationId,
+    p_n8n_execution_id: null,
+    p_status: finalStatus,
+    p_started_at: startedAt,
+    p_finished_at: new Date().toISOString(),
+    p_error: errorMessage ? { message: errorMessage, http_status: status || null } : null,
   } as never);
 
-  if (!errorMsg && status_code && status_code < 400) {
-    await supabaseAdmin
-      .from("n8n_workflows")
-      .update({ last_dispatched_at: new Date().toISOString() })
-      .eq("id", wf.id);
-    return { ok: true, status: status_code };
-  }
-
-  return { ok: false, status: status_code ?? 0, error: errorMsg ?? `HTTP ${status_code}` };
+  if (finalStatus === "SUCCEEDED") return { ok: true, status, workflow_slug: workflowSlug };
+  return { ok: false, status, error: errorMessage ?? `HTTP ${status}`, workflow_slug: workflowSlug };
 }
