@@ -14,21 +14,21 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect live webhook nodes without secrets
+      - name: Inspect registered webhook paths without secrets
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          script_stop: true
           script: |
             set -eu
             C=n8n-umlg-n8n-1
-            OUT=/tmp/impulsionando-n8n-workflows.json
-            docker exec "$C" rm -f "$OUT" || true
-            docker exec "$C" n8n export:workflow --all --output="$OUT" >/dev/null
-            docker cp "$C:$OUT" /tmp/impulsionando-n8n-workflows.json
-            node -e 'const fs=require("fs"); const raw=JSON.parse(fs.readFileSync("/tmp/impulsionando-n8n-workflows.json","utf8")); const list=Array.isArray(raw)?raw:[raw]; for(const w of list){ const hooks=(w.nodes||[]).filter(n=>String(n.type||"").includes("webhook")).map(n=>({path:n.parameters&&n.parameters.path||null,method:n.parameters&&n.parameters.httpMethod||"GET"})); if(hooks.length) console.log(JSON.stringify({id:w.id,name:w.name,active:!!w.active,hooks})); }'
-            rm -f /tmp/impulsionando-n8n-workflows.json
-            docker exec "$C" rm -f "$OUT" || true
+            echo "SQLITE_HOST=$(command -v sqlite3 >/dev/null 2>&1 && echo yes || echo no)"
+            MOUNT=$(docker inspect "$C" --format '{{range .Mounts}}{{if eq .Destination "/home/node/.n8n"}}{{.Source}}{{end}}{{end}}')
+            if command -v sqlite3 >/dev/null 2>&1 && [ -f "$MOUNT/database.sqlite" ]; then
+              sqlite3 -readonly -separator '|' "$MOUNT/database.sqlite" "select workflowId,webhookPath,method from webhook_entity order by workflowId,webhookPath;" | grep '^\(kjdkkV9rjIMgAMdA\|YT7nYlKuQryGUNEq\|TwxMj5XSMgUEbXiD\|NYX6Bo1dlyd7b3P7\|J2vrRXk9L2WoRfam\|s1fiGRPTRcyeAPyt\|CUFC3smxigoC5hOx\|FmNmDqMNYbbW3fM7\|WavassyWPggKwThY\|cBPqXfXfP0H3pAbs\|7i5gHQnraIKzgdz1\|njO3SGf3tl3j8wh0\|SXW6oLezwWFvAGwN\|y080sHJouKP66SAH\|iGZ5djNpjie6WSTB\|VwGvbkMMVKU2CQ3E\|1QysKcsGaLHountH\|vvqBbKmhz6gF1szf\|hdyhky3EYUcOPaAk\|NcPcGGHAbAmbrMiG\|QSfPQDe2C63j7ZNp\|JJu7F0uXxS1RN7BK\|0dA5lyMj9LtObOdg\|SMbKe6dT2j2Qs9gt\|F0asmrhkiplhhrYW\|3m68WaCpdlC6G9Vh\)|' || true
+            else
+              echo "REGISTERED_PATH_AUDIT=sqlite3_unavailable"
+              docker exec "$C" sh -lc 'node -e "try{console.log(require.resolve(\"better-sqlite3\"))}catch(e){console.log(\"BETTER_SQLITE3=unavailable\")}"'
+            fi
