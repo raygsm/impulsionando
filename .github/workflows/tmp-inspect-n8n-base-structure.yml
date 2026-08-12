@@ -1,0 +1,51 @@
+name: Temporary inspect n8n base structure
+
+on:
+  push:
+    branches:
+      - agent/core-n8n-centralization-20260813
+    paths:
+      - .github/workflows/tmp-inspect-n8n-base-structure.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect representative workflow safely
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          command_timeout: 10m
+          script: |
+            set -eu
+            C=n8n-umlg-n8n-1
+            MOUNT=$(docker inspect "$C" --format '{{range .Mounts}}{{if eq .Destination "/home/node/.n8n"}}{{.Source}}{{end}}{{end}}')
+            DB="$MOUNT/database.sqlite"
+            test -f "$DB"
+            cat > /tmp/inspect_n8n.py <<'PY'
+            import os, sqlite3, json
+            wid='kjdkkV9rjIMgAMdA'
+            con=sqlite3.connect('file:'+os.environ['DB_PATH']+'?mode=ro',uri=True)
+            row=con.execute('select name,nodes,connections from workflow_entity where id=?',(wid,)).fetchone()
+            name,nodes_raw,conn_raw=row
+            nodes=json.loads(nodes_raw or '[]'); conn=json.loads(conn_raw or '{}')
+            print('WORKFLOW='+name)
+            for n in nodes:
+                typ=str(n.get('type','')); nm=str(n.get('name','')); p=n.get('parameters') or {}
+                print('NODE|'+nm+'|'+typ)
+                if typ=='n8n-nodes-base.webhook': print('WEBHOOK_PARAMS|'+json.dumps({k:p.get(k) for k in ('path','httpMethod','authentication','responseMode')},ensure_ascii=False))
+                if 'code' in typ.lower() or 'function' in typ.lower():
+                    code=str(p.get('jsCode') or p.get('functionCode') or p.get('code') or '')
+                    clean=' '.join(code.split())[:1200]
+                    print('CODE|'+nm+'|'+clean)
+            print('CONNECTIONS='+json.dumps(conn,ensure_ascii=False))
+            con.close()
+            PY
+            DB_PATH="$DB" python3 /tmp/inspect_n8n.py
+            rm -f /tmp/inspect_n8n.py
