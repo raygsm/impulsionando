@@ -25,10 +25,11 @@ jobs:
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
           cat >/tmp/wmp-lead.json <<'JSON'
-          {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":true,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
+          {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
           JSON
           sudo docker cp /tmp/wmp-lead.json "$N8N:/tmp/wmp-lead.json"
-          sudo docker exec "$N8N" n8n import:workflow --input=/tmp/wmp-lead.json --activeState=fromJson
+          sudo docker exec "$N8N" n8n import:workflow --input=/tmp/wmp-lead.json
+          sudo docker exec "$N8N" n8n update:workflow --id=wmpLeadIntake01 --active=true
           sudo docker exec "$N8N" n8n publish:workflow --id=wmpLeadIntake01
           sudo docker restart "$N8N" >/dev/null
           sleep 12
