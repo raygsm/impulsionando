@@ -13,6 +13,11 @@ create table if not exists public.agenda_professional_terms (
   accepted_at timestamptz not null default now(), revoked_at timestamptz, ip_hash text, user_agent text, metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(), constraint agenda_professional_terms_company check (company_id='642096b5-a9ff-4521-a82a-c004f6d2e2d2'::uuid)
 );
+-- June Agenda created a smaller contract. CREATE TABLE IF NOT EXISTS does not
+-- add later columns, so clean replays must converge before indexes/functions.
+alter table public.agenda_professional_terms add column if not exists revoked_at timestamptz;
+alter table public.agenda_professional_terms add column if not exists ip_hash text;
+alter table public.agenda_professional_terms add column if not exists metadata jsonb not null default '{}'::jsonb;
 create unique index if not exists agenda_professional_terms_active_unique on public.agenda_professional_terms(professional_id,terms_version) where revoked_at is null;
 create table if not exists public.agenda_professional_eligibility (
   id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete restrict,
@@ -20,6 +25,9 @@ create table if not exists public.agenda_professional_eligibility (
   priority integer not null default 100, is_active boolean not null default true, created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
   constraint agenda_professional_eligibility_company check (company_id='642096b5-a9ff-4521-a82a-c004f6d2e2d2'::uuid), unique(professional_id)
 );
+alter table public.agenda_professional_eligibility add column if not exists profession_id uuid;
+alter table public.agenda_professional_eligibility add column if not exists primary_area text;
+create unique index if not exists agenda_professional_eligibility_professional_unique on public.agenda_professional_eligibility(professional_id);
 create table if not exists public.agenda_open_slots (
   id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete restrict,
   origin text not null default 'cancellation' check (origin in ('cancellation','manual','substitution','emergency')),
@@ -31,6 +39,15 @@ create table if not exists public.agenda_open_slots (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
   constraint agenda_open_slots_company check(company_id='642096b5-a9ff-4521-a82a-c004f6d2e2d2'::uuid), constraint agenda_open_slots_valid_range check(ends_at>starts_at)
 );
+alter table public.agenda_open_slots add column if not exists original_professional_id uuid references public.agenda_professionals(id) on delete set null;
+alter table public.agenda_open_slots add column if not exists offering_id uuid references public.chrismed_service_offerings(id) on delete set null;
+alter table public.agenda_open_slots add column if not exists profession_id uuid;
+alter table public.agenda_open_slots add column if not exists primary_area text;
+alter table public.agenda_open_slots add column if not exists reason text;
+alter table public.agenda_open_slots drop constraint if exists agenda_open_slots_appointment_id_fkey;
+alter table public.agenda_open_slots
+  add constraint agenda_open_slots_appointment_id_fkey
+  foreign key (appointment_id) references public.chrismed_appointments(id) on delete set null;
 create index if not exists agenda_open_slots_status_time_idx on public.agenda_open_slots(status,starts_at);
 create table if not exists public.agenda_slot_offers (
   id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete restrict,
@@ -39,6 +56,10 @@ create table if not exists public.agenda_slot_offers (
   sent_at timestamptz not null default now(), expires_at timestamptz not null, responded_at timestamptz, created_at timestamptz not null default now(),
   constraint agenda_slot_offers_company check(company_id='642096b5-a9ff-4521-a82a-c004f6d2e2d2'::uuid), unique(open_slot_id,professional_id)
 );
+alter table public.agenda_slot_offers drop constraint if exists agenda_slot_offers_status_check;
+alter table public.agenda_slot_offers
+  add constraint agenda_slot_offers_status_check
+  check (status in ('sent','accepted','declined','expired','cancelled'));
 create index if not exists agenda_slot_offers_prof_status_idx on public.agenda_slot_offers(professional_id,status,expires_at);
 alter table public.agenda_professional_availability enable row level security;
 alter table public.agenda_professional_terms enable row level security;
