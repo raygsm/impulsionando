@@ -1,0 +1,43 @@
+name: Temporary audit n8n live callbacks
+
+on:
+  push:
+    branches:
+      - ops/audit-n8n-live-callbacks-20260813
+    paths:
+      - .github/workflows/tmp-audit-n8n-live-callbacks.yml
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect sanitized live workflow topology
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -eu
+            C=n8n-umlg-n8n-1
+            docker exec "$C" n8n export:workflow --all --output=/tmp/impulsionando-workflows.json >/dev/null 2>&1
+            docker exec "$C" node -e '
+              const fs=require("fs");
+              let data=JSON.parse(fs.readFileSync("/tmp/impulsionando-workflows.json","utf8"));
+              if(!Array.isArray(data)) data=[data];
+              for(const w of data){
+                const webhooks=[];
+                let callback=false;
+                let canonicalCallback=false;
+                for(const n of (w.nodes||[])){
+                  const t=String(n.type||"");
+                  const p=n.parameters||{};
+                  if(t.includes("webhook")) webhooks.push({name:String(n.name||""),path:String(p.path||""),method:String(p.httpMethod||p.method||"")});
+                  const url=String(p.url||"");
+                  if(url.includes("n8n-callback")||url.includes("/api/public/hooks/n8n-log")){callback=true; if(url.includes("impulsionando.com.br")) canonicalCallback=true;}
+                }
+                console.log(JSON.stringify({id:String(w.id||""),name:String(w.name||""),active:!!w.active,webhooks,callback,canonicalCallback}));
+              }
+            '
+            docker exec "$C" rm -f /tmp/impulsionando-workflows.json
