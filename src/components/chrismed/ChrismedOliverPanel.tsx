@@ -15,7 +15,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink, Send, Loader2, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
-import { askOliver } from '@/lib/oliver-chat.functions';
+import { askOliverOmnichannel } from '@/lib/oliver-omnichannel.functions';
 import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
@@ -64,8 +64,25 @@ const OLIVER_WELCOME: ChatMsg = {
 
 const C = CHRISMED_CONTACT.channels;
 
+const OLIVER_SESSION_STORAGE_KEY = 'chrismed:oliver:web-session:v1';
+function getOliverWebSessionId(): string {
+  if (typeof window === 'undefined') return `web:chrismed:ssr`;
+  try {
+    const existing = window.localStorage.getItem(OLIVER_SESSION_STORAGE_KEY)?.trim();
+    if (existing && /^web:chrismed:[A-Za-z0-9:_-]{8,180}$/.test(existing)) return existing;
+    const suffix = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const generated = `web:chrismed:${suffix}`;
+    window.localStorage.setItem(OLIVER_SESSION_STORAGE_KEY, generated);
+    return generated;
+  } catch {
+    return `web:chrismed:ephemeral:${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
+
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
-// sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
+// sábado 09-13h. A disponibilidade real deve ser mantida pela configuração operacional.
 function isHumanOnline(now: Date = new Date()): boolean {
   const day = now.getDay();
   const hour = now.getHours();
@@ -86,8 +103,8 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Agendar consulta', hint: 'Sem cadastro para ver horários', icon: Calendar, to: '/chrismed/agendar' },
   { label: 'Profissionais da saúde', hint: 'Rede e especialidades', icon: Users, to: '/chrismed/medicos' },
   { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
-  { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
-  { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
+  { label: 'Meus agendamentos', hint: 'Área do paciente', icon: ClipboardList, to: '/chrismed/minha-conta' },
+  { label: 'Pagamento', hint: 'No fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo oficial de agendamento, após a escolha do horário e a confirmação dos dados. As formas disponíveis são apresentadas pelo próprio checkout.' },
 ];
 
 type OliverLang = 'pt' | 'en' | 'es';
@@ -99,7 +116,7 @@ export function ChrismedOliverPanel() {
   const { open, context, info } = useChrismedOliverState();
 
   // Chat real com IA — cérebro CHRISMED
-  const ask = useServerFn(askOliver);
+  const ask = useServerFn(askOliverOmnichannel);
   const [messages, setMessages] = useState<ChatMsg[]>([OLIVER_WELCOME]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -128,6 +145,7 @@ export function ChrismedOliverPanel() {
           messages: next,
           pathname,
           lang: searchLang,
+          sessionId: getOliverWebSessionId(),
         },
       });
       setMessages((prev) => [...prev, { role: 'assistant', content: res.reply }]);

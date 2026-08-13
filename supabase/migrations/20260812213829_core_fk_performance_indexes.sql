@@ -1,0 +1,15 @@
+create index if not exists idx_audit_logs_user on public.audit_logs(user_id);
+create index if not exists idx_billing_contracts_plan on public.billing_contracts(plan_id);
+create index if not exists idx_billing_contracts_policy on public.billing_contracts(policy_id);
+create index if not exists idx_billing_plan_modules_module on public.billing_plan_modules(module_id);
+create index if not exists idx_billing_suspensions_company on public.billing_suspensions(company_id);
+create index if not exists idx_billing_suspensions_invoice on public.billing_suspensions(invoice_id);
+create index if not exists idx_message_outbox_company on public.message_outbox(company_id);
+create index if not exists idx_message_outbox_recipient_user on public.message_outbox(recipient_user_id);
+create index if not exists idx_module_versions_released_by on public.module_versions(released_by);
+create index if not exists idx_crm_pipelines_company on public.crm_pipelines(company_id);
+create index if not exists idx_crm_tags_company on public.crm_tags(company_id);
+create index if not exists idx_support_sla_company on public.support_sla_policies(company_id);
+create index if not exists idx_support_tickets_contact on public.support_tickets(contact_id);
+create index if not exists idx_knowledge_articles_created_by on public.knowledge_articles(created_by);
+create index if not exists idx_knowledge_articles_updated_by on public.knowledge_articles(updated_by);

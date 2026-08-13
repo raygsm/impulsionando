@@ -1,24 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Card } from "@/components/ui/card";
-import { ALL_WORKFLOWS } from "@/data/automacao-catalog";
-import { FlowCard } from "@/components/core/automacao/FlowCard";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/core/automacao/demonstracoes")({
-  head: () => ({ meta: [{ title: "Demonstrações — Automação" }, { name: "robots", content: "noindex" }] }),
-  component: DemoPage,
+  head: () => ({ meta: [{ title: "Demonstrações de automação — Impulsionando" }, { name: "robots", content: "noindex" }] }),
+  component: RedirectToCatalog,
 });
 
-function DemoPage() {
-  const items = ALL_WORKFLOWS.filter((w) => w.modo === "demo");
-  return (
-    <div className="space-y-4">
-      <Card className="p-4 bg-muted/30 text-sm">
-        <p><strong>Modo demonstração</strong> — payload fictício, nenhum canal real acionado, logs simulados apenas.
-        Alterne para produção via <code>/core/automacao/aprovacoes</code> quando o checklist estiver assinado.</p>
-      </Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {items.map((wf) => <FlowCard key={wf.slug} wf={wf} />)}
-      </div>
-    </div>
-  );
+function RedirectToCatalog() {
+  // O catálogo de fluxos pode ser consultado sem sugerir que payload fictício
+  // representa execução de produção.
+  return <Navigate to="/core/automacao/fluxos" search={{ mode: "demo" }} replace />;
 }

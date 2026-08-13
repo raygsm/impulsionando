@@ -1,23 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import {
-  listN8nWorkflows,
-  updateN8nWorkflow,
-  dispatchN8nEvent,
-  listN8nLogs,
-  type N8nWorkflow,
-} from "@/lib/n8n-workflows.functions";
+import { listN8nWorkflows, listN8nLogs, type N8nWorkflow } from "@/lib/n8n-workflows.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Workflow, Play, Save, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+import { Workflow, RefreshCw, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/integracoes/n8n")({
   head: () => ({
@@ -29,25 +18,26 @@ export const Route = createFileRoute("/_authenticated/admin/integracoes/n8n")({
   component: N8nAdminPage,
 });
 
-const FUNIS: Array<{ key: N8nWorkflow["funil"]; label: string }> = [
+const FUNIS = [
   { key: "captacao", label: "Captação" },
   { key: "conversao", label: "Conversão" },
   { key: "relacionamento", label: "Relacionamento" },
 ];
 
 function N8nAdminPage() {
-  const qc = useQueryClient();
   const list = useServerFn(listN8nWorkflows);
   const logsFn = useServerFn(listN8nLogs);
 
-  const { data: workflows = [], isLoading } = useQuery({
-    queryKey: ["n8n-workflows"],
+  const { data: workflows = [], isLoading, refetch } = useQuery({
+    queryKey: ["n8n-workflows-live"],
     queryFn: () => list(),
+    refetchInterval: 15000,
   });
 
   const { data: logs = [], refetch: refetchLogs } = useQuery({
-    queryKey: ["n8n-logs"],
-    queryFn: () => logsFn({ data: { limit: 30 } }),
+    queryKey: ["n8n-runs-live"],
+    queryFn: () => logsFn({ data: { limit: 50 } }),
+    refetchInterval: 15000,
   });
 
   const grouped = FUNIS.map((f) => ({
@@ -55,181 +45,123 @@ function N8nAdminPage() {
     items: workflows.filter((w) => w.funil === f.key),
   }));
 
+  const active = workflows.filter((w) => w.registry_status === "ACTIVE" && w.state_status === "ACTIVE").length;
+  const verified = workflows.filter((w) => w.webhook_verified).length;
+
   return (
     <div className="container mx-auto py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Workflow className="h-7 w-7" /> Integração n8n
-        </h1>
-        <p className="text-muted-foreground">
-          Conecte cada fluxo do n8n a um evento da jornada Impulsionando. Cole a URL de webhook,
-          ative e teste.
-        </p>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Workflow className="h-7 w-7" /> n8n — Runtime real
+          </h1>
+          <p className="text-muted-foreground max-w-3xl">
+            Painel operacional do n8n da Impulsionando. Os dados abaixo vêm do registry e do ledger de execuções do Supabase. Este painel não simula ativação nem aceita URL manual sem validação do runtime.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { refetch(); refetchLogs(); }}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Atualizar
+          </Button>
+          <Button asChild variant="outline">
+            <a href="https://n8n.impulsionando.com.br" target="_blank" rel="noreferrer">
+              Abrir n8n <ExternalLink className="h-4 w-4 ml-2" />
+            </a>
+          </Button>
+        </div>
       </div>
 
+      <div className="grid gap-3 md:grid-cols-3">
+        <Metric title="Workflows registrados" value={workflows.length} />
+        <Metric title="Ativos no Core" value={active} />
+        <Metric title="Webhook canônico verificado" value={verified} />
+      </div>
+
+      <Card className="border-amber-200 bg-amber-50/40 dark:bg-amber-950/10">
+        <CardContent className="py-4 text-sm">
+          Alterações de workflow, credencial, ativação e webhook são feitas no runtime n8n e sincronizadas ao backend. Isso evita o erro antigo de um botão alterar apenas o banco e aparentar que o n8n foi modificado.
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="captacao">
-        <TabsList>
-          {FUNIS.map((f) => (
-            <TabsTrigger key={f.key} value={f.key}>
-              {f.label}
-            </TabsTrigger>
-          ))}
-          <TabsTrigger value="logs">Logs</TabsTrigger>
+        <TabsList className="flex flex-wrap h-auto">
+          {FUNIS.map((f) => <TabsTrigger key={f.key} value={f.key}>{f.label}</TabsTrigger>)}
+          <TabsTrigger value="outros">Outros</TabsTrigger>
+          <TabsTrigger value="logs">Execuções</TabsTrigger>
         </TabsList>
 
         {grouped.map((g) => (
           <TabsContent key={g.key} value={g.key} className="space-y-3">
-            {isLoading ? (
-              <Card>
-                <CardContent className="py-10 text-center text-muted-foreground">
-                  Carregando…
-                </CardContent>
-              </Card>
-            ) : (
-              g.items.map((wf) => (
-                <WorkflowRow
-                  key={wf.id}
-                  wf={wf}
-                  onSaved={() => qc.invalidateQueries({ queryKey: ["n8n-workflows"] })}
-                  onTested={() => refetchLogs()}
-                />
-              ))
-            )}
+            <WorkflowList items={g.items} isLoading={isLoading} />
           </TabsContent>
         ))}
+
+        <TabsContent value="outros" className="space-y-3">
+          <WorkflowList items={workflows.filter((w) => !FUNIS.some((f) => f.key === w.funil))} isLoading={isLoading} />
+        </TabsContent>
 
         <TabsContent value="logs">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Últimos disparos</CardTitle>
-              <Button size="sm" variant="ghost" onClick={() => refetchLogs()}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
+              <CardTitle className="text-base">Ledger único de execuções</CardTitle>
+              <Button size="sm" variant="ghost" onClick={() => refetchLogs()}><RefreshCw className="h-4 w-4" /></Button>
             </CardHeader>
             <CardContent className="space-y-2">
               {logs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum disparo registrado ainda.</p>
-              ) : (
-                logs.map((l: any) => (
-                  <div
-                    key={l.id}
-                    className="flex items-center justify-between border-b py-2 text-sm"
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-mono">{l.event_code}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(l.dispatched_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <Badge variant={statusVariant(l.status_code, l.error)}>
-                      {l.error ? "erro" : l.status_code ?? "—"}
-                    </Badge>
+                <p className="text-sm text-muted-foreground">Nenhuma execução registrada ainda.</p>
+              ) : logs.map((l: any) => (
+                <div key={l.id} className="grid gap-2 border-b py-3 text-sm md:grid-cols-[1fr_120px_170px]">
+                  <div>
+                    <div className="font-mono text-xs break-all">{l.event_code}</div>
+                    <div className="text-xs text-muted-foreground">{l.n8n_execution_id ? `Execução n8n ${l.n8n_execution_id}` : l.correlation_id}</div>
+                    {l.error ? <div className="text-xs text-destructive mt-1">{JSON.stringify(l.error).slice(0, 240)}</div> : null}
                   </div>
-                ))
-              )}
+                  <Badge className="w-fit" variant={l.status === "FAILED" ? "destructive" : l.status === "SUCCEEDED" ? "default" : "secondary"}>{l.status}</Badge>
+                  <span className="text-xs text-muted-foreground md:text-right">{new Date(l.finished_at ?? l.started_at ?? l.created_at).toLocaleString("pt-BR")}</span>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="text-sm text-muted-foreground">
+        Diagnóstico geral de integrações: <Link to="/core/integracoes/diagnostico" className="underline">abrir diagnóstico</Link>.
+      </div>
     </div>
   );
 }
 
-function statusVariant(status: number | null, error: string | null): any {
-  if (error) return "destructive";
-  if (!status) return "secondary";
-  if (status < 300) return "default";
-  if (status < 500) return "outline";
-  return "destructive";
+function Metric({ title, value }: { title: string; value: number }) {
+  return <Card><CardContent className="py-4"><div className="text-xs text-muted-foreground">{title}</div><div className="text-2xl font-semibold mt-1">{value}</div></CardContent></Card>;
 }
 
-function WorkflowRow({
-  wf,
-  onSaved,
-  onTested,
-}: {
-  wf: N8nWorkflow;
-  onSaved: () => void;
-  onTested: () => void;
-}) {
-  const [url, setUrl] = useState(wf.webhook_url ?? "");
-  const [active, setActive] = useState(wf.is_active);
-  const update = useServerFn(updateN8nWorkflow);
-  const dispatch = useServerFn(dispatchN8nEvent);
+function WorkflowList({ items, isLoading }: { items: N8nWorkflow[]; isLoading: boolean }) {
+  if (isLoading) return <Card><CardContent className="py-10 text-center text-muted-foreground">Carregando runtime…</CardContent></Card>;
+  if (!items.length) return <Card><CardContent className="py-10 text-center text-muted-foreground">Nenhum workflow nesta categoria.</CardContent></Card>;
+  return <>{items.map((wf) => <WorkflowRow key={wf.id} wf={wf} />)}</>;
+}
 
-  const saveMut = useMutation({
-    mutationFn: () =>
-      update({ data: { id: wf.id, webhook_url: url, is_active: active } }),
-    onSuccess: () => {
-      toast.success("Fluxo salvo.");
-      onSaved();
-    },
-    onError: (e: any) => toast.error(e?.message ?? "Erro ao salvar"),
-  });
-
-  const testMut = useMutation({
-    mutationFn: () =>
-      dispatch({
-        data: {
-          event_code: wf.event_code,
-          payload: { test: true, source: "admin.integracoes.n8n" },
-        },
-      }),
-    onSuccess: (res: any) => {
-      if (res?.skipped) toast.warning(`Não disparado: ${res.reason}`);
-      else if (res?.error) toast.error(`Erro: ${res.error}`);
-      else toast.success(`Disparado — HTTP ${res?.status_code}`);
-      onTested();
-    },
-    onError: (e: any) => toast.error(e?.message ?? "Erro no disparo"),
-  });
-
+function WorkflowRow({ wf }: { wf: N8nWorkflow }) {
+  const active = wf.registry_status === "ACTIVE" && wf.state_status === "ACTIVE";
   return (
     <Card>
-      <CardContent className="pt-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+      <CardContent className="pt-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
             <div className="font-medium">{wf.label}</div>
-            <div className="text-xs font-mono text-muted-foreground">{wf.event_code}</div>
+            <div className="text-xs font-mono text-muted-foreground break-all">{wf.event_code}</div>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              <Badge variant={active ? "default" : "secondary"}>{active ? "Ativo" : wf.state_status ?? wf.registry_status}</Badge>
+              <Badge variant="outline">n8n ID: {wf.n8n_workflow_id ?? "não vinculado"}</Badge>
+              <Badge variant={wf.webhook_verified ? "default" : "outline"}>{wf.webhook_verified ? "Webhook verificado" : "Webhook não sincronizado"}</Badge>
+              {wf.last_run_status ? <Badge variant={wf.last_run_status === "FAILED" ? "destructive" : "outline"}>Última execução: {wf.last_run_status}</Badge> : null}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor={`active-${wf.id}`} className="text-sm">
-              Ativo
-            </Label>
-            <Switch
-              id={`active-${wf.id}`}
-              checked={active}
-              onCheckedChange={setActive}
-            />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">URL do webhook n8n</Label>
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://n8n.impulsionando.com.br/webhook/..."
-          />
-        </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Último disparo:{" "}
-            {wf.last_dispatched_at
-              ? new Date(wf.last_dispatched_at).toLocaleString()
-              : "nunca"}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => testMut.mutate()}
-              disabled={testMut.isPending || !url}
-            >
-              <Play className="h-3.5 w-3.5 mr-1" /> Testar
-            </Button>
-            <Button size="sm" onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
-              <Save className="h-3.5 w-3.5 mr-1" /> Salvar
-            </Button>
+          <div className="text-xs text-muted-foreground md:text-right">
+            <div>Gatilho: {wf.trigger_type ?? "não informado"}</div>
+            <div>{wf.last_execution_at ? `Última atividade: ${new Date(wf.last_execution_at).toLocaleString("pt-BR")}` : "Sem execução registrada"}</div>
+            {wf.last_error ? <div className="mt-1 max-w-md text-destructive">{JSON.stringify(wf.last_error).slice(0, 220)}</div> : null}
           </div>
         </div>
       </CardContent>

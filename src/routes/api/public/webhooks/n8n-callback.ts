@@ -1,221 +1,102 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { z } from "zod";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+/**
+ * Endpoint de compatibilidade para workflows antigos.
+ * Mantém o contrato legado, mas persiste no mesmo registry/ledger moderno
+ * utilizado por /api/public/hooks/n8n-log.
+ */
 const Body = z.object({
-  workflow: z.string().min(1),
+  workflow: z.string().min(1).max(240),
   workflow_version: z.string().optional(),
-  event: z.string().min(1),
+  event: z.string().min(1).max(200),
   step: z.string().min(1).default("execute"),
   status: z.enum(["received", "ok", "retry", "failed", "skipped", "suppressed"]),
-  niche_slug: z.string().optional().nullable(),
-  channel: z.enum(["email", "whatsapp", "slack", "internal", "api", "sms"]).optional(),
-  http_status: z.number().int().optional(),
-  latency_ms: z.number().int().optional(),
-  contact_email: z.string().optional(),
-  contact_phone: z.string().optional(),
-  lead_id: z.string().uuid().optional(),
   tenant_id: z.string().uuid().optional(),
-  entity_type: z.string().optional(),
-  entity_id: z.string().optional(),
-  executionId: z.string().optional(),
-  idempotency_key: z.string().optional(),
-  error: z.string().optional(),
+  tenant_slug: z.string().min(1).max(120).optional(),
+  executionId: z.string().max(200).optional(),
+  idempotency_key: z.string().max(240).optional(),
+  error: z.string().max(4000).optional(),
   payload: z.record(z.string(), z.any()).optional(),
+  started_at: z.string().datetime().optional(),
   finished_at: z.string().datetime().optional(),
 });
 
-const STAGE_TO_REGUA: Record<string, string> = {
-  capture: "captacao",
-  convert: "conversao",
-  relate: "relacionamento",
-  retain: "retencao",
-  expand: "outro",
-};
+function validSignature(raw: string, signature: string, secret: string) {
+  const normalized = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!secret || !/^[a-f0-9]{64}$/i.test(normalized)) return false;
+  const expected = createHmac("sha256", secret).update(raw).digest("hex");
+  const a = Buffer.from(normalized, "hex");
+  const b = Buffer.from(expected, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
-function inferRegua(event: string): string {
-  const e = event.toLowerCase();
-  if (e.includes("lead") || e.includes("capture") || e.includes("captacao")) return "captacao";
-  if (e.includes("checkout") || e.includes("trial") || e.includes("convert") || e.includes("won")) return "conversao";
-  if (e.includes("nps") || e.includes("birthday") || e.includes("reminder") || e.includes("relate")) return "relacionamento";
-  if (e.includes("overdue") || e.includes("cancel") || e.includes("winback") || e.includes("retain") || e.includes("no_visit")) return "retencao";
-  return "outro";
+function mapStatus(status: z.infer<typeof Body>["status"]) {
+  if (status === "ok") return "SUCCEEDED";
+  if (status === "failed") return "FAILED";
+  if (status === "skipped" || status === "suppressed") return "CANCELLED";
+  return "RUNNING";
+}
+
+async function resolveTenantSlug(parsed: z.infer<typeof Body>) {
+  if (parsed.tenant_slug) return parsed.tenant_slug;
+  if (!parsed.tenant_id) return "impulsionando";
+  const { data, error } = await supabaseAdmin
+    .from("communication_tenants" as never)
+    .select("slug" as never)
+    .eq("id" as never, parsed.tenant_id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("tenant_not_found");
+  return String((data as any).slug);
 }
 
 export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET;
-        if (!secret) {
-          return new Response("Missing IMPULSIONANDO_WEBHOOK_SECRET", { status: 500 });
-        }
+        const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
+        if (!secret) return new Response("Missing webhook secret", { status: 503 });
 
         const raw = await request.text();
         const signature = request.headers.get("x-impulsionando-signature") ?? "";
-        const expected = createHmac("sha256", secret).update(raw).digest("hex");
-        const sigBuf = Buffer.from(signature);
-        const expBuf = Buffer.from(expected);
-        if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
-          return new Response("Invalid signature", { status: 401 });
-        }
+        if (!validSignature(raw, signature, secret)) return new Response("Invalid signature", { status: 401 });
 
         let parsed: z.infer<typeof Body>;
         try {
           parsed = Body.parse(JSON.parse(raw));
-        } catch (err: any) {
-          return Response.json({ error: "invalid_body", detail: err?.message }, { status: 400 });
+        } catch (error) {
+          return Response.json({ ok: false, error: "invalid_body", detail: (error as Error).message }, { status: 422 });
         }
 
-        const regua = STAGE_TO_REGUA[parsed.niche_slug ?? ""] ?? inferRegua(parsed.event);
+        try {
+          const tenantSlug = await resolveTenantSlug(parsed);
+          const status = mapStatus(parsed.status);
+          const terminal = status === "SUCCEEDED" || status === "FAILED" || status === "CANCELLED";
+          const correlationId = parsed.idempotency_key
+            ?? parsed.executionId
+            ?? `${parsed.workflow}:${parsed.step}:${randomUUID()}`;
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const row = {
-          workflow_name: parsed.workflow,
-          workflow_version: parsed.workflow_version ?? null,
-          regua,
-          event_name: parsed.event,
-          step: parsed.step,
-          status: parsed.status,
-          channel: parsed.channel ?? null,
-          http_status: parsed.http_status ?? null,
-          latency_ms: parsed.latency_ms ?? null,
-          contact_email: parsed.contact_email ?? null,
-          contact_phone: parsed.contact_phone ?? null,
-          lead_id: parsed.lead_id ?? null,
-          tenant_id: parsed.tenant_id ?? null,
-          entity_type: parsed.entity_type ?? null,
-          entity_id: parsed.entity_id ?? null,
-          payload: { ...(parsed.payload ?? {}), niche_slug: parsed.niche_slug ?? null, executionId: parsed.executionId ?? null },
-          error: parsed.error ?? null,
-          idempotency_key: parsed.idempotency_key ?? parsed.executionId ?? null,
-          finished_at: parsed.finished_at ?? new Date().toISOString(),
-        };
+          const { data: runId, error } = await supabaseAdmin.rpc("record_n8n_registry_run" as never, {
+            p_tenant_slug: tenantSlug,
+            p_workflow_slug: parsed.workflow,
+            p_correlation_id: correlationId,
+            p_n8n_execution_id: parsed.executionId ?? null,
+            p_status: status,
+            p_started_at: parsed.started_at ?? new Date().toISOString(),
+            p_finished_at: parsed.finished_at ?? (terminal ? new Date().toISOString() : null),
+            p_error: parsed.error ? { message: parsed.error, event: parsed.event, step: parsed.step } : null,
+          } as never);
+          if (error) throw error;
 
-        const { error } = await supabaseAdmin
-          .from("n8n_workflow_runs")
-          .upsert(row as any, { onConflict: "workflow_name,step,idempotency_key", ignoreDuplicates: false });
-
-        if (error) {
-          console.error("[n8n-callback] insert failed", error);
-          return Response.json({ error: "db_insert_failed", detail: error.message }, { status: 500 });
+          return Response.json({ ok: true, run_id: runId, status, compatibility_endpoint: true });
+        } catch (error) {
+          console.error("[n8n-callback] ledger failure", error);
+          return Response.json({ ok: false, error: "ledger_write_failed" }, { status: 500 });
         }
-
-        // Alert on failure (incident row + optional Slack ping)
-        if (parsed.status === "failed") {
-          try {
-            await notifyFailure(supabaseAdmin, {
-              workflow: parsed.workflow,
-              event: parsed.event,
-              niche_slug: parsed.niche_slug ?? null,
-              error: parsed.error ?? null,
-              tenant_id: parsed.tenant_id ?? null,
-              executionId: parsed.executionId ?? null,
-            });
-          } catch (e) {
-            console.error("[n8n-callback] notifyFailure failed", e);
-          }
-        }
-
-        return Response.json({ ok: true });
       },
     },
   },
 });
-
-async function notifyFailure(
-  supabaseAdmin: any,
-  ctx: {
-    workflow: string;
-    event: string;
-    niche_slug: string | null;
-    error: string | null;
-    tenant_id: string | null;
-    executionId: string | null;
-  },
-) {
-  const title = `N8N failure: ${ctx.workflow} (${ctx.event})`;
-  const description = [
-    ctx.niche_slug ? `Nicho: ${ctx.niche_slug}` : "Global",
-    ctx.error ? `Erro: ${ctx.error}` : null,
-    ctx.executionId ? `Execução: ${ctx.executionId}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  // 1) Persist incident (dedupe by open+title within 30min via metadata)
-  const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-  const { data: existing } = await supabaseAdmin
-    .from("core_incidents")
-    .select("id, event_count, severity")
-    .eq("status", "open")
-    .eq("title", title)
-    .gte("detected_at", since)
-    .limit(1)
-    .maybeSingle();
-
-  let finalSeverity: "sev1" | "sev2" | "sev3" = "sev3";
-  let escalated = false;
-  let newCount = 1;
-
-  if (existing?.id) {
-    newCount = (existing.event_count ?? 1) + 1;
-    // Auto-escalation thresholds: >10 → sev2, >50 → sev1
-    const prevSeverity = (existing as any).severity ?? "sev3";
-    finalSeverity = newCount > 50 ? "sev1" : newCount > 10 ? "sev2" : "sev3";
-    escalated = finalSeverity !== prevSeverity;
-
-    await supabaseAdmin
-      .from("core_incidents")
-      .update({
-        event_count: newCount,
-        severity: finalSeverity,
-        updated_at: new Date().toISOString(),
-        metadata: {
-          last_error: ctx.error,
-          last_execution: ctx.executionId,
-          tenant_id: ctx.tenant_id,
-          ...(escalated ? { escalated_at: new Date().toISOString(), escalated_from: prevSeverity } : {}),
-        },
-      })
-      .eq("id", existing.id);
-  } else {
-    await supabaseAdmin.from("core_incidents").insert({
-      scope: "runtime_scope",
-      runtime_scope: `n8n:${ctx.niche_slug ?? "global"}:${ctx.event}`,
-      severity: "sev3",
-      status: "open",
-      title,
-      description,
-      source: "n8n",
-      metadata: {
-        workflow: ctx.workflow,
-        event: ctx.event,
-        niche_slug: ctx.niche_slug,
-        error: ctx.error,
-        executionId: ctx.executionId,
-        tenant_id: ctx.tenant_id,
-      },
-    });
-  }
-
-  // 2) Best-effort Slack ping when SLACK_OPS_WEBHOOK is configured.
-  //    Skip noisy re-pings: only post on first occurrence or escalation.
-  const slackWebhook = process.env.SLACK_OPS_WEBHOOK;
-  const shouldPing = !existing?.id || escalated;
-  if (slackWebhook && shouldPing) {
-    const emoji = finalSeverity === "sev1" ? ":fire:" : finalSeverity === "sev2" ? ":warning:" : ":rotating_light:";
-    const header = escalated
-      ? `${emoji} *[${finalSeverity.toUpperCase()} · escalado]* ${title} — ${newCount} ocorrências`
-      : `${emoji} *${title}*`;
-    try {
-      await fetch(slackWebhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: `${header}\n${description}` }),
-      });
-    } catch (e) {
-      console.error("[n8n-callback] slack post failed", e);
-    }
-  }
-}
