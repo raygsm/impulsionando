@@ -1,0 +1,22 @@
+name: Temporary Planos fallback import fix
+on:
+  push:
+    branches: [fix/core-commercial-source-of-truth-20260813]
+    paths: [.github/workflows/tmp-fix-planos-fallback-import.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/core-commercial-source-of-truth-20260813
+          fetch-depth: 0
+      - run: python3 scripts/tmp_fix_planos_fallback_import.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(planos): wire Impulsionito fallback"
+          git push origin HEAD:fix/core-commercial-source-of-truth-20260813
