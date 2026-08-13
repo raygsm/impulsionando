@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Import WMP workflows idempotently
+      - name: Validate WMP lead workflow import
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -24,39 +24,14 @@ jobs:
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          tmp=/tmp/wmp-n8n-bootstrap
-          rm -rf "$tmp" && mkdir -p "$tmp"
-          cat > "$tmp/lead.json" <<'JSON'
-          {"name":"WMP · lead intake","active":true,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"responseNode","options":{}},"id":"lead-webhook","name":"Entrada WMP","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,0],"webhookId":"wmp-lead-intake"},{"parameters":{"jsCode":"const b=$json.body??$json; const ok=b.event_code==='wmp.lead.received' && b.tenant_slug==='wmp'; return [{json:{ok,event_code:b.event_code??null,workflow:'wmp_lead_intake',correlation_id:b.correlation_id??null}}];"},"id":"lead-validate","name":"Validar evento","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,0]},{"parameters":{"respondWith":"json","responseBody":"={{$json}}","options":{"responseCode":"={{$json.ok ? 202 : 422}}"}},"id":"lead-response","name":"Responder","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[480,0]}],"connections":{"Entrada WMP":{"main":[[{"node":"Validar evento","type":"main","index":0}]]},"Validar evento":{"main":[[{"node":"Responder","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"},"pinData":{},"tags":[]}
+          echo '== Antes =='
+          sudo docker exec "$C" n8n list:workflow 2>&1 | grep 'WMP' || true
+          cat >/tmp/wmp-lead.json <<'JSON'
+          {"name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
           JSON
-          cat > "$tmp/proposal.json" <<'JSON'
-          {"name":"WMP · proposal lifecycle","active":true,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-proposal-lifecycle","responseMode":"responseNode","options":{}},"id":"proposal-webhook","name":"Entrada WMP","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,0],"webhookId":"wmp-proposal-lifecycle"},{"parameters":{"jsCode":"const b=$json.body??$json; const allowed=['wmp.proposal.generated','wmp.proposal.sent','wmp.proposal.viewed','wmp.proposal.accepted','wmp.proposal.signed','wmp.proposal.won']; const ok=b.tenant_slug==='wmp'&&allowed.includes(b.event_code); return [{json:{ok,event_code:b.event_code??null,workflow:'wmp_proposal_lifecycle',correlation_id:b.correlation_id??null}}];"},"id":"proposal-validate","name":"Validar evento","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,0]},{"parameters":{"respondWith":"json","responseBody":"={{$json}}","options":{"responseCode":"={{$json.ok ? 202 : 422}}"}},"id":"proposal-response","name":"Responder","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[480,0]}],"connections":{"Entrada WMP":{"main":[[{"node":"Validar evento","type":"main","index":0}]]},"Validar evento":{"main":[[{"node":"Responder","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"},"pinData":{},"tags":[]}
-          JSON
-          cat > "$tmp/dj.json" <<'JSON'
-          {"name":"WMP · DJ booking lifecycle","active":true,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-dj-booking-lifecycle","responseMode":"responseNode","options":{}},"id":"dj-webhook","name":"Entrada WMP","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,0],"webhookId":"wmp-dj-booking-lifecycle"},{"parameters":{"jsCode":"const b=$json.body??$json; const allowed=['wmp.dj.offered','wmp.dj.accepted','wmp.dj.confirmed','wmp.dj.reminder','wmp.dj.completed']; const ok=b.tenant_slug==='wmp'&&allowed.includes(b.event_code); return [{json:{ok,event_code:b.event_code??null,workflow:'wmp_dj_booking_lifecycle',correlation_id:b.correlation_id??null}}];"},"id":"dj-validate","name":"Validar evento","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,0]},{"parameters":{"respondWith":"json","responseBody":"={{$json}}","options":{"responseCode":"={{$json.ok ? 202 : 422}}"}},"id":"dj-response","name":"Responder","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[480,0]}],"connections":{"Entrada WMP":{"main":[[{"node":"Validar evento","type":"main","index":0}]]},"Validar evento":{"main":[[{"node":"Responder","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"},"pinData":{},"tags":[]}
-          JSON
-          cat > "$tmp/post.json" <<'JSON'
-          {"name":"WMP · post-event relationship","active":true,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-post-event-relationship","responseMode":"responseNode","options":{}},"id":"post-webhook","name":"Entrada WMP","type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[0,0],"webhookId":"wmp-post-event-relationship"},{"parameters":{"jsCode":"const b=$json.body??$json; const allowed=['wmp.event.completed','wmp.feedback.requested','wmp.feedback.received','wmp.repurchase.due']; const ok=b.tenant_slug==='wmp'&&allowed.includes(b.event_code); return [{json:{ok,event_code:b.event_code??null,workflow:'wmp_post_event_relationship',correlation_id:b.correlation_id??null}}];"},"id":"post-validate","name":"Validar evento","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,0]},{"parameters":{"respondWith":"json","responseBody":"={{$json}}","options":{"responseCode":"={{$json.ok ? 202 : 422}}"}},"id":"post-response","name":"Responder","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[480,0]}],"connections":{"Entrada WMP":{"main":[[{"node":"Validar evento","type":"main","index":0}]]},"Validar evento":{"main":[[{"node":"Responder","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"},"pinData":{},"tags":[]}
-          JSON
-          sudo docker exec "$C" mkdir -p /tmp/wmp-bootstrap
-          for f in lead proposal dj post; do sudo docker cp "$tmp/$f.json" "$C:/tmp/wmp-bootstrap/$f.json"; done
-          ensure() {
-            name="$1"; file="$2"
-            id="$(sudo docker exec "$C" n8n list:workflow 2>/dev/null | awk -F'|' -v n="$name" '$2==n{print $1;exit}')"
-            if [ -z "$id" ]; then
-              sudo docker exec "$C" n8n import:workflow --input="$file" --activeState=fromJson >/dev/null
-              id="$(sudo docker exec "$C" n8n list:workflow 2>/dev/null | awk -F'|' -v n="$name" '$2==n{print $1;exit}')"
-            fi
-            [ -n "$id" ] || { echo "workflow import failed: $name"; exit 31; }
-            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null || true
-            echo "$id|$name"
-          }
-          ensure 'WMP · lead intake' /tmp/wmp-bootstrap/lead.json
-          ensure 'WMP · proposal lifecycle' /tmp/wmp-bootstrap/proposal.json
-          ensure 'WMP · DJ booking lifecycle' /tmp/wmp-bootstrap/dj.json
-          ensure 'WMP · post-event relationship' /tmp/wmp-bootstrap/post.json
-          echo '== WMP workflows ativos/listados =='
-          sudo docker exec "$C" n8n list:workflow 2>/dev/null | grep 'WMP ·' || true
-          echo '== Smoke webhooks =='
-          curl -fsS -X POST https://n8n.impulsionando.com.br/webhook/wmp-lead-intake -H 'content-type: application/json' -d '{"tenant_slug":"wmp","event_code":"wmp.lead.received","correlation_id":"bootstrap-smoke"}'
+          sudo docker cp /tmp/wmp-lead.json "$C:/tmp/wmp-lead.json"
+          echo '== Import =='
+          sudo docker exec "$C" n8n import:workflow --input=/tmp/wmp-lead.json
+          echo '== Depois =='
+          sudo docker exec "$C" n8n list:workflow 2>&1 | grep 'WMP' || true
           REMOTE
