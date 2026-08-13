@@ -87,21 +87,13 @@ async function main() {
   );
   if (ogLocale) add("og:locale = pt_BR", ogLocale === "pt_BR", ogLocale);
 
-  // 3. Preços e quotas exatos (de PLANS/PLAN_SETUP_BRL)
-  const expectedPrices = ["759", "1.518", "1518", "3.036", "3036"];
-  const foundPrices = expectedPrices.filter((p) => html.includes(p));
+  // 3. Catálogo comercial: preços antigos não podem ser institucionalizados no HTML.
+  const staleCommercialValues = ["R$ 759", "R$ 1.518", "R$ 3.036"];
+  const staleFound = staleCommercialValues.filter((value) => html.includes(value));
   add(
-    "preços R$ 759 / 1.518 / 3.036 no HTML",
-    foundPrices.length >= 3,
-    `encontrados: ${foundPrices.join(", ") || "nenhum"}`,
-  );
-
-  const expectedSetups = ["297", "759", "1.518", "1518"];
-  const foundSetups = expectedSetups.filter((p) => html.includes(p));
-  add(
-    "setup R$ 297 / 759 / 1.518 no HTML",
-    foundSetups.length >= 3,
-    `encontrados: ${foundSetups.join(", ") || "nenhum"}`,
+    "sem preços comerciais legados hardcoded",
+    staleFound.length === 0,
+    staleFound.length ? `valores legados encontrados: ${staleFound.join(", ")}` : "catálogo público controlado pelo backend",
   );
 
   // 4. Trial 7 dias + 90 dias
