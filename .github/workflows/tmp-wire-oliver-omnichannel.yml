@@ -1,0 +1,68 @@
+name: Temporary wire Oliver omnichannel
+
+on:
+  push:
+    branches:
+      - agent/core-n8n-centralization-20260813
+    paths:
+      - .github/workflows/tmp-wire-oliver-omnichannel.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/core-n8n-centralization-20260813
+      - name: Patch Oliver UI surgically
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/components/chrismed/ChrismedOliverPanel.tsx')
+          s = p.read_text()
+          old_import = "import { askOliver } from '@/lib/oliver-chat.functions';"
+          new_import = "import { askOliverOmnichannel } from '@/lib/oliver-omnichannel.functions';"
+          if old_import in s:
+              s = s.replace(old_import, new_import, 1)
+          elif new_import not in s:
+              raise SystemExit('Oliver import contract not found')
+
+          old_hook = 'const ask = useServerFn(askOliver);'
+          new_hook = 'const ask = useServerFn(askOliverOmnichannel);'
+          if old_hook in s:
+              s = s.replace(old_hook, new_hook, 1)
+          elif new_hook not in s:
+              raise SystemExit('Oliver server function hook not found')
+
+          marker = 'const C = CHRISMED_CONTACT.channels;\n'
+          helper = '''const C = CHRISMED_CONTACT.channels;\n\nconst OLIVER_SESSION_STORAGE_KEY = 'chrismed:oliver:web-session:v1';\nfunction getOliverWebSessionId(): string {\n  if (typeof window === 'undefined') return `web:chrismed:ssr`;\n  try {\n    const existing = window.localStorage.getItem(OLIVER_SESSION_STORAGE_KEY)?.trim();\n    if (existing && /^web:chrismed:[A-Za-z0-9:_-]{8,180}$/.test(existing)) return existing;\n    const suffix = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'\n      ? crypto.randomUUID()\n      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;\n    const generated = `web:chrismed:${suffix}`;\n    window.localStorage.setItem(OLIVER_SESSION_STORAGE_KEY, generated);\n    return generated;\n  } catch {\n    return `web:chrismed:ephemeral:${Date.now()}-${Math.random().toString(36).slice(2)}`;\n  }\n}\n'''
+          if 'OLIVER_SESSION_STORAGE_KEY' not in s:
+              if marker not in s:
+                  raise SystemExit('Oliver channels marker not found')
+              s = s.replace(marker, helper, 1)
+
+          payload_marker = "          lang: searchLang,\n"
+          payload_with_session = "          lang: searchLang,\n          sessionId: getOliverWebSessionId(),\n"
+          if 'sessionId: getOliverWebSessionId()' not in s:
+              if payload_marker not in s:
+                  raise SystemExit('Oliver request payload marker not found')
+              s = s.replace(payload_marker, payload_with_session, 1)
+
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- src/components/chrismed/ChrismedOliverPanel.tsx
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/chrismed/ChrismedOliverPanel.tsx
+          git commit -m "feat(chrismed): connect Oliver UI to omnichannel ledger"
+          git push origin HEAD:agent/core-n8n-centralization-20260813
