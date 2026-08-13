@@ -15,7 +15,41 @@ export function WmpShell({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="wmp-brand">
+    <div className="wmp-brand min-h-dvh w-full overflow-x-clip">
+      <style>{`
+        .wmp-brand [role="dialog"][aria-label*="Impulsionito"] {
+          max-width: calc(100vw - 24px);
+          max-height: calc(100dvh - 24px);
+          overscroll-behavior: contain;
+        }
+        .wmp-brand button[aria-label*="Abrir Impulsionito"] {
+          right: max(12px, env(safe-area-inset-right));
+          bottom: max(12px, env(safe-area-inset-bottom));
+          min-width: 48px;
+          min-height: 48px;
+        }
+        @media (max-width: 640px) {
+          .wmp-brand [role="dialog"][aria-label*="Impulsionito"] {
+            inset: 0 !important;
+            width: 100dvw !important;
+            height: 100dvh !important;
+            max-width: 100dvw !important;
+            max-height: 100dvh !important;
+            border-radius: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+          .wmp-brand [role="dialog"][aria-label*="Impulsionito"] form {
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+          }
+          .wmp-brand [role="dialog"][aria-label*="Impulsionito"] textarea {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
+
       <a
         href="#wmp-main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md"
@@ -28,16 +62,16 @@ export function WmpShell({
         className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_oklab,var(--wmp-bg)_75%,transparent)] border-b border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
         role="banner"
       >
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link
             to="/wmp"
-            className="flex items-center gap-2 wmp-display text-xl"
+            className="flex min-w-0 items-center gap-2 wmp-display text-xl"
             aria-label="WMP — Wagner Miller Produções, ir para o início"
           >
-            <Music2 className="size-5" style={{ color: "var(--wmp-gold)" }} aria-hidden />
+            <Music2 className="size-5 shrink-0" style={{ color: "var(--wmp-gold)" }} aria-hidden />
             <span>WMP</span>
             <span
-              className="hidden sm:inline text-xs font-normal opacity-70"
+              className="hidden sm:inline truncate text-xs font-normal opacity-70"
               style={{ fontFamily: "Inter" }}
             >
               Wagner Miller Produções
@@ -61,7 +95,7 @@ export function WmpShell({
 
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center size-10 rounded-lg"
+            className="md:hidden inline-flex items-center justify-center size-11 shrink-0 rounded-lg"
             style={{ background: "var(--wmp-surface-2)", color: "var(--wmp-fg)" }}
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
@@ -78,7 +112,7 @@ export function WmpShell({
             className="md:hidden border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
             aria-label="Menu mobile"
           >
-            <ul className="px-6 py-4 flex flex-col gap-3 text-sm">
+            <ul className="px-4 sm:px-6 py-4 flex flex-col gap-3 text-sm">
               <li><Link to="/wmp/pacotes" onClick={() => setOpen(false)}>Pacotes</Link></li>
               <li><Link to="/wmp/cases" onClick={() => setOpen(false)}>Cases</Link></li>
               <li><Link to="/wmp/sobre" onClick={() => setOpen(false)}>Sobre</Link></li>
@@ -89,7 +123,7 @@ export function WmpShell({
                   to="/wmp/orcamento"
                   onClick={() => setOpen(false)}
                   className="wmp-cta w-full justify-center"
-                  style={{ padding: "0.6rem 1rem", fontSize: "0.875rem" }}
+                  style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", minHeight: "44px" }}
                 >
                   <Sparkles className="size-4" aria-hidden /> Orçamento em 60s
                 </Link>
@@ -102,7 +136,7 @@ export function WmpShell({
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav
           aria-label="Trilha de navegação"
-          className="mx-auto max-w-7xl px-6 pt-4 text-xs opacity-75"
+          className="mx-auto max-w-7xl px-4 sm:px-6 pt-4 text-xs opacity-75"
         >
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
@@ -122,13 +156,13 @@ export function WmpShell({
         </nav>
       )}
 
-      <main id="wmp-main">{children}</main>
+      <main id="wmp-main" className="min-w-0">{children}</main>
 
       <footer
-        className="mt-24 border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
+        className="mt-16 sm:mt-24 border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
         role="contentinfo"
       >
-        <div className="mx-auto max-w-7xl px-6 py-12 grid gap-8 md:grid-cols-4 text-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-12 grid gap-8 md:grid-cols-4 text-sm">
           <div>
             <div className="wmp-display text-lg mb-2">WMP</div>
             <p className="opacity-70 leading-relaxed">
@@ -165,7 +199,7 @@ export function WmpShell({
             </ul>
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-6 pb-8 text-xs opacity-60 flex flex-col md:flex-row gap-3 justify-between">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-8 text-xs opacity-60 flex flex-col md:flex-row gap-3 justify-between">
           <span>© {new Date().getFullYear()} Wagner Miller Produções — todos os direitos reservados.</span>
           <span>
             Operado no ecossistema{" "}
@@ -174,7 +208,6 @@ export function WmpShell({
         </div>
       </footer>
 
-      {/* Onda 2.9 — padrão global */}
       <MoreContentFab bg="var(--wmp-gold)" accent="var(--wmp-bg)" />
     </div>
   );
