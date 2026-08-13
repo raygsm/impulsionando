@@ -28,7 +28,7 @@ export type WmpProposalLogistics = {
   transportMode: string;
 };
 
-export type WmpMilitoSuggestion = {
+export type WmpMillitoSuggestion = {
   title: string;
   rationale: string;
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
