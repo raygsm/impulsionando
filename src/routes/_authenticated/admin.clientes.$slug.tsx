@@ -3,52 +3,34 @@ import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import {
-  Building2,
-  ExternalLink,
-  Globe,
-  Crown,
-  Brain,
-  Rocket,
-  ChevronLeft,
-} from "lucide-react";
+import { Building2, ExternalLink, Globe, Crown, Brain, Rocket, ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { canonicalClientHost, resolveClientCompanyBySlug } from "@/lib/client-registry";
 
-const loadTenantHeader = createServerFn({ method: "GET" })
+const loadClientHeader = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ slug: z.string().min(1) }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: company } = await context.supabase
-      .from("companies")
-      .select(
-        "id,name,legal_name,subdomain,domain,status,status_commercial,status_financial,status_technical,is_active,is_demo,niche_id,full_courtesy_status,full_courtesy_ends_at,logo_url",
-      )
-      .eq("subdomain", data.slug)
-      .maybeSingle();
-
-    let niche: { slug: string | null; name: string | null } | null = null;
-    if (company?.niche_id) {
-      const { data: n } = await context.supabase
-        .from("niches")
-        .select("slug,name")
-        .eq("id", company.niche_id)
-        .maybeSingle();
-      niche = n ? { slug: n.slug ?? null, name: n.name ?? null } : null;
-    }
+    const resolved = await resolveClientCompanyBySlug(context.supabase as any, data.slug);
+    if (!resolved) return { registry: null, company: null, brainStatus: null };
 
     let brainStatus: string | null = null;
-    if (company?.id) {
-      const { data: brain } = await context.supabase
+    if (resolved.company?.id) {
+      const { data: brain } = await (context.supabase as any)
         .from("core_ai_brains")
         .select("status")
-        .eq("company_id", company.id)
+        .eq("company_id", resolved.company.id)
         .maybeSingle();
-      brainStatus = (brain as { status?: string | null } | null)?.status ?? null;
+      brainStatus = brain?.status ?? null;
     }
 
-    return { company, niche, brainStatus };
+    return {
+      registry: resolved.registry,
+      company: resolved.company,
+      brainStatus,
+    };
   });
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
@@ -63,7 +45,6 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
 
 type TabDef = { key: string; label: string; to: string; exact?: boolean };
 
-// Cliente 360 — 13 abas oficiais (Fase P2). Copy usa sempre "cliente/empresa".
 function buildTabs(slug: string): TabDef[] {
   return [
     { key: "painel", label: "Painel", to: `/admin/clientes/${slug}/painel` },
@@ -96,32 +77,11 @@ function toneClass(tone: StatusTone) {
       return "bg-muted text-muted-foreground ring-border";
   }
 }
-function commercialTone(v: string | null | undefined): StatusTone {
-  const s = (v ?? "").toLowerCase();
-  if (["active", "ativo", "customer", "cliente"].includes(s)) return "ok";
-  if (["trial", "cortesia", "onboarding"].includes(s)) return "warn";
-  if (["churned", "cancelado", "inativo", "lost"].includes(s)) return "bad";
-  return "muted";
-}
-function financialTone(v: string | null | undefined): StatusTone {
-  const s = (v ?? "").toLowerCase();
-  if (["ok", "adimplente", "paid"].includes(s)) return "ok";
-  if (["pendente", "aguardando", "overdue_soon"].includes(s)) return "warn";
-  if (["inadimplente", "overdue", "blocked", "vencido"].includes(s)) return "bad";
-  return "muted";
-}
-function technicalTone(v: string | null | undefined): StatusTone {
-  const s = (v ?? "").toLowerCase();
-  if (["ok", "healthy", "operational"].includes(s)) return "ok";
-  if (["degraded", "warning", "atencao"].includes(s)) return "warn";
-  if (["down", "failing", "critico", "critical"].includes(s)) return "bad";
-  return "muted";
-}
 
 function ClienteWorkspaceLayout() {
   const { slug } = Route.useParams();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const fetchHeader = useServerFn(loadTenantHeader);
+  const fetchHeader = useServerFn(loadClientHeader);
   const { data, isLoading } = useQuery({
     queryKey: ["cliente-header", slug],
     queryFn: () => fetchHeader({ data: { slug } }),
@@ -133,146 +93,109 @@ function ClienteWorkspaceLayout() {
     t.exact ? pathname === t.to : pathname === t.to || pathname.startsWith(t.to + "/");
 
   const company = data?.company;
-  const niche = data?.niche;
+  const registry = data?.registry;
   const brainStatus = data?.brainStatus;
-  const domain = company?.domain ?? (company ? `${company.subdomain}.impulsionando.com.br` : null);
-  const hasCustomDomain = !!(company?.domain && !company.domain.endsWith(".impulsionando.com.br"));
-
-  const courtesyActive = company?.full_courtesy_status === "active";
+  const domain = registry ? canonicalClientHost(registry.slug) : null;
+  const courtesyStatus = (company as any)?.full_courtesy_status as string | undefined;
+  const courtesyEndsAt = (company as any)?.full_courtesy_ends_at as string | undefined;
+  const courtesyActive = courtesyStatus === "active";
   const courtesyDaysLeft = (() => {
-    if (!courtesyActive || !company?.full_courtesy_ends_at) return null;
-    const end = new Date(company.full_courtesy_ends_at).getTime();
+    if (!courtesyActive || !courtesyEndsAt) return null;
+    const end = new Date(courtesyEndsAt).getTime();
     return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
   })();
 
   return (
-    <div className="flex flex-col min-h-dvh bg-background">
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-20">
-        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-            <Link
-              to="/companies"
-              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-            >
+    <div className="flex min-h-dvh flex-col bg-background">
+      <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
+        <div className="px-4 pb-2 pt-3 sm:px-6 lg:px-8">
+          <div className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
+            <Link to="/companies" className="inline-flex items-center gap-1 transition-colors hover:text-foreground">
               <ChevronLeft className="h-3 w-3" /> Clientes
             </Link>
             <span aria-hidden>/</span>
-            <span className="font-mono truncate">{slug}</span>
+            <span className="truncate font-mono">{slug}</span>
           </div>
 
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-            <div className="min-w-0 flex items-start gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-card ring-1 ring-border overflow-hidden">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-card ring-1 ring-border">
                 {company?.logo_url ? (
-                  <img
-                    src={company.logo_url}
-                    alt={`Logo de ${company.name}`}
-                    className="h-full w-full object-contain"
-                  />
+                  <img src={company.logo_url} alt={`Logo de ${company.name}`} className="h-full w-full object-contain" />
                 ) : (
                   <Building2 className="h-5 w-5 text-muted-foreground" aria-hidden />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-semibold truncate flex items-center gap-2">
+                <h1 className="flex truncate text-xl font-semibold sm:text-2xl">
                   {isLoading ? (
                     <Skeleton className="h-7 w-56" />
                   ) : (
-                    <>
-                      <span className="truncate">{company?.name ?? "Cliente não encontrado"}</span>
-                      {company?.is_demo && (
-                        <Badge variant="outline" className="text-[10px] shrink-0">demo</Badge>
-                      )}
-                      {company && !company.is_active && (
-                        <Badge variant="destructive" className="text-[10px] shrink-0">inativo</Badge>
-                      )}
-                    </>
+                    <span className="truncate">{company?.name ?? registry?.display_name ?? "Cliente não vinculado"}</span>
                   )}
                 </h1>
                 {company && (
-                  <p className="text-xs text-muted-foreground mt-1 truncate">
-                    {company.legal_name ?? "—"}
-                    {niche?.name ? <> · <span>{niche.name}</span></> : null}
-                  </p>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">{company.legal_name ?? company.name}</p>
                 )}
 
-                {/* Chips de status resumidos */}
-                {company && (
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <StatusChip
-                      label="Comercial"
-                      value={company.status_commercial}
-                      tone={commercialTone(company.status_commercial)}
-                    />
-                    <StatusChip
-                      label="Financeiro"
-                      value={company.status_financial}
-                      tone={financialTone(company.status_financial)}
-                    />
-                    <StatusChip
-                      label="Técnico"
-                      value={company.status_technical}
-                      tone={technicalTone(company.status_technical)}
-                    />
-                    {courtesyActive && (
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(
-                          "warn",
-                        )}`}
-                      >
-                        <Crown className="h-3 w-3" aria-hidden />
-                        Cortesia Full
-                        {courtesyDaysLeft !== null ? ` · ${courtesyDaysLeft}d` : ""}
-                      </span>
-                    )}
-                    {brainStatus && (
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(
-                          brainStatus === "active" ? "ok" : "muted",
-                        )}`}
-                      >
-                        <Brain className="h-3 w-3" aria-hidden />
-                        Cérebro IA · {brainStatus}
-                      </span>
-                    )}
-                    {domain && (
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(
-                          hasCustomDomain ? "ok" : "muted",
-                        )}`}
-                      >
-                        <Globe className="h-3 w-3" aria-hidden />
-                        <code className="font-mono">{domain}</code>
-                      </span>
-                    )}
-                  </div>
-                )}
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {registry && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(registry.active ? "ok" : "bad")}`}>
+                      <span className="font-medium">Registry</span><span aria-hidden>·</span>{registry.active ? "ativo" : "inativo"}
+                    </span>
+                  )}
+                  {company?.is_demo && <Badge variant="outline" className="text-[10px]">demo</Badge>}
+                  {company && !company.is_active && <Badge variant="destructive" className="text-[10px]">inativo</Badge>}
+                  {company && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(company.is_active ? "ok" : "bad")}`}>
+                      <span className="font-medium">Cadastro</span><span aria-hidden>·</span>{company.status ?? (company.is_active ? "active" : "inactive")}
+                    </span>
+                  )}
+                  {courtesyActive && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass("warn")}`}>
+                      <Crown className="h-3 w-3" aria-hidden /> Cortesia Full{courtesyDaysLeft !== null ? ` · ${courtesyDaysLeft}d` : ""}
+                    </span>
+                  )}
+                  {brainStatus && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(brainStatus === "active" ? "ok" : "muted")}`}>
+                      <Brain className="h-3 w-3" aria-hidden /> Cérebro IA · {brainStatus}
+                    </span>
+                  )}
+                  {domain && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass("muted")}`}>
+                      <Globe className="h-3 w-3" aria-hidden /><code className="font-mono">{domain}</code>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Ações rápidas — sempre com destino funcional */}
-            {company && (
-              <div className="flex flex-wrap gap-2 justify-end shrink-0">
+            {registry && (
+              <div className="flex shrink-0 flex-wrap justify-end gap-2">
                 {domain && (
-                  <Button asChild variant="outline" size="sm" aria-label="Abrir site do cliente em nova aba">
+                  <Button asChild variant="outline" size="sm">
                     <a href={`https://${domain}`} target="_blank" rel="noreferrer">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Abrir site</span>
+                      <ExternalLink className="h-3.5 w-3.5" /><span className="hidden sm:inline">Abrir site</span>
                     </a>
                   </Button>
                 )}
                 <Button asChild variant="outline" size="sm">
                   <Link to="/admin/clientes/$slug/painel" params={{ slug }}>
-                    <Rocket className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Painel</span>
+                    <Rocket className="h-3.5 w-3.5" /><span className="hidden sm:inline">Painel</span>
                   </Link>
                 </Button>
               </div>
             )}
           </div>
+
+          {registry && !company && (
+            <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
+              Este cliente está ativo no registry de comunicação, mas ainda não possui vínculo com um cadastro central de empresa.
+            </div>
+          )}
         </div>
 
-        <nav aria-label="Áreas do Cliente 360" className="px-4 sm:px-6 lg:px-8 -mb-px overflow-x-auto scroll-contrast">
+        <nav aria-label="Áreas do Cliente 360" className="-mb-px overflow-x-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex gap-1 text-sm">
             {tabs.map((t) => {
               const active = isActive(t);
@@ -281,11 +204,7 @@ function ClienteWorkspaceLayout() {
                   <Link
                     to={t.to}
                     aria-current={active ? "page" : undefined}
-                    className={`inline-block px-3 py-2 border-b-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                      active
-                        ? "border-primary text-foreground font-medium"
-                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                    }`}
+                    className={`inline-block whitespace-nowrap border-b-2 px-3 py-2 transition-colors ${active ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"}`}
                   >
                     {t.label}
                   </Link>
@@ -296,32 +215,7 @@ function ClienteWorkspaceLayout() {
         </nav>
       </header>
 
-      <div className="flex-1">
-        <Outlet />
-      </div>
+      <div className="flex-1"><Outlet /></div>
     </div>
-  );
-}
-
-function StatusChip({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string | null | undefined;
-  tone: StatusTone;
-}) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${toneClass(
-        tone,
-      )}`}
-      title={`${label}: ${value ?? "—"}`}
-    >
-      <span className="font-medium">{label}</span>
-      <span aria-hidden>·</span>
-      <span className="truncate max-w-[8rem]">{value ?? "—"}</span>
-    </span>
   );
 }
