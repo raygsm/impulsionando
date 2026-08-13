@@ -82,7 +82,7 @@ function getOliverWebSessionId(): string {
 }
 
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
-// sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
+// sábado 09-13h. A disponibilidade real deve ser mantida pela configuração operacional.
 function isHumanOnline(now: Date = new Date()): boolean {
   const day = now.getDay();
   const hour = now.getHours();
@@ -103,8 +103,8 @@ const GLOBAL_ACTIONS: GlobalAction[] = [
   { label: 'Agendar consulta', hint: 'Sem cadastro para ver horários', icon: Calendar, to: '/chrismed/agendar' },
   { label: 'Profissionais da saúde', hint: 'Rede e especialidades', icon: Users, to: '/chrismed/medicos' },
   { label: 'Especialidades', hint: 'Áreas de atuação', icon: Stethoscope, to: '/chrismed/especialidades' },
-  { label: 'Meus agendamentos', hint: 'Área do paciente — pendente Codex', icon: ClipboardList, info: 'A área do paciente com histórico de agendamentos e pagamentos está em preparação (Pendente Codex). Assim que liberada, você acessa por aqui.' },
-  { label: 'Pagamento', hint: 'PIX no fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo de agendamento, após você escolher horário e confirmar seus dados. Aceitamos PIX via Mercado Pago; cartão e parcelamento serão liberados em breve pela integração Codex.' },
+  { label: 'Meus agendamentos', hint: 'Área do paciente', icon: ClipboardList, to: '/chrismed/minha-conta' },
+  { label: 'Pagamento', hint: 'No fluxo de agendamento', icon: CreditCard, info: 'O pagamento acontece dentro do fluxo oficial de agendamento, após a escolha do horário e a confirmação dos dados. As formas disponíveis são apresentadas pelo próprio checkout.' },
 ];
 
 type OliverLang = 'pt' | 'en' | 'es';
