@@ -57,6 +57,22 @@ export interface ImpulsionitoTransport {
 }
 
 const ENDPOINT = "/api/impulsionito/chat";
+const SESSION_STORAGE_KEY = "impulsionito:web-session:v1";
+
+function getAnonymousWebSessionId(): string {
+  if (typeof window === "undefined") return "web:ssr";
+  try {
+    const existing = window.localStorage.getItem(SESSION_STORAGE_KEY)?.trim();
+    if (existing) return existing.slice(0, 200);
+    const generated = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? `web:${crypto.randomUUID()}`
+      : `web:${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(SESSION_STORAGE_KEY, generated);
+    return generated;
+  } catch {
+    return `web:ephemeral:${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Mock (fallback local — permanece para dev e degradação graciosa).
@@ -73,7 +89,7 @@ function pickMockReply(input: SendMessageInput): string {
   if (t.includes("financeiro") || t.includes("pagamento") || t.includes("pix"))
     return "Para pagamentos e faturas, vá em Financeiro → Minha Assinatura.";
   if (t.includes("whatsapp"))
-    return "O canal WhatsApp está no roadmap (Z-API na fase 1). Por enquanto, converse comigo por aqui mesmo.";
+    return "O canal WhatsApp está em preparação. Enquanto a conexão oficial não estiver ativa, converse comigo por aqui mesmo.";
   if (path.startsWith("/admin"))
     return "Você está na área administrativa. Posso te orientar sobre métricas, ajustes ou próximas ações.";
   return `Entendi. Registrei "${input.text.slice(0, 80)}". Como posso avançar?`;
@@ -116,7 +132,11 @@ async function* streamLive(input: SendMessageInput): AsyncIterable<TokenChunk> {
 
   const res = await fetch(ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/plain" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/plain",
+      "X-Impulsionando-Session": getAnonymousWebSessionId(),
+    },
     body: JSON.stringify(payload),
     signal: input.signal,
   });
@@ -162,8 +182,6 @@ function forcedMockMode(): boolean {
 const liveTransport: ImpulsionitoTransport = {
   mode: "live",
   sendMessage: (input) => {
-    // Wrapper que faz fallback gracioso: se streamLive falhar antes do
-    // primeiro chunk (rede, 502), cai para mock automaticamente.
     return {
       [Symbol.asyncIterator]: async function* () {
         if (typeof navigator !== "undefined" && navigator.onLine === false) {
@@ -183,9 +201,7 @@ const liveTransport: ImpulsionitoTransport = {
         } catch (err) {
           if (input.signal?.aborted) return;
           console.warn("[impulsionito] live falhou, usando mock:", err);
-          yield {
-            delta: "",
-          };
+          yield { delta: "" };
           yield* streamMock(input);
         }
       },
@@ -238,7 +254,6 @@ export function moduleSlugFromPath(pathname: string): string | null {
   const m = pathname.match(/^\/(?:modulos|demo\/modulos|admin\/modules)\/([^/?#]+)/);
   return m?.[1] ?? null;
 }
-
 
 export function suggestionsForRoute(pathname: string): string[] {
   const nichoSlug = nichoSlugFromPath(pathname);
