@@ -1,10 +1,11 @@
 /**
- * Onda B — Auditoria "Full Plan" por cliente.
- * Verifica se um tenant tem tudo que um plano Full precisa: dados, plano/cortesia,
- * módulos ativos, credenciais MP, WhatsApp, fiscal, Cérebro IA, N8N e publicação.
+ * Auditoria operacional por cliente usando somente contratos atuais do Core.
+ * O slug canônico é resolvido via communication_tenants; estruturas legadas
+ * (companies.subdomain, n8n_workflows, core_whatsapp_credentials etc.) não são usadas.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveClientCompanyBySlug, canonicalClientHost } from "@/lib/client-registry";
 import { z } from "zod";
 
 export type AuditStatus = "ok" | "warn" | "error" | "muted";
@@ -25,20 +26,32 @@ export const auditTenantFull = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const items: AuditItem[] = [];
+    const resolved = await resolveClientCompanyBySlug(sb, data.slug);
 
-    const { data: company } = await sb
-      .from("companies")
-      .select("id,name,legal_name,document,email,phone,logo_url,domain,subdomain,is_active,status,status_commercial,status_financial,status_technical,full_courtesy_status,full_courtesy_ends_at,niche_id,primary_color,cover_image_url")
-      .eq("subdomain", data.slug)
-      .maybeSingle();
+    if (!resolved) throw new Error(`Cliente ${data.slug} não encontrado no registry`);
+    if (!resolved.company) {
+      return {
+        company: { id: null, name: resolved.registry.display_name, slug: data.slug },
+        items: [{
+          id: "company-link",
+          category: "dados" as const,
+          label: "Vínculo com cadastro central",
+          status: "error" as const,
+          detail: "Cliente ativo no registry, mas communication_tenants.company_id ainda está vazio.",
+          action: "Criar/vincular o cadastro central da empresa.",
+        }],
+        summary: { ok: 0, warn: 0, error: 1 },
+        score: 0,
+      };
+    }
 
-    if (!company) throw new Error(`Empresa ${data.slug} não encontrada`);
-    const companyId = company.id as string;
+    const company = resolved.company;
+    const companyId = company.id;
+    const tenantId = resolved.registry.id;
 
-    // 1. Dados básicos
     const missing: string[] = [];
     if (!company.legal_name) missing.push("razão social");
-    if (!company.document) missing.push("CNPJ");
+    if (!company.document) missing.push("CNPJ/CPF");
     if (!company.email) missing.push("email");
     if (!company.phone) missing.push("telefone");
     if (!company.logo_url) missing.push("logo");
@@ -46,111 +59,143 @@ export const auditTenantFull = createServerFn({ method: "POST" })
       id: "dados-basicos", category: "dados", label: "Dados cadastrais",
       status: missing.length === 0 ? "ok" : missing.length > 2 ? "error" : "warn",
       detail: missing.length ? `Faltando: ${missing.join(", ")}` : "Todos os campos essenciais preenchidos.",
-      action: missing.length ? "Editar em Dados." : undefined,
+      action: missing.length ? "Completar os dados da empresa." : undefined,
     });
 
     items.push({
-      id: "identidade-visual", category: "dados", label: "Identidade visual",
-      status: company.primary_color && company.cover_image_url ? "ok" : "warn",
-      detail: `${company.primary_color ? "Cor" : "sem cor"} · ${company.cover_image_url ? "capa OK" : "sem capa"}`,
+      id: "ativacao", category: "plano", label: "Ativação central",
+      status: company.is_active && resolved.registry.active ? "ok" : "error",
+      detail: `empresa=${company.is_active ? "ativa" : "inativa"} · registry=${resolved.registry.active ? "ativo" : "inativo"} · status=${company.status}`,
     });
 
+    const courtesyStatus = (company as any).full_courtesy_status as string | undefined;
+    const courtesyEnds = (company as any).full_courtesy_ends_at as string | undefined;
+    const { data: contracts, error: contractError } = await sb
+      .from("billing_contracts")
+      .select("id,status,plan_id,created_at")
+      .eq("company_id", companyId)
+      .limit(10);
+    const courtesyActive = courtesyStatus === "active";
+    const hasContract = !contractError && (contracts?.length ?? 0) > 0;
     items.push({
-      id: "ativacao", category: "plano", label: "Ativação",
-      status: company.is_active ? "ok" : "error",
-      detail: `is_active=${company.is_active} · status=${company.status}`,
+      id: "plano", category: "plano", label: "Plano / cortesia",
+      status: courtesyActive || hasContract ? "ok" : "warn",
+      detail: courtesyActive
+        ? `Cortesia ativa${courtesyEnds ? ` até ${courtesyEnds}` : ""}`
+        : hasContract
+          ? `${contracts.length} contrato(s) encontrado(s)`
+          : "Sem contrato ou cortesia operacional registrada.",
     });
 
-    // 2. Plano / cortesia
-    const courtesyActive = company.full_courtesy_status === "active";
+    const { data: companyModules, error: companyModulesError } = await sb
+      .from("company_modules")
+      .select("module_id,is_enabled,installed_version")
+      .eq("company_id", companyId);
+    const enabledRows = (companyModules ?? []).filter((m: any) => m.is_enabled);
+    const moduleIds = enabledRows.map((m: any) => m.module_id).filter(Boolean);
+    let activeModules: string[] = [];
+    if (!companyModulesError && moduleIds.length) {
+      const { data: moduleRows } = await sb.from("modules").select("id,slug,name").in("id", moduleIds);
+      activeModules = (moduleRows ?? []).map((m: any) => m.slug);
+    }
     items.push({
-      id: "plano-full", category: "plano", label: "Plano Full / cortesia",
-      status: courtesyActive ? "ok" : "warn",
-      detail: courtesyActive ? `Cortesia Full ativa até ${company.full_courtesy_ends_at ?? "?"}` : "Sem cortesia Full ativa — verificar assinatura.",
+      id: "modulos", category: "modulos", label: "Módulos habilitados",
+      status: companyModulesError ? "error" : activeModules.length ? "ok" : "warn",
+      detail: companyModulesError ? companyModulesError.message : activeModules.length ? activeModules.join(", ") : "Nenhum módulo habilitado para a empresa.",
+      action: !activeModules.length ? "Configurar company_modules para o cliente." : undefined,
     });
 
-    // 3. Módulos ativos
-    const { data: mods } = await sb.from("company_modules").select("module_slug,is_enabled").eq("company_id", companyId);
-    const activeMods = (mods ?? []).filter((m: any) => m.is_enabled).map((m: any) => m.module_slug);
-    const requiredMods = ["agenda", "crm", "financeiro", "site", "whatsapp"];
-    const missingMods = requiredMods.filter((r) => !activeMods.includes(r));
+    const { count: professionalCount } = await sb
+      .from("agenda_professionals")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId);
+    const { count: offeringCount } = await sb
+      .from("chrismed_service_offerings")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId);
+    if (data.slug === "chrismed") {
+      items.push({
+        id: "agenda", category: "modulos", label: "Agenda CHRISMED",
+        status: (professionalCount ?? 0) > 0 && (offeringCount ?? 0) > 0 ? "ok" : "warn",
+        detail: `${professionalCount ?? 0} profissional(is) · ${offeringCount ?? 0} oferta(s) de serviço`,
+      });
+    }
+
+    const { data: mpRows, error: mpError } = await sb
+      .from("mpago_credentials")
+      .select("environment,active")
+      .eq("company_id", companyId);
+    const mpProd = (mpRows ?? []).some((r: any) => r.environment === "production" && r.active);
     items.push({
-      id: "modulos", category: "modulos", label: "Módulos essenciais",
-      status: missingMods.length === 0 ? "ok" : missingMods.length >= 3 ? "error" : "warn",
-      detail: activeMods.length ? `Ativos: ${activeMods.join(", ")}` : "Nenhum módulo ativo.",
-      action: missingMods.length ? `Ativar: ${missingMods.join(", ")}` : undefined,
+      id: "mpago", category: "pagamentos", label: "Mercado Pago",
+      status: mpError ? "error" : mpProd ? "ok" : (mpRows?.length ?? 0) ? "warn" : "error",
+      detail: mpError ? mpError.message : mpProd ? "Credencial de produção ativa." : "Sem credencial de produção ativa.",
+      action: !mpProd ? "Configurar credenciais reais antes de liberar checkout." : undefined,
     });
 
-    // 4. Agenda populada
-    const [{ count: proCount }, { count: svcCount }] = await Promise.all([
-      sb.from("agenda_professionals").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-      sb.from("agenda_services").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-    ]);
+    const { data: channelRows, error: channelError } = await sb
+      .from("communication_channel_endpoints")
+      .select("channel,provider,status,is_primary,last_error")
+      .eq("tenant_id", tenantId);
+    const activeChannels = (channelRows ?? []).filter((c: any) => c.status === "ACTIVE");
+    const pendingChannels = (channelRows ?? []).filter((c: any) => c.status === "PENDING_CONNECTION");
     items.push({
-      id: "agenda", category: "modulos", label: "Agenda",
-      status: (proCount ?? 0) > 0 && (svcCount ?? 0) > 0 ? "ok" : (proCount ?? 0) === 0 && (svcCount ?? 0) === 0 ? "error" : "warn",
-      detail: `${proCount ?? 0} profissionais · ${svcCount ?? 0} serviços cadastrados`,
-      action: (proCount ?? 0) === 0 ? "Cadastrar profissionais em Agenda." : undefined,
+      id: "canais", category: "comunicacao", label: "Canais de comunicação",
+      status: channelError ? "error" : activeChannels.length ? "ok" : pendingChannels.length ? "warn" : "error",
+      detail: channelError
+        ? channelError.message
+        : `${activeChannels.length} ativo(s) · ${pendingChannels.length} aguardando conexão`,
+      action: !activeChannels.length ? "Conectar ao menos um canal real." : undefined,
     });
 
-    // 5. Mercado Pago
-    const { data: mp } = await sb.from("mpago_credentials").select("environment,active").eq("company_id", companyId);
-    const mpProd = (mp ?? []).find((r: any) => r.environment === "production" && r.active);
-    items.push({
-      id: "mpago", category: "pagamentos", label: "Mercado Pago (produção)",
-      status: mpProd ? "ok" : (mp?.length ? "warn" : "error"),
-      detail: mp?.length ? `${mp.length} credenciais (${(mp as any[]).map((r) => r.environment).join(", ")})` : "Sem credenciais.",
-      action: !mpProd ? "Configurar na aba Mercado Pago." : undefined,
-    });
-
-    // 6. WhatsApp
-    const { count: waCount } = await sb.from("core_whatsapp_credentials").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_active", true);
-    items.push({
-      id: "whatsapp", category: "comunicacao", label: "WhatsApp",
-      status: (waCount ?? 0) > 0 ? "ok" : "warn",
-      detail: `${waCount ?? 0} conexão(ões) ativa(s)`,
-      action: (waCount ?? 0) === 0 ? "Conectar WhatsApp em Configurações → Canais." : undefined,
-    });
-
-    // 7. Fiscal
-    const { count: fiscalCount } = await sb.from("core_fiscal_issuer_config").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_active", true);
-    items.push({
-      id: "fiscal", category: "fiscal", label: "Emissor fiscal",
-      status: (fiscalCount ?? 0) > 0 ? "ok" : "warn",
-      detail: `${fiscalCount ?? 0} emissor(es) ativo(s)`,
-    });
-
-    // 8. Cérebro IA
-    const { data: brain } = await sb.from("core_ai_brains").select("status,persona,updated_at").eq("company_id", companyId).maybeSingle();
+    const { data: brain, error: brainError } = await sb
+      .from("core_ai_brains")
+      .select("status,agent_name,tone,updated_at")
+      .eq("company_id", companyId)
+      .maybeSingle();
     items.push({
       id: "cerebro-ia", category: "ia", label: "Cérebro IA",
-      status: brain?.status === "active" ? "ok" : brain ? "warn" : "error",
-      detail: brain ? `status=${brain.status} · persona=${brain.persona ?? "—"}` : "Não configurado.",
+      status: brainError ? "error" : brain?.status === "active" ? "ok" : brain ? "warn" : "warn",
+      detail: brainError
+        ? "Estrutura do Cérebro IA ainda não está aplicada no banco atual."
+        : brain
+          ? `status=${brain.status} · agente=${brain.agent_name ?? "não nomeado"}`
+          : "Cérebro IA ainda não configurado para este cliente.",
+      action: brainError ? "Aplicar a migration de reconciliação do Cérebro IA." : undefined,
     });
 
-    // 9. N8N Workflows
-    const { count: wfCount } = await sb.from("n8n_workflows").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("active", true);
+    const { data: workflowRows, error: workflowError } = await sb
+      .from("tenant_workflow_state")
+      .select("status,registry_id,last_execution_at,last_error")
+      .eq("tenant_id", tenantId);
+    const activeWorkflows = (workflowRows ?? []).filter((w: any) => w.status === "ACTIVE").length;
+    const readyWorkflows = (workflowRows ?? []).filter((w: any) => w.status === "READY").length;
     items.push({
-      id: "n8n", category: "automacoes", label: "Jornadas N8N",
-      status: (wfCount ?? 0) >= 3 ? "ok" : (wfCount ?? 0) > 0 ? "warn" : "error",
-      detail: `${wfCount ?? 0} workflow(s) ativos`,
-      action: (wfCount ?? 0) < 3 ? "Publicar pelo menos captação, conversão e retenção." : undefined,
+      id: "n8n", category: "automacoes", label: "Jornadas n8n",
+      status: workflowError ? "error" : activeWorkflows ? "ok" : readyWorkflows ? "warn" : "error",
+      detail: workflowError ? workflowError.message : `${activeWorkflows} ativa(s) · ${readyWorkflows} pronta(s) aguardando vínculo`,
+      action: readyWorkflows ? "Vincular apenas os workflows READY; preservar os ACTIVE." : undefined,
     });
 
-    // 10. Publicação / domínio
-    const hasCustomDomain = !!(company.domain && !String(company.domain).endsWith(".impulsionando.com.br"));
     items.push({
-      id: "dominio", category: "publicacao", label: "Domínio",
-      status: hasCustomDomain ? "ok" : company.subdomain ? "warn" : "error",
-      detail: company.domain ?? (company.subdomain ? `${company.subdomain}.impulsionando.com.br` : "sem domínio"),
+      id: "fiscal", category: "fiscal", label: "Fiscal",
+      status: "muted",
+      detail: "Nenhum contrato fiscal canônico foi identificado no schema atual durante esta reconciliação; não é tratado como pronto por inferência.",
     });
 
-    // Resumo
+    const host = canonicalClientHost(data.slug);
+    items.push({
+      id: "publicacao", category: "publicacao", label: "Publicação / domínio canônico",
+      status: resolved.registry.active ? "ok" : "warn",
+      detail: host,
+    });
+
     const summary = {
       ok: items.filter((i) => i.status === "ok").length,
       warn: items.filter((i) => i.status === "warn").length,
       error: items.filter((i) => i.status === "error").length,
     };
-    const score = items.length === 0 ? 0 : Math.round((summary.ok * 100 + summary.warn * 50) / items.length);
+    const scored = items.filter((i) => i.status !== "muted");
+    const score = scored.length === 0 ? 0 : Math.round((summary.ok * 100 + summary.warn * 50) / scored.length);
     return { company: { id: companyId, name: company.name, slug: data.slug }, items, summary, score };
   });
