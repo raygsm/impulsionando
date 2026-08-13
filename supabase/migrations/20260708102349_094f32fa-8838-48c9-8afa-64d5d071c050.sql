@@ -94,41 +94,79 @@ $$;
 -- 3) Ajusta preços com salário mínimo atual
 SELECT public.sync_plan_prices_from_minimum_wage();
 
--- 4) Cadastra Colors Saúde
-INSERT INTO public.companies (
-  name, legal_name, trade_name, is_master, is_active, status,
-  niche_id, segment, subdomain, website, support_email, environment
-) VALUES (
-  'Colors Saúde',
-  'Grupo Colors Ltda.',
-  'Colors Saúde',
-  false, true, 'active',
-  'a6696010-9178-4082-9a17-32e4378fc0b8',
-  'Saúde e Suplementação',
-  'colors',
-  'https://colors.impulsionando.com.br',
-  'sac@grupocolors.com.br',
-  'real'
-)
-ON CONFLICT DO NOTHING;
+-- 4-6) Seed operacional legado da Colors.
+-- Este seed foi aplicado originalmente em um ambiente onde nicho, identidade Auth
+-- e perfil master já haviam sido provisionados externamente. Em instalações novas,
+-- esses dados não devem ser inventados pela migration: cada etapa só é executada
+-- quando sua dependência canônica já existe.
+DO $colors_seed$
+DECLARE
+  v_company_id uuid;
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.niches
+    WHERE id = 'a6696010-9178-4082-9a17-32e4378fc0b8'::uuid
+  ) THEN
+    INSERT INTO public.companies (
+      name, legal_name, trade_name, is_master, is_active, status,
+      niche_id, segment, subdomain, website, support_email, environment
+    ) VALUES (
+      'Colors Saúde',
+      'Grupo Colors Ltda.',
+      'Colors Saúde',
+      false, true, 'active',
+      'a6696010-9178-4082-9a17-32e4378fc0b8',
+      'Saúde e Suplementação',
+      'colors',
+      'https://colors.impulsionando.com.br',
+      'sac@grupocolors.com.br',
+      'real'
+    )
+    ON CONFLICT DO NOTHING;
+  ELSE
+    RAISE NOTICE 'Colors legacy seed skipped: canonical niche is not provisioned';
+  END IF;
 
--- 5) Vincula Mozart como super admin da Colors
-INSERT INTO public.user_profiles (user_id, company_id, profile_id, display_name, email, is_active)
-SELECT
-  '73285c6d-7c8a-421d-b94c-7f24a59f54a0',
-  c.id,
-  '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4',
-  'Mozart Silva Neto',
-  'mozartsn@yahoo.com.br',
-  true
-FROM public.companies c
-WHERE c.subdomain = 'colors'
-ON CONFLICT DO NOTHING;
+  SELECT id INTO v_company_id
+  FROM public.companies
+  WHERE subdomain = 'colors'
+  LIMIT 1;
 
--- 6) Ativa cortesia Full por 30 dias na Colors
-SELECT public.set_company_courtesy_plan(
-  (SELECT id FROM public.companies WHERE subdomain = 'colors'),
-  'full',
-  30,
-  'Cortesia inicial Colors Saúde — plano Full por 30 dias'
-);
+  IF v_company_id IS NULL THEN
+    RAISE NOTICE 'Colors admin/courtesy seed skipped: company is not provisioned';
+    RETURN;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM auth.users
+    WHERE id = '73285c6d-7c8a-421d-b94c-7f24a59f54a0'::uuid
+  ) AND EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4'::uuid
+  ) THEN
+    INSERT INTO public.user_profiles (user_id, company_id, profile_id, display_name, email, is_active)
+    VALUES (
+      '73285c6d-7c8a-421d-b94c-7f24a59f54a0',
+      v_company_id,
+      '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4',
+      'Mozart Silva Neto',
+      'mozartsn@yahoo.com.br',
+      true
+    )
+    ON CONFLICT DO NOTHING;
+  ELSE
+    RAISE NOTICE 'Colors legacy admin link skipped: Auth user/profile is not provisioned';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM public.billing_plans WHERE code = 'full') THEN
+    PERFORM public.set_company_courtesy_plan(
+      v_company_id,
+      'full',
+      30,
+      'Cortesia inicial Colors Saúde — plano Full por 30 dias'
+    );
+  ELSE
+    RAISE NOTICE 'Colors courtesy seed skipped: full plan is not provisioned';
+  END IF;
+END;
+$colors_seed$;
