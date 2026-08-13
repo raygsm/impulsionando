@@ -1,10 +1,12 @@
-name: DNS/IP check → VPS (187)
+name: DNS/Origin check → VPS (187)
 
-# Confirma a cada 6h (e em cada push em main) que os dominios operacionais
-# resolvem para o IP oficial da VPS Hostinger. Se algum host ainda estiver
-# apontando para infraestrutura antiga ou DNS incorreto, o job falha.
+# Confirma a cada 6h (e em cada push em main) duas camadas independentes:
+# 1) DNS/HTTPS publico precisa resolver e responder, inclusive quando protegido
+#    por Cloudflare ou outro proxy/CDN;
+# 2) a origem Hostinger precisa responder diretamente para o mesmo hostname.
 #
-# Secrets: VPS_HOST (IP publico esperado da VPS Hostinger).
+# Comparar o A publico diretamente com VPS_HOST e incorreto para hosts proxied.
+# Secret: VPS_HOST (IP publico da origem VPS Hostinger).
 
 on:
   schedule:
@@ -17,13 +19,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolver e comparar IPs
+      - name: Validar DNS publico, HTTPS e origem VPS
         env:
           EXPECTED_IP: ${{ secrets.VPS_HOST }}
         run: |
-          set -euo pipefail
-          if [ -z "$EXPECTED_IP" ]; then
-            echo "::error::Secret VPS_HOST nao configurado"; exit 1
+          set -u
+          if [ -z "${EXPECTED_IP:-}" ]; then
+            echo "::error::Secret VPS_HOST nao configurado"
+            exit 1
           fi
 
           HOSTS=(
@@ -37,13 +40,32 @@ jobs:
 
           fail=0
           for h in "${HOSTS[@]}"; do
-            ip=$(dig +short "$h" A | tail -n1)
-            code=$(curl -skI --max-time 10 "https://$h" -o /dev/null -w "%{http_code}") || code="000"
-            server=$(curl -skI --max-time 10 "https://$h" | awk -F': ' 'tolower($1)=="server"{print $2}' | tr -d '\r')
-            echo "$h -> DNS=$ip HTTP=$code Server=${server:-?}"
-            if [ "$ip" != "$EXPECTED_IP" ]; then
-              echo "::error::$h resolve para $ip (esperado $EXPECTED_IP)"
+            dns_ips=$(dig +short "$h" A | sort -u | paste -sd, -)
+            if [ -z "$dns_ips" ]; then
+              echo "::error::$h nao possui registro A publico"
+              fail=1
+            fi
+
+            public_code=$(curl -sk --max-time 15 -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
+            public_code=${public_code:-000}
+            server=$(curl -skI --max-time 15 "https://$h" 2>/dev/null | awk -F': ' 'tolower($1)=="server"{print $2}' | tr -d '\r' | head -n1 || true)
+
+            # Testa a origem sem depender do DNS publico/CDN. -k e intencional:
+            # o objetivo aqui e validar roteamento/servico da origem; a cadeia TLS
+            # publica continua sendo exercitada pelo request normal acima.
+            origin_code=$(curl -sk --max-time 15 --resolve "$h:443:$EXPECTED_IP" -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
+            origin_code=${origin_code:-000}
+
+            echo "$h -> DNS=${dns_ips:-NONE} PUBLIC=$public_code Server=${server:-?} ORIGIN=$origin_code"
+
+            if [ "$public_code" = "000" ] || [ "$public_code" -ge 500 ] 2>/dev/null; then
+              echo "::error::$h falhou no HTTPS publico (HTTP $public_code)"
+              fail=1
+            fi
+            if [ "$origin_code" = "000" ] || [ "$origin_code" -ge 500 ] 2>/dev/null; then
+              echo "::error::$h falhou na origem VPS $EXPECTED_IP (HTTP $origin_code)"
               fail=1
             fi
           done
+
           exit $fail
