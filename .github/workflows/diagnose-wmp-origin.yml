@@ -1,0 +1,44 @@
+name: Diagnose WMP origin routing
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/diagnose-wmp-origin.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Inspect proxy routing
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '== impulsionando-core labels =='
+          sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}'
+          echo '== impulsionando-core networks =='
+          sudo docker inspect impulsionando-core --format '{{json .NetworkSettings.Networks}}'
+          echo '== traefik labels =='
+          sudo docker inspect traefik-traefik-1 --format '{{json .Config.Labels}}'
+          echo '== traefik mounts =='
+          sudo docker inspect traefik-traefik-1 --format '{{json .Mounts}}'
+          echo '== traefik command =='
+          sudo docker inspect traefik-traefik-1 --format '{{json .Config.Cmd}}'
+          echo '== direct host checks =='
+          for h in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br; do
+            code=$(curl -sk --max-time 10 --resolve "$h:443:127.0.0.1" -o /dev/null -w '%{http_code}' "https://$h" || true)
+            echo "$h=$code"
+          done
+          REMOTE
