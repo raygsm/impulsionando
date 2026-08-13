@@ -22,7 +22,7 @@ export const listWmpProposals = createServerFn({ method: 'POST' })
     const tenantId = await getWmpTenantId(context.supabase)
     let q = context.supabase
       .from('wmp_proposals')
-      .select('id, proposal_number, status, current_version, title, commercial_summary, created_at, updated_at')
+      .select('id, proposal_number, status, current_version, title, client_snapshot, event_snapshot, commercial_summary, opportunity_id, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
     if (data.status) q = q.eq('status', data.status)
@@ -50,14 +50,11 @@ export const createWmpProposalDraft = createServerFn({ method: 'POST' })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const tenantId = await getWmpTenantId(context.supabase)
-    const year = new Date().getFullYear()
-    const suffix = crypto.randomUUID().slice(0, 8).toUpperCase()
-    const proposalNumber = `WMP-${year}-${suffix}`
     const { data: row, error } = await context.supabase
       .from('wmp_proposals')
       .insert({
         tenant_id: tenantId,
-        proposal_number: proposalNumber,
+        proposal_number: 'AUTO',
         status: 'DRAFT',
         current_version: 1,
         title: data.title,
@@ -68,8 +65,19 @@ export const createWmpProposalDraft = createServerFn({ method: 'POST' })
         event_snapshot: data.event_snapshot ?? {},
         created_by: context.userId,
       })
-      .select('id, proposal_number, status')
+      .select('id, proposal_number, status, opportunity_id')
       .single()
     if (error) throw error
     return row
+  })
+
+export const sendWmpProposal = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { proposal_id: string }) => z.object({ proposal_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: outboxId, error } = await context.supabase.rpc('queue_wmp_proposal_email', { p_proposal_id: data.proposal_id })
+    if (error) throw error
+    const { flushOutboxByReference } = await import('@/lib/outboxFlush.server')
+    const delivery = await flushOutboxByReference('wmp_proposal', data.proposal_id)
+    return { outbox_id: outboxId as string, delivery }
   })
