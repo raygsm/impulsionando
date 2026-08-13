@@ -1,0 +1,196 @@
+name: Temporary commercial source-of-truth patch
+
+on:
+  push:
+    branches:
+      - fix/core-commercial-source-of-truth-20260813
+    paths:
+      - .github/workflows/tmp-commercial-source-of-truth.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/core-commercial-source-of-truth-20260813
+          fetch-depth: 0
+      - name: Apply fail-closed commercial publication rules
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          # Canonical public domain.
+          p = Path('src/components/marketing/PublicFooter.tsx')
+          s = p.read_text()
+          s = s.replace('https://impulsionandobrasil.com.br', 'https://impulsionando.com.br')
+          p.write_text(s)
+
+          p = Path('src/routes/__root.tsx')
+          s = p.read_text()
+          s = s.replace('sameAs: ["https://impulsionandobrasil.com.br"],', 'sameAs: [],')
+          p.write_text(s)
+
+          # /planos: metadata no longer advertises unpublished pricing.
+          p = Path('src/routes/planos.tsx')
+          s = p.read_text()
+          s = s.replace(
+            '{ title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },',
+            '{ title: "Planos e Soluções — Impulsionando Tecnologia" },'
+          )
+          s = s.replace(
+            '{ name: "description", content: "Planos atrelados ao salário mínimo: Essencial (½ SM), Integrado (1 SM), Avançado (2 SM) e Sob Medida. Mensal ou anual com 2 meses grátis." },',
+            '{ name: "description", content: "Conheça as soluções da Impulsionando. Valores e contratação direta só são exibidos quando publicados pela gestão no catálogo comercial oficial." },'
+          )
+          s = s.replace(
+            '{ property: "og:description", content: "Do Essencial ao Sob Medida. Anual com 2 meses grátis. Sem fidelidade obrigatória." },',
+            '{ property: "og:description", content: "Soluções modulares para empresas. Condições comerciais são publicadas a partir do catálogo oficial da Impulsionando." },'
+          )
+          needle = '''  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });'''
+          repl = needle + '''
+  // Fail closed: nenhuma condição comercial é renderizada enquanto o backend
+  // não publicar explicitamente pelo menos um plano com show_on_site=true.
+  const commercialPublishingReady = availability?.hasPublishedPlans === true;'''
+          if needle not in s:
+            raise SystemExit('planos availability block not found')
+          s = s.replace(needle, repl, 1)
+          s = s.replace('{audience === "white-label" && (', '{audience === "white-label" && commercialPublishingReady && (', 1)
+          s = s.replace('{audience === "consumidor" && (', '{audience === "consumidor" && commercialPublishingReady && (', 1)
+          s = s.replace('{audience === "empresas" && (', '{audience === "empresas" && commercialPublishingReady && (', 1)
+          anchor = '''      {audience === "white-label" && commercialPublishingReady && (
+        <WhiteLabelPlansPanel />
+      )}'''
+          fallback = '''      {availability && !commercialPublishingReady && (
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 w-full">
+          <Card className="p-8 sm:p-10 text-center border-primary/25 bg-primary/5">
+            <Badge variant="outline" className="mb-4">Catálogo comercial controlado pelo Core</Badge>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Condições comerciais em configuração</h1>
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Nenhum plano está publicado para contratação direta neste momento. Para evitar valores desatualizados ou condições não autorizadas, preços e checkout permanecem ocultos até a publicação pela gestão.
+            </p>
+            <div className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
+              <Button asChild size="lg" className="bg-gradient-primary">
+                <Link to="/orcamento">Solicitar proposta</Link>
+              </Button>
+              <Button type="button" size="lg" variant="outline" onClick={() => openImpulsionito("planos-catalogo-nao-publicado")}>
+                Falar com especialista
+              </Button>
+            </div>
+          </Card>
+        </section>
+      )}
+
+''' + anchor
+          if anchor not in s:
+            raise SystemExit('planos panel anchor not found')
+          s = s.replace(anchor, fallback, 1)
+          p.write_text(s)
+
+          # /demo: replace static prices with the published backend catalog.
+          p = Path('src/routes/demo.index.tsx')
+          s = p.read_text()
+          s = s.replace(
+            'import { createFileRoute, Link } from "@tanstack/react-router";',
+            'import { createFileRoute, Link } from "@tanstack/react-router";\nimport { useQuery } from "@tanstack/react-query";\nimport { useServerFn } from "@tanstack/react-start";'
+          )
+          s = s.replace(
+            'import { openImpulsionito } from "@/lib/impulsionito-tracking";',
+            'import { openImpulsionito } from "@/lib/impulsionito-tracking";\nimport { getCommercialAvailability } from "@/lib/commercial.functions";'
+          )
+          s = s.replace(
+            'function DemoLanding() {\n  return (',
+            '''function DemoLanding() {
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability", "demo"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+  const publishedPlans = availability?.publishedPlans ?? [];
+
+  return ('''
+          )
+          start = s.index('        {/* Planos — etapa final da demonstração */}')
+          end = s.index('        {/* Especialista */}', start)
+          replacement = '''        {/* Condições comerciais — sempre derivadas do catálogo publicado no Core */}
+        <section className="mb-6 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <Badge className="bg-gradient-primary mb-3 gap-1"><Sparkles className="w-3 h-3" /> Condições comerciais</Badge>
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              {publishedPlans.length ? "Planos publicados pela gestão" : "Solicite uma proposta para sua operação"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
+              {publishedPlans.length
+                ? "Os valores abaixo vêm diretamente do catálogo comercial oficial da Impulsionando."
+                : "Nenhum preço está publicado para contratação direta neste momento. Não exibimos valores estimados ou desatualizados."}
+            </p>
+          </div>
+          {publishedPlans.length ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {publishedPlans.map((p) => {
+                const price = p.recurring_amount > 0
+                  ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.recurring_amount)
+                  : "Sob consulta";
+                return (
+                  <Card key={p.code} className="p-5 flex flex-col hover-lift">
+                    <h3 className="font-semibold text-base">{p.name}</h3>
+                    <div className="text-2xl font-bold mt-1">{price}</div>
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">{p.description ?? "Condição comercial publicada pela gestão."}</p>
+                    <Button asChild size="sm" variant="outline" className="mt-4 focus-ring">
+                      <Link to="/planos">{p.cta ?? (p.route_to_quote ? "Solicitar proposta" : "Ver condições")} <ArrowRight className="w-3 h-3 ml-1" /></Link>
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <Button asChild size="lg" className="bg-gradient-primary btn-alive gap-2">
+                <Link to="/orcamento">Solicitar proposta <ArrowRight className="w-4 h-4" /></Link>
+              </Button>
+              <Button type="button" size="lg" variant="outline" onClick={() => openImpulsionito("demo-condicoes-comerciais")}>
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com especialista
+              </Button>
+            </div>
+          )}
+        </section>
+
+'''
+          s = s[:start] + replacement + s[end:]
+          p.write_text(s)
+
+          # Meta verifier: reject stale institutionalized prices instead of requiring them.
+          p = Path('scripts/verify-planos-meta.ts')
+          s = p.read_text()
+          begin = s.index('  // 3. Preços e quotas exatos')
+          finish = s.index('  // 4. Trial 7 dias + 90 dias', begin)
+          block = '''  // 3. Catálogo comercial: preços antigos não podem ser institucionalizados no HTML.
+  const staleCommercialValues = ["R$ 759", "R$ 1.518", "R$ 3.036"];
+  const staleFound = staleCommercialValues.filter((value) => html.includes(value));
+  add(
+    "sem preços comerciais legados hardcoded",
+    staleFound.length === 0,
+    staleFound.length ? `valores legados encontrados: ${staleFound.join(", ")}` : "catálogo público controlado pelo backend",
+  );
+
+'''
+          s = s[:begin] + block + s[finish:]
+          p.write_text(s)
+
+          # Remove this temporary workflow from the final branch history tree.
+          Path('.github/workflows/tmp-commercial-source-of-truth.yml').unlink()
+      - name: Commit patch and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(commercial): enforce backend as public pricing source"
+          git push origin HEAD:fix/core-commercial-source-of-truth-20260813
