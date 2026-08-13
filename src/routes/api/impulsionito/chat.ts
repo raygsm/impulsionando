@@ -1,16 +1,19 @@
 /**
  * /api/impulsionito/chat — endpoint HTTP de streaming do Impulsionito.
  *
- * O ledger omnichannel é a fonte persistente da conversa. O navegador envia
- * somente uma identidade anônima de sessão; qualquer união futura com outra
- * identidade/canal exige verificação explícita no backend.
+ * Segurança do contrato público:
+ * - identidade web é anônima por sessão e não é mesclada automaticamente;
+ * - o ledger omnichannel é a fonte persistente do histórico;
+ * - BrainSnapshot, provedor/modelo e campos livres do contexto enviados pelo
+ *   navegador NÃO têm autoridade sobre o system prompt;
+ * - somente a rota atual, sanitizada, entra como contexto não confiável.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { randomUUID } from "crypto";
 import { streamText, type ModelMessage } from "ai";
 import { assemblePrompt } from "@/lib/impulsionito/context-engine.server";
 import { resolveProvider } from "@/lib/impulsionito/providers.server";
-import type { ImpulsionitoChatRequestBody, ImpulsionitoWireMessage } from "@/lib/impulsionito/types";
+import type { ImpulsionitoChatRequestBody, ImpulsionitoRequestContext, ImpulsionitoWireMessage } from "@/lib/impulsionito/types";
 import {
   listConversationHistory,
   recordInboundMessage,
@@ -23,9 +26,9 @@ function toModelMessages(msgs: ImpulsionitoWireMessage[]): ModelMessage[] {
   for (const m of msgs) {
     const content = (m.text ?? "").toString().trim();
     if (!content) continue;
-    if (m.role === "system") out.push({ role: "system", content });
-    else if (m.role === "assistant") out.push({ role: "assistant", content });
-    else out.push({ role: "user", content });
+    if (m.role === "assistant") out.push({ role: "assistant", content });
+    else if (m.role === "user") out.push({ role: "user", content });
+    // Mensagens system vindas do cliente são deliberadamente descartadas.
   }
   return out;
 }
@@ -44,6 +47,17 @@ function safeSessionId(request: Request): string {
   const supplied = request.headers.get("x-impulsionando-session")?.trim() ?? "";
   if (/^web:[A-Za-z0-9:_-]{8,200}$/.test(supplied)) return supplied;
   return `web:ephemeral:${randomUUID()}`;
+}
+
+function safePublicContext(body: ImpulsionitoChatRequestBody): ImpulsionitoRequestContext {
+  const rawPath = body.context?.pathname?.trim() ?? "/";
+  const pathname = /^\/[A-Za-z0-9_./?=&%+~-]{0,299}$/.test(rawPath) ? rawPath : "/";
+  return {
+    pathname,
+    channel: "web",
+    tenant: "impulsionando",
+    audience: "public_web",
+  };
 }
 
 function trackedTextStream(
@@ -94,15 +108,12 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
         const clientMessages = Array.isArray(body.messages) ? body.messages : [];
         const clientModelMessages = toModelMessages(clientMessages);
         const lastUser = [...clientModelMessages].reverse().find((m) => m.role === "user");
-        const lastUserText =
-          typeof lastUser?.content === "string"
-            ? lastUser.content.trim()
-            : Array.isArray(lastUser?.content)
-              ? (lastUser.content as any[]).map((p) => p.text ?? "").join(" ").trim()
-              : "";
+        const lastUserText = typeof lastUser?.content === "string" ? lastUser.content.trim() : "";
 
         if (!lastUserText) return Response.json({ error: "empty_messages" }, { status: 400 });
+        if (lastUserText.length > 12000) return Response.json({ error: "message_too_large" }, { status: 413 });
 
+        const publicContext = safePublicContext(body);
         let ledger: InboundLedger;
         try {
           ledger = await recordInboundMessage({
@@ -113,9 +124,7 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
             bodyText: lastUserText,
             endpointAddress: "https://impulsionando.com.br",
             metadata: {
-              pathname: body.context?.pathname ?? null,
-              screen: body.context?.screen ?? null,
-              audience: body.context?.audience ?? null,
+              pathname: publicContext.pathname,
               source: "impulsionito_web_chat",
             },
           });
@@ -133,7 +142,10 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
         }
         if (modelMessages.length > 30) modelMessages = modelMessages.slice(-30);
 
-        const assembled = assemblePrompt(body.brain, body.context);
+        // O endpoint público nunca aceita system prompt/BrainSnapshot do browser.
+        // Até a base oficial do Centro de Inteligência ser persistida no backend,
+        // assemblePrompt usa o núcleo seguro embutido no servidor.
+        const assembled = assemblePrompt(undefined, publicContext);
 
         const persistOutbound = async (text: string, status = "SENT", metadata: Record<string, unknown> = {}) => {
           await recordOutboundMessage({
@@ -177,8 +189,7 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
               "Cache-Control": "no-store",
               "X-Impulsionito-Provider": "mock",
               "X-Impulsionito-Model": "mock-1",
-              "X-Impulsionito-Brain": assembled.meta.hasBrain ? "1" : "0",
-              "X-Impulsionito-Prompt-Version": String(assembled.meta.promptVersion ?? 0),
+              "X-Impulsionito-Brain": "server-fallback",
               "X-Impulsionito-Fallback-Reason": reason || "unknown",
               "X-Conversation-Id": ledger.conversation_id,
             },
@@ -187,7 +198,8 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
 
         let resolved;
         try {
-          resolved = resolveProvider({ llm: body.llm });
+          // Política de provedor/modelo é exclusivamente server-side.
+          resolved = resolveProvider({});
         } catch {
           return mockStream("no_provider_available");
         }
@@ -197,8 +209,8 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
             model: resolved.model,
             system: assembled.system,
             messages: modelMessages,
-            temperature: body.llm?.temperature ?? 0.4,
-            maxOutputTokens: body.llm?.maxTokens ?? 1024,
+            temperature: 0.4,
+            maxOutputTokens: 1024,
           });
 
           const stream = trackedTextStream(
@@ -206,7 +218,7 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
             (text) => persistOutbound(text, "SENT", {
               provider: resolved.provider,
               model: resolved.modelId,
-              prompt_version: assembled.meta.promptVersion ?? 0,
+              prompt_source: "server",
             }),
           );
 
@@ -216,8 +228,7 @@ export const Route = createFileRoute("/api/impulsionito/chat")({
               "Cache-Control": "no-store",
               "X-Impulsionito-Provider": resolved.provider,
               "X-Impulsionito-Model": resolved.modelId,
-              "X-Impulsionito-Brain": assembled.meta.hasBrain ? "1" : "0",
-              "X-Impulsionito-Prompt-Version": String(assembled.meta.promptVersion ?? 0),
+              "X-Impulsionito-Brain": "server-fallback",
               "X-Conversation-Id": ledger.conversation_id,
             },
           });
