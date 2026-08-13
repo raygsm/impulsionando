@@ -27,7 +27,7 @@ jobs:
           echo '== Antes =='
           sudo docker exec "$C" n8n list:workflow 2>&1 | grep 'WMP' || true
           cat >/tmp/wmp-lead.json <<'JSON'
-          {"name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
+          {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
           JSON
           sudo docker cp /tmp/wmp-lead.json "$C:/tmp/wmp-lead.json"
           echo '== Import =='
