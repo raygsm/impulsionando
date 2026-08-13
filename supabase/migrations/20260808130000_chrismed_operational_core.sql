@@ -196,6 +196,23 @@ GRANT ALL ON public.companies, public.user_roles, public.health_professions,
   public.health_specialties, public.agenda_professionals, public.health_professional_specialties,
   public.agenda_schedules, public.agenda_blocks, public.health_specialty_requests TO service_role;
 
+-- Historical CHRISMED schemas may already contain some of these policies from
+-- earlier migrations. Recreate the intended policy set deterministically so a
+-- clean migration replay and an upgraded production schema converge safely.
+DROP POLICY IF EXISTS companies_staff_read ON public.companies;
+DROP POLICY IF EXISTS user_roles_self_read ON public.user_roles;
+DROP POLICY IF EXISTS health_professions_public_read ON public.health_professions;
+DROP POLICY IF EXISTS health_professions_staff_manage ON public.health_professions;
+DROP POLICY IF EXISTS health_specialties_public_read ON public.health_specialties;
+DROP POLICY IF EXISTS health_specialties_staff_manage ON public.health_specialties;
+DROP POLICY IF EXISTS agenda_professionals_self_or_staff_read ON public.agenda_professionals;
+DROP POLICY IF EXISTS agenda_professionals_self_or_staff_update ON public.agenda_professionals;
+DROP POLICY IF EXISTS health_professional_specialties_self_or_staff ON public.health_professional_specialties;
+DROP POLICY IF EXISTS agenda_schedules_self_or_staff ON public.agenda_schedules;
+DROP POLICY IF EXISTS agenda_blocks_self_or_staff ON public.agenda_blocks;
+DROP POLICY IF EXISTS health_specialty_requests_self_or_staff_read ON public.health_specialty_requests;
+DROP POLICY IF EXISTS health_specialty_requests_self_insert ON public.health_specialty_requests;
+
 CREATE POLICY companies_staff_read ON public.companies FOR SELECT TO authenticated
   USING (public.is_impulsionando_staff(auth.uid()));
 CREATE POLICY user_roles_self_read ON public.user_roles FOR SELECT TO authenticated
