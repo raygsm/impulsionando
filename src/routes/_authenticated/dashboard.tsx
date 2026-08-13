@@ -18,11 +18,16 @@ import { NicheOnboardingBanner } from "@/components/app/NicheOnboardingBanner";
 import { useDashboardWidgets, WIDGET_CATALOG, type WidgetId } from "@/hooks/use-dashboard-widgets";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useRecentPages } from "@/hooks/use-recent-pages";
+import { WmpManagementDashboard } from "@/components/wmp/WmpManagementDashboard";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Impulsionando" }] }),
   component: DashboardPage,
 });
+
+function isWmpHost(): boolean {
+  return typeof window !== "undefined" && window.location.hostname.toLowerCase() === "wmp.impulsionando.com.br";
+}
 
 async function fetchStats() {
   const counts = await Promise.all([
@@ -138,6 +143,11 @@ function RecentsPanel() {
 }
 
 function DashboardPage() {
+  if (isWmpHost()) return <WmpManagementDashboard />;
+  return <CoreDashboardPage />;
+}
+
+function CoreDashboardPage() {
   const { data: me } = useCurrentUser();
   const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ["dashboard-stats"], queryFn: fetchStats });
   const { data: audit, isLoading: auditLoading } = useQuery({ queryKey: ["dashboard-audit"], queryFn: fetchRecentAudit });
@@ -203,9 +213,7 @@ function DashboardPage() {
                     <span className="font-medium truncate">{row.entity}</span>
                     <span className="text-muted-foreground truncate">{row.user_email ?? "—"}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {new Date(row.created_at).toLocaleString("pt-BR")}
-                  </span>
+                  <span className="text-xs text-muted-foreground shrink-0">{new Date(row.created_at).toLocaleString("pt-BR")}</span>
                 </div>
               ))}
             </div>
