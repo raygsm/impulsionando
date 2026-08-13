@@ -8,27 +8,29 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const CANONICAL_N8N = "https://n8n.impulsionando.com.br/";
 
-function normalizeWorkflowSlug(eventCode: string) {
+function normalizeWorkflowSlug(eventCode: string, tenantSlug: string) {
   const trimmed = eventCode.trim();
-  return trimmed.startsWith("impulsionando.") ? trimmed : `impulsionando.${trimmed}`;
+  if (trimmed.startsWith(`${tenantSlug}.`)) return trimmed;
+  return `${tenantSlug}.${trimmed}`;
 }
 
 export async function dispatchN8nByEvent(
   event_code: string,
   payload: Record<string, unknown>,
   company_id: string | null = null,
+  tenant_slug = "impulsionando",
 ): Promise<{ ok: boolean; skipped?: boolean; status?: number; error?: string; workflow_slug?: string }> {
-  const workflowSlug = normalizeWorkflowSlug(event_code);
+  const workflowSlug = normalizeWorkflowSlug(event_code, tenant_slug);
 
   const { data: tenant, error: tenantError } = await supabaseAdmin
     .from("communication_tenants" as never)
     .select("id" as never)
-    .eq("slug" as never, "impulsionando")
+    .eq("slug" as never, tenant_slug)
     .eq("active" as never, true)
     .limit(1)
     .maybeSingle();
   if (tenantError) return { ok: false, error: tenantError.message, workflow_slug: workflowSlug };
-  if (!tenant) return { ok: false, error: "impulsionando_tenant_not_found", workflow_slug: workflowSlug };
+  if (!tenant) return { ok: false, error: `tenant_not_found:${tenant_slug}`, workflow_slug: workflowSlug };
 
   const { data: registry, error: registryError } = await supabaseAdmin
     .from("n8n_workflow_registry" as never)
@@ -68,6 +70,7 @@ export async function dispatchN8nByEvent(
   const body = JSON.stringify({
     workflow_name: workflowSlug,
     event_code,
+    tenant_slug,
     correlation_id: correlationId,
     company_id,
     dispatched_at: startedAt,
@@ -94,7 +97,7 @@ export async function dispatchN8nByEvent(
 
   const finalStatus = !errorMessage && status > 0 && status < 400 ? "SUCCEEDED" : "FAILED";
   await supabaseAdmin.rpc("record_n8n_registry_run" as never, {
-    p_tenant_slug: "impulsionando",
+    p_tenant_slug: tenant_slug,
     p_workflow_slug: workflowSlug,
     p_correlation_id: correlationId,
     p_n8n_execution_id: null,
