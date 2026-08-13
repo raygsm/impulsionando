@@ -11,7 +11,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect sanitized live workflow topology
+      - name: Inspect sanitized callback targets
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -26,18 +26,16 @@ jobs:
               const fs=require("fs");
               let data=JSON.parse(fs.readFileSync("/tmp/impulsionando-workflows.json","utf8"));
               if(!Array.isArray(data)) data=[data];
-              for(const w of data){
-                const webhooks=[];
-                let callback=false;
-                let canonicalCallback=false;
+              for(const w of data.filter(x=>x.active)){
+                const callbacks=[];
                 for(const n of (w.nodes||[])){
-                  const t=String(n.type||"");
                   const p=n.parameters||{};
-                  if(t.includes("webhook")) webhooks.push({name:String(n.name||""),path:String(p.path||""),method:String(p.httpMethod||p.method||"")});
-                  const url=String(p.url||"");
-                  if(url.includes("n8n-callback")||url.includes("/api/public/hooks/n8n-log")){callback=true; if(url.includes("impulsionando.com.br")) canonicalCallback=true;}
+                  const raw=String(p.url||"");
+                  if(!raw.includes("n8n-callback")&&!raw.includes("/api/public/hooks/n8n-log")) continue;
+                  const safeUrl=raw.split("?")[0].split("#")[0].replace(/(Bearer|token|secret|key)[=:][^ }&]+/ig,"$1=REDACTED");
+                  callbacks.push({node:String(n.name||""),type:String(n.type||""),method:String(p.method||p.httpMethod||""),url:safeUrl,authentication:String(p.authentication||"none"),sendHeaders:!!p.sendHeaders});
                 }
-                console.log(JSON.stringify({id:String(w.id||""),name:String(w.name||""),active:!!w.active,webhooks,callback,canonicalCallback}));
+                console.log(JSON.stringify({id:String(w.id||""),name:String(w.name||""),callbacks}));
               }
             '
             docker exec "$C" rm -f /tmp/impulsionando-workflows.json
