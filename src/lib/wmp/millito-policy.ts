@@ -23,3 +23,18 @@ export const MILLITO_AUTONOMOUS_ACTIONS = [
   'qualify_lead','request_images','analyze_venue','suggest_setup','select_catalog_items',
   'estimate_logistics','prepare_proposal','request_fiscal_data','validate_proposal_inputs','ask_send_confirmation'
 ] as const
+
+export const MILLITO_CLOSING_FLOW = {
+  askBeforeClose: 'Algo mais em que eu ainda possa ajudar?',
+  negativeSignals: ['não', 'nao', 'não, obrigado', 'nao, obrigado', 'obrigado', 'era só isso', 'era so isso'],
+  closingMessage: 'Pois não. Caso queira, você pode ter acesso à conversa na íntegra.',
+  protocolRequired: true,
+  exportRequiresWmpRegistration: true,
+  exportRequiredFields: ['full_name', 'cpf', 'email', 'mobile'] as const,
+  emailVerificationRequired: true,
+  mobileVerificationRequired: true,
+  emailVerificationMode: 'link' as const,
+  unauthenticatedAction: 'REGISTER_OR_LOGIN' as const,
+  authenticatedUnverifiedAction: 'VERIFY_IDENTITIES' as const,
+  eligibleAction: 'EXPORT_AND_EMAIL' as const,
+} as const
