@@ -1,15 +1,14 @@
 name: DNS/IP check → VPS (187)
 
-# Confirma diariamente (e em cada push) que chrismed.impulsionando.com.br
-# e demais subdominios resolvem para o IP oficial da VPS. Se algum host
-# ainda estiver apontando para o IP antigo da Lovable (185.x.x.x),
-# o job falha e o operador recebe alerta imediato.
+# Confirma a cada 6h (e em cada push em main) que os dominios operacionais
+# resolvem para o IP oficial da VPS Hostinger. Se algum host ainda estiver
+# apontando para infraestrutura antiga ou DNS incorreto, o job falha.
 #
 # Secrets: VPS_HOST (IP publico esperado da VPS Hostinger).
 
 on:
   schedule:
-    - cron: "0 */6 * * *"     # a cada 6h
+    - cron: "0 */6 * * *"
   push:
     branches: [main]
   workflow_dispatch:
@@ -30,6 +29,7 @@ jobs:
           HOSTS=(
             "impulsionando.com.br"
             "chrismed.impulsionando.com.br"
+            "n8n.impulsionando.com.br"
             "wmp.impulsionando.com.br"
             "colorssaude.impulsionando.com.br"
             "marocas.impulsionando.com.br"
