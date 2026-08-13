@@ -5,6 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { breadcrumbJsonLd } from "@/lib/seo";
 
 import { getCommercialAvailability } from "@/lib/commercial.functions";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
   Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
