@@ -94,41 +94,67 @@ $$;
 -- 3) Ajusta preços com salário mínimo atual
 SELECT public.sync_plan_prices_from_minimum_wage();
 
--- 4) Cadastra Colors Saúde
-INSERT INTO public.companies (
-  name, legal_name, trade_name, is_master, is_active, status,
-  niche_id, segment, subdomain, website, support_email, environment
-) VALUES (
-  'Colors Saúde',
-  'Grupo Colors Ltda.',
-  'Colors Saúde',
-  false, true, 'active',
-  'a6696010-9178-4082-9a17-32e4378fc0b8',
-  'Saúde e Suplementação',
-  'colors',
-  'https://colors.impulsionando.com.br',
-  'sac@grupocolors.com.br',
-  'real'
-)
-ON CONFLICT DO NOTHING;
+-- 4–6) Bootstrap legado da Colors.
+-- Na época, nicho, usuário e perfil eram provisionados fora das migrations.
+-- Em bancos novos não devemos recriar esses registros históricos/obsoletos só
+-- para satisfazer o seed. As funções estruturais acima continuam aplicadas.
+DO $$
+DECLARE
+  v_niche_id constant uuid := 'a6696010-9178-4082-9a17-32e4378fc0b8';
+  v_user_id constant uuid := '73285c6d-7c8a-421d-b94c-7f24a59f54a0';
+  v_profile_id constant uuid := '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4';
+  v_company_id uuid;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.niches WHERE id = v_niche_id)
+     OR NOT EXISTS (SELECT 1 FROM auth.users WHERE id = v_user_id)
+     OR NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = v_profile_id)
+     OR NOT EXISTS (SELECT 1 FROM public.billing_plans WHERE code = 'full') THEN
+    RAISE NOTICE 'Legacy Colors bootstrap skipped: externally provisioned prerequisites are absent';
+    RETURN;
+  END IF;
 
--- 5) Vincula Mozart como super admin da Colors
-INSERT INTO public.user_profiles (user_id, company_id, profile_id, display_name, email, is_active)
-SELECT
-  '73285c6d-7c8a-421d-b94c-7f24a59f54a0',
-  c.id,
-  '6fbbb7e6-01ae-447f-bd66-85aeba9f54c4',
-  'Mozart Silva Neto',
-  'mozartsn@yahoo.com.br',
-  true
-FROM public.companies c
-WHERE c.subdomain = 'colors'
-ON CONFLICT DO NOTHING;
+  INSERT INTO public.companies (
+    name, legal_name, trade_name, is_master, is_active, status,
+    niche_id, segment, subdomain, website, support_email, environment
+  ) VALUES (
+    'Colors Saúde',
+    'Grupo Colors Ltda.',
+    'Colors Saúde',
+    false, true, 'active',
+    v_niche_id,
+    'Saúde e Suplementação',
+    'colors',
+    'https://colors.impulsionando.com.br',
+    'sac@grupocolors.com.br',
+    'real'
+  )
+  ON CONFLICT DO NOTHING;
 
--- 6) Ativa cortesia Full por 30 dias na Colors
-SELECT public.set_company_courtesy_plan(
-  (SELECT id FROM public.companies WHERE subdomain = 'colors'),
-  'full',
-  30,
-  'Cortesia inicial Colors Saúde — plano Full por 30 dias'
-);
+  SELECT id INTO v_company_id
+  FROM public.companies
+  WHERE subdomain = 'colors'
+  LIMIT 1;
+
+  IF v_company_id IS NULL THEN
+    RAISE NOTICE 'Legacy Colors bootstrap skipped: company was not created/resolved';
+    RETURN;
+  END IF;
+
+  INSERT INTO public.user_profiles (user_id, company_id, profile_id, display_name, email, is_active)
+  VALUES (
+    v_user_id,
+    v_company_id,
+    v_profile_id,
+    'Mozart Silva Neto',
+    'mozartsn@yahoo.com.br',
+    true
+  )
+  ON CONFLICT DO NOTHING;
+
+  PERFORM public.set_company_courtesy_plan(
+    v_company_id,
+    'full',
+    30,
+    'Cortesia inicial Colors Saúde — plano Full por 30 dias'
+  );
+END $$;
