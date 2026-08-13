@@ -1,0 +1,30 @@
+name: Temporary audit live n8n webhook paths
+
+on:
+  push:
+    branches:
+      - ops/audit-live-n8n-webhooks-20260812
+    paths:
+      - .github/workflows/tmp-audit-live-n8n-webhook-paths.yml
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Export sanitized webhook paths from live n8n
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -eu
+            C=n8n-umlg-n8n-1
+            docker exec "$C" n8n export:workflow --all --output=/tmp/impulsionando-workflows.json >/dev/null 2>&1
+            docker cp "$C":/tmp/impulsionando-workflows.json /tmp/impulsionando-workflows.json >/dev/null
+            echo "WORKFLOW_WEBHOOK_PATHS_BEGIN"
+            jq -r '.[] as $w | $w.nodes[]? | select((.type // "") | test("webhook"; "i")) | [$w.id, $w.name, ($w.active|tostring), .name, (.parameters.httpMethod // "ANY"), (.parameters.path // "")] | @tsv' /tmp/impulsionando-workflows.json | sort
+            echo "WORKFLOW_WEBHOOK_PATHS_END"
+            rm -f /tmp/impulsionando-workflows.json
+            docker exec "$C" rm -f /tmp/impulsionando-workflows.json >/dev/null 2>&1 || true
