@@ -1,0 +1,84 @@
+name: Temporary Pega Agenda schema patch
+
+on:
+  push:
+    branches:
+      - agent/schema-ci-and-core-completion-20260813
+    paths:
+      - .github/workflows/tmp-patch-pega-schema.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/schema-ci-and-core-completion-20260813
+          fetch-depth: 0
+      - name: Patch historical compatibility deterministically
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('supabase/migrations/20260812114505_chrismed_pega_agenda_core.sql')
+          text = path.read_text()
+
+          marker = "create unique index if not exists agenda_professional_terms_active_unique on public.agenda_professional_terms(professional_id,terms_version) where revoked_at is null;"
+          compat = r"""-- Reconcile the June Agenda schema before using the CHRISMED Pega Agenda contract.
+-- CREATE TABLE IF NOT EXISTS does not add columns to legacy tables, so a clean
+-- replay must explicitly converge the historical shape to the production shape.
+alter table public.agenda_professional_terms add column if not exists revoked_at timestamptz;
+alter table public.agenda_professional_terms add column if not exists ip_hash text;
+alter table public.agenda_professional_terms add column if not exists metadata jsonb not null default '{}'::jsonb;
+
+alter table public.agenda_professional_eligibility add column if not exists profession_id uuid;
+alter table public.agenda_professional_eligibility add column if not exists primary_area text;
+create unique index if not exists agenda_professional_eligibility_professional_unique
+  on public.agenda_professional_eligibility(professional_id);
+
+alter table public.agenda_open_slots add column if not exists original_professional_id uuid references public.agenda_professionals(id) on delete set null;
+alter table public.agenda_open_slots add column if not exists offering_id uuid references public.chrismed_service_offerings(id) on delete set null;
+alter table public.agenda_open_slots add column if not exists profession_id uuid;
+alter table public.agenda_open_slots add column if not exists primary_area text;
+alter table public.agenda_open_slots add column if not exists reason text;
+
+-- The June table pointed appointment_id to the generic agenda table. Pega Agenda
+-- moves a CHRISMED appointment, therefore the FK must converge to chrismed_appointments.
+alter table public.agenda_open_slots drop constraint if exists agenda_open_slots_appointment_id_fkey;
+alter table public.agenda_open_slots
+  add constraint agenda_open_slots_appointment_id_fkey
+  foreign key (appointment_id) references public.chrismed_appointments(id) on delete set null;
+
+-- Legacy offers allowed seen/locked but not cancelled; current claim logic cancels
+-- competing offers atomically. Replace only the historical unnamed status check.
+alter table public.agenda_slot_offers drop constraint if exists agenda_slot_offers_status_check;
+alter table public.agenda_slot_offers
+  add constraint agenda_slot_offers_status_check
+  check (status in ('sent','accepted','declined','expired','cancelled'));
+
+""" + marker
+          if marker not in text:
+              raise SystemExit('Pega Agenda marker not found')
+          if 'Reconcile the June Agenda schema' not in text:
+              text = text.replace(marker, compat, 1)
+          path.write_text(text)
+
+          wf = Path('.github/workflows/schema-check.yml')
+          schema = wf.read_text()
+          old = "if: github.event_name != 'pull_request'"
+          if old in schema:
+              schema = schema.replace(old, "if: always()", 1)
+          wf.write_text(schema)
+          PY
+
+          rm -f .github/workflows/tmp-patch-pega-schema.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add supabase/migrations/20260812114505_chrismed_pega_agenda_core.sql .github/workflows/schema-check.yml .github/workflows/tmp-patch-pega-schema.yml
+          git diff --cached --check
+          git commit -m "fix(schema): reconcile legacy Agenda before Pega Agenda"
+          git push origin HEAD:agent/schema-ci-and-core-completion-20260813
