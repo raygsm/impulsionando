@@ -11,7 +11,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit registered webhook paths from live n8n
+      - name: Audit registered webhook paths from n8n SQLite
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -23,16 +23,9 @@ jobs:
           script: |
             set -eu
             C=n8n-umlg-n8n-1
-            echo "N8N_DB_AUDIT_BEGIN"
-            DBTYPE=$(docker exec "$C" sh -lc 'printf "%s" "${DB_TYPE:-sqlite}"')
-            echo "DB_TYPE=$DBTYPE"
-            if [ "$DBTYPE" = "sqlite" ] || [ "$DBTYPE" = "sqlite3" ]; then
-              if docker exec "$C" sh -lc 'command -v sqlite3 >/dev/null 2>&1'; then
-                docker exec "$C" sh -lc 'sqlite3 -readonly /home/node/.n8n/database.sqlite "select workflowId,webhookPath,method from webhook_entity order by workflowId,webhookPath;"' | sed 's/|/\t/g'
-              else
-                echo "SQLITE_CLI=ABSENT"
-              fi
-            else
-              echo "NON_SQLITE_DB=true"
-            fi
-            echo "N8N_DB_AUDIT_END"
+            TMP=/tmp/n8n-webhook-audit-$$.sqlite
+            docker cp "$C":/home/node/.n8n/database.sqlite "$TMP" >/dev/null
+            echo "N8N_REGISTERED_WEBHOOKS_BEGIN"
+            python3 -c 'import sqlite3,sys; db=sys.argv[1]; c=sqlite3.connect("file:"+db+"?mode=ro",uri=True); cols=[r[1] for r in c.execute("pragma table_info(webhook_entity)")]; print("COLUMNS="+",".join(cols)); wanted=[x for x in ["workflowId","webhookPath","method","node"] if x in cols]; q="select "+",".join([chr(34)+x+chr(34) for x in wanted])+" from webhook_entity order by "+",".join([chr(34)+x+chr(34) for x in wanted]); [print("\t".join("" if v is None else str(v) for v in row)) for row in c.execute(q)]' "$TMP"
+            echo "N8N_REGISTERED_WEBHOOKS_END"
+            rm -f "$TMP"
