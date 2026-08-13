@@ -40,6 +40,14 @@ DECLARE
   v_parts text[];
   v_scope text;
 BEGIN
+  -- Este seed histórico dependia da empresa RioMed provisionada externamente.
+  -- Em instalações limpas, não crie usuários/setores órfãos nem quebre a cadeia
+  -- de migrations; quando a empresa existe, o comportamento original é mantido.
+  IF NOT EXISTS (SELECT 1 FROM public.companies WHERE id = v_company) THEN
+    RAISE NOTICE 'RioMed company % not provisioned; skipping legacy team seed', v_company;
+    RETURN;
+  END IF;
+
   -- ============ SETORES ============
   INSERT INTO public.sectors (company_id, name, code, description)
   VALUES (v_company, 'Diretoria', 'diretoria', 'Visão completa do negócio')
