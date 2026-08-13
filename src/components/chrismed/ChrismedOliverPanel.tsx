@@ -15,7 +15,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X, RotateCcw, Calendar, Users, Stethoscope, ClipboardList, CreditCard, ArrowRight, Clock3, UserRound, Contact, MessageCircle, Phone, Mail, Instagram, MapPin, Star, QrCode, Globe as GlobeIcon, ExternalLink, Send, Loader2, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
-import { askOliver } from '@/lib/oliver-chat.functions';
+import { askOliverOmnichannel } from '@/lib/oliver-omnichannel.functions';
 import { CHRISMED_CONTACT } from '@/data/chrismed-contact';
 import { useRouterState, useNavigate } from '@tanstack/react-router';
 import {
@@ -64,6 +64,23 @@ const OLIVER_WELCOME: ChatMsg = {
 
 const C = CHRISMED_CONTACT.channels;
 
+const OLIVER_SESSION_STORAGE_KEY = 'chrismed:oliver:web-session:v1';
+function getOliverWebSessionId(): string {
+  if (typeof window === 'undefined') return `web:chrismed:ssr`;
+  try {
+    const existing = window.localStorage.getItem(OLIVER_SESSION_STORAGE_KEY)?.trim();
+    if (existing && /^web:chrismed:[A-Za-z0-9:_-]{8,180}$/.test(existing)) return existing;
+    const suffix = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const generated = `web:chrismed:${suffix}`;
+    window.localStorage.setItem(OLIVER_SESSION_STORAGE_KEY, generated);
+    return generated;
+  } catch {
+    return `web:chrismed:ephemeral:${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
+
 // Janela humana operacional (America/Sao_Paulo) — segunda a sexta 09-19h,
 // sábado 09-13h. Ajuste pelo Codex quando integração de agenda entrar.
 function isHumanOnline(now: Date = new Date()): boolean {
@@ -99,7 +116,7 @@ export function ChrismedOliverPanel() {
   const { open, context, info } = useChrismedOliverState();
 
   // Chat real com IA — cérebro CHRISMED
-  const ask = useServerFn(askOliver);
+  const ask = useServerFn(askOliverOmnichannel);
   const [messages, setMessages] = useState<ChatMsg[]>([OLIVER_WELCOME]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -128,6 +145,7 @@ export function ChrismedOliverPanel() {
           messages: next,
           pathname,
           lang: searchLang,
+          sessionId: getOliverWebSessionId(),
         },
       });
       setMessages((prev) => [...prev, { role: 'assistant', content: res.reply }]);
