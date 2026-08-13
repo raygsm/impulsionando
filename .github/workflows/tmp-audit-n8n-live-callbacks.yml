@@ -1,4 +1,4 @@
-name: Temporary repair n8n Core API base
+name: Temporary inspect n8n environment wiring
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
       - .github/workflows/tmp-audit-n8n-live-callbacks.yml
 
 jobs:
-  repair:
+  inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Set canonical Core API base for n8n
+      - name: Inspect non-secret environment wiring
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -19,51 +19,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           timeout: 60s
-          command_timeout: 10m
+          command_timeout: 5m
           script: |
             set -eu
             cd /docker/n8n-umlg
-            TS=$(date +%Y%m%d%H%M%S)
-            cp .env ".env.bak.$TS"
-            cp docker-compose.yml "docker-compose.yml.bak.$TS"
-
-            if grep -q '^IMPULSIONANDO_API_BASE=' .env; then
-              sed -i 's#^IMPULSIONANDO_API_BASE=.*#IMPULSIONANDO_API_BASE=https://impulsionando.com.br#' .env
-            else
-              printf '\nIMPULSIONANDO_API_BASE=https://impulsionando.com.br\n' >> .env
-            fi
-
-            if ! grep -q 'IMPULSIONANDO_API_BASE' docker-compose.yml; then
-              awk '
-                /IMPULSIONANDO_WEBHOOK_SECRET/ && !done {
-                  print;
-                  match($0,/^[[:space:]]*/); indent=substr($0,1,RLENGTH);
-                  print indent "- IMPULSIONANDO_API_BASE=${IMPULSIONANDO_API_BASE}";
-                  done=1; next
-                }
-                {print}
-              ' docker-compose.yml > docker-compose.yml.tmp
-              mv docker-compose.yml.tmp docker-compose.yml
-            fi
-
-            docker compose config >/dev/null
-            docker compose up -d n8n
-            sleep 15
-
+            echo '--- raw compose key locations ---'
+            grep -nE 'environment:|IMPULSIONANDO_API_BASE|IMPULSIONANDO_WEBHOOK_SECRET|WEBHOOK_URL|N8N_HOST|N8N_PROTOCOL' docker-compose.yml | sed -E 's#(IMPULSIONANDO_WEBHOOK_SECRET[=: -]*).*#\1REDACTED#' || true
+            echo '--- rendered n8n env key presence ---'
+            docker compose config | awk '
+              /n8n:/ {seen=1}
+              seen && /environment:/ {env=1; next}
+              env && /^[[:space:]]{6}[A-Za-z0-9_]+:/ {
+                key=$1; sub(/:$/, "", key);
+                if (key ~ /^(IMPULSIONANDO_API_BASE|IMPULSIONANDO_WEBHOOK_SECRET|WEBHOOK_URL|N8N_HOST|N8N_PROTOCOL)$/) print key "=PRESENT";
+              }
+            '
+            echo '--- container key presence ---'
             C=n8n-umlg-n8n-1
-            BASE=$(docker exec "$C" sh -lc 'printf "%s" "${IMPULSIONANDO_API_BASE:-}"')
-            if [ "$BASE" != 'https://impulsionando.com.br' ]; then
-              echo 'CORE_API_BASE=INVALID'
-              cp "docker-compose.yml.bak.$TS" docker-compose.yml
-              cp ".env.bak.$TS" .env
-              docker compose up -d n8n
-              exit 1
-            fi
-
-            STATUS=$(docker inspect -f '{{.State.Status}}' "$C")
-            RESTARTS=$(docker inspect -f '{{.RestartCount}}' "$C")
-            HTTP=$(curl -sk --max-time 20 -o /dev/null -w '%{http_code}' https://n8n.impulsionando.com.br/healthz || true)
-            echo "CORE_API_BASE=OK STATUS=$STATUS RESTARTS=$RESTARTS HEALTH=${HTTP:-000}"
-            [ "$STATUS" = 'running' ]
-            [ "${HTTP:-000}" != '000' ]
-            [ "${HTTP:-000}" -lt 500 ]
+            for key in IMPULSIONANDO_API_BASE IMPULSIONANDO_WEBHOOK_SECRET WEBHOOK_URL N8N_HOST N8N_PROTOCOL; do
+              if docker exec "$C" sh -lc "test -n \"\${$key:-}\""; then echo "$key=PRESENT"; else echo "$key=MISSING"; fi
+            done
