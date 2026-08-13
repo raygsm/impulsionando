@@ -40,6 +40,14 @@ DECLARE
   v_parts text[];
   v_scope text;
 BEGIN
+  -- Seed legado: somente aplica se a empresa RioMed alvo existir. A empresa
+  -- era provisionada externamente na época; instalações novas não devem criar
+  -- uma empresa fantasma apenas para satisfazer este seed histórico.
+  IF NOT EXISTS (SELECT 1 FROM public.companies WHERE id = v_company) THEN
+    RAISE NOTICE 'RioMed legacy seed skipped: company % is not provisioned', v_company;
+    RETURN;
+  END IF;
+
   -- ============ SETORES ============
   INSERT INTO public.sectors (company_id, name, code, description)
   VALUES (v_company, 'Diretoria', 'diretoria', 'Visão completa do negócio')
