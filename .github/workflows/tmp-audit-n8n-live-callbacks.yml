@@ -11,7 +11,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect sanitized callback targets
+      - name: Inspect callback base and HMAC shape safely
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -21,21 +21,25 @@ jobs:
           script: |
             set -eu
             C=n8n-umlg-n8n-1
+            BASE=$(docker exec "$C" sh -lc 'printf "%s" "${IMPULSIONANDO_API_BASE:-}"')
+            if [ -z "$BASE" ]; then echo 'IMPULSIONANDO_API_BASE=MISSING'; else echo "IMPULSIONANDO_API_BASE=$BASE"; fi
             docker exec "$C" n8n export:workflow --all --output=/tmp/impulsionando-workflows.json >/dev/null 2>&1
             docker exec "$C" node -e '
               const fs=require("fs");
-              let data=JSON.parse(fs.readFileSync("/tmp/impulsionando-workflows.json","utf8"));
-              if(!Array.isArray(data)) data=[data];
+              let data=JSON.parse(fs.readFileSync("/tmp/impulsionando-workflows.json","utf8")); if(!Array.isArray(data))data=[data];
+              const classify=v=>{const s=String(v||""); if(/createHmac|hmac|sha256/i.test(s))return "HMAC_EXPRESSION"; if(/IMPULSIONANDO_WEBHOOK_SECRET/.test(s))return "SECRET_ENV_REFERENCE"; if(!s)return "EMPTY"; return "OTHER_EXPRESSION";};
               for(const w of data.filter(x=>x.active)){
-                const callbacks=[];
                 for(const n of (w.nodes||[])){
-                  const p=n.parameters||{};
-                  const raw=String(p.url||"");
-                  if(!raw.includes("n8n-callback")&&!raw.includes("/api/public/hooks/n8n-log")) continue;
-                  const safeUrl=raw.split("?")[0].split("#")[0].replace(/(Bearer|token|secret|key)[=:][^ }&]+/ig,"$1=REDACTED");
-                  callbacks.push({node:String(n.name||""),type:String(n.type||""),method:String(p.method||p.httpMethod||""),url:safeUrl,authentication:String(p.authentication||"none"),sendHeaders:!!p.sendHeaders});
+                  const p=n.parameters||{}, raw=String(p.url||"");
+                  if(!raw.includes("/api/public/hooks/n8n-log"))continue;
+                  const headers=[];
+                  const vals=p.headerParameters?.parameters||p.sendHeaders?.parameters||[];
+                  for(const h of vals){headers.push({name:String(h.name||""),valueShape:classify(h.value)});}
+                  const bodyKeys=[];
+                  const b=p.jsonBody;
+                  if(typeof b==="string"){for(const m of b.matchAll(/["'\x60]([A-Za-z0-9_]+)["'\x60]\s*:/g))bodyKeys.push(m[1]);}
+                  console.log(JSON.stringify({id:String(w.id||""),headers,bodyKeys:[...new Set(bodyKeys)].sort()}));
                 }
-                console.log(JSON.stringify({id:String(w.id||""),name:String(w.name||""),callbacks}));
               }
             '
             docker exec "$C" rm -f /tmp/impulsionando-workflows.json
