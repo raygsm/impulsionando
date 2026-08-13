@@ -1,0 +1,28 @@
+name: WMP Public Gate
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - '.github/workflows/wmp-public-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wmp-public:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate WMP public routes
+        run: |
+          set -euo pipefail
+          base='https://wmp.impulsionando.com.br'
+          paths=( '/' '/orcamento' '/pacotes' '/cases' '/sobre' '/faq' '/parceiro' '/parceiro/cadastro' )
+          for path in "${paths[@]}"; do
+            code=$(curl -sS -L --max-time 20 -o /tmp/wmp-body -w '%{http_code}' "$base$path")
+            echo "$path -> HTTP $code"
+            if [ "$code" -lt 200 ] || [ "$code" -ge 400 ]; then
+              echo "::error::WMP route $path returned HTTP $code"
+              exit 1
+            fi
+          done
