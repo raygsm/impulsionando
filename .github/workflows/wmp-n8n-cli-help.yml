@@ -1,0 +1,24 @@
+name: WMP n8n CLI help
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/wmp-n8n-cli-help.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: n8n help
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'sudo docker exec n8n-umlg-n8n-1 n8n import:workflow --help; sudo docker exec n8n-umlg-n8n-1 n8n update:workflow --help'
