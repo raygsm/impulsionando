@@ -16,27 +16,57 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Activate and validate WMP lead workflow
+      - name: Diagnose and activate WMP lead workflow
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
         run: |
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "N8N_API_KEY='${N8N_API_KEY}' bash -s" <<'REMOTE'
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
+          echo '=== n8n runtime ==='
+          sudo docker exec "$N8N" n8n --version
+          echo '=== workflow-related CLI commands ==='
+          sudo docker exec "$N8N" n8n --help 2>&1 | grep -E 'workflow|publish|activate' || true
+          echo '=== database/runtime mode (values redacted) ==='
+          sudo docker exec "$N8N" sh -lc 'printf "DB_TYPE=%s\nEXECUTIONS_MODE=%s\n" "${DB_TYPE:-sqlite}" "${EXECUTIONS_MODE:-regular}"'
+
           cat >/tmp/wmp-lead.json <<'JSON'
           {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
           JSON
           sudo docker cp /tmp/wmp-lead.json "$N8N:/tmp/wmp-lead.json"
           sudo docker exec "$N8N" n8n import:workflow --input=/tmp/wmp-lead.json
-          sudo docker exec "$N8N" n8n update:workflow --id=wmpLeadIntake01 --active=true
-          sudo docker exec "$N8N" n8n publish:workflow --id=wmpLeadIntake01
+          sudo docker exec "$N8N" n8n publish:workflow --id=wmpLeadIntake01 || true
+
+          echo '=== exported workflow state after import/publish ==='
+          sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp-export.json >/dev/null
+          sudo docker exec "$N8N" node - <<'NODE'
+          const fs=require('fs');
+          const raw=JSON.parse(fs.readFileSync('/tmp/wmp-export.json','utf8'));
+          const w=Array.isArray(raw)?raw[0]:raw;
+          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId},null,2));
+          NODE
+
+          if [ -n "${N8N_API_KEY:-}" ]; then
+            echo '=== GitHub N8N_API_KEY present: activating via public API ==='
+            api_code="$(curl -sS -o /tmp/n8n-activate.out -w '%{http_code}' --max-time 20 \
+              -X POST "https://n8n.impulsionando.com.br/api/v1/workflows/wmpLeadIntake01/activate" \
+              -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H 'content-type: application/json' -d '{}')"
+            echo "activation_http=$api_code"
+            node -e "const fs=require('fs');let s=fs.readFileSync('/tmp/n8n-activate.out','utf8');try{let j=JSON.parse(s);console.log(JSON.stringify({id:j.id,name:j.name,active:j.active,activeVersionId:j.activeVersionId,message:j.message},null,2))}catch{console.log(s.slice(0,500))}"
+          else
+            echo 'N8N_API_KEY_PRESENT=false'
+          fi
+
           sudo docker restart "$N8N" >/dev/null
           sleep 12
           sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>{console.log('health='+r.status);if(!r.ok)process.exit(1)})"
           code="$(curl -sS -o /tmp/wmp-lead-smoke.out -w '%{http_code}' --max-time 20 -X POST https://n8n.impulsionando.com.br/webhook/wmp-lead-intake -H 'content-type: application/json' -d '{"tenant_slug":"wmp","event_code":"wmp.lead.received","correlation_id":"activation-smoke"}')"
           cat /tmp/wmp-lead-smoke.out || true
           echo
-          echo "http=$code"
+          echo "webhook_http=$code"
           case "$code" in 2*|3*) ;; *) exit 22 ;; esac
           REMOTE
