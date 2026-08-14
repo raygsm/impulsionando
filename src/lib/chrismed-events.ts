@@ -26,6 +26,7 @@ export type PublicChrismedEvent = {
   seatsRemaining: number;
   priceCents: number;
   registrationOpen: boolean;
+  isPast: boolean;
 };
 
 export async function listPublicChrismedEvents() {
@@ -35,13 +36,11 @@ export async function listPublicChrismedEvents() {
   return ((events ?? []) as unknown as Array<Record<string, unknown>>).map((event) => {
     const capacity = Number(event.capacity);
     const seatsRemaining = Number(event.seats_remaining);
-    const opensAt = event.registration_opens_at
-      ? new Date(String(event.registration_opens_at)).getTime()
-      : null;
-    const closesAt = event.registration_closes_at
-      ? new Date(String(event.registration_closes_at)).getTime()
-      : null;
+    const opensAt = event.registration_opens_at ? new Date(String(event.registration_opens_at)).getTime() : null;
+    const closesAt = event.registration_closes_at ? new Date(String(event.registration_closes_at)).getTime() : null;
+    const endsAt = new Date(String(event.ends_at)).getTime();
     const current = Date.now();
+    const isPast = endsAt < current;
     return {
       id: String(event.id),
       slug: String(event.slug),
@@ -57,8 +56,12 @@ export async function listPublicChrismedEvents() {
       capacity,
       seatsRemaining,
       priceCents: Number(event.price_cents),
+      isPast,
       registrationOpen:
-        (opensAt === null || current >= opensAt) && (closesAt === null || current <= closesAt),
+        !isPast &&
+        seatsRemaining > 0 &&
+        (opensAt === null || current >= opensAt) &&
+        (closesAt === null || current <= closesAt),
     } satisfies PublicChrismedEvent;
   });
 }
