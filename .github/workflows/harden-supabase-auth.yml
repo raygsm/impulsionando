@@ -1,0 +1,48 @@
+name: Harden Supabase Auth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/harden-supabase-auth.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  harden-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable leaked password protection
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: arygtqrdpcdkwnuwsgmm
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          http_code=$(curl --silent --show-error --output /tmp/auth-update.json --write-out '%{http_code}' \
+            --request PATCH \
+            "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/config/auth" \
+            --header "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            --header 'Content-Type: application/json' \
+            --data '{"password_hibp_enabled":true}')
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "Supabase Auth config update failed with HTTP $http_code"
+            jq -r '{message, error, statusCode}' /tmp/auth-update.json 2>/dev/null || true
+            exit 1
+          fi
+
+      - name: Verify setting
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: arygtqrdpcdkwnuwsgmm
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/config/auth" \
+            --header "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            --output /tmp/auth-config.json
+          value=$(jq -r '.password_hibp_enabled' /tmp/auth-config.json)
+          echo "password_hibp_enabled=$value"
+          test "$value" = "true"
