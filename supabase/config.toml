@@ -1,5 +1,11 @@
 project_id = "arygtqrdpcdkwnuwsgmm"
 
+[functions.mpago-create-payment]
+# CHRISMED public booking authenticates the payment request with a short-lived,
+# server-validated hold token. Other tenants still require a valid user session
+# inside the function body.
+verify_jwt = false
+
 [functions.mpago-webhook]
 verify_jwt = false
 
