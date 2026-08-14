@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { dispatchN8nByEvent } from '@/lib/n8n-dispatch-by-event.server'
 
 const WMP_TENANT_SLUG = 'wmp'
 
@@ -55,5 +56,10 @@ export const sendWmpProposal = createServerFn({ method: 'POST' }).middleware([re
     if (error) throw error
     const { flushOutboxByReference } = await import('@/lib/outboxFlush.server')
     const delivery = await flushOutboxByReference('wmp_proposal', data.proposal_id)
-    return { outbox_id: outboxId as string, delivery }
+    const automation = await dispatchN8nByEvent('wmp.proposal.sent', {
+      proposal_id: data.proposal_id,
+      outbox_id: outboxId as string,
+      delivery,
+    }, null, 'wmp')
+    return { outbox_id: outboxId as string, delivery, automation }
   })
