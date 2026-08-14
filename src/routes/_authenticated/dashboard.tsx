@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
 import { CardSkeleton } from "@/components/feedback";
-import { Building2, Users, Boxes, Tags, FileSearch, MapPin, LayoutGrid, RotateCcw, Star, Clock } from "lucide-react";
+import { Building2, Users, Boxes, Tags, FileSearch, MapPin, LayoutGrid, RotateCcw, Star, Clock, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,8 +26,78 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
+function currentHost(): string {
+  return typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
+}
+
 function isWmpHost(): boolean {
-  return typeof window !== "undefined" && window.location.hostname.toLowerCase() === "wmp.impulsionando.com.br";
+  return currentHost() === "wmp.impulsionando.com.br";
+}
+
+function isChrismedHost(): boolean {
+  return currentHost() === "chrismed.impulsionando.com.br";
+}
+
+function ChrismedDashboardEntry() {
+  useEffect(() => {
+    void (async () => {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (authError || !user) {
+        window.location.replace("/auth?mode=signin");
+        return;
+      }
+
+      const appMetadata = user.app_metadata as Record<string, unknown> | undefined;
+      const isManagement =
+        appMetadata?.is_super_admin === true ||
+        appMetadata?.is_impulsionando_staff === true ||
+        appMetadata?.platform_role === "super_admin";
+
+      if (isManagement) {
+        window.location.replace("/chrismed/admin");
+        return;
+      }
+
+      const { data: professional } = await supabase
+        .from("agenda_professionals")
+        .select("id, profile_status")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      const userMetadata = user.user_metadata as Record<string, unknown> | undefined;
+      const professionalSignup =
+        userMetadata?.chrismed_professional_signup === true ||
+        typeof userMetadata?.health_profession_id === "string" ||
+        typeof userMetadata?.profession_id === "string";
+
+      if (professional?.id) {
+        const status = String(professional.profile_status ?? "").toLowerCase();
+        const onboardingNeeded = Boolean(status) && !["active", "approved"].includes(status);
+        window.location.replace(onboardingNeeded ? "/chrismed/profissional/onboarding" : "/agenda/profissional");
+        return;
+      }
+
+      if (professionalSignup) {
+        window.location.replace("/chrismed/profissional/onboarding");
+        return;
+      }
+
+      window.location.replace("/chrismed/minha-conta");
+    })().catch(() => {
+      window.location.replace("/chrismed/minha-conta");
+    });
+  }, []);
+
+  return (
+    <main className="flex min-h-[55vh] items-center justify-center p-6" aria-live="polite">
+      <div className="flex items-center gap-3 rounded-xl border bg-card px-5 py-4 text-sm text-muted-foreground shadow-sm">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <span>Identificando seu acesso CHRISMED…</span>
+      </div>
+    </main>
+  );
 }
 
 async function fetchStats() {
@@ -144,6 +215,7 @@ function RecentsPanel() {
 
 function DashboardPage() {
   if (isWmpHost()) return <WmpManagementDashboard />;
+  if (isChrismedHost()) return <ChrismedDashboardEntry />;
   return <CoreDashboardPage />;
 }
 
