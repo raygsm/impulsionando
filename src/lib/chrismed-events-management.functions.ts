@@ -126,6 +126,27 @@ export const setChrismedEventStatus = createServerFn({ method: 'POST' })
     return row;
   });
 
+export const deleteChrismedEvent = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertChrismedManager(context);
+
+    const { count, error: countError } = await supabaseAdmin
+      .from('chrismed_event_registrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('event_id', data.id)
+      .neq('status', 'cancelled');
+    if (countError) throw new Error(countError.message);
+    if ((count ?? 0) > 0) {
+      throw new Error('Este evento possui inscrições ativas. Cancele as inscrições ou altere o status do evento em vez de excluí-lo.');
+    }
+
+    const { error } = await supabaseAdmin.from('chrismed_events').delete().eq('id', data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const listChrismedEventRegistrationsManagement = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ event_id: z.string().uuid() }).parse(input))
