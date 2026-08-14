@@ -16,9 +16,29 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Read live compose service
+      - name: Audit production HMAC wiring safely
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
+          GH_HMAC: ${{ secrets.IMPULSIONANDO_WEBHOOK_SECRET }}
         run: |
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "sudo sed -n '/impulsionando-core:/,/^[^[:space:]]/p' /opt/impulsionando/deploy/hostinger/docker-compose.yml | head -n 140"
+          set -euo pipefail
+          if [ -n "${GH_HMAC:-}" ]; then echo 'GITHUB_HMAC_PRESENT=true'; else echo 'GITHUB_HMAC_PRESENT=false'; fi
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          core=false
+          if sudo test -s /etc/impulsionando-core.env && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env; then core=true; fi
+          echo "CORE_HMAC_PRESENT=$core"
+          if sudo docker container inspect n8n-umlg-n8n-1 >/dev/null 2>&1; then
+            n8n="$(sudo docker exec n8n-umlg-n8n-1 sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
+            echo "N8N_HMAC_PRESENT=$n8n"
+          else
+            echo 'N8N_HMAC_PRESENT=false'
+          fi
+          if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
+            core_container="$(sudo docker exec impulsionando-core sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
+            echo "CORE_CONTAINER_HMAC_PRESENT=$core_container"
+          else
+            echo 'CORE_CONTAINER_HMAC_PRESENT=not_applicable'
+          fi
+          REMOTE
