@@ -1,12 +1,12 @@
-name: DNS/Origin check → VPS (187)
+name: DNS/HTTPS publication check
 
-# Confirma a cada 6h (e em cada push em main) duas camadas independentes:
-# 1) DNS/HTTPS publico precisa resolver e responder, inclusive quando protegido
-#    por Cloudflare ou outro proxy/CDN;
-# 2) a origem Hostinger precisa responder diretamente para o mesmo hostname.
+# Confirma a cada 6h (e em cada push em main) a disponibilidade publica dos
+# principais dominios do ecossistema. Hosts protegidos por Cloudflare/CDN nao
+# devem falhar apenas porque a origem bloqueia acesso direto por IP/SNI.
 #
-# Comparar o A publico diretamente com VPS_HOST e incorreto para hosts proxied.
-# Secret: VPS_HOST (IP publico da origem VPS Hostinger).
+# A origem VPS e testada como diagnostico adicional quando VPS_HOST existe.
+# Se o DNS publico aponta diretamente para a origem, a falha de origem e fatal.
+# Se o host esta proxied, a origem direta e apenas informativa.
 
 on:
   schedule:
@@ -19,15 +19,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Validar DNS publico, HTTPS e origem VPS
+      - name: Validar DNS publico, HTTPS e diagnostico da origem
         env:
           EXPECTED_IP: ${{ secrets.VPS_HOST }}
         run: |
           set -u
-          if [ -z "${EXPECTED_IP:-}" ]; then
-            echo "::error::Secret VPS_HOST nao configurado"
-            exit 1
-          fi
 
           HOSTS=(
             "impulsionando.com.br"
@@ -36,32 +32,45 @@ jobs:
             "wmp.impulsionando.com.br"
             "colorssaude.impulsionando.com.br"
             "marocas.impulsionando.com.br"
+            "riomed.impulsionando.com.br"
           )
 
           fail=0
           for h in "${HOSTS[@]}"; do
-            dns_ips=$(dig +short "$h" A | sort -u | paste -sd, -)
-            if [ -z "$dns_ips" ]; then
-              echo "::error::$h nao possui registro A publico"
+            dns_raw=$(dig +short "$h" A || true)
+            dns_ips=$(printf '%s\n' "$dns_raw" | grep -E '^[0-9]+(\.[0-9]+){3}$' | sort -u | paste -sd, -)
+            dns_all=$(printf '%s\n' "$dns_raw" | sort -u | paste -sd, -)
+            if [ -z "$dns_raw" ]; then
+              echo "::error::$h nao possui resolucao publica"
               fail=1
             fi
 
-            public_code=$(curl -sk --max-time 15 -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
+            public_code=$(curl -skL --max-time 20 -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
             public_code=${public_code:-000}
             server=$(curl -skI --max-time 15 "https://$h" 2>/dev/null | awk -F': ' 'tolower($1)=="server"{print $2}' | tr -d '\r' | head -n1 || true)
 
-            origin_code=$(curl -sk --max-time 15 --resolve "$h:443:$EXPECTED_IP" -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
-            origin_code=${origin_code:-000}
+            origin_code="SKIPPED"
+            direct_origin=0
+            if [ -n "${EXPECTED_IP:-}" ]; then
+              if printf '%s\n' "$dns_ips" | tr ',' '\n' | grep -Fxq "$EXPECTED_IP"; then
+                direct_origin=1
+              fi
+              origin_code=$(curl -sk --connect-timeout 5 --max-time 10 --resolve "$h:443:$EXPECTED_IP" -o /dev/null -w "%{http_code}" "https://$h" 2>/dev/null || true)
+              origin_code=${origin_code:-000}
+            fi
 
-            echo "$h -> DNS=${dns_ips:-NONE} PUBLIC=$public_code Server=${server:-?} ORIGIN=$origin_code"
+            echo "$h -> DNS=${dns_all:-NONE} PUBLIC=$public_code Server=${server:-?} ORIGIN=$origin_code"
 
             if [ "$public_code" = "000" ] || [ "$public_code" -lt 200 ] 2>/dev/null || [ "$public_code" -ge 400 ] 2>/dev/null; then
               echo "::error::$h falhou no HTTPS publico (HTTP $public_code)"
               fail=1
             fi
-            if [ "$origin_code" = "000" ] || [ "$origin_code" -lt 200 ] 2>/dev/null || [ "$origin_code" -ge 400 ] 2>/dev/null; then
-              echo "::error::$h falhou na origem VPS $EXPECTED_IP (HTTP $origin_code)"
+
+            if [ "$direct_origin" -eq 1 ] && { [ "$origin_code" = "000" ] || [ "$origin_code" -lt 200 ] 2>/dev/null || [ "$origin_code" -ge 400 ] 2>/dev/null; }; then
+              echo "::error::$h aponta diretamente para VPS_HOST, mas a origem falhou (HTTP $origin_code)"
               fail=1
+            elif [ "$direct_origin" -eq 0 ] && [ -n "${EXPECTED_IP:-}" ] && [ "$origin_code" = "000" ]; then
+              echo "::notice::$h esta atras de proxy/CDN ou bloqueia acesso direto a origem; HTTPS publico permanece a fonte de verdade."
             fi
           done
 
