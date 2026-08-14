@@ -29,34 +29,25 @@ jobs:
           N8N=n8n-umlg-n8n-1
           echo '=== n8n runtime ==='
           sudo docker exec "$N8N" n8n --version
-          echo '=== workflow-related CLI commands ==='
-          sudo docker exec "$N8N" n8n --help 2>&1 | grep -E 'workflow|publish|activate' || true
-          echo '=== database/runtime mode (values redacted) ==='
           sudo docker exec "$N8N" sh -lc 'printf "DB_TYPE=%s\nEXECUTIONS_MODE=%s\n" "${DB_TYPE:-sqlite}" "${EXECUTIONS_MODE:-regular}"'
 
           cat >/tmp/wmp-lead.json <<'JSON'
-          {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]}],"connections":{},"settings":{"executionOrder":"v1"}}
+          {"id":"wmpLeadIntake01","name":"WMP Lead Intake","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"lastNode","options":{}},"id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"wmp-lead-intake"}],"connections":{},"settings":{"executionOrder":"v1"}}
           JSON
           sudo docker cp /tmp/wmp-lead.json "$N8N:/tmp/wmp-lead.json"
           sudo docker exec "$N8N" n8n import:workflow --input=/tmp/wmp-lead.json
-          sudo docker exec "$N8N" n8n publish:workflow --id=wmpLeadIntake01 || true
+          sudo docker exec "$N8N" n8n publish:workflow --id=wmpLeadIntake01
 
-          echo '=== exported workflow state after import/publish ==='
+          echo '=== exported workflow state ==='
           sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp-export.json >/dev/null
-          sudo docker exec "$N8N" node - <<'NODE'
-          const fs=require('fs');
-          const raw=JSON.parse(fs.readFileSync('/tmp/wmp-export.json','utf8'));
-          const w=Array.isArray(raw)?raw[0]:raw;
-          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId},null,2));
-          NODE
+          sudo docker exec "$N8N" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/wmp-export.json','utf8'));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,webhookId:w.nodes&&w.nodes[0]&&w.nodes[0].webhookId},null,2))"
 
           if [ -n "${N8N_API_KEY:-}" ]; then
-            echo '=== GitHub N8N_API_KEY present: activating via public API ==='
-            api_code="$(curl -sS -o /tmp/n8n-activate.out -w '%{http_code}' --max-time 20 \
-              -X POST "https://n8n.impulsionando.com.br/api/v1/workflows/wmpLeadIntake01/activate" \
-              -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H 'content-type: application/json' -d '{}')"
+            echo '=== API activation ==='
+            api_code="$(curl -sS -o /tmp/n8n-activate.out -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/api/v1/workflows/wmpLeadIntake01/activate" -H "X-N8N-API-KEY: ${N8N_API_KEY}" -H 'content-type: application/json' -d '{}')"
             echo "activation_http=$api_code"
-            node -e "const fs=require('fs');let s=fs.readFileSync('/tmp/n8n-activate.out','utf8');try{let j=JSON.parse(s);console.log(JSON.stringify({id:j.id,name:j.name,active:j.active,activeVersionId:j.activeVersionId,message:j.message},null,2))}catch{console.log(s.slice(0,500))}"
+            cat /tmp/n8n-activate.out || true
+            echo
           else
             echo 'N8N_API_KEY_PRESENT=false'
           fi
