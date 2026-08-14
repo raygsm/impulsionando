@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { dispatchN8nByEvent } from '@/lib/n8n-dispatch-by-event.server'
 
 const WMP_COMPANY_ID = 'ff2a9570-1168-4f9c-a852-1e042d9f32ed'
 
@@ -56,6 +57,13 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
 
 const tableSchema = z.enum(['wmp_briefings', 'wmp_parceiros', 'wmp_dj_bookings', 'wmp_dj_availability', 'wmp_equipment_rentals', 'wmp_equipment_rental_payouts'])
 
+const djLifecycleEvents: Record<string, string> = {
+  OFFERED: 'wmp.dj.offered',
+  ACCEPTED: 'wmp.dj.accepted',
+  CONFIRMED: 'wmp.dj.confirmed',
+  COMPLETED: 'wmp.dj.completed',
+}
+
 export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { table: string; id: string; status: string }) => z.object({
@@ -65,9 +73,48 @@ export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const id = await tenantId(context)
+    const normalizedStatus = data.status.toUpperCase()
+    const now = new Date().toISOString()
+
+    if (data.table === 'wmp_dj_bookings') {
+      const { data: current, error: readError } = await context.supabase
+        .from('wmp_dj_bookings')
+        .select('id,proposal_id,parceiro_id,event_name,event_date,status')
+        .eq('tenant_id', id)
+        .eq('id', data.id)
+        .single()
+      if (readError) throw readError
+
+      const patch: Record<string, unknown> = { status: normalizedStatus, updated_at: now }
+      if (normalizedStatus === 'ACCEPTED') patch.accepted_at = now
+      if (normalizedStatus === 'DECLINED') patch.declined_at = now
+
+      const { error } = await context.supabase
+        .from('wmp_dj_bookings')
+        .update(patch)
+        .eq('tenant_id', id)
+        .eq('id', data.id)
+      if (error) throw error
+
+      const eventName = djLifecycleEvents[normalizedStatus]
+      const automation = eventName
+        ? await dispatchN8nByEvent(eventName, {
+            booking_id: current.id,
+            proposal_id: current.proposal_id,
+            partner_id: current.parceiro_id,
+            event_name: current.event_name,
+            event_date: current.event_date,
+            previous_status: current.status,
+            status: normalizedStatus,
+            transitioned_at: now,
+          }, null, 'wmp')
+        : null
+      return { ok: true, automation }
+    }
+
     const { error } = await context.supabase
       .from(data.table)
-      .update({ status: data.status, updated_at: new Date().toISOString() })
+      .update({ status: data.status, updated_at: now })
       .eq('tenant_id', id)
       .eq('id', data.id)
     if (error) throw error
