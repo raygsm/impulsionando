@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Compare WMP and Core webhook registration
+      - name: Verify WMP production webhook before and after restart
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -25,43 +25,39 @@ jobs:
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
-          CORE_ID=kjdkkV9rjIMgAMdA
-          WMP_ID=wmpLeadIntake01
+          URL=https://n8n.impulsionando.com.br/webhook/wmp-lead-intake
 
-          echo '=== exported node comparison ==='
-          for spec in "core:$CORE_ID" "wmp:$WMP_ID"; do
-            label="${spec%%:*}"; wid="${spec#*:}"
-            sudo docker exec "$N8N" n8n export:workflow --id="$wid" --output="/tmp/${label}.json" >/dev/null
-            echo "--- $label ---"
-            sudo docker exec "$N8N" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/${label}.json','utf8'));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).filter(n=>n.type==='n8n-nodes-base.webhook').map(n=>({id:n.id,name:n.name,type:n.type,typeVersion:n.typeVersion,webhookId:n.webhookId,parameters:n.parameters,disabled:n.disabled}))},null,2))"
-          done
-
-          echo '=== sqlite read-only registration comparison ==='
-          sudo docker exec -i "$N8N" node - <<'NODE' || true
-          let Database;
-          try { Database=require('better-sqlite3'); } catch(e) { console.log('better-sqlite3-unavailable:'+e.message); process.exit(0); }
-          const db=new Database('/home/node/.n8n/database.sqlite',{readonly:true});
-          const tables=db.prepare("select name from sqlite_master where type='table' and (lower(name) like '%webhook%' or lower(name) like '%workflow%') order by name").all().map(x=>x.name);
-          console.log('tables='+JSON.stringify(tables));
-          for (const t of tables) {
-            const cols=db.prepare(`pragma table_info('${t.replaceAll("'","''")}')`).all().map(x=>x.name);
-            if (!cols.includes('workflowId') && !cols.includes('id')) continue;
-            try {
-              if (cols.includes('workflowId')) {
-                const rows=db.prepare(`select * from "${t}" where workflowId in (?,?)`).all('kjdkkV9rjIMgAMdA','wmpLeadIntake01');
-                if (rows.length) console.log(t+'='+JSON.stringify(rows));
-              } else if (t.toLowerCase().includes('workflow')) {
-                const select=['id','name','active','versionId','activeVersionId'].filter(c=>cols.includes(c)).map(c=>'"'+c+'"').join(',');
-                if (select) {
-                  const rows=db.prepare(`select ${select} from "${t}" where id in (?,?)`).all('kjdkkV9rjIMgAMdA','wmpLeadIntake01');
-                  if (rows.length) console.log(t+'='+JSON.stringify(rows));
-                }
-              }
-            } catch(e) { console.log(t+'_error='+e.message); }
+          probe() {
+            label="$1"
+            code="$(curl -sS -o "/tmp/${label}.out" -w '%{http_code}' --max-time 20 \
+              -X POST "$URL" \
+              -H 'content-type: application/json' \
+              -d "{\"tenant_slug\":\"wmp\",\"event_code\":\"wmp.lead.received\",\"correlation_id\":\"${label}-$(date +%s)\"}")"
+            echo "${label}_http=$code"
+            head -c 800 "/tmp/${label}.out" || true
+            echo
+            case "$code" in 2*|3*) ;; *) exit 22 ;; esac
           }
-          db.close();
-          NODE
 
-          echo '=== container-local WMP probe ==='
-          sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/webhook/wmp-lead-intake',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({correlation_id:'container-probe'})}).then(async r=>{console.log('status='+r.status);console.log((await r.text()).slice(0,500))}).catch(e=>{console.error(e);process.exit(1)})"
+          echo '=== workflow state ==='
+          sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp.json >/dev/null
+          sudo docker exec "$N8N" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/wmp.json','utf8'));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId},null,2));if(!w.active||!w.activeVersionId)process.exit(9)"
+
+          echo '=== public probe before restart ==='
+          probe before_restart
+
+          echo '=== restart ==='
+          sudo docker restart "$N8N" >/dev/null
+          for i in $(seq 1 30); do
+            if sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+          sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>{console.log('health='+r.status);if(!r.ok)process.exit(1)})"
+
+          echo '=== public probe after restart ==='
+          probe after_restart
+
+          echo 'N8N_WMP_PRODUCTION_WEBHOOK=PASS'
           REMOTE
