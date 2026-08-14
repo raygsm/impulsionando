@@ -27,17 +27,8 @@ jobs:
           N8N=n8n-umlg-n8n-1
           echo "n8n_version=$(sudo docker exec "$N8N" n8n --version)"
           echo '=== required runtime variable presence only ==='
-          sudo docker exec "$N8N" node - <<'NODE'
-          const names=['SUPABASE_URL','SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE_KEY','IMPULSIONANDO_WEBHOOK_SECRET','CHRISMED_WORKER_TOKEN','N8N_ENCRYPTION_KEY'];
-          for (const n of names) console.log(`${n}_PRESENT=${Boolean(process.env[n])}`);
-          NODE
+          sudo docker exec "$N8N" node -e 'for(const n of ["SUPABASE_URL","SUPABASE_ANON_KEY","SUPABASE_SERVICE_ROLE_KEY","IMPULSIONANDO_WEBHOOK_SECRET","CHRISMED_WORKER_TOKEN","N8N_ENCRYPTION_KEY"]) console.log(`${n}_PRESENT=${Boolean(process.env[n])}`)'
           echo '=== existing CHRISMED workflows ==='
           sudo docker exec "$N8N" n8n export:workflow --all --output=/tmp/all-workflows.json >/dev/null
-          sudo docker exec "$N8N" node - <<'NODE'
-          const fs=require('fs');
-          const raw=JSON.parse(fs.readFileSync('/tmp/all-workflows.json','utf8'));
-          const list=Array.isArray(raw)?raw:[raw];
-          const rows=list.filter(w=>/chrismed/i.test(`${w.name||''} ${JSON.stringify(w.tags||[])}`)).map(w=>({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null}));
-          console.log(JSON.stringify(rows,null,2));
-          NODE
+          sudo docker exec "$N8N" node -e 'const fs=require("fs");const raw=JSON.parse(fs.readFileSync("/tmp/all-workflows.json","utf8"));const list=Array.isArray(raw)?raw:[raw];console.log(JSON.stringify(list.filter(w=>/chrismed/i.test(`${w.name||""} ${JSON.stringify(w.tags||[])}`)).map(w=>({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null})),null,2))'
           REMOTE
