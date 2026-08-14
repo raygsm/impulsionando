@@ -71,7 +71,6 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-border surface-2 mt-20">
       <div className="container-narrow section-tight">
-        {/* Bloco superior: marca + navegação por jornada */}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,3fr)]">
           <div className="space-y-4 min-w-0">
             <LogoImpulsionando variant="light" size="xl" />
@@ -94,7 +93,7 @@ export function PublicFooter() {
                 <Mail className="w-3.5 h-3.5" /> {EMAIL}
               </a>
               <a
-                href="https://impulsionandobrasil.com.br"
+                href="https://impulsionando.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
@@ -126,7 +125,6 @@ export function PublicFooter() {
           </nav>
         </div>
 
-        {/* Canal oficial — mantido, sem "Saiba mais" duplicado (já linkado ao lado) */}
         <div className="mt-10 rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-4 text-xs leading-snug text-amber-900 dark:text-amber-100">
           <strong>Canal oficial único.</strong> Toda comunicação, envio de documentos, comprovantes
           e solicitações acontece exclusivamente pelo WhatsApp oficial:{" "}
