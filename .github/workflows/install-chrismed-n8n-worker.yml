@@ -1,4 +1,4 @@
-name: Install CHRISMED N8N worker
+name: Verify CHRISMED N8N worker
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 jobs:
-  install:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - name: Configure SSH
@@ -16,60 +16,53 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Import encrypted credential and CHRISMED workflow
+      - name: Verify persistent CHRISMED N8N worker
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
-          test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "SUPABASE_SERVICE_ROLE_KEY='${SUPABASE_SERVICE_ROLE_KEY}' bash -s" <<'REMOTE'
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
-          CRED_ID=chrismedSupabaseHeader01
           WF_ID=chrismedOutboxWorker01
-
-          node - <<'NODE' >/tmp/chrismed-credential.json
-          const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
-          if(!key) process.exit(2);
-          console.log(JSON.stringify([{id:'chrismedSupabaseHeader01',name:'CHRISMED Supabase Service Role',type:'httpHeaderAuth',data:{name:'Authorization',value:`Bearer ${key}`}}]));
-          NODE
-          cat >/tmp/chrismed-worker.json <<'JSON'
-          [{
-            "id":"chrismedOutboxWorker01",
-            "name":"CHRISMED Communication Outbox Worker",
-            "active":false,
-            "nodes":[
-              {"parameters":{"rule":{"interval":[{"field":"minutes","minutesInterval":1}]}},"id":"chrismed-schedule","name":"Every minute","type":"n8n-nodes-base.scheduleTrigger","typeVersion":1.2,"position":[0,-100]},
-              {"parameters":{"httpMethod":"POST","path":"chrismed-outbox-worker","responseMode":"lastNode","options":{}},"id":"chrismed-webhook","name":"CHRISMED Worker Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,100]},
-              {"parameters":{"method":"POST","url":"https://arygtqrdpcdkwnuwsgmm.supabase.co/functions/v1/chrismed-communication-worker","authentication":"genericCredentialType","genericAuthType":"httpHeaderAuth","sendHeaders":true,"headerParameters":{"parameters":[{"name":"content-type","value":"application/json"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"{}","options":{"timeout":30000}},"id":"chrismed-worker-call","name":"Process CHRISMED Outbox","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[280,0],"credentials":{"httpHeaderAuth":{"id":"chrismedSupabaseHeader01","name":"CHRISMED Supabase Service Role"}}}
-            ],
-            "connections":{"Every minute":{"main":[[{"node":"Process CHRISMED Outbox","type":"main","index":0}]]},"CHRISMED Worker Webhook":{"main":[[{"node":"Process CHRISMED Outbox","type":"main","index":0}]]}},
-            "settings":{"executionOrder":"v1","timezone":"America/Sao_Paulo"}
-          }]
-          JSON
-
-          sudo docker cp /tmp/chrismed-credential.json "$N8N:/tmp/chrismed-credential.json"
-          sudo docker cp /tmp/chrismed-worker.json "$N8N:/tmp/chrismed-worker.json"
-          sudo docker exec "$N8N" n8n import:credentials --input=/tmp/chrismed-credential.json
-          sudo docker exec "$N8N" n8n import:workflow --input=/tmp/chrismed-worker.json
-          sudo docker exec "$N8N" n8n update:workflow --id="$WF_ID" --active=true || true
-          sudo docker exec "$N8N" n8n publish:workflow --id="$WF_ID"
-          sudo docker restart "$N8N" >/dev/null
-
-          for i in $(seq 1 45); do
-            if sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
-            sleep 2
-          done
-          sleep 8
+          URL=https://n8n.impulsionando.com.br/webhook/chrismed-outbox-worker
 
           sudo docker exec "$N8N" n8n export:workflow --id="$WF_ID" --output=/tmp/chrismed-worker-export.json >/dev/null
           sudo docker exec "$N8N" node -e 'const fs=require("fs");const r=JSON.parse(fs.readFileSync("/tmp/chrismed-worker-export.json","utf8"));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null},null,2));if(!w.active||!w.activeVersionId)process.exit(9)'
 
-          code="$(curl -sS -o /tmp/chrismed-worker-response.json -w '%{http_code}' --max-time 40 -X POST https://n8n.impulsionando.com.br/webhook/chrismed-outbox-worker -H 'content-type: application/json' -d '{}')"
-          cat /tmp/chrismed-worker-response.json
-          echo
-          echo "chrismed_worker_http=$code"
-          case "$code" in 2*) ;; *) exit 22 ;; esac
+          ready=0
+          for i in $(seq 1 30); do
+            code="$(curl -sS -o /tmp/chrismed-worker-response.json -w '%{http_code}' --max-time 40 -X POST "$URL" -H 'content-type: application/json' -d '{}')"
+            echo "attempt_${i}_http=$code"
+            if [ "${code#2}" != "$code" ]; then
+              cat /tmp/chrismed-worker-response.json
+              echo
+              ready=1
+              break
+            fi
+            if [ "$code" != "404" ]; then cat /tmp/chrismed-worker-response.json || true; echo; fi
+            sleep 3
+          done
+          test "$ready" -eq 1
+
+          sudo docker restart "$N8N" >/dev/null
+          for i in $(seq 1 45); do
+            if sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          ready=0
+          for i in $(seq 1 30); do
+            code="$(curl -sS -o /tmp/chrismed-worker-response-after.json -w '%{http_code}' --max-time 40 -X POST "$URL" -H 'content-type: application/json' -d '{}')"
+            echo "post_restart_attempt_${i}_http=$code"
+            if [ "${code#2}" != "$code" ]; then
+              cat /tmp/chrismed-worker-response-after.json
+              echo
+              ready=1
+              break
+            fi
+            sleep 3
+          done
+          test "$ready" -eq 1
+          echo 'N8N_CHRISMED_OUTBOX_WORKER=PASS'
           REMOTE
