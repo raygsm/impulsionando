@@ -1,0 +1,62 @@
+name: Diagnose tenant origins
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-tenant-origins.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Inspect origin routing without changes
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          ssh "${VPS_USER}@${VPS_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '== Active proxy services =='
+          sudo systemctl --no-pager --type=service --state=running | grep -Ei 'nginx|caddy|apache|traefik|docker|coolify|dokploy' || true
+          echo '== Listening ports =='
+          sudo ss -ltnp | grep -E ':(80|443|3000)\b' || true
+          echo '== Nginx enabled sites =='
+          sudo find /etc/nginx/sites-enabled -maxdepth 1 -type l -printf '%f -> %l\n' 2>/dev/null | sort || true
+          echo '== Nginx server_name entries =='
+          sudo grep -RhoE 'server_name[[:space:]]+[^;]+' /etc/nginx/sites-enabled 2>/dev/null | sort -u || true
+          echo '== LetsEncrypt certificate names =='
+          sudo find /etc/letsencrypt/live -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true
+          echo '== Docker containers and published ports =='
+          sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}' 2>/dev/null || true
+          echo '== Traefik-like labels for running containers =='
+          for c in $(sudo docker ps --format '{{.Names}}' 2>/dev/null); do
+            labels=$(sudo docker inspect "$c" --format '{{json .Config.Labels}}' 2>/dev/null || true)
+            if printf '%s' "$labels" | grep -Eqi 'traefik|host\('; then
+              echo "CONTAINER=$c"
+              printf '%s\n' "$labels" | sed -E 's/(password|passwd|token|secret|key)[^,}]*/REDACTED/Ig'
+            fi
+          done
+          echo '== Core local host-header checks =='
+          for h in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br colors.impulsionando.com.br; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: $h" http://127.0.0.1:3000/ || true)
+            echo "$h CORE3000=$code"
+          done
+          REMOTE
