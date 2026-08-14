@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Audit n8n CHRISMED capability safely
+      - name: Inspect CHRISMED active workflow safely
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -26,9 +26,22 @@ jobs:
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
           echo "n8n_version=$(sudo docker exec "$N8N" n8n --version)"
-          echo '=== required runtime variable presence only ==='
-          sudo docker exec "$N8N" node -e 'for(const n of ["SUPABASE_URL","SUPABASE_ANON_KEY","SUPABASE_SERVICE_ROLE_KEY","IMPULSIONANDO_WEBHOOK_SECRET","CHRISMED_WORKER_TOKEN","N8N_ENCRYPTION_KEY"]) console.log(`${n}_PRESENT=${Boolean(process.env[n])}`)'
-          echo '=== existing CHRISMED workflows ==='
-          sudo docker exec "$N8N" n8n export:workflow --all --output=/tmp/all-workflows.json >/dev/null
-          sudo docker exec "$N8N" node -e 'const fs=require("fs");const raw=JSON.parse(fs.readFileSync("/tmp/all-workflows.json","utf8"));const list=Array.isArray(raw)?raw:[raw];console.log(JSON.stringify(list.filter(w=>/chrismed/i.test(`${w.name||""} ${JSON.stringify(w.tags||[])}`)).map(w=>({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null})),null,2))'
+          sudo docker exec "$N8N" n8n export:workflow --id=chrismedOutboxWorker01 --output=/tmp/chrismed.json >/dev/null
+          sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp.json >/dev/null
+          echo '=== safe workflow structure comparison ==='
+          sudo docker exec "$N8N" node -e '
+            const fs=require("fs");
+            for(const [label,file] of [["chrismed","/tmp/chrismed.json"],["wmp","/tmp/wmp.json"]]){
+              const r=JSON.parse(fs.readFileSync(file,"utf8")); const w=Array.isArray(r)?r[0]:r;
+              console.log(JSON.stringify({label,id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).map(n=>({name:n.name,type:n.type,typeVersion:n.typeVersion,path:n.parameters?.path,httpMethod:n.parameters?.httpMethod,rule:n.type.includes("scheduleTrigger")?n.parameters?.rule:undefined})),connections:Object.keys(w.connections||{}),settings:w.settings},null,2));
+            }'
+          echo '=== recent workflow activation/startup messages ==='
+          sudo docker logs --since 15m "$N8N" 2>&1 | grep -Ei 'chrismed|workflow|webhook|activate|activation|trigger|error|failed' | tail -n 240 || true
+          echo '=== current public probes ==='
+          for path in wmp-lead-intake chrismed-outbox-worker; do
+            code="$(curl -sS -o "/tmp/${path}.out" -w '%{http_code}' --max-time 30 -X POST "https://n8n.impulsionando.com.br/webhook/${path}" -H 'content-type: application/json' -d '{}')"
+            echo "${path}_http=${code}"
+            head -c 500 "/tmp/${path}.out" || true
+            echo
+          done
           REMOTE
