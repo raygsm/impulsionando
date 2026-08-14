@@ -3,9 +3,9 @@ import { ArrowRight, Stethoscope, Users } from "lucide-react";
 import { ChrismedShell } from "@/components/chrismed/ChrismedShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CHRISMED_DOCTORS, CHRISMED_SPECIALTIES } from "@/data/chrismed-mock";
+import { CHRISMED_DOCTORS, CHRISMED_SPECIALTIES } from "@/data/chrismed-catalog";
 
-/** Rota legada mantida para links antigos; a área de cadastro oficial é /alth. */
+/** Rota de rede profissional. Cadastro e acesso oficial acontecem em /auth. */
 export const Route = createFileRoute("/chrismed/medicos")({
   head: () => ({
     meta: [
@@ -37,7 +37,7 @@ function HealthProfessionalNetwork() {
             categorias atuando em uma jornada integrada de cuidado.
           </p>
           <Button asChild className="mt-7 bg-[var(--chrismed-ink)] text-[var(--chrismed-ivory)]">
-            <Link to="/alth">
+            <Link to="/auth" search={{ mode: "signup" }}>
               <Users className="mr-2 h-4 w-4" />
               Acessar a Área dos Profissionais da Saúde
             </Link>
