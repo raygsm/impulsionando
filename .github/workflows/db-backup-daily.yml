@@ -53,7 +53,6 @@ jobs:
           SIZE=$(stat -c%s "$FILE")
           echo "dump: $FILE size=$SIZE sha256=$RAW_SHA"
 
-          # Sanity check — abaixo de 50 KB provavelmente é dump vazio/erro.
           if [ "$SIZE" -lt 51200 ]; then
             echo "::error::Dump suspeito (<50KB)"; exit 1
           fi
@@ -63,12 +62,13 @@ jobs:
             -in "$FILE" -out "$ENC" -pass env:ENC_KEY
 
           ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
-          echo "$ENC_SHA  $ENC" > "${ENC}.sha256"
-          echo "raw_sha=$RAW_SHA" >> "${ENC}.sha256"
-          echo "raw_size=$SIZE" >> "${ENC}.sha256"
-          echo "created_at=$TS" >> "${ENC}.sha256"
+          {
+            echo "$ENC_SHA  $ENC"
+            echo "raw_sha=$RAW_SHA"
+            echo "raw_size=$SIZE"
+            echo "created_at=$TS"
+          } > "${ENC}.sha256"
 
-          # Verificação local: decripta e compara SHA.
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
             -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}' > /tmp/check.sha
           if ! grep -q "$RAW_SHA" /tmp/check.sha; then
@@ -77,8 +77,10 @@ jobs:
           echo "Integridade OK."
 
           rm -f "$FILE"
-          echo "ENC_FILE=$ENC" >> $GITHUB_ENV
-          echo "SHA_FILE=${ENC}.sha256" >> $GITHUB_ENV
+          {
+            echo "ENC_FILE=$ENC"
+            echo "SHA_FILE=${ENC}.sha256"
+          } >> "$GITHUB_ENV"
 
       - name: Enviar backup para VPS (scp)
         uses: appleboy/scp-action@v0.1.7
@@ -101,10 +103,9 @@ jobs:
           script: |
             set -euo pipefail
             ROOT=/var/backups/impulsionando
-            mkdir -p $ROOT/daily $ROOT/weekly $ROOT/monthly
-            cd $ROOT/incoming
+            mkdir -p "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
+            cd "$ROOT/incoming"
 
-            # Verifica SHA-256 recebido.
             for f in *.enc; do
               [ -f "$f" ] || continue
               expected=$(head -n1 "${f}.sha256" | awk '{print $1}')
@@ -114,21 +115,20 @@ jobs:
                 rm -f "$f" "${f}.sha256"
                 exit 1
               fi
-              mv "$f" "${f}.sha256" $ROOT/daily/
+              mv "$f" "${f}.sha256" "$ROOT/daily/"
             done
 
-            # Rotacionar semanais (domingo) e mensais (dia 1).
-            DOW=$(date +%u); DOM=$(date +%d)
-            LATEST=$(ls -1t $ROOT/daily/*.enc 2>/dev/null | head -n1 || true)
+            DOW=$(date +%u)
+            DOM=$(date +%d)
+            LATEST=$(find "$ROOT/daily" -maxdepth 1 -type f -name '*.enc' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2- || true)
             if [ -n "$LATEST" ]; then
-              [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" $ROOT/weekly/ 2>/dev/null || true
-              [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" $ROOT/monthly/ 2>/dev/null || true
+              if [ "$DOW" = "7" ]; then cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true; fi
+              if [ "$DOM" = "01" ]; then cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true; fi
             fi
 
-            # Retenção
-            find $ROOT/daily   -type f -mtime +30  -delete
-            find $ROOT/weekly  -type f -mtime +84  -delete   # ~12 semanas
-            find $ROOT/monthly -type f -mtime +366 -delete   # ~12 meses
+            find "$ROOT/daily" -type f -mtime +30 -delete
+            find "$ROOT/weekly" -type f -mtime +84 -delete
+            find "$ROOT/monthly" -type f -mtime +366 -delete
 
             echo "Backup diário armazenado. Snapshot atual:"
-            du -sh $ROOT/daily $ROOT/weekly $ROOT/monthly
+            du -sh "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
