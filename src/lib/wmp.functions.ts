@@ -1,7 +1,46 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { diagnoseAcoustics, type WmpAcousticInput } from "@/lib/wmp/acoustic-rules";
+import { dispatchN8nByEvent } from "@/lib/n8n-dispatch-by-event.server";
+
+const WMP_COMPANY_ID = "ff2a9570-1168-4f9c-a852-1e042d9f32ed";
 const clean=(v:unknown,max=500)=>typeof v==="string"&&v.trim()?v.trim().slice(0,max):undefined;
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{if(!d||typeof d!=="object")throw new Error("Payload inválido");const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipo=clean(d.evento_tipo,80);if(!nome||!email||!telefone||!eventoTipo)throw new Error("Campos obrigatórios faltando.");if(!EMAIL_RE.test(email))throw new Error("E-mail inválido.");const cep=(clean(d.evento_cep,12)??"").replace(/\D/g,"");if(cep&&cep.length!==8)throw new Error("CEP inválido.");return{contratante_nome:nome,contratante_email:email.toLowerCase(),contratante_telefone:telefone,contratante_empresa:clean(d.contratante_empresa,160),evento_tipo:eventoTipo,evento_data:clean(d.evento_data,20),evento_horario_inicio:clean(d.evento_horario_inicio,8),evento_horario_fim:clean(d.evento_horario_fim,8),evento_publico_estimado:Number.isFinite(Number(d.evento_publico_estimado))?Number(d.evento_publico_estimado):null,evento_perfil_publico:clean(d.evento_perfil_publico,200),evento_cep:cep||undefined,evento_bairro:clean(d.evento_bairro,120),evento_endereco:clean(d.evento_endereco,240),evento_cidade:clean(d.evento_cidade,80),evento_estado:clean(d.evento_estado,4),ambiente:d.ambiente&&typeof d.ambiente==="object"?d.ambiente:{},medidas:d.medidas&&typeof d.medidas==="object"?d.medidas:{},acustica:d.acustica&&typeof d.acustica==="object"?d.acustica:{},utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"}}).handler(async({data})=>{const input:WmpAcousticInput={ambiente:data.ambiente,medidas:data.medidas,evento:{publico_estimado:data.evento_publico_estimado??undefined,horario_fim:data.evento_horario_fim,tipo:data.evento_tipo},acustica:data.acustica};const pre_diagnostico=diagnoseAcoustics(input);const{data:row,error}=await supabaseAdmin.from("wmp_briefings").insert({...data,pre_diagnostico}).select("id, created_at").single();if(error)throw new Error(error.message);return{id:row.id,created_at:row.created_at,pre_diagnostico}});
-export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d:any)=>{const nome=clean(d?.nome,120),email=clean(d?.email,200),telefone=clean(d?.telefone,40),categoria=clean(d?.categoria,40);const validas=["dj","musico","tecnico_som","tecnico_luz","tecnico_video","fornecedor","cerimonialista","outro"];if(!nome||!email||!telefone||!categoria)throw new Error("Campos obrigatórios faltando.");if(!EMAIL_RE.test(email)||!validas.includes(categoria))throw new Error("Dados inválidos.");return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade:clean(d.cidade,80),estado:clean(d.estado,4),experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"}}).handler(async({data})=>{const{data:row,error}=await supabaseAdmin.from("wmp_parceiros").insert(data).select("id, created_at").single();if(error)throw new Error(error.message);return{id:row.id,created_at:row.created_at}});
+
+async function getWmpTenantId(){
+  const {data,error}=await supabaseAdmin.from("communication_tenants").select("id").eq("slug","wmp").eq("active",true).single();
+  if(error||!data?.id)throw new Error(error?.message??"Tenant WMP não encontrado.");
+  return data.id as string;
+}
+
+export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{
+  if(!d||typeof d!=="object")throw new Error("Payload inválido");
+  const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipo=clean(d.evento_tipo,80);
+  if(!nome||!email||!telefone||!eventoTipo)throw new Error("Campos obrigatórios faltando.");
+  if(!EMAIL_RE.test(email))throw new Error("E-mail inválido.");
+  const cep=(clean(d.evento_cep,12)??"").replace(/\D/g,"");
+  if(cep&&cep.length!==8)throw new Error("CEP inválido.");
+  return{contratante_nome:nome,contratante_email:email.toLowerCase(),contratante_telefone:telefone,contratante_empresa:clean(d.contratante_empresa,160),evento_tipo:eventoTipo,evento_data:clean(d.evento_data,20),evento_horario_inicio:clean(d.evento_horario_inicio,8),evento_horario_fim:clean(d.evento_horario_fim,8),evento_publico_estimado:Number.isFinite(Number(d.evento_publico_estimado))?Number(d.evento_publico_estimado):null,evento_perfil_publico:clean(d.evento_perfil_publico,200),evento_cep:cep||undefined,evento_bairro:clean(d.evento_bairro,120),evento_endereco:clean(d.evento_endereco,240),evento_cidade:clean(d.evento_cidade,80),evento_estado:clean(d.evento_estado,4),ambiente:d.ambiente&&typeof d.ambiente==="object"?d.ambiente:{},medidas:d.medidas&&typeof d.medidas==="object"?d.medidas:{},acustica:d.acustica&&typeof d.acustica==="object"?d.acustica:{},utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
+}).handler(async({data})=>{
+  const tenant_id=await getWmpTenantId();
+  const input:WmpAcousticInput={ambiente:data.ambiente,medidas:data.medidas,evento:{publico_estimado:data.evento_publico_estimado??undefined,horario_fim:data.evento_horario_fim,tipo:data.evento_tipo},acustica:data.acustica};
+  const pre_diagnostico=diagnoseAcoustics(input);
+  const{data:row,error}=await supabaseAdmin.from("wmp_briefings").insert({...data,tenant_id,consent_at:new Date().toISOString(),pre_diagnostico}).select("id, created_at").single();
+  if(error)throw new Error(error.message);
+  const automation=await dispatchN8nByEvent("wmp.lead.received",{lead_type:"briefing",briefing_id:row.id,email:data.contratante_email,phone:data.contratante_telefone,event_type:data.evento_tipo},WMP_COMPANY_ID,"wmp");
+  return{id:row.id,created_at:row.created_at,pre_diagnostico,automation};
+});
+
+export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d:any)=>{
+  const nome=clean(d?.nome,120),email=clean(d?.email,200),telefone=clean(d?.telefone,40),categoria=clean(d?.categoria,40);
+  const validas=["dj","musico","tecnico_som","tecnico_luz","tecnico_video","fornecedor","cerimonialista","outro"];
+  if(!nome||!email||!telefone||!categoria)throw new Error("Campos obrigatórios faltando.");
+  if(!EMAIL_RE.test(email)||!validas.includes(categoria))throw new Error("Dados inválidos.");
+  return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade:clean(d.cidade,80),estado:clean(d.estado,4),experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
+}).handler(async({data})=>{
+  const tenant_id=await getWmpTenantId();
+  const{data:row,error}=await supabaseAdmin.from("wmp_parceiros").insert({...data,tenant_id,consent_at:new Date().toISOString()}).select("id, created_at").single();
+  if(error)throw new Error(error.message);
+  const automation=await dispatchN8nByEvent("wmp.partner.received",{lead_type:"partner",partner_id:row.id,category:data.categoria,email:data.email,phone:data.telefone},WMP_COMPANY_ID,"wmp");
+  return{id:row.id,created_at:row.created_at,automation};
+});
