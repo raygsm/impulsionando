@@ -1,17 +1,17 @@
-name: CHRISMED Communication Worker
+name: CHRISMED Communication Worker (Manual Fallback)
 
+# Production scheduling is owned by N8N workflow chrismedOutboxWorker01.
+# This GitHub Action remains available only for an explicit emergency/manual replay.
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: chrismed-communication-worker
+  group: chrismed-communication-worker-fallback
   cancel-in-progress: false
 
 jobs:
   dispatch:
-    name: Deliver due CHRISMED transactional emails
+    name: Manually deliver due CHRISMED transactional emails
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
