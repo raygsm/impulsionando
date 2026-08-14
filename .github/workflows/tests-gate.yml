@@ -45,8 +45,12 @@ jobs:
       - name: Append run to quality history
         if: always()
         run: |
-          node scripts/append-quality-history.mjs test-results/vitest.json \
-            > public/qa-history.json.next && mv public/qa-history.json.next public/qa-history.json || true
+          if node scripts/append-quality-history.mjs test-results/vitest.json \
+            > public/qa-history.json.next; then
+            mv public/qa-history.json.next public/qa-history.json
+          else
+            rm -f public/qa-history.json.next
+          fi
 
       - name: Upload test results
         if: always()
