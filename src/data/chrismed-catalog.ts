@@ -1,11 +1,11 @@
 /**
- * Catalogo institucional CHRISMED usado pela experiencia publica.
+ * Catálogo institucional CHRISMED usado pela experiência pública.
  *
  * IMPORTANTE:
- * - este arquivo NAO representa disponibilidade de agenda;
- * - horarios, bloqueios e reservas sao sempre lidos do backend/Supabase;
- * - precos e duracoes sao lidos de chrismed_service_offerings;
- * - a agenda publica usa list_chrismed_available_slots.
+ * - este arquivo NÃO representa disponibilidade de agenda;
+ * - horários, bloqueios e reservas são sempre lidos do backend/Supabase;
+ * - preços e durações são lidos de chrismed_service_offerings;
+ * - a agenda pública usa list_chrismed_available_slots.
  */
 
 export type ChrismedModality =
@@ -74,13 +74,13 @@ export const CHRISMED_SPECIALTIES: ChrismedSpecialty[] = [
   {
     slug: 'hepatologia',
     name: 'Hepatologia',
-    short: 'Figado, vias biliares e hepatites',
+    short: 'Fígado, vias biliares e hepatites',
     icon: 'stethoscope',
   },
   {
     slug: 'clinica-medica',
-    name: 'Clinica Medica',
-    short: 'Diagnostico geral e acompanhamento',
+    name: 'Clínica Médica',
+    short: 'Diagnóstico geral e acompanhamento',
     icon: 'stethoscope',
   },
   {
@@ -100,38 +100,38 @@ export const CHRISMED_SPECIALTIES: ChrismedSpecialty[] = [
 export const CHRISMED_UNITS: ChrismedUnit[] = [
   {
     slug: 'copacabana',
-    name: 'Consultorio Copacabana',
-    address: 'Endereco enviado apos confirmacao',
+    name: 'Consultório Copacabana',
+    address: 'Endereço enviado após confirmação',
     neighborhood: 'Copacabana',
     city: 'Rio de Janeiro',
   },
   {
     slug: 'telemedicina',
-    name: 'Teleconsulta (video)',
-    address: 'Link seguro enviado apos confirmacao',
+    name: 'Teleconsulta (vídeo)',
+    address: 'Link seguro enviado após confirmação',
     neighborhood: '—',
     city: '—',
   },
   {
     slug: 'domiciliar',
     name: 'Domiciliar (a definir)',
-    address: 'Endereco informado pelo paciente',
+    address: 'Endereço informado pelo paciente',
     neighborhood: '—',
     city: '—',
   },
 ];
 
 /**
- * Catalogo editorial da profissional atualmente destacada no site.
- * Elegibilidade e disponibilidade publica continuam validadas pelo backend.
+ * Catálogo editorial da profissional atualmente destacada no site.
+ * Elegibilidade e disponibilidade pública continuam validadas pelo backend.
  */
 export const CHRISMED_DOCTORS: ChrismedDoctor[] = [
   {
     slug: 'dra-christiane-alencar',
     name: 'Dra. Christiane Alencar',
-    title: 'Gastroenterologia · Hepatologia · Clinica Medica · Medicina Ocupacional · GMS',
+    title: 'Gastroenterologia · Hepatologia · Clínica Médica · Medicina Ocupacional · GMS',
     crm: 'CRM/RJ 52.58575-0',
-    bio: 'Medica formada pela UFRJ, +30 anos de experiencia e +80.000 atendimentos. Direcao tecnica da CHRISMED, atendimento pericial (laudos para Justica e Previdencia) e emissao de ASO presencial.',
+    bio: 'Médica formada pela UFRJ, +30 anos de experiência e +80.000 atendimentos. Direção técnica da CHRISMED, atendimento pericial (laudos para Justiça e Previdência) e emissão de ASO presencial.',
     specialtySlugs: [
       'gastroenterologia',
       'hepatologia',
