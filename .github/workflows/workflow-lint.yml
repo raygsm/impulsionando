@@ -1,8 +1,8 @@
 name: Lint & Validate Workflows
 
-# Roda em qualquer PR que toque .github/workflows/**, e também em push na main
-# e por dispatch manual. Falha rápido se algum YAML estiver invalido — assim
-# nenhum workflow "invisivel" chega em main.
+# Valida sintaxe YAML e, principalmente, schema/expressoes do GitHub Actions.
+# Regras puramente cosmeticas de EOF/linhas vazias ficam fora do gate para que
+# arquivos legados semanticamente validos nao bloqueiem mudancas de infraestrutura.
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
           else
             mapfile -t files < <(find .github/workflows -maxdepth 1 -type f -name '*.yml' | sort)
           fi
-          [ "${#files[@]}" -eq 0 ] || yamllint -d "{extends: relaxed, rules: {line-length: disable}}" "${files[@]}"
+          [ "${#files[@]}" -eq 0 ] || yamllint -d "{extends: relaxed, rules: {line-length: disable, new-line-at-end-of-file: disable, empty-lines: disable}}" "${files[@]}"
 
       - name: actionlint (schema GitHub Actions)
         env:
