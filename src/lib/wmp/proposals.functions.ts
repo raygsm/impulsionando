@@ -63,3 +63,70 @@ export const sendWmpProposal = createServerFn({ method: 'POST' }).middleware([re
     }, null, 'wmp')
     return { outbox_id: outboxId as string, delivery, automation }
   })
+
+type ProposalTransition = 'ACCEPTED' | 'SIGNED' | 'WON'
+
+const transitionRules: Record<ProposalTransition, { allowed: string[]; event: string }> = {
+  ACCEPTED: { allowed: ['SENT', 'VIEWED', 'ACCEPTED'], event: 'wmp.proposal.accepted' },
+  SIGNED: { allowed: ['ACCEPTED', 'SIGNED'], event: 'wmp.proposal.signed' },
+  WON: { allowed: ['SIGNED', 'WON'], event: 'wmp.proposal.won' },
+}
+
+export const transitionWmpProposal = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { proposal_id: string; transition: ProposalTransition }) => z.object({
+    proposal_id: z.string().uuid(),
+    transition: z.enum(['ACCEPTED', 'SIGNED', 'WON']),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const tenantId = await getWmpTenantId(context.supabase)
+    const { data: proposal, error } = await context.supabase
+      .from('wmp_proposals')
+      .select('id,proposal_number,status,current_version,opportunity_id')
+      .eq('tenant_id', tenantId)
+      .eq('id', data.proposal_id)
+      .single()
+    if (error) throw error
+
+    const rule = transitionRules[data.transition]
+    if (!rule.allowed.includes(proposal.status)) {
+      throw new Error(`Transição inválida: ${proposal.status} → ${data.transition}`)
+    }
+
+    const now = new Date().toISOString()
+    if (proposal.status !== data.transition) {
+      const versionPatch: Record<string, unknown> = { status: data.transition }
+      if (data.transition === 'ACCEPTED') versionPatch.accepted_at = now
+      if (data.transition === 'SIGNED') versionPatch.signed_at = now
+
+      const { error: versionError } = await context.supabase
+        .from('wmp_proposal_versions')
+        .update(versionPatch)
+        .eq('tenant_id', tenantId)
+        .eq('proposal_id', proposal.id)
+        .eq('version', proposal.current_version)
+      if (versionError) throw versionError
+
+      const { error: proposalError } = await context.supabase
+        .from('wmp_proposals')
+        .update({ status: data.transition, updated_at: now })
+        .eq('tenant_id', tenantId)
+        .eq('id', proposal.id)
+        .eq('status', proposal.status)
+      if (proposalError) throw proposalError
+    }
+
+    const automation = await dispatchN8nByEvent(rule.event, {
+      proposal_id: proposal.id,
+      proposal_number: proposal.proposal_number,
+      opportunity_id: proposal.opportunity_id,
+      transition: data.transition,
+      transitioned_at: now,
+    }, null, 'wmp')
+
+    return {
+      proposal_id: proposal.id,
+      proposal_number: proposal.proposal_number,
+      status: data.transition,
+      automation,
+    }
+  })
