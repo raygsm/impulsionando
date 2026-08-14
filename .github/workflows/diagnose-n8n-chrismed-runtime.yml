@@ -1,4 +1,4 @@
-name: Diagnose N8N CHRISMED runtime
+name: Diagnose N8N CHRISMED webhook identity
 on:
   push:
     branches: [main]
@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Inspect CHRISMED active workflow safely
+      - name: Compare webhook identity
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -25,23 +25,26 @@ jobs:
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
-          echo "n8n_version=$(sudo docker exec "$N8N" n8n --version)"
-          sudo docker exec "$N8N" n8n export:workflow --id=chrismedOutboxWorker01 --output=/tmp/chrismed.json >/dev/null
-          sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp.json >/dev/null
-          echo '=== safe workflow structure comparison ==='
-          sudo docker exec "$N8N" node -e '
-            const fs=require("fs");
-            for(const [label,file] of [["chrismed","/tmp/chrismed.json"],["wmp","/tmp/wmp.json"]]){
-              const r=JSON.parse(fs.readFileSync(file,"utf8")); const w=Array.isArray(r)?r[0]:r;
-              console.log(JSON.stringify({label,id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).map(n=>({name:n.name,type:n.type,typeVersion:n.typeVersion,path:n.parameters?.path,httpMethod:n.parameters?.httpMethod,rule:n.type.includes("scheduleTrigger")?n.parameters?.rule:undefined})),connections:Object.keys(w.connections||{}),settings:w.settings},null,2));
-            }'
-          echo '=== recent workflow activation/startup messages ==='
-          sudo docker logs --since 15m "$N8N" 2>&1 | grep -Ei 'chrismed|workflow|webhook|activate|activation|trigger|error|failed' | tail -n 240 || true
-          echo '=== current public probes ==='
-          for path in wmp-lead-intake chrismed-outbox-worker; do
-            code="$(curl -sS -o "/tmp/${path}.out" -w '%{http_code}' --max-time 30 -X POST "https://n8n.impulsionando.com.br/webhook/${path}" -H 'content-type: application/json' -d '{}')"
-            echo "${path}_http=${code}"
-            head -c 500 "/tmp/${path}.out" || true
-            echo
+          for id in chrismedOutboxWorker01 wmpLeadIntake01; do
+            sudo docker exec "$N8N" n8n export:workflow --id="$id" --output="/tmp/$id.json" >/dev/null
+            sudo docker exec "$N8N" node -e 'const fs=require("fs");const id=process.argv[1];const r=JSON.parse(fs.readFileSync(`/tmp/${id}.json`,"utf8"));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).map(n=>({id:n.id,name:n.name,type:n.type,webhookId:n.webhookId??null,path:n.parameters?.path??null,disabled:n.disabled??false}))},null,2))' "$id"
           done
+          echo '=== sqlite webhook rows if local sqlite is used ==='
+          DB=$(sudo docker inspect "$N8N" --format '{{range .Mounts}}{{if eq .Destination "/home/node/.n8n"}}{{.Source}}{{end}}{{end}}')
+          if [ -n "$DB" ] && [ -f "$DB/database.sqlite" ]; then
+            sudo python3 - "$DB/database.sqlite" <<'PY'
+          import sqlite3,sys
+          db=sqlite3.connect(sys.argv[1])
+          for table in ['webhook_entity','workflow_entity','workflow_history']:
+              try:
+                  cols=[r[1] for r in db.execute(f'pragma table_info("{table}")')]
+                  print(table, cols)
+                  if table=='webhook_entity':
+                      rows=db.execute('select * from webhook_entity where workflowId in (?,?)',('chrismedOutboxWorker01','wmpLeadIntake01')).fetchall()
+                      print('webhook_rows',rows)
+              except Exception as e: print(table,'ERR',type(e).__name__)
+          PY
+          else
+            echo 'sqlite_local=false'
+          fi
           REMOTE
