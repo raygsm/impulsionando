@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Verify WMP production webhook before and after restart
+      - name: Verify persistent WMP production webhook readiness
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -27,37 +27,62 @@ jobs:
           N8N=n8n-umlg-n8n-1
           URL=https://n8n.impulsionando.com.br/webhook/wmp-lead-intake
 
-          probe() {
+          state() {
+            sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp.json >/dev/null
+            sudo docker exec "$N8N" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/wmp.json','utf8'));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId},null,2));if(!w.active||!w.activeVersionId)process.exit(9)"
+          }
+
+          probe_once() {
             label="$1"
             code="$(curl -sS -o "/tmp/${label}.out" -w '%{http_code}' --max-time 20 \
               -X POST "$URL" \
               -H 'content-type: application/json' \
               -d "{\"tenant_slug\":\"wmp\",\"event_code\":\"wmp.lead.received\",\"correlation_id\":\"${label}-$(date +%s)\"}")"
             echo "${label}_http=$code"
-            head -c 800 "/tmp/${label}.out" || true
-            echo
-            case "$code" in 2*|3*) ;; *) exit 22 ;; esac
+            case "$code" in 2*|3*) return 0 ;; *) return 1 ;; esac
           }
 
-          echo '=== workflow state ==='
-          sudo docker exec "$N8N" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp.json >/dev/null
-          sudo docker exec "$N8N" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/wmp.json','utf8'));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId},null,2));if(!w.active||!w.activeVersionId)process.exit(9)"
+          echo '=== current persistent state ==='
+          state
 
-          echo '=== public probe before restart ==='
-          probe before_restart
+          echo '=== current public probe ==='
+          if ! probe_once current; then
+            echo 'Webhook is not registered before restart; showing startup evidence.'
+            sudo docker logs --since 10m "$N8N" 2>&1 | grep -Ei 'workflow|webhook|error|activ|publish' | tail -n 120 || true
+            exit 22
+          fi
 
           echo '=== restart ==='
           sudo docker restart "$N8N" >/dev/null
-          for i in $(seq 1 30); do
+
+          echo '=== wait for process health ==='
+          for i in $(seq 1 45); do
             if sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then
+              echo "health_ready_after_seconds=$((i*2))"
               break
             fi
             sleep 2
           done
-          sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>{console.log('health='+r.status);if(!r.ok)process.exit(1)})"
 
-          echo '=== public probe after restart ==='
-          probe after_restart
+          echo '=== state after restart ==='
+          state
 
-          echo 'N8N_WMP_PRODUCTION_WEBHOOK=PASS'
+          echo '=== wait for production webhook readiness ==='
+          ready=0
+          for i in $(seq 1 30); do
+            if probe_once "post_restart_${i}"; then
+              echo "webhook_ready_after_health_seconds=$(((i-1)*3))"
+              ready=1
+              break
+            fi
+            sleep 3
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            echo '=== startup diagnostics ==='
+            sudo docker logs --since 5m "$N8N" 2>&1 | grep -Ei 'workflow|webhook|error|activ|publish' | tail -n 160 || true
+            exit 22
+          fi
+
+          echo 'N8N_WMP_PRODUCTION_WEBHOOK_PERSISTENCE=PASS'
           REMOTE
