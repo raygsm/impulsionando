@@ -125,6 +125,8 @@ jobs:
             deploy/impulsionando-core.service \
             deploy/nginx.chrismed.http.conf \
             deploy/nginx.chrismed.conf \
+            deploy/nginx.chrismed-legacy.http.conf \
+            deploy/nginx.chrismed-legacy.conf \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
 
       - name: Activate release and server configuration
@@ -205,6 +207,11 @@ jobs:
           sudo install -d -m 0755 /var/www/letsencrypt
           sudo install -m 0644 /tmp/nginx.chrismed.http.conf /etc/nginx/sites-available/chrismed.impulsionando.com.br
           sudo ln -sfn /etc/nginx/sites-available/chrismed.impulsionando.com.br /etc/nginx/sites-enabled/chrismed.impulsionando.com.br
+
+          # Legacy CHRISMED domain: HTTP redirect is safe to install before DNS cutover.
+          sudo install -m 0644 /tmp/nginx.chrismed-legacy.http.conf /etc/nginx/sites-available/chrismed.com.br
+          sudo ln -sfn /etc/nginx/sites-available/chrismed.com.br /etc/nginx/sites-enabled/chrismed.com.br
+
           sudo nginx -t
           if ! sudo systemctl is-active --quiet nginx; then
             echo "Nginx is installed but inactive; refusing to replace the active public proxy."
@@ -212,11 +219,12 @@ jobs:
           fi
           sudo systemctl reload nginx
 
+          if ! command -v certbot >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y certbot
+          fi
+
           if [ ! -f /etc/letsencrypt/live/chrismed.impulsionando.com.br/fullchain.pem ]; then
-            if ! command -v certbot >/dev/null 2>&1; then
-              sudo apt-get update
-              sudo apt-get install -y certbot
-            fi
             sudo certbot certonly --webroot --webroot-path /var/www/letsencrypt \
               --non-interactive --agree-tos --email sac@impulsionando.com.br \
               -d chrismed.impulsionando.com.br
@@ -225,6 +233,26 @@ jobs:
           sudo install -m 0644 /tmp/nginx.chrismed.conf /etc/nginx/sites-available/chrismed.impulsionando.com.br
           sudo nginx -t
           sudo systemctl reload nginx
+
+          # Try to activate HTTPS redirect for the legacy domain. If DNS still
+          # points to the old host, certificate issuance is deferred instead of
+          # failing the CHRISMED production deploy. A later deploy will retry.
+          if [ ! -f /etc/letsencrypt/live/chrismed.com.br/fullchain.pem ]; then
+            if sudo certbot certonly --webroot --webroot-path /var/www/letsencrypt \
+              --non-interactive --agree-tos --email sac@impulsionando.com.br \
+              -d chrismed.com.br -d www.chrismed.com.br; then
+              echo "Legacy CHRISMED certificate issued."
+            else
+              echo "Legacy CHRISMED certificate pending DNS cutover; HTTP redirect remains prepared."
+            fi
+          fi
+
+          if [ -f /etc/letsencrypt/live/chrismed.com.br/fullchain.pem ]; then
+            sudo install -m 0644 /tmp/nginx.chrismed-legacy.conf /etc/nginx/sites-available/chrismed.com.br
+            sudo nginx -t
+            sudo systemctl reload nginx
+            echo "Legacy CHRISMED HTTPS redirect active."
+          fi
           REMOTE
 
       - name: Validate public frontends
