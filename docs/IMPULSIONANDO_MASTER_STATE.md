@@ -1,6 +1,6 @@
 # IMPULSIONANDO MASTER STATE
 
-Atualizado em: 2026-08-14
+Atualizado em: 2026-08-15
 
 ## Protocolo obrigatorio de continuidade entre chats
 Este arquivo existe para impedir perda de contexto quando um chat atingir o limite de tamanho.
@@ -25,14 +25,68 @@ Sempre que um novo chat do projeto Impulsionando for iniciado, o ChatGPT deve ob
 - Em linguagem comercial/UI usar `cliente`, `empresa` ou `cliente conectado ao Core`; `tenant` apenas em contexto tecnico.
 - Nao usar Codex neste projeto.
 
+## Regra definitiva de consolidacao de dados — selection first
+- Regra transversal do ecossistema: dados mestres, classificaveis ou relacionais devem ser escolhidos em listas pesquisaveis/canonicas; texto livre e excecao.
+- Objetivo de UX/dados: 99% ou mais dos campos classificaveis por selecao, autocomplete estruturado, relacao ou preenchimento automatico.
+- Texto livre deve ficar restrito ao que e intrinsecamente individual: nome, numero/complemento, observacao, descricao, bio, mensagem e excecoes justificadas.
+- CEP e sempre a primeira pergunta dentro do bloco de endereco brasileiro. O Core deve preencher logradouro, bairro, municipio, UF e codigo IBGE quando a fonte retornar os dados.
+- Frontends nao devem consultar ViaCEP ou IBGE diretamente. Provedores externos ficam mediados pelo Core.
+- UF usa referencia canonica; municipio usa codigo IBGE. Bairro nao possui uma lista oficial nacional unica equivalente aos municipios: o Core usa CEP como fonte primaria e mantem `core_localities` para aprender/normalizar bairros validados, evitando falsa precisao.
+- CPF/CNPJ brasileiros devem ser validados no Core e no backend/banco, nunca apenas por mascara/front.
+- CNPJ suporta o formato atual alfanumerico da Receita Federal: 12 posicoes alfanumericas + 2 DVs numericos, alem do legado numerico.
+- `reference_option_sets` + `reference_options` sao a fonte central de listas; nao criar tabelas paralelas sem necessidade de dominio relacional proprio.
+
+## Selection-first — estado implementado em 2026-08-15
+- `src/lib/validators.ts` centraliza CPF, CNPJ, CEP e mascaras. WMP fiscal delega ao Core.
+- Rotas Core criadas/ativas em codigo:
+  - `/api/public/cep/$cep` — consulta server-side e normaliza endereco; alimenta `core_localities`.
+  - `/api/public/municipios/$uf` — consulta server-side da lista oficial de municipios/IBGE.
+  - `/api/public/referencias/$key` — expõe apenas conjuntos de referencia publicos permitidos.
+- Migration live `20260815102844 core_selection_first_master_data_20260815`:
+  - funcoes `core_is_valid_cpf`, `core_is_valid_cnpj`, normalizacao CNPJ;
+  - `core_localities`;
+  - 27 UFs canonicas;
+  - tipos de documento PF/PJ;
+  - 48 categorias canonicas de equipamento WMP.
+- Migration live `20260815104305 core_fiscal_document_integrity_20260815`:
+  - `core_is_valid_br_document`;
+  - integridade de CNPJ em `companies` quando `document_type=CNPJ`;
+  - integridade CPF/CNPJ em `wmp_briefings` conforme `contratante_tipo_documento`;
+  - integridade de CNPJ em `chrismed_occupational_intakes` quando aplicavel;
+  - documentos estrangeiros continuam suportados por tipo explicito.
+- Auditoria antes do endurecimento: o unico `companies.document` preenchido era CNPJ valido; WMP briefing e CHRISMED ocupacional nao tinham documentos gravados.
+
+## WMP — selection-first implementado
+- Migration live `20260815103201 wmp_equipment_reference_integrity_20260815`:
+  - `manufacturer_id` e `model_id` relacionais em `wmp_equipment_catalog`;
+  - fila `wmp_equipment_reference_requests` para excecao controlada quando fabricante/modelo ainda nao existe;
+  - base inicial ampla de fabricantes profissionais AV. Nao afirmar que todos os fabricantes/modelos do mundo estao carregados; a arquitetura permite expansao continua sem poluir dados mestres.
+- Migration live `20260815103354 wmp_briefing_canonical_municipality_20260815`: `evento_municipio_ibge`.
+- Migration live `20260815103443 wmp_reference_taxonomy_expansion_20260815`: `wmp_event_types` e `wmp_partner_categories`.
+- Migration live `20260815103603 wmp_partner_canonical_municipality_20260815`: `municipio_ibge` no parceiro.
+- Todas as cinco migrations de selection-first/fiscal acima estao rastreadas no GitHub com suas versoes reais do banco.
+- `src/lib/wmp/equipment.functions.ts` valida categoria, fabricante e modelo contra catalogos e grava IDs relacionais; ausencia de referencia vai para fila de curadoria.
+- `src/components/wmp/WmpOrcamentoForm.tsx`: endereco CEP-first, municipio por IBGE, UF/cidade consolidados.
+- `src/routes/wmp.parceiro.cadastro.tsx`: categoria, UF e municipio por listas Core; cidade nao e mais texto livre.
+- `src/lib/wmp.functions.ts`: backend valida evento/UF/municipio/CEP e normaliza alias legado `outro` para `outro_curado` antes de persistir.
+- Pendencia: retirar a lista hardcoded de tipos de evento do front WMP e consumir `wmp_event_types` dinamicamente. O backend ja garante dado canonico.
+
+## Outros fronts migrados para CEP Core
+- `src/routes/quero-comecar.tsx`: ViaCEP direto removido; guarda codigo IBGE quando disponivel.
+- `src/routes/chrismed.domiciliar.tsx`: CEP-first; UF/municipio automaticos; numero/complemento continuam livres; bairro/logradouro so editaveis quando a fonte nao retorna.
+- `src/components/colors/PreCheckoutModal.tsx`: CEP Core; cidade/UF bloqueadas para digitacao; logradouro/bairro somente excecao; bloco de endereco com CEP primeiro.
+- `src/lib/colors-checkout.functions.ts`: CPF opcional, quando presente, agora e validado pelo Core antes de hash/persistencia.
+- `src/routes/_authenticated/talentos.cadastro.tsx` ainda requer migracao: ViaCEP direto e varios campos classificaveis ainda sao texto livre (cargo, curso, instituicao, habilidades, idiomas). Nao reescrever a tela sem preservar funcionalidades; criar/usar catalogos canonicos antes da troca.
+
 ## Infraestrutura confirmada
 - GitHub conectado ao repositorio `raygsm/impulsionando`.
-- Supabase principal: projeto `Impulsionando`, ref `arygtqrdpcdkwnuwsgmm`, status ACTIVE_HEALTHY, regiao us-east-2.
+- Supabase principal: projeto `Impulsionando`, ref `arygtqrdpcdkwnuwsgmm`, regiao us-east-2.
+- Plano Supabase PRO confirmado; HIBP/leaked-password protection habilitado posteriormente e warning removido.
 - GitHub Actions cobre migrations, build, deploy, E2E, DNS/VPS, n8n, seguranca e monitoramento.
 - Publicacao principal ocorre em VPS/Hostinger; trafego publico atual e atendido por Traefik.
 - Core responde localmente em porta 3000 e Traefik possui regra wildcard para `*.impulsionando.com.br`.
-- Diagnostico de 2026-08-14 confirmou HTTP 200 no Core para Host headers: impulsionando, CHRISMED, WMP, Marocas, RioMed e Colors.
-- Portanto, nao tratar Marocas/RioMed/Colors como ausencia de rota quando checagem direta da origem sem roteamento adequado retornar 404.
+- Diagnostico anterior confirmou HTTP 200 no Core para Host headers: Impulsionando, CHRISMED, WMP, Marocas, RioMed e Colors.
+- Nao tratar Marocas/RioMed/Colors como ausencia de rota quando checagem direta da origem sem roteamento adequado retornar 404.
 
 ## Clientes prioritarios e regras fixas
 ### Impulsionando
@@ -45,7 +99,8 @@ Sempre que um novo chat do projeto Impulsionando for iniciado, o ChatGPT deve ob
 - Rota correta de autenticacao: `/auth`; `/alth` e legado incorreto.
 - Remetente oficial: `sac@chrismed.com.br`.
 - Agenda, profissionais, pacientes, especialidades, eventos, pega-agenda, teleconsulta, pagamentos, carteira, gravacoes, comunicacao e dashboards devem ser homologados ponta a ponta.
-- Cadastro profissional deve carregar especialidades por profissao e permitir multiplas especialidades.
+- Dra. Christiane Alencar e medica e gestora. Politica de comunicacao de gestao: primaria `sac@chrismed.com.br`, copia gerencial `chrissalencar@yahoo.com.br`; conteudo clinico sensivel usa modo `metadata_only` na copia gerencial.
+- Worker `chrismed-communication-worker` v3 foi implantado com esta politica; falta homologacao controlada de recebimento end-to-end sem PII.
 
 ### WMP — Wagner Miller Producoes
 - Dominio oficial: `https://wmp.impulsionando.com.br`.
@@ -56,12 +111,13 @@ Sempre que um novo chat do projeto Impulsionando for iniciado, o ChatGPT deve ob
 - Por DJ: R$ 50 alimentacao + R$ 50 estacionamento; deduzir o que for fornecido diretamente pelo contratante.
 
 ### Marocas
-- Grafia tecnica encontrada no repositorio: `Marocas`.
 - Existem modulos para site, app, login, anfitriao, hospede, prestador, imoveis, planos, limpeza/manutencao, notificacoes e food service.
+- Reconciliacao de identidade/agent ainda pendente; nao inventar marca/agente.
 
 ### RioMed
 - Existem modulos para portal, vendedor, cotizacao, suporte, carrinho, checkout, aluguel, pacientes, IA, n8n e pos-venda.
 - Preservar foco em equipamentos medicos, venda, locacao e manutencao.
+- Backend legado ainda precisa trocar dependencias de `companies.subdomain` pela identidade Core.
 
 ### CP — Chat Privado
 - Nome oficial: `CP — Chat Privado`.
@@ -70,66 +126,59 @@ Sempre que um novo chat do projeto Impulsionando for iniciado, o ChatGPT deve ob
 - Retencao e exclusao sao configuraveis; exclusao definitiva exige confirmacao e e irreversivel.
 
 ## Impulsionito e agentes — estado real
-- Impulsionito: ativo, role `platform_orchestrator`, rota `/api/agents/omnichannel`.
-- Oliver/CHRISMED: ativo, rota `/api/agents/omnichannel`.
-- Milito/WMP: cadastro corrigido em 2026-08-14 para nome `Milito` e rota `/api/agents/omnichannel`.
-- A chave tecnica WMP ainda e `wmp-millito` e algumas rotas/nomes de arquivo internos usam `millito` por compatibilidade. Nao expor essa grafia ao usuario. Migracao tecnica futura deve ser coordenada para nao quebrar sessoes/ingestao.
-- Front WMP teve textos visiveis corrigidos para `Milito` no componente do chat.
+- Impulsionito: ativo, role `platform_orchestrator`.
+- Oliver/CHRISMED: ativo.
+- Milito/WMP: ativo; grafia visivel oficial `Milito`.
+- A chave tecnica WMP ainda pode usar `wmp-millito`/arquivos `millito` por compatibilidade. Nao expor essa grafia ao usuario.
+- Universal conversation protocol/export existe no banco (`20260815023718`), mas rotas server ainda precisam ser migradas integralmente para remover acoplamento WMP-only.
 
-## n8n — estado real verificado em producao
-- Inventario exportado diretamente do runtime em 2026-08-14: **31 workflows, 28 ativos**.
-- Core Impulsionando possui workflows ativos para captacao, conversao, relacionamento, onboarding e Impulsionito proativo.
-- CHRISMED possui `chrismedOutboxWorker01` ativo, webhook canônico `/webhook/chrismed-outbox-worker`, execution model `shared_outbox_worker`.
-- O registro `communication_automations` de `outbox-processor` foi sincronizado para ACTIVE e recebeu o ID/webhook reais em 2026-08-14.
-- Os demais workflows CHRISMED continuam READY/DRAFT sem webhook/ID. Nao ativa-los em massa; verificar primeiro se o evento deve ser atendido pelo worker/outbox compartilhado ou necessita orquestracao separada.
-- WMP `wmp_lead_intake` esta ACTIVE no workflow `wmpLeadIntake01`.
-- WMP `wmp_partner_intake` compartilha intencionalmente o mesmo workflow e webhook.
-- WMP `wmp_proposal_lifecycle`, `wmp_dj_booking_lifecycle` e `wmp_post_event_relationship` permanecem READY.
-- Backend WMP ja despacha `wmp.lead.received` e `wmp.partner.received`.
-- Em 2026-08-14, envio real de proposta passou a despachar `wmp.proposal.sent`; enquanto o lifecycle estiver READY, o dispatcher retorna inactive e nao chama webhook inexistente.
-- Existem 3 workflows inativos no runtime: duas versoes historicas duplicadas (lead-qualificado e pagamento-aprovado) e `My workflow`. Nao excluir sem validar ausencia de referencias.
-- Documento `docs/n8n/PENDENCIAS.md` foi reconciliado com o estado real em 2026-08-14 e nao deve ser substituido por versoes antigas.
+## n8n — estado consolidado anterior
+- Inventario exportado do runtime em 2026-08-14: 31 workflows, 28 ativos.
+- Core possui workflows ativos para captacao, conversao, relacionamento, onboarding e Impulsionito proativo.
+- CHRISMED possui worker/outbox compartilhado ativo; nao ativar workflows duplicados em massa.
+- WMP `wmp_lead_intake` ativo; partner intake compartilha intencionalmente o mesmo workflow.
+- WMP proposal/DJ/post-event lifecycle permanecem READY ate homologacao de eventos transacionais reais.
 
-## Seguranca — executado e pendencias
-- `.gitignore` atualizado para bloquear novos `.env` e variantes, preservando apenas arquivos `.example` seguros.
-- `.env`, `.env.development` e `.env.production` antigos ainda estao rastreados. O `.env` principal contem apenas configuracao publica do Supabase; os arquivos de environment de pagamento nao devem ser removidos ate o deploy passar a injetar o token por secret, para nao quebrar checkout.
-- Supabase Security Advisor mostra tabelas com RLS sem policy. Isso e deny-by-default para anon/authenticated; nao criar policy permissiva apenas para zerar advisor.
-- Funcoes SECURITY DEFINER devem ser classificadas caso a caso. Muitas possuem validacao interna ou precisam ser publicas para agenda/eventos; nao revogar em massa.
-- Tentativa automatizada de habilitar HaveIBeenPwned/leaked-password protection pela Management API retornou HTTP 402: recurso exige Supabase Pro ou superior. Registrar como dependencia comercial externa.
-- Extensao `btree_gist` permanece no schema public; avaliar migracao somente com analise de dependencias.
+## Pagamentos — bloqueio conhecido
+- `mpago-create-payment` e `mpago-webhook` estao implantados, mas `mpago_credentials` e `vault.secrets` estavam vazios na ultima auditoria.
+- RPC de configuracao de credenciais foi restaurada, mas isso nao restaura os segredos brutos antigos.
+- Nao declarar Mercado Pago/checkout CHRISMED ou Core homologado ate credenciais serem restauradas por canal seguro e PIX/webhook serem testados ponta a ponta.
+- Nunca pedir segredos para serem colados no chat.
 
-## Performance — executado e pendencias
-- Migration `add_wmp_fk_indexes_20260814` aplicada com sucesso, adicionando indices de cobertura das FKs operacionais WMP apontadas pelo Advisor.
-- Indice duplicado `idx_wmp_conversation_messages_export` removido, preservando `idx_communication_conversation_messages_thread`.
-- Advisor deixou de apontar FKs WMP sem indice e indice duplicado.
-- Permanecem warnings de RLS initplan e policies permissivas duplicadas. Otimizar preservando exatamente as regras de acesso.
-- Nao remover indices apenas porque aparecem como `unused` enquanto a plataforma entra em producao.
+## Seguranca — estado
+- `.gitignore` bloqueia novos `.env`; arquivos antigos rastreados ainda precisam de migracao segura de secrets antes de remover.
+- RLS sem policy em tabelas internas pode ser deny-by-default; nao criar policy permissiva so para zerar advisor.
+- SECURITY DEFINER deve ser auditada funcao a funcao.
+- `btree_gist` no schema public permanece pendente de analise de dependencia.
+- HIBP/leaked-password protection esta habilitado no Supabase Pro.
 
-## GitHub e legado
-- Repositorio ainda contem `.lovable` e dependencias Lovable; auditar antes de remover.
-- Deploy atual injeta secrets do Supabase via GitHub Secrets, mas nao injeta o token client-side de pagamento; por isso os environments rastreados ainda nao podem ser simplesmente apagados.
-- Nunca expor valores de secrets em documentacao, commits ou chat.
-- Workflows diagnosticos criados em 2026-08-14 sao somente leitura: `diagnose-tenant-origins.yml` e `diagnose-n8n-registry.yml`.
+## Riscos/pendencias estruturais ainda abertos
+- `support-pro.functions.ts` usa contrato antigo de `support_tickets`; reconciliar com colunas atuais (`ticket_code`, `category`, `source_channel`, etc.).
+- Billing plans: front Essencial/Ideal/Full e live `billing_plans` ESSENCIAL/PRO/ENTERPRISE/WHITE_LABEL ainda divergem; nao declarar billing/recorrencia funcional.
+- `omnichannel.server.ts` ainda precisa usar a tabela/funcoes universais de conversation ticket/export em todos os agentes.
+- RioMed ainda possui dependencia legada de `companies.subdomain`.
+- Marocas/RioMed precisam de reconciliacao front-back e selection-first especifica.
+- Public site deve remover qualquer afirmacao de `dados hospedados no Brasil` enquanto o Supabase estiver em us-east-2.
+- Talentos precisa de catalogo de ocupacoes/idiomas/formacao e CEP Core.
+- Catalogo WMP de modelos precisa enriquecimento continuo/curado; nao aceitar texto livre na tabela principal.
 
-## Commits relevantes desta execucao
-- `a28557b921e59cc84d39e64f5792251a301e7db7` — endurecimento do `.gitignore`.
-- `5c4a307d69fd974564fbc59d99299064fa0345d7` — diagnostico read-only de origem/Traefik/VPS.
-- `9573a72e92209e9b13670adb42bbb45955d2d73f` — diagnostico read-only do n8n.
-- `886deabbf1f9f84118f55868e095e34526ae33f5` — WMP passa a despachar evento de proposta enviada.
-- `0ed821be455d22ebd3e88884ddea359851f7c1a7` — nome visivel Milito corrigido no chat WMP.
-- `58fcf91ef90d4fc314b39449220b76c492c054d7` — documentacao n8n reconciliada.
-
-## Proximos blocos — continuar daqui
-1. Validar CI/deploy dos commits de codigo WMP acima e smoke test do front publicado.
-2. Auditar todos os pontos transacionais WMP para proposta aceita/assinada/ganha, DJ lifecycle e pos-evento antes de ativar workflows n8n.
-3. Auditar CHRISMED evento por evento para separar `outbox compartilhado` de `workflow n8n dedicado`; ativar somente automacoes reais.
-4. Resolver injecao segura do token client-side de pagamento no build via secret/config e somente depois remover `.env.production/.env.development` rastreados.
-5. Otimizar RLS initplan/policies permissivas sem alterar isolamento por empresa.
-6. Inventariar e migrar conteudo util do repo legado `raygsm/impulsionito`; excluir apenas depois de comprovada consolidacao.
-7. Continuar homologacao funcional de dashboards/rotas de Marocas, RioMed, CHRISMED, WMP e Core.
+## GitHub / CI — atencao
+- O conector GitHub apresentou leitura inconsistente/cacheada do HEAD do `main`: `fetch_file` mostra conteudo novo no branch, enquanto endpoint `/commits/main` ainda retornou `7ac5e32...` durante esta execucao.
+- Nao mover `main` manualmente/force enquanto essa inconsistencia nao for resolvida.
+- Tests Gate/DNS vistos para commit antigo nao homologam os commits novos deste checkpoint.
+- Antes de declarar deploy/homologacao, revalidar Actions/HEAD e smoke test do front publicado.
 
 ## Definicao de pronto
 Nenhum recurso e considerado pronto apenas porque arquivo/tabela existe. Exigir, quando aplicavel: build + lint + testes + persistencia real + auth/autorizacao + RLS + rotas + botoes + comunicacao + deploy + monitoramento.
+
+## Proximo checkpoint — continuar daqui
+1. Confirmar GitHub HEAD/Actions para o conteudo atual sem force update de branch.
+2. WMP: trocar lista visual hardcoded de tipo de evento pelo endpoint Core `wmp_event_types`.
+3. Talentos: criar catalogos canonicos e migrar CEP/cargo/idiomas/formacao sem perder upload/IA/curriculo.
+4. Nova varredura de ViaCEP/IBGE direto e de CPF/CNPJ/documentos em front/server/banco.
+5. Reconciliar support contract e universal conversation protocol.
+6. Continuar selection-first para CHRISMED, Impulsionando, Marocas e RioMed.
+7. Homologar cada bloco no front publicado; manter porcentagem de implementacao separada da homologacao.
 
 ## Regra operacional
 - Nao usar Codex.
