@@ -95,6 +95,11 @@ function MvpPage() {
 
     refresh();
 
+    const poll = window.setInterval(refresh, 5000);
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+
     let channel: any;
     try {
       channel = client
@@ -107,6 +112,9 @@ function MvpPage() {
 
     return () => {
       mounted = false;
+      window.clearInterval(poll);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
       if (channel) client.removeChannel(channel);
     };
   }, []);
@@ -122,7 +130,7 @@ function MvpPage() {
               <Badge className="border-0 bg-white/15 text-white"><Sparkles className="mr-1 h-3.5 w-3.5" /> Investor Room</Badge>
               <Badge className="border-0 bg-white/10 text-white">
                 {live ? <Radio className="mr-1 h-3.5 w-3.5" /> : <CircleDot className="mr-1 h-3.5 w-3.5" />}
-                {live ? "Atualização em tempo real" : "Conteúdo-base ativo"}
+                {live ? "Atualização em tempo real" : "Sincronização contínua"}
               </Badge>
             </div>
             <h1 className="mt-6 max-w-5xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
@@ -166,8 +174,8 @@ function MvpPage() {
         <section className="border-y border-border bg-muted/30">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
             <div className="grid gap-6 lg:grid-cols-3">
-              <Card className="p-6"><ShieldCheck className="h-5 w-5 text-primary" /><h3 className="mt-3 font-semibold">Governança de publicação</h3><p className="mt-2 text-sm text-muted-foreground">A página pública só deve consumir conteúdo marcado como publicado e aprovado para investidores. Conteúdo interno, dados sensíveis e segredos nunca entram neste feed.</p></Card>
-              <Card className="p-6"><Radio className="h-5 w-5 text-primary" /><h3 className="mt-3 font-semibold">Atualização viva</h3><p className="mt-2 text-sm text-muted-foreground">Quando uma seção aprovada muda no Core, o Realtime atualiza a página sem exigir reload ou novo deploy do front-end.</p></Card>
+              <Card className="p-6"><ShieldCheck className="h-5 w-5 text-primary" /><h3 className="mt-3 font-semibold">Governança de publicação</h3><p className="mt-2 text-sm text-muted-foreground">A página pública só consome conteúdo marcado como publicado e aprovado para investidores. Conteúdo interno, dados sensíveis e segredos nunca entram neste feed.</p></Card>
+              <Card className="p-6"><Radio className="h-5 w-5 text-primary" /><h3 className="mt-3 font-semibold">Atualização viva</h3><p className="mt-2 text-sm text-muted-foreground">A página tenta Realtime e mantém sincronização automática a cada 5 segundos como fallback, além de atualizar quando o navegador volta ao foco.</p></Card>
               <Card className="p-6"><Rocket className="h-5 w-5 text-primary" /><h3 className="mt-3 font-semibold">Narrativa evolutiva</h3><p className="mt-2 text-sm text-muted-foreground">O Impulsionito pode reorganizar e atualizar a narrativa conforme produto, integrações, status de homologação e modelo de negócio evoluem — sempre respeitando aprovação de publicação.</p></Card>
             </div>
             <div className="mt-6 text-xs text-muted-foreground">
