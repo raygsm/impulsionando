@@ -7,7 +7,7 @@ const modules = [
   { title: 'DJs e parceiros', description: 'Cadastros, aprovação, disponibilidade, convites e confirmações.', href: '/wmp/operacao?area=djs', icon: Headphones, enabled: true },
   { title: 'Equipamentos e locações', description: 'Catálogo, quantidade, valor de locação, proprietários e utilização.', href: '/wmp/operacao?area=equip', icon: Package, enabled: true },
   { title: 'Financeiro e repasses', description: 'Locações, beneficiários, valores e acompanhamento de repasses.', href: '/wmp/operacao?area=finance', icon: WalletCards, enabled: true },
-  { title: 'Millito', description: 'Conversas encerradas, protocolos, elegibilidade e exportações.', href: '/wmp/operacao?area=millito', icon: Sparkles, enabled: true },
+  { title: 'Milito', description: 'Conversas encerradas, protocolos, elegibilidade e exportações.', href: '/wmp/operacao?area=millito', icon: Sparkles, enabled: true },
   { title: 'Automações e jornadas', description: 'Comunicação de leads, propostas, equipe e pós-evento.', icon: Workflow, enabled: false },
   { title: 'Configurações', description: 'Dados da WMP, permissões, integrações e parâmetros operacionais.', icon: Settings, enabled: false },
 ] as const
