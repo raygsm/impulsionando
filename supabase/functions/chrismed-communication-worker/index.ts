@@ -30,6 +30,23 @@ const TEMPLATE_MAP: Record<string, string> = {
   pega_agenda_claimed_professional: "pega_agenda.claimed",
 };
 
+const SENSITIVE_EVENT_PREFIXES = ["appointment_", "payment_", "pega_agenda_"];
+const SENSITIVE_EVENT_CODES = new Set([
+  "appointment_created",
+  "appointment_confirmed",
+  "appointment_rescheduled",
+  "appointment_reminder_72h",
+  "appointment_reminder_24h",
+  "appointment_reminder_2h",
+  "appointment_cancelled",
+  "appointment_completed",
+  "appointment_no_show",
+  "payment_pending",
+  "pega_agenda_offer",
+  "pega_agenda_claimed",
+  "pega_agenda_claimed_professional",
+]);
+
 const required = (name: string) => { const value = Deno.env.get(name)?.trim(); if (!value) throw new Error(`missing_secret:${name}`); return value; };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
@@ -38,6 +55,11 @@ const render = (template: string, vars: Record<string, unknown>, html = false) =
 const fmtDate = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" }).format(d); };
 const fmtTime = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); };
 const fmtDateTime = (iso: unknown) => { const d = fmtDate(iso); const t = fmtTime(iso); return [d,t].filter(Boolean).join(" às "); };
+const isSensitiveEvent = (code: string) => SENSITIVE_EVENT_CODES.has(code) || SENSITIVE_EVENT_PREFIXES.some((prefix) => code.startsWith(prefix));
+const parseEmailList = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.map((v) => String(v ?? "").trim().toLowerCase()).filter((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+};
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -48,8 +70,26 @@ Deno.serve(async (req: Request) => {
   const db = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false } });
   const transporter = nodemailer.createTransport({ host: "smtp.hostinger.com", port: 465, secure: true, auth: { user: smtpUser, pass: smtpPassword }, connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 20_000 });
 
-  const { data: tenant, error: tenantError } = await db.from("communication_tenants").select("id").eq("slug", "chrismed").eq("active", true).maybeSingle();
+  const { data: tenant, error: tenantError } = await db.from("communication_tenants").select("id,company_id").eq("slug", "chrismed").eq("active", true).maybeSingle();
   if (tenantError || !tenant) return json({ error: "chrismed_tenant_unavailable" }, 503);
+
+  let managementPrimary = "sac@chrismed.com.br";
+  let managementCopies = ["chrissalencar@yahoo.com.br"];
+  let clinicalSensitiveMode = "metadata_only";
+  if (tenant.company_id) {
+    const { data: settings } = await db.from("company_settings")
+      .select("key,value")
+      .eq("company_id", tenant.company_id)
+      .in("key", ["comms.management_primary_email", "comms.management_copy_emails", "comms.management_copy_policy"]);
+    for (const row of settings ?? []) {
+      if (row.key === "comms.management_primary_email") managementPrimary = scalar(row.value).replace(/^"|"$/g, "") || managementPrimary;
+      if (row.key === "comms.management_copy_emails") managementCopies = parseEmailList(row.value).length ? parseEmailList(row.value) : managementCopies;
+      if (row.key === "comms.management_copy_policy" && row.value && typeof row.value === "object" && !Array.isArray(row.value)) {
+        clinicalSensitiveMode = scalar((row.value as Record<string, unknown>).clinical_sensitive_mode) || clinicalSensitiveMode;
+      }
+    }
+  }
+
   const { data: claimed, error: claimError } = await db.rpc("chrismed_claim_communication_outbox", { p_batch_size: 25 });
   if (claimError) return json({ error: "outbox_claim_failed" }, 500);
 
@@ -106,7 +146,20 @@ Deno.serve(async (req: Request) => {
       const text = render(version.text_template, vars);
       const htmlBody = render(version.html_template, vars, true);
       const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eef4f3;font-family:Arial,Helvetica,sans-serif;color:#173a39"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fff;border:1px solid #d8e5e3;border-radius:18px"><tr><td style="height:7px;background:#006b68"></td></tr><tr><td style="padding:28px 32px 8px;font-size:26px;font-weight:800;color:#006b68">CHRISMED</td></tr><tr><td style="padding:16px 32px 30px;font-size:16px;line-height:1.65;color:#385654">${htmlBody}</td></tr><tr><td style="padding:20px 32px;background:#f7faf9;border-top:1px solid #e1eae9;font-size:12px;color:#627775">Precisa de ajuda? sac@chrismed.com.br<br>Mensagem transacional automática da CHRISMED.</td></tr></table></td></tr></table></body></html>`;
+
       await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: row.recipient, replyTo: row.reply_to_email || "sac@chrismed.com.br", subject, text, html });
+
+      const copyRecipients = Array.from(new Set(managementCopies.map((e) => e.toLowerCase()))).filter((e) => e && e !== row.recipient.toLowerCase());
+      if (copyRecipients.length) {
+        if (isSensitiveEvent(code) && clinicalSensitiveMode === "metadata_only") {
+          const mgmtSubject = `[CHRISMED · Cópia gerencial] ${code}`;
+          const mgmtText = `Uma comunicação CHRISMED foi processada.\n\nEvento: ${code}\nData/hora: ${new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "medium" }).format(new Date())}\nStatus: enviada ao destinatário original\nReferência operacional: ${row.id}\n\nPor política de minimização de dados, esta cópia gerencial não replica conteúdo assistencial sensível. Consulte o ambiente autenticado da CHRISMED para detalhes.`;
+          await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: managementPrimary, cc: copyRecipients, replyTo: "sac@chrismed.com.br", subject: mgmtSubject, text: mgmtText });
+        } else {
+          await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: managementPrimary, cc: copyRecipients, replyTo: "sac@chrismed.com.br", subject: `[CHRISMED · Cópia gerencial] ${subject}`, text, html });
+        }
+      }
+
       const { error: sentError } = await db.from("chrismed_communication_outbox").update({ status: "sent", sent_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString() }).eq("id", row.id).eq("status", "processing");
       if (sentError) throw new Error("outbox_finalize_sent_failed");
       sent += 1;
