@@ -15,6 +15,9 @@ function start(command, args, label) {
     if (!stopping && label === 'pulsonitor' && code && code !== 0) {
       console.error(`[Core Runtime] Pulsonitor exited code=${code}; web remains available.`);
     }
+    if (!stopping && label === 'colors-automation' && code && code !== 0) {
+      console.error(`[Core Runtime] Colors Automation exited code=${code}; web remains available.`);
+    }
   });
   return child;
 }
@@ -35,6 +38,10 @@ if (process.env.PULSONITOR_ENABLED === 'true') {
   start(process.execPath, ['scripts/pulsonitor-worker.mjs'], 'pulsonitor');
 } else {
   console.log('[Core Runtime] Pulsonitor disabled; web runtime starting normally.');
+}
+
+if (process.env.COLORS_AUTOMATION_ENABLED !== 'false') {
+  start(process.execPath, ['scripts/colors-automation-worker.mjs'], 'colors-automation');
 }
 
 start(process.execPath, ['.output/server/index.mjs'], 'web');
