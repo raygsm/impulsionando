@@ -1,268 +1,50 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import {
-  listSubscriptions,
-  cancelSubscriptionAdmin,
-  openCustomerPortalAdmin,
-  getBillingStats,
-} from "@/lib/billing-admin.functions";
-import { PageHeader, StatCard } from "@/components/app/PageElements";
+import { ArrowRight, CalendarDays, CreditCard, FileClock, Receipt, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  CreditCard,
-  CheckCircle2,
-  AlertTriangle,
-  Ban,
-  ExternalLink,
-} from "lucide-react";
-import { toast } from "sonner";
+import { getCanonicalBillingAdmin } from "@/lib/canonical-billing.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/billing")({
-  head: () => ({ meta: [{ title: "Billing — Impulsionando Tecnologia" }] }),
-  component: AdminBillingPage,
+  head: () => ({ meta: [{ title: "Planos & Cobrança — Impulsionando" }, { name: "robots", content: "noindex" }] }),
+  component: BillingCockpit,
 });
 
-const STATUS_LABELS: Record<string, string> = {
-  active: "Ativa",
-  trialing: "Em trial",
-  past_due: "Em atraso",
-  paused: "Pausada",
-  canceled: "Cancelada",
-};
+function money(v: unknown) { return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+function date(v?: string | null) { return v ? new Date(`${v}T12:00:00`).toLocaleDateString("pt-BR") : "—"; }
 
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  active: "default",
-  trialing: "secondary",
-  past_due: "destructive",
-  paused: "outline",
-  canceled: "outline",
-};
-
-function fmtDate(d?: string | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("pt-BR");
-}
-
-function AdminBillingPage() {
-  const qc = useQueryClient();
-  const listFn = useServerFn(listSubscriptions);
-  const statsFn = useServerFn(getBillingStats);
-  const cancelFn = useServerFn(cancelSubscriptionAdmin);
-  const portalFn = useServerFn(openCustomerPortalAdmin);
-
-  const [statusFilter, setStatusFilter] = useState("");
-  const [envFilter, setEnvFilter] = useState("");
-  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
-
-  const { data: list, isLoading } = useQuery({
-    queryKey: ["admin-subscriptions", statusFilter, envFilter],
-    queryFn: () =>
-      listFn({
-        data: {
-          status: statusFilter || undefined,
-          environment: envFilter || undefined,
-        },
-      }),
-  });
-  const { data: stats } = useQuery({
-    queryKey: ["admin-billing-stats"],
-    queryFn: () => statsFn(),
-  });
-
-  const refetch = () => {
-    qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
-    qc.invalidateQueries({ queryKey: ["admin-billing-stats"] });
-  };
-
-  const mCancel = useMutation({
-    mutationFn: (vars: { id: string; effectiveFrom: "immediately" | "next_billing_period" }) =>
-      cancelFn({ data: { subscriptionId: vars.id, effectiveFrom: vars.effectiveFrom } }),
-    onSuccess: () => {
-      toast.success("Assinatura cancelada");
-      setCancelTarget(null);
-      refetch();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const mPortal = useMutation({
-    mutationFn: (id: string) => portalFn({ data: { subscriptionId: id } }),
-    onSuccess: (res) => {
-      const url =
-        res.subscriptionUrls?.[0]?.cancelSubscription ??
-        res.subscriptionUrls?.[0]?.updateSubscriptionPaymentMethod ??
-        res.overviewUrl;
-      if (url) window.open(url, "_blank");
-      else toast.error("Portal indisponível");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+function BillingCockpit() {
+  const load = useServerFn(getCanonicalBillingAdmin);
+  const { data, isLoading, error, refetch, isFetching } = useQuery({ queryKey: ["canonical-billing-admin"], queryFn: () => load() });
+  const contracts: any[] = data?.contracts ?? [];
+  const companies = new Map((data?.companies ?? []).map((x: any) => [x.id,x]));
+  const plans = new Map((data?.plans ?? []).map((x: any) => [x.id,x]));
+  const invoices: any[] = data?.invoices ?? [];
+  const requests: any[] = data?.requests ?? [];
+  const openInvoices = invoices.filter((x) => ["open","overdue"].includes(x.status));
+  const active = contracts.filter((x) => x.status === "active").length;
+  const mrr = contracts.filter((x) => x.status === "active").reduce((s,x)=>s+Number(x.recurring_amount||0),0);
+  const pendingChanges = requests.filter((x)=>["awaiting_acceptance","accepted"].includes(x.status));
 
   return (
-    <div>
-      <PageHeader
-        title="Billing das assinaturas"
-        description="Visão e administração das assinaturas dos clientes vinculados."
-      />
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <StatCard label="Total" value={stats?.total ?? 0} icon={CreditCard} accent />
-        <StatCard label="Live" value={stats?.liveTotal ?? 0} icon={CreditCard} />
-        <StatCard label="Ativas (live)" value={stats?.active ?? 0} icon={CheckCircle2} />
-        <StatCard label="Em atraso" value={stats?.pastDue ?? 0} icon={AlertTriangle} />
-        <StatCard label="Canceladas" value={stats?.canceled ?? 0} icon={Ban} />
-      </div>
-
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <Button size="sm" variant={statusFilter === "" ? "default" : "outline"} onClick={() => setStatusFilter("")}>
-          Todas
-        </Button>
-        {Object.entries(STATUS_LABELS).map(([k, v]) => (
-          <Button
-            key={k}
-            size="sm"
-            variant={statusFilter === k ? "default" : "outline"}
-            onClick={() => setStatusFilter(k)}
-          >
-            {v}
-          </Button>
-        ))}
-        <div className="ml-auto flex gap-2">
-          <Button size="sm" variant={envFilter === "" ? "default" : "outline"} onClick={() => setEnvFilter("")}>
-            Todos ambientes
-          </Button>
-          <Button size="sm" variant={envFilter === "live" ? "default" : "outline"} onClick={() => setEnvFilter("live")}>
-            Live
-          </Button>
-          <Button size="sm" variant={envFilter === "sandbox" ? "default" : "outline"} onClick={() => setEnvFilter("sandbox")}>
-            Test
-          </Button>
+    <div className="space-y-5">
+      <PageHeader title="Planos & Cobrança" description="Fonte operacional única para contratos, vencimentos no dia 5, faturas, setup e alterações de plano. O legado Paddle não é mais a fonte de gestão do Core." />
+      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>refetch()} disabled={isFetching}><RefreshCw className={isFetching?"mr-2 h-4 w-4 animate-spin":"mr-2 h-4 w-4"}/>Atualizar</Button><Button asChild variant="outline"><Link to="/core/planos">Gerenciar catálogo</Link></Button><Button asChild variant="outline"><Link to="/admin/billing-policy">Régua de cobrança</Link></Button></div>
+      {isLoading ? <Card className="p-6">Carregando…</Card> : error ? <Card className="p-6 text-destructive">{(error as Error).message}</Card> : <>
+        <div className="grid gap-3 md:grid-cols-4">
+          <Card className="p-4"><CreditCard className="h-4 w-4 text-primary"/><div className="mt-2 text-xs text-muted-foreground">Contratos ativos</div><div className="text-2xl font-bold">{active}</div></Card>
+          <Card className="p-4"><Receipt className="h-4 w-4 text-primary"/><div className="mt-2 text-xs text-muted-foreground">MRR contratado</div><div className="text-2xl font-bold">{money(mrr)}</div></Card>
+          <Card className="p-4"><CalendarDays className="h-4 w-4 text-primary"/><div className="mt-2 text-xs text-muted-foreground">Faturas abertas/atrasadas</div><div className="text-2xl font-bold">{openInvoices.length}</div></Card>
+          <Card className="p-4"><FileClock className="h-4 w-4 text-primary"/><div className="mt-2 text-xs text-muted-foreground">Mudanças pendentes</div><div className="text-2xl font-bold">{pendingChanges.length}</div></Card>
         </div>
-      </div>
 
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr className="text-left">
-                <th className="p-3">Cliente</th>
-                <th className="p-3">Plano</th>
-                <th className="p-3">Ciclo</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Período atual</th>
-                <th className="p-3">Ambiente</th>
-                <th className="p-3 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Carregando…</td></tr>
-              )}
-              {!isLoading && (list?.items?.length ?? 0) === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Nenhuma assinatura encontrada.</td></tr>
-              )}
-              {(list?.items ?? []).map((s: any) => (
-                <tr key={s.id} className="border-t">
-                  <td className="p-3">
-                    <div className="font-medium">{s.user_name ?? "—"}</div>
-                    <div className="text-xs text-muted-foreground">{s.user_email ?? s.user_id}</div>
-                  </td>
-                  <td className="p-3">{s.planLabel}</td>
-                  <td className="p-3 capitalize">{s.cycleLabel}</td>
-                  <td className="p-3">
-                    <Badge variant={STATUS_VARIANT[s.status] ?? "outline"}>
-                      {STATUS_LABELS[s.status] ?? s.status}
-                    </Badge>
-                    {s.cancel_at_period_end && (
-                      <div className="text-xs text-muted-foreground mt-1">Cancela no fim do período</div>
-                    )}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {fmtDate(s.current_period_start)} → {fmtDate(s.current_period_end)}
-                  </td>
-                  <td className="p-3">
-                    <Badge variant={s.environment === "live" ? "default" : "outline"}>
-                      {s.environment === "live" ? "Live" : "Test"}
-                    </Badge>
-                  </td>
-                  <td className="p-3 text-right whitespace-nowrap">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => mPortal.mutate(s.id)}
-                      disabled={mPortal.isPending}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Portal
-                    </Button>
-                    {s.status !== "canceled" && (
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="ml-2"
-                        onClick={() => setCancelTarget(s)}
-                      >
-                        Cancelar
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+        <Card className="overflow-hidden"><div className="border-b p-4"><h2 className="font-semibold">Contratos</h2><p className="text-sm text-muted-foreground">Plano vigente, setup, mensalidade e próximo dia 5 por cliente.</p></div><div className="divide-y">{contracts.length===0?<div className="p-6 text-sm text-muted-foreground">Nenhum contrato canônico criado ainda.</div>:contracts.map((ct:any)=>{const company:any=companies.get(ct.company_id);const plan:any=plans.get(ct.plan_id);return <div key={ct.id} className="grid gap-3 p-4 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto] md:items-center"><div><div className="font-medium">{company?.name??ct.company_id}</div><div className="text-xs text-muted-foreground">{company?.email??"Sem e-mail"}</div></div><div><div className="text-xs text-muted-foreground">Plano</div><div className="font-medium">{plan?.name??"—"}</div></div><div><div className="text-xs text-muted-foreground">Mensalidade</div><div className="font-medium">{money(ct.recurring_amount)}</div></div><div><div className="text-xs text-muted-foreground">Próximo vencimento</div><div className="font-medium">{date(ct.next_due_date)} <span className="text-xs text-muted-foreground">(dia {ct.due_day})</span></div></div><div className="flex items-center gap-2"><Badge variant={ct.status==="active"?"default":"outline"}>{ct.status}</Badge><Button asChild size="sm" variant="ghost"><Link to="/core/cliente/$id" params={{id:ct.company_id}}>Cliente <ArrowRight className="ml-1 h-3 w-3"/></Link></Button></div></div>})}</div></Card>
 
-      <Dialog open={!!cancelTarget} onOpenChange={(o) => !o && setCancelTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cancelar assinatura</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <p>
-              Cliente: <strong>{cancelTarget?.user_email ?? cancelTarget?.user_id}</strong>
-            </p>
-            <p>
-              Plano: <strong>{cancelTarget?.planLabel} ({cancelTarget?.cycleLabel})</strong>
-            </p>
-            <p className="text-muted-foreground">
-              Conforme política definida, o cancelamento padrão é imediato e suspende o acesso.
-            </p>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                cancelTarget &&
-                mCancel.mutate({ id: cancelTarget.id, effectiveFrom: "next_billing_period" })
-              }
-              disabled={mCancel.isPending}
-            >
-              Ao fim do período
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() =>
-                cancelTarget && mCancel.mutate({ id: cancelTarget.id, effectiveFrom: "immediately" })
-              }
-              disabled={mCancel.isPending}
-            >
-              Cancelar agora
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Card className="overflow-hidden"><div className="border-b p-4"><h2 className="font-semibold">Alterações de plano</h2><p className="text-sm text-muted-foreground">Upgrade e downgrade com cálculo proporcional, aceite e liquidação auditável.</p></div><div className="divide-y">{requests.length===0?<div className="p-6 text-sm text-muted-foreground">Nenhuma alteração registrada.</div>:requests.map((r:any)=>{const company:any=companies.get(r.company_id);const from:any=plans.get(r.current_plan_id);const to:any=plans.get(r.new_plan_id);return <div key={r.id} className="grid gap-2 p-4 md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] md:items-center"><div><div className="font-medium">{company?.name??r.company_id}</div><div className="text-xs text-muted-foreground capitalize">{r.direction} · {from?.name??"—"} → {to?.name??"—"}</div></div><div><div className="text-xs text-muted-foreground">Cobrança proporcional</div><div>{money(r.prorata_charge)}</div></div><div><div className="text-xs text-muted-foreground">Crédito proporcional</div><div>{money(r.prorata_credit)}</div></div><div><div className="text-xs text-muted-foreground">Solicitado</div><div>{new Date(r.requested_at).toLocaleDateString("pt-BR")}</div></div><Badge variant="outline">{r.status}</Badge></div>})}</div></Card>
+      </>}
     </div>
   );
 }
