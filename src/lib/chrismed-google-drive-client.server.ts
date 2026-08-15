@@ -16,6 +16,14 @@ type DriveFile = {
   trashed?: boolean;
 };
 
+type InstitutionalKnowledgeHit = {
+  driveFileId: string;
+  fileName: string;
+  documentType: string;
+  modifiedTime: string | null;
+  content?: string;
+};
+
 function requiredEnv(name: 'GOOGLE_DRIVE_CLIENT_ID' | 'GOOGLE_DRIVE_CLIENT_SECRET') {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`missing_${name.toLowerCase()}`);
@@ -139,6 +147,79 @@ export async function fetchChrismedDriveFileContent(driveFileId: string) {
   if (bytes.byteLength > 15 * 1024 * 1024) throw new Error('drive_file_too_large_for_context');
   await (supabaseAdmin as any).from('client_drive_audit_log').insert({ company_id: CHRISMED_COMPANY_ID, drive_document_id: doc.id, actor_type: 'oliver', action: 'document_read_for_context', result: 'success', metadata: { drive_file_id: driveFileId, file_name: doc.file_name, release_policy: doc.release_policy } });
   return { document: doc, contentType, bytes };
+}
+
+function knowledgeTerms(query: string) {
+  return Array.from(new Set(query.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter((term) => term.length >= 4))).slice(0, 8);
+}
+
+/**
+ * Busca segura para o chat público do Oliver.
+ * Nunca inclui documentos clínicos, notas fiscais, laudos individuais ou qualquer
+ * arquivo associado a CPF/CNPJ/titular. Conteúdo bruto não é retornado ao browser.
+ */
+export async function searchChrismedInstitutionalDriveKnowledge(query: string, limit = 4): Promise<InstitutionalKnowledgeHit[]> {
+  const terms = knowledgeTerms(query);
+  if (!terms.length) return [];
+  const safeLimit = Math.min(Math.max(limit, 1), 6);
+
+  let request = (supabaseAdmin as any)
+    .from('client_drive_documents')
+    .select('drive_file_id,file_name,mime_type,document_type,modified_time,party_document,party_name,release_policy,status')
+    .eq('company_id', CHRISMED_COMPANY_ID)
+    .eq('status', 'indexed')
+    .is('party_document', null)
+    .is('party_name', null)
+    .in('document_type', ['document','contract','term'])
+    .order('modified_time', { ascending: false })
+    .limit(30);
+
+  const { data, error } = await request;
+  if (error) throw new Error(`drive_knowledge_search_failed:${error.message}`);
+
+  const candidates = ((data ?? []) as Array<any>)
+    .map((doc) => {
+      const haystack = `${doc.file_name ?? ''} ${doc.document_type ?? ''}`.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const score = terms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
+      return { doc, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, safeLimit);
+
+  const hits: InstitutionalKnowledgeHit[] = [];
+  for (const { doc } of candidates) {
+    const hit: InstitutionalKnowledgeHit = {
+      driveFileId: String(doc.drive_file_id),
+      fileName: String(doc.file_name ?? 'Documento institucional'),
+      documentType: String(doc.document_type ?? 'document'),
+      modifiedTime: doc.modified_time ?? null,
+    };
+    const textReadable = ['application/vnd.google-apps.document','application/vnd.google-apps.spreadsheet','application/vnd.google-apps.presentation','text/plain','text/csv','text/markdown'].includes(String(doc.mime_type));
+    if (textReadable) {
+      try {
+        const file = await fetchChrismedDriveFileContent(hit.driveFileId);
+        if (file.contentType.startsWith('text/') || String(doc.mime_type).startsWith('application/vnd.google-apps.')) {
+          const decoded = new TextDecoder('utf-8', { fatal: false }).decode(file.bytes);
+          hit.content = decoded.replace(/\u0000/g, '').slice(0, 6000);
+        }
+      } catch (error) {
+        console.error('[CHRISMED Drive knowledge read] metadata-only fallback', error);
+      }
+    }
+    hits.push(hit);
+  }
+
+  if (hits.length) {
+    await (supabaseAdmin as any).from('client_drive_audit_log').insert({
+      company_id: CHRISMED_COMPANY_ID,
+      actor_type: 'oliver',
+      action: 'institutional_knowledge_search',
+      result: 'success',
+      metadata: { terms, result_count: hits.length, public_chat_safe_filter: true },
+    });
+  }
+  return hits;
 }
 
 export { CHRISMED_COMPANY_ID };
