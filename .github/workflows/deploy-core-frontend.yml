@@ -233,10 +233,14 @@ jobs:
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed.html
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agendar >/tmp/chrismed-agendar.html
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/eventos >/tmp/chrismed-eventos.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/evento-convite >/tmp/chrismed-evento-convite.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/evento-credencial >/tmp/chrismed-evento-credencial.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
           grep -qi "CHRISMED" /tmp/chrismed.html
           grep -qi "Agendar consulta" /tmp/chrismed-agendar.html
           grep -qi "Eventos" /tmp/chrismed-eventos.html
+          grep -qi "Convite inválido" /tmp/chrismed-evento-convite.html
+          grep -qi "Credencial indisponível" /tmp/chrismed-evento-credencial.html
 
       - name: Roll back failed release
         if: failure()
