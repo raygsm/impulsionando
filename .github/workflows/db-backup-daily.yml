@@ -4,6 +4,7 @@ name: Daily Encrypted DB Backup → VPS
 # Retenção: diários 30d, semanais 12, mensais 12.
 # Usa Session Pooler IPv4 quando a conexão direta do Supabase não é
 # alcançável pelo runner GitHub (a conexão direta pode resolver somente IPv6).
+# Mudanças neste próprio workflow disparam um teste imediato.
 #
 # Secrets:
 #   SUPABASE_DB_URL          conexão direta atual (obrigatória como fonte da senha)
@@ -12,6 +13,10 @@ name: Daily Encrypted DB Backup → VPS
 #   VPS_HOST / VPS_USER / VPS_SSH_KEY / VPS_PORT
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/db-backup-daily.yml"
   schedule:
     - cron: "30 3 * * *"
   workflow_dispatch:
