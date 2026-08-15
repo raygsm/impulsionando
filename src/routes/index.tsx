@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
+import { AnaMaduHome } from "@/components/anamadu/AnaMaduHome";
+import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { useEffect } from "react";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
@@ -14,6 +16,7 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   riomed: "/riomed",
   wmp: "/wmp",
   garrido: "/garrido",
+  anamadu: "/anamadu",
   // Sem landing dedicada → vitrine pública do tenant
   impulsity: "/vitrine/impulsity",
   dqa: "/vitrine/dqa-panini",
@@ -22,16 +25,12 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   "impulsionando-brasil": "/vitrine/impulsionando-brasil",
 };
 
-
 // Domínios de clientes (white-label) → rota dedicada.
 const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
-  // Alias Lovable do tenant Colors — resolve para a landing quando o
-  // domínio estiver conectado a este projeto Core.
   "colors.impulsionando.lovable.app": "/colors",
   "colorsaude.lovable.app": "/colors",
-  "colorssaude.lovable.app": "/colors",
 };
 
 export const Route = createFileRoute("/")({
@@ -49,16 +48,14 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeWithSubdomainGuard() {
-  if (
-    typeof window !== "undefined" &&
-    window.location.hostname.toLowerCase() === "chrismed.impulsionando.com.br"
-  ) {
-    return (
-      <>
-        <ChrismedRootMetadata />
-        <ChrismedHomePage />
-      </>
-    );
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "chrismed.impulsionando.com.br") {
+      return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
+    }
+    if (host === "anamadu.impulsionando.com.br") {
+      return <><AnaMaduRootMetadata /><AnaMaduHome /><AnitaDock /></>;
+    }
   }
   return <HomePage />;
 }
@@ -67,17 +64,22 @@ function ChrismedRootMetadata() {
   useEffect(() => {
     const canonicalUrl = "https://chrismed.impulsionando.com.br/";
     document.title = "CHRISMED — Medicina privada com a Dra. Christiane Alencar";
-
-    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    canonical?.setAttribute("href", canonicalUrl);
-
-    const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
-    ogUrl?.setAttribute("content", canonicalUrl);
-
-    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
-    ogTitle?.setAttribute("content", "CHRISMED — Dra. Christiane Alencar");
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "CHRISMED — Dra. Christiane Alencar");
   }, []);
+  return null;
+}
 
+function AnaMaduRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://anamadu.impulsionando.com.br/";
+    document.title = "Ana Madú — Acessórios e joias autorais com pedras naturais";
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "Ana Madú — Pedras naturais, peças autorais e Ourives");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Peças autorais Ana Madú com pedras naturais, coleções, presentes e projetos personalizados Ourives com atendimento da Anita.");
+  }, []);
   return null;
 }
 
