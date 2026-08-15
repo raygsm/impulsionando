@@ -11,6 +11,7 @@ import {
   Bell,
   CalendarClock,
   CheckCircle2,
+  ClipboardList,
   Clock,
   MonitorSmartphone,
   ShieldCheck,
@@ -207,7 +208,7 @@ function AgendaProfissionalPage() {
       <header className="space-y-1">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#078f8b]">Portal do Profissional da Saúde</p>
         <h1 className="text-3xl font-bold tracking-tight">Sua agenda CHRISMED</h1>
-        <p className="text-muted-foreground">Atendimentos, teleconsultas, carteira e oportunidades do Pega Agenda em um só lugar.</p>
+        <p className="text-muted-foreground">Atendimentos, prontuários, teleconsultas, carteira e oportunidades do Pega Agenda em um só lugar.</p>
       </header>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -237,7 +238,7 @@ function AgendaProfissionalPage() {
       </div>
 
       <section className="space-y-3">
-        <div><h2 className="text-xl font-semibold">Próximos atendimentos</h2><p className="text-sm text-muted-foreground">Teleconsultas liberam a sala para você 3 minutos antes do horário.</p></div>
+        <div><h2 className="text-xl font-semibold">Próximos atendimentos</h2><p className="text-sm text-muted-foreground">Abra o prontuário a partir do atendimento. Teleconsultas liberam a sala 3 minutos antes do horário.</p></div>
         {upcoming.length === 0 ? (
           <Card><CardContent className="py-10 text-center text-muted-foreground">Nenhum atendimento próximo.</CardContent></Card>
         ) : (
@@ -247,6 +248,7 @@ function AgendaProfissionalPage() {
               const delta = start - now;
               const isTele = appointment.modality === "telemedicina" || appointment.modality === "teleconsulta";
               const canEnter = isTele && delta <= 3 * 60_000;
+              const canOpenRecord = ["confirmed", "completed", "in_progress"].includes(appointment.status);
               return (
                 <Card key={appointment.appointment_id} className={canEnter ? "border-[#078f8b]/40 shadow-sm" : ""}>
                   <CardContent className="space-y-3 pt-6">
@@ -263,11 +265,18 @@ function AgendaProfissionalPage() {
                         {delta > 3 * 60_000 ? `Sala disponível em ${Math.ceil((delta - 3 * 60_000) / 60_000)} min.` : delta > 0 ? "Sala liberada. Entre agora e aguarde o paciente." : "Consulta em andamento. Se ainda não entrou, acesse imediatamente."}
                       </div>
                     )}
-                    {canEnter && (
-                      <Link to="/chrismed/teleconsulta/$appointmentId" params={{ appointmentId: appointment.appointment_id }}>
-                        <Button className="w-full"><MonitorSmartphone className="mr-2 h-4 w-4" /> Entrar na sala CHRISMED</Button>
-                      </Link>
-                    )}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {canOpenRecord && (
+                        <Link to="/chrismed/profissional/prontuario/$appointmentId" params={{ appointmentId: appointment.appointment_id }}>
+                          <Button variant="outline" className="w-full"><ClipboardList className="mr-2 h-4 w-4" /> Prontuário</Button>
+                        </Link>
+                      )}
+                      {canEnter && (
+                        <Link to="/chrismed/teleconsulta/$appointmentId" params={{ appointmentId: appointment.appointment_id }}>
+                          <Button className="w-full"><MonitorSmartphone className="mr-2 h-4 w-4" /> Entrar na sala</Button>
+                        </Link>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
