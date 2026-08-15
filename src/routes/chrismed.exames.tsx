@@ -7,10 +7,10 @@ import { FlaskConical, Droplets, HeartPulse, Camera, ClipboardCheck, AlarmClock,
 export const Route = createFileRoute('/chrismed/exames')({
   head: () => ({
     meta: [
-      { title: 'Exames e preparo — CrisMed' },
-      { name: 'description', content: 'Solicitação, coleta domiciliar e preparo para exames laboratoriais e de imagem via rede parceira CrisMed. Confira orientações antes da coleta.' },
-      { property: 'og:title', content: 'Exames · CrisMed' },
-      { property: 'og:description', content: 'Exames laboratoriais, imagem e cardiológicos com rede parceira e orientações de preparo.' },
+      { title: 'Exames e preparo — CHRISMED' },
+      { name: 'description', content: 'Orientações CHRISMED sobre solicitação e preparo de exames laboratoriais, cardiológicos e de imagem, conforme indicação médica.' },
+      { property: 'og:title', content: 'Exames · CHRISMED' },
+      { property: 'og:description', content: 'Orientações de solicitação e preparo de exames conforme avaliação médica.' },
     ],
   }),
   component: ExamesPage,
@@ -29,10 +29,10 @@ function ExamesPage() {
           <h1 className="chrismed-serif text-4xl md:text-6xl text-[var(--chrismed-ink)] leading-[1.05] max-w-3xl">{t.title}</h1>
           <p className="mt-6 text-lg text-[var(--chrismed-graphite)] max-w-2xl">{t.lead}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
+            <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-forest)] text-[var(--chrismed-ivory)]">
               <Link to="/chrismed/agendar">{t.cta1}</Link>
             </Button>
-            <Button asChild variant="outline" className="border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-bone)]">
+            <Button asChild variant="outline" className="border-[var(--chrismed-forest)] bg-white text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-forest-mist)]">
               <Link to="/chrismed/contato">{t.cta2}</Link>
             </Button>
           </div>
@@ -45,7 +45,7 @@ function ExamesPage() {
           return (
             <article key={c.title} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
               <div className="h-11 w-11 rounded-full bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center">
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" aria-hidden="true" />
               </div>
               <h3 className="mt-4 chrismed-serif text-lg text-[var(--chrismed-ink)]">{c.title}</h3>
               <p className="mt-2 text-sm text-[var(--chrismed-graphite)] leading-relaxed">{c.body}</p>
@@ -56,7 +56,7 @@ function ExamesPage() {
 
       <section className="border-y border-[var(--chrismed-sand)] bg-[var(--chrismed-bone)]">
         <div className="container py-14 max-w-5xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-champagne-deep)]">{t.prepEyebrow}</div>
+          <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--chrismed-mist)]">{t.prepEyebrow}</div>
           <h2 className="chrismed-serif text-3xl text-[var(--chrismed-ink)] mt-2">{t.prepTitle}</h2>
           <div className="mt-6 grid md:grid-cols-3 gap-5">
             {t.prep.map((p, i) => {
@@ -64,7 +64,7 @@ function ExamesPage() {
               return (
                 <div key={p.title} className="rounded-2xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-6">
                   <div className="flex items-center gap-2 text-[var(--chrismed-ink)]">
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                     <h3 className="chrismed-serif text-lg">{p.title}</h3>
                   </div>
                   <p className="mt-2 text-sm text-[var(--chrismed-graphite)] leading-relaxed">{p.body}</p>
@@ -88,68 +88,68 @@ function ExamesPage() {
 const COPY = {
   pt: {
     eyebrow: 'Exames',
-    title: 'Solicitação, coleta e preparo — do consultório ou da sua casa.',
-    lead: 'A CrisMed emite as solicitações de exames após avaliação médica e integra rede parceira de laboratórios e centros de imagem. Coleta domiciliar disponível mediante agendamento.',
+    title: 'Solicitação e preparo, sempre conforme avaliação médica.',
+    lead: 'Quando um exame é clinicamente indicado, a CHRISMED orienta a solicitação e o preparo adequado. A realização, disponibilidade e condições do exame dependem do laboratório ou serviço escolhido para executá-lo.',
     cta1: 'Agendar consulta',
     cta2: 'Solicitar orientação',
     categories: [
-      { icon: 'lab', title: 'Laboratoriais', body: 'Hemograma, perfil metabólico, hormônios, sorologias, marcadores inflamatórios e mais.' },
-      { icon: 'blood', title: 'Coleta domiciliar', body: 'Coleta onde você estiver, dentro da área atendida pela equipe de enfermagem parceira, mediante agendamento.' },
-      { icon: 'cardio', title: 'Cardiológicos', body: 'ECG, MAPA, Holter, teste ergométrico e ecocardiograma via centros parceiros.' },
-      { icon: 'imaging', title: 'Imagem', body: 'Ultrassonografia, ressonância, tomografia e radiografia em centros de referência.' },
+      { icon: 'lab', title: 'Laboratoriais', body: 'Exames laboratoriais podem ser solicitados conforme história clínica, exame médico e necessidade individual.' },
+      { icon: 'blood', title: 'Coleta', body: 'A possibilidade de coleta convencional ou domiciliar deve ser confirmada diretamente com o serviço responsável pela realização.' },
+      { icon: 'cardio', title: 'Cardiológicos', body: 'Exames cardiológicos podem ser indicados conforme avaliação clínica e realizados em serviço habilitado de escolha do paciente.' },
+      { icon: 'imaging', title: 'Imagem', body: 'Ultrassonografia, ressonância, tomografia, radiografia e outros métodos dependem de indicação e do serviço executor.' },
     ],
     prepEyebrow: 'Preparo',
-    prepTitle: 'Orientações gerais de preparo',
+    prepTitle: 'Orientações gerais de segurança',
     prep: [
-      { title: 'Jejum e hidratação', body: 'A maioria dos exames de sangue exige jejum de 8 a 12 horas. Água pode ser ingerida normalmente, salvo orientação contrária.' },
-      { title: 'Medicações em uso', body: 'Não suspenda medicamentos sem orientação. Informe todos os medicamentos e suplementos ao médico e ao laboratório.' },
-      { title: 'Documentos', body: 'Leve documento com foto, cartão do convênio (se aplicável) e o pedido médico impresso ou digital.' },
+      { title: 'Jejum e hidratação', body: 'Não adote jejum por conta própria. O tempo de jejum e as regras de hidratação variam conforme o exame e devem seguir a orientação específica do serviço executor.' },
+      { title: 'Medicações em uso', body: 'Não suspenda medicamentos ou suplementos sem orientação médica. Informe ao profissional de saúde e ao serviço executor tudo o que utiliza.' },
+      { title: 'Documentos', body: 'Confirme previamente com o local do exame quais documentos, pedido médico e informações clínicas são necessários.' },
     ],
-    disclaimerTitle: 'Aviso',
-    disclaimerBody: 'As orientações desta página são de caráter geral. Cada exame pode exigir preparo específico — confira sempre as instruções entregues junto à solicitação médica. Em caso de dúvida, fale com a equipe CrisMed antes da coleta.',
+    disclaimerTitle: 'Importante',
+    disclaimerBody: 'As informações desta página são gerais e não substituem as instruções específicas de cada exame. Siga sempre o pedido médico e as orientações do serviço que realizará o procedimento. Em caso de dúvida clínica, fale com a equipe CHRISMED.',
   },
   en: {
     eyebrow: 'Exams',
-    title: 'Requests, collection and preparation — from the office or your home.',
-    lead: 'CrisMed issues exam requests after medical evaluation and integrates a partner network of laboratories and imaging centers. Home collection is available upon booking.',
+    title: 'Requests and preparation, always based on medical evaluation.',
+    lead: 'When an exam is clinically indicated, CHRISMED provides guidance on the request and appropriate preparation. Availability and conditions depend on the laboratory or service chosen to perform the exam.',
     cta1: 'Book a consultation',
     cta2: 'Request guidance',
     categories: [
-      { icon: 'lab', title: 'Laboratory', body: 'CBC, metabolic panel, hormones, serology, inflammatory markers and more.' },
-      { icon: 'blood', title: 'Home collection', body: 'Collection wherever you are within the served area, by a partner nursing team, upon appointment.' },
-      { icon: 'cardio', title: 'Cardiology', body: 'ECG, ABPM, Holter, stress test and echocardiogram via partner centers.' },
-      { icon: 'imaging', title: 'Imaging', body: 'Ultrasound, MRI, CT and X-ray in reference centers.' },
+      { icon: 'lab', title: 'Laboratory', body: 'Laboratory tests may be requested according to medical history, clinical evaluation and individual need.' },
+      { icon: 'blood', title: 'Collection', body: 'Conventional or home collection availability must be confirmed with the service responsible for performing the test.' },
+      { icon: 'cardio', title: 'Cardiology', body: 'Cardiology tests may be indicated after clinical evaluation and performed by a qualified service chosen by the patient.' },
+      { icon: 'imaging', title: 'Imaging', body: 'Ultrasound, MRI, CT, X-ray and other methods depend on medical indication and the performing service.' },
     ],
     prepEyebrow: 'Preparation',
-    prepTitle: 'General preparation guidelines',
+    prepTitle: 'General safety guidance',
     prep: [
-      { title: 'Fasting & hydration', body: 'Most blood tests require 8–12 hours of fasting. Water is usually allowed unless advised otherwise.' },
-      { title: 'Current medications', body: 'Do not stop medications without guidance. Inform your doctor and the lab about all medications and supplements.' },
-      { title: 'Documents', body: 'Bring a photo ID, insurance card (if applicable) and the printed or digital medical request.' },
+      { title: 'Fasting & hydration', body: 'Do not fast on your own. Fasting time and hydration rules vary by exam and must follow the specific instructions of the performing service.' },
+      { title: 'Current medications', body: 'Do not stop medications or supplements without medical guidance. Tell your clinician and the performing service everything you use.' },
+      { title: 'Documents', body: 'Confirm in advance which identification, medical request and clinical information the exam provider requires.' },
     ],
-    disclaimerTitle: 'Notice',
-    disclaimerBody: 'The guidance on this page is general. Each exam may require specific preparation — always follow the instructions provided with the medical request. In case of doubt, contact the CrisMed team before collection.',
+    disclaimerTitle: 'Important',
+    disclaimerBody: 'This page provides general information and does not replace exam-specific instructions. Always follow the medical request and the guidance of the service performing the procedure. Contact CHRISMED for clinical questions.',
   },
   es: {
     eyebrow: 'Exámenes',
-    title: 'Solicitud, toma y preparación — desde el consultorio o su casa.',
-    lead: 'CrisMed emite las solicitudes de exámenes tras evaluación médica e integra una red asociada de laboratorios y centros de imagen. Toma domiciliaria disponible con agenda.',
+    title: 'Solicitud y preparación, siempre según evaluación médica.',
+    lead: 'Cuando un examen está clínicamente indicado, CHRISMED orienta sobre la solicitud y la preparación adecuada. La disponibilidad y las condiciones dependen del laboratorio o servicio elegido para realizarlo.',
     cta1: 'Agendar consulta',
     cta2: 'Solicitar orientación',
     categories: [
-      { icon: 'lab', title: 'Laboratorio', body: 'Hemograma, perfil metabólico, hormonas, serologías, marcadores inflamatorios y más.' },
-      { icon: 'blood', title: 'Toma domiciliaria', body: 'Toma donde usted esté, dentro del área atendida por el equipo de enfermería asociado, con cita.' },
-      { icon: 'cardio', title: 'Cardiología', body: 'ECG, MAPA, Holter, ergometría y ecocardiograma en centros asociados.' },
-      { icon: 'imaging', title: 'Imagen', body: 'Ecografía, resonancia, tomografía y radiografía en centros de referencia.' },
+      { icon: 'lab', title: 'Laboratorio', body: 'Los exámenes de laboratorio pueden solicitarse según la historia clínica, evaluación médica y necesidad individual.' },
+      { icon: 'blood', title: 'Toma', body: 'La disponibilidad de toma convencional o domiciliaria debe confirmarse con el servicio responsable de realizar el examen.' },
+      { icon: 'cardio', title: 'Cardiología', body: 'Los exámenes cardiológicos pueden indicarse tras evaluación clínica y realizarse en un servicio habilitado elegido por el paciente.' },
+      { icon: 'imaging', title: 'Imagen', body: 'Ecografía, resonancia, tomografía, radiografía y otros métodos dependen de indicación médica y del servicio ejecutor.' },
     ],
     prepEyebrow: 'Preparación',
-    prepTitle: 'Orientaciones generales',
+    prepTitle: 'Orientaciones generales de seguridad',
     prep: [
-      { title: 'Ayuno e hidratación', body: 'La mayoría de exámenes de sangre requiere 8–12 h de ayuno. El agua suele estar permitida, salvo indicación contraria.' },
-      { title: 'Medicamentos en uso', body: 'No suspenda medicamentos sin orientación. Informe todos los medicamentos y suplementos.' },
-      { title: 'Documentos', body: 'Lleve documento con foto, tarjeta del seguro (si aplica) y la solicitud médica impresa o digital.' },
+      { title: 'Ayuno e hidratación', body: 'No haga ayuno por cuenta propia. El tiempo de ayuno y las reglas de hidratación varían según el examen y deben seguir la orientación específica del servicio ejecutor.' },
+      { title: 'Medicamentos en uso', body: 'No suspenda medicamentos o suplementos sin orientación médica. Informe todo lo que utiliza al profesional y al servicio ejecutor.' },
+      { title: 'Documentos', body: 'Confirme previamente qué documentos, solicitud médica e información clínica exige el lugar del examen.' },
     ],
-    disclaimerTitle: 'Aviso',
-    disclaimerBody: 'Las orientaciones son generales. Cada examen puede requerir preparación específica — siga siempre las instrucciones entregadas con la solicitud médica. Ante dudas, contacte al equipo CrisMed antes de la toma.',
+    disclaimerTitle: 'Importante',
+    disclaimerBody: 'La información de esta página es general y no sustituye las instrucciones específicas de cada examen. Siga siempre la solicitud médica y las orientaciones del servicio que realizará el procedimiento. Ante dudas clínicas, contacte a CHRISMED.',
   },
 } as const;
