@@ -91,6 +91,13 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
           GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
+          COLORS_META_APP_SECRET: ${{ secrets.COLORS_META_APP_SECRET }}
+          COLORS_META_VERIFY_TOKEN: ${{ secrets.COLORS_META_VERIFY_TOKEN }}
+          COLORS_META_WHATSAPP_TOKEN: ${{ secrets.COLORS_META_WHATSAPP_TOKEN }}
+          COLORS_META_PHONE_NUMBER_ID: ${{ secrets.COLORS_META_PHONE_NUMBER_ID }}
+          COLORS_META_PAGE_TOKEN: ${{ secrets.COLORS_META_PAGE_TOKEN }}
+          COLORS_META_PAGE_ID: ${{ secrets.COLORS_META_PAGE_ID }}
+          COLORS_META_IG_ACCOUNT_ID: ${{ secrets.COLORS_META_IG_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           test -n "${GOOGLE_DRIVE_CLIENT_ID:-}"
@@ -104,6 +111,14 @@ jobs:
             printf 'GOOGLE_DRIVE_CLIENT_ID=%s\n' "$GOOGLE_DRIVE_CLIENT_ID"
             printf 'GOOGLE_DRIVE_CLIENT_SECRET=%s\n' "$GOOGLE_DRIVE_CLIENT_SECRET"
             printf 'CHRISMED_BASE_URL=https://chrismed.impulsionando.com.br\n'
+            printf 'COLORS_META_APP_SECRET=%s\n' "${COLORS_META_APP_SECRET:-}"
+            printf 'COLORS_META_VERIFY_TOKEN=%s\n' "${COLORS_META_VERIFY_TOKEN:-}"
+            printf 'COLORS_META_WHATSAPP_TOKEN=%s\n' "${COLORS_META_WHATSAPP_TOKEN:-}"
+            printf 'COLORS_META_PHONE_NUMBER_ID=%s\n' "${COLORS_META_PHONE_NUMBER_ID:-}"
+            printf 'COLORS_META_PAGE_TOKEN=%s\n' "${COLORS_META_PAGE_TOKEN:-}"
+            printf 'COLORS_META_PAGE_ID=%s\n' "${COLORS_META_PAGE_ID:-}"
+            printf 'COLORS_META_IG_ACCOUNT_ID=%s\n' "${COLORS_META_IG_ACCOUNT_ID:-}"
+            printf 'COLORS_META_GRAPH_VERSION=v23.0\n'
             if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
               printf 'PULSONITOR_ENABLED=true\n'
             else
@@ -168,10 +183,23 @@ jobs:
           fi
           REMOTE
 
-      - name: Validate public Core
+      - name: Validate public Core and Colors
         run: |
+          set -euo pipefail
           curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
+
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/ >/tmp/colors-home.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/agenda >/tmp/colors-agenda.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/eventos >/tmp/colors-eventos.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/suporte >/tmp/colors-suporte.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/super-green-black >/tmp/colors-sgb.html
+
+          grep -qi "Colors" /tmp/colors-home.html
+          grep -qi "Agende" /tmp/colors-agenda.html
+          grep -qi "Eventos" /tmp/colors-eventos.html
+          grep -qi "Suporte\|atendimento" /tmp/colors-suporte.html
+          grep -qi "Super Green Black" /tmp/colors-sgb.html
 
       - name: Roll back failed release
         if: failure()
