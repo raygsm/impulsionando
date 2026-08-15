@@ -1,7 +1,8 @@
-import { CalendarDays, FileText, Headphones, Package, Settings, Sparkles, Users, WalletCards, Workflow } from 'lucide-react'
+import { CalendarDays, FileText, Headphones, Package, Settings, ShieldCheck, Sparkles, Users, WalletCards, Workflow } from 'lucide-react'
 
 const modules = [
   { title: 'Propostas', description: 'Criação, envio, negociação, aceite e histórico de versões.', href: '/wmp/propostas', icon: FileText, enabled: true },
+  { title: 'Contratos e cláusulas', description: 'Governança jurídica versionada. Contrato só é liberado após aceite comercial e com cláusulas ativas.', href: '/wmp/contratos/clausulas', icon: ShieldCheck, enabled: true },
   { title: 'CRM e clientes', description: 'Briefings, leads, qualificação, contatos e evolução comercial.', href: '/wmp/operacao?area=crm', icon: Users, enabled: true },
   { title: 'Agenda e eventos', description: 'Bookings, datas, locais, prazos, cachês e status operacional.', href: '/wmp/operacao?area=agenda', icon: CalendarDays, enabled: true },
   { title: 'DJs e parceiros', description: 'Cadastros, aprovação, disponibilidade, convites e confirmações.', href: '/wmp/operacao?area=djs', icon: Headphones, enabled: true },
