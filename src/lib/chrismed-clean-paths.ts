@@ -12,6 +12,7 @@ const PUBLIC_ROUTE_ROOTS = new Set([
   "cupons",
   "domiciliar",
   "dra-cristiane",
+  "empresa",
   "especialidades",
   "evento-convite",
   "evento-credencial",
