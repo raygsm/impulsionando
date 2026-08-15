@@ -1,0 +1,60 @@
+name: CHRISMED Card Integration Current Main
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-card-integration-current.yml
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-current:
+    name: Apply card checkout to current main safely
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reuse audited surgical patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source=Path('.github/workflows/chrismed-card-integration.yml').read_text()
+          start=source.index("          node <<'NODE'\n")+len("          node <<'NODE'\n")
+          end=source.index("\n          NODE\n",start)
+          block=source[start:end]
+          lines=[]
+          for line in block.splitlines():
+              lines.append(line[10:] if line.startswith('          ') else line)
+          Path('/tmp/chrismed-card-patch.cjs').write_text('\n'.join(lines)+'\n')
+          PY
+          node /tmp/chrismed-card-patch.cjs
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate CHRISMED booking security
+        run: npx vitest run tests/chrismed-booking-security.test.ts
+      - name: Build
+        run: npm run build
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Commit, rebase and publish without force
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/routes/chrismed.agendar.tsx src/components/chrismed/ChrismedPaymentMethod.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m 'feat(chrismed): enable PIX and card booking payments'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
