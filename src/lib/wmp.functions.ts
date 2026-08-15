@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { diagnoseAcoustics, type WmpAcousticInput } from "@/lib/wmp/acoustic-rules";
 import { dispatchN8nByEvent } from "@/lib/n8n-dispatch-by-event.server";
+import { assertBrazilLocation, assertBrazilMunicipality } from "@/lib/core/locations.server";
 import { isValidCNPJ, normalizeCNPJ } from "@/lib/validators";
 
 const db:any=supabaseAdmin;
@@ -26,36 +27,6 @@ async function assertReference(setKey:string,code:string,label:string){
   return option;
 }
 
-async function assertMunicipality(input:{uf:string;cidade:string;ibge:string}){
-  if(!/^\d{7}$/.test(input.ibge))throw new Error("Código IBGE do município inválido.");
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),5000);
-  try{
-    const response=await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${input.uf}/municipios?orderBy=nome`,{signal:controller.signal,headers:{accept:"application/json"}});
-    if(!response.ok)throw new Error("Não foi possível validar o município selecionado.");
-    const rows=await response.json() as Array<{id?:number;nome?:string}>;
-    const match=rows.some(row=>String(row.id)===input.ibge&&String(row.nome??"").trim()===input.cidade);
-    if(!match)throw new Error("Município e UF não correspondem à lista oficial. Selecione novamente.");
-  }finally{clearTimeout(timer);}
-}
-
-async function assertCepLocation(input:{cep:string;uf:string;cidade:string;ibge:string}){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),4500);
-  try{
-    const response=await fetch(`https://viacep.com.br/ws/${input.cep}/json/`,{signal:controller.signal,headers:{accept:"application/json"}});
-    if(!response.ok)throw new Error("Não foi possível validar o CEP informado.");
-    const data=await response.json() as Record<string,unknown>;
-    if(data.erro===true||data.erro==="true")throw new Error("CEP não encontrado.");
-    const uf=String(data.uf??"").toUpperCase();
-    const cidade=String(data.localidade??"").trim();
-    const ibge=String(data.ibge??"").trim();
-    if(uf!==input.uf.toUpperCase()||cidade!==input.cidade||ibge!==input.ibge){
-      throw new Error("CEP, município e UF não correspondem. Consulte o CEP novamente e escolha os dados preenchidos pelo sistema.");
-    }
-  }finally{clearTimeout(timer);}
-}
-
 export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{
   if(!d||typeof d!=="object")throw new Error("Payload inválido");
   const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipoRaw=clean(d.evento_tipo,80);
@@ -73,7 +44,7 @@ export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d
   await Promise.all([
     assertReference("wmp_event_types",data.evento_tipo,"Tipo de evento"),
     assertReference("br_states",data.evento_estado,"Estado"),
-    assertCepLocation({cep:data.evento_cep,uf:data.evento_estado,cidade:data.evento_cidade,ibge:data.evento_municipio_ibge}),
+    assertBrazilLocation({cep:data.evento_cep,uf:data.evento_estado,cidade:data.evento_cidade,ibge:data.evento_municipio_ibge}),
   ]);
   const tenant_id=await getWmpTenantId();
   const input:WmpAcousticInput={ambiente:data.ambiente,medidas:data.medidas,evento:{publico_estimado:data.evento_publico_estimado??undefined,horario_fim:data.evento_horario_fim,tipo:data.evento_tipo},acustica:data.acustica};
@@ -103,7 +74,7 @@ export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d
   await Promise.all([
     assertReference("wmp_partner_categories",data.categoria,"Categoria de parceiro"),
     assertReference("br_states",data.estado,"Estado"),
-    assertMunicipality({uf:data.estado,cidade:data.cidade,ibge:data.municipio_ibge}),
+    assertBrazilMunicipality({uf:data.estado,cidade:data.cidade,ibge:data.municipio_ibge}),
   ]);
   const tenant_id=await getWmpTenantId();
   const{data:row,error}=await db.from("wmp_parceiros").insert({...data,tenant_id,consent_at:new Date().toISOString()}).select("id, created_at").single();
