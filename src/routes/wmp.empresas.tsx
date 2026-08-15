@@ -7,8 +7,11 @@ export const Route = createFileRoute('/wmp/empresas')({
     meta: [
       { title: 'WMP para hotéis e empresas — DJs, eventos e operação recorrente' },
       { name: 'description', content: 'Contratação recorrente de DJs, produção técnica e operação de eventos para hotéis e empresas com briefing, agenda, histórico e gestão centralizada pela WMP.' },
+      { property: 'og:title', content: 'WMP para hotéis e empresas — operação recorrente de eventos e DJs' },
+      { property: 'og:description', content: 'Briefing, curadoria de DJs, estrutura técnica, agenda, proposta e histórico em uma operação centralizada para hotéis e empresas.' },
+      { property: 'og:url', content: 'https://wmp.impulsionando.com.br/empresas' },
     ],
-    links: [{ rel: 'canonical', href: '/wmp/empresas' }],
+    links: [{ rel: 'canonical', href: 'https://wmp.impulsionando.com.br/empresas' }],
   }),
   component: EmpresasPage,
 })
