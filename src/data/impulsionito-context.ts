@@ -18,6 +18,15 @@ const DEFAULT: ImpulsionitoContext = {
 
 const ROUTE_CONTEXTS: Array<{ match: RegExp; ctx: ImpulsionitoContext }> = [
   {
+    match: /^\/mvp/,
+    ctx: {
+      id: "mvp-investidor",
+      tip: "Você está na Investor Room. Posso explicar a tese da Impulsionando, arquitetura do Core, modelo de negócio, diferenciação, riscos, estágio real de execução, escalabilidade e como o ecossistema pode gerar receita recorrente sem vender funcionalidades ainda não homologadas.",
+      cta: "Explorar a tese de investimento",
+      whatsapp: "Olá! Estou na Investor Room da Impulsionando e quero conversar sobre tese, produto, tecnologia, modelo de negócio, escala e oportunidade de investimento.",
+    },
+  },
+  {
     match: /^\/empresas/,
     ctx: {
       id: "empresas",
