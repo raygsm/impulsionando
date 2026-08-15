@@ -1,0 +1,136 @@
+name: CHRISMED Card Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-card-integration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    name: Patch and validate CHRISMED card checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Apply surgical CHRISMED payment patch
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const routePath = 'src/routes/chrismed.agendar.tsx';
+          const componentPath = 'src/components/chrismed/ChrismedPaymentMethod.tsx';
+          let route = fs.readFileSync(routePath, 'utf8');
+          let component = fs.readFileSync(componentPath, 'utf8');
+
+          function replaceOnce(text, from, to, label) {
+            const first = text.indexOf(from);
+            if (first < 0) throw new Error(`Patch anchor not found: ${label}`);
+            if (text.indexOf(from, first + from.length) >= 0) throw new Error(`Patch anchor is not unique: ${label}`);
+            return text.slice(0, first) + to + text.slice(first + from.length);
+          }
+
+          component = replaceOnce(
+            component,
+            `  function choose(next: 'pix' | 'credit_card') {\n    setMethod(next);\n    setPrepared(false);\n    currentIntent = { method: 'pix' };\n  }`,
+            `  function choose(next: 'pix' | 'credit_card') {\n    setMethod(next);\n    setPrepared(false);\n    currentIntent = next === 'pix'\n      ? { method: 'pix' }\n      : { method: 'credit_card', token: '', paymentMethodId: '', installments: 1 };\n  }`,
+            'card selection intent',
+          );
+
+          route = replaceOnce(
+            route,
+            `import { openChrismedOliver } from '@/components/chrismed/oliver-store';`,
+            `import { openChrismedOliver } from '@/components/chrismed/oliver-store';\nimport { ChrismedPaymentMethod, getChrismedPaymentIntent, resetChrismedPaymentIntent } from '@/components/chrismed/ChrismedPaymentMethod';`,
+            'payment method import',
+          );
+
+          route = replaceOnce(
+            route,
+            `  const [pixResult, setPixResult] = useState<{ qr_code: string; qr_code_base64: string; payment_id: string } | null>(null);\n  const [holdToken, setHoldToken] = useState<string | null>(null);`,
+            `  const [pixResult, setPixResult] = useState<{ qr_code?: string; qr_code_base64?: string; payment_id: string } | null>(null);\n  const [paymentMethodUsed, setPaymentMethodUsed] = useState<'pix' | 'credit_card'>('pix');\n  const [chargedAmountCents, setChargedAmountCents] = useState<number | null>(null);\n  const [holdToken, setHoldToken] = useState<string | null>(null);`,
+            'payment state',
+          );
+
+          route = replaceOnce(
+            route,
+            `      setHoldToken(hold.hold_token);\n\n      const { data, error } = await supabase.functions.invoke('mpago-create-payment', {\n        body: {\n          company_id: CHRISMED_COMPANY_ID,\n          payment_method: 'pix',\n          hold_token: hold.hold_token,\n          payer: {\n            email: patient.email,\n            first_name: patient.first_name,\n            last_name: patient.last_name || undefined,\n            identification: patient.doc ? { type: 'CPF', number: patient.doc.replace(/\\D/g, '') } : undefined,\n          },\n        },\n      });\n      if (error) throw error;\n      if (data?.error) throw new Error(data.error);\n      setPixResult({ qr_code: data.mp.qr_code, qr_code_base64: data.mp.qr_code_base64, payment_id: data.payment.id });\n      setStep('payment');`,
+            `      setHoldToken(hold.hold_token);\n      setChargedAmountCents(Number(hold.amount_cents ?? currentOffering.price_cents));\n\n      const paymentIntent = getChrismedPaymentIntent();\n      if (paymentIntent.method === 'credit_card' && (!paymentIntent.token || !paymentIntent.paymentMethodId)) {\n        throw new Error('Valide o cartão com o Mercado Pago antes de continuar.');\n      }\n      setPaymentMethodUsed(paymentIntent.method);\n\n      const { data, error } = await supabase.functions.invoke('mpago-create-payment', {\n        body: {\n          company_id: CHRISMED_COMPANY_ID,\n          payment_method: paymentIntent.method,\n          hold_token: hold.hold_token,\n          token: paymentIntent.method === 'credit_card' ? paymentIntent.token : undefined,\n          payment_method_id: paymentIntent.method === 'credit_card' ? paymentIntent.paymentMethodId : undefined,\n          installments: paymentIntent.method === 'credit_card' ? paymentIntent.installments : undefined,\n          payer: {\n            email: patient.email,\n            first_name: patient.first_name,\n            last_name: patient.last_name || undefined,\n            identification: patient.doc ? { type: 'CPF', number: patient.doc.replace(/\\D/g, '') } : undefined,\n          },\n        },\n      });\n      if (error) throw error;\n      if (data?.error) throw new Error(data.error);\n      setPixResult({ qr_code: data.mp?.qr_code || '', qr_code_base64: data.mp?.qr_code_base64 || '', payment_id: data.payment.id });\n      setStep('payment');`,
+            'payment invocation',
+          );
+
+          route = replaceOnce(
+            route,
+            `      toast.error(\`Erro ao gerar PIX: \${(e as Error).message}\`);`,
+            `      toast.error(\`Erro ao iniciar pagamento: \${(e as Error).message}\`);`,
+            'generic payment error',
+          );
+
+          route = replaceOnce(
+            route,
+            `                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={submitting || !currentOffering || !acceptedTerms} onClick={handlePay}>`,
+            `                <ChrismedPaymentMethod patientDocument={patient.doc} />\n                <Button className="w-full bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]" disabled={submitting || !currentOffering || !acceptedTerms} onClick={handlePay}>`,
+            'payment selector mount',
+          );
+
+          route = replaceOnce(
+            route,
+            `                  {currentOffering && currentOffering.price_cents === 0 ? 'Confirmar reserva (cortesia)' : 'Ir para pagamento PIX'}`,
+            `                  {currentOffering && currentOffering.price_cents === 0 ? 'Confirmar reserva (cortesia)' : 'Ir para pagamento'}`,
+            'payment button label',
+          );
+
+          route = replaceOnce(
+            route,
+            `        {/* STEP 8: Pagamento (PIX real) */}\n        {step === 'payment' && pixResult && (\n          <section aria-labelledby="s8" className="max-w-xl mx-auto">\n            <h2 id="s8" className="chrismed-serif text-3xl text-[var(--chrismed-ink)] text-center">Pague via PIX</h2>\n            <p className="mt-2 text-[var(--chrismed-graphite)] text-center">Aponte a câmera para o QR ou copie o código. Confirmação automática.</p>`,
+            `        {/* STEP 8: Pagamento real — PIX ou cartão Mercado Pago */}\n        {step === 'payment' && pixResult && (\n          <section aria-labelledby="s8" className="max-w-xl mx-auto">\n            <h2 id="s8" className="chrismed-serif text-3xl text-[var(--chrismed-ink)] text-center">{paymentMethodUsed === 'pix' ? 'Pague via PIX' : 'Pagamento no cartão'}</h2>\n            <p className="mt-2 text-[var(--chrismed-graphite)] text-center">{paymentMethodUsed === 'pix' ? 'Aponte a câmera para o QR ou copie o código. Confirmação automática.' : 'Seu cartão foi tokenizado pelo Mercado Pago. Aguarde a confirmação automática da transação.'}</p>`,
+            'payment step copy',
+          );
+
+          route = replaceOnce(
+            route,
+            `                <Button variant="outline" className="w-full border-[var(--chrismed-sand)]" onClick={() => { setPixResult(null); setPollStatus('pending'); setStep('confirm'); }}>`,
+            `                <Button variant="outline" className="w-full border-[var(--chrismed-sand)]" onClick={() => { setPixResult(null); setPollStatus('pending'); resetChrismedPaymentIntent(); setPaymentMethodUsed('pix'); setStep('confirm'); }}>`,
+            'payment cancel reset',
+          );
+
+          route = replaceOnce(
+            route,
+            `                        : \`R$ \${(currentOffering.price_cents / 100).toFixed(2).replace('.', ',')}\``,
+            `                        : \`R$ \${((chargedAmountCents ?? currentOffering.price_cents) / 100).toFixed(2).replace('.', ',')}\``,
+            'charged amount summary',
+          );
+
+          route = route.replaceAll('pagamento PIX aprovado', 'pagamento aprovado');
+          route = route.replaceAll('confirmada após a aprovação do pagamento PIX.', 'confirmada após a aprovação do pagamento.');
+
+          fs.writeFileSync(routePath, route);
+          fs.writeFileSync(componentPath, component);
+          NODE
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate CHRISMED booking security
+        run: npx vitest run tests/chrismed-booking-security.test.ts
+      - name: Build
+        run: npm run build
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Commit validated integration
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/routes/chrismed.agendar.tsx src/components/chrismed/ChrismedPaymentMethod.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m 'feat(chrismed): enable PIX and card booking payments'
+          git push origin HEAD:main
