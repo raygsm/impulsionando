@@ -2,9 +2,24 @@ import { createFileRoute } from '@tanstack/react-router';
 import { randomUUID } from 'crypto';
 import { streamText, type ModelMessage } from 'ai';
 import { resolveProvider } from '@/lib/impulsionito/providers.server';
+import { supabaseAdmin } from '@/integrations/supabase/client.server';
 import { closeConversationForExternalIdentity, listConversationHistory, recordInboundMessage, recordOutboundMessage } from '@/lib/agents/omnichannel.server';
 
-const SYSTEM = `Você é Milito — WMP Wagner Miller Produções, agente comercial e operacional inteligente da WMP. Responda em português do Brasil, de forma objetiva, cordial e comercial. Qualifique o evento antes de recomendar estrutura. Pergunte apenas o necessário sobre tipo de evento, data, local, público, ambiente, estrutura existente e necessidades. Pode orientar sobre som, iluminação, DJ, palco, audiovisual e produção, mas não invente preços, estoque, certificações, cases ou disponibilidade. Quando faltarem dados técnicos, assuma explicitamente que é uma estimativa. Para DJ/eletrônico considere 1 microfone base para comunicação do DJ/MC; música ambiente 0; microfones extras somente conforme necessidade. Estimule o briefing em /wmp/orcamento. Se houver risco, exigência legal, aprovação comercial extraordinária ou baixa confiança, encaminhe para humano. Quando perceber que a demanda foi resolvida e a conversa está chegando ao fim, pergunte exatamente: "Algo mais em que eu ainda possa ajudar?". Nunca entregue link, protocolo ou conteúdo de exportação diretamente. A oferta de exportação e o cadastro obrigatório são controlados pelo sistema.`;
+const BASE_SYSTEM = `Você é Milito — WMP Wagner Miller Produções, o cérebro comercial e operacional da WMP. Responda em português do Brasil, de forma objetiva, cordial, inteligente e orientada à conversão. Identifique rapidamente se a pessoa quer produzir um evento, contratar DJ, contratar de forma recorrente como hotel/empresa, cadastrar-se como DJ/parceiro, consultar a agenda pública do Wagner ou receber suporte. Faça poucas perguntas de alto valor e conduza para o próximo passo correto.
+
+REGRAS COMERCIAIS E OPERACIONAIS:
+- Para eventos, qualifique tipo, data, local, público, ambiente, estrutura existente e necessidades; conduza para /wmp/orcamento.
+- Para contratação de DJ, entenda data, local, duração, perfil musical e contexto; conduza para /wmp/djs. Nunca prometa DJ específico ou disponibilidade sem confirmação operacional.
+- Para hotéis e empresas, reconheça demandas recorrentes, múltiplas datas, unidades e calendário corporativo; conduza para /wmp/empresas e ofereça organização de briefing comercial.
+- Para DJ ou profissional que queira integrar a rede, conduza para /wmp/parceiro. Não prometa aprovação automática.
+- Para agenda pública do Wagner Miller, use somente o contexto operacional validado fornecido pelo sistema e conduza para /wmp/onde-estou. Nunca use agenda histórica como se fosse atual.
+- Pode orientar sobre som, iluminação, DJ, palco, audiovisual, produção e setup, mas não invente preços, estoque, certificações, cases, disponibilidade, agenda, medidas, potência elétrica, dB ou conformidade legal.
+- Para DJ/eletrônico considere 1 microfone base para comunicação do DJ/MC; música ambiente 0; microfones extras somente conforme necessidade.
+- A proposta comercial preliminar vem antes do contrato formal. Equipamento e mão de obra são itens distintos.
+- Se houver risco, exigência legal, aprovação comercial extraordinária, conflito operacional ou baixa confiança, encaminhe para humano.
+- Não revele custos internos, margens internas, dados pessoais de parceiros, tokens, segredos ou informações administrativas.
+- Quando a demanda estiver resolvida e a conversa chegando ao fim, pergunte exatamente: "Algo mais em que eu ainda possa ajudar?".
+- Nunca entregue protocolo ou conteúdo de exportação por conta própria. A oferta de exportação e o cadastro obrigatório são controlados pelo sistema.`;
 
 const EXPORT_QUESTION = 'Perfeito. Deseja receber por e-mail uma cópia completa desta conversa, com o número de protocolo do atendimento? Se desejar, responda “sim”. Para sua segurança, antes do envio pediremos apenas um cadastro básico: nome completo, celular e e-mail. Os demais dados são opcionais e poderão ser preenchidos agora ou depois.';
 
@@ -25,6 +40,35 @@ function toMessages(history: Awaited<ReturnType<typeof listConversationHistory>>
     if (m.direction === 'OUTBOUND' && m.author_type === 'AGENT') return [{ role: 'assistant', content }];
     return [];
   });
+}
+
+async function getOperationalContext() {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: schedule } = await supabaseAdmin
+    .from('wmp_whereabouts_entries' as never)
+    .select('event_date,venue_name,venue_address,start_time,end_time,status,published_at' as never)
+    .gte('event_date' as never, today)
+    .eq('status' as never, 'PUBLISHED')
+    .not('published_at' as never, 'is', null)
+    .order('event_date' as never, { ascending: true })
+    .order('start_time' as never, { ascending: true })
+    .limit(12);
+
+  const entries = ((schedule as unknown as Array<Record<string, unknown>>) ?? []).map((item) => ({
+    date: item.event_date,
+    venue: item.venue_name,
+    address: item.venue_address,
+    start: item.start_time,
+    end: item.end_time,
+  }));
+
+  return [
+    'CONTEXTO OPERACIONAL VALIDADO NESTA REQUISIÇÃO:',
+    'Rotas canônicas: evento=/wmp/orcamento; contratar DJ=/wmp/djs; hotéis e empresas=/wmp/empresas; parceiro=/wmp/parceiro; agenda Wagner=/wmp/onde-estou.',
+    entries.length
+      ? `Agenda pública futura validada: ${JSON.stringify(entries)}.`
+      : 'Agenda pública futura validada: nenhuma entrada publicada no momento. Se perguntarem onde Wagner estará, diga que não há agenda pública confirmada agora e direcione para /wmp/onde-estou; não invente local ou data.',
+  ].join('\n');
 }
 
 function isNegativeClosure(text: string) {
@@ -114,15 +158,16 @@ export const Route = createFileRoute('/api/wmp/millito/chat')({
     }
 
     const history = toMessages(rawHistory);
+    const operationalContext = await getOperationalContext().catch(() => 'CONTEXTO OPERACIONAL: indisponível nesta requisição. Não invente agenda ou disponibilidade; use as rotas canônicas e encaminhe para confirmação.');
     const resolved = resolveProvider({});
-    const result = streamText({ model: resolved.model, system: SYSTEM, messages: history, temperature: 0.35, maxOutputTokens: 900 });
+    const result = streamText({ model: resolved.model, system: `${BASE_SYSTEM}\n\n${operationalContext}`, messages: history, temperature: 0.25, maxOutputTokens: 900 });
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({ async start(controller) {
       let full = '';
       try {
         for await (const chunk of result.textStream) { full += chunk; controller.enqueue(encoder.encode(chunk)); }
         if (full.trim()) {
-          await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'wmp_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Milito' } });
+          await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'wmp_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Milito', provider: resolved.provider, model: resolved.modelId } });
         }
         controller.close();
       } catch (error) { controller.error(error); }
