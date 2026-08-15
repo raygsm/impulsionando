@@ -3,18 +3,25 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 async function getRioMedId(supabase: any): Promise<string | null> {
-  const { data } = await supabase.from("companies").select("id").eq("subdomain", "riomed").maybeSingle();
-  return data?.id ?? null;
+  const { data, error } = await supabase
+    .from("communication_tenants")
+    .select("company_id")
+    .eq("slug", "rio-med")
+    .eq("active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.company_id ?? null;
 }
 
-// ============ RENTAL ASSETS ============
 export const listRentalAssets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return [];
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("rental_assets").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(200);
+    if (error) throw error;
     return data ?? [];
   });
 
@@ -27,31 +34,31 @@ export const createRentalAsset = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const companyId = await getRioMedId(context.supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
     const { data: row, error } = await context.supabase.from("rental_assets").insert({ ...data, company_id: companyId }).select().single();
     if (error) throw error;
     return row;
   });
 
-// ============ RENTAL CONTRACTS ============
 export const listRentalContracts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return [];
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("rental_contracts").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(200);
+    if (error) throw error;
     return data ?? [];
   });
 
-// ============ SERVICE ORDERS ============
 export const listServiceOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return [];
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("service_orders").select("*").eq("company_id", companyId).order("opened_at", { ascending: false }).limit(200);
+    if (error) throw error;
     return data ?? [];
   });
 
@@ -65,20 +72,20 @@ export const createServiceOrder = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const companyId = await getRioMedId(context.supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
     const { data: row, error } = await context.supabase.from("service_orders").insert({ ...data, company_id: companyId }).select().single();
     if (error) throw error;
     return row;
   });
 
-// ============ ROUTING RULES ============
 export const listRoutingRules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return [];
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("crm_lead_routing_rules").select("*").eq("company_id", companyId).order("priority").limit(200);
+    if (error) throw error;
     return data ?? [];
   });
 
@@ -91,20 +98,20 @@ export const createRoutingRule = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const companyId = await getRioMedId(context.supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
     const { data: row, error } = await context.supabase.from("crm_lead_routing_rules").insert({ ...data, company_id: companyId }).select().single();
     if (error) throw error;
     return row;
   });
 
-// ============ ABANDONED CARTS ============
 export const listAbandonedCarts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return { carts: [], stats: { pending: 0, recovered: 0, total_value: 0 } };
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("commerce_abandoned_carts").select("*").eq("company_id", companyId).order("abandoned_at", { ascending: false }).limit(200);
+    if (error) throw error;
     const carts = data ?? [];
     const stats = {
       pending: carts.filter((c: any) => c.recovery_status === "pending").length,
@@ -114,17 +121,17 @@ export const listAbandonedCarts = createServerFn({ method: "GET" })
     return { carts, stats };
   });
 
-// ============ AI ASSISTANT (prompt + catálogo por audiência) ============
 export const loadRioMedAssistant = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return { companyId: null, identity: null, assistant: null };
-    const { data: identity } = await context.supabase
+    const { data: identity, error } = await context.supabase
       .from("core_tenant_identity")
       .select("id,company_id,subdomain,metadata,updated_at")
       .eq("company_id", companyId)
       .maybeSingle();
+    if (error) throw error;
     const meta = (identity?.metadata as Record<string, any>) ?? {};
     return {
       companyId,
@@ -139,20 +146,14 @@ export const loadRioMedAssistant = createServerFn({ method: "GET" })
 
 export const saveRioMedAssistant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({
-      assistant: z.record(z.string(), z.any()),
-    }).parse(d),
-  )
+  .inputValidator((d) => z.object({ assistant: z.record(z.string(), z.any()) }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    // admin master ou super gating
-    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" as any });
-    const { data: isSuper } = await supabase.rpc("has_role", { _user_id: userId, _role: "super" as any });
-    if (!isAdmin && !isSuper) throw new Error("Forbidden: apenas administradores podem editar o assistente");
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Apenas equipe Impulsionando pode editar o assistente");
 
     const companyId = await getRioMedId(supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
 
     const next = {
       ...data.assistant,
@@ -161,11 +162,12 @@ export const saveRioMedAssistant = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
 
-    const { data: identity } = await supabase
+    const { data: identity, error: readError } = await supabase
       .from("core_tenant_identity")
       .select("metadata")
       .eq("company_id", companyId)
       .maybeSingle();
+    if (readError) throw readError;
     const meta = (identity?.metadata as Record<string, any>) ?? {};
     const mergedMeta = { ...meta, ai_assistant: next, assistant_synced_at: new Date().toISOString() };
 
@@ -177,7 +179,6 @@ export const saveRioMedAssistant = createServerFn({ method: "POST" })
     return { ok: true, assistant: next };
   });
 
-// ============ RIOMED PRODUCTS (catálogo virtual com sync automático) ============
 const productSchema = z.object({
   id: z.string().uuid().optional(),
   sku: z.string().optional().nullable(),
@@ -201,9 +202,10 @@ export const listRioMedProducts = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const companyId = await getRioMedId(context.supabase);
     if (!companyId) return [];
-    const { data } = await context.supabase
+    const { data, error } = await context.supabase
       .from("riomed_products").select("*").eq("company_id", companyId)
       .order("display_order").order("name");
+    if (error) throw error;
     return data ?? [];
   });
 
@@ -212,11 +214,11 @@ export const upsertRioMedProduct = createServerFn({ method: "POST" })
   .inputValidator((d) => productSchema.parse(d))
   .handler(async ({ data, context }) => {
     const companyId = await getRioMedId(context.supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
     const payload: any = { ...data, company_id: companyId };
     if (payload.image_url === "") payload.image_url = null;
     const { data: row, error } = data.id
-      ? await context.supabase.from("riomed_products").update(payload).eq("id", data.id).select().single()
+      ? await context.supabase.from("riomed_products").update(payload).eq("id", data.id).eq("company_id", companyId).select().single()
       : await context.supabase.from("riomed_products").insert(payload).select().single();
     if (error) throw error;
     return row;
@@ -226,12 +228,13 @@ export const deleteRioMedProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("riomed_products").delete().eq("id", data.id);
+    const companyId = await getRioMedId(context.supabase);
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
+    const { error } = await context.supabase.from("riomed_products").delete().eq("id", data.id).eq("company_id", companyId);
     if (error) throw error;
     return { ok: true };
   });
 
-// ============ BULK IMPORT (CSV/JSON) — products ============
 const productBulkSchema = z.object({
   items: z.array(productSchema.omit({ id: true })).min(1).max(2000),
   mode: z.enum(["upsert_by_sku", "insert_only"]).default("upsert_by_sku"),
@@ -242,7 +245,7 @@ export const bulkImportRioMedProducts = createServerFn({ method: "POST" })
   .inputValidator((d) => productBulkSchema.parse(d))
   .handler(async ({ data, context }) => {
     const companyId = await getRioMedId(context.supabase);
-    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    if (!companyId) throw new Error("Cliente Rio Med não encontrado no Core");
 
     let inserted = 0;
     let updated = 0;
@@ -255,22 +258,22 @@ export const bulkImportRioMedProducts = createServerFn({ method: "POST" })
 
       try {
         if (data.mode === "upsert_by_sku" && raw.sku) {
-          const { data: existing } = await context.supabase
+          const { data: existing, error: existingError } = await context.supabase
             .from("riomed_products")
             .select("id")
             .eq("company_id", companyId)
             .eq("sku", raw.sku)
             .maybeSingle();
+          if (existingError) throw existingError;
           if (existing?.id) {
             const { error } = await context.supabase
-              .from("riomed_products").update(payload).eq("id", existing.id);
+              .from("riomed_products").update(payload).eq("id", existing.id).eq("company_id", companyId);
             if (error) throw error;
             updated++;
             continue;
           }
         }
-        const { error } = await context.supabase
-          .from("riomed_products").insert(payload);
+        const { error } = await context.supabase.from("riomed_products").insert(payload);
         if (error) throw error;
         inserted++;
       } catch (e: any) {
