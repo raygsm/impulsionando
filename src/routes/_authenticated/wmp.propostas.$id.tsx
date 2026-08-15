@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { getWmpProposal, sendWmpProposal } from '@/lib/wmp/proposals.functions'
+import { FileSignature } from 'lucide-react'
+import { getWmpProposal, sendWmpProposal, transitionWmpProposal } from '@/lib/wmp/proposals.functions'
+import { generateAndSendWmpContract } from '@/lib/wmp/contracts.functions'
 
 export const Route = createFileRoute('/_authenticated/wmp/propostas/$id')({ component: Page })
 
@@ -16,7 +18,37 @@ function Page() {
   async function load() { try { setData(await getWmpProposal({ data: { proposal_id: id } })); setError('') } catch (e: any) { setError(e?.message ?? 'Falha ao carregar proposta.') } }
   useEffect(() => { void load() }, [id])
 
-  async function send() { setBusy(true); setMessage(''); try { const r: any = await sendWmpProposal({ data: { proposal_id: id } }); setMessage(r?.delivery?.sent > 0 ? 'Proposta enviada com sucesso.' : 'Envio registrado, aguardando confirmação do canal.'); await load() } catch (e: any) { setMessage(e?.message ?? 'Falha no envio.') } finally { setBusy(false) } }
+  async function send() {
+    setBusy(true); setMessage('')
+    try {
+      const r: any = await sendWmpProposal({ data: { proposal_id: id } })
+      setMessage(r?.delivery?.sent > 0 ? 'Proposta comercial preliminar enviada com sucesso.' : 'Envio registrado, aguardando confirmação do canal.')
+      await load()
+    } catch (e: any) { setMessage(e?.message ?? 'Falha no envio.') }
+    finally { setBusy(false) }
+  }
+
+  async function acceptCommercially() {
+    setBusy(true); setMessage('')
+    try {
+      await transitionWmpProposal({ data: { proposal_id: id, transition: 'ACCEPTED' } })
+      setMessage('Aceite comercial registrado. O contrato formal já pode ser gerado.')
+      await load()
+    } catch (e: any) { setMessage(e?.message ?? 'Não foi possível registrar o aceite comercial.') }
+    finally { setBusy(false) }
+  }
+
+  async function generateContract() {
+    setBusy(true); setMessage('')
+    try {
+      const r: any = await generateAndSendWmpContract({ data: { proposal_id: id } })
+      setMessage(r?.delivery?.sent > 0
+        ? `Contrato ${r.contract_number} gerado e enviado ao cliente com link seguro de assinatura.`
+        : `Contrato ${r.contract_number} gerado. O envio ainda não teve confirmação do canal.`)
+    } catch (e: any) {
+      setMessage(e?.message ?? 'Não foi possível gerar o contrato.')
+    } finally { setBusy(false) }
+  }
 
   if (error) return <div className="mx-auto max-w-5xl p-6"><div className="rounded-lg border p-4">{error}</div></div>
   if (!data) return <div className="mx-auto max-w-5xl p-6 text-sm text-muted-foreground">Carregando proposta...</div>
@@ -26,6 +58,8 @@ function Page() {
   const event = p.event_snapshot ?? {}
   const commercial = p.commercial_summary ?? {}
   const canSend = !['ACCEPTED','SIGNED','WON','CANCELLED'].includes(p.status)
+  const canAccept = ['SENT','VIEWED'].includes(p.status)
+  const canGenerateContract = ['ACCEPTED'].includes(p.status)
 
   return <div className="mx-auto max-w-5xl p-6 space-y-6">
     <div className="flex flex-wrap gap-2 text-sm"><a className="rounded-md border px-3 py-2" href="/wmp/propostas">Todas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/enviadas">Enviadas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/aceitas">Aceitas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/nova">Nova proposta</a></div>
@@ -37,7 +71,14 @@ function Page() {
     </div>
     <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Evento</h2><dl className="mt-4 grid gap-3 md:grid-cols-2 text-sm"><div><dt className="text-muted-foreground">Nome</dt><dd>{event.event_name ?? event.nome ?? '—'}</dd></div><div><dt className="text-muted-foreground">Serviço</dt><dd>{event.service ?? event.servico ?? commercial.service ?? '—'}</dd></div><div><dt className="text-muted-foreground">Data</dt><dd>{event.event_date ?? event.datas ?? '—'}</dd></div><div><dt className="text-muted-foreground">Local</dt><dd>{event.location ?? event.local ?? '—'}</dd></div></dl></section>
     <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Histórico de versões</h2><div className="mt-3 space-y-2">{data.versions.map((v: any)=><div key={v.id} className="flex flex-wrap justify-between gap-2 border-b py-2 text-sm"><span>V{v.version} · {v.status} · {v.legal_terms_version ?? 'sem versão jurídica'}</span><span>{money(v.total_cents)}</span></div>)}</div></section>
-    {canSend && <div className="rounded-xl border p-5"><p className="mb-3">Enviar esta proposta para <strong>{client.email ?? 'o e-mail cadastrado'}</strong>?</p><button onClick={send} disabled={busy} className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy ? 'Enviando...' : 'Enviar proposta por e-mail'}</button></div>}
+
+    {canSend && <div className="rounded-xl border p-5"><p className="mb-3">Enviar esta proposta comercial preliminar para <strong>{client.email ?? 'o e-mail cadastrado'}</strong>?</p><button onClick={send} disabled={busy} className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy ? 'Enviando...' : 'Enviar proposta por e-mail'}</button></div>}
+
+    {canAccept && <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5"><h2 className="font-semibold">Cliente concordou com a proposta?</h2><p className="mt-2 text-sm">Registre o aceite comercial somente após a concordância real do cliente. Esta ação libera a etapa contratual; ela não equivale à assinatura do contrato.</p><button onClick={()=>void acceptCommercially()} disabled={busy} className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">Registrar aceite comercial</button></div>}
+
+    {canGenerateContract && <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5"><div className="flex items-start gap-3"><FileSignature className="mt-0.5 size-5 shrink-0"/><div><h2 className="font-semibold">Etapa contratual liberada</h2><p className="mt-2 text-sm">A proposta já foi aceita. O contrato será montado somente com cláusulas jurídicas WMP ativas e aprovadas e enviado ao cliente por link individual de assinatura.</p><button onClick={()=>void generateContract()} disabled={busy} className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">{busy ? 'Processando...' : 'Gerar e enviar contrato'}</button></div></div></div>}
+
+    {['SIGNED','WON'].includes(p.status) && <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5"><h2 className="font-semibold">Contrato assinado</h2><p className="mt-1 text-sm">A proposta está formalizada e pode seguir para agenda, DJs, equipamentos, logística e execução.</p></div>}
     {message && <div className="rounded-lg border p-4 text-sm">{message}</div>}
   </div>
 }
