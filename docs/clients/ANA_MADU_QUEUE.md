@@ -1,6 +1,6 @@
 # ANA MADU — FILA DE PRODUCAO IMPULSIONANDO FULL
 
-Status: QUEUED — nao iniciar antes da conclusao da fila tecnica atual e do bloco Colors, conforme priorizacao do usuario em 2026-08-15.
+Status: QUEUED — nao iniciar antes da conclusao da fila tecnica atual. Ana Madu entra antes de Colors, pois Colors permanece como o ultimo item da fila conforme priorizacao do usuario em 2026-08-15.
 
 ## Identidade e canais confirmados
 - Cliente: Ana Madu
@@ -97,4 +97,4 @@ Quando Ana Madu e os demais clientes estiverem homologados, inclui-los na vitrin
 Nao declarar 100% apenas por existir front ou tabela. Exigir: build/lint/testes, banco/persistencia, auth, RLS/permissoes, integracoes, jornadas, templates, pagamentos homologados quando aplicavel, NF real, omnichannel real, deploy, monitoramento e E2E.
 
 ## Ordem
-Manter em fila. A execucao atual do ecossistema Impulsionando nao deve ser interrompida por este cliente. Colors permanece no fim da fila atual conforme instrucao anterior; Ana Madu inicia somente quando sua posicao for liberada explicitamente pelo checkpoint/priorizacao vigente.
+Manter em fila. A execucao atual do ecossistema Impulsionando nao deve ser interrompida por este cliente. Ordem: concluir fila tecnica atual -> Ana Madu -> Colors. Colors permanece como ultimo item.
