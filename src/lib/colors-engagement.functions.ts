@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHash, randomUUID } from "crypto";
 
 const touchSchema = z.object({
   sourceChannel: z.string().max(60).optional(),
@@ -45,8 +44,10 @@ const supportSchema = touchSchema.extend({
 
 function normEmail(v?: string) { return v ? v.trim().toLowerCase() : null; }
 function normPhone(v?: string) { return v ? v.replace(/\D/g, "") : null; }
-function protocol() { return `COL-${new Date().toISOString().slice(0,10).replace(/-/g,"")}-${randomUUID().slice(0,8).toUpperCase()}`; }
-function hashDocument(v: string) { return createHash("sha256").update(`colors:${v}`).digest("hex"); }
+function protocol() {
+  const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  return `COL-${new Date().toISOString().slice(0,10).replace(/-/g,"")}-${id.slice(0,8).toUpperCase()}`;
+}
 
 async function companyId(sb: any) {
   const { data, error } = await sb.from("companies").select("id").eq("document", "58.255.587/0001-60").maybeSingle();
