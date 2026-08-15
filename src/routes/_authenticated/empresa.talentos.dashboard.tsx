@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Heart, UserCheck, Briefcase } from "lucide-react";
+import { getCurrentCompanyId } from "@/lib/current-company";
 
 export const Route = createFileRoute("/_authenticated/empresa/talentos/dashboard")({
   component: TalentosDashboard,
@@ -20,17 +21,20 @@ function TalentosDashboard() {
 
   useEffect(() => {
     async function load() {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) { setLoading(false); return; }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const m = await (supabase as any).from("talentos_matches")
-        .select("stage,created_at,candidato_id,contratado_em,desligado_em").eq("company_id", u.user.id);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const c = await (supabase as any).from("talentos_candidatos")
-        .select("cidade,cargo_desejado,faixa_etaria,escolaridade,nicho").eq("ativo", true).eq("visivel_rede", true).limit(500);
-      setMatches((m.data ?? []) as MatchRow[]);
-      setCands((c.data ?? []) as CandRow[]);
-      setLoading(false);
+      try {
+        const companyId = await getCurrentCompanyId();
+        if (!companyId) { setLoading(false); return; }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const m = await (supabase as any).from("talentos_matches")
+          .select("stage,created_at,candidato_id,contratado_em,desligado_em").eq("company_id", companyId);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const c = await (supabase as any).from("talentos_candidatos")
+          .select("cidade,cargo_desejado,faixa_etaria,escolaridade,nicho").eq("ativo", true).eq("visivel_rede", true).limit(500);
+        setMatches((m.data ?? []) as MatchRow[]);
+        setCands((c.data ?? []) as CandRow[]);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
