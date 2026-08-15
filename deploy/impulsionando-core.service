@@ -1,5 +1,5 @@
 [Unit]
-Description=Core Impulsionando frontend (TanStack Start/Nitro)
+Description=Core Impulsionando runtime (TanStack Start/Nitro + Pulsonitor)
 After=network.target
 
 [Service]
@@ -12,7 +12,7 @@ Environment=NITRO_HOST=127.0.0.1
 Environment=NITRO_PORT=3000
 EnvironmentFile=-/etc/impulsionando-core.env
 # The deployment workflow replaces this with the Node binary discovered on the host.
-ExecStart=/usr/bin/env node .output/server/index.mjs
+ExecStart=/usr/bin/env node scripts/start-core-runtime.mjs
 Restart=always
 RestartSec=5
 User=www-data
