@@ -3,6 +3,9 @@ import { randomUUID } from 'crypto';
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 const TENANT_SLUG = 'anamadu';
+const PIX_KEY = process.env.ANAMADU_PIX_KEY ?? '21966606899';
+const PIX_KEY_TYPE = 'phone';
+const PIX_BENEFICIARY = 'Ana Madú';
 
 function clean(value: unknown, max = 160) {
   return String(value ?? '').trim().slice(0, max);
@@ -12,19 +15,12 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
   server: {
     handlers: {
       GET: async () => {
-        const { data: tenant } = await (supabaseAdmin as any)
-          .from('communication_tenants')
-          .select('id,company_id,settings')
-          .eq('slug', TENANT_SLUG)
-          .eq('active', true)
-          .maybeSingle();
-
-        const pix = tenant?.settings?.pix ?? {};
         return Response.json({
           ok: true,
-          pixConfigured: Boolean(pix?.key),
-          pix: pix?.key ? { key: pix.key, keyType: pix.keyType ?? null, beneficiary: pix.beneficiary ?? 'Ana Madú' } : null,
+          pixConfigured: Boolean(PIX_KEY),
+          pix: PIX_KEY ? { key: PIX_KEY, keyType: PIX_KEY_TYPE, beneficiary: PIX_BENEFICIARY } : null,
           mercadoPago: { enabled: false, label: 'Em breve, Mercado Pago' },
+          commercePlatform: 'nuvemshop',
         });
       },
 
@@ -43,6 +39,9 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
         if (!Number.isFinite(amount) || amount <= 0 || amount > 100000) {
           return Response.json({ ok: false, error: 'Valor inválido.' }, { status: 400 });
         }
+        if (!PIX_KEY) {
+          return Response.json({ ok: false, error: 'PIX ainda não configurado.' }, { status: 503 });
+        }
 
         const { data: tenant, error: tenantError } = await (supabaseAdmin as any)
           .from('communication_tenants')
@@ -52,11 +51,6 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
           .maybeSingle();
         if (tenantError || !tenant?.company_id) {
           return Response.json({ ok: false, error: 'Ana Madú não provisionada no Core.' }, { status: 503 });
-        }
-
-        const pix = tenant?.settings?.pix ?? {};
-        if (!pix?.key) {
-          return Response.json({ ok: false, error: 'PIX ainda não configurado.' }, { status: 503 });
         }
 
         const companyId = tenant.company_id as string;
@@ -87,6 +81,7 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
             total: amount,
             metadata: {
               tenant_slug: TENANT_SLUG,
+              commerce_platform: 'nuvemshop',
               payment_method: 'pix_manual',
               payment_status: 'pending',
               customer: { name, email, phone },
@@ -122,7 +117,7 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
             source: clean((attribution as any)?.utm_source || 'checkout_anamadu', 120),
             campaign: clean((attribution as any)?.utm_campaign || '', 160) || null,
             product_interest: productName,
-            metadata: { order_id: order.id, order_number: orderNumber, email, phone, attribution, test_scenario: amount === 1 ? 'anamadu_r1_e2e' : null },
+            metadata: { order_id: order.id, order_number: orderNumber, email, phone, attribution, commerce_platform: 'nuvemshop', test_scenario: amount === 1 ? 'anamadu_r1_e2e' : null },
           });
         }
 
@@ -136,8 +131,8 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
           occurred_at: new Date().toISOString(),
           correlation_id: correlationId,
           idempotency_key: `anamadu:${orderNumber}:pix_generated`,
-          metadata: { order_number: orderNumber, test_scenario: amount === 1 ? 'anamadu_r1_e2e' : null },
-          payload: { order_number: orderNumber, amount, currency: 'BRL', customer: { name, email, phone }, product: productName, attribution },
+          metadata: { order_number: orderNumber, commerce_platform: 'nuvemshop', test_scenario: amount === 1 ? 'anamadu_r1_e2e' : null },
+          payload: { order_number: orderNumber, amount, currency: 'BRL', customer: { name, email, phone }, product: productName, attribution, commerce_platform: 'nuvemshop' },
           source: 'anamadu_checkout',
           environment: 'production',
         });
@@ -154,6 +149,7 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
             payer_name: name,
             product: productName,
             attribution,
+            commerce_platform: 'nuvemshop',
             payment_method: 'pix_manual',
             test_scenario: amount === 1 ? 'anamadu_r1_e2e' : null,
           }, companyId, TENANT_SLUG);
@@ -164,8 +160,9 @@ export const Route = createFileRoute('/api/anamadu/pix-order')({
         return Response.json({
           ok: true,
           order: { id: order.id, number: orderNumber, amount, status: 'awaiting_payment' },
-          pix: { key: pix.key, keyType: pix.keyType ?? null, beneficiary: pix.beneficiary ?? 'Ana Madú' },
+          pix: { key: PIX_KEY, keyType: PIX_KEY_TYPE, beneficiary: PIX_BENEFICIARY },
           mercadoPago: { enabled: false, label: 'Em breve, Mercado Pago' },
+          commercePlatform: 'nuvemshop',
         });
       },
     },
