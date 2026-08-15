@@ -12,7 +12,7 @@ const NAV = [
   { label: 'DJs e parceiros', to: '/wmp/operacao?area=djs' },
   { label: 'Equipamentos', to: '/wmp/operacao?area=equip' },
   { label: 'Financeiro', to: '/wmp/operacao?area=finance' },
-  { label: 'Millito', to: '/wmp/operacao?area=millito' },
+  { label: 'Milito', to: '/wmp/operacao?area=millito' },
 ] as const
 
 export function WmpAuthenticatedShell({ children }: { children: React.ReactNode }) {
