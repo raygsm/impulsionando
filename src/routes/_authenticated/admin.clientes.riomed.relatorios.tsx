@@ -14,7 +14,7 @@ import { Download, FileSpreadsheet, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/relatorios")({
-  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='reports' title='Relatórios RioMed'><Page /></TenantModuleShell>),
+  component: () => (<TenantModuleShell tenantSlug="rio-med" moduleSlug="reports" title="Relatórios Rio Med"><Page /></TenantModuleShell>),
 });
 
 function download(filename: string, content: string) {
@@ -29,7 +29,7 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accen
 function Page() {
   const fn = useServerFn(getExecutiveOverview);
   const exp = useServerFn(exportCsv);
-  const fiscal = useServerFn(getFiscalReport);
+  const commercial = useServerFn(getFiscalReport);
   const today = new Date().toISOString().slice(0, 10);
   const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
   const [from, setFrom] = useState(monthAgo);
@@ -40,7 +40,7 @@ function Page() {
     queryFn: () => fn({ data: { from, to } }),
   });
 
-  const money = (v: number) => new Intl.NumberFormat("pt-BR", { style:"currency", currency:"BOB" }).format(v ?? 0);
+  const money = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BOB" }).format(v ?? 0);
   const doExport = async (ds: any) => {
     try {
       const r = await exp({ data: { dataset: ds, from, to } });
@@ -48,9 +48,9 @@ function Page() {
       download(r.filename, r.csv); toast.success(`${r.count} linhas exportadas`);
     } catch (e: any) { toast.error(e?.message ?? "Erro"); }
   };
-  const doFiscal = async () => {
+  const doCommercial = async () => {
     try {
-      const r = await fiscal({ data: { month } });
+      const r = await commercial({ data: { month } });
       download(r.filename, r.csv);
       toast.success(`${r.summary.orders} pedidos · ${money(r.summary.gross)}`);
     } catch (e: any) { toast.error(e?.message ?? "Erro"); }
@@ -77,7 +77,7 @@ function Page() {
         <Kpi label="Receita" value={money(d.kpis.revenue)} />
         <Kpi label="Pedidos" value={String(d.kpis.orders)} />
         <Kpi label="Ticket médio" value={money(d.kpis.avgTicket)} />
-        <Kpi label="Leads" value={String(d.kpis.leads)} />
+        <Kpi label="Contatos captados" value={String(d.kpis.leads)} />
         <Kpi label="Win rate" value={`${d.kpis.winRate.toFixed(1)}%`} />
         <Kpi label="A Receber" value={money(d.kpis.arOpen)} />
         <Kpi label="A Pagar" value={money(d.kpis.apOpen)} />
@@ -92,46 +92,19 @@ function Page() {
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="exports">Exportações</TabsTrigger>
-          <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
+          <TabsTrigger value="commercial">Comercial mensal</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card><CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" />Receita diária</CardTitle></CardHeader>
-              <CardContent className="h-72">
-                <ResponsiveContainer><AreaChart data={d.salesByDay}>
-                  <XAxis dataKey="date" fontSize={11} /><YAxis fontSize={11} />
-                  <Tooltip formatter={(v: any) => money(Number(v))} />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.2)" />
-                </AreaChart></ResponsiveContainer>
-              </CardContent></Card>
-
+              <CardContent className="h-72"><ResponsiveContainer><AreaChart data={d.salesByDay}><XAxis dataKey="date" fontSize={11} /><YAxis fontSize={11} /><Tooltip formatter={(v: any) => money(Number(v))} /><Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.2)" /></AreaChart></ResponsiveContainer></CardContent></Card>
             <Card><CardHeader><CardTitle className="text-base">Pedidos por status</CardTitle></CardHeader>
-              <CardContent className="h-72">
-                <ResponsiveContainer><BarChart data={d.ordersByStatus}>
-                  <XAxis dataKey="status" fontSize={11} /><YAxis fontSize={11} />
-                  <Tooltip /><Bar dataKey="count" fill="hsl(var(--primary))" />
-                </BarChart></ResponsiveContainer>
-              </CardContent></Card>
-
-            <Card><CardHeader><CardTitle className="text-base">Leads por origem</CardTitle></CardHeader>
-              <CardContent className="h-72">
-                <ResponsiveContainer><PieChart>
-                  <Pie data={d.leadsBySource} dataKey="count" nameKey="source" outerRadius={90}>
-                    {d.leadsBySource.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip /><Legend />
-                </PieChart></ResponsiveContainer>
-              </CardContent></Card>
-
+              <CardContent className="h-72"><ResponsiveContainer><BarChart data={d.ordersByStatus}><XAxis dataKey="status" fontSize={11} /><YAxis fontSize={11} /><Tooltip /><Bar dataKey="count" fill="hsl(var(--primary))" /></BarChart></ResponsiveContainer></CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-base">Contatos por origem</CardTitle></CardHeader>
+              <CardContent className="h-72"><ResponsiveContainer><PieChart><Pie data={d.leadsBySource} dataKey="count" nameKey="source" outerRadius={90}>{d.leadsBySource.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /><Legend /></PieChart></ResponsiveContainer></CardContent></Card>
             <Card><CardHeader><CardTitle className="text-base">Resumo operacional</CardTitle></CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <Row label="Campanhas ativas" v={String(d.kpis.campaignsRunning)} />
-                <Row label="Pedidos no período" v={String(d.kpis.orders)} />
-                <Row label="Conversão (Win rate)" v={`${d.kpis.winRate.toFixed(1)}%`} />
-                <Row label="Saldo previsto (AR − AP)" v={money(d.kpis.arOpen - d.kpis.apOpen)} />
-                <Row label="Comissões acumuladas" v={money(d.kpis.commissionsAccrued)} />
-              </CardContent></Card>
+              <CardContent className="space-y-2 text-sm"><Row label="Campanhas em execução" v={String(d.kpis.campaignsRunning)} /><Row label="Pedidos no período" v={String(d.kpis.orders)} /><Row label="Conversão de cotações" v={`${d.kpis.winRate.toFixed(1)}%`} /><Row label="Saldo previsto (AR − AP)" v={money(d.kpis.arOpen - d.kpis.apOpen)} /><Row label="Comissões acumuladas" v={money(d.kpis.commissionsAccrued)} /></CardContent></Card>
           </div>
         </TabsContent>
 
@@ -139,29 +112,20 @@ function Page() {
           <Card><CardHeader><CardTitle className="text-base">Exportar CSV ({from} → {to})</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {([
-                ["sales_orders","Pedidos"],
-                ["riomed_quotes","Cotações"],
-                ["riomed_ar_invoices","Contas a Receber"],
-                ["riomed_ap_invoices","Contas a Pagar"],
-                ["riomed_commissions","Comissões"],
-                ["riomed_stock_levels","Estoque"],
-                ["riomed_products","Produtos"],
-                ["crm_leads","Leads"],
-              ] as const).map(([k, lbl]) => (
-                <Button key={k} variant="outline" size="sm" onClick={() => doExport(k)}>
-                  <Download className="h-3 w-3 mr-2" />{lbl}
-                </Button>
-              ))}
+                ["sales_orders", "Pedidos"], ["riomed_quotes", "Cotações"], ["riomed_ar_invoices", "Contas a Receber"],
+                ["riomed_ap_invoices", "Contas a Pagar"], ["riomed_commissions", "Comissões"], ["riomed_product_variants", "Estoque / variantes"],
+                ["riomed_products", "Produtos"], ["communication_contacts", "Contatos"],
+              ] as const).map(([k, lbl]) => <Button key={k} variant="outline" size="sm" onClick={() => doExport(k)}><Download className="h-3 w-3 mr-2" />{lbl}</Button>)}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="fiscal">
-          <Card><CardHeader><CardTitle className="text-base flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" />Relatório fiscal mensal</CardTitle></CardHeader>
+        <TabsContent value="commercial">
+          <Card><CardHeader><CardTitle className="text-base flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" />Relatório comercial mensal</CardTitle></CardHeader>
             <CardContent className="flex items-end gap-2 flex-wrap">
-              <div><Label className="text-xs">Mês (YYYY-MM)</Label><Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-48" /></div>
-              <Button onClick={doFiscal}><Download className="h-4 w-4 mr-2" />Gerar CSV</Button>
-              <p className="text-xs text-muted-foreground basis-full mt-2">Inclui todos os pedidos do mês com itens detalhados — pronto para conciliação contábil/fiscal.</p>
+              <div><Label className="text-xs">Mês</Label><Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-48" /></div>
+              <Button onClick={doCommercial}><Download className="h-4 w-4 mr-2" />Gerar CSV</Button>
+              <p className="text-xs text-muted-foreground basis-full mt-2">Relatório de apoio comercial e contábil com pedidos e itens. Não é documento fiscal oficial nem substitui emissão fiscal autorizada.</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -170,12 +134,5 @@ function Page() {
   );
 }
 
-function Kpi({ label, value }: { label: string; value: string }) {
-  return <Card><CardContent className="p-3">
-    <div className="text-xs text-muted-foreground">{label}</div>
-    <div className="text-base font-bold mt-1">{value}</div>
-  </CardContent></Card>;
-}
-function Row({ label, v }: { label: string; v: string }) {
-  return <div className="flex justify-between border-b pb-1"><span className="text-muted-foreground">{label}</span><span className="font-medium">{v}</span></div>;
-}
+function Kpi({ label, value }: { label: string; value: string }) { return <Card><CardContent className="p-3"><div className="text-xs text-muted-foreground">{label}</div><div className="text-base font-bold mt-1">{value}</div></CardContent></Card>; }
+function Row({ label, v }: { label: string; v: string }) { return <div className="flex justify-between border-b pb-1"><span className="text-muted-foreground">{label}</span><span className="font-medium">{v}</span></div>; }
