@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { AnaMaduHome } from '@/components/anamadu/AnaMaduHome';
+import { AnaMaduPixCheckout } from '@/components/anamadu/AnaMaduPixCheckout';
 import { AnitaDock } from '@/components/anamadu/AnitaDock';
 
 export const Route = createFileRoute('/anamadu')({
@@ -22,5 +23,11 @@ export const Route = createFileRoute('/anamadu')({
 });
 
 function AnaMaduExperience() {
-  return <><AnaMaduHome /><AnitaDock /></>;
+  return (
+    <>
+      <AnaMaduHome />
+      <AnaMaduPixCheckout />
+      <AnitaDock />
+    </>
+  );
 }
