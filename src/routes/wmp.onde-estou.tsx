@@ -11,8 +11,11 @@ export const Route = createFileRoute('/wmp/onde-estou')({
     meta: [
       { title: 'Onde Estou — agenda pública Wagner Miller | WMP' },
       { name: 'description', content: 'Agenda pública validada de Wagner Miller. Consulte datas, locais e horários publicados diretamente pela WMP.' },
+      { property: 'og:title', content: 'Onde Estou — agenda pública de Wagner Miller' },
+      { property: 'og:description', content: 'Veja somente locais, datas e horários validados e publicados pela WMP.' },
+      { property: 'og:url', content: 'https://wmp.impulsionando.com.br/onde-estou' },
     ],
-    links: [{ rel: 'canonical', href: '/wmp/onde-estou' }],
+    links: [{ rel: 'canonical', href: 'https://wmp.impulsionando.com.br/onde-estou' }],
   }),
   loader: async () => ({ entries: await loadWhereabouts() }),
   component: OndeEstouPage,
