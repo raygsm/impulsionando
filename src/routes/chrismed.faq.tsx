@@ -9,10 +9,10 @@ export const Route = createFileRoute('/chrismed/faq')({
     const jsonLd = buildFaqJsonLd(COPY.pt.faqs.map((f) => ({ question: f.q, answer: f.a })));
     return {
       meta: [
-        { title: 'Perguntas frequentes — CrisMed' },
-        { name: 'description', content: 'Dúvidas comuns sobre teleconsulta, consulta domiciliar, atendimento em Copacabana, pagamento, cancelamento e sigilo — CrisMed.' },
-        { property: 'og:title', content: 'FAQ · CrisMed' },
-        { property: 'og:description', content: 'Respostas para as principais dúvidas sobre atendimento CrisMed.' },
+        { title: 'Perguntas frequentes — CHRISMED' },
+        { name: 'description', content: 'Dúvidas comuns sobre teleconsulta, consulta domiciliar, atendimento em Copacabana, pagamento, cancelamento e sigilo — CHRISMED.' },
+        { property: 'og:title', content: 'FAQ · CHRISMED' },
+        { property: 'og:description', content: 'Respostas para as principais dúvidas sobre atendimento CHRISMED.' },
       ],
       scripts: [{ type: 'application/ld+json', children: JSON.stringify(jsonLd) }],
     };
@@ -36,10 +36,10 @@ function FaqPage() {
       <section className="container py-16 max-w-3xl">
         <FaqAccordion faqs={t.faqs.map((f) => ({ question: f.q, answer: f.a }))} />
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)]">
+          <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-forest)] text-[var(--chrismed-ivory)]">
             <Link to="/chrismed/agendar">{t.ctaBook}</Link>
           </Button>
-          <Button asChild variant="outline" className="border-[var(--chrismed-sand)] text-[var(--chrismed-ink)] hover:bg-[var(--chrismed-bone)]">
+          <Button asChild variant="outline" className="border-[var(--chrismed-forest)] bg-white text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-forest-mist)]">
             <Link to="/chrismed/contato">{t.ctaContact}</Link>
           </Button>
         </div>
@@ -56,16 +56,16 @@ const COPY = {
     ctaBook: 'Agendar consulta',
     ctaContact: 'Falar com a equipe',
     faqs: [
-      { q: 'Como funciona a teleconsulta?', a: 'Você escolhe o horário na agenda, faz o pagamento via PIX/cartão pelo Mercado Pago e recebe o link da consulta por e-mail e WhatsApp. No horário marcado é só acessar o link — a Dra. Cristiane realiza a consulta por vídeo, com prescrição digital e prontuário eletrônico.' },
-      { q: 'A consulta domiciliar cobre qual região?', a: 'A cobertura padrão é Zona Sul e Centro do Rio de Janeiro. Para outras regiões e cidades, envie sua solicitação com CEP e endereço — validamos a disponibilidade antes de confirmar o horário.' },
-      { q: 'Vocês atendem convênio?', a: 'A CrisMed é uma clínica particular, com atendimento privado. Emitimos recibo com CID e código TUSS quando aplicável, para que você possa solicitar reembolso ao seu convênio.' },
-      { q: 'Como é feito o pagamento?', a: 'Todas as modalidades exigem pagamento no ato do agendamento, via PIX ou cartão pelo Mercado Pago. O horário fica bloqueado apenas após a aprovação do pagamento.' },
-      { q: 'Posso cancelar ou remarcar?', a: 'Cancelamentos com mais de 24h de antecedência têm reembolso integral. Remarcações podem ser feitas pelo WhatsApp, respeitando a disponibilidade da agenda.' },
-      { q: 'Vocês atendem em outros idiomas?', a: 'Sim. A Dra. Cristiane atende integralmente em português, inglês e espanhol — sem intérprete intermediário.' },
-      { q: 'A CrisMed atende empresas?', a: 'Sim. Oferecemos ASO admissional, periódico, demissional, PCMSO, NR-1 e gestão médica corporativa. Solicite uma proposta pela página Empresa.' },
-      { q: 'Como funciona a receita digital?', a: 'A prescrição é emitida em formato digital assinado, com validade nacional. Você recebe por e-mail e pode apresentar em qualquer farmácia do Brasil.' },
-      { q: 'Meus dados estão seguros?', a: 'Sim. Utilizamos prontuário eletrônico criptografado, com controle de acesso e conformidade total com a LGPD. Consulte a página de Privacidade para detalhes.' },
-      { q: 'A Dra. Cristiane realiza segunda opinião médica?', a: 'Sim. Você pode agendar uma consulta específica para revisão de diagnóstico e condutas, com emissão de relatório formal ao final.' },
+      { q: 'Como funciona a teleconsulta?', a: 'Você escolhe o horário na agenda, conclui o pagamento quando aplicável e recebe as orientações de acesso pelos canais cadastrados. No horário marcado, a Dra. Christiane realiza a consulta por vídeo, com os recursos digitais disponíveis para o atendimento.' },
+      { q: 'A consulta domiciliar cobre qual região?', a: 'A cobertura padrão contempla Zona Sul, Grande Tijuca e Barra, no Rio de Janeiro. Para outras regiões, envie sua solicitação com CEP e endereço para validação de disponibilidade antes da confirmação.' },
+      { q: 'Vocês atendem convênio?', a: 'A CHRISMED trabalha com atendimento particular nas modalidades apresentadas no agendamento. Quando aplicável, a equipe orienta sobre a documentação disponível para eventual solicitação de reembolso ao plano de saúde.' },
+      { q: 'Como é feito o pagamento?', a: 'O valor, a forma de pagamento e a necessidade de pagamento antecipado são apresentados antes da confirmação. O sistema nunca deve alterar o preço informado durante a jornada.' },
+      { q: 'Posso cancelar ou remarcar?', a: 'Cancelamento, remarcação e eventual retorno seguem as condições da modalidade contratada e as informações apresentadas na confirmação. Em caso de dúvida, fale com a equipe CHRISMED antes de alterar o agendamento.' },
+      { q: 'Vocês atendem em outros idiomas?', a: 'Sim. A Dra. Christiane atende em português, inglês e espanhol.' },
+      { q: 'A CHRISMED atende empresas?', a: 'Sim. A frente de Medicina Ocupacional e saúde corporativa possui jornada própria para empresas, separada do atendimento ambulatorial particular.' },
+      { q: 'Como funciona a receita digital?', a: 'Quando clinicamente indicada, a documentação médica pode ser emitida em formato digital conforme os requisitos aplicáveis. As orientações de uso são enviadas ao paciente pelos canais cadastrados.' },
+      { q: 'Meus dados estão seguros?', a: 'A CHRISMED aplica controles de acesso, rastreabilidade e práticas de proteção de dados compatíveis com a natureza das informações de saúde. Consulte a página de Privacidade para detalhes.' },
+      { q: 'A Dra. Christiane realiza segunda opinião médica?', a: 'A necessidade e o formato de uma avaliação de segunda opinião podem ser informados à equipe antes do agendamento para direcionamento adequado.' },
     ],
   },
   en: {
@@ -75,16 +75,16 @@ const COPY = {
     ctaBook: 'Book a consultation',
     ctaContact: 'Talk to our team',
     faqs: [
-      { q: 'How does telehealth work?', a: 'You pick a time slot, pay via PIX/card through Mercado Pago and receive the meeting link by email and WhatsApp. At the scheduled time, just open the link — Dr. Cristiane runs the video consultation with digital prescription and electronic records.' },
-      { q: 'What area does the home visit cover?', a: 'Standard coverage is South Zone and Center of Rio de Janeiro. For other areas, send your request with ZIP and address — we confirm availability before booking.' },
-      { q: 'Do you accept health insurance?', a: 'CrisMed is a private clinic. We issue receipts with CID and TUSS codes when applicable so you can request reimbursement from your insurer.' },
-      { q: 'How is payment handled?', a: 'All modalities require payment at booking, via PIX or card through Mercado Pago. The slot is locked only after payment approval.' },
-      { q: 'Can I cancel or reschedule?', a: 'Cancellations more than 24h in advance get a full refund. Rescheduling can be arranged via WhatsApp, subject to availability.' },
-      { q: 'Do you see patients in other languages?', a: 'Yes. Dr. Cristiane runs consultations entirely in Portuguese, English and Spanish — no third-party interpreter.' },
-      { q: 'Does CrisMed serve companies?', a: 'Yes. We offer occupational exams (admissional, periodic, exit), PCMSO, NR-1 and corporate medical management. Request a proposal via the Business page.' },
-      { q: 'How does the digital prescription work?', a: 'The prescription is issued in signed digital format, valid nationwide. You receive it by email and can present it at any Brazilian pharmacy.' },
-      { q: 'Is my data secure?', a: 'Yes. We use encrypted electronic records with access control, fully compliant with Brazilian LGPD. See our Privacy page for details.' },
-      { q: 'Does Dr. Cristiane provide second opinions?', a: 'Yes. You can book a specific consultation to review diagnosis and management, with a formal report at the end.' },
+      { q: 'How does telehealth work?', a: 'Choose an available time, complete payment when applicable and receive access instructions through your registered channels. At the scheduled time, Dra. Christiane conducts the video consultation using the digital resources available for care.' },
+      { q: 'What area does the home visit cover?', a: 'Standard coverage includes the South Zone, Greater Tijuca and Barra in Rio de Janeiro. For other areas, send your ZIP code and address so availability can be confirmed before booking.' },
+      { q: 'Do you accept health insurance?', a: 'CHRISMED provides private care in the modalities shown during booking. When applicable, the team can explain which documents are available for a possible reimbursement request to your insurer.' },
+      { q: 'How is payment handled?', a: 'The price, payment method and any prepayment requirement are shown before confirmation. The system must not change the price presented during the booking journey.' },
+      { q: 'Can I cancel or reschedule?', a: 'Cancellation, rescheduling and any return visit follow the conditions of the selected service and the information shown in your confirmation. Contact the CHRISMED team if you need assistance.' },
+      { q: 'Do you see patients in other languages?', a: 'Yes. Dra. Christiane provides care in Portuguese, English and Spanish.' },
+      { q: 'Does CHRISMED serve companies?', a: 'Yes. Occupational Medicine and corporate health have a dedicated business journey, separate from private ambulatory care.' },
+      { q: 'How does the digital prescription work?', a: 'When clinically indicated, medical documents may be issued digitally according to applicable requirements. Usage instructions are sent through the patient’s registered channels.' },
+      { q: 'Is my data secure?', a: 'CHRISMED applies access controls, traceability and data-protection practices appropriate for health information. See the Privacy page for details.' },
+      { q: 'Does Dra. Christiane provide second opinions?', a: 'You can tell the team that you are seeking a second-opinion evaluation before booking so the request can be directed appropriately.' },
     ],
   },
   es: {
@@ -94,16 +94,16 @@ const COPY = {
     ctaBook: 'Agendar consulta',
     ctaContact: 'Hablar con el equipo',
     faqs: [
-      { q: '¿Cómo funciona la teleconsulta?', a: 'Elige el horario, paga vía PIX/tarjeta por Mercado Pago y recibe el enlace por email y WhatsApp. En el horario, solo abre el enlace — la Dra. Cristiane realiza la consulta con receta digital e historia clínica electrónica.' },
-      { q: '¿Qué zona cubre la visita domiciliaria?', a: 'La cobertura estándar es Zona Sur y Centro de Río de Janeiro. Para otras zonas, envía la solicitud con CEP y dirección — validamos la disponibilidad antes de confirmar.' },
-      { q: '¿Atienden convenios?', a: 'CrisMed es una clínica particular. Emitimos recibo con códigos CID y TUSS cuando aplica, para solicitar reembolso a su seguro.' },
-      { q: '¿Cómo se paga?', a: 'Todas las modalidades requieren pago al agendar, vía PIX o tarjeta por Mercado Pago. El horario se bloquea solo tras aprobación.' },
-      { q: '¿Puedo cancelar o reagendar?', a: 'Cancelaciones con más de 24 h de antelación tienen reembolso íntegro. Reagendar por WhatsApp, según disponibilidad.' },
-      { q: '¿Atienden en otros idiomas?', a: 'Sí. La Dra. Cristiane atiende íntegramente en portugués, inglés y español — sin intérprete intermediario.' },
-      { q: '¿CrisMed atiende a empresas?', a: 'Sí. Ofrecemos exámenes ocupacionales, PCMSO, NR-1 y gestión médica corporativa. Solicite una propuesta en Empresa.' },
-      { q: '¿Cómo funciona la receta digital?', a: 'La prescripción es digital firmada, con validez nacional. La recibe por email y la presenta en cualquier farmacia de Brasil.' },
-      { q: '¿Mis datos están seguros?', a: 'Sí. Utilizamos historia clínica electrónica cifrada, con control de acceso y cumplimiento LGPD. Consulte la página de Privacidad.' },
-      { q: '¿La Dra. Cristiane realiza segunda opinión?', a: 'Sí. Puede agendar una consulta específica para revisión, con informe formal al final.' },
+      { q: '¿Cómo funciona la teleconsulta?', a: 'Elige un horario disponible, completa el pago cuando corresponda y recibe las instrucciones de acceso por los canales registrados. A la hora programada, la Dra. Christiane realiza la consulta por video con los recursos digitales disponibles.' },
+      { q: '¿Qué zona cubre la visita domiciliaria?', a: 'La cobertura estándar incluye Zona Sur, Grande Tijuca y Barra, en Río de Janeiro. Para otras zonas, envía CEP y dirección para validar disponibilidad antes de confirmar.' },
+      { q: '¿Atienden convenios?', a: 'CHRISMED trabaja con atención particular en las modalidades presentadas al agendar. Cuando corresponda, el equipo puede orientar sobre los documentos disponibles para una posible solicitud de reembolso.' },
+      { q: '¿Cómo se paga?', a: 'El valor, la forma de pago y cualquier requisito de pago anticipado se muestran antes de confirmar. El sistema no debe modificar el precio presentado durante la jornada.' },
+      { q: '¿Puedo cancelar o reagendar?', a: 'La cancelación, reagendamiento y eventual retorno siguen las condiciones del servicio elegido y la información de la confirmación. Contacta al equipo CHRISMED si necesitas ayuda.' },
+      { q: '¿Atienden en otros idiomas?', a: 'Sí. La Dra. Christiane atiende en portugués, inglés y español.' },
+      { q: '¿CHRISMED atiende a empresas?', a: 'Sí. Medicina Ocupacional y salud corporativa cuentan con una jornada empresarial específica, separada de la atención ambulatoria particular.' },
+      { q: '¿Cómo funciona la receta digital?', a: 'Cuando está clínicamente indicada, la documentación médica puede emitirse en formato digital conforme a los requisitos aplicables. Las orientaciones se envían por los canales registrados.' },
+      { q: '¿Mis datos están seguros?', a: 'CHRISMED aplica controles de acceso, trazabilidad y prácticas de protección de datos adecuadas a la información de salud. Consulta la página de Privacidad para más detalles.' },
+      { q: '¿La Dra. Christiane realiza segunda opinión?', a: 'Puedes informar al equipo antes de agendar que buscas una evaluación de segunda opinión para que la solicitud sea direccionada adecuadamente.' },
     ],
   },
 } as const;
