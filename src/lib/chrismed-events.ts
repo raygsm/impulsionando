@@ -66,6 +66,30 @@ export async function registerForChrismedEvent(input: unknown) {
   return { id: row.registration_id, code: row.registration_code, status: row.registration_status };
 }
 
+export type ChrismedInvitationActivity = "opened" | "confirm_started" | "confirm_failed" | "confirmed";
+
+export async function trackChrismedEventInvitationActivity(
+  token: string,
+  eventType: ChrismedInvitationActivity,
+  error?: unknown,
+) {
+  const parsed = z.string().uuid().safeParse(token);
+  if (!parsed.success) return false;
+  const err = error instanceof Error ? error : null;
+  const { data, error: telemetryError } = await supabase.rpc("chrismed_track_event_invitation_activity" as never, {
+    p_token: parsed.data,
+    p_event_type: eventType,
+    p_error_code: err?.name ?? null,
+    p_error_message: err?.message ?? null,
+    p_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+  } as never);
+  if (telemetryError) {
+    console.warn("[CHRISMED invitation telemetry]", telemetryError.message);
+    return false;
+  }
+  return Boolean(data);
+}
+
 export async function acceptChrismedEventInvitation(token: string) {
   const parsed = z.string().uuid().parse(token);
   const { data, error } = await supabase.rpc("chrismed_accept_event_invitation" as never, { p_token: parsed } as never);
