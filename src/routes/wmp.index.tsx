@@ -12,9 +12,9 @@ export const Route = createFileRoute("/wmp/")({
       { property: "og:description", content: "Produção técnica e comercial sob medida, do briefing à proposta." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "WMP" },
-      { property: "og:url", content: "https://wmp.impulsionando.com.br/wmp" },
+      { property: "og:url", content: "https://wmp.impulsionando.com.br/" },
     ],
-    links: [{ rel: "canonical", href: "https://wmp.impulsionando.com.br/wmp" }],
+    links: [{ rel: "canonical", href: "https://wmp.impulsionando.com.br/" }],
   }),
   component: WmpHome,
 });
