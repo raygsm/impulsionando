@@ -1,0 +1,45 @@
+name: WMP Onde Estou Daily
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: wmp-onde-estou-daily
+  cancel-in-progress: false
+
+jobs:
+  request-update:
+    name: Ask Wagner to update Onde Estou
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      WMP_URL: https://wmp.impulsionando.com.br
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Verify secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo "::error::Missing SUPABASE_SERVICE_ROLE_KEY"; exit 1; }
+
+      - name: Trigger Milito daily request
+        shell: bash
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code=$(curl --silent --show-error --retry 2 --retry-all-errors \
+            --output "$response_file" --write-out '%{http_code}' \
+            --request POST "$WMP_URL/api/wmp/whereabouts/daily" \
+            --header "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            --header 'content-type: application/json' \
+            --data '{}')
+          cat "$response_file"
+          echo
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::WMP Onde Estou daily endpoint returned HTTP $http_code"
+            exit 1
+          fi
