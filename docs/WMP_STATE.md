@@ -24,10 +24,12 @@ Ao receber `Continue`, `Siga` ou `Retome do ultimo checkpoint` em contexto WMP:
 Estado implementado:
 - `communication_agents`: Milito ativo no tenant WMP.
 - `communication_agent_runtime`: CLIENT_INSTANCE com vision/multimodal, structured output, confidence policy, handoff, CRM update, image analysis, proposal draft, lead qualification, setup recommendation, DJ availability lookup e equipment catalog lookup.
-- Config live corrigida para `name_spelling=Milito`.
-- Rotas canonicas live: briefing `/wmp/orcamento`, contratar DJ `/wmp/djs`, B2B `/wmp/empresas`, parceiro `/wmp/parceiro`, agenda `/wmp/onde-estou`.
+- Config live e migration rastreada com `name_spelling=Milito` e rotas canonicas.
+- Rotas: briefing `/wmp/orcamento`, contratar DJ `/wmp/djs`, B2B `/wmp/empresas`, parceiro `/wmp/parceiro`, agenda `/wmp/onde-estou`.
 - Chat `/api/wmp/millito/chat` consulta agenda publicada futura no banco a cada requisicao e nao reutiliza agenda historica como atual.
 - Dock possui atalhos por intencao e links clicaveis de continuidade/exportacao.
+- Policy de exportacao alinhada: nome completo, e-mail e celular obrigatorios; CPF/CNPJ/endereco/empresa opcionais; no maximo 10 perguntas.
+- Tela de exportacao usa apenas a grafia publica Milito.
 
 ## Front comercial
 Implementado no `main`:
@@ -37,7 +39,7 @@ Implementado no `main`:
 - `/wmp/onde-estou` — agenda publica validada.
 - `/wmp/orcamento` — briefing inteligente.
 - `/wmp/parceiro` — cadastro de DJ/parceiro.
-- menu principal e mobile expõem contratar DJ, B2B, Onde Estou, servicos, cases, sobre e parceiros.
+- menu principal e mobile expoem contratar DJ, B2B, Onde Estou, servicos, cases, sobre e parceiros.
 - widget Onde Estou usa asset `public/wmp/wagner-miller.webp`.
 
 ## Briefing e evidencias privadas
@@ -54,15 +56,28 @@ Implementado no codigo e no Supabase live:
 - imagens acionam pre-diagnostico multimodal server-side; falha de IA nao perde o arquivo e deixa analise pendente.
 - analise visual nao pode inventar dimensoes, lotacao, potencia eletrica, carga, dB, certificacao ou conformidade.
 
+## B2B multi-data
+Implementado no banco e no `main`:
+- `wmp_briefing_dates` como tabela filha normalizada do briefing-mestre.
+- 1 a 100 datas por solicitacao corporativa.
+- cada data tem local, horario, municipio IBGE, observacao e status independente.
+- status: REQUESTED, QUOTED, CONFIRMED, CANCELLED.
+- RLS e isolamento por cliente ativo.
+- `/wmp/empresas` incorpora o planner de agenda corporativa.
+- `submitWmpCorporateDemand` cria um unico briefing/lead-mãe e varias datas, evitando duplicacao de CRM.
+- Central Operacional consulta e gerencia as datas corporativas separadamente dos bookings de DJs.
+
 ## Migrations WMP recentes rastreadas no GitHub
 - `20260815232926_wmp_private_briefing_evidence_uploads_20260815.sql`
 - `20260815233120_wmp_atomic_briefing_upload_grant_20260815.sql`
 - `20260815233136_wmp_atomic_briefing_evidence_append_20260815.sql`
+- `20260815233322_wmp_atomic_multimodal_analysis_append_20260815.sql`
+- `20260815233603_wmp_milito_runtime_canonical_routes_20260815.sql`
+- `20260815234151_wmp_corporate_briefing_dates_20260815.sql`
 
-## Drift conhecido: live aplicado, arquivo ainda nao rastreado
-As migrations abaixo estao aplicadas e registradas em `supabase_migrations.schema_migrations`, mas duas tentativas de criar o arquivo correspondente pelo conector GitHub foram bloqueadas pelo proprio conector. NAO reaplicar nem renomear sem reconciliacao:
-- `20260815233322_wmp_atomic_multimodal_analysis_append_20260815`
-- `20260815233603_wmp_milito_runtime_canonical_routes_20260815`
+## Drift de schema
+- O drift conhecido de multimodal/runtime foi reconciliado: as migrations live agora tambem possuem arquivo no GitHub.
+- Continuar comparando `supabase_migrations.schema_migrations` com `supabase/migrations` antes de qualquer nova DDL.
 
 ## n8n — fonte real de status
 Live registry:
@@ -87,16 +102,16 @@ Em 2026-08-15 o banco tinha, internamente:
 Nao expor dados pessoais ou contagens internas como promessa comercial sem necessidade.
 
 ## Producao e CI
-Problema confirmado durante a auditoria: producao ainda servia versao antiga com claims/cases/precos nao homologados enquanto `main` ja havia removido esse conteudo.
-O build Docker mais recente deve ser validado ate conclusao, seguido de deploy e nova verificacao externa.
-Nenhum status GO-LIVE pode ser emitido enquanto producao estiver divergente do `main`.
+- O build `npm install` + `npm run build` do commit `368595e33768990694e3585bc749514c46b1d801` concluiu com sucesso; esse commit ja continha Milito com contexto live, anexos privados e multimodal.
+- Commits posteriores adicionaram foto real do Wagner, agenda B2B multi-data, limpeza de exportacao e gestao de datas corporativas; os workflows correspondentes foram disparados e devem ser validados ate o HEAD mais recente.
+- Problema confirmado durante a auditoria: producao ainda servia versao antiga com claims/cases/precos nao homologados enquanto `main` ja havia removido esse conteudo.
+- Nenhum status GO-LIVE pode ser emitido enquanto producao estiver divergente do `main`.
 
 ## Pendencias prioritarias
 1. fechar build/deploy do HEAD WMP e verificar producao;
 2. executar E2E do briefing com anexo privado + analise multimodal + intake;
-3. reconciliar no GitHub as duas migrations live sem arquivo;
-4. criar agenda corporativa multi-data normalizada para hoteis/empresas, sem duplicar CRM;
-5. criar/ativar workflows n8n reais para proposta, DJ booking e pos-evento quando houver acesso n8n;
-6. validar proposta → aceite → contrato → DJ → equipamento → locacao → evento → pos-evento;
-7. validar mobile, RLS, perfis, botoes, logs e observabilidade;
-8. somente entao avaliar `WMP — GO-LIVE APROVADO`.
+3. executar E2E do B2B multi-data e confirmar aparicao/gestao no dashboard;
+4. criar/ativar workflows n8n reais para proposta, DJ booking e pos-evento quando houver acesso n8n;
+5. validar proposta → aceite → contrato → DJ → equipamento → locacao → evento → pos-evento;
+6. validar mobile, RLS, perfis, botoes, logs e observabilidade;
+7. somente entao avaliar `WMP — GO-LIVE APROVADO`.
