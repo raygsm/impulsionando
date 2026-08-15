@@ -90,6 +90,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.VPS_USER }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           IMPULSIONANDO_WEBHOOK_SECRET: ${{ secrets.IMPULSIONANDO_WEBHOOK_SECRET }}
           GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
@@ -103,6 +104,10 @@ jobs:
           COLORS_META_IG_ACCOUNT_ID: ${{ secrets.COLORS_META_IG_ACCOUNT_ID }}
           COLORS_MAISFY_WEBHOOK_SECRET: ${{ secrets.COLORS_MAISFY_WEBHOOK_SECRET }}
           COLORS_MAISFY_WEBHOOK_TOKEN: ${{ secrets.COLORS_MAISFY_WEBHOOK_TOKEN }}
+          COLORS_MONETIZZE_UNIQUE_KEY: ${{ secrets.COLORS_MONETIZZE_UNIQUE_KEY }}
+          COLORS_PERFECTPAY_WEBHOOK_TOKEN: ${{ secrets.COLORS_PERFECTPAY_WEBHOOK_TOKEN }}
+          COLORS_GROUP_URL: ${{ secrets.COLORS_GROUP_URL }}
+          CHRISMED_REFERRAL_SECRET: ${{ secrets.CHRISMED_REFERRAL_SECRET }}
         run: |
           set -euo pipefail
           test -n "${GOOGLE_DRIVE_CLIENT_ID:-}"
@@ -112,6 +117,7 @@ jobs:
           {
             printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY"
             printf 'SUPABASE_URL=%s\n' "$SUPABASE_URL"
+            printf 'SUPABASE_PUBLISHABLE_KEY=%s\n' "$SUPABASE_PUBLISHABLE_KEY"
             printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
             printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "${IMPULSIONANDO_WEBHOOK_SECRET:-}"
             printf 'GOOGLE_DRIVE_CLIENT_ID=%s\n' "$GOOGLE_DRIVE_CLIENT_ID"
@@ -127,6 +133,10 @@ jobs:
             printf 'COLORS_META_GRAPH_VERSION=v23.0\n'
             printf 'COLORS_MAISFY_WEBHOOK_SECRET=%s\n' "${COLORS_MAISFY_WEBHOOK_SECRET:-}"
             printf 'COLORS_MAISFY_WEBHOOK_TOKEN=%s\n' "${COLORS_MAISFY_WEBHOOK_TOKEN:-}"
+            printf 'COLORS_MONETIZZE_UNIQUE_KEY=%s\n' "${COLORS_MONETIZZE_UNIQUE_KEY:-}"
+            printf 'COLORS_PERFECTPAY_WEBHOOK_TOKEN=%s\n' "${COLORS_PERFECTPAY_WEBHOOK_TOKEN:-}"
+            printf 'COLORS_GROUP_URL=%s\n' "${COLORS_GROUP_URL:-}"
+            printf 'CHRISMED_REFERRAL_SECRET=%s\n' "${CHRISMED_REFERRAL_SECRET:-}"
             printf 'COLORS_AUTOMATION_ENABLED=true\n'
             printf 'COLORS_AUTOMATION_INTERVAL_MS=60000\n'
             if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
@@ -206,12 +216,21 @@ jobs:
           curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/eventos >/tmp/colors-eventos.html
           curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/suporte >/tmp/colors-suporte.html
           curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/super-green-black >/tmp/colors-sgb.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/rastreio >/tmp/colors-rastreio.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/privacidade >/tmp/colors-privacy.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/termos >/tmp/colors-terms.html
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/monetizze-colors >/tmp/colors-monetizze.json
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/perfectpay-colors >/tmp/colors-perfectpay.json
+          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors >/tmp/colors-maisfy.json
 
           grep -qi "Colors" /tmp/colors-home.html
           grep -qi "Agende" /tmp/colors-agenda.html
           grep -qi "Eventos" /tmp/colors-eventos.html
           grep -qi "Suporte\|atendimento" /tmp/colors-suporte.html
           grep -qi "Super Green Black" /tmp/colors-sgb.html
+          grep -qi "Rastre" /tmp/colors-rastreio.html
+          grep -qi "Privacidade" /tmp/colors-privacy.html
+          grep -qi "Termos" /tmp/colors-terms.html
 
       - name: Roll back failed release
         if: failure()
