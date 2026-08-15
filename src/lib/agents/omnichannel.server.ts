@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
-export type OmnichannelAgentKey = 'impulsionito-core' | 'chrismed-oliver' | 'wmp-millito';
-export type OmnichannelChannel = 'web_chat' | 'whatsapp' | 'instagram' | string;
+export type OmnichannelAgentKey = 'impulsionito-core' | 'colors-iris' | 'chrismed-oliver' | 'wmp-millito';
+export type OmnichannelChannel = 'web_chat' | 'whatsapp' | 'instagram' | 'facebook' | string;
 
 export type InboundMessageInput = {
   agentKey: OmnichannelAgentKey;
