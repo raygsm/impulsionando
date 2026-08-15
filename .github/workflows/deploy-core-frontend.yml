@@ -205,11 +205,19 @@ jobs:
           fi
           REMOTE
 
-      - name: Validate public Core and Colors
+      - name: Validate public Core, CHRISMED and Colors
         run: |
           set -euo pipefail
           curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
+
+          # CHRISMED: every critical public route must answer successfully after each Core deploy.
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed-home.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agendar >/tmp/chrismed-agendar.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/eventos >/tmp/chrismed-eventos.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/auth >/tmp/chrismed-auth.html
+          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agenda/profissional >/tmp/chrismed-profissional.html
+          grep -qi "CHRISMED\|CrisMed" /tmp/chrismed-home.html
 
           curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/ >/tmp/colors-home.html
           curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/agenda >/tmp/colors-agenda.html
