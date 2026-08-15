@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client'
 
 const NAV = [
   { label: 'Visão geral', to: '/dashboard' },
+  { label: 'Agenda Wagner', to: '/wmp/agenda' },
   { label: 'Propostas', to: '/wmp/propostas' },
   { label: 'CRM e clientes', to: '/wmp/operacao?area=crm' },
   { label: 'Agenda e eventos', to: '/wmp/operacao?area=agenda' },
