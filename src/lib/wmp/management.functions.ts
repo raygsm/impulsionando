@@ -46,11 +46,12 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
       .maybeSingle()
     if (categorySet.error) throw categorySet.error
 
-    const [briefings, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories] = await Promise.all([
-      context.supabase.from('wmp_briefings').select('id,status,contratante_nome,contratante_empresa,contratante_email,contratante_telefone,evento_tipo,evento_data,evento_cidade,evento_estado,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(100),
+    const [briefings, corporateDates, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories] = await Promise.all([
+      context.supabase.from('wmp_briefings').select('id,status,contratante_nome,contratante_empresa,contratante_email,contratante_telefone,evento_tipo,evento_data,evento_cidade,evento_estado,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
+      context.supabase.from('wmp_briefing_dates').select('id,briefing_id,event_date,start_time,end_time,venue_name,venue_cep,venue_address,venue_bairro,venue_city,venue_state,venue_municipio_ibge,status,notes,created_at').eq('tenant_id', id).gte('event_date', new Date().toISOString().slice(0, 10)).order('event_date', { ascending: true }).order('start_time', { ascending: true }).limit(1000),
       context.supabase.from('wmp_parceiros').select('id,status,nome,nome_artistico,email,telefone,categoria,cidade,estado,experiencia_anos,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
-      context.supabase.from('wmp_dj_bookings').select('id,parceiro_id,proposal_id,event_name,event_date,venue_name,city,state,status,fee_cents,response_deadline,accepted_at,declined_at,meal_allowance_cents,parking_allowance_cents,meal_provided_by_contractor,parking_provided_by_contractor,logistics,created_at').eq('tenant_id', id).order('event_date', { ascending: true }).limit(200),
-      context.supabase.from('wmp_dj_availability').select('id,parceiro_id,date,start_time,end_time,status,city,state,notes').eq('tenant_id', id).gte('date', new Date().toISOString().slice(0, 10)).order('date', { ascending: true }).limit(300),
+      context.supabase.from('wmp_dj_bookings').select('id,parceiro_id,proposal_id,event_name,event_date,venue_name,city,state,status,fee_cents,response_deadline,accepted_at,declined_at,meal_allowance_cents,parking_allowance_cents,meal_provided_by_contractor,parking_provided_by_contractor,logistics,created_at').eq('tenant_id', id).order('event_date', { ascending: true }).limit(300),
+      context.supabase.from('wmp_dj_availability').select('id,parceiro_id,date,start_time,end_time,status,city,state,notes').eq('tenant_id', id).gte('date', new Date().toISOString().slice(0, 10)).order('date', { ascending: true }).limit(500),
       context.supabase.from('wmp_equipment_catalog').select('id,code,category,name,manufacturer,manufacturer_id,model,model_id,quantity_available,internal_cost_cents,commercial_value_cents,status,owner_type,owner_ref_id,owner_name,beneficiary_kind').eq('tenant_id', id).order('name').limit(500),
       context.supabase.from('wmp_equipment_rentals').select('id,equipment_id,proposal_id,dj_booking_id,quantity,unit_rental_cents,status,owner_type,owner_name,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(300),
       context.supabase.from('wmp_equipment_rental_payouts').select('id,rental_id,beneficiary_type,beneficiary_name,amount_cents,status,paid_at,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(300),
@@ -62,14 +63,15 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
         ? context.supabase.from('reference_options').select('id,code,label,description,sort_order').eq('set_id', categorySet.data.id).eq('active', true).order('sort_order').limit(500)
         : Promise.resolve({ data: [], error: null }),
     ])
-    const all = { briefings, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories }
+
+    const all = { briefings, corporateDates, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories }
     for (const [key, result] of Object.entries(all)) {
       if ((result as any).error) throw new Error(`${key}: ${(result as any).error.message}`)
     }
     return Object.fromEntries(Object.entries(all).map(([key, result]) => [key, (result as any).data ?? []]))
   })
 
-const tableSchema = z.enum(['wmp_briefings', 'wmp_parceiros', 'wmp_dj_bookings', 'wmp_dj_availability', 'wmp_equipment_rentals', 'wmp_equipment_rental_payouts'])
+const tableSchema = z.enum(['wmp_briefings', 'wmp_briefing_dates', 'wmp_parceiros', 'wmp_dj_bookings', 'wmp_dj_availability', 'wmp_equipment_rentals', 'wmp_equipment_rental_payouts'])
 
 const djLifecycleEvents: Record<string, string> = {
   OFFERED: 'wmp.dj.offered',
@@ -77,6 +79,8 @@ const djLifecycleEvents: Record<string, string> = {
   CONFIRMED: 'wmp.dj.confirmed',
   COMPLETED: 'wmp.dj.completed',
 }
+
+const corporateDateStatuses = new Set(['REQUESTED', 'QUOTED', 'CONFIRMED', 'CANCELLED'])
 
 export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -89,6 +93,35 @@ export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
     const id = await tenantId(context)
     const normalizedStatus = data.status.toUpperCase()
     const now = new Date().toISOString()
+
+    if (data.table === 'wmp_briefing_dates') {
+      if (!corporateDateStatuses.has(normalizedStatus)) throw new Error('Status inválido para data corporativa.')
+      const { data: current, error: readError } = await context.supabase
+        .from('wmp_briefing_dates')
+        .select('id,briefing_id,event_date,start_time,end_time,venue_name,status')
+        .eq('tenant_id', id)
+        .eq('id', data.id)
+        .single()
+      if (readError) throw readError
+
+      const { error } = await context.supabase
+        .from('wmp_briefing_dates')
+        .update({ status: normalizedStatus, updated_at: now })
+        .eq('tenant_id', id)
+        .eq('id', data.id)
+      if (error) throw error
+
+      return {
+        ok: true,
+        transition: {
+          briefing_id: current.briefing_id,
+          event_date: current.event_date,
+          venue_name: current.venue_name,
+          previous_status: current.status,
+          status: normalizedStatus,
+        },
+      }
+    }
 
     if (data.table === 'wmp_dj_bookings') {
       const { data: current, error: readError } = await context.supabase
