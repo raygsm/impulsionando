@@ -2,175 +2,76 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import nodemailer from "npm:nodemailer@6.9.16";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
-type OutboxRow = { id: string; event_code: string; recipient: string; payload: Record<string, unknown>; attempts: number; from_email: string | null; reply_to_email: string | null };
+type OutboxRow = { id:string; event_code:string; recipient:string; payload:Record<string,unknown>; attempts:number; from_email:string|null; reply_to_email:string|null };
 
-const TEMPLATE_MAP: Record<string, string> = {
-  appointment_created: "appointment.created",
-  payment_pending: "payment.pending",
-  appointment_confirmed: "appointment.confirmed",
-  appointment_confirmed_management: "appointment.confirmed.management",
-  appointment_rescheduled: "appointment.rescheduled",
-  appointment_reminder_72h: "appointment.reminder.72h",
-  appointment_reminder_24h: "appointment.reminder.24h",
-  appointment_reminder_2h: "appointment.reminder.2h",
-  appointment_cancelled: "appointment.cancelled",
-  appointment_completed: "appointment.completed",
-  appointment_no_show: "appointment.no_show",
-  event_confirmed: "event.confirmed",
-  event_reminder: "event.reminder",
-  event_survey: "event.survey",
-  "chrismed.event.invitation.created": "chrismed.event.invitation.created",
-  "chrismed.event.registration.confirmed": "chrismed.event.registration.confirmed",
-  "chrismed.event.registration.rejected": "chrismed.event.registration.rejected",
-  professional_registration_received: "professional.registration.received",
-  professional_registration_management: "professional.registration.management",
-  pega_agenda_offer: "pega_agenda.opportunity",
-  pega_agenda_opt_in: "pega_agenda.opt_in",
-  pega_agenda_claimed: "pega_agenda.patient_reassigned",
-  pega_agenda_claimed_professional: "pega_agenda.claimed",
+const TEMPLATE_MAP: Record<string,string> = {
+  appointment_created:"appointment.created",
+  payment_pending:"payment.pending",
+  appointment_confirmed:"appointment.confirmed",
+  appointment_confirmed_management:"appointment.confirmed.management",
+  appointment_rescheduled:"appointment.rescheduled",
+  appointment_reminder_72h:"appointment.reminder.72h",
+  appointment_reminder_24h:"appointment.reminder.24h",
+  appointment_reminder_2h:"appointment.reminder.2h",
+  appointment_cancelled:"appointment.cancelled",
+  appointment_completed:"appointment.completed",
+  appointment_no_show:"appointment.no_show",
+  event_confirmed:"event.confirmed",
+  event_reminder:"event.reminder",
+  event_survey:"event.survey",
+  "chrismed.event.invitation.created":"chrismed.event.invitation.created",
+  "chrismed.event.registration.pending":"event.registration.pending",
+  "chrismed.event.registration.management_alert":"event.registration.management",
+  "chrismed.event.registration.confirmed":"event.registration.confirmed",
+  "chrismed.event.registration.rejected":"event.registration.rejected",
+  "chrismed.event.checkin.welcome":"event.checkin.welcome",
+  "chrismed.event.post_event.survey":"event.survey",
+  "chrismed.event.referral.invited":"event.referral.invited",
+  professional_registration_received:"professional.registration.received",
+  professional_registration_management:"professional.registration.management",
+  pega_agenda_offer:"pega_agenda.opportunity",
+  pega_agenda_opt_in:"pega_agenda.opt_in",
+  pega_agenda_claimed:"pega_agenda.patient_reassigned",
+  pega_agenda_claimed_professional:"pega_agenda.claimed",
 };
 
-const SENSITIVE_EVENT_PREFIXES = ["appointment_", "payment_", "pega_agenda_"];
-const SENSITIVE_EVENT_CODES = new Set([
-  "appointment_created",
-  "appointment_confirmed",
-  "appointment_rescheduled",
-  "appointment_reminder_72h",
-  "appointment_reminder_24h",
-  "appointment_reminder_2h",
-  "appointment_cancelled",
-  "appointment_completed",
-  "appointment_no_show",
-  "payment_pending",
-  "pega_agenda_offer",
-  "pega_agenda_claimed",
-  "pega_agenda_claimed_professional",
-]);
+const SENSITIVE_PREFIXES=["appointment_","payment_","pega_agenda_"];
+const required=(n:string)=>{const v=Deno.env.get(n)?.trim();if(!v)throw new Error(`missing_secret:${n}`);return v;};
+const json=(b:unknown,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
+const escapeHtml=(v:string)=>v.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+const scalar=(v:unknown):string=>v==null?"":Array.isArray(v)?v.map(scalar).filter(Boolean).join(", "):typeof v==="object"?JSON.stringify(v):String(v);
+const render=(t:string,vars:Record<string,unknown>,html=false)=>t.replace(/\{\{\s*([\w.]+)\s*\}\}/g,(_m,k)=>html?escapeHtml(scalar(vars[k])):scalar(vars[k]));
+const fmtDate=(v:unknown)=>{const d=new Date(String(v??""));return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",year:"numeric"}).format(d);};
+const fmtTime=(v:unknown)=>{const d=new Date(String(v??""));return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit",hour12:false}).format(d);};
+const fmtDateTime=(v:unknown)=>[fmtDate(v),fmtTime(v)].filter(Boolean).join(" às ");
+const parseEmailList=(v:unknown):string[]=>Array.isArray(v)?v.map(x=>String(x??"").trim().toLowerCase()).filter(x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x)):[];
 
-const required = (name: string) => { const value = Deno.env.get(name)?.trim(); if (!value) throw new Error(`missing_secret:${name}`); return value; };
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
-const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-const scalar = (value: unknown): string => value == null ? "" : Array.isArray(value) ? value.map(scalar).filter(Boolean).join(", ") : typeof value === "object" ? JSON.stringify(value) : String(value);
-const render = (template: string, vars: Record<string, unknown>, html = false) => template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => html ? escapeHtml(scalar(vars[key])) : scalar(vars[key]));
-const fmtDate = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" }).format(d); };
-const fmtTime = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); };
-const fmtDateTime = (iso: unknown) => { const d = fmtDate(iso); const t = fmtTime(iso); return [d,t].filter(Boolean).join(" às "); };
-const isSensitiveEvent = (code: string) => SENSITIVE_EVENT_CODES.has(code) || SENSITIVE_EVENT_PREFIXES.some((prefix) => code.startsWith(prefix));
-const parseEmailList = (value: unknown): string[] => {
-  if (!Array.isArray(value)) return [];
-  return value.map((v) => String(v ?? "").trim().toLowerCase()).filter((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
-};
-
-Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-  const supabaseUrl = required("SUPABASE_URL");
-  const serviceRole = required("SUPABASE_SERVICE_ROLE_KEY");
-  const smtpUser = required("CHRISMED_SMTP_USERNAME");
-  const smtpPassword = required("CHRISMED_SMTP_PASSWORD");
-  const db = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false } });
-  const transporter = nodemailer.createTransport({ host: "smtp.hostinger.com", port: 465, secure: true, auth: { user: smtpUser, pass: smtpPassword }, connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 20_000 });
-
-  const { data: tenant, error: tenantError } = await db.from("communication_tenants").select("id,company_id").eq("slug", "chrismed").eq("active", true).maybeSingle();
-  if (tenantError || !tenant) return json({ error: "chrismed_tenant_unavailable" }, 503);
-
-  let managementPrimary = "sac@chrismed.com.br";
-  let managementCopies = ["chrissalencar@yahoo.com.br"];
-  let clinicalSensitiveMode = "metadata_only";
-  if (tenant.company_id) {
-    const { data: settings } = await db.from("company_settings")
-      .select("key,value")
-      .eq("company_id", tenant.company_id)
-      .in("key", ["comms.management_primary_email", "comms.management_copy_emails", "comms.management_copy_policy"]);
-    for (const row of settings ?? []) {
-      if (row.key === "comms.management_primary_email") managementPrimary = scalar(row.value).replace(/^"|"$/g, "") || managementPrimary;
-      if (row.key === "comms.management_copy_emails") managementCopies = parseEmailList(row.value).length ? parseEmailList(row.value) : managementCopies;
-      if (row.key === "comms.management_copy_policy" && row.value && typeof row.value === "object" && !Array.isArray(row.value)) {
-        clinicalSensitiveMode = scalar((row.value as Record<string, unknown>).clinical_sensitive_mode) || clinicalSensitiveMode;
-      }
-    }
-  }
-
-  const { data: claimed, error: claimError } = await db.rpc("chrismed_claim_communication_outbox", { p_batch_size: 25 });
-  if (claimError) return json({ error: "outbox_claim_failed" }, 500);
-
-  const rows = (claimed ?? []) as OutboxRow[];
-  let sent = 0; let failed = 0;
-  const failures: Array<{ id: string; code: string }> = [];
-
-  for (const row of rows) {
-    try {
-      const code = row.event_code.toLowerCase();
-      const templateKey = TEMPLATE_MAP[code];
-      if (!templateKey) throw new Error(`template_mapping_missing:${code}`);
-      const { data: template, error: templateError } = await db.from("communication_templates").select("id,current_version").eq("tenant_id", tenant.id).eq("template_key", templateKey).eq("locale", "pt-BR").eq("status", "PUBLISHED").is("deleted_at", null).maybeSingle();
-      if (templateError || !template?.current_version) throw new Error(`published_template_missing:${templateKey}`);
-      const { data: version, error: versionError } = await db.from("communication_template_versions").select("subject_template,html_template,text_template,required_variables,approval_status").eq("template_id", template.id).eq("version", template.current_version).eq("approval_status", "APPROVED").maybeSingle();
-      if (versionError || !version) throw new Error(`approved_template_version_missing:${templateKey}`);
-
-      const vars: Record<string, unknown> = { ...(row.payload ?? {}) };
-      const base = "https://chrismed.impulsionando.com.br";
-      if (vars.appointment_id) {
-        const { data: appointment } = await db.from("chrismed_appointments").select("patient_name,patient_email,professional_id,starts_at,ends_at").eq("id", String(vars.appointment_id)).maybeSingle();
-        if (appointment) Object.assign(vars, appointment, vars);
-      }
-      if (vars.professional_id) {
-        const { data: professional } = await db.from("agenda_professionals").select("name,email").eq("id", String(vars.professional_id)).maybeSingle();
-        if (professional?.name && !vars.professional_name) vars.professional_name = professional.name;
-      }
-      vars.patient_name = vars.patient_name || vars.recipient_name || vars.first_name || "cliente";
-      vars.recipient_name = vars.recipient_name || vars.attendee_name || vars.professional_name || vars.invitee_name || vars.patient_name || vars.first_name || "cliente";
-      vars.event_name = vars.event_name || vars.event_title || "evento CHRISMED";
-      vars.appointment_date = vars.appointment_date || fmtDate(vars.starts_at);
-      vars.appointment_time = vars.appointment_time || fmtTime(vars.starts_at);
-      vars.event_date = vars.event_date || fmtDate(vars.starts_at);
-      vars.event_time = vars.event_time || fmtTime(vars.starts_at);
-      vars.event_date_time = vars.event_date_time || fmtDateTime(vars.starts_at);
-      vars.event_venue = vars.event_venue || [vars.venue_name, vars.venue_address, vars.city].map(scalar).filter(Boolean).join(" · ");
-      vars.expires_at_local = vars.expires_at_local || fmtDateTime(vars.expires_at);
-      vars.appointment_url = vars.appointment_url || `${base}/agendar`;
-      vars.booking_url = vars.booking_url || `${base}/agendar`;
-      vars.confirmation_url = vars.confirmation_url || `${base}/agendar`;
-      vars.payment_url = vars.payment_url || `${base}/agendar`;
-      vars.event_url = vars.event_url || `${base}/eventos`;
-      vars.survey_url = vars.survey_url || `${base}/eventos`;
-      vars.access_url = vars.access_url || `${base}/auth`;
-      vars.management_url = vars.management_url || `${base}/auth`;
-      vars.agenda_url = vars.agenda_url || `${base}/agenda/profissional`;
-      vars.offer_url = vars.offer_url || `${base}/agenda/profissional`;
-      vars.terms_version = vars.terms_version || "pega-agenda-v1";
-      vars.amount = vars.amount || vars.amount_brl || "";
-
-      const missing = ((version.required_variables ?? []) as string[]).filter((key) => !scalar(vars[key]).trim());
-      if (missing.length) throw new Error(`required_variables_missing:${missing.join(",")}`);
-      const subject = render(version.subject_template, vars).replace(/[\r\n]+/g, " ").trim();
-      const text = render(version.text_template, vars);
-      const htmlBody = render(version.html_template, vars, true);
-      const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eef4f3;font-family:Arial,Helvetica,sans-serif;color:#173a39"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fff;border:1px solid #d8e5e3;border-radius:18px"><tr><td style="height:7px;background:#006b68"></td></tr><tr><td style="padding:28px 32px 8px;font-size:26px;font-weight:800;color:#006b68">CHRISMED</td></tr><tr><td style="padding:16px 32px 30px;font-size:16px;line-height:1.65;color:#385654">${htmlBody}</td></tr><tr><td style="padding:20px 32px;background:#f7faf9;border-top:1px solid #e1eae9;font-size:12px;color:#627775">Precisa de ajuda? sac@chrismed.com.br<br>Mensagem transacional automática da CHRISMED.</td></tr></table></td></tr></table></body></html>`;
-
-      await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: row.recipient, replyTo: row.reply_to_email || "sac@chrismed.com.br", subject, text, html });
-
-      const copyRecipients = Array.from(new Set(managementCopies.map((e) => e.toLowerCase()))).filter((e) => e && e !== row.recipient.toLowerCase());
-      if (copyRecipients.length) {
-        if (isSensitiveEvent(code) && clinicalSensitiveMode === "metadata_only") {
-          const mgmtSubject = `[CHRISMED · Cópia gerencial] ${code}`;
-          const mgmtText = `Uma comunicação CHRISMED foi processada.\n\nEvento: ${code}\nData/hora: ${new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "medium" }).format(new Date())}\nStatus: enviada ao destinatário original\nReferência operacional: ${row.id}\n\nPor política de minimização de dados, esta cópia gerencial não replica conteúdo assistencial sensível. Consulte o ambiente autenticado da CHRISMED para detalhes.`;
-          await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: managementPrimary, cc: copyRecipients, replyTo: "sac@chrismed.com.br", subject: mgmtSubject, text: mgmtText });
-        } else {
-          await transporter.sendMail({ from: `"CHRISMED" <${smtpUser}>`, to: managementPrimary, cc: copyRecipients, replyTo: "sac@chrismed.com.br", subject: `[CHRISMED · Cópia gerencial] ${subject}`, text, html });
-        }
-      }
-
-      const { error: sentError } = await db.from("chrismed_communication_outbox").update({ status: "sent", sent_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString() }).eq("id", row.id).eq("status", "processing");
-      if (sentError) throw new Error("outbox_finalize_sent_failed");
-      sent += 1;
-    } catch (error) {
-      failed += 1;
-      const message = error instanceof Error ? error.message : "delivery_failed";
-      const terminal = row.attempts >= 5 || message.startsWith("template_mapping_missing") || message.startsWith("published_template_missing") || message.startsWith("approved_template_version_missing") || message.startsWith("required_variables_missing");
-      const delayMinutes = Math.min(360, 5 * Math.pow(2, Math.max(0, row.attempts - 1)));
-      await db.from("chrismed_communication_outbox").update({ status: terminal ? "dead_letter" : "failed", last_error: message.slice(0, 1000), available_at: new Date(Date.now() + delayMinutes * 60_000).toISOString(), updated_at: new Date().toISOString() }).eq("id", row.id).eq("status", "processing");
-      failures.push({ id: row.id, code: message.split(":")[0] });
-    }
-  }
-  return json({ ok: true, claimed: rows.length, sent, failed, failures });
+Deno.serve(async(req:Request)=>{
+  if(req.method!=="POST")return json({error:"method_not_allowed"},405);
+  const db=createClient(required("SUPABASE_URL"),required("SUPABASE_SERVICE_ROLE_KEY"),{auth:{persistSession:false}});
+  const smtpUser=required("CHRISMED_SMTP_USERNAME");
+  const transporter=nodemailer.createTransport({host:"smtp.hostinger.com",port:465,secure:true,auth:{user:smtpUser,pass:required("CHRISMED_SMTP_PASSWORD")},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000});
+  const {data:tenant,error:tenantError}=await db.from("communication_tenants").select("id,company_id").eq("slug","chrismed").eq("active",true).maybeSingle();
+  if(tenantError||!tenant)return json({error:"chrismed_tenant_unavailable"},503);
+  let managementPrimary="sac@chrismed.com.br",managementCopies=["chrissalencar@yahoo.com.br"],clinicalSensitiveMode="metadata_only";
+  if(tenant.company_id){const {data:settings}=await db.from("company_settings").select("key,value").eq("company_id",tenant.company_id).in("key",["comms.management_primary_email","comms.management_copy_emails","comms.management_copy_policy"]);for(const row of settings??[]){if(row.key==="comms.management_primary_email")managementPrimary=scalar(row.value).replace(/^"|"$/g,"")||managementPrimary;if(row.key==="comms.management_copy_emails"){const list=parseEmailList(row.value);if(list.length)managementCopies=list;}if(row.key==="comms.management_copy_policy"&&row.value&&typeof row.value==="object"&&!Array.isArray(row.value))clinicalSensitiveMode=scalar((row.value as Record<string,unknown>).clinical_sensitive_mode)||clinicalSensitiveMode;}}
+  const {data:claimed,error:claimError}=await db.rpc("chrismed_claim_communication_outbox",{p_batch_size:25});
+  if(claimError)return json({error:"outbox_claim_failed"},500);
+  const rows=(claimed??[]) as OutboxRow[];let sent=0,failed=0;const failures:Array<{id:string;code:string}>=[];
+  for(const row of rows){try{
+    const code=row.event_code.toLowerCase(),templateKey=TEMPLATE_MAP[code];if(!templateKey)throw new Error(`template_mapping_missing:${code}`);
+    const {data:template,error:te}=await db.from("communication_templates").select("id,current_version").eq("tenant_id",tenant.id).eq("template_key",templateKey).eq("locale","pt-BR").eq("status","PUBLISHED").is("deleted_at",null).maybeSingle();if(te||!template?.current_version)throw new Error(`published_template_missing:${templateKey}`);
+    const {data:version,error:ve}=await db.from("communication_template_versions").select("subject_template,html_template,text_template,required_variables,approval_status").eq("template_id",template.id).eq("version",template.current_version).eq("approval_status","APPROVED").maybeSingle();if(ve||!version)throw new Error(`approved_template_version_missing:${templateKey}`);
+    const vars:Record<string,unknown>={...(row.payload??{})};const base="https://chrismed.impulsionando.com.br";
+    if(vars.appointment_id){const {data:a}=await db.from("chrismed_appointments").select("patient_name,patient_email,professional_id,starts_at,ends_at").eq("id",String(vars.appointment_id)).maybeSingle();if(a)Object.assign(vars,a,vars);}
+    if(vars.event_id){const {data:e}=await db.from("chrismed_events").select("title,starts_at,ends_at,venue_name,venue_address,city").eq("id",String(vars.event_id)).maybeSingle();if(e)Object.assign(vars,{event_title:e.title,starts_at:e.starts_at,ends_at:e.ends_at,venue_name:e.venue_name,venue_address:e.venue_address,city:e.city},vars);}
+    if(vars.professional_id){const {data:p}=await db.from("agenda_professionals").select("name,email").eq("id",String(vars.professional_id)).maybeSingle();if(p?.name&&!vars.professional_name)vars.professional_name=p.name;}
+    vars.patient_name=vars.patient_name||vars.recipient_name||vars.first_name||"cliente";vars.recipient_name=vars.recipient_name||vars.attendee_name||vars.professional_name||vars.invitee_name||vars.patient_name||vars.first_name||"cliente";vars.event_name=vars.event_name||vars.event_title||"evento CHRISMED";vars.appointment_date=vars.appointment_date||fmtDate(vars.starts_at);vars.appointment_time=vars.appointment_time||fmtTime(vars.starts_at);vars.event_date=vars.event_date||fmtDate(vars.starts_at);vars.event_time=vars.event_time||fmtTime(vars.starts_at);vars.event_date_time=vars.event_date_time||fmtDateTime(vars.starts_at);vars.event_venue=vars.event_venue||[vars.venue_name,vars.venue_address,vars.city].map(scalar).filter(Boolean).join(" · ");vars.expires_at_local=vars.expires_at_local||fmtDateTime(vars.expires_at||vars.approval_expires_at);vars.appointment_url=vars.appointment_url||`${base}/agendar`;vars.booking_url=vars.booking_url||`${base}/agendar`;vars.confirmation_url=vars.confirmation_url||`${base}/agendar`;vars.payment_url=vars.payment_url||`${base}/agendar`;vars.event_url=vars.event_url||`${base}/eventos`;vars.survey_url=vars.survey_url||`${base}/eventos`;vars.access_url=vars.access_url||`${base}/auth`;vars.management_url=vars.management_url||`${base}/auth`;vars.agenda_url=vars.agenda_url||`${base}/agenda/profissional`;vars.offer_url=vars.offer_url||`${base}/agenda/profissional`;vars.terms_version=vars.terms_version||"pega-agenda-v1";vars.amount=vars.amount||vars.amount_brl||"";
+    const missing=((version.required_variables??[]) as string[]).filter(k=>!scalar(vars[k]).trim());if(missing.length)throw new Error(`required_variables_missing:${missing.join(",")}`);
+    const subject=render(version.subject_template,vars).replace(/[\r\n]+/g," ").trim(),text=render(version.text_template,vars),body=render(version.html_template,vars,true);const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head><body style="margin:0;background:#eef4f3;font-family:Arial,Helvetica,sans-serif;color:#173a39"><table role="presentation" width="100%"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" style="max-width:640px;background:#fff;border:1px solid #d8e5e3;border-radius:18px"><tr><td style="height:7px;background:#006b68"></td></tr><tr><td style="padding:28px 32px 8px;font-size:26px;font-weight:800;color:#006b68">CHRISMED</td></tr><tr><td style="padding:16px 32px 30px;font-size:16px;line-height:1.65;color:#385654">${body}</td></tr><tr><td style="padding:20px 32px;background:#f7faf9;border-top:1px solid #e1eae9;font-size:12px;color:#627775">Precisa de ajuda? sac@chrismed.com.br<br>Mensagem transacional automática da CHRISMED.</td></tr></table></td></tr></table></body></html>`;
+    await transporter.sendMail({from:`"CHRISMED" <${smtpUser}>`,to:row.recipient,replyTo:row.reply_to_email||"sac@chrismed.com.br",subject,text,html});
+    const copies=Array.from(new Set(managementCopies)).filter(e=>e&&e!==row.recipient.toLowerCase());if(copies.length){const sensitive=SENSITIVE_PREFIXES.some(p=>code.startsWith(p));if(sensitive&&clinicalSensitiveMode==="metadata_only"){await transporter.sendMail({from:`"CHRISMED" <${smtpUser}>`,to:managementPrimary,cc:copies,replyTo:"sac@chrismed.com.br",subject:`[CHRISMED · Cópia gerencial] ${code}`,text:`Uma comunicação CHRISMED foi processada.\n\nEvento: ${code}\nReferência operacional: ${row.id}\n\nPor política de minimização de dados, esta cópia gerencial não replica conteúdo assistencial sensível.`});}else await transporter.sendMail({from:`"CHRISMED" <${smtpUser}>`,to:managementPrimary,cc:copies,replyTo:"sac@chrismed.com.br",subject:`[CHRISMED · Cópia gerencial] ${subject}`,text,html});}
+    const {error:se}=await db.from("chrismed_communication_outbox").update({status:"sent",sent_at:new Date().toISOString(),last_error:null,updated_at:new Date().toISOString()}).eq("id",row.id).eq("status","processing");if(se)throw new Error("outbox_finalize_sent_failed");sent++;
+  }catch(error){failed++;const message=error instanceof Error?error.message:"delivery_failed";const terminal=row.attempts>=5||/^(template_mapping_missing|published_template_missing|approved_template_version_missing|required_variables_missing)/.test(message);const delay=Math.min(360,5*Math.pow(2,Math.max(0,row.attempts-1)));await db.from("chrismed_communication_outbox").update({status:terminal?"dead_letter":"failed",last_error:message.slice(0,1000),available_at:new Date(Date.now()+delay*60000).toISOString(),updated_at:new Date().toISOString()}).eq("id",row.id).eq("status","processing");failures.push({id:row.id,code:message.split(":")[0]});}}
+  return json({ok:true,claimed:rows.length,sent,failed,failures});
 });
