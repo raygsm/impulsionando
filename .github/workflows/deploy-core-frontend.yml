@@ -50,6 +50,7 @@ jobs:
           test -d .output/public
           test -f scripts/start-core-runtime.mjs
           test -f scripts/pulsonitor-worker.mjs
+          test -f scripts/colors-automation-worker.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: impulsionando-core-output
@@ -57,6 +58,7 @@ jobs:
             .output
             scripts/start-core-runtime.mjs
             scripts/pulsonitor-worker.mjs
+            scripts/colors-automation-worker.mjs
             package.json
             package-lock.json
           if-no-files-found: error
@@ -89,6 +91,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          IMPULSIONANDO_WEBHOOK_SECRET: ${{ secrets.IMPULSIONANDO_WEBHOOK_SECRET }}
           GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
           GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
           COLORS_META_APP_SECRET: ${{ secrets.COLORS_META_APP_SECRET }}
@@ -98,6 +101,8 @@ jobs:
           COLORS_META_PAGE_TOKEN: ${{ secrets.COLORS_META_PAGE_TOKEN }}
           COLORS_META_PAGE_ID: ${{ secrets.COLORS_META_PAGE_ID }}
           COLORS_META_IG_ACCOUNT_ID: ${{ secrets.COLORS_META_IG_ACCOUNT_ID }}
+          COLORS_MAISFY_WEBHOOK_SECRET: ${{ secrets.COLORS_MAISFY_WEBHOOK_SECRET }}
+          COLORS_MAISFY_WEBHOOK_TOKEN: ${{ secrets.COLORS_MAISFY_WEBHOOK_TOKEN }}
         run: |
           set -euo pipefail
           test -n "${GOOGLE_DRIVE_CLIENT_ID:-}"
@@ -108,6 +113,7 @@ jobs:
             printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY"
             printf 'SUPABASE_URL=%s\n' "$SUPABASE_URL"
             printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_SERVICE_ROLE_KEY"
+            printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "${IMPULSIONANDO_WEBHOOK_SECRET:-}"
             printf 'GOOGLE_DRIVE_CLIENT_ID=%s\n' "$GOOGLE_DRIVE_CLIENT_ID"
             printf 'GOOGLE_DRIVE_CLIENT_SECRET=%s\n' "$GOOGLE_DRIVE_CLIENT_SECRET"
             printf 'CHRISMED_BASE_URL=https://chrismed.impulsionando.com.br\n'
@@ -119,6 +125,10 @@ jobs:
             printf 'COLORS_META_PAGE_ID=%s\n' "${COLORS_META_PAGE_ID:-}"
             printf 'COLORS_META_IG_ACCOUNT_ID=%s\n' "${COLORS_META_IG_ACCOUNT_ID:-}"
             printf 'COLORS_META_GRAPH_VERSION=v23.0\n'
+            printf 'COLORS_MAISFY_WEBHOOK_SECRET=%s\n' "${COLORS_MAISFY_WEBHOOK_SECRET:-}"
+            printf 'COLORS_MAISFY_WEBHOOK_TOKEN=%s\n' "${COLORS_MAISFY_WEBHOOK_TOKEN:-}"
+            printf 'COLORS_AUTOMATION_ENABLED=true\n'
+            printf 'COLORS_AUTOMATION_INTERVAL_MS=60000\n'
             if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
               printf 'PULSONITOR_ENABLED=true\n'
             else
@@ -144,8 +154,6 @@ jobs:
           DEPLOY_USER: ${{ secrets.VPS_USER }}
         run: |
           RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
-          # RELEASE_DIR is intentionally expanded by the runner before SSH.
-          # shellcheck disable=SC2029
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
           set -euo pipefail
           PREVIOUS_RELEASE="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
@@ -156,6 +164,7 @@ jobs:
           test -f .output/server/index.mjs
           test -f scripts/start-core-runtime.mjs
           test -f scripts/pulsonitor-worker.mjs
+          test -f scripts/colors-automation-worker.mjs
           npm ci --omit=dev --no-audit --no-fund
           ln -sfn "$RELEASE_DIR" /var/www/impulsionando-core/current
 
@@ -179,7 +188,10 @@ jobs:
           done
 
           if sudo grep -q '^PULSONITOR_ENABLED=true$' /etc/impulsionando-core.env; then
-            sudo journalctl --no-pager -u impulsionando-core -n 120 | grep -q '\[Pulsonitor\] started'
+            sudo journalctl --no-pager -u impulsionando-core -n 160 | grep -q '\[Pulsonitor\] started'
+          fi
+          if sudo grep -q '^COLORS_AUTOMATION_ENABLED=true$' /etc/impulsionando-core.env && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env; then
+            sudo journalctl --no-pager -u impulsionando-core -n 160 | grep -q '\[Colors Automation\] started'
           fi
           REMOTE
 
