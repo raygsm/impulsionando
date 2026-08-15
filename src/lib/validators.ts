@@ -65,14 +65,13 @@ export function isValidPhoneBR(p: string): boolean {
   if (d.length < 10 || d.length > 11) return false;
   const ddd = parseInt(d.slice(0, 2));
   if (ddd < 11 || ddd > 99) return false;
-  // celular precisa começar com 9
   if (d.length === 11 && d[2] !== "9") return false;
   return true;
 }
 
 export const isValidCEP = (c: string) => /^\d{5}-?\d{3}$/.test(c.trim());
 
-// ============== ViaCEP ==============
+// ============== CEP ==============
 export interface CepResult {
   cep: string;
   logradouro: string;
@@ -82,21 +81,44 @@ export interface CepResult {
   ibge?: string;
 }
 
+type CepApiResponse = {
+  ok?: boolean;
+  address?: {
+    cep?: string;
+    logradouro?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
+    ibge?: string;
+  };
+};
+
+/**
+ * Mantém o contrato usado pelos formulários, mas a consulta externa passa
+ * pelo backend do Core em `/api/public/cep/:cep`. Isso desacopla o frontend
+ * do provedor de CEP e centraliza timeout/validação/fallback no servidor.
+ */
 export async function lookupCEP(cep: string): Promise<CepResult | null> {
   const clean = cep.replace(/\D/g, "");
   if (clean.length !== 8) return null;
+
   try {
-    const r = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-    if (!r.ok) return null;
-    const j = await r.json();
-    if (j.erro) return null;
+    const response = await fetch(`/api/public/cep/${clean}`, {
+      headers: { accept: "application/json" },
+    });
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as CepApiResponse;
+    const address = payload.address;
+    if (!payload.ok || !address) return null;
+
     return {
-      cep: j.cep,
-      logradouro: j.logradouro ?? "",
-      bairro: j.bairro ?? "",
-      cidade: j.localidade ?? "",
-      uf: j.uf ?? "",
-      ibge: j.ibge,
+      cep: address.cep ?? maskCEP(clean),
+      logradouro: address.logradouro ?? "",
+      bairro: address.bairro ?? "",
+      cidade: address.cidade ?? "",
+      uf: address.uf ?? "",
+      ibge: address.ibge,
     };
   } catch {
     return null;
