@@ -23,6 +23,7 @@ type FiscalStatus = {
   provider_secret: boolean;
   webhook_secret: boolean;
   provider_token_validated: boolean;
+  focus_company_registered: boolean;
   ready: boolean;
   jobs?: { blocked?: number; queued?: number; sent?: number; issued?: number; failed?: number };
 };
@@ -39,10 +40,18 @@ function maskedCnpj(value: string) {
   return v.length === 14 ? `${v.slice(0,2)}.${v.slice(2,5)}.${v.slice(5,8)}/${v.slice(8,12)}-${v.slice(12)}` : value;
 }
 
+async function accessToken() {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Sessão administrativa não encontrada.');
+  return token;
+}
+
 function ChrismedFiscal() {
   const [status, setStatus] = useState<FiscalStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [environment, setEnvironment] = useState<'homologation' | 'production'>('homologation');
   const [focusToken, setFocusToken] = useState('');
 
@@ -71,6 +80,22 @@ function ChrismedFiscal() {
     await load();
   }
 
+  async function validateFocus() {
+    setValidating(true);
+    try {
+      const token = await accessToken();
+      const response = await fetch('/api/chrismed/fiscal/focus/validate', { method:'POST', headers:{ Authorization:`Bearer ${token}` } });
+      const body = await response.json().catch(()=>({})) as { companyRegistered?: boolean; error?: string };
+      if (!response.ok) throw new Error(body.error || 'Não foi possível validar a credencial Focus NFe.');
+      toast.success(body.companyRegistered ? 'Token válido e CHRISMED localizada no ambiente Focus NFe.' : 'Token válido, mas o CNPJ CHRISMED ainda não está cadastrado/habilitado nesse ambiente Focus NFe.');
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível validar a credencial Focus NFe.');
+    } finally {
+      setValidating(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#F7F3EA] px-4 py-7 text-[#071C18] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -94,22 +119,27 @@ function ChrismedFiscal() {
 
             <Card className={status.ready ? 'border-emerald-300 bg-white' : 'border-amber-300 bg-white'}>
               <CardHeader><div className="flex items-center justify-between gap-3"><CardTitle className="flex items-center gap-2"><FileText className="h-5 w-5" />Readiness de emissão</CardTitle><Badge className={status.ready ? 'bg-emerald-50 text-emerald-900 border border-emerald-300' : 'bg-amber-50 text-amber-950 border border-amber-300'}>{status.ready ? 'PRONTO' : 'BLOQUEADO'}</Badge></div></CardHeader>
-              <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <State label="Inscrição municipal" ok={Boolean(status.municipal_registration)} />
                 <State label="Código 04.01.01" ok={Boolean(status.service_code)} />
                 <State label="Token Focus no Vault" ok={status.provider_secret} />
-                <State label="Token validado" ok={status.provider_token_validated} />
+                <State label="Token autorizado" ok={status.provider_token_validated} />
+                <State label="CHRISMED cadastrada na Focus" ok={status.focus_company_registered} />
               </CardContent>
             </Card>
 
             <Card className="border-[#D9D3CB] bg-white">
               <CardHeader><CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5" />Credencial Focus NFe</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><ShieldAlert className="mr-2 inline h-4 w-4" />Salvar o token <strong>não ativa emissão</strong>. A CHRISMED permanece em fail-closed até validar a credencial e o fluxo de homologação.</div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><ShieldAlert className="mr-2 inline h-4 w-4" />Salvar o token <strong>não ativa emissão</strong>. A CHRISMED permanece em fail-closed até validar a credencial e confirmar o CNPJ no ambiente Focus.</div>
                 <div className="grid gap-4 md:grid-cols-[14rem_1fr_auto] md:items-end">
                   <div><Label htmlFor="focus-env">Ambiente</Label><select id="focus-env" value={environment} onChange={(e)=>setEnvironment(e.target.value as 'homologation'|'production')} className="mt-1 h-10 w-full rounded-md border border-[#D9D3CB] bg-white px-3"><option value="homologation">Homologação</option><option value="production">Produção</option></select></div>
                   <div><Label htmlFor="focus-token">Token API Focus NFe</Label><Input id="focus-token" type="password" autoComplete="new-password" value={focusToken} onChange={(e)=>setFocusToken(e.target.value)} placeholder="Digite diretamente aqui; não envie por chat" /></div>
                   <Button onClick={() => void saveFocus()} disabled={saving || focusToken.trim().length < 16} className="bg-[#071C18] text-white">{saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Salvando…</> : 'Salvar no cofre'}</Button>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D9D3CB] bg-[#FDFCFB] p-4">
+                  <p className="max-w-3xl text-xs leading-5 text-[#596660]">A validação é somente leitura: consulta a lista de empresas da Focus usando HTTP Basic e verifica se o CNPJ 42.625.058/0001-70 está cadastrado no ambiente selecionado. Nenhuma nota é emitida.</p>
+                  <Button variant="outline" onClick={() => void validateFocus()} disabled={validating || !status.provider_secret}>{validating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Validando…</> : <><ShieldCheck className="mr-2 h-4 w-4"/>Validar token</>}</Button>
                 </div>
                 <p className="text-xs text-[#596660]">O token é encaminhado à RPC protegida e armazenado no Supabase Vault. A aplicação mantém apenas o nome da referência secreta.</p>
               </CardContent>
