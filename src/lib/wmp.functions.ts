@@ -7,6 +7,8 @@ const db:any=supabaseAdmin;
 const WMP_COMPANY_ID = "ff2a9570-1168-4f9c-a852-1e042d9f32ed";
 const clean=(v:unknown,max=500)=>typeof v==="string"&&v.trim()?v.trim().slice(0,max):undefined;
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EVENT_CODE_ALIASES:Record<string,string>={outro:"outro_curado"};
+const normalizeEventCode=(value:string)=>EVENT_CODE_ALIASES[value]??value;
 
 async function getWmpTenantId(){
   const {data,error}=await db.from("communication_tenants").select("id").eq("slug","wmp").eq("active",true).single();
@@ -55,9 +57,10 @@ async function assertCepLocation(input:{cep:string;uf:string;cidade:string;ibge:
 
 export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{
   if(!d||typeof d!=="object")throw new Error("Payload inválido");
-  const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipo=clean(d.evento_tipo,80);
-  if(!nome||!email||!telefone||!eventoTipo)throw new Error("Campos obrigatórios faltando.");
+  const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipoRaw=clean(d.evento_tipo,80);
+  if(!nome||!email||!telefone||!eventoTipoRaw)throw new Error("Campos obrigatórios faltando.");
   if(!EMAIL_RE.test(email))throw new Error("E-mail inválido.");
+  const eventoTipo=normalizeEventCode(eventoTipoRaw);
   const cep=(clean(d.evento_cep,12)??"").replace(/\D/g,"");
   if(cep.length!==8)throw new Error("CEP inválido.");
   const uf=(clean(d.evento_estado,2)??"").toUpperCase();
