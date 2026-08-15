@@ -17,7 +17,7 @@ function EventCredentialPage() {
   const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token);
   const { data, isLoading, error } = useQuery({ queryKey: ['chrismed-event-credential', token], queryFn: () => getChrismedEventCredential(token), enabled: valid, retry: false });
   const [qr, setQr] = useState('');
-  useEffect(() => { if (!data?.qrToken) return; void QRCode.toDataURL(`CHRIMED-EVENT:${data.eventId}:${data.qrToken}`, { width: 360, margin: 2 }).then(setQr); }, [data]);
+  useEffect(() => { if (!data?.qrToken) return; void QRCode.toDataURL(`CHRISMED-EVENT:${data.eventId}:${data.qrToken}`, { width: 360, margin: 2 }).then(setQr); }, [data]);
   const fmt = (value: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value));
 
   return <ChrismedShell><main className="min-h-[70vh] bg-[var(--chrismed-ivory)] px-5 py-14 text-[var(--chrismed-forest-deep)] sm:px-6 md:py-20">
