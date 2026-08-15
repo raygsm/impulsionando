@@ -22,9 +22,11 @@ describe('CHRISMED secure booking gate', () => {
     expect(migration).toContain("status IN ('held','pending_payment','confirmed')");
   });
 
-  it('derives price and duration from active server-side offerings', () => {
+  it('derives price and duration from active server-side offerings and only permits server-side discounts', () => {
     expect(migration).toContain('v_offering.duration_minutes');
-    expect(createPayment).toContain('body.amount_cents = offering.price_cents');
+    expect(createPayment).toContain('appointment.metadata?.checkout_amount_cents ?? offering.price_cents');
+    expect(createPayment).toContain('checkoutAmount > offering.price_cents');
+    expect(createPayment).toContain('gross_amount_cents: offering.price_cents');
     expect(createPayment).toContain('A valid CHRISMED booking hold is required');
     expect(booking).toContain("rpc('create_chrismed_booking_hold'");
     expect(booking).toContain("rpc('list_chrismed_available_slots'");
@@ -74,8 +76,9 @@ describe('CHRISMED secure booking gate', () => {
     expect(setup).toContain('Authorization: `Bearer ${sessionData.session.access_token}`');
   });
 
-  it('confirms appointments and queues idempotent reminders only from the webhook', () => {
-    expect(webhook).toContain("nextAppointmentStatus = mpData.status === 'approved'");
+  it('confirms appointments and queues idempotent reminders only from the authenticated webhook', () => {
+    expect(webhook).toContain("const nextAppointmentStatus = status === 'approved'");
+    expect(webhook).toContain('signatureValid !== true');
     expect(webhook).toContain('appointment_reminder_24h');
     expect(webhook).toContain('appointment_reminder_2h');
     expect(migration).toContain('idempotency_key text NOT NULL UNIQUE');
