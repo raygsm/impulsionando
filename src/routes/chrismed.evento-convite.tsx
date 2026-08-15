@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { CheckCircle2, CalendarDays, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
-import { acceptChrismedEventInvitation } from '@/lib/chrismed-events';
+import { acceptChrismedEventInvitation, trackChrismedEventInvitationActivity } from '@/lib/chrismed-events';
 
 export const Route = createFileRoute('/chrismed/evento-convite')({
   validateSearch: (search: Record<string, unknown>) => ({ token: typeof search.token === 'string' ? search.token : '' }),
@@ -13,9 +13,29 @@ export const Route = createFileRoute('/chrismed/evento-convite')({
 
 function EventInvitationPage() {
   const { token } = Route.useSearch();
-  const mutation = useMutation({ mutationFn: () => acceptChrismedEventInvitation(token) });
   const started = useRef(false);
+  const openedTracked = useRef(false);
   const invalid = !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await trackChrismedEventInvitationActivity(token, 'confirm_started');
+      try {
+        const result = await acceptChrismedEventInvitation(token);
+        await trackChrismedEventInvitationActivity(token, 'confirmed');
+        return result;
+      } catch (error) {
+        await trackChrismedEventInvitationActivity(token, 'confirm_failed', error);
+        throw error;
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (invalid || openedTracked.current) return;
+    openedTracked.current = true;
+    void trackChrismedEventInvitationActivity(token, 'opened');
+  }, [invalid, token]);
 
   useEffect(() => {
     if (invalid || started.current) return;
