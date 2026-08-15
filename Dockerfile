@@ -28,7 +28,8 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.output ./.output
 COPY --from=build /app/public ./public
+COPY --from=build /app/scripts/pulsonitor-worker.mjs ./scripts/pulsonitor-worker.mjs
 
 EXPOSE 3000
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["sh", "-c", "node scripts/pulsonitor-worker.mjs & exec node .output/server/index.mjs"]
