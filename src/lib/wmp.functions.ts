@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { diagnoseAcoustics, type WmpAcousticInput } from "@/lib/wmp/acoustic-rules";
@@ -11,6 +12,7 @@ const clean=(v:unknown,max=500)=>typeof v==="string"&&v.trim()?v.trim().slice(0,
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EVENT_CODE_ALIASES:Record<string,string>={outro:"outro_curado"};
 const normalizeEventCode=(value:string)=>EVENT_CODE_ALIASES[value]??value;
+const hashUploadToken=(token:string)=>createHash("sha256").update(token,"utf8").digest("hex");
 
 async function getWmpTenantId(){
   const {data,error}=await db.from("communication_tenants").select("id").eq("slug","wmp").eq("active",true).single();
@@ -25,6 +27,19 @@ async function assertReference(setKey:string,code:string,label:string){
   if(error)throw new Error(error.message);
   if(!option)throw new Error(`${label} inválido. Selecione uma opção da lista.`);
   return option;
+}
+
+async function createBriefingUploadGrant(briefingId:string){
+  const token=randomBytes(32).toString("base64url");
+  const expiresAt=new Date(Date.now()+45*60*1000).toISOString();
+  const {error}=await db.from("wmp_briefing_upload_tokens").insert({
+    briefing_id:briefingId,
+    token_hash:hashUploadToken(token),
+    expires_at:expiresAt,
+    max_files:8,
+  });
+  if(error)throw new Error(`Briefing criado, mas o canal seguro de anexos não pôde ser preparado: ${error.message}`);
+  return{token,expires_at:expiresAt,max_files:8};
 }
 
 export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{
@@ -51,8 +66,9 @@ export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d
   const pre_diagnostico=diagnoseAcoustics(input);
   const{data:row,error}=await db.from("wmp_briefings").insert({...data,tenant_id,consent_at:new Date().toISOString(),pre_diagnostico}).select("id, created_at").single();
   if(error)throw new Error(error.message);
+  const upload_grant=await createBriefingUploadGrant(row.id);
   const automation=await dispatchN8nByEvent("wmp.lead.received",{lead_type:"briefing",briefing_id:row.id,email:data.contratante_email,phone:data.contratante_telefone,event_type:data.evento_tipo},WMP_COMPANY_ID,"wmp");
-  return{id:row.id,created_at:row.created_at,pre_diagnostico,automation};
+  return{id:row.id,created_at:row.created_at,pre_diagnostico,automation,upload_grant};
 });
 
 export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d:any)=>{
