@@ -5,7 +5,7 @@ const modules = [
   { title: 'CRM e clientes', description: 'Briefings, leads, qualificação, contatos e evolução comercial.', href: '/wmp/operacao?area=crm', icon: Users, enabled: true },
   { title: 'Agenda e eventos', description: 'Bookings, datas, locais, prazos, cachês e status operacional.', href: '/wmp/operacao?area=agenda', icon: CalendarDays, enabled: true },
   { title: 'DJs e parceiros', description: 'Cadastros, aprovação, disponibilidade, convites e confirmações.', href: '/wmp/operacao?area=djs', icon: Headphones, enabled: true },
-  { title: 'Equipamentos e locações', description: 'Catálogo, quantidade, valor de locação, proprietários e utilização.', href: '/wmp/operacao?area=equip', icon: Package, enabled: true },
+  { title: 'Equipamentos e locações', description: 'Catálogo canônico, fabricante, modelo, quantidade, locação, proprietários e curadoria.', href: '/wmp/equipamentos', icon: Package, enabled: true },
   { title: 'Financeiro e repasses', description: 'Locações, beneficiários, valores e acompanhamento de repasses.', href: '/wmp/operacao?area=finance', icon: WalletCards, enabled: true },
   { title: 'Milito', description: 'Conversas encerradas, protocolos, elegibilidade e exportações.', href: '/wmp/operacao?area=millito', icon: Sparkles, enabled: true },
   { title: 'Automações e jornadas', description: 'Comunicação de leads, propostas, equipe e pós-evento.', icon: Workflow, enabled: false },
