@@ -1,18 +1,19 @@
 name: Daily Encrypted DB Backup → VPS
 
-# Backup diário do Postgres (Lovable Cloud / Supabase) enviado
-# criptografado para a VPS Hostinger. Retenção rotativa: diários
-# (30d), semanais (12), mensais (12). Verificação de integridade
-# via SHA-256 antes e depois do envio.
+# Backup diário do Postgres enviado criptografado para a VPS.
+# Retenção: diários 30d, semanais 12, mensais 12.
+# Usa Session Pooler IPv4 quando a conexão direta do Supabase não é
+# alcançável pelo runner GitHub (a conexão direta pode resolver somente IPv6).
 #
-# Secrets obrigatórios no GitHub:
-#   SUPABASE_DB_URL       postgresql://postgres:...@db.<ref>.supabase.co:5432/postgres
-#   BACKUP_ENCRYPTION_KEY chave forte (openssl rand -base64 48) — GUARDAR no Bitwarden.
-#   VPS_HOST / VPS_USER / VPS_SSH_KEY / VPS_PORT (já usados no mirror deploy)
+# Secrets:
+#   SUPABASE_DB_URL          conexão direta atual (obrigatória como fonte da senha)
+#   SUPABASE_DB_POOLER_URL   opcional; se definido, tem precedência
+#   BACKUP_ENCRYPTION_KEY
+#   VPS_HOST / VPS_USER / VPS_SSH_KEY / VPS_PORT
 
 on:
   schedule:
-    - cron: "30 3 * * *"   # 03:30 UTC = 00:30 BRT
+    - cron: "30 3 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -24,25 +25,67 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Instalar postgresql-client 15
+      - name: Instalar PostgreSQL client e OpenSSL
         run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
           sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-15 openssl
+          sudo apt-get install -y postgresql-client openssl
+
+      - name: Resolver conexão IPv4 segura
+        id: db-url
+        env:
+          DIRECT_URL: ${{ secrets.SUPABASE_DB_URL }}
+          POOLER_URL: ${{ secrets.SUPABASE_DB_POOLER_URL }}
+          PROJECT_REF: arygtqrdpcdkwnuwsgmm
+          POOLER_HOST: aws-0-us-east-2.pooler.supabase.com
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${POOLER_URL:-}" ]; then
+            DB_URL="$POOLER_URL"
+            SOURCE="secret_pooler"
+          else
+            if [ -z "${DIRECT_URL:-}" ]; then
+              echo "::error::SUPABASE_DB_URL não configurada"
+              exit 1
+            fi
+            DB_URL=$(printf '%s' "$DIRECT_URL" \
+              | sed -E "s#^postgres(ql)?://postgres:#postgresql://postgres.${PROJECT_REF}:#" \
+              | sed -E "s#@db\.${PROJECT_REF}\.supabase\.co(:5432)?#@${POOLER_HOST}:5432#")
+            SOURCE="derived_session_pooler"
+          fi
+          if printf '%s' "$DB_URL" | grep -q "db.${PROJECT_REF}.supabase.co"; then
+            echo "::error::A URL continuou apontando para conexão direta; abortando para não repetir falha IPv6"
+            exit 1
+          fi
+          echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+          echo "connection_source=$SOURCE" >> "$GITHUB_OUTPUT"
+          echo "Conexão preparada via $SOURCE (credenciais mascaradas pelo GitHub)."
+
+      - name: Testar conectividade antes do dump
+        env:
+          PGCONNECT_TIMEOUT: "10"
+        run: |
+          set -euo pipefail
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -Atc "select current_database(), current_user;" >/tmp/db-check.txt
+          test -s /tmp/db-check.txt
+          echo "Conectividade PostgreSQL OK."
 
       - name: pg_dump + criptografia AES-256
         env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           ENC_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          PGCONNECT_TIMEOUT: "15"
         run: |
           set -euo pipefail
+          if [ -z "${ENC_KEY:-}" ]; then
+            echo "::error::BACKUP_ENCRYPTION_KEY não configurada"
+            exit 1
+          fi
           TS=$(date -u +%Y%m%d-%H%M%S)
           FILE="impulsionando-${TS}.sql.gz"
           ENC="${FILE}.enc"
 
           echo "==> Rodando pg_dump…"
-          pg_dump "$SUPABASE_DB_URL" \
+          pg_dump "$DB_URL" \
             --format=plain --no-owner --no-privileges \
             --exclude-schema=auth --exclude-schema=storage \
             --exclude-schema=realtime --exclude-schema=supabase_functions \
@@ -51,13 +94,11 @@ jobs:
 
           RAW_SHA=$(sha256sum "$FILE" | awk '{print $1}')
           SIZE=$(stat -c%s "$FILE")
-          echo "dump: $FILE size=$SIZE sha256=$RAW_SHA"
-
+          echo "dump size=$SIZE sha256=$RAW_SHA"
           if [ "$SIZE" -lt 51200 ]; then
             echo "::error::Dump suspeito (<50KB)"; exit 1
           fi
 
-          echo "==> Criptografando (AES-256-CBC + PBKDF2)…"
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
             -in "$FILE" -out "$ENC" -pass env:ENC_KEY
 
@@ -72,9 +113,10 @@ jobs:
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
             -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}' > /tmp/check.sha
           if ! grep -q "$RAW_SHA" /tmp/check.sha; then
-            echo "::error::Integridade falhou — SHA pós-decrypt não bate"; exit 1
+            echo "::error::Integridade falhou após decrypt"; exit 1
           fi
-          echo "Integridade OK."
+          gzip -t "$FILE"
+          echo "Integridade criptográfica e gzip OK."
 
           rm -f "$FILE"
           {
@@ -82,7 +124,7 @@ jobs:
             echo "SHA_FILE=${ENC}.sha256"
           } >> "$GITHUB_ENV"
 
-      - name: Enviar backup para VPS (scp)
+      - name: Enviar backup para VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -92,7 +134,7 @@ jobs:
           source: "${{ env.ENC_FILE }},${{ env.SHA_FILE }}"
           target: "/var/backups/impulsionando/incoming/"
 
-      - name: Aplicar retenção + verificar SHA na VPS
+      - name: Aplicar retenção e verificar SHA na VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -103,15 +145,14 @@ jobs:
           script: |
             set -euo pipefail
             ROOT=/var/backups/impulsionando
-            mkdir -p "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
+            mkdir -p "$ROOT/incoming" "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
             cd "$ROOT/incoming"
-
             for f in *.enc; do
               [ -f "$f" ] || continue
               expected=$(head -n1 "${f}.sha256" | awk '{print $1}')
               actual=$(sha256sum "$f" | awk '{print $1}')
               if [ "$expected" != "$actual" ]; then
-                echo "SHA divergente para $f — descartando"
+                echo "SHA divergente para $f"
                 rm -f "$f" "${f}.sha256"
                 exit 1
               fi
@@ -122,13 +163,13 @@ jobs:
             DOM=$(date +%d)
             LATEST=$(find "$ROOT/daily" -maxdepth 1 -type f -name '*.enc' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2- || true)
             if [ -n "$LATEST" ]; then
-              if [ "$DOW" = "7" ]; then cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true; fi
-              if [ "$DOM" = "01" ]; then cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true; fi
+              [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true
+              [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true
             fi
 
             find "$ROOT/daily" -type f -mtime +30 -delete
             find "$ROOT/weekly" -type f -mtime +84 -delete
             find "$ROOT/monthly" -type f -mtime +366 -delete
-
-            echo "Backup diário armazenado. Snapshot atual:"
+            test -n "$LATEST"
+            echo "Backup diário armazenado e verificado."
             du -sh "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
