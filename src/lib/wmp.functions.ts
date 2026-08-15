@@ -13,15 +13,50 @@ async function getWmpTenantId(){
   return data.id as string;
 }
 
+async function assertReference(setKey:string,code:string,label:string){
+  const {data:set,error:setError}=await supabaseAdmin.from("reference_option_sets").select("id").eq("key",setKey).eq("active",true).single();
+  if(setError||!set?.id)throw new Error(`Catálogo ${label} indisponível.`);
+  const {data:option,error}=await supabaseAdmin.from("reference_options").select("code,label").eq("set_id",set.id).eq("code",code).eq("active",true).maybeSingle();
+  if(error)throw new Error(error.message);
+  if(!option)throw new Error(`${label} inválido. Selecione uma opção da lista.`);
+  return option;
+}
+
+async function assertCepLocation(input:{cep:string;uf:string;cidade:string;ibge:string}){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),4500);
+  try{
+    const response=await fetch(`https://viacep.com.br/ws/${input.cep}/json/`,{signal:controller.signal,headers:{accept:"application/json"}});
+    if(!response.ok)throw new Error("Não foi possível validar o CEP informado.");
+    const data=await response.json() as Record<string,unknown>;
+    if(data.erro===true||data.erro==="true")throw new Error("CEP não encontrado.");
+    const uf=String(data.uf??"").toUpperCase();
+    const cidade=String(data.localidade??"").trim();
+    const ibge=String(data.ibge??"").trim();
+    if(uf!==input.uf.toUpperCase()||cidade!==input.cidade||ibge!==input.ibge){
+      throw new Error("CEP, município e UF não correspondem. Consulte o CEP novamente e escolha os dados preenchidos pelo sistema.");
+    }
+  }finally{clearTimeout(timer);}
+}
+
 export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d:any)=>{
   if(!d||typeof d!=="object")throw new Error("Payload inválido");
   const nome=clean(d.contratante_nome,120),email=clean(d.contratante_email,200),telefone=clean(d.contratante_telefone,40),eventoTipo=clean(d.evento_tipo,80);
   if(!nome||!email||!telefone||!eventoTipo)throw new Error("Campos obrigatórios faltando.");
   if(!EMAIL_RE.test(email))throw new Error("E-mail inválido.");
   const cep=(clean(d.evento_cep,12)??"").replace(/\D/g,"");
-  if(cep&&cep.length!==8)throw new Error("CEP inválido.");
-  return{contratante_nome:nome,contratante_email:email.toLowerCase(),contratante_telefone:telefone,contratante_empresa:clean(d.contratante_empresa,160),evento_tipo:eventoTipo,evento_data:clean(d.evento_data,20),evento_horario_inicio:clean(d.evento_horario_inicio,8),evento_horario_fim:clean(d.evento_horario_fim,8),evento_publico_estimado:Number.isFinite(Number(d.evento_publico_estimado))?Number(d.evento_publico_estimado):null,evento_perfil_publico:clean(d.evento_perfil_publico,200),evento_cep:cep||undefined,evento_bairro:clean(d.evento_bairro,120),evento_endereco:clean(d.evento_endereco,240),evento_cidade:clean(d.evento_cidade,80),evento_estado:clean(d.evento_estado,4),ambiente:d.ambiente&&typeof d.ambiente==="object"?d.ambiente:{},medidas:d.medidas&&typeof d.medidas==="object"?d.medidas:{},acustica:d.acustica&&typeof d.acustica==="object"?d.acustica:{},utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
+  if(cep.length!==8)throw new Error("CEP inválido.");
+  const uf=(clean(d.evento_estado,2)??"").toUpperCase();
+  const cidade=clean(d.evento_cidade,120);
+  const ibge=clean(d.evento_municipio_ibge,12);
+  if(!uf||!cidade||!ibge||!/^\d{7}$/.test(ibge))throw new Error("Município/UF inválidos. Selecione o endereço a partir do CEP.");
+  return{contratante_nome:nome,contratante_email:email.toLowerCase(),contratante_telefone:telefone,contratante_empresa:clean(d.contratante_empresa,160),evento_tipo:eventoTipo,evento_data:clean(d.evento_data,20),evento_horario_inicio:clean(d.evento_horario_inicio,8),evento_horario_fim:clean(d.evento_horario_fim,8),evento_publico_estimado:Number.isFinite(Number(d.evento_publico_estimado))?Number(d.evento_publico_estimado):null,evento_perfil_publico:clean(d.evento_perfil_publico,200),evento_cep:cep,evento_bairro:clean(d.evento_bairro,120),evento_endereco:clean(d.evento_endereco,240),evento_cidade:cidade,evento_estado:uf,evento_municipio_ibge:ibge,ambiente:d.ambiente&&typeof d.ambiente==="object"?d.ambiente:{},medidas:d.medidas&&typeof d.medidas==="object"?d.medidas:{},acustica:d.acustica&&typeof d.acustica==="object"?d.acustica:{},utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
 }).handler(async({data})=>{
+  await Promise.all([
+    assertReference("wmp_event_types",data.evento_tipo,"Tipo de evento"),
+    assertReference("br_states",data.evento_estado,"Estado"),
+    assertCepLocation({cep:data.evento_cep,uf:data.evento_estado,cidade:data.evento_cidade,ibge:data.evento_municipio_ibge}),
+  ]);
   const tenant_id=await getWmpTenantId();
   const input:WmpAcousticInput={ambiente:data.ambiente,medidas:data.medidas,evento:{publico_estimado:data.evento_publico_estimado??undefined,horario_fim:data.evento_horario_fim,tipo:data.evento_tipo},acustica:data.acustica};
   const pre_diagnostico=diagnoseAcoustics(input);
@@ -33,11 +68,12 @@ export const submitWmpBriefing=createServerFn({method:"POST"}).inputValidator((d
 
 export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d:any)=>{
   const nome=clean(d?.nome,120),email=clean(d?.email,200),telefone=clean(d?.telefone,40),categoria=clean(d?.categoria,40);
-  const validas=["dj","musico","tecnico_som","tecnico_luz","tecnico_video","fornecedor","cerimonialista","outro"];
   if(!nome||!email||!telefone||!categoria)throw new Error("Campos obrigatórios faltando.");
-  if(!EMAIL_RE.test(email)||!validas.includes(categoria))throw new Error("Dados inválidos.");
-  return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade:clean(d.cidade,80),estado:clean(d.estado,4),experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
+  if(!EMAIL_RE.test(email))throw new Error("Dados inválidos.");
+  return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade:clean(d.cidade,120),estado:(clean(d.estado,2)??"").toUpperCase()||undefined,experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
 }).handler(async({data})=>{
+  await assertReference("wmp_partner_categories",data.categoria,"Categoria de parceiro");
+  if(data.estado)await assertReference("br_states",data.estado,"Estado");
   const tenant_id=await getWmpTenantId();
   const{data:row,error}=await supabaseAdmin.from("wmp_parceiros").insert({...data,tenant_id,consent_at:new Date().toISOString()}).select("id, created_at").single();
   if(error)throw new Error(error.message);
