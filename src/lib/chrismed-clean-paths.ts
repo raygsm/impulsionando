@@ -11,6 +11,8 @@ const PUBLIC_ROUTE_ROOTS = new Set([
   "domiciliar",
   "dra-cristiane",
   "especialidades",
+  "evento-convite",
+  "evento-credencial",
   "eventos",
   "exames",
   "faq",
