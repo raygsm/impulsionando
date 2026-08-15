@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentCompanyId } from "@/lib/current-company";
 
 export const Route = createFileRoute("/_authenticated/empresa/talentos/rede")({
   component: RedeTalentos,
@@ -27,20 +28,22 @@ function RedeTalentos() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data: comp } = await sb.from("companies").select("id, niche").eq("owner_id", u.user.id).maybeSingle();
-      if (!comp) return;
-      setCompanyId(comp.id); setNicho(comp.niche ?? "");
-      const { data: cfg } = await sb.from("talentos_company_settings").select("*").eq("company_id", comp.id).maybeSingle();
-      if (cfg) {
-        setParticipa(cfg.participa ?? true);
-        setReceberAuto(cfg.receber_automatico ?? true);
-        setCidades((cfg.cidades_interesse ?? []).join(", "));
-        setBairros((cfg.bairros_interesse ?? []).join(", "));
-        setRaio(cfg.raio_km ?? 20);
+      try {
+        const resolvedCompanyId = await getCurrentCompanyId();
+        if (!resolvedCompanyId) return;
+        setCompanyId(resolvedCompanyId);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: cfg } = await (supabase as any).from("talentos_company_settings").select("*").eq("company_id", resolvedCompanyId).maybeSingle();
+        if (cfg) {
+          setParticipa(cfg.participa ?? true);
+          setReceberAuto(cfg.receber_automatico ?? true);
+          setCidades((cfg.cidades_interesse ?? []).join(", "));
+          setBairros((cfg.bairros_interesse ?? []).join(", "));
+          setRaio(cfg.raio_km ?? 20);
+          setNicho(cfg.nicho ?? "");
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Não foi possível identificar a empresa.");
       }
     })();
   }, []);
