@@ -40,7 +40,7 @@ const INTENCOES: Intencao[] = [
     short: "Captar, converter e reter clientes.",
     headline: "Cada oportunidade recebida, respondida e acompanhada.",
     body:
-      "CRM, WhatsApp oficial, funis por etapa e cobrança automática trabalhando em conjunto para transformar interesse em receita — sem depender de planilhas ou memória.",
+      "CRM, funis por etapa, e-mail e automações homologadas trabalhando em conjunto para transformar interesse em receita. Outros canais são ativados conforme disponibilidade e configuração.",
     cta: { to: "/solucoes", label: "Ver como vender mais" },
     hint: "Ideal para quem perde lead por demora, esquece follow-up ou não sabe quanto vale seu funil.",
   },
@@ -102,7 +102,7 @@ const DEMO_STEPS = [
   { n: "02", title: "Impulsionito responde", body: "Atende em segundos, qualifica e agenda com contexto." },
   { n: "03", title: "CRM registra", body: "Contato, histórico e etapa do funil ficam disponíveis para o time." },
   { n: "04", title: "Jornada inicia", body: "Réguas de comunicação, lembretes e conteúdos entram no ar." },
-  { n: "05", title: "Pagamento", body: "Link enviado, confirmação automática, comprovante organizado." },
+  { n: "05", title: "Pagamento", body: "Cobrança e pagamento entram na jornada quando o meio homologado está configurado, com registro no Core." },
   { n: "06", title: "Onboarding", body: "Cliente recebe boas-vindas guiadas e acessa sua área imediatamente." },
   { n: "07", title: "Core acompanha", body: "A empresa vê tudo — atendimento, vendas, agenda e financeiro em um só painel." },
 ];
@@ -114,15 +114,15 @@ const BENEFICIOS = [
   { icon: MessageCircle, title: "Atendimento contínuo", body: "Impulsionito responde 24/7 e passa o bastão para o humano com contexto.", to: "/solucoes" },
   { icon: Target, title: "Visão da operação", body: "Um painel único: agenda, vendas, atendimento e financeiro juntos.", to: "/solucoes" },
   { icon: Rocket, title: "Implantação guiada", body: "Você não fica sozinho. Ativação assistida por especialista.", to: "/central-de-ajuda" },
-  { icon: ShieldCheck, title: "Crescimento com controle", body: "Permissões, LGPD, dados no Brasil e trilhas de auditoria.", to: "/sobre" },
+  { icon: ShieldCheck, title: "Crescimento com controle", body: "Permissões granulares, isolamento de dados, LGPD e trilhas de auditoria.", to: "/sobre" },
 ];
 
 // ============== 5. CONFIANÇA INSTITUCIONAL ==============
 const CONFIANCA = [
   { title: "Clareza de funcionamento", body: "Você vê o sistema operando antes de contratar. Demonstrações reais por setor." },
-  { title: "Segurança e LGPD", body: "Dados hospedados no Brasil, permissões granulares e trilhas de auditoria." },
+  { title: "Segurança e LGPD", body: "Isolamento de dados, permissões granulares, auditoria e práticas de proteção compatíveis com SaaS empresarial." },
   { title: "Suporte e acompanhamento", body: "Canal oficial único, implantação assistida e acompanhamento contínuo." },
-  { title: "Integração de verdade", body: "WhatsApp oficial, pagamentos, e-mail, agenda e ferramentas do seu dia-a-dia." },
+  { title: "Integração de verdade", body: "Integrações são ativadas conforme homologação e configuração do ambiente; o Core conecta os recursos disponíveis sem prometer canal ainda não validado." },
 ];
 
 // ============== 6. SETORES DESTACADOS ==============
@@ -626,4 +626,3 @@ export function HomePage() {
 }
 
 export default HomePage;
-
