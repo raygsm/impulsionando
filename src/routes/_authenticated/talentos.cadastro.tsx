@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { extractCurriculoFromFile } from "@/lib/talentos-ai.functions";
+import { lookupCEP } from "@/lib/validators";
 
 export const Route = createFileRoute("/_authenticated/talentos/cadastro")({
   component: CadastroTalento,
@@ -40,7 +41,7 @@ function CadastroTalento() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     nome: "", email: "", whatsapp: "", cep: "",
-    bairro: "", cidade: "", estado: "",
+    bairro: "", cidade: "", estado: "", municipio_ibge: "",
     foto_url: "", video_url: "",
     cargo_desejado: "", experiencia: EXPERIENCIAS[0],
     faixa_etaria: "26-35", escolaridade: ESCOLARIDADES[6],
@@ -57,10 +58,18 @@ function CadastroTalento() {
     const clean = cep.replace(/\D/g, "");
     if (clean.length !== 8) return;
     try {
-      const r = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-      const j = await r.json();
-      if (!j.erro) setForm((f) => ({ ...f, bairro: j.bairro ?? "", cidade: j.localidade ?? "", estado: j.uf ?? "" }));
-    } catch { /* noop */ }
+      const j = await lookupCEP(clean);
+      if (!j) return;
+      setForm((f) => ({
+        ...f,
+        bairro: j.bairro ?? "",
+        cidade: j.cidade ?? "",
+        estado: j.uf ?? "",
+        municipio_ibge: j.ibge ?? "",
+      }));
+    } catch {
+      toast.error("Não foi possível consultar o CEP agora.");
+    }
   }
 
   async function uploadTo(bucket: string, file: File, userId: string) {
@@ -99,6 +108,10 @@ function CadastroTalento() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Verifique os campos"); return; }
     if (!form.foto_url) { toast.error("Envie sua foto de perfil"); return; }
+    if (!form.cidade || !form.estado || !form.municipio_ibge) {
+      toast.error("Informe um CEP válido para consolidar município e UF.");
+      return;
+    }
 
     setLoading(true);
     const { data: userRes } = await supabase.auth.getUser();
@@ -126,7 +139,6 @@ function CadastroTalento() {
           candidato_id: cand.id, arquivo_url: path,
           formato: cvFile.name.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
         });
-        // Auto-extração via IA (não-bloqueante)
         try {
           const dataUrl = await fileToDataUrl(cvFile);
           await extractCurriculoFromFile({ data: { file_data_url: dataUrl, filename: cvFile.name, candidato_id: cand.id } });
@@ -161,7 +173,7 @@ function CadastroTalento() {
                 <Input id="whatsapp" required value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} /></div>
               <div><Label htmlFor="cep">CEP</Label>
                 <Input id="cep" required value={form.cep}
-                  onChange={(e) => { setForm({ ...form, cep: e.target.value }); lookupCep(e.target.value); }} /></div>
+                  onChange={(e) => { setForm({ ...form, cep: e.target.value, cidade: "", estado: "", municipio_ibge: "" }); lookupCep(e.target.value); }} /></div>
               <div className="text-sm text-muted-foreground self-end">
                 {form.cidade ? `${form.bairro ? form.bairro + " · " : ""}${form.cidade}/${form.estado}` : "Cidade detectada pelo CEP"}
               </div>
