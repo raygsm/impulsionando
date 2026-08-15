@@ -1,22 +1,9 @@
 name: Daily Encrypted DB Backup → VPS
 
-# Backup diário do Postgres enviado criptografado para a VPS.
-# Retenção: diários 30d, semanais 12, mensais 12.
-# Usa Session Pooler IPv4 quando a conexão direta do Supabase não é
-# alcançável pelo runner GitHub (a conexão direta pode resolver somente IPv6).
-# Mudanças neste próprio workflow disparam um teste imediato.
-#
-# Secrets:
-#   SUPABASE_DB_URL          conexão direta atual (obrigatória como fonte da senha)
-#   SUPABASE_DB_POOLER_URL   opcional; se definido, tem precedência
-#   BACKUP_ENCRYPTION_KEY
-#   VPS_HOST / VPS_USER / VPS_SSH_KEY / VPS_PORT
-
 on:
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/db-backup-daily.yml"
+    paths: [".github/workflows/db-backup-daily.yml"]
   schedule:
     - cron: "30 3 * * *"
   workflow_dispatch:
@@ -36,12 +23,10 @@ jobs:
           sudo apt-get install -y postgresql-client openssl
 
       - name: Resolver conexão IPv4 segura
-        id: db-url
         env:
           DIRECT_URL: ${{ secrets.SUPABASE_DB_URL }}
           POOLER_URL: ${{ secrets.SUPABASE_DB_POOLER_URL }}
           PROJECT_REF: arygtqrdpcdkwnuwsgmm
-          POOLER_HOST: aws-0-us-east-2.pooler.supabase.com
         shell: bash
         run: |
           set -euo pipefail
@@ -53,18 +38,25 @@ jobs:
               echo "::error::SUPABASE_DB_URL não configurada"
               exit 1
             fi
-            DB_URL=$(printf '%s' "$DIRECT_URL" \
-              | sed -E "s#^postgres(ql)?://postgres:#postgresql://postgres.${PROJECT_REF}:#" \
-              | sed -E "s#@db\.${PROJECT_REF}\.supabase\.co(:5432)?#@${POOLER_HOST}:5432#")
-            SOURCE="derived_session_pooler"
-          fi
-          if printf '%s' "$DB_URL" | grep -q "db.${PROJECT_REF}.supabase.co"; then
-            echo "::error::A URL continuou apontando para conexão direta; abortando para não repetir falha IPv6"
-            exit 1
+            DB_URL=""
+            for cluster in 0 1 2 3 4 5; do
+              host="aws-${cluster}-us-east-2.pooler.supabase.com"
+              candidate=$(printf '%s' "$DIRECT_URL" \
+                | sed -E "s#^postgres(ql)?://postgres:#postgresql://postgres.${PROJECT_REF}:#" \
+                | sed -E "s#@db\.${PROJECT_REF}\.supabase\.co(:5432)?#@${host}:5432#")
+              if PGCONNECT_TIMEOUT=4 psql "$candidate" -v ON_ERROR_STOP=1 -Atc "select 1" >/dev/null 2>&1; then
+                DB_URL="$candidate"
+                SOURCE="autodiscovered_session_pooler_${cluster}"
+                break
+              fi
+            done
+            if [ -z "$DB_URL" ]; then
+              echo "::error::Não foi possível autodetectar o Session Pooler. Configure SUPABASE_DB_POOLER_URL com a URL Session exibida em Supabase > Connect."
+              exit 1
+            fi
           fi
           echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
-          echo "connection_source=$SOURCE" >> "$GITHUB_OUTPUT"
-          echo "Conexão preparada via $SOURCE (credenciais mascaradas pelo GitHub)."
+          echo "Conexão IPv4 preparada via $SOURCE; credenciais não são exibidas."
 
       - name: Testar conectividade antes do dump
         env:
@@ -81,32 +73,19 @@ jobs:
           PGCONNECT_TIMEOUT: "15"
         run: |
           set -euo pipefail
-          if [ -z "${ENC_KEY:-}" ]; then
-            echo "::error::BACKUP_ENCRYPTION_KEY não configurada"
-            exit 1
-          fi
+          test -n "${ENC_KEY:-}" || { echo "::error::BACKUP_ENCRYPTION_KEY não configurada"; exit 1; }
           TS=$(date -u +%Y%m%d-%H%M%S)
           FILE="impulsionando-${TS}.sql.gz"
           ENC="${FILE}.enc"
-
-          echo "==> Rodando pg_dump…"
-          pg_dump "$DB_URL" \
-            --format=plain --no-owner --no-privileges \
-            --exclude-schema=auth --exclude-schema=storage \
-            --exclude-schema=realtime --exclude-schema=supabase_functions \
-            --exclude-schema=vault --exclude-schema=graphql \
+          pg_dump "$DB_URL" --format=plain --no-owner --no-privileges \
+            --exclude-schema=auth --exclude-schema=storage --exclude-schema=realtime \
+            --exclude-schema=supabase_functions --exclude-schema=vault --exclude-schema=graphql \
             | gzip -9 > "$FILE"
-
           RAW_SHA=$(sha256sum "$FILE" | awk '{print $1}')
           SIZE=$(stat -c%s "$FILE")
-          echo "dump size=$SIZE sha256=$RAW_SHA"
-          if [ "$SIZE" -lt 51200 ]; then
-            echo "::error::Dump suspeito (<50KB)"; exit 1
-          fi
-
-          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
-            -in "$FILE" -out "$ENC" -pass env:ENC_KEY
-
+          [ "$SIZE" -ge 51200 ] || { echo "::error::Dump suspeito (<50KB)"; exit 1; }
+          gzip -t "$FILE"
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$FILE" -out "$ENC" -pass env:ENC_KEY
           ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
           {
             echo "$ENC_SHA  $ENC"
@@ -114,20 +93,12 @@ jobs:
             echo "raw_size=$SIZE"
             echo "created_at=$TS"
           } > "${ENC}.sha256"
-
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
-            -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}' > /tmp/check.sha
-          if ! grep -q "$RAW_SHA" /tmp/check.sha; then
-            echo "::error::Integridade falhou após decrypt"; exit 1
-          fi
-          gzip -t "$FILE"
-          echo "Integridade criptográfica e gzip OK."
-
+          DEC_SHA=$(openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}')
+          [ "$DEC_SHA" = "$RAW_SHA" ] || { echo "::error::Integridade falhou após decrypt"; exit 1; }
           rm -f "$FILE"
-          {
-            echo "ENC_FILE=$ENC"
-            echo "SHA_FILE=${ENC}.sha256"
-          } >> "$GITHUB_ENV"
+          echo "ENC_FILE=$ENC" >> "$GITHUB_ENV"
+          echo "SHA_FILE=${ENC}.sha256" >> "$GITHUB_ENV"
+          echo "Dump, gzip, criptografia e decrypt validados."
 
       - name: Enviar backup para VPS
         uses: appleboy/scp-action@v0.1.7
@@ -156,25 +127,15 @@ jobs:
               [ -f "$f" ] || continue
               expected=$(head -n1 "${f}.sha256" | awk '{print $1}')
               actual=$(sha256sum "$f" | awk '{print $1}')
-              if [ "$expected" != "$actual" ]; then
-                echo "SHA divergente para $f"
-                rm -f "$f" "${f}.sha256"
-                exit 1
-              fi
+              [ "$expected" = "$actual" ] || { rm -f "$f" "${f}.sha256"; exit 1; }
               mv "$f" "${f}.sha256" "$ROOT/daily/"
             done
-
-            DOW=$(date +%u)
-            DOM=$(date +%d)
-            LATEST=$(find "$ROOT/daily" -maxdepth 1 -type f -name '*.enc' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2- || true)
-            if [ -n "$LATEST" ]; then
-              [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true
-              [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true
-            fi
-
+            DOW=$(date +%u); DOM=$(date +%d)
+            LATEST=$(find "$ROOT/daily" -maxdepth 1 -type f -name '*.enc' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2- || true)
+            test -n "$LATEST"
+            [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true
+            [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true
             find "$ROOT/daily" -type f -mtime +30 -delete
             find "$ROOT/weekly" -type f -mtime +84 -delete
             find "$ROOT/monthly" -type f -mtime +366 -delete
-            test -n "$LATEST"
-            echo "Backup diário armazenado e verificado."
-            du -sh "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
+            echo "Backup armazenado e SHA validado na VPS."
