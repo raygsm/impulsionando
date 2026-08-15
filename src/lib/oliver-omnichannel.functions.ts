@@ -64,7 +64,7 @@ function withLiveKnowledge(messages: OliverMessage[], knowledge: Knowledge): Oli
     return [
       `ARTIGO OFICIAL ${index + 1} · ${String(article.title ?? article.slug ?? 'CHRISMED')}`,
       String(article.summary ?? ''),
-      String(article.body ?? '').slice(0, 9000),
+      String(article.body_markdown ?? '').slice(0, 9000),
     ].filter(Boolean).join('\n');
   });
   const driveBlocks = knowledge.driveDocuments.map((raw, index) => {
