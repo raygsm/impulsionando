@@ -62,7 +62,7 @@ function classifyByName(name: string, mimeType: string) {
 export async function getChrismedDriveStatus() {
   const [{ data: connection }, { count: documentCount }, { count: linkedCount }] = await Promise.all([
     (supabaseAdmin as any).from('client_drive_connections').select('id,provider_account_email,status,connected_at,last_sync_at,last_error,scopes,metadata').eq('company_id', CHRISMED_COMPANY_ID).eq('provider', 'google_drive').maybeSingle(),
-    (supabaseAdmin as any).from('client_drive_documents').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID),
+    (supabaseAdmin as any).from('client_drive_documents').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'active'),
     (supabaseAdmin as any).from('client_drive_document_links').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID).eq('release_to_entity', true),
   ]);
   return { connection: connection ?? null, documentCount: documentCount ?? 0, releasedLinks: linkedCount ?? 0 };
@@ -114,7 +114,7 @@ export async function syncChrismedDriveMetadata(actorUserId?: string | null) {
       document_type: documentType,
       release_policy: documentType === 'clinical' ? 'care_team_only' : 'restricted',
       indexed_by: 'google_drive_metadata_sync',
-      status: 'indexed',
+      status: 'active',
       metadata: { source: 'google_drive', metadata_only: true, synced_at: now },
       updated_at: now,
     };
@@ -132,7 +132,7 @@ export async function syncChrismedDriveMetadata(actorUserId?: string | null) {
 
 export async function fetchChrismedDriveFileContent(driveFileId: string) {
   if (!/^[A-Za-z0-9_-]{10,200}$/.test(driveFileId)) throw new Error('invalid_drive_file_id');
-  const { data: doc } = await (supabaseAdmin as any).from('client_drive_documents').select('id,mime_type,file_name,release_policy').eq('company_id', CHRISMED_COMPANY_ID).eq('drive_file_id', driveFileId).maybeSingle();
+  const { data: doc } = await (supabaseAdmin as any).from('client_drive_documents').select('id,mime_type,file_name,release_policy,status').eq('company_id', CHRISMED_COMPANY_ID).eq('drive_file_id', driveFileId).eq('status', 'active').maybeSingle();
   if (!doc) throw new Error('drive_document_not_indexed');
   const accessToken = await refreshAccessToken();
   const isGoogleDoc = String(doc.mime_type).startsWith('application/vnd.google-apps.');
@@ -163,18 +163,17 @@ export async function searchChrismedInstitutionalDriveKnowledge(query: string, l
   if (!terms.length) return [];
   const safeLimit = Math.min(Math.max(limit, 1), 6);
 
-  let request = (supabaseAdmin as any)
+  const { data, error } = await (supabaseAdmin as any)
     .from('client_drive_documents')
     .select('drive_file_id,file_name,mime_type,document_type,modified_time,party_document,party_name,release_policy,status')
     .eq('company_id', CHRISMED_COMPANY_ID)
-    .eq('status', 'indexed')
+    .eq('status', 'active')
     .is('party_document', null)
     .is('party_name', null)
     .in('document_type', ['document','contract','term'])
     .order('modified_time', { ascending: false })
     .limit(30);
 
-  const { data, error } = await request;
   if (error) throw new Error(`drive_knowledge_search_failed:${error.message}`);
 
   const candidates = ((data ?? []) as Array<any>)
