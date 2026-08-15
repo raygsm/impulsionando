@@ -157,7 +157,7 @@ export async function syncChrismedGoogleDrive() {
   const now = new Date().toISOString();
   const { error: updateError } = await (supabaseAdmin as any)
     .from('client_drive_connections')
-    .update({ last_sync_at: now, last_error: null, updated_at: now })
+    .update({ last_sync: now, last_error: null, updated_at: now })
     .eq('id', connection.id);
   if (updateError) throw new Error(`drive_connection_sync_status_failed:${updateError.message}`);
 
@@ -175,31 +175,14 @@ export async function searchChrismedTenantKnowledge(query: string, limit = 8) {
   const term = query.trim().slice(0, 500);
   if (!term) return { articles: [], driveDocuments: [] };
   const safeLimit = Math.min(Math.max(limit, 1), 12);
-  const sanitized = term.replace(/[%_,]/g, '');
-  const [articlesResult, driveResult] = await Promise.all([
-    (supabaseAdmin as any).from('knowledge_articles')
-      .select('slug,title,summary,body_markdown,category,audience,version')
-      .eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'published')
-      .or(`title.ilike.%${sanitized}%,summary.ilike.%${sanitized}%,body_markdown.ilike.%${sanitized}%`)
-      .limit(safeLimit),
-    (supabaseAdmin as any).from('client_drive_documents')
-      .select('id,file_name,mime_type,document_type,release_policy,metadata,modified_time,party_name,party_document')
-      .eq('company_id', CHRISMED_COMPANY_ID)
-      .eq('status', 'active')
-      .in('document_type', ['institutional','contract'])
-      .is('party_name', null)
-      .is('party_document', null)
-      .eq('metadata->>public_knowledge_eligible', 'true')
-      .or(`file_name.ilike.%${sanitized}%,metadata->>text_excerpt.ilike.%${sanitized}%`)
-      .limit(safeLimit),
-  ]);
+  const { data, error } = await (supabaseAdmin as any).rpc('chrismed_search_oliver_knowledge', {
+    p_query: term,
+    p_limit: safeLimit,
+  });
+  if (error) throw new Error(`chrismed_knowledge_search_failed:${error.message}`);
+  const payload = data as { articles?: unknown[]; drive_documents?: unknown[] } | null;
   return {
-    articles: articlesResult.data ?? [],
-    driveDocuments: (driveResult.data ?? []).map((doc: any) => ({
-      id: doc.id,
-      document_type: doc.document_type,
-      modified_time: doc.modified_time,
-      text_excerpt: String(doc.metadata?.text_excerpt ?? '').slice(0, 12000),
-    })),
+    articles: Array.isArray(payload?.articles) ? payload!.articles : [],
+    driveDocuments: Array.isArray(payload?.drive_documents) ? payload!.drive_documents : [],
   };
 }
