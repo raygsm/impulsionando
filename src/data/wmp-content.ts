@@ -1,5 +1,5 @@
-// Conteúdo comercial WMP — front-end only.
-// Utilizado por home, /wmp/pacotes, /wmp/cases, /wmp/sobre e /wmp/faq.
+// Conteúdo comercial WMP — somente informações institucionais e operacionais validadas.
+// Não publicar preços, cases, depoimentos, SLAs, seguros, ART ou capacidades numéricas sem fonte documental aprovada.
 
 export type WmpPacote = {
   slug: "essencial" | "premium" | "show";
@@ -14,46 +14,44 @@ export type WmpPacote = {
 export const WMP_PACOTES: WmpPacote[] = [
   {
     slug: "essencial",
-    nome: "Essencial",
-    publico: "Até 200 pessoas",
-    preco_a_partir: "R$ 2.900",
+    nome: "Evento Essencial",
+    publico: "Estrutura dimensionada conforme briefing técnico",
+    preco_a_partir: "sob proposta",
     bullets: [
-      "PA 2.000 W + 2 microfones sem fio",
-      "Kit iluminação cênica básico (8 PAR LED)",
-      "Mesa digital + técnico FOH dedicado",
-      "Montagem, operação e desmontagem",
-      "Laudo de dB sob demanda",
+      "Sonorização compatível com o ambiente e público",
+      "Microfones e operação conforme necessidade do evento",
+      "Iluminação configurada conforme escopo",
+      "Montagem, operação e desmontagem discriminadas na proposta",
+      "Equipamentos e mão de obra orçados separadamente",
     ],
-    cta: "Cotar Essencial",
+    cta: "Solicitar proposta",
   },
   {
     slug: "premium",
-    nome: "Premium",
-    publico: "200 a 1.500 pessoas",
-    preco_a_partir: "R$ 7.400",
+    nome: "Evento Premium",
+    publico: "Produção ampliada e experiência personalizada",
+    preco_a_partir: "sob proposta",
     destaque: true,
     bullets: [
-      "Line array 8.000 W + subwoofers dedicados",
-      "Iluminação cênica com moving heads + fumaça",
-      "Palco Q30 coberto + telão LED P4 (6m²)",
-      "2 técnicos FOH + operador de luz DMX",
-      "ART emitida + laudo de dB municipal",
-      "Plano B documentado (chuva, elétrica, atraso)",
+      "Som, luz, vídeo e estrutura combinados conforme briefing",
+      "Equipe técnica dimensionada para a operação",
+      "DJs e parceiros selecionados conforme perfil e disponibilidade",
+      "Adicionais de equipamento configuráveis",
+      "Logística e responsabilidades apresentadas separadamente",
     ],
-    cta: "Cotar Premium",
+    cta: "Montar meu evento",
   },
   {
     slug: "show",
-    nome: "Show / Festival",
-    publico: "Acima de 1.500 pessoas",
+    nome: "Show / Produção Especial",
+    publico: "Projetos com produção técnica sob medida",
     preco_a_partir: "sob consulta",
     bullets: [
-      "Line array L-Acoustics / d&b (até 30k W)",
-      "Palco Q50 profissional + gerador silencioso",
-      "Iluminação broadcast + telão LED P3 (>20m²)",
-      "Equipe completa (FOH, monitor, luz, backline)",
-      "Coordenação de produção minuto a minuto",
-      "ART, laudos e alvarás acompanhados por engenharia",
+      "Projeto técnico conforme rider e características do local",
+      "Fornecedores e equipamentos escolhidos por necessidade real",
+      "Coordenação de montagem, operação e desmontagem",
+      "Planejamento de contingências conforme risco do evento",
+      "Proposta comercial antes do contrato formal",
     ],
     cta: "Falar com produção",
   },
@@ -68,56 +66,8 @@ export type WmpCase = {
   destaque: string;
 };
 
-export const WMP_CASES: WmpCase[] = [
-  {
-    titulo: "Festival Sertanejo de Verão",
-    categoria: "Festival",
-    publico: "8.000 pessoas",
-    local: "Barra da Tijuca, RJ",
-    ano: 2025,
-    destaque: "Line array L-Acoustics em 4 dias consecutivos, laudo de dB dentro dos limites municipais.",
-  },
-  {
-    titulo: "Convenção Nacional Tech Corp",
-    categoria: "Corporativo",
-    publico: "1.200 executivos",
-    local: "Windsor Barra, RJ",
-    ano: 2025,
-    destaque: "3 palcos simultâneos, tradução simultânea, telão LED 12m e cronograma minuto a minuto.",
-  },
-  {
-    titulo: "Casamento Praia Grumari",
-    categoria: "Casamento",
-    publico: "350 convidados",
-    local: "Grumari, RJ",
-    ano: 2024,
-    destaque: "Estrutura coberta, DJ + banda com troca em 8 minutos, gerador silencioso na areia.",
-  },
-  {
-    titulo: "Formatura Medicina UFRJ",
-    categoria: "Formatura",
-    publico: "2.400 pessoas",
-    local: "Vivo Rio, RJ",
-    ano: 2024,
-    destaque: "Cerimônia + baile no mesmo espaço, transição de estrutura em 45 minutos.",
-  },
-  {
-    titulo: "Show Nacional Turnê 2025",
-    categoria: "Show",
-    publico: "5.500 pessoas",
-    local: "Jeunesse Arena, RJ",
-    ano: 2025,
-    destaque: "Backline completo, monitor in-ear para 7 músicos, alinhamento de sistema Smaart.",
-  },
-  {
-    titulo: "Corporativo Fim de Ano Petro",
-    categoria: "Corporativo",
-    publico: "800 colaboradores",
-    local: "Copacabana Palace, RJ",
-    ano: 2024,
-    destaque: "Palco em U, DJ residente, mesa 32 canais e captação de vídeo para pós-evento.",
-  },
-];
+// Cases públicos só devem ser cadastrados após validação documental/autorização de publicação.
+export const WMP_CASES: WmpCase[] = [];
 
 export type WmpDepoimento = {
   nome: string;
@@ -126,67 +76,41 @@ export type WmpDepoimento = {
   evento: string;
 };
 
-export const WMP_DEPOIMENTOS: WmpDepoimento[] = [
-  {
-    nome: "Fernanda Ribeiro",
-    cargo: "Diretora de Eventos, Tech Corp",
-    texto: "Contratamos a WMP para nossa convenção nacional. Do briefing à desmontagem, tudo cronometrado. O pré-diagnóstico acústico foi o diferencial: sabíamos exatamente o que esperar.",
-    evento: "Convenção Nacional 2025",
-  },
-  {
-    nome: "Rafael e Camila Torres",
-    cargo: "Noivos",
-    texto: "Casamento em Grumari — vento forte, areia, gerador. A WMP planejou tudo, com plano B por escrito. Nenhum imprevisto atrapalhou. Som impecável e luz emocionante.",
-    evento: "Casamento Praia Grumari",
-  },
-  {
-    nome: "Marcelo Andrade",
-    cargo: "Produtor musical",
-    texto: "Já trabalhei com dezenas de produtoras. A WMP é a única que entrega laudo de dB, ART e cronograma escrito antes do evento. Isso muda o jogo para quem opera profissionalmente.",
-    evento: "Show Turnê 2025",
-  },
-];
+// Depoimentos públicos só devem ser publicados com origem e autorização verificadas.
+export const WMP_DEPOIMENTOS: WmpDepoimento[] = [];
 
 export type WmpFaq = { pergunta: string; resposta: string };
 
 export const WMP_FAQ: WmpFaq[] = [
   {
-    pergunta: "Em quanto tempo recebo o orçamento?",
-    resposta: "Enviamos proposta detalhada em até 24 horas úteis após o briefing. Para eventos com data em menos de 15 dias, respondemos em até 6 horas.",
+    pergunta: "Como recebo uma proposta?",
+    resposta: "A WMP primeiro coleta um briefing objetivo do evento. A proposta comercial preliminar apresenta o tipo de serviço, a data ou período e o preço. O contrato formal só é enviado depois da concordância comercial inicial.",
   },
   {
-    pergunta: "O que é o pré-diagnóstico acústico?",
-    resposta: "Antes mesmo da visita técnica, calculamos potência de PA, subwoofer, microfones, monitores, iluminação e reverberação estimada a partir do seu briefing (público, ambiente, material, altura, estilo). Você já entra na conversa com a estrutura ideal proposta.",
+    pergunta: "Como a estrutura do evento é definida?",
+    resposta: "Som, iluminação, vídeo, palco, DJs, técnicos e demais recursos são dimensionados a partir das características reais do evento, do local, do público e das necessidades informadas no briefing.",
   },
   {
-    pergunta: "A WMP emite ART e laudo de decibéis?",
-    resposta: "Sim. Emitimos Anotação de Responsabilidade Técnica (ART) via engenheiro parceiro e fazemos medição de pressão sonora (dB) durante o evento, respeitando os limites municipais do local.",
+    pergunta: "Equipamento e mão de obra são cobrados juntos?",
+    resposta: "Não. A WMP controla equipamento e mão de obra como itens distintos. Sempre que um equipamento é utilizado, ele é tratado como locação, com proprietário, beneficiário, valor e histórico próprios.",
   },
   {
-    pergunta: "Vocês atendem fora do Rio de Janeiro?",
-    resposta: "Sim. Operamos em toda a Região Sudeste e viajamos para eventos de médio e grande porte em qualquer estado. Logística e diárias entram destacadas no orçamento.",
-  },
-  {
-    pergunta: "Existe plano B para chuva ou queda de energia?",
-    resposta: "Todo evento contratado recebe um plano de contingência por escrito: gerador de backup, cobertura alternativa, cronograma de recuo e responsáveis por decisão em campo.",
+    pergunta: "Posso solicitar equipamentos adicionais?",
+    resposta: "Sim. Microfones, caixas, subwoofers, iluminação, monitores, estruturas, telas, projetores e outros itens podem ser adicionados conforme disponibilidade e valor cadastrado pela gestão WMP.",
   },
   {
     pergunta: "Como funciona a rede de parceiros WMP?",
-    resposta: "DJs, músicos, técnicos e fornecedores cadastrados são acionados em eventos compatíveis com perfil, cidade e disponibilidade. Contrato claro, cachê combinado antes e pagamento em até 7 dias após o evento.",
+    resposta: "DJs, músicos, técnicos e fornecedores cadastrados podem ser acionados de acordo com perfil, localização, disponibilidade e necessidade de cada evento. Valores e responsabilidades são definidos antes da confirmação.",
   },
   {
-    pergunta: "Precisa pagar sinal para reservar a data?",
-    resposta: "Sim. A reserva de data é confirmada com 30% de sinal + contrato assinado. O saldo é dividido em duas parcelas: 40% até 15 dias antes do evento e 30% na entrega.",
-  },
-  {
-    pergunta: "Vocês trabalham com bandas e artistas convidados pelo cliente?",
-    resposta: "Sim. Fornecemos backline completo (bateria, amplificadores, monitores in-ear) e nosso técnico FOH faz passagem de som com a banda contratada pelo cliente.",
+    pergunta: "O que o Milito faz?",
+    resposta: "Milito é o agente comercial e operacional da WMP. Ele recebe o cliente, entende o contexto, coleta briefing, registra protocolo, orienta jornadas, apoia propostas e encaminha para atendimento humano quando necessário.",
   },
 ];
 
 export const WMP_CERTIFICACOES = [
-  { titulo: "ART CREA", desc: "Anotação de Responsabilidade Técnica emitida para todos os eventos de médio/grande porte." },
-  { titulo: "Laudo de dB", desc: "Medição de pressão sonora conforme legislação municipal (Lei do Silêncio)." },
-  { titulo: "Seguro operacional", desc: "Equipamentos e equipe cobertos por apólice específica de eventos." },
-  { titulo: "Contrato claro", desc: "Escopo, prazos, forma de pagamento e plano B documentados antes da execução." },
+  { titulo: "Escopo documentado", desc: "Serviços, equipamentos, mão de obra, logística e condições comerciais são registrados antes da execução." },
+  { titulo: "Equipamentos rastreáveis", desc: "Cada locação pode registrar proprietário, beneficiário, valor, quantidade, evento e histórico." },
+  { titulo: "Proposta antes do contrato", desc: "A formalização contratual só avança após a concordância com a proposta comercial preliminar." },
+  { titulo: "Operação auditável", desc: "CRM, agenda, parceiros, protocolos, propostas e movimentações operacionais permanecem registrados no ecossistema WMP." },
 ];
