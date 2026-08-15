@@ -4,10 +4,11 @@ import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Wand2 } from "lucide-r
 import { WmpShell } from "@/components/wmp/WmpShell";
 import { submitWmpBriefing } from "@/lib/wmp.functions";
 import { diagnoseAcoustics, type WmpAcousticDiagnosis } from "@/lib/wmp/acoustic-rules";
-import { WMP_AUDIENCE_RANGES, WMP_FLOOR_MATERIALS, WMP_WALL_MATERIALS, WMP_UFS, WMP_BASE_MICROPHONES } from "@/lib/wmp/briefing-options";
+import { WMP_AUDIENCE_RANGES, WMP_FLOOR_MATERIALS, WMP_WALL_MATERIALS, WMP_BASE_MICROPHONES } from "@/lib/wmp/briefing-options";
 import { lookupCEP } from "@/lib/validators";
 
 type Municipality = { ibge: string; nome: string; uf: string };
+type ReferenceOption = { code: string; label: string; description?: string | null; metadata?: Record<string, unknown> };
 type FormState = {
   contratante_nome: string; contratante_email: string; contratante_telefone: string; contratante_empresa: string;
   evento_tipo: string; evento_data: string; evento_horario_inicio: string; evento_horario_fim: string;
@@ -20,7 +21,7 @@ type FormState = {
 
 const INIT: FormState = {
   contratante_nome: "", contratante_email: "", contratante_telefone: "", contratante_empresa: "",
-  evento_tipo: "casamento", evento_data: "", evento_horario_inicio: "", evento_horario_fim: "",
+  evento_tipo: "", evento_data: "", evento_horario_inicio: "", evento_horario_fim: "",
   evento_publico_faixa: "", evento_cep: "", evento_bairro: "", evento_cidade: "", evento_estado: "", evento_municipio_ibge: "", evento_endereco: "",
   ambiente_tipo: "fechado", ambiente_piso: "ceramica", ambiente_paredes: "alvenaria", ambiente_altura: "", medidas_largura: "", medidas_comprimento: "",
   acustica_estilo: "musica_ambiente", microfones_adicionais: "0",
@@ -36,14 +37,37 @@ export function WmpOrcamentoForm() {
   const [error, setError] = useState<string | null>(null);
   const [cepLoading, setCepLoading] = useState(false);
   const [citiesLoading, setCitiesLoading] = useState(false);
+  const [referenceLoading, setReferenceLoading] = useState(true);
   const [cities, setCities] = useState<Municipality[]>([]);
+  const [eventTypes, setEventTypes] = useState<ReferenceOption[]>([]);
+  const [states, setStates] = useState<ReferenceOption[]>([]);
   const [livePreview, setLivePreview] = useState<WmpAcousticDiagnosis | null>(null);
 
   const audience = useMemo(() => WMP_AUDIENCE_RANGES.find((r) => r.value === form.evento_publico_faixa), [form.evento_publico_faixa]);
+  const eventTypeLabel = useMemo(() => eventTypes.find((item) => item.code === form.evento_tipo)?.label ?? form.evento_tipo, [eventTypes, form.evento_tipo]);
   const audienceTechnical = audience?.technicalValue;
   const baseMics = WMP_BASE_MICROPHONES[form.acustica_estilo] ?? 0;
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) { setForm((f) => ({ ...f, [key]: value })); }
+
+  useEffect(() => {
+    let active = true;
+    setReferenceLoading(true);
+    Promise.all([
+      fetch("/api/public/reference-options/wmp_event_types", { headers: { accept: "application/json" } }).then((r) => r.ok ? r.json() : Promise.reject(new Error("Falha ao carregar tipos de evento"))),
+      fetch("/api/public/reference-options/br_states", { headers: { accept: "application/json" } }).then((r) => r.ok ? r.json() : Promise.reject(new Error("Falha ao carregar estados"))),
+    ])
+      .then(([eventPayload, statePayload]: [{ options?: ReferenceOption[] }, { options?: ReferenceOption[] }]) => {
+        if (!active) return;
+        const loadedEvents = eventPayload.options ?? [];
+        setEventTypes(loadedEvents);
+        setStates(statePayload.options ?? []);
+        setForm((current) => ({ ...current, evento_tipo: current.evento_tipo || loadedEvents[0]?.code || "" }));
+      })
+      .catch(() => { if (active) setError("Não foi possível carregar os catálogos oficiais do Core."); })
+      .finally(() => { if (active) setReferenceLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (!form.evento_estado) { setCities([]); return; }
@@ -121,19 +145,19 @@ export function WmpOrcamentoForm() {
     <section className="mx-auto max-w-3xl px-4 md:px-6 pb-24 -mt-6"><Stepper step={step}/><div className="wmp-surface p-5 md:p-10 mt-6">
       {step === 0 && <Grid><Field label="Nome completo *"><input value={form.contratante_nome} onChange={(e)=>update("contratante_nome",e.target.value)}/></Field><Field label="E-mail *"><input type="email" value={form.contratante_email} onChange={(e)=>update("contratante_email",e.target.value)}/></Field><Field label="WhatsApp *"><input value={form.contratante_telefone} onChange={(e)=>update("contratante_telefone",e.target.value)} placeholder="(21) 99999-0000"/></Field><Field label="Empresa (opcional)"><input value={form.contratante_empresa} onChange={(e)=>update("contratante_empresa",e.target.value)}/></Field></Grid>}
       {step === 1 && <Grid>
-        <Field label="Tipo de evento *"><select value={form.evento_tipo} onChange={(e)=>update("evento_tipo",e.target.value)}><option value="casamento">Casamento</option><option value="aniversario">Aniversário</option><option value="corporativo">Corporativo</option><option value="show">Show / Festival</option><option value="formatura">Formatura</option><option value="palestra">Palestra / Convenção</option><option value="karaoke">Karaokê</option><option value="outro">Outro</option></select></Field>
+        <Field label="Tipo de evento *"><select value={form.evento_tipo} disabled={referenceLoading} onChange={(e)=>update("evento_tipo",e.target.value)}><option value="">{referenceLoading?"Carregando...":"Selecione"}</option>{eventTypes.map((item)=><option key={item.code} value={item.code}>{item.label}</option>)}</select></Field>
         <Field label="Data *"><input type="date" value={form.evento_data} onChange={(e)=>update("evento_data",e.target.value)}/></Field>
         <Field label="Horário de início"><input type="time" value={form.evento_horario_inicio} onChange={(e)=>update("evento_horario_inicio",e.target.value)}/></Field><Field label="Horário de término"><input type="time" value={form.evento_horario_fim} onChange={(e)=>update("evento_horario_fim",e.target.value)}/></Field>
         <Field label="Público estimado *"><select value={form.evento_publico_faixa} onChange={(e)=>update("evento_publico_faixa",e.target.value)}><option value="">Selecione</option>{WMP_AUDIENCE_RANGES.map((r)=><option key={r.value} value={r.value}>{r.label}</option>)}</select></Field>
         <Field label="CEP *"><div className="relative"><input inputMode="numeric" value={form.evento_cep} onChange={(e)=>lookupCep(e.target.value)} placeholder="00000000"/>{cepLoading && <Loader2 className="absolute right-3 top-3 size-4 animate-spin"/>}</div><small className="opacity-60">Digite o CEP primeiro. Município e UF são preenchidos e consolidados automaticamente.</small></Field>
         <Field label="Endereço"><input value={form.evento_endereco} onChange={(e)=>update("evento_endereco",e.target.value)} placeholder="Preenchido pelo CEP; complemente somente quando necessário"/></Field>
         <Field label="Bairro"><input value={form.evento_bairro} onChange={(e)=>update("evento_bairro",e.target.value)} readOnly={!!form.evento_bairro} placeholder="Preenchido pelo CEP quando disponível"/></Field>
-        <Field label="Estado *"><select value={form.evento_estado} onChange={(e)=>{update("evento_estado",e.target.value);update("evento_cidade","");update("evento_municipio_ibge","");}}><option value="">Selecione</option>{WMP_UFS.map(([uf,nome])=><option key={uf} value={uf}>{uf} — {nome}</option>)}</select></Field>
+        <Field label="Estado *"><select value={form.evento_estado} disabled={referenceLoading} onChange={(e)=>{update("evento_estado",e.target.value);update("evento_cidade","");update("evento_municipio_ibge","");}}><option value="">{referenceLoading?"Carregando...":"Selecione"}</option>{states.map((item)=><option key={item.code} value={item.code}>{item.code} — {item.label}</option>)}</select></Field>
         <Field label="Cidade *"><select value={form.evento_municipio_ibge} disabled={!form.evento_estado || citiesLoading} onChange={(e)=>{const chosen=cities.find((city)=>city.ibge===e.target.value);update("evento_municipio_ibge",e.target.value);update("evento_cidade",chosen?.nome??"");}}><option value="">{citiesLoading?"Carregando...":"Selecione"}</option>{form.evento_municipio_ibge && !cities.some((city)=>city.ibge===form.evento_municipio_ibge) && <option value={form.evento_municipio_ibge}>{form.evento_cidade}</option>}{cities.map((city)=><option key={city.ibge} value={city.ibge}>{city.nome}</option>)}</select></Field>
       </Grid>}
       {step === 2 && <Grid><Field label="Tipo de ambiente"><select value={form.ambiente_tipo} onChange={(e)=>update("ambiente_tipo",e.target.value as FormState["ambiente_tipo"])}><option value="fechado">Fechado</option><option value="semi_aberto">Semi-aberto</option><option value="aberto">Aberto</option></select></Field><Field label="Altura do teto (m)"><input type="number" step="0.1" value={form.ambiente_altura} onChange={(e)=>update("ambiente_altura",e.target.value)}/></Field><Field label="Largura (m)"><input type="number" step="0.1" value={form.medidas_largura} onChange={(e)=>update("medidas_largura",e.target.value)}/></Field><Field label="Comprimento (m)"><input type="number" step="0.1" value={form.medidas_comprimento} onChange={(e)=>update("medidas_comprimento",e.target.value)}/></Field><Field label="Material do piso"><select value={form.ambiente_piso} onChange={(e)=>update("ambiente_piso",e.target.value)}>{WMP_FLOOR_MATERIALS.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></Field><Field label="Material das paredes"><select value={form.ambiente_paredes} onChange={(e)=>update("ambiente_paredes",e.target.value)}>{WMP_WALL_MATERIALS.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></Field></Grid>}
       {step === 3 && <Grid><Field label="Uso predominante" full><select value={form.acustica_estilo} onChange={(e)=>update("acustica_estilo",e.target.value as FormState["acustica_estilo"])}><option value="musica_ambiente">Música ambiente</option><option value="voz_palestra">Voz / palestra / cerimônia</option><option value="dj_eletronico">DJ / eletrônico</option><option value="banda_rock">Banda / show</option><option value="show_grande_porte">Show de grande porte</option></select></Field><Field label={`Microfones adicionais (base do setup: ${baseMics})`} full><select value={form.microfones_adicionais} onChange={(e)=>update("microfones_adicionais",e.target.value)}>{Array.from({length:11},(_,i)=><option key={i} value={String(i)}>{i===0?"Nenhum adicional":`+${i} microfone${i>1?"s":""}`}</option>)}</select><small className="opacity-60">Cada adicional será precificado conforme o valor do equipamento definido pela gestão WMP.</small></Field><button type="button" onClick={()=>refreshPreview()} className="wmp-cta wmp-cta-outline mt-2 md:col-span-2 self-start"><Sparkles className="size-4"/> Pré-visualizar diagnóstico</button>{livePreview&&<DiagnosisCard d={livePreview}/>}</Grid>}
-      {step === 4 && <div className="space-y-4 text-sm"><h3 className="wmp-display text-2xl">Revisão final</h3><ReviewBlock title="Contato" rows={[["Nome",form.contratante_nome],["E-mail",form.contratante_email],["WhatsApp",form.contratante_telefone],["Empresa",form.contratante_empresa||"—"]]}/><ReviewBlock title="Evento" rows={[["Tipo",form.evento_tipo],["Data",form.evento_data||"—"],["Público",audience?.label||"—"],["CEP",form.evento_cep||"—"],["Local",[form.evento_endereco,form.evento_bairro,form.evento_cidade,form.evento_estado].filter(Boolean).join(" · ")||"—"]]}/><ReviewBlock title="Estrutura" rows={[["Uso",form.acustica_estilo],["Microfones base",String(baseMics)],["Microfones adicionais",form.microfones_adicionais],["Piso",form.ambiente_piso],["Paredes",form.ambiente_paredes]]}/>{livePreview&&<DiagnosisCard d={livePreview}/>}</div>}
+      {step === 4 && <div className="space-y-4 text-sm"><h3 className="wmp-display text-2xl">Revisão final</h3><ReviewBlock title="Contato" rows={[["Nome",form.contratante_nome],["E-mail",form.contratante_email],["WhatsApp",form.contratante_telefone],["Empresa",form.contratante_empresa||"—"]]}/><ReviewBlock title="Evento" rows={[["Tipo",eventTypeLabel],["Data",form.evento_data||"—"],["Público",audience?.label||"—"],["CEP",form.evento_cep||"—"],["Local",[form.evento_endereco,form.evento_bairro,form.evento_cidade,form.evento_estado].filter(Boolean).join(" · ")||"—"]]}/><ReviewBlock title="Estrutura" rows={[["Uso",form.acustica_estilo],["Microfones base",String(baseMics)],["Microfones adicionais",form.microfones_adicionais],["Piso",form.ambiente_piso],["Paredes",form.ambiente_paredes]]}/>{livePreview&&<DiagnosisCard d={livePreview}/>}</div>}
       {error&&<div className="mt-4 p-3 rounded-lg text-sm" style={{background:"color-mix(in oklab, red 20%, transparent)",color:"white"}}>{error}</div>}
       <div className="flex items-center justify-between mt-8 gap-3"><button type="button" onClick={()=>setStep((s)=>Math.max(0,s-1))} disabled={step===0} className="wmp-cta wmp-cta-outline disabled:opacity-40"><ArrowLeft className="size-4"/> Voltar</button>{step<STEPS.length-1?<button type="button" onClick={next} className="wmp-cta">Avançar <ArrowRight className="size-4"/></button>:<button type="button" onClick={handleSubmit} disabled={submitting} className="wmp-cta">{submitting?<><Loader2 className="size-4 animate-spin"/> Enviando…</>:<><Check className="size-4"/> Enviar briefing</>}</button>}</div>
     </div></section>
