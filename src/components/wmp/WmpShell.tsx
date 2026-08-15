@@ -123,8 +123,10 @@ function WhereaboutsFloatingWidget() {
           setDragging(true);
         }}
       >
-        <div className="mx-auto mb-2 flex size-16 items-center justify-center overflow-hidden rounded-full border-2 text-sm font-semibold shadow-lg"
-          style={{ borderColor: "var(--wmp-gold)", background: "var(--wmp-surface-2)", color: "var(--wmp-gold)" }}>
+        <div
+          className="mx-auto mb-2 flex size-16 items-center justify-center overflow-hidden rounded-full border-2 text-sm font-semibold shadow-lg"
+          style={{ borderColor: "var(--wmp-gold)", background: "var(--wmp-surface-2)", color: "var(--wmp-gold)" }}
+        >
           <span aria-label="Foto do Wagner Miller pendente de cadastro" title="Foto oficial do Wagner Miller será exibida aqui">WM</span>
         </div>
 
@@ -222,7 +224,8 @@ export function WmpShell({
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-4 text-sm" aria-label="Menu principal">
+          <nav className="hidden xl:flex items-center gap-4 text-sm" aria-label="Menu principal">
+            <Link to="/wmp/djs" className="opacity-80 hover:opacity-100">Contratar DJ</Link>
             <Link to="/wmp/empresas" className="opacity-80 hover:opacity-100">Hotéis & Empresas</Link>
             <Link to="/wmp/onde-estou" className="opacity-80 hover:opacity-100">Onde Estou</Link>
             <Link to="/wmp/pacotes" className="opacity-80 hover:opacity-100">Serviços</Link>
@@ -240,7 +243,7 @@ export function WmpShell({
 
           <button
             type="button"
-            className="lg:hidden inline-flex items-center justify-center size-11 shrink-0 rounded-lg"
+            className="xl:hidden inline-flex items-center justify-center size-11 shrink-0 rounded-lg"
             style={{ background: "var(--wmp-surface-2)", color: "var(--wmp-fg)" }}
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
@@ -254,10 +257,11 @@ export function WmpShell({
         {open && (
           <nav
             id="wmp-mobile-nav"
-            className="lg:hidden border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
+            className="xl:hidden border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
             aria-label="Menu mobile"
           >
             <ul className="px-4 sm:px-6 py-4 flex flex-col gap-3 text-sm">
+              <li><Link to="/wmp/djs" onClick={() => setOpen(false)}>Contratar DJ</Link></li>
               <li><Link to="/wmp/empresas" onClick={() => setOpen(false)}>Hotéis & Empresas</Link></li>
               <li><Link to="/wmp/onde-estou" onClick={() => setOpen(false)}>Onde Estou</Link></li>
               <li><Link to="/wmp/pacotes" onClick={() => setOpen(false)}>Serviços</Link></li>
@@ -320,6 +324,7 @@ export function WmpShell({
             <div className="wmp-display text-sm mb-3 opacity-90">Contratar</div>
             <ul className="space-y-2 opacity-80">
               <li><Link to="/wmp/orcamento" className="hover:opacity-100">Solicitar proposta</Link></li>
+              <li><Link to="/wmp/djs" className="hover:opacity-100">Contratar DJ</Link></li>
               <li><Link to="/wmp/empresas" className="hover:opacity-100">Hotéis & Empresas</Link></li>
               <li><Link to="/wmp/onde-estou" className="hover:opacity-100">Onde Estou</Link></li>
             </ul>
