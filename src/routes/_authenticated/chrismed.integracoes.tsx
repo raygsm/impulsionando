@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Bot, Cloud, FileText, RefreshCw, ShieldCheck, TicketCheck } from 'lucide-react';
+import { Bot, Cloud, FileText, RefreshCw, ShieldCheck, TicketCheck, TicketPercent } from 'lucide-react';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 const CHRISMED_TENANT_ID = '94bf647c-c851-41ab-8700-1e062263e54d';
 
-type DriveConnection = { id: string; provider_account_email: string | null; status: string; connected_at: string | null; last_sync: string | null; last_error: string | null };
+type DriveConnection = { id: string; provider_account_email: string | null; status: string; connected_at: string | null; last_sync_at: string | null; last_error: string | null };
 type Agent = { id: string; name: string; role: string | null; active: boolean; reply_route: string | null };
-type Counts = { tickets: number; openConversations: number; queuedExports: number; indexedDocuments: number };
+type Counts = { tickets: number; openConversations: number; queuedExports: number; indexedDocuments: number; coupons: number };
 
 export const Route = createFileRoute('/_authenticated/chrismed/integracoes')({
   beforeLoad: requireChrismedManagement,
@@ -21,26 +21,36 @@ export const Route = createFileRoute('/_authenticated/chrismed/integracoes')({
   head: () => ({ meta: [{ title: 'Integrações — Gestão CHRISMED' }] }),
 });
 
+async function getAccessToken() {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Sessão administrativa não encontrada.');
+  return token;
+}
+
 function ChrismedIntegrations() {
   const [drive, setDrive] = useState<DriveConnection | null>(null);
   const [oliver, setOliver] = useState<Agent | null>(null);
-  const [counts, setCounts] = useState<Counts>({ tickets: 0, openConversations: 0, queuedExports: 0, indexedDocuments: 0 });
+  const [counts, setCounts] = useState<Counts>({ tickets: 0, openConversations: 0, queuedExports: 0, indexedDocuments: 0, coupons: 0 });
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   async function load() {
     setLoading(true);
-    const [driveResult, agentResult, ticketsResult, conversationsResult, exportsResult, docsResult] = await Promise.all([
-      supabase.from('client_drive_connections').select('id,provider_account_email,status,connected_at,last_sync,last_error').eq('company_id', CHRISMED_COMPANY_ID).eq('provider', 'google_drive').maybeSingle(),
+    const [driveResult, agentResult, ticketsResult, conversationsResult, exportsResult, docsResult, couponsResult] = await Promise.all([
+      supabase.from('client_drive_connections').select('id,provider_account_email,status,connected_at,last_sync_at,last_error').eq('company_id', CHRISMED_COMPANY_ID).eq('provider', 'google_drive').maybeSingle(),
       supabase.from('communication_agents').select('id,name,role,active,reply_route').eq('tenant_id', CHRISMED_TENANT_ID).eq('name', 'Oliver').maybeSingle(),
       supabase.from('communication_conversation_tickets').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID),
-      supabase.from('communication_conversations').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).eq('status', 'OPEN'),
-      supabase.from('communication_conversation_export_requests').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).eq('status', 'QUEUED'),
+      supabase.from('communication_conversations').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).in('status', ['OPEN','open','active']),
+      supabase.from('communication_conversation_export_requests').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).in('status', ['QUEUED','PROCESSING']),
       supabase.from('client_drive_documents').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'indexed'),
+      supabase.from('chrismed_coupons').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID),
     ]);
+    if (driveResult.error) console.error('[CHRISMED Drive status]', driveResult.error);
     setDrive((driveResult.data as DriveConnection | null) ?? null);
     setOliver((agentResult.data as Agent | null) ?? null);
-    setCounts({ tickets: ticketsResult.count ?? 0, openConversations: conversationsResult.count ?? 0, queuedExports: exportsResult.count ?? 0, indexedDocuments: docsResult.count ?? 0 });
+    setCounts({ tickets: ticketsResult.count ?? 0, openConversations: conversationsResult.count ?? 0, queuedExports: exportsResult.count ?? 0, indexedDocuments: docsResult.count ?? 0, coupons: couponsResult.count ?? 0 });
     setLoading(false);
   }
 
@@ -49,9 +59,7 @@ function ChrismedIntegrations() {
   async function connectGoogleDrive() {
     setConnecting(true);
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) throw new Error('Sessão administrativa não encontrada.');
+      const token = await getAccessToken();
       const response = await fetch('/api/chrismed/google-drive/start', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const body = await response.json();
       if (!response.ok || !body.authorizationUrl) throw new Error(body.error || 'Não foi possível iniciar a conexão.');
@@ -62,6 +70,22 @@ function ChrismedIntegrations() {
     }
   }
 
+  async function syncGoogleDrive() {
+    setSyncing(true);
+    try {
+      const token = await getAccessToken();
+      const response = await fetch('/api/chrismed/google-drive/sync', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Não foi possível sincronizar o Google Drive.');
+      toast.success(`${body.filesSeen ?? 0} arquivos verificados no Google Drive.`);
+      await load();
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   const driveReady = drive?.status === 'connected';
   const oliverReady = Boolean(oliver?.active && oliver.reply_route);
 
@@ -69,15 +93,16 @@ function ChrismedIntegrations() {
     <main className="min-h-screen bg-[#F7F3EA] px-4 py-7 text-[#071C18] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-col gap-4 rounded-3xl border border-[#D9D3CB] bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#596660]">Gestão · IA · Documentos</p><h1 className="mt-1 text-3xl font-bold">Integrações CHRISMED</h1><p className="mt-2 max-w-3xl text-sm text-[#3F4A47]">Google Drive, Oliver, protocolos e exportações em um único cockpit operacional.</p></div>
+          <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#596660]">Gestão · IA · Documentos</p><h1 className="mt-1 text-3xl font-bold">Integrações CHRISMED</h1><p className="mt-2 max-w-3xl text-sm text-[#3F4A47]">Google Drive, Oliver, cupons, protocolos e exportações em um único cockpit operacional.</p></div>
           <Button variant="outline" onClick={() => void load()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />Atualizar</Button>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Metric icon={TicketCheck} label="Protocolos" value={counts.tickets} />
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <Metric icon={TicketCheck} label="Protocolos" value={counts.tickets} href="/chrismed/protocolos" />
           <Metric icon={Bot} label="Conversas abertas" value={counts.openConversations} />
           <Metric icon={FileText} label="Exportações na fila" value={counts.queuedExports} />
           <Metric icon={Cloud} label="Docs indexados" value={counts.indexedDocuments} />
+          <Metric icon={TicketPercent} label="Cupons" value={counts.coupons} href="/chrismed/cupons" />
         </section>
 
         <section className="grid gap-5 lg:grid-cols-2">
@@ -85,11 +110,11 @@ function ChrismedIntegrations() {
             <CardHeader><div className="flex items-center justify-between gap-3"><CardTitle className="flex items-center gap-2"><Cloud className="h-5 w-5" />Google Drive CHRISMED</CardTitle><Badge className={driveReady ? 'border border-emerald-300 bg-emerald-50 text-emerald-900' : 'border border-amber-300 bg-amber-50 text-amber-950'}>{driveReady ? 'CONECTADO' : 'PENDENTE'}</Badge></div></CardHeader>
             <CardContent className="space-y-4 text-sm">
               <p className="text-[#3F4A47]">Fonte documental oficial da CHRISMED para o Oliver consultar e classificar documentos. A leitura não autoriza o compartilhamento com pacientes.</p>
-              <Info label="Conta autorizada" value={drive?.provider_account_email ?? 'Ainda não conectada'} />
+              <Info label="Conta autorizada" value={drive?.provider_account_email ?? 'chrissalencar@gmail.com'} />
               <Info label="Conectado em" value={drive?.connected_at ? new Date(drive.connected_at).toLocaleString('pt-BR') : '—'} />
-              <Info label="Última sincronização" value={drive?.last_sync ? new Date(drive.last_sync).toLocaleString('pt-BR') : '—'} />
+              <Info label="Última sincronização" value={drive?.last_sync_at ? new Date(drive.last_sync_at).toLocaleString('pt-BR') : '—'} />
               {drive?.last_error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">{drive.last_error}</div>}
-              <Button onClick={() => void connectGoogleDrive()} disabled={connecting} className="bg-[#071C18] text-white">{connecting ? 'Abrindo Google…' : driveReady ? 'Reconectar Google Drive' : 'Conectar Google Drive'}</Button>
+              <div className="flex flex-wrap gap-2"><Button onClick={() => void connectGoogleDrive()} disabled={connecting} className="bg-[#071C18] text-white">{connecting ? 'Abrindo Google…' : driveReady ? 'Reconectar Google Drive' : 'Conectar Google Drive'}</Button><Button variant="outline" disabled={!driveReady || syncing} onClick={() => void syncGoogleDrive()}>{syncing ? 'Sincronizando…' : 'Sincronizar agora'}</Button></div>
             </CardContent>
           </Card>
 
@@ -111,5 +136,5 @@ function ChrismedIntegrations() {
   );
 }
 
-function Metric({ icon: Icon, label, value }: { icon: typeof Bot; label: string; value: number }) { return <Card className="border-[#D9D3CB] bg-white"><CardContent className="flex items-center gap-3 p-5"><div className="rounded-xl bg-[#F1E9D9] p-3"><Icon className="h-5 w-5" /></div><div><div className="text-xs uppercase tracking-[0.12em] text-[#596660]">{label}</div><div className="text-2xl font-bold">{value}</div></div></CardContent></Card>; }
+function Metric({ icon: Icon, label, value, href }: { icon: typeof Bot; label: string; value: number; href?: string }) { const card=<Card className="h-full border-[#D9D3CB] bg-white"><CardContent className="flex items-center gap-3 p-5"><div className="rounded-xl bg-[#F1E9D9] p-3"><Icon className="h-5 w-5" /></div><div><div className="text-xs uppercase tracking-[0.12em] text-[#596660]">{label}</div><div className="text-2xl font-bold">{value}</div></div></CardContent></Card>; return href?<a href={href} className="block">{card}</a>:card; }
 function Info({ label, value }: { label: string; value: string }) { return <div className="rounded-lg border border-[#E3DDD4] bg-[#FDFCFB] p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-[#596660]">{label}</div><div className="mt-1 font-medium break-words">{value}</div></div>; }
