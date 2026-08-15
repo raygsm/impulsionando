@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { diagnoseAcoustics, type WmpAcousticInput } from "@/lib/wmp/acoustic-rules";
 import { dispatchN8nByEvent } from "@/lib/n8n-dispatch-by-event.server";
+import { isValidCNPJ, normalizeCNPJ } from "@/lib/validators";
 
 const db:any=supabaseAdmin;
 const WMP_COMPANY_ID = "ff2a9570-1168-4f9c-a852-1e042d9f32ed";
@@ -88,9 +89,16 @@ export const submitWmpParceiro=createServerFn({method:"POST"}).inputValidator((d
   const estado=(clean(d.estado,2)??"").toUpperCase();
   const cidade=clean(d.cidade,120);
   const municipioIbge=clean(d.municipio_ibge,12);
+  const razaoSocial=clean(d.razao_social,200);
+  const cnpjRaw=clean(d.cnpj,30);
+  const cnpj=cnpjRaw?normalizeCNPJ(cnpjRaw):undefined;
   if(!nome||!email||!telefone||!categoria||!estado||!cidade||!municipioIbge)throw new Error("Campos obrigatórios faltando.");
   if(!EMAIL_RE.test(email)||!/^\d{7}$/.test(municipioIbge))throw new Error("Dados inválidos.");
-  return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade,estado,municipio_ibge:municipioIbge,experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
+  if(categoria==="dj"){
+    if(!razaoSocial||!cnpj)throw new Error("Para DJ parceiro, razão social e CNPJ são obrigatórios.");
+    if(!isValidCNPJ(cnpj))throw new Error("CNPJ inválido. Confira os dados da empresa.");
+  }else if(cnpj&&!isValidCNPJ(cnpj))throw new Error("CNPJ inválido. Confira os dados da empresa.");
+  return{nome,nome_artistico:clean(d.nome_artistico,120),email:email.toLowerCase(),telefone,categoria,cidade,estado,municipio_ibge:municipioIbge,experiencia_anos:Number.isFinite(Number(d.experiencia_anos))?Number(d.experiencia_anos):null,bio:clean(d.bio,1500),portfolio_links:Array.isArray(d.portfolio_links)?d.portfolio_links.map((x:unknown)=>clean(x,300)).filter(Boolean):[],razao_social:razaoSocial,cnpj,invoice_required:true,payout_terms_days:10,utm:d.utm&&typeof d.utm==="object"?d.utm:null,user_agent:clean(d.user_agent,300),origem:clean(d.origem,40)??"site"};
 }).handler(async({data})=>{
   await Promise.all([
     assertReference("wmp_partner_categories",data.categoria,"Categoria de parceiro"),
