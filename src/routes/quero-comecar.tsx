@@ -1,10 +1,7 @@
 /**
- * /comecar — Onda 3: cadastro progressivo CEP-first.
- *
- * Passo 1: CEP → ViaCEP auto-preenche cidade/UF/bairro.
+ * /comecar — cadastro progressivo CEP-first.
+ * Passo 1: CEP → Core auto-preenche cidade/UF/bairro.
  * Passo 2: Nome + WhatsApp + email + objetivo.
- * Grava em marketing_leads (source=outro, answers.origin=comecar-cep) e
- * redireciona para /orcamento com os dados prefixados via query string.
  */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -18,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { lookupCEP, type CepResult } from "@/lib/validators";
 
 export const Route = createFileRoute("/quero-comecar")({
   head: () => ({
@@ -34,22 +32,13 @@ export const Route = createFileRoute("/quero-comecar")({
   component: ComecarPage,
 });
 
-interface ViaCep {
-  cep?: string;
-  logradouro?: string;
-  bairro?: string;
-  localidade?: string;
-  uf?: string;
-  erro?: boolean;
-}
-
 function ComecarPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
   const [loadingCep, setLoadingCep] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cep, setCep] = useState("");
-  const [address, setAddress] = useState<ViaCep | null>(null);
+  const [address, setAddress] = useState<CepResult | null>(null);
   const [form, setForm] = useState({ name: "", email: "", whatsapp: "", goal: "" });
 
   function fmtCep(raw: string) {
@@ -71,9 +60,8 @@ function ComecarPage() {
     }
     setLoadingCep(true);
     try {
-      const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-      const data: ViaCep = await r.json();
-      if (data.erro) {
+      const data = await lookupCEP(digits);
+      if (!data) {
         toast.error("CEP não encontrado. Verifique e tente novamente.");
         return;
       }
@@ -104,6 +92,7 @@ function ComecarPage() {
         origin: "comecar-cep",
         cep,
         address,
+        municipality_ibge: address?.ibge ?? null,
         goal: form.goal,
       },
     } as never);
@@ -119,7 +108,7 @@ function ComecarPage() {
         nome: form.name,
         email: form.email,
         whatsapp: form.whatsapp,
-        cidade: address?.localidade,
+        cidade: address?.cidade,
         uf: address?.uf,
       },
     } as never);
@@ -132,38 +121,18 @@ function ComecarPage() {
         <Badge variant="outline" className="mb-2 gap-1">
           <Sparkles className="w-3.5 h-3.5" /> Passo {step} de 2
         </Badge>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {step === 1 ? "Vamos começar pelo seu CEP" : "Complete seus dados"}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {step === 1
-            ? "Usamos seu CEP para localizar sua região e sugerir o plano ideal."
-            : "Falta pouco. Depois disso, mostramos sua recomendação personalizada."}
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{step === 1 ? "Vamos começar pelo seu CEP" : "Complete seus dados"}</h1>
+        <p className="mt-2 text-muted-foreground">{step === 1 ? "Usamos seu CEP para localizar sua região e sugerir o plano ideal." : "Falta pouco. Depois disso, mostramos sua recomendação personalizada."}</p>
 
         <Card className="mt-8 p-6">
           {step === 1 ? (
             <div className="grid gap-4">
               <div className="grid gap-1.5">
-                <Label className="text-sm flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" /> CEP
-                </Label>
-                <Input
-                  value={cep}
-                  onChange={(e) => setCep(fmtCep(e.target.value))}
-                  placeholder="00000-000"
-                  inputMode="numeric"
-                  autoFocus
-                />
+                <Label className="text-sm flex items-center gap-1.5"><MapPin className="w-4 h-4" /> CEP</Label>
+                <Input value={cep} onChange={(e) => setCep(fmtCep(e.target.value))} placeholder="00000-000" inputMode="numeric" autoFocus />
               </div>
-              <Button onClick={lookupCep} disabled={loadingCep} size="lg" className="gap-2">
-                {loadingCep && <Loader2 className="w-4 h-4 animate-spin" />}
-                Continuar
-              </Button>
-              <p className="text-xs text-muted-foreground text-center">
-                Não guardamos seu CEP para envio de correspondência. Apenas para
-                recomendar a solução regional certa.
-              </p>
+              <Button onClick={lookupCep} disabled={loadingCep} size="lg" className="gap-2">{loadingCep && <Loader2 className="w-4 h-4 animate-spin" />}Continuar</Button>
+              <p className="text-xs text-muted-foreground text-center">Não guardamos seu CEP para envio de correspondência. Apenas para recomendar a solução regional certa.</p>
             </div>
           ) : (
             <form onSubmit={submit} className="grid gap-4">
@@ -171,37 +140,20 @@ function ComecarPage() {
                 <div className="rounded-md border bg-muted/30 p-3 text-sm flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <div className="font-medium">{address.localidade} / {address.uf}</div>
+                    <div className="font-medium">{address.cidade} / {address.uf}</div>
                     {address.bairro && <div className="text-muted-foreground text-xs">{address.bairro}{address.logradouro ? ` · ${address.logradouro}` : ""}</div>}
                     <button type="button" className="text-xs underline text-muted-foreground mt-1" onClick={() => setStep(1)}>Alterar CEP</button>
                   </div>
                 </div>
               )}
-              <div className="grid gap-1.5">
-                <Label className="text-sm">Seu nome *</Label>
-                <Input value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} autoFocus />
-              </div>
+              <div className="grid gap-1.5"><Label className="text-sm">Seu nome *</Label><Input value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} autoFocus /></div>
               <div className="grid sm:grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label className="text-sm">Email *</Label>
-                  <Input type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label className="text-sm">WhatsApp *</Label>
-                  <Input value={form.whatsapp} onChange={(e) => setForm((s) => ({ ...s, whatsapp: fmtWhats(e.target.value) }))} placeholder="(11) 99999-9999" />
-                </div>
+                <div className="grid gap-1.5"><Label className="text-sm">Email *</Label><Input type="email" value={form.email} onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))} /></div>
+                <div className="grid gap-1.5"><Label className="text-sm">WhatsApp *</Label><Input value={form.whatsapp} onChange={(e) => setForm((s) => ({ ...s, whatsapp: fmtWhats(e.target.value) }))} placeholder="(11) 99999-9999" /></div>
               </div>
-              <div className="grid gap-1.5">
-                <Label className="text-sm">O que você quer resolver?</Label>
-                <Input value={form.goal} onChange={(e) => setForm((s) => ({ ...s, goal: e.target.value }))} placeholder="Ex.: Site novo, automatizar atendimento, gestão de clínica…" />
-              </div>
-              <Button type="submit" size="lg" disabled={submitting} className="gap-2 mt-2">
-                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                Ver minha recomendação
-              </Button>
-              <p className="text-[11px] text-muted-foreground text-center">
-                Ao continuar, você autoriza contato do time Impulsionando via WhatsApp e email.
-              </p>
+              <div className="grid gap-1.5"><Label className="text-sm">O que você quer resolver?</Label><Input value={form.goal} onChange={(e) => setForm((s) => ({ ...s, goal: e.target.value }))} placeholder="Ex.: Site novo, automatizar atendimento, gestão de clínica…" /></div>
+              <Button type="submit" size="lg" disabled={submitting} className="gap-2 mt-2">{submitting && <Loader2 className="w-4 h-4 animate-spin" />}Ver minha recomendação</Button>
+              <p className="text-[11px] text-muted-foreground text-center">Ao continuar, você autoriza contato do time Impulsionando via WhatsApp e email.</p>
             </form>
           )}
         </Card>
