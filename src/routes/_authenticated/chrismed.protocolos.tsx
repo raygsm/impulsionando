@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Download, MessageCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
+const OLIVER_SESSION_STORAGE_KEY = 'chrismed:oliver:web-session:v1';
+
 type Ticket = {
   ticket_id: string;
   protocol: string;
@@ -34,15 +36,21 @@ function fmt(value: string | null) {
 
 function statusLabel(value: string | null) {
   const map: Record<string, string> = {
-    open: 'Em atendimento',
-    active: 'Em atendimento',
-    resolved: 'Resolvido',
-    closed: 'Encerrado',
-    QUEUED: 'Exportação solicitada',
-    PROCESSING: 'Preparando exportação',
-    SENT: 'Exportação enviada',
+    open: 'Em atendimento', OPEN: 'Em atendimento', active: 'Em atendimento', ACTIVE: 'Em atendimento',
+    resolved: 'Resolvido', RESOLVED: 'Resolvido', closed: 'Encerrado', CLOSED: 'Encerrado',
+    QUEUED: 'Exportação solicitada', PROCESSING: 'Preparando exportação', SENT: 'Exportação enviada',
   };
   return map[String(value)] ?? String(value ?? '—');
+}
+
+function getSavedOliverSession() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const value = window.localStorage.getItem(OLIVER_SESSION_STORAGE_KEY)?.trim() ?? '';
+    return /^web:chrismed:[A-Za-z0-9:_-]{8,180}$/.test(value) ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 function ChrismedProtocolsPage() {
@@ -50,8 +58,18 @@ function ChrismedProtocolsPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<string | null>(null);
 
+  async function bindCurrentOliverSession() {
+    const sessionId = getSavedOliverSession();
+    if (!sessionId) return;
+    const { error } = await (supabase as any).rpc('chrismed_bind_my_oliver_session', { p_external_user_id: sessionId });
+    if (error && !String(error.message ?? '').includes('session_not_found')) {
+      console.error('[CHRISMED Oliver session binding]', error);
+    }
+  }
+
   async function load() {
     setLoading(true);
+    await bindCurrentOliverSession();
     const { data, error } = await (supabase as any).rpc('chrismed_get_my_support_tickets');
     setLoading(false);
     if (error) {
