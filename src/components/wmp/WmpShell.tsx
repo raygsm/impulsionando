@@ -1,14 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { Music2, Sparkles, Menu, X, MessageCircle, MapPin } from "lucide-react";
+import { MapPin, Menu, MessageCircle, Music2, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MoreContentFab } from "@/components/impulsionando";
 
 type Crumb = { label: string; to?: string };
-
 type Point = { x: number; y: number };
 
-const WMP_WHEREABOUTS_POSITION_KEY = "wmp:whereabouts:position";
-const WMP_WHEREABOUTS_DISMISSED_KEY = "wmp:whereabouts:dismissed";
+const POSITION_KEY = "wmp:whereabouts:position";
+const DISMISSED_KEY = "wmp:whereabouts:dismissed";
+const WAGNER_PORTRAIT = "/wmp/wagner-miller.webp";
 
 function clampPosition(point: Point, width = 118, height = 132): Point {
   if (typeof window === "undefined") return point;
@@ -28,19 +28,16 @@ function WhereaboutsFloatingWidget() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setDismissed(sessionStorage.getItem(WMP_WHEREABOUTS_DISMISSED_KEY) === "1");
-
-    const saved = sessionStorage.getItem(WMP_WHEREABOUTS_POSITION_KEY);
+    setDismissed(sessionStorage.getItem(DISMISSED_KEY) === "1");
+    const saved = sessionStorage.getItem(POSITION_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as Point;
-        setPosition(clampPosition(parsed));
+        setPosition(clampPosition(JSON.parse(saved) as Point));
         return;
       } catch {
-        // Ignore malformed session data and use the default position.
+        // Invalid session state is ignored.
       }
     }
-
     setPosition(clampPosition({ x: 16, y: window.innerHeight - 164 }));
   }, []);
 
@@ -53,55 +50,39 @@ function WhereaboutsFloatingWidget() {
 
   useEffect(() => {
     if (!dragging || typeof window === "undefined") return;
-
-    const onPointerMove = (event: PointerEvent) => {
+    const onMove = (event: PointerEvent) => {
       moved.current = true;
-      setPosition(
-        clampPosition({
-          x: event.clientX - dragOffset.current.x,
-          y: event.clientY - dragOffset.current.y,
-        }),
-      );
+      setPosition(clampPosition({ x: event.clientX - dragOffset.current.x, y: event.clientY - dragOffset.current.y }));
     };
-
-    const onPointerUp = () => {
+    const onUp = () => {
       setDragging(false);
       setPosition((current) => {
-        if (current) sessionStorage.setItem(WMP_WHEREABOUTS_POSITION_KEY, JSON.stringify(current));
+        if (current) sessionStorage.setItem(POSITION_KEY, JSON.stringify(current));
         return current;
       });
     };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp, { once: true });
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
     return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
     };
   }, [dragging]);
 
   if (dismissed || !position) return null;
 
   return (
-    <div
-      className="fixed z-40 select-none touch-none"
-      style={{ left: position.x, top: position.y }}
-      aria-label="Onde Estou — Wagner Miller"
-    >
+    <div className="fixed z-40 select-none touch-none" style={{ left: position.x, top: position.y }} aria-label="Onde Estou — Wagner Miller">
       <button
         type="button"
         aria-label="Fechar Onde Estou"
         className="absolute -right-1 -top-1 z-10 flex size-7 items-center justify-center rounded-full border shadow-md"
-        style={{
-          background: "var(--wmp-bg)",
-          borderColor: "color-mix(in oklab, var(--wmp-gold) 45%, transparent)",
-          color: "var(--wmp-fg)",
-        }}
+        style={{ background: "var(--wmp-bg)", borderColor: "color-mix(in oklab, var(--wmp-gold) 45%, transparent)", color: "var(--wmp-fg)" }}
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          sessionStorage.setItem(WMP_WHEREABOUTS_DISMISSED_KEY, "1");
+          sessionStorage.setItem(DISMISSED_KEY, "1");
           setDismissed(true);
         }}
       >
@@ -111,10 +92,7 @@ function WhereaboutsFloatingWidget() {
       <div
         role="group"
         className="w-[112px] cursor-grab rounded-2xl border p-2 shadow-2xl backdrop-blur-md active:cursor-grabbing"
-        style={{
-          background: "color-mix(in oklab, var(--wmp-bg) 88%, transparent)",
-          borderColor: "color-mix(in oklab, var(--wmp-gold) 28%, transparent)",
-        }}
+        style={{ background: "color-mix(in oklab, var(--wmp-bg) 88%, transparent)", borderColor: "color-mix(in oklab, var(--wmp-gold) 28%, transparent)" }}
         onPointerDown={(event) => {
           const target = event.target as HTMLElement;
           if (target.closest("a,button")) return;
@@ -123,13 +101,9 @@ function WhereaboutsFloatingWidget() {
           setDragging(true);
         }}
       >
-        <div
-          className="mx-auto mb-2 flex size-16 items-center justify-center overflow-hidden rounded-full border-2 text-sm font-semibold shadow-lg"
-          style={{ borderColor: "var(--wmp-gold)", background: "var(--wmp-surface-2)", color: "var(--wmp-gold)" }}
-        >
-          <span aria-label="Foto do Wagner Miller pendente de cadastro" title="Foto oficial do Wagner Miller será exibida aqui">WM</span>
+        <div className="mx-auto mb-2 size-16 overflow-hidden rounded-full border-2 shadow-lg" style={{ borderColor: "var(--wmp-gold)", background: "var(--wmp-surface-2)" }}>
+          <img src={WAGNER_PORTRAIT} alt="Wagner Miller" className="h-full w-full object-cover" loading="lazy" draggable={false} />
         </div>
-
         <Link
           to="/wmp/onde-estou"
           className="flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-center text-xs font-semibold"
@@ -141,8 +115,7 @@ function WhereaboutsFloatingWidget() {
             }
           }}
         >
-          <MapPin className="size-3.5" aria-hidden />
-          Onde estou
+          <MapPin className="size-3.5" aria-hidden /> Onde estou
         </Link>
         <div className="pt-1.5 text-center text-[10px] opacity-60">Arraste para mover</div>
       </div>
@@ -150,210 +123,86 @@ function WhereaboutsFloatingWidget() {
   );
 }
 
-export function WmpShell({
-  children,
-  breadcrumbs,
-}: {
-  children: React.ReactNode;
-  breadcrumbs?: Crumb[];
-}) {
+const NAV = [
+  ["Contratar DJ", "/wmp/djs"],
+  ["Hotéis & Empresas", "/wmp/empresas"],
+  ["Onde Estou", "/wmp/onde-estou"],
+  ["Serviços", "/wmp/pacotes"],
+  ["Cases", "/wmp/cases"],
+  ["Sobre", "/wmp/sobre"],
+  ["Seja Parceiro", "/wmp/parceiro"],
+] as const;
+
+export function WmpShell({ children, breadcrumbs }: { children: React.ReactNode; breadcrumbs?: Crumb[] }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="wmp-brand min-h-dvh w-full overflow-x-clip">
       <style>{`
-        .wmp-brand [role="dialog"][aria-label*="Milito"] {
-          max-width: calc(100vw - 24px);
-          max-height: calc(100dvh - 24px);
-          overscroll-behavior: contain;
-        }
-        .wmp-brand button[aria-label*="Abrir Milito"] {
-          right: max(12px, env(safe-area-inset-right));
-          bottom: max(12px, env(safe-area-inset-bottom));
-          min-width: 48px;
-          min-height: 48px;
-        }
+        .wmp-brand [role="dialog"][aria-label*="Milito"] { max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overscroll-behavior: contain; }
+        .wmp-brand button[aria-label*="Abrir Milito"] { right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); min-width: 48px; min-height: 48px; }
         @media (max-width: 640px) {
-          .wmp-brand [role="dialog"][aria-label*="Milito"] {
-            inset: 0 !important;
-            width: 100dvw !important;
-            height: 100dvh !important;
-            max-width: 100dvw !important;
-            max-height: 100dvh !important;
-            border-radius: 0 !important;
-            border-left: 0 !important;
-            border-right: 0 !important;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-          }
-          .wmp-brand [role="dialog"][aria-label*="Milito"] form {
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-          }
-          .wmp-brand [role="dialog"][aria-label*="Milito"] input,
-          .wmp-brand [role="dialog"][aria-label*="Milito"] textarea {
-            font-size: 16px !important;
-          }
+          .wmp-brand [role="dialog"][aria-label*="Milito"] { inset: 0 !important; width: 100dvw !important; height: 100dvh !important; max-width: 100dvw !important; max-height: 100dvh !important; border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+          .wmp-brand [role="dialog"][aria-label*="Milito"] form { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+          .wmp-brand [role="dialog"][aria-label*="Milito"] input, .wmp-brand [role="dialog"][aria-label*="Milito"] textarea { font-size: 16px !important; }
         }
       `}</style>
 
-      <a
-        href="#wmp-main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md"
-        style={{ background: "var(--wmp-gold)", color: "var(--wmp-bg)" }}
-      >
-        Pular para o conteúdo
-      </a>
+      <a href="#wmp-main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:px-3 focus:py-2" style={{ background: "var(--wmp-gold)", color: "var(--wmp-bg)" }}>Pular para o conteúdo</a>
 
-      <header
-        className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_oklab,var(--wmp-bg)_75%,transparent)] border-b border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
-        role="banner"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link
-            to="/wmp"
-            className="flex min-w-0 items-center gap-2 wmp-display text-xl"
-            aria-label="WMP — Wagner Miller Produções, ir para o início"
-          >
+      <header className="sticky top-0 z-40 border-b border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)] bg-[color-mix(in_oklab,var(--wmp-bg)_75%,transparent)] backdrop-blur-md" role="banner">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link to="/wmp" className="wmp-display flex min-w-0 items-center gap-2 text-xl" aria-label="WMP — Wagner Miller Produções, ir para o início">
             <Music2 className="size-5 shrink-0" style={{ color: "var(--wmp-gold)" }} aria-hidden />
             <span>WMP</span>
-            <span
-              className="hidden sm:inline truncate text-xs font-normal opacity-70"
-              style={{ fontFamily: "Inter" }}
-            >
-              Wagner Miller Produções
-            </span>
+            <span className="hidden truncate text-xs font-normal opacity-70 sm:inline" style={{ fontFamily: "Inter" }}>Wagner Miller Produções</span>
           </Link>
 
-          <nav className="hidden xl:flex items-center gap-4 text-sm" aria-label="Menu principal">
-            <Link to="/wmp/djs" className="opacity-80 hover:opacity-100">Contratar DJ</Link>
-            <Link to="/wmp/empresas" className="opacity-80 hover:opacity-100">Hotéis & Empresas</Link>
-            <Link to="/wmp/onde-estou" className="opacity-80 hover:opacity-100">Onde Estou</Link>
-            <Link to="/wmp/pacotes" className="opacity-80 hover:opacity-100">Serviços</Link>
-            <Link to="/wmp/cases" className="opacity-80 hover:opacity-100">Cases</Link>
-            <Link to="/wmp/sobre" className="opacity-80 hover:opacity-100">Sobre</Link>
-            <Link to="/wmp/parceiro" className="opacity-80 hover:opacity-100">Seja Parceiro</Link>
-            <Link
-              to="/wmp/orcamento"
-              className="wmp-cta"
-              style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
-            >
-              <Sparkles className="size-4" aria-hidden /> Solicitar proposta
-            </Link>
+          <nav className="hidden items-center gap-4 text-sm xl:flex" aria-label="Menu principal">
+            {NAV.map(([label, to]) => <Link key={to} to={to} className="opacity-80 hover:opacity-100">{label}</Link>)}
+            <Link to="/wmp/orcamento" className="wmp-cta" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}><Sparkles className="size-4" aria-hidden /> Solicitar proposta</Link>
           </nav>
 
-          <button
-            type="button"
-            className="xl:hidden inline-flex items-center justify-center size-11 shrink-0 rounded-lg"
-            style={{ background: "var(--wmp-surface-2)", color: "var(--wmp-fg)" }}
-            aria-label={open ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={open}
-            aria-controls="wmp-mobile-nav"
-            onClick={() => setOpen((v) => !v)}
-          >
+          <button type="button" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg xl:hidden" style={{ background: "var(--wmp-surface-2)", color: "var(--wmp-fg)" }} aria-label={open ? "Fechar menu" : "Abrir menu"} aria-expanded={open} aria-controls="wmp-mobile-nav" onClick={() => setOpen((value) => !value)}>
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
 
         {open && (
-          <nav
-            id="wmp-mobile-nav"
-            className="xl:hidden border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
-            aria-label="Menu mobile"
-          >
-            <ul className="px-4 sm:px-6 py-4 flex flex-col gap-3 text-sm">
-              <li><Link to="/wmp/djs" onClick={() => setOpen(false)}>Contratar DJ</Link></li>
-              <li><Link to="/wmp/empresas" onClick={() => setOpen(false)}>Hotéis & Empresas</Link></li>
-              <li><Link to="/wmp/onde-estou" onClick={() => setOpen(false)}>Onde Estou</Link></li>
-              <li><Link to="/wmp/pacotes" onClick={() => setOpen(false)}>Serviços</Link></li>
-              <li><Link to="/wmp/cases" onClick={() => setOpen(false)}>Cases</Link></li>
-              <li><Link to="/wmp/sobre" onClick={() => setOpen(false)}>Sobre</Link></li>
+          <nav id="wmp-mobile-nav" className="border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)] xl:hidden" aria-label="Menu mobile">
+            <ul className="flex flex-col gap-3 px-4 py-4 text-sm sm:px-6">
+              {NAV.map(([label, to]) => <li key={to}><Link to={to} onClick={() => setOpen(false)}>{label}</Link></li>)}
               <li><Link to="/wmp/faq" onClick={() => setOpen(false)}>FAQ</Link></li>
-              <li><Link to="/wmp/parceiro" onClick={() => setOpen(false)}>Seja parceiro</Link></li>
-              <li>
-                <Link
-                  to="/wmp/orcamento"
-                  onClick={() => setOpen(false)}
-                  className="wmp-cta w-full justify-center"
-                  style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", minHeight: "44px" }}
-                >
-                  <Sparkles className="size-4" aria-hidden /> Solicitar proposta
-                </Link>
-              </li>
+              <li><Link to="/wmp/orcamento" onClick={() => setOpen(false)} className="wmp-cta w-full justify-center" style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", minHeight: "44px" }}><Sparkles className="size-4" aria-hidden /> Solicitar proposta</Link></li>
             </ul>
           </nav>
         )}
       </header>
 
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav
-          aria-label="Trilha de navegação"
-          className="mx-auto max-w-7xl px-4 sm:px-6 pt-4 text-xs opacity-75"
-        >
+      {breadcrumbs?.length ? (
+        <nav aria-label="Trilha de navegação" className="mx-auto max-w-7xl px-4 pt-4 text-xs opacity-75 sm:px-6">
           <ol className="flex flex-wrap items-center gap-1.5">
-            <li>
-              <Link to="/wmp" className="hover:underline">WMP</Link>
-            </li>
-            {breadcrumbs.map((c, i) => (
-              <li key={`${c.label}-${i}`} className="flex items-center gap-1.5">
+            <li><Link to="/wmp" className="hover:underline">WMP</Link></li>
+            {breadcrumbs.map((crumb, index) => (
+              <li key={`${crumb.label}-${index}`} className="flex items-center gap-1.5">
                 <span aria-hidden>/</span>
-                {c.to && i < breadcrumbs.length - 1 ? (
-                  <Link to={c.to} className="hover:underline">{c.label}</Link>
-                ) : (
-                  <span aria-current="page" className="opacity-90">{c.label}</span>
-                )}
+                {crumb.to && index < breadcrumbs.length - 1 ? <Link to={crumb.to} className="hover:underline">{crumb.label}</Link> : <span aria-current="page" className="opacity-90">{crumb.label}</span>}
               </li>
             ))}
           </ol>
         </nav>
-      )}
+      ) : null}
 
       <main id="wmp-main" className="min-w-0">{children}</main>
 
-      <footer
-        className="mt-16 sm:mt-24 border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)]"
-        role="contentinfo"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-12 grid gap-8 md:grid-cols-4 text-sm">
-          <div>
-            <div className="wmp-display text-lg mb-2">WMP</div>
-            <p className="opacity-70 leading-relaxed">
-              Produção e operação de eventos, DJs, som, luz, palco, audiovisual e rede de parceiros para clientes, hotéis e empresas.
-            </p>
-          </div>
-          <div>
-            <div className="wmp-display text-sm mb-3 opacity-90">Contratar</div>
-            <ul className="space-y-2 opacity-80">
-              <li><Link to="/wmp/orcamento" className="hover:opacity-100">Solicitar proposta</Link></li>
-              <li><Link to="/wmp/djs" className="hover:opacity-100">Contratar DJ</Link></li>
-              <li><Link to="/wmp/empresas" className="hover:opacity-100">Hotéis & Empresas</Link></li>
-              <li><Link to="/wmp/onde-estou" className="hover:opacity-100">Onde Estou</Link></li>
-            </ul>
-          </div>
-          <div>
-            <div className="wmp-display text-sm mb-3 opacity-90">Institucional</div>
-            <ul className="space-y-2 opacity-80">
-              <li><Link to="/wmp/sobre" className="hover:opacity-100">Sobre a WMP</Link></li>
-              <li><Link to="/wmp/faq" className="hover:opacity-100">Perguntas frequentes</Link></li>
-              <li><Link to="/wmp/parceiro" className="hover:opacity-100">Seja parceiro</Link></li>
-            </ul>
-          </div>
-          <div>
-            <div className="wmp-display text-sm mb-3 opacity-90">Atendimento</div>
-            <ul className="space-y-2 opacity-80">
-              <li className="flex items-start gap-2">
-                <MessageCircle className="size-4 mt-0.5 shrink-0" aria-hidden style={{ color: "var(--wmp-gold)" }} />
-                <span>Use o Milito para iniciar, continuar ou qualificar seu atendimento. Quando necessário, ele encaminha para a equipe WMP.</span>
-              </li>
-            </ul>
-          </div>
+      <footer className="mt-16 border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)] sm:mt-24" role="contentinfo">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm sm:px-6 sm:py-12 md:grid-cols-4">
+          <div><div className="wmp-display mb-2 text-lg">WMP</div><p className="leading-relaxed opacity-70">Produção e operação de eventos, DJs, som, luz, palco, audiovisual e rede de parceiros para clientes, hotéis e empresas.</p></div>
+          <div><div className="wmp-display mb-3 text-sm opacity-90">Contratar</div><ul className="space-y-2 opacity-80"><li><Link to="/wmp/orcamento">Solicitar proposta</Link></li><li><Link to="/wmp/djs">Contratar DJ</Link></li><li><Link to="/wmp/empresas">Hotéis & Empresas</Link></li><li><Link to="/wmp/onde-estou">Onde Estou</Link></li></ul></div>
+          <div><div className="wmp-display mb-3 text-sm opacity-90">Institucional</div><ul className="space-y-2 opacity-80"><li><Link to="/wmp/sobre">Sobre a WMP</Link></li><li><Link to="/wmp/faq">Perguntas frequentes</Link></li><li><Link to="/wmp/parceiro">Seja parceiro</Link></li></ul></div>
+          <div><div className="wmp-display mb-3 text-sm opacity-90">Atendimento</div><div className="flex items-start gap-2 opacity-80"><MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden style={{ color: "var(--wmp-gold)" }} /><span>Use o Milito para iniciar, continuar ou qualificar seu atendimento. Quando necessário, ele encaminha para a equipe WMP.</span></div></div>
         </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-8 text-xs opacity-60 flex flex-col md:flex-row gap-3 justify-between">
-          <span>© {new Date().getFullYear()} Wagner Miller Produções — todos os direitos reservados.</span>
-          <span>
-            Operado no ecossistema{" "}
-            <a href="/" className="underline">Impulsionando</a>.
-          </span>
-        </div>
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-4 pb-8 text-xs opacity-60 sm:px-6 md:flex-row"><span>© {new Date().getFullYear()} Wagner Miller Produções — todos os direitos reservados.</span><span>Operado no ecossistema <a href="/" className="underline">Impulsionando</a>.</span></div>
       </footer>
 
       <WhereaboutsFloatingWidget />
