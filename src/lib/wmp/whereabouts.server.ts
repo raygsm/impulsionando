@@ -53,7 +53,7 @@ export async function ensureDailyWhereaboutsRequest(date = new Date().toLocaleDa
   if (!request) throw new Error('whereabouts_request_unavailable')
   if (request.status === 'COMPLETED' || request.sent_at) return { request, delivery: null, alreadyHandled: true }
 
-  const formUrl = `${BASE_URL}/wmp/onde-estou/atualizar?token=${encodeURIComponent(request.access_token)}`
+  const formUrl = `${BASE_URL}/onde-estou/atualizar?token=${encodeURIComponent(request.access_token)}`
   const dateLabel = new Date(`${date}T12:00:00-03:00`).toLocaleDateString('pt-BR')
   const body = todaysEntry
     ? [
