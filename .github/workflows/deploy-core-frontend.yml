@@ -205,11 +205,25 @@ jobs:
           fi
           REMOTE
 
-      - name: Validate public Core, CHRISMED and Colors
+      - name: Validate public Core, WMP, CHRISMED and Colors
         run: |
           set -euo pipefail
           curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
+
+          # WMP: critical public conversion routes must all answer after every Core deploy.
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/ >/tmp/wmp-home.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/djs >/tmp/wmp-djs.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/empresas >/tmp/wmp-empresas.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/orcamento >/tmp/wmp-orcamento.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/parceiro >/tmp/wmp-parceiro.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/onde-estou >/tmp/wmp-onde-estou.html
+          grep -qi "WMP\|Wagner Miller" /tmp/wmp-home.html
+          grep -qi "DJ" /tmp/wmp-djs.html
+          grep -qi "hotel\|empresa" /tmp/wmp-empresas.html
+          grep -qi "briefing\|orçamento\|orcamento" /tmp/wmp-orcamento.html
+          grep -qi "parceiro\|DJ" /tmp/wmp-parceiro.html
+          grep -qi "Onde Estou\|agenda" /tmp/wmp-onde-estou.html
 
           # CHRISMED: every critical public route must answer successfully after each Core deploy.
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed-home.html
