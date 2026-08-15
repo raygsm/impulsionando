@@ -11,7 +11,7 @@ import { Bot, Cloud, FileText, RefreshCw, ShieldCheck, TicketCheck, TicketPercen
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 const CHRISMED_TENANT_ID = '94bf647c-c851-41ab-8700-1e062263e54d';
 
-type DriveConnection = { id: string; provider_account_email: string | null; status: string; connected_at: string | null; last_sync_at: string | null; last_error: string | null };
+type DriveConnection = { id: string; provider_account_email: string | null; status: string; connected_at: string | null; last_sync: string | null; last_error: string | null };
 type Agent = { id: string; name: string; role: string | null; active: boolean; reply_route: string | null };
 type Counts = { tickets: number; openConversations: number; queuedExports: number; indexedDocuments: number; coupons: number };
 
@@ -39,12 +39,12 @@ function ChrismedIntegrations() {
   async function load() {
     setLoading(true);
     const [driveResult, agentResult, ticketsResult, conversationsResult, exportsResult, docsResult, couponsResult] = await Promise.all([
-      supabase.from('client_drive_connections').select('id,provider_account_email,status,connected_at,last_sync_at,last_error').eq('company_id', CHRISMED_COMPANY_ID).eq('provider', 'google_drive').maybeSingle(),
+      supabase.from('client_drive_connections').select('id,provider_account_email,status,connected_at,last_sync,last_error').eq('company_id', CHRISMED_COMPANY_ID).eq('provider', 'google_drive').maybeSingle(),
       supabase.from('communication_agents').select('id,name,role,active,reply_route').eq('tenant_id', CHRISMED_TENANT_ID).eq('name', 'Oliver').maybeSingle(),
       supabase.from('communication_conversation_tickets').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID),
       supabase.from('communication_conversations').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).in('status', ['OPEN','open','active']),
       supabase.from('communication_conversation_export_requests').select('id', { count: 'exact', head: true }).eq('tenant_id', CHRISMED_TENANT_ID).in('status', ['QUEUED','PROCESSING']),
-      supabase.from('client_drive_documents').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'indexed'),
+      supabase.from('client_drive_documents').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'active'),
       supabase.from('chrismed_coupons').select('id', { count: 'exact', head: true }).eq('company_id', CHRISMED_COMPANY_ID),
     ]);
     if (driveResult.error) console.error('[CHRISMED Drive status]', driveResult.error);
@@ -77,7 +77,7 @@ function ChrismedIntegrations() {
       const response = await fetch('/api/chrismed/google-drive/sync', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Não foi possível sincronizar o Google Drive.');
-      toast.success(`${body.filesSeen ?? 0} arquivos verificados no Google Drive.`);
+      toast.success(`${body.indexed ?? 0} arquivos indexados; ${body.withText ?? 0} com conteúdo textual disponível para contexto.`);
       await load();
     } catch (error) {
       toast.error((error as Error).message);
@@ -112,7 +112,7 @@ function ChrismedIntegrations() {
               <p className="text-[#3F4A47]">Fonte documental oficial da CHRISMED para o Oliver consultar e classificar documentos. A leitura não autoriza o compartilhamento com pacientes.</p>
               <Info label="Conta autorizada" value={drive?.provider_account_email ?? 'chrissalencar@gmail.com'} />
               <Info label="Conectado em" value={drive?.connected_at ? new Date(drive.connected_at).toLocaleString('pt-BR') : '—'} />
-              <Info label="Última sincronização" value={drive?.last_sync_at ? new Date(drive.last_sync_at).toLocaleString('pt-BR') : '—'} />
+              <Info label="Última sincronização" value={drive?.last_sync ? new Date(drive.last_sync).toLocaleString('pt-BR') : '—'} />
               {drive?.last_error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">{drive.last_error}</div>}
               <div className="flex flex-wrap gap-2"><Button onClick={() => void connectGoogleDrive()} disabled={connecting} className="bg-[#071C18] text-white">{connecting ? 'Abrindo Google…' : driveReady ? 'Reconectar Google Drive' : 'Conectar Google Drive'}</Button><Button variant="outline" disabled={!driveReady || syncing} onClick={() => void syncGoogleDrive()}>{syncing ? 'Sincronizando…' : 'Sincronizar agora'}</Button></div>
             </CardContent>
