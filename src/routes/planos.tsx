@@ -5,6 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { breadcrumbJsonLd } from "@/lib/seo";
 
 import { getCommercialAvailability } from "@/lib/commercial.functions";
+import { openImpulsionito } from "@/lib/impulsionito-tracking";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
   Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
@@ -70,10 +71,10 @@ export const Route = createFileRoute("/planos")({
   },
   head: () => ({
     meta: [
-      { title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },
-      { name: "description", content: "Planos atrelados ao salário mínimo: Essencial (½ SM), Integrado (1 SM), Avançado (2 SM) e Sob Medida. Mensal ou anual com 2 meses grátis." },
+      { title: "Planos e Soluções — Impulsionando Tecnologia" },
+      { name: "description", content: "Conheça as soluções da Impulsionando. Valores e contratação direta só são exibidos quando publicados pela gestão no catálogo comercial oficial." },
       { property: "og:title", content: "Planos — Impulsionando Tecnologia" },
-      { property: "og:description", content: "Do Essencial ao Sob Medida. Anual com 2 meses grátis. Sem fidelidade obrigatória." },
+      { property: "og:description", content: "Soluções modulares para empresas. Condições comerciais são publicadas a partir do catálogo oficial da Impulsionando." },
       { property: "og:url", content: "https://impulsionando.com.br/planos" },
       { property: "og:type", content: "website" },
     ],
@@ -417,6 +418,9 @@ function PlanosPage() {
     queryFn: () => fetchAvailability(),
     staleTime: 60_000,
   });
+  // Fail closed: nenhuma condição comercial é renderizada enquanto o backend
+  // não publicar explicitamente pelo menos um plano com show_on_site=true.
+  const commercialPublishingReady = availability?.hasPublishedPlans === true;
 
   // Preços derivados do salário mínimo nacional (Decreto 12.797/2025, R$ 1.621,00 a partir de 01/01/2026).
   const wage = useMinimumWage();
@@ -556,15 +560,35 @@ function PlanosPage() {
         </div>
       </section>
 
-      {audience === "white-label" && (
+      {availability && !commercialPublishingReady && (
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 w-full">
+          <Card className="p-8 sm:p-10 text-center border-primary/25 bg-primary/5">
+            <Badge variant="outline" className="mb-4">Catálogo comercial controlado pelo Core</Badge>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Condições comerciais em configuração</h1>
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Nenhum plano está publicado para contratação direta neste momento. Para evitar valores desatualizados ou condições não autorizadas, preços e checkout permanecem ocultos até a publicação pela gestão.
+            </p>
+            <div className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
+              <Button asChild size="lg" className="bg-gradient-primary">
+                <Link to="/orcamento">Solicitar proposta</Link>
+              </Button>
+              <Button type="button" size="lg" variant="outline" onClick={() => openImpulsionito("planos-catalogo-nao-publicado")}>
+                Falar com especialista
+              </Button>
+            </div>
+          </Card>
+        </section>
+      )}
+
+      {audience === "white-label" && commercialPublishingReady && (
         <WhiteLabelPlansPanel />
       )}
 
-      {audience === "consumidor" && (
+      {audience === "consumidor" && commercialPublishingReady && (
         <ConsumidorPlansPanel />
       )}
 
-      {audience === "empresas" && (
+      {audience === "empresas" && commercialPublishingReady && (
         <>
       <PlanosSectionsNav onExpandDetails={() => setShowComparison(true)} />
       {/* HERO */}

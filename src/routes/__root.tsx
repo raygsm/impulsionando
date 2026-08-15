@@ -374,7 +374,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           logo: "https://impulsionando.com.br/__l5e/assets-v1/bfbd00d4-b55e-4e72-b25c-e93c63adf738/logo-impulsionando.png",
           description:
             "Plataforma SaaS multiempresa modular para gestão, atendimento e automação.",
-          sameAs: ["https://impulsionandobrasil.com.br"],
+          sameAs: [],
         }),
       },
       {

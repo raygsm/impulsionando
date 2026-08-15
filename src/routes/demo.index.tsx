@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
@@ -14,6 +16,7 @@ import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { getDemoNichoLink } from "@/lib/demoResolver";
 import { trackFunnelCta } from "@/lib/funnelTracking";
 import { openImpulsionito } from "@/lib/impulsionito-tracking";
+import { getCommercialAvailability } from "@/lib/commercial.functions";
 
 export const Route = createFileRoute("/demo/")({
   head: () => ({
@@ -99,6 +102,14 @@ const STATUS_VARIANT: Record<ModuleDemo["status"], string> = {
 };
 
 function DemoLanding() {
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability", "demo"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+  const publishedPlans = availability?.publishedPlans ?? [];
+
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
@@ -296,39 +307,47 @@ function DemoLanding() {
           </div>
         </div>
 
-        {/* Planos — etapa final da demonstração */}
+        {/* Condições comerciais — sempre derivadas do catálogo publicado no Core */}
         <section className="mb-6 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-6 sm:p-8">
           <div className="text-center mb-6">
-            <Badge className="bg-gradient-primary mb-3 gap-1"><Sparkles className="w-3 h-3" /> Pronto para contratar</Badge>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Escolha o plano ideal</h2>
+            <Badge className="bg-gradient-primary mb-3 gap-1"><Sparkles className="w-3 h-3" /> Condições comerciais</Badge>
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              {publishedPlans.length ? "Planos publicados pela gestão" : "Solicite uma proposta para sua operação"}
+            </h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-              Todas as soluções demonstradas estão disponíveis nos planos abaixo — para empresas, white label e consumidor final (Clube).
+              {publishedPlans.length
+                ? "Os valores abaixo vêm diretamente do catálogo comercial oficial da Impulsionando."
+                : "Nenhum preço está publicado para contratação direta neste momento. Não exibimos valores estimados ou desatualizados."}
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { code: "essencial-mensal", name: "Essencial", price: "R$ 759", desc: "Até 3 módulos. Ideal para começar.", cta: "Contratar", featured: false },
-              { code: "completo-mensal", name: "Completo", price: "R$ 1.518", desc: "Até 6 módulos. Operação completa.", cta: "Contratar", featured: true },
-              { code: "full", name: "Full", price: "Sob consulta", desc: "Todos os módulos liberados.", cta: "Falar com vendas", featured: false },
-              { code: "sob-medida", name: "Sob Medida", price: "Sob proposta", desc: "Multi-unidade, white label, integrações.", cta: "Solicitar proposta", featured: false },
-              { code: "clube_premium", name: "Clube Premium", price: "R$ 9,99/mês", desc: "Consumidor final — benefícios em toda a rede.", cta: "Assinar Clube", featured: false },
-            ].map((p) => (
-              <Card key={p.code} className={`p-5 flex flex-col hover-lift ${p.featured ? "border-2 border-primary shadow-elegant" : ""}`}>
-                {p.featured && <Badge className="self-start mb-2 bg-gradient-primary text-[10px]">Mais escolhido</Badge>}
-                <h3 className="font-semibold text-base">{p.name}</h3>
-                <div className="text-2xl font-bold mt-1">{p.price}</div>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">{p.desc}</p>
-                <Button asChild size="sm" variant={p.featured ? "default" : "outline"} className={`mt-4 ${p.featured ? "btn-alive" : "focus-ring"}`}>
-                  <Link to="/planos" search={{ plano: p.code } as never}>{p.cta} <ArrowRight className="w-3 h-3 ml-1" /></Link>
-                </Button>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center mt-6">
-            <Button asChild size="lg" className="bg-gradient-primary btn-alive gap-2">
-              <Link to="/planos"><BarChart3 className="w-4 h-4" /> Ver comparativo completo dos planos</Link>
-            </Button>
-          </div>
+          {publishedPlans.length ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {publishedPlans.map((plan) => {
+                const price = plan.recurring_amount > 0
+                  ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(plan.recurring_amount)
+                  : "Sob consulta";
+                return (
+                  <Card key={plan.code} className="p-5 flex flex-col hover-lift">
+                    <h3 className="font-semibold text-base">{plan.name}</h3>
+                    <div className="text-2xl font-bold mt-1">{price}</div>
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">{plan.description ?? "Condição comercial publicada pela gestão."}</p>
+                    <Button asChild size="sm" variant="outline" className="mt-4 focus-ring">
+                      <Link to="/planos">{plan.cta ?? (plan.route_to_quote ? "Solicitar proposta" : "Ver condições")} <ArrowRight className="w-3 h-3 ml-1" /></Link>
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <Button asChild size="lg" className="bg-gradient-primary btn-alive gap-2">
+                <Link to="/orcamento">Solicitar proposta <ArrowRight className="w-4 h-4" /></Link>
+              </Button>
+              <Button type="button" size="lg" variant="outline" onClick={() => openImpulsionito("demo-condicoes-comerciais")}>
+                <MessageCircle className="w-4 h-4 mr-2" /> Falar com especialista
+              </Button>
+            </div>
+          )}
         </section>
 
         {/* Especialista */}
