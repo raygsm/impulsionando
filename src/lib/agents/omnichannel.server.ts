@@ -145,9 +145,10 @@ export async function closeConversationForExternalIdentity(input: {
   if (closeError) throw new Error(`conversation_close_failed:${closeError.message}`);
 
   const { data: ticket, error: ticketError } = await supabaseAdmin
-    .from('wmp_conversation_tickets' as never)
+    .from('communication_conversation_tickets' as never)
     .select('protocol,access_token,contact_id,export_status' as never)
     .eq('tenant_id' as never, tenantId)
+    .eq('agent_id' as never, agentId)
     .eq('conversation_id' as never, conversationId)
     .maybeSingle();
   if (ticketError || !ticket) throw new Error('conversation_ticket_not_created');
