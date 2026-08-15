@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Wand2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, FileImage, Loader2, Paperclip, Sparkles, Wand2, X } from "lucide-react";
 import { WmpShell } from "@/components/wmp/WmpShell";
 import { submitWmpBriefing } from "@/lib/wmp.functions";
 import { diagnoseAcoustics, type WmpAcousticDiagnosis } from "@/lib/wmp/acoustic-rules";
@@ -18,6 +18,7 @@ type FormState = {
   acustica_estilo: "dj_eletronico" | "banda_rock" | "voz_palestra" | "musica_ambiente" | "show_grande_porte";
   microfones_adicionais: string;
 };
+type CreatedBriefing = { id: string; token: string };
 
 const INIT: FormState = {
   contratante_nome: "", contratante_email: "", contratante_telefone: "", contratante_empresa: "",
@@ -27,7 +28,11 @@ const INIT: FormState = {
   acustica_estilo: "musica_ambiente", microfones_adicionais: "0",
 };
 
-const STEPS = ["Contato", "Evento", "Ambiente", "Uso", "Revisão"] as const;
+const STEPS = ["Contato", "Evento", "Ambiente", "Uso", "Evidências", "Revisão"] as const;
+const MAX_EVIDENCE_FILES = 8;
+const MAX_EVIDENCE_BYTES = 50 * 1024 * 1024;
+const EVIDENCE_TYPES = new Set(["image/jpeg","image/png","image/webp","application/pdf","video/mp4","video/webm","video/quicktime"]);
+const fileKey=(file:File)=>`${file.name}:${file.size}:${file.lastModified}`;
 
 export function WmpOrcamentoForm() {
   const navigate = useNavigate();
@@ -42,6 +47,9 @@ export function WmpOrcamentoForm() {
   const [eventTypes, setEventTypes] = useState<ReferenceOption[]>([]);
   const [states, setStates] = useState<ReferenceOption[]>([]);
   const [livePreview, setLivePreview] = useState<WmpAcousticDiagnosis | null>(null);
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
+  const [createdBriefing, setCreatedBriefing] = useState<CreatedBriefing | null>(null);
+  const [uploadedKeys, setUploadedKeys] = useState<Set<string>>(() => new Set());
 
   const audience = useMemo(() => WMP_AUDIENCE_RANGES.find((r) => r.value === form.evento_publico_faixa), [form.evento_publico_faixa]);
   const eventTypeLabel = useMemo(() => eventTypes.find((item) => item.code === form.evento_tipo)?.label ?? form.evento_tipo, [eventTypes, form.evento_tipo]);
@@ -122,26 +130,64 @@ export function WmpOrcamentoForm() {
     setError(null); if (step === 2 || step === 3) refreshPreview(); setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
+  function chooseEvidence(list: FileList | null) {
+    if (!list || createdBriefing) return;
+    const selected=Array.from(list);
+    const merged=[...evidenceFiles];
+    for(const file of selected){
+      if(merged.length>=MAX_EVIDENCE_FILES)break;
+      if(!EVIDENCE_TYPES.has(file.type)){setError(`Formato não aceito: ${file.name}`);continue;}
+      if(file.size>MAX_EVIDENCE_BYTES){setError(`Arquivo acima de 50 MB: ${file.name}`);continue;}
+      if(!merged.some((current)=>fileKey(current)===fileKey(file)))merged.push(file);
+    }
+    setEvidenceFiles(merged);
+  }
+
+  async function uploadEvidence(briefing: CreatedBriefing) {
+    for (const file of evidenceFiles) {
+      const key=fileKey(file);
+      if(uploadedKeys.has(key))continue;
+      const payload=new FormData();
+      payload.append("file",file,file.name);
+      const response=await fetch(`/api/wmp/briefing/${encodeURIComponent(briefing.id)}/evidence`,{
+        method:"POST",
+        headers:{"x-wmp-upload-token":briefing.token},
+        body:payload,
+      });
+      if(!response.ok){
+        const detail=await response.json().catch(()=>null) as {error?:string}|null;
+        throw new Error(`Briefing salvo, mas o anexo “${file.name}” não foi concluído (${detail?.error??response.status}). Tente enviar novamente; o briefing não será duplicado.`);
+      }
+      setUploadedKeys((current)=>{const next=new Set(current);next.add(key);return next;});
+    }
+  }
+
   async function handleSubmit() {
     setSubmitting(true); setError(null);
     try {
-      const res = await submitWmpBriefing({ data: {
-        contratante_nome: form.contratante_nome, contratante_email: form.contratante_email, contratante_telefone: form.contratante_telefone, contratante_empresa: form.contratante_empresa,
-        evento_tipo: form.evento_tipo, evento_data: form.evento_data || undefined, evento_horario_inicio: form.evento_horario_inicio || undefined, evento_horario_fim: form.evento_horario_fim || undefined,
-        evento_publico_estimado: audienceTechnical ?? null, evento_perfil_publico: audience?.label,
-        evento_cep: form.evento_cep, evento_bairro: form.evento_bairro, evento_cidade: form.evento_cidade, evento_estado: form.evento_estado, evento_municipio_ibge: form.evento_municipio_ibge, evento_endereco: form.evento_endereco,
-        ambiente: { tipo: form.ambiente_tipo, material_piso: form.ambiente_piso, material_paredes: form.ambiente_paredes, teto_altura_m: Number(form.ambiente_altura) || undefined },
-        medidas: { largura_m: Number(form.medidas_largura) || undefined, comprimento_m: Number(form.medidas_comprimento) || undefined },
-        acustica: { estilo: form.acustica_estilo, microfones_adicionais: Number(form.microfones_adicionais) || 0 },
-        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined, origem: "site_wmp",
-      }});
-      navigate({ to: "/wmp/obrigado/$tipo", params: { tipo: "orcamento" }, search: { id: res.id } });
+      let briefing=createdBriefing;
+      if(!briefing){
+        const res = await submitWmpBriefing({ data: {
+          contratante_nome: form.contratante_nome, contratante_email: form.contratante_email, contratante_telefone: form.contratante_telefone, contratante_empresa: form.contratante_empresa,
+          evento_tipo: form.evento_tipo, evento_data: form.evento_data || undefined, evento_horario_inicio: form.evento_horario_inicio || undefined, evento_horario_fim: form.evento_horario_fim || undefined,
+          evento_publico_estimado: audienceTechnical ?? null, evento_perfil_publico: audience?.label,
+          evento_cep: form.evento_cep, evento_bairro: form.evento_bairro, evento_cidade: form.evento_cidade, evento_estado: form.evento_estado, evento_municipio_ibge: form.evento_municipio_ibge, evento_endereco: form.evento_endereco,
+          ambiente: { tipo: form.ambiente_tipo, material_piso: form.ambiente_piso, material_paredes: form.ambiente_paredes, teto_altura_m: Number(form.ambiente_altura) || undefined },
+          medidas: { largura_m: Number(form.medidas_largura) || undefined, comprimento_m: Number(form.medidas_comprimento) || undefined },
+          acustica: { estilo: form.acustica_estilo, microfones_adicionais: Number(form.microfones_adicionais) || 0 },
+          user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined, origem: "site_wmp",
+        }});
+        briefing={id:res.id,token:res.upload_grant.token};
+        setCreatedBriefing(briefing);
+      }
+      await uploadEvidence(briefing);
+      navigate({ to: "/wmp/obrigado/$tipo", params: { tipo: "orcamento" }, search: { id: briefing.id } });
     } catch (e: any) { setError(e?.message ?? "Falha ao enviar. Tente novamente."); }
     finally { setSubmitting(false); }
   }
 
   return <WmpShell breadcrumbs={[{ label: "Orçamento" }]}>
-    <section className="wmp-stage-bg"><div className="mx-auto max-w-3xl px-5 pt-10 pb-10 text-center"><span className="wmp-chip mb-4"><Wand2 className="size-3"/> Briefing inteligente</span><h1 className="wmp-display text-3xl md:text-5xl mb-3">Seu evento, dimensionado com inteligência</h1><p className="opacity-80">Informe o ambiente e o uso. A WMP monta um pré-diagnóstico técnico e transforma adicionais em itens rastreáveis da proposta.</p></div></section>
+    <section className="wmp-stage-bg"><div className="mx-auto max-w-3xl px-5 pt-10 pb-10 text-center"><span className="wmp-chip mb-4"><Wand2 className="size-3"/> Briefing inteligente</span><h1 className="wmp-display text-3xl md:text-5xl mb-3">Seu evento, dimensionado com inteligência</h1><p className="opacity-80">Informe o ambiente e o uso. Fotos, vídeos, planta e rider podem complementar a leitura técnica sem tornar seus arquivos públicos.</p></div></section>
     <section className="mx-auto max-w-3xl px-4 md:px-6 pb-24 -mt-6"><Stepper step={step}/><div className="wmp-surface p-5 md:p-10 mt-6">
       {step === 0 && <Grid><Field label="Nome completo *"><input value={form.contratante_nome} onChange={(e)=>update("contratante_nome",e.target.value)}/></Field><Field label="E-mail *"><input type="email" value={form.contratante_email} onChange={(e)=>update("contratante_email",e.target.value)}/></Field><Field label="WhatsApp *"><input value={form.contratante_telefone} onChange={(e)=>update("contratante_telefone",e.target.value)} placeholder="(21) 99999-0000"/></Field><Field label="Empresa (opcional)"><input value={form.contratante_empresa} onChange={(e)=>update("contratante_empresa",e.target.value)}/></Field></Grid>}
       {step === 1 && <Grid>
@@ -157,9 +203,10 @@ export function WmpOrcamentoForm() {
       </Grid>}
       {step === 2 && <Grid><Field label="Tipo de ambiente"><select value={form.ambiente_tipo} onChange={(e)=>update("ambiente_tipo",e.target.value as FormState["ambiente_tipo"])}><option value="fechado">Fechado</option><option value="semi_aberto">Semi-aberto</option><option value="aberto">Aberto</option></select></Field><Field label="Altura do teto (m)"><input type="number" step="0.1" value={form.ambiente_altura} onChange={(e)=>update("ambiente_altura",e.target.value)}/></Field><Field label="Largura (m)"><input type="number" step="0.1" value={form.medidas_largura} onChange={(e)=>update("medidas_largura",e.target.value)}/></Field><Field label="Comprimento (m)"><input type="number" step="0.1" value={form.medidas_comprimento} onChange={(e)=>update("medidas_comprimento",e.target.value)}/></Field><Field label="Material do piso"><select value={form.ambiente_piso} onChange={(e)=>update("ambiente_piso",e.target.value)}>{WMP_FLOOR_MATERIALS.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></Field><Field label="Material das paredes"><select value={form.ambiente_paredes} onChange={(e)=>update("ambiente_paredes",e.target.value)}>{WMP_WALL_MATERIALS.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></Field></Grid>}
       {step === 3 && <Grid><Field label="Uso predominante" full><select value={form.acustica_estilo} onChange={(e)=>update("acustica_estilo",e.target.value as FormState["acustica_estilo"])}><option value="musica_ambiente">Música ambiente</option><option value="voz_palestra">Voz / palestra / cerimônia</option><option value="dj_eletronico">DJ / eletrônico</option><option value="banda_rock">Banda / show</option><option value="show_grande_porte">Show de grande porte</option></select></Field><Field label={`Microfones adicionais (base do setup: ${baseMics})`} full><select value={form.microfones_adicionais} onChange={(e)=>update("microfones_adicionais",e.target.value)}>{Array.from({length:11},(_,i)=><option key={i} value={String(i)}>{i===0?"Nenhum adicional":`+${i} microfone${i>1?"s":""}`}</option>)}</select><small className="opacity-60">Cada adicional será precificado conforme o valor do equipamento definido pela gestão WMP.</small></Field><button type="button" onClick={()=>refreshPreview()} className="wmp-cta wmp-cta-outline mt-2 md:col-span-2 self-start"><Sparkles className="size-4"/> Pré-visualizar diagnóstico</button>{livePreview&&<DiagnosisCard d={livePreview}/>}</Grid>}
-      {step === 4 && <div className="space-y-4 text-sm"><h3 className="wmp-display text-2xl">Revisão final</h3><ReviewBlock title="Contato" rows={[["Nome",form.contratante_nome],["E-mail",form.contratante_email],["WhatsApp",form.contratante_telefone],["Empresa",form.contratante_empresa||"—"]]}/><ReviewBlock title="Evento" rows={[["Tipo",eventTypeLabel],["Data",form.evento_data||"—"],["Público",audience?.label||"—"],["CEP",form.evento_cep||"—"],["Local",[form.evento_endereco,form.evento_bairro,form.evento_cidade,form.evento_estado].filter(Boolean).join(" · ")||"—"]]}/><ReviewBlock title="Estrutura" rows={[["Uso",form.acustica_estilo],["Microfones base",String(baseMics)],["Microfones adicionais",form.microfones_adicionais],["Piso",form.ambiente_piso],["Paredes",form.ambiente_paredes]]}/>{livePreview&&<DiagnosisCard d={livePreview}/>}</div>}
+      {step === 4 && <div className="space-y-5"><div><h3 className="wmp-display text-2xl mb-2 flex items-center gap-2"><FileImage className="size-5"/> Evidências do local</h3><p className="text-sm opacity-75">Opcional. Envie até 8 fotos, vídeos, PDF de planta, mapa técnico ou rider. Os arquivos ficam em armazenamento privado e servem como apoio ao diagnóstico; não substituem vistoria quando necessária.</p></div><label className="block rounded-xl border border-dashed p-5 text-center cursor-pointer" style={{borderColor:"var(--wmp-gold)"}}><Paperclip className="mx-auto mb-2 size-6"/><span className="font-semibold">Selecionar arquivos</span><span className="block mt-1 text-xs opacity-60">JPG, PNG, WEBP, PDF, MP4, WEBM ou MOV · até 50 MB cada</span><input className="sr-only" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4,video/webm,video/quicktime" disabled={!!createdBriefing} onChange={(e)=>chooseEvidence(e.target.files)}/></label>{createdBriefing&&<p className="text-xs opacity-70">O briefing já foi registrado. A seleção de arquivos foi bloqueada para que uma nova tentativa envie apenas anexos pendentes, sem duplicar o atendimento.</p>}{evidenceFiles.length>0?<div className="space-y-2">{evidenceFiles.map((file)=><div key={fileKey(file)} className="flex items-center gap-3 rounded-lg border p-3"><FileImage className="size-4 shrink-0"/><div className="min-w-0 flex-1"><div className="truncate text-sm font-medium">{file.name}</div><div className="text-xs opacity-60">{(file.size/1024/1024).toFixed(1)} MB {uploadedKeys.has(fileKey(file))?"· enviado":"· pronto para envio"}</div></div>{!createdBriefing&&<button type="button" className="p-2" aria-label={`Remover ${file.name}`} onClick={()=>setEvidenceFiles((current)=>current.filter((item)=>fileKey(item)!==fileKey(file)))}><X className="size-4"/></button>}</div>)}</div>:<div className="text-sm opacity-60">Nenhum arquivo selecionado. Você pode continuar sem anexos.</div>}</div>}
+      {step === 5 && <div className="space-y-4 text-sm"><h3 className="wmp-display text-2xl">Revisão final</h3><ReviewBlock title="Contato" rows={[["Nome",form.contratante_nome],["E-mail",form.contratante_email],["WhatsApp",form.contratante_telefone],["Empresa",form.contratante_empresa||"—"]]}/><ReviewBlock title="Evento" rows={[["Tipo",eventTypeLabel],["Data",form.evento_data||"—"],["Público",audience?.label||"—"],["CEP",form.evento_cep||"—"],["Local",[form.evento_endereco,form.evento_bairro,form.evento_cidade,form.evento_estado].filter(Boolean).join(" · ")||"—"]]}/><ReviewBlock title="Estrutura" rows={[["Uso",form.acustica_estilo],["Microfones base",String(baseMics)],["Microfones adicionais",form.microfones_adicionais],["Piso",form.ambiente_piso],["Paredes",form.ambiente_paredes],["Anexos",evidenceFiles.length?`${evidenceFiles.length} arquivo(s) privado(s)`:"Nenhum"]]}/>{livePreview&&<DiagnosisCard d={livePreview}/>}</div>}
       {error&&<div className="mt-4 p-3 rounded-lg text-sm" style={{background:"color-mix(in oklab, red 20%, transparent)",color:"white"}}>{error}</div>}
-      <div className="flex items-center justify-between mt-8 gap-3"><button type="button" onClick={()=>setStep((s)=>Math.max(0,s-1))} disabled={step===0} className="wmp-cta wmp-cta-outline disabled:opacity-40"><ArrowLeft className="size-4"/> Voltar</button>{step<STEPS.length-1?<button type="button" onClick={next} className="wmp-cta">Avançar <ArrowRight className="size-4"/></button>:<button type="button" onClick={handleSubmit} disabled={submitting} className="wmp-cta">{submitting?<><Loader2 className="size-4 animate-spin"/> Enviando…</>:<><Check className="size-4"/> Enviar briefing</>}</button>}</div>
+      <div className="flex items-center justify-between mt-8 gap-3"><button type="button" onClick={()=>setStep((s)=>Math.max(0,s-1))} disabled={step===0||!!createdBriefing} className="wmp-cta wmp-cta-outline disabled:opacity-40"><ArrowLeft className="size-4"/> Voltar</button>{step<STEPS.length-1?<button type="button" onClick={next} className="wmp-cta">Avançar <ArrowRight className="size-4"/></button>:<button type="button" onClick={handleSubmit} disabled={submitting} className="wmp-cta">{submitting?<><Loader2 className="size-4 animate-spin"/> {createdBriefing?"Enviando anexos…":"Registrando…"}</>:<><Check className="size-4"/> {createdBriefing?"Tentar anexos novamente":"Enviar briefing"}</>}</button>}</div>
     </div></section>
   </WmpShell>;
 }
