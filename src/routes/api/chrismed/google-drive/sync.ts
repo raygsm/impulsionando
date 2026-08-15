@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { authenticateChrismedDriveAdmin } from '@/lib/chrismed-google-drive.server';
-import { syncChrismedDriveMetadata } from '@/lib/chrismed-google-drive-client.server';
+import { syncChrismedGoogleDrive } from '@/lib/chrismed-drive-sync.server';
 
 export const Route = createFileRoute('/api/chrismed/google-drive/sync')({
   server: {
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/api/chrismed/google-drive/sync')({
         const user = await authenticateChrismedDriveAdmin(request);
         if (!user) return Response.json({ error: 'unauthorized' }, { status: 401 });
         try {
-          const result = await syncChrismedDriveMetadata(user.id);
+          const result = await syncChrismedGoogleDrive();
           return Response.json({ ok: true, ...result });
         } catch (error) {
           console.error('[CHRISMED Drive sync]', error);
