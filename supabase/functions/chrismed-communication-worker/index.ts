@@ -19,6 +19,9 @@ const TEMPLATE_MAP: Record<string, string> = {
   event_confirmed: "event.confirmed",
   event_reminder: "event.reminder",
   event_survey: "event.survey",
+  "chrismed.event.invitation.created": "chrismed.event.invitation.created",
+  "chrismed.event.registration.confirmed": "chrismed.event.registration.confirmed",
+  "chrismed.event.registration.rejected": "chrismed.event.registration.rejected",
   professional_registration_received: "professional.registration.received",
   professional_registration_management: "professional.registration.management",
   pega_agenda_offer: "pega_agenda.opportunity",
@@ -34,6 +37,7 @@ const scalar = (value: unknown): string => value == null ? "" : Array.isArray(va
 const render = (template: string, vars: Record<string, unknown>, html = false) => template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => html ? escapeHtml(scalar(vars[key])) : scalar(vars[key]));
 const fmtDate = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" }).format(d); };
 const fmtTime = (iso: unknown) => { if (!iso) return ""; const d = new Date(String(iso)); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); };
+const fmtDateTime = (iso: unknown) => { const d = fmtDate(iso); const t = fmtTime(iso); return [d,t].filter(Boolean).join(" às "); };
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -74,12 +78,15 @@ Deno.serve(async (req: Request) => {
         if (professional?.name && !vars.professional_name) vars.professional_name = professional.name;
       }
       vars.patient_name = vars.patient_name || vars.recipient_name || vars.first_name || "cliente";
-      vars.recipient_name = vars.recipient_name || vars.attendee_name || vars.professional_name || vars.patient_name || vars.first_name || "cliente";
+      vars.recipient_name = vars.recipient_name || vars.attendee_name || vars.professional_name || vars.invitee_name || vars.patient_name || vars.first_name || "cliente";
       vars.event_name = vars.event_name || vars.event_title || "evento CHRISMED";
       vars.appointment_date = vars.appointment_date || fmtDate(vars.starts_at);
       vars.appointment_time = vars.appointment_time || fmtTime(vars.starts_at);
       vars.event_date = vars.event_date || fmtDate(vars.starts_at);
       vars.event_time = vars.event_time || fmtTime(vars.starts_at);
+      vars.event_date_time = vars.event_date_time || fmtDateTime(vars.starts_at);
+      vars.event_venue = vars.event_venue || [vars.venue_name, vars.venue_address, vars.city].map(scalar).filter(Boolean).join(" · ");
+      vars.expires_at_local = vars.expires_at_local || fmtDateTime(vars.expires_at);
       vars.appointment_url = vars.appointment_url || `${base}/agendar`;
       vars.booking_url = vars.booking_url || `${base}/agendar`;
       vars.confirmation_url = vars.confirmation_url || `${base}/agendar`;
