@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       if (!body.hold_token) return json({ error: 'A valid CHRISMED booking hold is required' }, 409);
       const { data: appointment, error: appointmentError } = await supabase
         .from('chrismed_appointments')
-        .select('id,offering_id,patient_user_id,patient_name,patient_email,patient_phone,starts_at,ends_at,status,hold_expires_at,payment_id')
+        .select('id,offering_id,patient_user_id,patient_name,patient_email,patient_phone,starts_at,ends_at,status,hold_expires_at,payment_id,metadata')
         .eq('company_id', CHRISMED_COMPANY_ID)
         .eq('hold_token', body.hold_token)
         .maybeSingle();
@@ -93,8 +93,15 @@ Deno.serve(async (req) => {
         .eq('active', true)
         .maybeSingle();
       if (!offering || offering.price_cents <= 0) return json({ error: 'CHRISMED offering is unavailable for payment' }, 409);
+      const checkoutAmount = Number(appointment.metadata?.checkout_amount_cents ?? offering.price_cents);
+      if (!Number.isInteger(checkoutAmount) || checkoutAmount < 0 || checkoutAmount > offering.price_cents) {
+        return json({ error: 'CHRISMED checkout amount is invalid' }, 409);
+      }
+      if (checkoutAmount === 0) {
+        return json({ error: 'zero_value_coupon_requires_courtesy_flow' }, 409);
+      }
       chrismedAppointment = appointment;
-      body.amount_cents = offering.price_cents;
+      body.amount_cents = checkoutAmount;
       body.description = `CHRISMED - ${offering.name}`;
       body.external_reference = `chrismed:${appointment.id}`;
       body.context_type = 'chrismed_appointment';
@@ -102,7 +109,14 @@ Deno.serve(async (req) => {
       body.payer.email = appointment.patient_email;
       body.payer.first_name = appointment.patient_name.split(' ')[0];
       body.payer.last_name = appointment.patient_name.split(' ').slice(1).join(' ') || undefined;
-      body.metadata = { appointment_id: appointment.id, offering_slug: offering.slug, modality: offering.modality };
+      body.metadata = {
+        appointment_id: appointment.id,
+        offering_slug: offering.slug,
+        modality: offering.modality,
+        gross_amount_cents: offering.price_cents,
+        checkout_amount_cents: checkoutAmount,
+        coupon: appointment.metadata?.coupon ?? null,
+      };
     } else if (!authenticatedUserId) {
       return json({ error: 'authentication required' }, 401);
     }
@@ -164,6 +178,8 @@ Deno.serve(async (req) => {
       const { error: appointmentUpdateError } = await supabase.from('chrismed_appointments').update(appointmentPatch)
         .eq('id', chrismedAppointment.id).eq('hold_token', body.hold_token).in('status', ['held', 'pending_payment']);
       if (appointmentUpdateError) return json({ error: 'Payment created but booking linkage requires reconciliation' }, 503);
+      await supabase.from('chrismed_coupon_redemptions').update({ payment_id: payment.id, updated_at: new Date().toISOString() })
+        .eq('appointment_id', chrismedAppointment.id).eq('status', 'reserved');
     }
 
     if (modelKind) {
