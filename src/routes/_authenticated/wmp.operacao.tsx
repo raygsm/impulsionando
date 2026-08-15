@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Mail, RefreshCw } from 'lucide-react'
-import { getWmpOperations, updateWmpEquipment, updateWmpOperationalStatus } from '@/lib/wmp/management.functions'
+import { useEffect, useMemo, useState } from 'react'
+import { Building2, Mail, RefreshCw } from 'lucide-react'
+import { getWmpOperations, updateWmpOperationalStatus } from '@/lib/wmp/management.functions'
 import { sendWmpDjInvitation } from '@/lib/wmp/dj-invitations.functions'
 
 export const Route = createFileRoute('/_authenticated/wmp/operacao')({ component: WmpOperationsPage })
@@ -9,12 +9,20 @@ export const Route = createFileRoute('/_authenticated/wmp/operacao')({ component
 type Ops = Record<string, any[]>
 const money=(v:number|null|undefined)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(v)||0)/100)
 const date=(v:string|null|undefined)=>v?new Date(`${v}${v.length===10?'T12:00:00':''}`).toLocaleDateString('pt-BR'):'—'
+const time=(v:string|null|undefined)=>v?String(v).slice(0,5):'—'
 const initialArea=()=>typeof window==='undefined'?'crm':new URLSearchParams(window.location.search).get('area')||'crm'
 
 function StatusButtons({table,id,current,options,onDone}:{table:string;id:string;current:string;options:string[];onDone:()=>void}){
   const [busy,setBusy]=useState(false)
-  async function setStatus(status:string){if(status===current)return;setBusy(true);try{await updateWmpOperationalStatus({data:{table,id,status}});onDone()}finally{setBusy(false)}}
-  return <div className="flex flex-wrap gap-1">{options.map(s=><button disabled={busy} key={s} onClick={()=>void setStatus(s)} className={`rounded border px-2 py-1 text-[11px] ${s===current?'bg-primary text-primary-foreground':'bg-background hover:bg-muted'}`}>{s}</button>)}</div>
+  const [error,setError]=useState('')
+  async function setStatus(status:string){
+    if(status===current)return
+    setBusy(true);setError('')
+    try{await updateWmpOperationalStatus({data:{table,id,status}});onDone()}
+    catch(e:any){setError(e?.message??'Falha ao atualizar status.')}
+    finally{setBusy(false)}
+  }
+  return <div className="space-y-1"><div className="flex flex-wrap gap-1">{options.map(s=><button type="button" disabled={busy} key={s} onClick={()=>void setStatus(s)} className={`rounded border px-2 py-1 text-[11px] ${s===current?'bg-primary text-primary-foreground':'bg-background hover:bg-muted'}`}>{s}</button>)}</div>{error&&<p className="text-[11px] text-destructive">{error}</p>}</div>
 }
 
 function BookingActions({booking,onDone}:{booking:any;onDone:()=>void}){
@@ -22,28 +30,62 @@ function BookingActions({booking,onDone}:{booking:any;onDone:()=>void}){
   const [message,setMessage]=useState('')
   async function invite(){setBusy(true);setMessage('');try{const r:any=await sendWmpDjInvitation({data:{booking_id:booking.id}});setMessage(r?.delivery?.sent>0?'Convite enviado ao DJ.':'Convite criado; canal ainda não confirmou o envio.');onDone()}catch(e:any){setMessage(e?.message??'Falha ao convidar DJ.')}finally{setBusy(false)}}
   return <div className="space-y-2">
-    {['HOLD','OFFERED'].includes(booking.status)&&<button disabled={busy} onClick={()=>void invite()} className="inline-flex items-center gap-1.5 rounded border bg-background px-2 py-1 text-[11px] hover:bg-muted disabled:opacity-50"><Mail className="size-3"/>{booking.status==='OFFERED'?'Reenviar convite':'Convidar DJ'}</button>}
+    {['HOLD','OFFERED'].includes(booking.status)&&<button type="button" disabled={busy} onClick={()=>void invite()} className="inline-flex items-center gap-1.5 rounded border bg-background px-2 py-1 text-[11px] hover:bg-muted disabled:opacity-50"><Mail className="size-3"/>{booking.status==='OFFERED'?'Reenviar convite':'Convidar DJ'}</button>}
     <StatusButtons table="wmp_dj_bookings" id={booking.id} current={booking.status} options={['HOLD','ACCEPTED','DECLINED','CONFIRMED','CANCELLED','COMPLETED']} onDone={onDone}/>
     {message&&<p className="max-w-xs text-[11px] text-muted-foreground">{message}</p>}
   </div>
 }
 
 function WmpOperationsPage(){
-  const [data,setData]=useState<Ops>({}); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null); const [tab,setTab]=useState(initialArea)
+  const [data,setData]=useState<Ops>({})
+  const [loading,setLoading]=useState(true)
+  const [error,setError]=useState<string|null>(null)
+  const [tab,setTab]=useState(initialArea)
+
   async function load(){setLoading(true);setError(null);try{setData(await getWmpOperations({data:{}}) as Ops)}catch(e:any){setError(e?.message??'Falha ao carregar operação WMP.')}finally{setLoading(false)}}
   useEffect(()=>{void load()},[])
+
   const tabs=[['crm','CRM e clientes'],['agenda','Agenda e eventos'],['djs','DJs e parceiros'],['equip','Equipamentos'],['finance','Financeiro'],['millito','Milito']]
+  const briefingsById=useMemo(()=>new Map((data.briefings??[]).map((row:any)=>[row.id,row])),[data.briefings])
+  const corporateOpen=(data.corporateDates??[]).filter((row:any)=>!['CANCELLED'].includes(row.status))
+
   return <main className="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
-    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="text-sm text-muted-foreground">WMP — Wagner Miller Produções</p><h1 className="text-3xl font-semibold tracking-tight">Central operacional</h1><p className="mt-1 text-sm text-muted-foreground">CRM, eventos, equipe, equipamentos, repasses e atendimento em dados reais.</p></div><button onClick={()=>void load()} className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm"><RefreshCw className="size-4"/>Atualizar</button></header>
-    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[['Briefings',data.briefings?.length],['Parceiros',data.partners?.length],['Bookings',data.bookings?.length],['Equipamentos',data.equipment?.length],['Locações',data.rentals?.length],['Repasses',data.payouts?.length],['Tickets Milito',data.tickets?.length],['Disponibilidades',data.availability?.length]].map(([label,value])=><div key={String(label)} className="rounded-xl border bg-card p-4"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-2xl font-semibold">{loading?'…':value??0}</p></div>)}</section>
-    <nav className="flex flex-wrap gap-2">{tabs.map(([id,label])=><button key={id} onClick={()=>setTab(id)} className={`rounded-md border px-3 py-2 text-sm ${tab===id?'bg-primary text-primary-foreground':'bg-card'}`}>{label}</button>)}</nav>
+    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="text-sm text-muted-foreground">WMP — Wagner Miller Produções</p><h1 className="text-3xl font-semibold tracking-tight">Central operacional</h1><p className="mt-1 text-sm text-muted-foreground">CRM, agenda corporativa, bookings de DJs, equipamentos, repasses e atendimento em dados reais.</p></div><button type="button" onClick={()=>void load()} className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm"><RefreshCw className="size-4"/>Atualizar</button></header>
+
+    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{[
+      ['Briefings',data.briefings?.length],
+      ['Datas corporativas',data.corporateDates?.length],
+      ['Parceiros',data.partners?.length],
+      ['Bookings',data.bookings?.length],
+      ['Equipamentos',data.equipment?.length],
+      ['Locações',data.rentals?.length],
+      ['Repasses',data.payouts?.length],
+      ['Tickets Milito',data.tickets?.length],
+      ['Disponibilidades',data.availability?.length],
+      ['Datas abertas',corporateOpen.length],
+    ].map(([label,value])=><div key={String(label)} className="rounded-xl border bg-card p-4"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-2xl font-semibold">{loading?'…':value??0}</p></div>)}</section>
+
+    <nav className="flex flex-wrap gap-2">{tabs.map(([id,label])=><button type="button" key={id} onClick={()=>setTab(id)} className={`rounded-md border px-3 py-2 text-sm ${tab===id?'bg-primary text-primary-foreground':'bg-card'}`}>{label}</button>)}</nav>
     {error&&<div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm">{error}</div>}
+
     {loading?<div className="rounded-xl border p-10 text-sm text-muted-foreground">Carregando operação...</div>:<>
       {tab==='crm'&&<section className="overflow-x-auto rounded-xl border bg-card"><div className="border-b p-4"><h2 className="font-semibold">Briefings e oportunidades</h2></div><table className="w-full min-w-[900px] text-sm"><thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="p-3">Cliente</th><th>Evento</th><th>Data/local</th><th>Contato</th><th>Status</th></tr></thead><tbody>{(data.briefings??[]).map(r=><tr key={r.id} className="border-b last:border-0"><td className="p-3"><b>{r.contratante_nome}</b><div className="text-xs text-muted-foreground">{r.contratante_empresa||'Pessoa física'}</div></td><td>{r.evento_tipo}</td><td>{date(r.evento_data)} · {[r.evento_cidade,r.evento_estado].filter(Boolean).join('/')||'—'}</td><td><div>{r.contratante_email}</div><div className="text-xs">{r.contratante_telefone}</div></td><td><StatusButtons table="wmp_briefings" id={r.id} current={r.status} options={['NEW','QUALIFYING','PROPOSAL','WON','LOST','ARCHIVED']} onDone={()=>void load()}/></td></tr>)}</tbody></table></section>}
-      {tab==='agenda'&&<section className="space-y-4"><div className="rounded-xl border bg-card p-4"><h2 className="font-semibold">Agenda operacional</h2><p className="mt-1 text-xs text-muted-foreground">Use “Convidar DJ” para gerar um link seguro; o profissional aceita ou recusa sem acessar o dashboard.</p><div className="mt-4 space-y-3">{(data.bookings??[]).length===0?<p className="text-sm text-muted-foreground">Nenhum booking registrado.</p>:(data.bookings??[]).map(r=><div key={r.id} className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1.4fr_.8fr_1fr_2fr]"><div><b>{r.event_name}</b><div className="text-xs text-muted-foreground">{r.venue_name||'Local a definir'} · {[r.city,r.state].filter(Boolean).join('/')}</div></div><div>{date(r.event_date)}<div className="text-xs text-muted-foreground">Cachê {money(r.fee_cents)}</div><div className="text-xs text-muted-foreground">Alim. {r.meal_provided_by_contractor?'fornecida':money(r.meal_allowance_cents)} · Estac. {r.parking_provided_by_contractor?'fornecido':money(r.parking_allowance_cents)}</div></div><div className="text-xs">Prazo: {r.response_deadline?new Date(r.response_deadline).toLocaleString('pt-BR'):'—'}</div><BookingActions booking={r} onDone={()=>void load()}/></div>)}</div></div></section>}
+
+      {tab==='agenda'&&<section className="space-y-5">
+        <div className="rounded-xl border bg-card">
+          <div className="border-b p-4"><div className="flex items-center gap-2"><Building2 className="size-4"/><h2 className="font-semibold">Agenda corporativa solicitada</h2></div><p className="mt-1 text-xs text-muted-foreground">Datas captadas por hotéis e empresas. Cada data evolui separadamente para cotação, confirmação ou cancelamento sem duplicar o lead-mãe.</p></div>
+          <div className="overflow-x-auto"><table className="w-full min-w-[1050px] text-sm"><thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="p-3">Empresa / contato</th><th>Data</th><th>Local</th><th>Horário</th><th>Observação</th><th>Status</th></tr></thead><tbody>{(data.corporateDates??[]).length===0?<tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Nenhuma data corporativa solicitada.</td></tr>:(data.corporateDates??[]).map(r=>{const briefing=briefingsById.get(r.briefing_id) as any;return <tr key={r.id} className="border-b last:border-0"><td className="p-3"><b>{briefing?.contratante_empresa||briefing?.contratante_nome||'Demanda corporativa'}</b><div className="text-xs text-muted-foreground">{briefing?.contratante_nome||'—'} · {briefing?.contratante_email||'—'}</div></td><td>{date(r.event_date)}</td><td><b>{r.venue_name||'Local a definir'}</b><div className="text-xs text-muted-foreground">{[r.venue_bairro,r.venue_city,r.venue_state].filter(Boolean).join(' · ')||'—'}</div></td><td>{time(r.start_time)} → {time(r.end_time)}</td><td className="max-w-[260px] text-xs text-muted-foreground">{r.notes||'—'}</td><td><StatusButtons table="wmp_briefing_dates" id={r.id} current={r.status} options={['REQUESTED','QUOTED','CONFIRMED','CANCELLED']} onDone={()=>void load()}/></td></tr>})}</tbody></table></div>
+        </div>
+
+        <div className="rounded-xl border bg-card p-4"><h2 className="font-semibold">Bookings de DJs</h2><p className="mt-1 text-xs text-muted-foreground">Após curadoria/seleção de DJ, o booking é controlado aqui. “Convidar DJ” gera link seguro para aceite ou recusa.</p><div className="mt-4 space-y-3">{(data.bookings??[]).length===0?<p className="text-sm text-muted-foreground">Nenhum booking registrado.</p>:(data.bookings??[]).map(r=><div key={r.id} className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1.4fr_.8fr_1fr_2fr]"><div><b>{r.event_name}</b><div className="text-xs text-muted-foreground">{r.venue_name||'Local a definir'} · {[r.city,r.state].filter(Boolean).join('/')}</div></div><div>{date(r.event_date)}<div className="text-xs text-muted-foreground">Cachê {money(r.fee_cents)}</div><div className="text-xs text-muted-foreground">Alim. {r.meal_provided_by_contractor?'fornecida':money(r.meal_allowance_cents)} · Estac. {r.parking_provided_by_contractor?'fornecido':money(r.parking_allowance_cents)}</div></div><div className="text-xs">Prazo: {r.response_deadline?new Date(r.response_deadline).toLocaleString('pt-BR'):'—'}</div><BookingActions booking={r} onDone={()=>void load()}/></div>)}</div></div>
+      </section>}
+
       {tab==='djs'&&<section className="overflow-x-auto rounded-xl border bg-card"><div className="border-b p-4"><h2 className="font-semibold">DJs e parceiros</h2></div><table className="w-full min-w-[900px] text-sm"><thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="p-3">Nome</th><th>Categoria</th><th>Local</th><th>Contato</th><th>Status</th></tr></thead><tbody>{(data.partners??[]).map(r=><tr key={r.id} className="border-b last:border-0"><td className="p-3"><b>{r.nome_artistico||r.nome}</b><div className="text-xs text-muted-foreground">{r.nome}</div></td><td>{r.categoria}</td><td>{[r.cidade,r.estado].filter(Boolean).join('/')||'—'}</td><td><div>{r.email}</div><div className="text-xs">{r.telefone}</div></td><td><StatusButtons table="wmp_parceiros" id={r.id} current={r.status} options={['PENDING','REVIEWING','APPROVED','REJECTED','INACTIVE']} onDone={()=>void load()}/></td></tr>)}</tbody></table></section>}
-      {tab==='equip'&&<section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Equipamentos</h2><p className="mt-2 text-sm text-muted-foreground">A gestão completa de catálogo, fabricantes, modelos, proprietários, valores, locações e curadoria foi movida para a tela dedicada.</p><a href="/wmp/equipamentos" className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Abrir gestão de equipamentos</a></section>}
+
+      {tab==='equip'&&<section className="rounded-xl border bg-card p-6"><h2 className="font-semibold">Equipamentos</h2><p className="mt-2 text-sm text-muted-foreground">A gestão completa de catálogo, fabricantes, modelos, proprietários, valores, locações e curadoria está na tela dedicada.</p><a href="/wmp/equipamentos" className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Abrir gestão de equipamentos</a></section>}
+
       {tab==='finance'&&<section className="grid gap-4 lg:grid-cols-2"><div className="rounded-xl border bg-card p-4"><h2 className="font-semibold">Locações</h2><div className="mt-3 space-y-2">{(data.rentals??[]).map(r=><div key={r.id} className="rounded border p-3 text-sm"><div className="flex justify-between"><span>{Number(r.quantity)} × {money(r.unit_rental_cents)}</span><b>{money(Number(r.quantity)*Number(r.unit_rental_cents))}</b></div><div className="mt-1 text-xs text-muted-foreground">{r.owner_name||r.owner_type} · {r.status}</div></div>)}</div></div><div className="rounded-xl border bg-card p-4"><h2 className="font-semibold">Repasses</h2><div className="mt-3 space-y-2">{(data.payouts??[]).map(r=><div key={r.id} className="rounded border p-3 text-sm"><div className="flex justify-between"><span>{r.beneficiary_name||r.beneficiary_type}</span><b>{money(r.amount_cents)}</b></div><div className="mt-1 text-xs text-muted-foreground">{r.status}{r.paid_at?` · pago em ${new Date(r.paid_at).toLocaleDateString('pt-BR')}`:''}</div></div>)}</div></div></section>}
+
       {tab==='millito'&&<section className="rounded-xl border bg-card"><div className="border-b p-4"><h2 className="font-semibold">Conversas, protocolos e exportações do Milito</h2><p className="mt-1 text-xs text-muted-foreground">Dados provenientes do Core universal de conversas.</p></div><div className="divide-y">{(data.tickets??[]).length===0?<p className="p-6 text-sm text-muted-foreground">Nenhum ticket de conversa encerrada.</p>:(data.tickets??[]).map(r=><div key={r.id} className="grid gap-2 p-4 text-sm md:grid-cols-[1fr_1fr_1fr]"><b>{r.protocol}</b><span>Exportação: {r.export_status||'não solicitada'}</span><span className="text-muted-foreground">{r.export_sent_at?`Enviada em ${new Date(r.export_sent_at).toLocaleString('pt-BR')}`:r.export_requested_at?'Exportação solicitada':'Sem exportação solicitada'}</span></div>)}</div></section>}
     </>}
   </main>
