@@ -1,12 +1,6 @@
 /**
- * Mapa de contexto do Impulsionito (assistente virtual da Impulsionando).
- * Cada rota / nicho tem:
- *  - tip: dica curta exibida no balão
- *  - cta: rótulo do botão principal
- *  - whatsapp: mensagem pré-preenchida quando o lead clica em "Falar agora"
- *
- * O FAB cai no fallback "default" quando a rota não tem entrada própria,
- * e tem matchers por prefixo de path + por `?nicho=` (quando aplicável).
+ * Contexto comercial público do Impulsionito.
+ * Regra: nunca prometer canal, preço, trial ou capacidade que não esteja homologada.
  */
 export type ImpulsionitoContext = {
   id: string;
@@ -17,209 +11,192 @@ export type ImpulsionitoContext = {
 
 const DEFAULT: ImpulsionitoContext = {
   id: "default",
-  tip: "Sou o Impulsionito — em qualquer página posso te apontar o próximo passo, módulo certo ou plano ideal.",
-  cta: "Falar com um especialista",
-  whatsapp:
-    "Olá! Vim pelo site da Impulsionando e quero entender qual plano e módulos fazem sentido pra mim.",
+  tip: "Sou o Impulsionito. Me conte o que seu negócio faz e o que mais atrapalha seu crescimento; eu te mostro a jornada Impulsionando mais adequada.",
+  cta: "Diagnosticar meu negócio",
+  whatsapp: "Olá! Vim pelo site da Impulsionando e quero entender como o ecossistema pode funcionar no meu negócio.",
 };
 
-/** Contexto por prefixo de rota (mais específico primeiro). */
 const ROUTE_CONTEXTS: Array<{ match: RegExp; ctx: ImpulsionitoContext }> = [
   {
-    match: /^\/planos/,
+    match: /^\/empresas/,
     ctx: {
-      id: "planos",
-      tip: "Em dúvida entre Essencial, Ideal e Full? Conta o que você precisa resolver primeiro e eu te indico o plano + módulos ideais.",
-      cta: "Quero ajuda pra escolher o plano",
-      whatsapp:
-        "Olá! Estou na página de Planos da Impulsionando e quero ajuda para escolher entre Essencial / Ideal / Full + os módulos certos para o meu negócio.",
+      id: "empresas",
+      tip: "Não vou te vender uma lista de módulos. Me diga seu segmento, como você capta clientes hoje e onde mais perde tempo ou vendas. Eu transformo isso numa jornada prática.",
+      cta: "Quero ver no meu negócio",
+      whatsapp: "Olá! Estou na área de Empresas da Impulsionando e quero um diagnóstico do meu negócio, com foco em captação, conversão, relacionamento e fidelização.",
     },
   },
   {
-    match: /^\/checkout/,
+    match: /^\/white-label/,
     ctx: {
-      id: "checkout",
-      tip: "Posso te ajudar a finalizar agora — Pix gera na hora, cartão libera em 1 minuto e boleto rola pro anual.",
-      cta: "Preciso de ajuda no pagamento",
-      whatsapp:
-        "Olá! Estou no checkout da Impulsionando e preciso de ajuda para concluir o pagamento (setup + 1ª mensalidade).",
-    },
-  },
-  {
-    match: /^\/demo\/simulador/,
-    ctx: {
-      id: "demo-simulador",
-      tip: "Cada botão aqui dispara automações reais. Faça um pedido, agende uma visita ou rode uma campanha — eu explico o impacto.",
-      cta: "Tirar dúvida sobre o simulador",
-      whatsapp:
-        "Olá! Estou no simulador da Impulsionando e quero entender como os módulos funcionam integrados no meu nicho.",
-    },
-  },
-  {
-    match: /^\/demo\/escolher-nicho/,
-    ctx: {
-      id: "demo-niche",
-      tip: "Escolha o nicho mais próximo do seu — não precisa ser exato. O simulador adapta a história e os módulos.",
-      cta: "Não vejo meu nicho aqui",
-      whatsapp:
-        "Olá! Meu negócio não se encaixa em nenhum nicho da demo da Impulsionando. Posso conversar com alguém?",
-    },
-  },
-  {
-    match: /^\/demo\/cadastro/,
-    ctx: {
-      id: "demo-signup",
-      tip: "É só email, nome e WhatsApp. Nada de cartão. Em segundos você cai num ambiente recheado com dados reais do seu nicho.",
-      cta: "Tenho dúvida no cadastro",
-      whatsapp:
-        "Olá! Estou no cadastro da demo da Impulsionando e tenho uma dúvida antes de continuar.",
-    },
-  },
-  {
-    match: /^\/nichos/,
-    ctx: {
-      id: "nichos",
-      tip: "Conta seu segmento que eu te levo direto ao plano e aos módulos certos — pulando a parte de quiz.",
-      cta: "Recomendação rápida pra meu nicho",
-      whatsapp:
-        "Olá! Quero uma recomendação rápida da Impulsionando para o meu nicho específico (sem responder o quiz).",
-    },
-  },
-  {
-    match: /^\/recomendacao/,
-    ctx: {
-      id: "recomendacao",
-      tip: "Te conheço pela resposta do quiz. Se algo soa estranho na recomendação, eu refaço com você em 1 min.",
-      cta: "Refinar minha recomendação",
-      whatsapp:
-        "Olá! Acabei de receber uma recomendação no site da Impulsionando e quero refiná-la com alguém do time.",
-    },
-  },
-  {
-    match: /^\/orcamento/,
-    ctx: {
-      id: "orcamento",
-      tip: "Para Sob Medida e Avançado eu já te conecto direto com o consultor responsável.",
-      cta: "Quero um orçamento sob medida",
-      whatsapp:
-        "Olá! Estou montando um orçamento sob medida na Impulsionando e quero falar com um consultor.",
+      id: "white-label",
+      tip: "White Label é para quem quer operar e comercializar o ecossistema com marca própria. Posso te mostrar capacidade, implantação, autonomia comercial e jornada de upgrade.",
+      cta: "Quero entender o White Label",
+      whatsapp: "Olá! Quero entender o White Label da Impulsionando, suas faixas de capacidade, implantação e modelo comercial.",
     },
   },
   {
     match: /^\/clube/,
     ctx: {
       id: "clube",
-      tip: "O Clube libera vantagens em todos os tenants da Impulsionando — uma única assinatura, descontos em vários parceiros.",
-      cta: "Quero entender o Clube",
-      whatsapp:
-        "Olá! Quero entender como funciona o Clube Impulsionando e quais vantagens estão disponíveis no momento.",
+      tip: "O Clube conecta consumidores às empresas e benefícios disponíveis no ecossistema. Posso te ajudar a encontrar vantagens e, quando publicado, produtos e disponibilidade das empresas participantes.",
+      cta: "Explorar o Clube",
+      whatsapp: "Olá! Quero entender o Clube Impulsionando e as vantagens disponíveis.",
     },
   },
   {
-    match: /^\/contratar/,
+    match: /^\/planos/,
     ctx: {
-      id: "contratar",
-      tip: "Posso te conduzir pelo Trial de 7 dias ou pelo contrato anual com 2 meses grátis.",
-      cta: "Falar com vendas",
-      whatsapp:
-        "Olá! Quero contratar a Impulsionando — pode me ajudar a escolher entre Trial, mensal e anual?",
+      id: "planos",
+      tip: "Eu comparo sua necessidade com o catálogo comercial realmente publicado no Core. Se um preço ou condição não estiver homologado, eu não invento: conduzo para proposta.",
+      cta: "Encontrar a melhor configuração",
+      whatsapp: "Olá! Estou na página de planos da Impulsionando e quero ajuda para definir a configuração adequada ao meu negócio.",
     },
   },
   {
-    match: /^\/trial/,
+    match: /^\/checkout/,
     ctx: {
-      id: "trial",
-      tip: "O Trial libera tudo do plano escolhido por 7 dias, sem cartão. Posso te ajudar a destravar qualquer parte.",
-      cta: "Tirar dúvida do Trial",
-      whatsapp:
-        "Olá! Estou no Trial da Impulsionando e quero ajuda para aproveitar melhor os 7 dias.",
+      id: "checkout",
+      tip: "Posso explicar exatamente o que está sendo contratado, valores publicados e próximos passos antes da confirmação.",
+      cta: "Revisar minha contratação",
+      whatsapp: "Olá! Estou no checkout da Impulsionando e quero ajuda para revisar minha contratação.",
     },
   },
   {
-    match: /^\/empresas|^\/white-label/,
+    match: /^\/demo\/escolher-nicho/,
     ctx: {
-      id: "white-label",
-      tip: "White Label coloca a sua marca em tudo — domínio próprio, app instalável, e o core Impulsionando rodando por trás.",
-      cta: "Quero detalhes do White Label",
-      whatsapp:
-        "Olá! Quero entender como funciona o White Label da Impulsionando (marca própria, domínio, multi-tenant).",
+      id: "demo-niche",
+      tip: "Escolha o segmento mais próximo. Se ele não estiver na lista, me diga o que sua empresa faz e eu conduzo a demonstração pela lógica operacional do seu negócio.",
+      cta: "Encontrar meu segmento",
+      whatsapp: "Olá! Quero encontrar a demonstração mais próxima do meu segmento na Impulsionando.",
+    },
+  },
+  {
+    match: /^\/demo/,
+    ctx: {
+      id: "demo",
+      tip: "Use a demonstração para enxergar a jornada, não apenas telas. Eu posso explicar como captação, CRM, operação, relacionamento e indicadores se conectam.",
+      cta: "Explicar esta demonstração",
+      whatsapp: "Olá! Estou em uma demonstração da Impulsionando e quero entender como essa jornada se aplicaria à minha empresa.",
+    },
+  },
+  {
+    match: /^\/nichos/,
+    ctx: {
+      id: "nichos",
+      tip: "Me diga seu nicho. Eu comparo o cenário atual com a jornada Impulsionando e mostro onde normalmente existem perdas invisíveis, recorrência desperdiçada e tarefas manuais.",
+      cta: "Diagnosticar meu nicho",
+      whatsapp: "Olá! Quero uma recomendação da Impulsionando para o meu segmento.",
+    },
+  },
+  {
+    match: /^\/recomendacao/,
+    ctx: {
+      id: "recomendacao",
+      tip: "Posso refinar sua recomendação usando segmento, tamanho da operação, canais atuais e principal objetivo de negócio.",
+      cta: "Refinar minha recomendação",
+      whatsapp: "Olá! Recebi uma recomendação no site da Impulsionando e quero refiná-la.",
+    },
+  },
+  {
+    match: /^\/orcamento/,
+    ctx: {
+      id: "orcamento",
+      tip: "Antes de fechar um orçamento, eu ajudo a separar o que é necessário agora, o que pode ser faseado e o que ainda depende de homologação.",
+      cta: "Montar a configuração certa",
+      whatsapp: "Olá! Estou montando um orçamento na Impulsionando e quero ajuda para definir o escopo correto.",
     },
   },
   {
     match: /^\/contato/,
     ctx: {
       id: "contato",
-      tip: "Você pode falar direto comigo pelo WhatsApp — ou usar o formulário se preferir registrar por escrito.",
-      cta: "Abrir WhatsApp agora",
-      whatsapp:
-        "Olá! Vim pela página de Contato da Impulsionando e quero falar com o time.",
+      tip: "Posso organizar sua necessidade antes do contato com o time, para que você já chegue com segmento, objetivo e prioridades claros.",
+      cta: "Organizar meu contato",
+      whatsapp: "Olá! Vim pela página de contato da Impulsionando e quero falar com o time.",
     },
   },
 ];
 
-/** Contexto por nicho (sobrescreve o de rota quando estiver presente). */
 const NICHE_CONTEXTS: Record<string, Partial<ImpulsionitoContext>> = {
   "bares-restaurantes": {
-    tip: "Bares e restaurantes começam pelo PDV + Comanda + Fidelização. Cardápio digital sai grátis no Ideal.",
-    whatsapp:
-      "Olá! Tenho um bar/restaurante e quero entender PDV, comanda, fidelização e cardápio digital da Impulsionando.",
+    tip: "Hoje você sabe quem sentou nas suas mesas, quanto cada cliente consome, do que gosta e quando deveria ser convidado a voltar? Eu te mostro como transformar comanda em relacionamento.",
+    cta: "Diagnosticar meu bar ou restaurante",
+    whatsapp: "Olá! Tenho bar/restaurante e quero entender como transformar PDV, cadastro, consumo, reservas, eventos e fidelização em uma jornada integrada.",
+  },
+  "materiais-construcao": {
+    tip: "Orçamento que não recebe follow-up e cliente em obra que compra uma vez são oportunidades invisíveis. Vamos mapear orçamento, recompra, profissionais e estoque.",
+    cta: "Diagnosticar minha loja",
+    whatsapp: "Olá! Tenho loja de materiais de construção e quero organizar orçamentos, CRM, estoque, recompra e relacionamento com profissionais.",
+  },
+  farmacias: {
+    tip: "Uma farmácia tem frequência natural. A pergunta é: quantos clientes recorrentes ainda passam anônimos e quantas campanhas realmente geram recompra?",
+    cta: "Diagnosticar minha farmácia",
+    whatsapp: "Olá! Tenho farmácia/drogaria e quero entender CRM, fidelidade, estoque e relacionamento dentro da Impulsionando.",
+  },
+  supermercados: {
+    tip: "Seu PDV conhece produtos vendidos; o desafio é transformar compras autorizadas em entendimento de frequência, ticket, categorias e retorno de campanhas.",
+    cta: "Diagnosticar meu mercado",
+    whatsapp: "Olá! Tenho supermercado/mercado e quero entender fidelização, CRM, estoque e campanhas segmentadas na Impulsionando.",
+  },
+  "lava-jato": {
+    tip: "Lavagem é recorrente por natureza. Se o cliente depende da própria memória para voltar, existe receita ficando na mesa. Vamos mapear veículo, histórico e retorno.",
+    cta: "Criar recorrência no meu lava jato",
+    whatsapp: "Olá! Tenho lava jato/estética automotiva e quero organizar clientes, veículos, serviços e recorrência.",
+  },
+  petshops: {
+    tip: "Banho, tosa e cuidados têm ciclo de retorno. Eu posso te mostrar como agenda, histórico do pet, lembretes e fidelidade formam uma jornada contínua.",
+    cta: "Diagnosticar meu negócio pet",
+    whatsapp: "Olá! Tenho pet shop/serviço pet e quero organizar agenda, histórico, retorno e fidelização.",
+  },
+  "saloes-estetica": {
+    tip: "Agenda cheia hoje não garante agenda cheia no próximo mês. Vamos medir retorno por profissional, clientes inativos e oportunidades de pacote ou recorrência.",
+    cta: "Diagnosticar meu salão",
+    whatsapp: "Olá! Tenho salão/barbearia/estética e quero organizar agenda, CRM, retorno e fidelização.",
   },
   clinicas: {
-    tip: "Clínicas integram Agenda + Prontuário (EHR) + WhatsApp. Plano Ideal já cobre confirmação automática.",
-    whatsapp:
-      "Olá! Tenho uma clínica e quero entender Agenda, Prontuário e confirmação automática da Impulsionando.",
+    tip: "Em saúde, organização e relacionamento precisam respeitar privacidade e regras do setor. Posso mapear captação, agenda, comunicação e retorno sem prometer o que não está homologado.",
+    whatsapp: "Olá! Tenho clínica/consultório e quero entender a jornada Impulsionando para captação, agenda e relacionamento.",
   },
   psicologia: {
-    tip: "Psicologia precisa de agenda recorrente, prontuário sigiloso e área do paciente. Tudo cabe no Essencial.",
-    whatsapp:
-      "Olá! Sou psicólogo(a) e quero entender Agenda, Prontuário e Área do Paciente da Impulsionando.",
+    tip: "Vamos olhar agenda, recorrência, comunicação, privacidade e acompanhamento do paciente sem misturar dados clínicos com marketing indevido.",
+    whatsapp: "Olá! Trabalho com psicologia e quero entender como a Impulsionando pode organizar agenda e relacionamento.",
   },
   imobiliaria: {
-    tip: "Imobiliária roda em Vitrine + CRM + Agenda de visitas. Lead do Instagram vira proposta sem digitar duas vezes.",
-    whatsapp:
-      "Olá! Tenho uma imobiliária e quero entender Vitrine, CRM e Agenda de visitas da Impulsionando.",
+    tip: "Lead imobiliário perde valor quando demora ou não recebe follow-up. Vamos conectar origem, interesse, visita, proposta e retomada da oportunidade.",
+    whatsapp: "Olá! Tenho imobiliária e quero entender CRM, captação, visitas e follow-up na Impulsionando.",
   },
   contabilidade: {
-    tip: "Contábil escala com Área do Cliente + ERP + automação de cobrança. Posso te mostrar o template.",
-    whatsapp:
-      "Olá! Tenho um escritório contábil e quero entender Área do Cliente, ERP e cobrança automática da Impulsionando.",
+    tip: "Escritórios ganham eficiência quando documentos, demandas, contratos, cobrança e relacionamento deixam de depender de mensagens dispersas.",
+    whatsapp: "Olá! Tenho escritório contábil e quero entender CRM, portal, contratos e automações na Impulsionando.",
   },
   juridico: {
-    tip: "Jurídico usa CRM de casos + Área do Cliente + Financeiro. Auditoria expandida já vem no Full.",
-    whatsapp:
-      "Olá! Tenho um escritório de advocacia e quero entender CRM de casos e Área do Cliente da Impulsionando.",
+    tip: "Vamos mapear captação, conflitos de interesse, relacionamento, documentos, prazos e financeiro com controle de acesso adequado ao contexto jurídico.",
+    whatsapp: "Olá! Tenho escritório jurídico e quero entender CRM, relacionamento e operação na Impulsionando.",
   },
   microcervejarias: {
-    tip: "Microcervejaria mistura Commerce + PDV + Eventos. Posso te mostrar o template pronto.",
-    whatsapp:
-      "Olá! Tenho uma microcervejaria e quero entender Commerce, PDV e Eventos da Impulsionando.",
+    tip: "Pedido B2B, estoque, comprador recorrente e sell-out não deveriam viver separados. Eu te mostro como transformar recompra em processo.",
+    whatsapp: "Olá! Tenho microcervejaria e quero organizar pedidos B2B, estoque, CRM e recompra.",
   },
   eventos: {
-    tip: "Eventos precisam de inscrições, área do participante e BI por edição. Tudo no plano Ideal.",
-    whatsapp:
-      "Olá! Produzo eventos e quero entender Inscrições, Área do Participante e BI da Impulsionando.",
+    tip: "Cada inscrição ou presença pode alimentar relacionamento, desde que haja consentimento e jornada correta. Vamos conectar captação, evento, pesquisa e próxima ação.",
+    whatsapp: "Olá! Produzo eventos e quero entender inscrições, relacionamento, comunicação e BI na Impulsionando.",
   },
   veiculos: {
-    tip: "Loja de veículos roda em Estoque + CRM + Financiamento. O BI mostra giro por modelo.",
-    whatsapp:
-      "Olá! Tenho uma loja de veículos e quero entender Estoque, CRM e BI da Impulsionando.",
+    tip: "Venda de veículo é uma jornada longa: origem do lead, interesse, proposta, financiamento, compra e pós-venda. Eu te mostro onde automatizar sem perder o contexto humano.",
+    whatsapp: "Olá! Trabalho com veículos e quero entender CRM, estoque, propostas e pós-venda na Impulsionando.",
   },
   servicos: {
-    tip: "Prestadores de serviço começam por Agenda + CRM + Contratos recorrentes.",
-    whatsapp:
-      "Olá! Sou prestador de serviços e quero entender Agenda, CRM e Contratos recorrentes da Impulsionando.",
+    tip: "Em serviços, a principal perda costuma acontecer entre pedido de orçamento, follow-up, execução, cobrança e recompra. Vamos mapear esse ciclo.",
+    whatsapp: "Olá! Sou prestador de serviços e quero organizar CRM, propostas, agenda, execução e recorrência.",
   },
   ecommerce: {
-    tip: "E-commerce integra Commerce + Estoque + Marketing. Remarketing dispara sozinho no Ideal.",
-    whatsapp:
-      "Olá! Tenho um e-commerce e quero entender Commerce, Estoque e Marketing da Impulsionando.",
+    tip: "Carrinho, compra, recompra e atendimento precisam alimentar o mesmo perfil. Vamos olhar aquisição, conversão, estoque e relacionamento pós-venda.",
+    whatsapp: "Olá! Tenho e-commerce/varejo e quero entender CRM, estoque, vendas e relacionamento na Impulsionando.",
   },
 };
 
-export function getImpulsionitoContext(
-  pathname: string,
-  niche?: string,
-): ImpulsionitoContext {
+export function getImpulsionitoContext(pathname: string, niche?: string): ImpulsionitoContext {
   const base = ROUTE_CONTEXTS.find((r) => r.match.test(pathname))?.ctx ?? DEFAULT;
   if (!niche) return base;
   const override = NICHE_CONTEXTS[niche];
