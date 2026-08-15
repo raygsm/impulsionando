@@ -1,9 +1,152 @@
 import { Link } from "@tanstack/react-router";
-import { Music2, Sparkles, Menu, X, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { Music2, Sparkles, Menu, X, MessageCircle, MapPin } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { MoreContentFab } from "@/components/impulsionando";
 
 type Crumb = { label: string; to?: string };
+
+type Point = { x: number; y: number };
+
+const WMP_WHEREABOUTS_POSITION_KEY = "wmp:whereabouts:position";
+const WMP_WHEREABOUTS_DISMISSED_KEY = "wmp:whereabouts:dismissed";
+
+function clampPosition(point: Point, width = 118, height = 132): Point {
+  if (typeof window === "undefined") return point;
+  const margin = 12;
+  return {
+    x: Math.min(Math.max(point.x, margin), Math.max(margin, window.innerWidth - width - margin)),
+    y: Math.min(Math.max(point.y, margin), Math.max(margin, window.innerHeight - height - margin)),
+  };
+}
+
+function WhereaboutsFloatingWidget() {
+  const [dismissed, setDismissed] = useState(false);
+  const [position, setPosition] = useState<Point | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragOffset = useRef<Point>({ x: 0, y: 0 });
+  const moved = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setDismissed(sessionStorage.getItem(WMP_WHEREABOUTS_DISMISSED_KEY) === "1");
+
+    const saved = sessionStorage.getItem(WMP_WHEREABOUTS_POSITION_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Point;
+        setPosition(clampPosition(parsed));
+        return;
+      } catch {
+        // Ignore malformed session data and use the default position.
+      }
+    }
+
+    setPosition(clampPosition({ x: 16, y: window.innerHeight - 164 }));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setPosition((current) => (current ? clampPosition(current) : current));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    if (!dragging || typeof window === "undefined") return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      moved.current = true;
+      setPosition(
+        clampPosition({
+          x: event.clientX - dragOffset.current.x,
+          y: event.clientY - dragOffset.current.y,
+        }),
+      );
+    };
+
+    const onPointerUp = () => {
+      setDragging(false);
+      setPosition((current) => {
+        if (current) sessionStorage.setItem(WMP_WHEREABOUTS_POSITION_KEY, JSON.stringify(current));
+        return current;
+      });
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp, { once: true });
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [dragging]);
+
+  if (dismissed || !position) return null;
+
+  return (
+    <div
+      className="fixed z-40 select-none touch-none"
+      style={{ left: position.x, top: position.y }}
+      aria-label="Onde Estou — Wagner Miller"
+    >
+      <button
+        type="button"
+        aria-label="Fechar Onde Estou"
+        className="absolute -right-1 -top-1 z-10 flex size-7 items-center justify-center rounded-full border shadow-md"
+        style={{
+          background: "var(--wmp-bg)",
+          borderColor: "color-mix(in oklab, var(--wmp-gold) 45%, transparent)",
+          color: "var(--wmp-fg)",
+        }}
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          sessionStorage.setItem(WMP_WHEREABOUTS_DISMISSED_KEY, "1");
+          setDismissed(true);
+        }}
+      >
+        <X className="size-3.5" aria-hidden />
+      </button>
+
+      <div
+        role="group"
+        className="w-[112px] cursor-grab rounded-2xl border p-2 shadow-2xl backdrop-blur-md active:cursor-grabbing"
+        style={{
+          background: "color-mix(in oklab, var(--wmp-bg) 88%, transparent)",
+          borderColor: "color-mix(in oklab, var(--wmp-gold) 28%, transparent)",
+        }}
+        onPointerDown={(event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest("a,button")) return;
+          moved.current = false;
+          dragOffset.current = { x: event.clientX - position.x, y: event.clientY - position.y };
+          setDragging(true);
+        }}
+      >
+        <div className="mx-auto mb-2 flex size-16 items-center justify-center overflow-hidden rounded-full border-2 text-sm font-semibold shadow-lg"
+          style={{ borderColor: "var(--wmp-gold)", background: "var(--wmp-surface-2)", color: "var(--wmp-gold)" }}>
+          <span aria-label="Foto do Wagner Miller pendente de cadastro" title="Foto oficial do Wagner Miller será exibida aqui">WM</span>
+        </div>
+
+        <Link
+          to="/wmp/onde-estou"
+          className="flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-center text-xs font-semibold"
+          style={{ background: "var(--gradient-wmp-cta)", color: "var(--wmp-bg)" }}
+          onClick={(event) => {
+            if (moved.current) {
+              event.preventDefault();
+              moved.current = false;
+            }
+          }}
+        >
+          <MapPin className="size-3.5" aria-hidden />
+          Onde estou
+        </Link>
+        <div className="pt-1.5 text-center text-[10px] opacity-60">Arraste para mover</div>
+      </div>
+    </div>
+  );
+}
 
 export function WmpShell({
   children,
@@ -121,7 +264,7 @@ export function WmpShell({
               <li><Link to="/wmp/cases" onClick={() => setOpen(false)}>Cases</Link></li>
               <li><Link to="/wmp/sobre" onClick={() => setOpen(false)}>Sobre</Link></li>
               <li><Link to="/wmp/faq" onClick={() => setOpen(false)}>FAQ</Link></li>
-              <li><Link to="/wmp/parceiro" onClick={() => setOpen(false)}>Seja Parceiro</Link></li>
+              <li><Link to="/wmp/parceiro" onClick={() => setOpen(false)}>Seja parceiro</Link></li>
               <li>
                 <Link
                   to="/wmp/orcamento"
@@ -208,6 +351,7 @@ export function WmpShell({
         </div>
       </footer>
 
+      <WhereaboutsFloatingWidget />
       <MoreContentFab bg="var(--wmp-gold)" accent="var(--wmp-bg)" />
     </div>
   );
