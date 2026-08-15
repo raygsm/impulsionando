@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Stethoscope, Video, Home, RefreshCw, Filter } from 'lucide-react';
+import { Loader2, Stethoscope, Video, Home, RefreshCw, Filter, RotateCcw } from 'lucide-react';
 import { ChrismedShell } from '@/components/chrismed/ChrismedShell';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
@@ -29,9 +29,9 @@ const MODALITY_META = {
 export const Route = createFileRoute('/chrismed/ofertas')({
   head: () => ({
     meta: [
-      { title: 'Modalidades de atendimento · CrisMed' },
-      { name: 'description', content: 'Conheça as modalidades CrisMed: consulta presencial em Copacabana, teleconsulta, atendimento domiciliar e retornos acompanhados — com a Dra. Cristiane Alencar.' },
-      { property: 'og:title', content: 'Modalidades de atendimento · CrisMed' },
+      { title: 'Modalidades de atendimento · CHRISMED' },
+      { name: 'description', content: 'Conheça as modalidades CHRISMED: consulta presencial em Copacabana, teleconsulta, atendimento domiciliar e retornos acompanhados — com a Dra. Christiane Alencar.' },
+      { property: 'og:title', content: 'Modalidades de atendimento · CHRISMED' },
       { property: 'og:description', content: 'Atendimento médico no formato que se encaixa na sua rotina, com sigilo, precisão e conforto.' },
     ],
   }),
@@ -45,20 +45,35 @@ function brl(c: number) {
 function OfertasPage() {
   const [items, setItems] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [filter, setFilter] = useState<'todos' | Offering['modality']>('todos');
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadFailed(false);
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('chrismed_service_offerings')
         .select('id,slug,name,description,modality,price_cents,duration_minutes')
         .eq('company_id', CHRISMED_COMPANY_ID)
         .eq('active', true)
         .order('display_order');
-      setItems((data ?? []) as Offering[]);
+      if (!active) return;
+      if (error) {
+        console.error('[CHRISMED] Falha ao carregar modalidades', error);
+        setItems([]);
+        setLoadFailed(true);
+      } else {
+        setItems((data ?? []) as Offering[]);
+      }
       setLoading(false);
     })();
-  }, []);
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
 
   const filtered = filter === 'todos' ? items : items.filter((i) => i.modality === filter);
   const modalities: Array<'todos' | Offering['modality']> = ['todos', 'presencial', 'telemedicina', 'domiciliar', 'retorno'];
@@ -81,10 +96,11 @@ function OfertasPage() {
 
       <section className="container py-12 max-w-5xl">
         <div className="flex items-center gap-2 justify-center flex-wrap mb-8">
-          <Filter className="h-4 w-4 text-[var(--chrismed-mist)]" />
+          <Filter className="h-4 w-4 text-[var(--chrismed-mist)]" aria-hidden="true" />
           {modalities.map((m) => (
             <button
               key={m}
+              type="button"
               onClick={() => setFilter(m)}
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 filter === m
@@ -99,7 +115,23 @@ function OfertasPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[var(--chrismed-ink)]" /></div>
+          <div className="flex min-h-48 flex-col items-center justify-center gap-3 py-16" role="status" aria-live="polite">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--chrismed-forest-deep)]" aria-hidden="true" />
+            <span className="text-sm font-medium text-[var(--chrismed-graphite)]">Carregando modalidades disponíveis…</span>
+          </div>
+        ) : loadFailed ? (
+          <div className="mx-auto max-w-xl rounded-2xl border border-[var(--chrismed-sand)] bg-white p-8 text-center" role="alert">
+            <h2 className="chrismed-serif text-2xl text-[var(--chrismed-forest-deep)]">Não foi possível carregar as modalidades agora</h2>
+            <p className="mt-3 text-sm leading-6 text-[var(--chrismed-graphite)]">Tente novamente. Se preferir, você também pode falar com a equipe CHRISMED pela página de contato.</p>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button type="button" onClick={() => setReloadKey((v) => v + 1)} className="bg-[var(--chrismed-forest-deep)] text-white hover:bg-[var(--chrismed-forest)]">
+                <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" /> Tentar novamente
+              </Button>
+              <Button asChild variant="outline" className="border-[var(--chrismed-forest)] bg-white text-[var(--chrismed-forest-deep)] hover:bg-[var(--chrismed-forest-mist)]">
+                <Link to="/chrismed/contato">Falar com a CHRISMED</Link>
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-5">
             {filtered.map((o) => {
@@ -108,21 +140,21 @@ function OfertasPage() {
               return (
                 <Card key={o.id} className="border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] hover:border-[var(--chrismed-sand)] hover:shadow-[0_18px_40px_-20px_rgba(6,42,32,0.35)] transition">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="h-12 w-12 rounded-xl bg-[var(--chrismed-bone)] text-[var(--chrismed-ink)] flex items-center justify-center">
-                        <Icon className="h-6 w-6" />
+                        <Icon className="h-6 w-6" aria-hidden="true" />
                       </div>
-                      <Badge variant="outline" className="bg-[var(--chrismed-bone)] text-[var(--chrismed-champagne-deep)] border-[var(--chrismed-champagne)] uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
+                      <Badge variant="outline" className="bg-[var(--chrismed-bone)] text-[var(--chrismed-graphite)] border-[var(--chrismed-champagne)] uppercase tracking-[0.14em] text-[10px]">{meta.label}</Badge>
                     </div>
                     <CardTitle className="mt-3 chrismed-serif text-[var(--chrismed-ink)]">{o.name}</CardTitle>
                     <CardDescription className="text-[var(--chrismed-graphite)]">{o.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex items-end justify-between">
+                  <CardContent className="flex items-end justify-between gap-4">
                     <div>
                       <div className="text-2xl chrismed-serif text-[var(--chrismed-ink)]">{brl(o.price_cents)}</div>
-                      <div className="text-xs text-[var(--chrismed-mist)]">~{o.duration_minutes} min</div>
+                      <div className="text-xs text-[var(--chrismed-mist)]">Duração aproximada: {o.duration_minutes} min</div>
                     </div>
-                    <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-champagne-deep)] text-[var(--chrismed-ivory)] shadow-sm">
+                    <Button asChild className="bg-[var(--chrismed-ink)] hover:bg-[var(--chrismed-forest)] text-[var(--chrismed-ivory)] shadow-sm">
                       <Link to="/chrismed/agendar" search={{ modality: o.modality }}>Reservar horário</Link>
                     </Button>
                   </CardContent>
@@ -130,8 +162,8 @@ function OfertasPage() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="md:col-span-2 text-center py-12 text-[var(--chrismed-mist)]">
-                Nenhuma modalidade ativa nesse filtro no momento.
+              <div className="md:col-span-2 rounded-2xl border border-[var(--chrismed-sand)] bg-white px-6 py-12 text-center text-[var(--chrismed-graphite)]">
+                Nenhuma modalidade ativa neste filtro no momento. Consulte outra opção ou fale com a equipe CHRISMED.
               </div>
             )}
           </div>
