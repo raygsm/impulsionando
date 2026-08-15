@@ -41,15 +41,29 @@ async function driveFetch(accessToken: string, url: string) {
   return fetch(url, { headers: { authorization: `Bearer ${accessToken}` } });
 }
 
-function classify(name: string, mimeType: string) {
+type DocumentType = 'invoice' | 'contract' | 'clinical_report' | 'prescription' | 'exam' | 'occupational' | 'institutional' | 'unknown';
+
+function classify(name: string, mimeType: string): DocumentType {
   const value = `${name} ${mimeType}`.toLowerCase();
   if (/nota fiscal|nfse|nfs-e|invoice|fatura/.test(value)) return 'invoice';
   if (/contrato|contract/.test(value)) return 'contract';
-  if (/laudo|relatorio medico|relatório médico/.test(value)) return 'clinical_report';
+  if (/laudo|relatorio medico|relatório médico|parecer medico|parecer médico/.test(value)) return 'clinical_report';
   if (/receita|prescricao|prescrição/.test(value)) return 'prescription';
-  if (/exame|laboratorial|laboratory/.test(value)) return 'exam';
-  if (/aso|ocupacional/.test(value)) return 'occupational';
+  if (/exame|laboratorial|laboratory|endoscopia|colonoscopia|biopsia|biópsia|ressonancia|ressonância|tomografia|ultrassom/.test(value)) return 'exam';
+  if (/aso|ocupacional|pcmso|pgr|nr-/.test(value)) return 'occupational';
+  if (/institucional|politica|política|privacidade|lgpd|termo|manual|faq|perguntas frequentes|servicos|serviços|precos|preços|tabela de valores|orientacoes|orientações|compliance|procedimento interno/.test(value)) return 'institutional';
   return 'unknown';
+}
+
+function isPublicKnowledgeEligible(type: DocumentType) {
+  return type === 'institutional' || type === 'contract';
+}
+
+function releasePolicyFor(type: DocumentType) {
+  if (type === 'clinical_report' || type === 'prescription' || type === 'exam') return 'care_team_only';
+  if (type === 'invoice') return 'authenticated_owner_only';
+  if (type === 'occupational') return 'company_owner_only';
+  return 'restricted';
 }
 
 function textExportUrl(fileId: string, mimeType: string) {
@@ -91,7 +105,7 @@ export async function syncChrismedGoogleDrive() {
       pageSize: '100',
       spaces: 'drive',
       orderBy: 'modifiedTime desc',
-      q: "trashed = false",
+      q: 'trashed = false',
       fields: 'nextPageToken,files(id,name,mimeType,parents,modifiedTime,size,md5Checksum,webViewLink,description,createdTime)',
     });
     if (pageToken) params.set('pageToken', pageToken);
@@ -103,14 +117,17 @@ export async function syncChrismedGoogleDrive() {
     for (const file of json.files ?? []) {
       const mimeType = String(file.mimeType ?? '');
       if (mimeType === 'application/vnd.google-apps.folder') continue;
-      const safeText = await extractSafeText(accessToken, String(file.id), mimeType);
-      if (safeText) withText += 1;
       const docType = classify(String(file.name ?? ''), mimeType);
+      const safeText = isPublicKnowledgeEligible(docType)
+        ? await extractSafeText(accessToken, String(file.id), mimeType)
+        : null;
+      if (safeText) withText += 1;
       const metadata = {
-        drive_description: file.description ?? null,
+        drive_description: isPublicKnowledgeEligible(docType) ? file.description ?? null : null,
         created_time: file.createdTime ?? null,
         text_excerpt: safeText,
         text_indexed: Boolean(safeText),
+        public_knowledge_eligible: isPublicKnowledgeEligible(docType),
         sync_source: 'google_drive_readonly',
       };
       const { error } = await (supabaseAdmin as any).from('client_drive_documents').upsert({
@@ -125,7 +142,7 @@ export async function syncChrismedGoogleDrive() {
         size_bytes: file.size ? Number(file.size) : null,
         checksum: file.md5Checksum ?? null,
         document_type: docType,
-        release_policy: 'restricted',
+        release_policy: releasePolicyFor(docType),
         indexed_by: 'oliver',
         status: 'active',
         metadata,
@@ -138,13 +155,18 @@ export async function syncChrismedGoogleDrive() {
   } while (pageToken && pages < 50);
 
   const now = new Date().toISOString();
-  await (supabaseAdmin as any).from('client_drive_connections').update({ last_sync: now, last_error: null, updated_at: now }).eq('id', connection.id);
+  const { error: updateError } = await (supabaseAdmin as any)
+    .from('client_drive_connections')
+    .update({ last_sync_at: now, last_error: null, updated_at: now })
+    .eq('id', connection.id);
+  if (updateError) throw new Error(`drive_connection_sync_status_failed:${updateError.message}`);
+
   await (supabaseAdmin as any).from('client_drive_audit_log').insert({
     company_id: CHRISMED_COMPANY_ID,
     actor_type: 'system',
     action: 'google_drive_sync',
     result: 'success',
-    metadata: { indexed, with_text: withText, pages, account_email: EXPECTED_ACCOUNT },
+    metadata: { indexed, with_text: withText, pages, account_email: EXPECTED_ACCOUNT, sensitive_text_persisted: false },
   });
   return { indexed, withText, pages, accountEmail: EXPECTED_ACCOUNT, syncedAt: now };
 }
@@ -153,26 +175,29 @@ export async function searchChrismedTenantKnowledge(query: string, limit = 8) {
   const term = query.trim().slice(0, 500);
   if (!term) return { articles: [], driveDocuments: [] };
   const safeLimit = Math.min(Math.max(limit, 1), 12);
+  const sanitized = term.replace(/[%_,]/g, '');
   const [articlesResult, driveResult] = await Promise.all([
     (supabaseAdmin as any).from('knowledge_articles')
       .select('slug,title,summary,body_markdown,category,audience,version')
       .eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'published')
-      .or(`title.ilike.%${term.replace(/[%_,]/g, '')}%,summary.ilike.%${term.replace(/[%_,]/g, '')}%,body_markdown.ilike.%${term.replace(/[%_,]/g, '')}%`)
+      .or(`title.ilike.%${sanitized}%,summary.ilike.%${sanitized}%,body_markdown.ilike.%${sanitized}%`)
       .limit(safeLimit),
     (supabaseAdmin as any).from('client_drive_documents')
-      .select('id,file_name,mime_type,document_type,release_policy,metadata,modified_time')
-      .eq('company_id', CHRISMED_COMPANY_ID).eq('status', 'active')
-      .or(`file_name.ilike.%${term.replace(/[%_,]/g, '')}%,metadata->>text_excerpt.ilike.%${term.replace(/[%_,]/g, '')}%`)
+      .select('id,file_name,mime_type,document_type,release_policy,metadata,modified_time,party_name,party_document')
+      .eq('company_id', CHRISMED_COMPANY_ID)
+      .eq('status', 'active')
+      .in('document_type', ['institutional','contract'])
+      .is('party_name', null)
+      .is('party_document', null)
+      .eq('metadata->>public_knowledge_eligible', 'true')
+      .or(`file_name.ilike.%${sanitized}%,metadata->>text_excerpt.ilike.%${sanitized}%`)
       .limit(safeLimit),
   ]);
   return {
     articles: articlesResult.data ?? [],
     driveDocuments: (driveResult.data ?? []).map((doc: any) => ({
       id: doc.id,
-      file_name: doc.file_name,
-      mime_type: doc.mime_type,
       document_type: doc.document_type,
-      release_policy: doc.release_policy,
       modified_time: doc.modified_time,
       text_excerpt: String(doc.metadata?.text_excerpt ?? '').slice(0, 12000),
     })),
