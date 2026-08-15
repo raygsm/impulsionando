@@ -2,9 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ensureDailyWhereaboutsRequest } from '@/lib/wmp/whereabouts.server'
 
 function authorized(request: Request) {
-  const expected = process.env.WMP_DAILY_JOB_TOKEN || process.env.CRON_SECRET || ''
+  const candidates = [
+    process.env.WMP_DAILY_JOB_TOKEN,
+    process.env.CRON_SECRET,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  ].filter(Boolean) as string[]
   const supplied = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim() || ''
-  return Boolean(expected && supplied && supplied === expected)
+  return Boolean(supplied && candidates.some((value) => supplied === value))
 }
 
 export const Route = createFileRoute('/api/wmp/whereabouts/daily')({
