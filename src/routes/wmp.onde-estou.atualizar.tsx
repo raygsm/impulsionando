@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, Clock3, MapPin } from 'lucide-react'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { WmpShell } from '@/components/wmp/WmpShell'
-import { getWhereaboutsRequest, publishWhereabouts } from '@/lib/wmp/whereabouts.server'
+import { confirmWhereabouts, getWhereaboutsRequest, publishWhereabouts } from '@/lib/wmp/whereabouts.server'
 
 const loadRequest = createServerFn({ method: 'GET' })
   .inputValidator((d: { token: string }) => z.object({ token: z.string().uuid() }).parse(d))
@@ -19,6 +19,10 @@ const saveWhereabouts = createServerFn({ method: 'POST' })
     end_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   }).parse(d))
   .handler(async ({ data }) => publishWhereabouts(data))
+
+const confirmCurrent = createServerFn({ method: 'POST' })
+  .inputValidator((d: { token: string }) => z.object({ token: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => confirmWhereabouts(data.token))
 
 export const Route = createFileRoute('/wmp/onde-estou/atualizar')({
   validateSearch: (search: Record<string, unknown>) => ({ token: typeof search.token === 'string' ? search.token : '' }),
@@ -42,6 +46,14 @@ function UpdateWhereaboutsPage() {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (!request?.entry) return
+    setVenueName(request.entry.venue_name ?? '')
+    setVenueAddress(request.entry.venue_address ?? '')
+    setStartTime(String(request.entry.start_time ?? '').slice(0, 5))
+    setEndTime(request.entry.end_time ? String(request.entry.end_time).slice(0, 5) : '')
+  }, [request])
+
   const dateLabel = useMemo(() => request?.publication_date ? new Date(`${request.publication_date}T12:00:00-03:00`).toLocaleDateString('pt-BR') : '', [request])
 
   if (!request || request.expired) {
@@ -49,7 +61,7 @@ function UpdateWhereaboutsPage() {
   }
 
   if (done || request.status === 'COMPLETED') {
-    return <WmpShell><section className="mx-auto max-w-xl px-6 py-24"><div className="wmp-surface p-8 text-center"><CheckCircle2 className="mx-auto size-12" style={{ color: 'var(--wmp-gold)' }} /><h1 className="wmp-display mt-4 text-2xl">Onde Estou atualizado.</h1><p className="mt-3 text-sm opacity-75">Obrigado, Wagner. O Milito já publicou a informação no site da WMP.</p></div></section></WmpShell>
+    return <WmpShell><section className="mx-auto max-w-xl px-6 py-24"><div className="wmp-surface p-8 text-center"><CheckCircle2 className="mx-auto size-12" style={{ color: 'var(--wmp-gold)' }} /><h1 className="wmp-display mt-4 text-2xl">Onde Estou confirmado.</h1><p className="mt-3 text-sm opacity-75">Obrigado, Wagner. O Milito já validou a agenda de hoje no site da WMP.</p></div></section></WmpShell>
   }
 
   async function submit(event: React.FormEvent) {
@@ -62,10 +74,18 @@ function UpdateWhereaboutsPage() {
     } finally { setBusy(false) }
   }
 
+  async function confirmSame() {
+    setBusy(true); setError('')
+    try { await confirmCurrent({ data: { token } }); setDone(true) }
+    catch (e: any) { setError(e?.message ?? 'Não foi possível confirmar agora.') }
+    finally { setBusy(false) }
+  }
+
   return <WmpShell breadcrumbs={[{ label: 'Onde Estou' }, { label: 'Atualizar' }]}>
     <section className="mx-auto max-w-2xl px-6 py-16 md:py-24">
       <div className="wmp-surface p-6 md:p-8">
-        <div className="mb-6"><span className="wmp-chip mb-3"><MapPin className="size-3" /> Atualização diária</span><h1 className="wmp-display text-3xl">Onde Estou — {dateLabel}</h1><p className="mt-2 text-sm opacity-75">Preencha somente o local, endereço e horário. Ao salvar, o Milito publica automaticamente no site.</p></div>
+        <div className="mb-6"><span className="wmp-chip mb-3"><MapPin className="size-3" /> Atualização diária</span><h1 className="wmp-display text-3xl">Onde Estou — {dateLabel}</h1><p className="mt-2 text-sm opacity-75">{request.entry ? 'Sua agenda já estava cadastrada. Se continua igual, basta confirmar. Se mudou, altere os campos abaixo e salve.' : 'Preencha somente o local, endereço e horário. Ao salvar, o Milito publica automaticamente no site.'}</p></div>
+        {request.entry && <button type="button" disabled={busy} onClick={()=>void confirmSame()} className="wmp-cta mb-5 w-full justify-center disabled:opacity-60">Sim, continua igual</button>}
         <form onSubmit={submit} className="space-y-4">
           <label className="block"><span className="mb-1 block text-sm font-medium">Nome do local *</span><input required value={venueName} onChange={e=>setVenueName(e.target.value)} className="w-full rounded-lg border bg-background px-3 py-3 text-base" placeholder="Ex.: Hotel Windsor Leme" /></label>
           <label className="block"><span className="mb-1 block text-sm font-medium">Endereço *</span><input required value={venueAddress} onChange={e=>setVenueAddress(e.target.value)} className="w-full rounded-lg border bg-background px-3 py-3 text-base" placeholder="Rua, número, bairro, cidade" /></label>
@@ -74,7 +94,7 @@ function UpdateWhereaboutsPage() {
             <label className="block"><span className="mb-1 block text-sm font-medium">Término</span><input type="time" value={endTime} onChange={e=>setEndTime(e.target.value)} className="w-full rounded-lg border bg-background px-3 py-3 text-base" /></label>
           </div>
           {error && <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">{error}</div>}
-          <button disabled={busy} className="wmp-cta w-full justify-center disabled:opacity-60">{busy ? 'Publicando...' : 'Salvar e publicar no site'}</button>
+          <button disabled={busy} className="wmp-cta w-full justify-center disabled:opacity-60">{busy ? 'Salvando...' : request.entry ? 'Salvar alteração e publicar' : 'Salvar e publicar no site'}</button>
         </form>
       </div>
     </section>
