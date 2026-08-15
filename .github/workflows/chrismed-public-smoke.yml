@@ -1,0 +1,58 @@
+name: CHRISMED Public Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - src/**/chrismed*
+      - src/components/chrismed/**
+      - src/lib/chrismed*
+      - src/data/chrismed*
+      - supabase/functions/chrismed-*/**
+      - supabase/migrations/*chrismed*
+      - .github/workflows/chrismed-public-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Validate CHRISMED public production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check critical public routes
+        run: |
+          set -euo pipefail
+          check() {
+            name="$1"
+            url="$2"
+            expected="$3"
+            out="/tmp/chrismed-${name}.html"
+            code="$(curl --location --silent --show-error --output "$out" --write-out '%{http_code}' --max-time 30 "$url")"
+            printf '%s -> HTTP %s\n' "$url" "$code"
+            case "$code" in
+              200|301|302|307|308) ;;
+              *) echo "Unexpected HTTP status for $url"; exit 1 ;;
+            esac
+            if [ -n "$expected" ]; then
+              grep -Eqi "$expected" "$out" || { echo "Expected page signature not found for $url"; exit 1; }
+            fi
+          }
+
+          check home 'https://chrismed.impulsionando.com.br/' 'CHRISMED|CrisMed'
+          check agendar 'https://chrismed.impulsionando.com.br/agendar' 'Agendar|consulta|CHRISMED|CrisMed'
+          check eventos 'https://chrismed.impulsionando.com.br/eventos' 'Eventos|evento|CHRISMED|CrisMed'
+          check auth 'https://chrismed.impulsionando.com.br/auth' 'Entrar|Acesso|CHRISMED|CrisMed'
+          check profissional 'https://chrismed.impulsionando.com.br/agenda/profissional' 'Profissional|Agenda|CHRISMED|CrisMed'
+
+      - name: Verify legacy typo is not canonical
+        run: |
+          set -euo pipefail
+          code="$(curl --location --silent --show-error --output /tmp/chrismed-alth.html --write-out '%{http_code}' --max-time 30 'https://chrismed.impulsionando.com.br/alth')"
+          printf '/alth -> HTTP %s\n' "$code"
+          # /alth may redirect or return 404; it must never be a successful canonical management page.
+          if [ "$code" = '200' ] && grep -Eqi 'Gestão CHRISMED|Centro operacional' /tmp/chrismed-alth.html; then
+            echo 'Legacy /alth is incorrectly serving the management page.'
+            exit 1
+          fi
