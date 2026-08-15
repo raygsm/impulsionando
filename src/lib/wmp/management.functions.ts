@@ -46,7 +46,7 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
       context.supabase.from('wmp_equipment_catalog').select('id,code,category,name,manufacturer,model,quantity_available,commercial_value_cents,status,owner_type,owner_name,beneficiary_kind').eq('tenant_id', id).order('name').limit(500),
       context.supabase.from('wmp_equipment_rentals').select('id,equipment_id,proposal_id,dj_booking_id,quantity,unit_rental_cents,status,owner_type,owner_name,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(300),
       context.supabase.from('wmp_equipment_rental_payouts').select('id,rental_id,beneficiary_type,beneficiary_name,amount_cents,status,paid_at,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(300),
-      context.supabase.from('wmp_conversation_tickets').select('id,protocol,conversation_id,contact_id,closed_at,export_status,export_email,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
+      context.supabase.from('communication_conversation_tickets').select('id,protocol,conversation_id,contact_id,closed_at,export_status,export_requested_at,export_sent_at,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
     ])
     const all = { briefings, partners, bookings, availability, equipment, rentals, payouts, tickets }
     for (const [key, result] of Object.entries(all)) {
