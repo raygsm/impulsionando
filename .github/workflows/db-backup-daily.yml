@@ -12,130 +12,115 @@ concurrency:
   group: db-backup-daily
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
-  dump-and-ship:
+  backup-on-vps:
+    name: Dump, encrypt and retain on Hostinger VPS
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Instalar PostgreSQL client e OpenSSL
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client openssl
-
-      - name: Resolver conexão IPv4 segura
+      - name: Configure SSH
         env:
-          DIRECT_URL: ${{ secrets.SUPABASE_DB_URL }}
-          POOLER_URL: ${{ secrets.SUPABASE_DB_POOLER_URL }}
-          PROJECT_REF: arygtqrdpcdkwnuwsgmm
-        shell: bash
+          VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           set -euo pipefail
-          if [ -n "${POOLER_URL:-}" ]; then
-            DB_URL="$POOLER_URL"
-            SOURCE="secret_pooler"
-          else
-            if [ -z "${DIRECT_URL:-}" ]; then
-              echo "::error::SUPABASE_DB_URL não configurada"
-              exit 1
-            fi
-            DB_URL=""
-            for cluster in 0 1 2 3 4 5; do
-              host="aws-${cluster}-us-east-2.pooler.supabase.com"
-              candidate=$(printf '%s' "$DIRECT_URL" \
-                | sed -E "s#^postgres(ql)?://postgres:#postgresql://postgres.${PROJECT_REF}:#" \
-                | sed -E "s#@db\.${PROJECT_REF}\.supabase\.co(:5432)?#@${host}:5432#")
-              if PGCONNECT_TIMEOUT=4 psql "$candidate" -v ON_ERROR_STOP=1 -Atc "select 1" >/dev/null 2>&1; then
-                DB_URL="$candidate"
-                SOURCE="autodiscovered_session_pooler_${cluster}"
-                break
-              fi
-            done
-            if [ -z "$DB_URL" ]; then
-              echo "::error::Não foi possível autodetectar o Session Pooler. Configure SUPABASE_DB_POOLER_URL com a URL Session exibida em Supabase > Connect."
-              exit 1
-            fi
-          fi
-          echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
-          echo "Conexão IPv4 preparada via $SOURCE; credenciais não são exibidas."
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.VPS_PORT || 22 }}" -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
-      - name: Testar conectividade antes do dump
+      - name: Transfer protected backup environment
         env:
-          PGCONNECT_TIMEOUT: "10"
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
         run: |
           set -euo pipefail
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -Atc "select current_database(), current_user;" >/tmp/db-check.txt
-          test -s /tmp/db-check.txt
-          echo "Conectividade PostgreSQL OK."
-
-      - name: pg_dump + criptografia AES-256
-        env:
-          ENC_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
-          PGCONNECT_TIMEOUT: "15"
-        run: |
-          set -euo pipefail
-          test -n "${ENC_KEY:-}" || { echo "::error::BACKUP_ENCRYPTION_KEY não configurada"; exit 1; }
-          TS=$(date -u +%Y%m%d-%H%M%S)
-          FILE="impulsionando-${TS}.sql.gz"
-          ENC="${FILE}.enc"
-          pg_dump "$DB_URL" --format=plain --no-owner --no-privileges \
-            --exclude-schema=auth --exclude-schema=storage --exclude-schema=realtime \
-            --exclude-schema=supabase_functions --exclude-schema=vault --exclude-schema=graphql \
-            | gzip -9 > "$FILE"
-          RAW_SHA=$(sha256sum "$FILE" | awk '{print $1}')
-          SIZE=$(stat -c%s "$FILE")
-          [ "$SIZE" -ge 51200 ] || { echo "::error::Dump suspeito (<50KB)"; exit 1; }
-          gzip -t "$FILE"
-          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$FILE" -out "$ENC" -pass env:ENC_KEY
-          ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
+          test -n "${SUPABASE_DB_URL:-}" || { echo "::error::SUPABASE_DB_URL não configurada"; exit 1; }
+          test -n "${BACKUP_ENCRYPTION_KEY:-}" || { echo "::error::BACKUP_ENCRYPTION_KEY não configurada"; exit 1; }
+          env_file="$(mktemp)"
+          trap 'rm -f "$env_file"' EXIT
           {
-            echo "$ENC_SHA  $ENC"
+            printf 'SUPABASE_DB_URL=%q\n' "$SUPABASE_DB_URL"
+            printf 'BACKUP_ENCRYPTION_KEY=%q\n' "$BACKUP_ENCRYPTION_KEY"
+          } > "$env_file"
+          chmod 0600 "$env_file"
+          scp -P "$VPS_PORT" "$env_file" "${VPS_USER}@${VPS_HOST}:/tmp/impulsionando-backup.env"
+
+      - name: Create and validate encrypted backup on VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          ssh -p "$VPS_PORT" "${VPS_USER}@${VPS_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          trap 'rm -f /tmp/impulsionando-backup.env /tmp/impulsionando-*.sql.gz 2>/dev/null || true' EXIT
+          chmod 0600 /tmp/impulsionando-backup.env
+          # shellcheck disable=SC1091
+          source /tmp/impulsionando-backup.env
+
+          if ! command -v pg_dump >/dev/null 2>&1 || ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-client openssl gzip
+          fi
+
+          export PGCONNECT_TIMEOUT=15
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -Atc "select current_database(), current_user;" >/tmp/impulsionando-db-check.txt
+          test -s /tmp/impulsionando-db-check.txt
+
+          ROOT=/var/backups/impulsionando
+          sudo mkdir -p "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
+          sudo chown -R "$(id -u):$(id -g)" "$ROOT"
+
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          RAW="/tmp/impulsionando-${TS}.sql.gz"
+          ENC="$ROOT/daily/impulsionando-${TS}.sql.gz.enc"
+          META="${ENC}.sha256"
+
+          pg_dump "$SUPABASE_DB_URL" \
+            --format=plain --no-owner --no-privileges \
+            --exclude-schema=auth --exclude-schema=storage \
+            --exclude-schema=realtime --exclude-schema=supabase_functions \
+            --exclude-schema=vault --exclude-schema=graphql \
+            | gzip -9 > "$RAW"
+
+          RAW_SHA=$(sha256sum "$RAW" | awk '{print $1}')
+          SIZE=$(stat -c%s "$RAW")
+          [ "$SIZE" -ge 51200 ] || { echo "Dump suspeito (<50KB)"; exit 1; }
+          gzip -t "$RAW"
+
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -in "$RAW" -out "$ENC" -pass env:BACKUP_ENCRYPTION_KEY
+
+          ENC_SHA=$(sha256sum "$ENC" | awk '{print $1}')
+          DEC_SHA=$(openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in "$ENC" -pass env:BACKUP_ENCRYPTION_KEY | sha256sum | awk '{print $1}')
+          [ "$DEC_SHA" = "$RAW_SHA" ] || { echo "Integridade falhou após decrypt"; exit 1; }
+
+          {
+            echo "$ENC_SHA  $(basename "$ENC")"
             echo "raw_sha=$RAW_SHA"
             echo "raw_size=$SIZE"
             echo "created_at=$TS"
-          } > "${ENC}.sha256"
-          DEC_SHA=$(openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$ENC" -pass env:ENC_KEY | sha256sum | awk '{print $1}')
-          [ "$DEC_SHA" = "$RAW_SHA" ] || { echo "::error::Integridade falhou após decrypt"; exit 1; }
-          rm -f "$FILE"
-          echo "ENC_FILE=$ENC" >> "$GITHUB_ENV"
-          echo "SHA_FILE=${ENC}.sha256" >> "$GITHUB_ENV"
-          echo "Dump, gzip, criptografia e decrypt validados."
+            echo "source=hostinger_vps_direct_supabase"
+          } > "$META"
 
-      - name: Enviar backup para VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          source: "${{ env.ENC_FILE }},${{ env.SHA_FILE }}"
-          target: "/var/backups/impulsionando/incoming/"
+          DOW=$(date +%u)
+          DOM=$(date +%d)
+          if [ "$DOW" = "7" ]; then cp -a "$ENC" "$META" "$ROOT/weekly/"; fi
+          if [ "$DOM" = "01" ]; then cp -a "$ENC" "$META" "$ROOT/monthly/"; fi
 
-      - name: Aplicar retenção e verificar SHA na VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script_stop: true
-          script: |
-            set -euo pipefail
-            ROOT=/var/backups/impulsionando
-            mkdir -p "$ROOT/incoming" "$ROOT/daily" "$ROOT/weekly" "$ROOT/monthly"
-            cd "$ROOT/incoming"
-            for f in *.enc; do
-              [ -f "$f" ] || continue
-              expected=$(head -n1 "${f}.sha256" | awk '{print $1}')
-              actual=$(sha256sum "$f" | awk '{print $1}')
-              [ "$expected" = "$actual" ] || { rm -f "$f" "${f}.sha256"; exit 1; }
-              mv "$f" "${f}.sha256" "$ROOT/daily/"
-            done
-            DOW=$(date +%u); DOM=$(date +%d)
-            LATEST=$(find "$ROOT/daily" -maxdepth 1 -type f -name '*.enc' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2- || true)
-            test -n "$LATEST"
-            [ "$DOW" = "7" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/weekly/" 2>/dev/null || true
-            [ "$DOM" = "01" ] && cp -a "$LATEST" "${LATEST}.sha256" "$ROOT/monthly/" 2>/dev/null || true
-            find "$ROOT/daily" -type f -mtime +30 -delete
-            find "$ROOT/weekly" -type f -mtime +84 -delete
-            find "$ROOT/monthly" -type f -mtime +366 -delete
-            echo "Backup armazenado e SHA validado na VPS."
+          find "$ROOT/daily" -type f -mtime +30 -delete
+          find "$ROOT/weekly" -type f -mtime +84 -delete
+          find "$ROOT/monthly" -type f -mtime +366 -delete
+
+          test -s "$ENC"
+          test -s "$META"
+          echo "Backup criado na VPS: $(basename "$ENC") size=$SIZE raw_sha=$RAW_SHA"
+          REMOTE
