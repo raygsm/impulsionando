@@ -14,10 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate WMP public routes
+        shell: bash
         run: |
           set -euo pipefail
           base='https://wmp.impulsionando.com.br'
-          paths=( '/' '/orcamento' '/pacotes' '/cases' '/sobre' '/faq' '/parceiro' '/parceiro/cadastro' )
+          paths=( '/' '/orcamento' '/pacotes' '/cases' '/sobre' '/faq' '/parceiro' '/parceiro/cadastro' '/onde-estou' )
           for path in "${paths[@]}"; do
             code=$(curl -sS -L --max-time 20 -o /tmp/wmp-body -w '%{http_code}' "$base$path")
             echo "$path -> HTTP $code"
@@ -26,3 +27,55 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Reject stale or unvalidated WMP content
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://wmp.impulsionando.com.br'
+          home=$(mktemp)
+          curl -sS -L --max-time 20 "$base/" -o "$home"
+
+          required=(
+            'O Milito acompanha a jornada comercial e operacional'
+            'Solicitar proposta'
+            'Onde estou'
+          )
+          for marker in "${required[@]}"; do
+            if ! grep -Fqi "$marker" "$home"; then
+              echo "::error::WMP production is missing current marker: $marker"
+              exit 1
+            fi
+          done
+
+          forbidden=(
+            '+850'
+            'R$ 2.900'
+            'R$2.900'
+            'R$ 7.400'
+            'R$7.400'
+            '24h resposta garantida'
+            '100% laudo de dB'
+            '50 a 10.000 pessoas'
+            'Festival Sertanejo de Verão'
+            'Convenção Corporativa Tech'
+            'Fernanda Ribeiro'
+          )
+          for marker in "${forbidden[@]}"; do
+            if grep -Fqi "$marker" "$home"; then
+              echo "::error::WMP production still exposes stale/unvalidated content: $marker"
+              exit 1
+            fi
+          done
+
+      - name: Validate Milito public integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://wmp.impulsionando.com.br'
+          home=$(mktemp)
+          curl -sS -L --max-time 20 "$base/" -o "$home"
+          if ! grep -Fqi 'Milito' "$home"; then
+            echo '::error::Milito is not visible on WMP public experience'
+            exit 1
+          fi
