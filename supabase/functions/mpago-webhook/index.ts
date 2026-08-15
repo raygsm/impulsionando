@@ -34,9 +34,7 @@ async function verifySignature(secret: string, dataId: string, requestId: string
   if (expected.length !== v1.length) return false;
 
   let diff = 0;
-  for (let i = 0; i < expected.length; i += 1) {
-    diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
-  }
+  for (let i = 0; i < expected.length; i += 1) diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
   return diff === 0;
 }
 
@@ -44,10 +42,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
-  const service = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  );
+  const service = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
   try {
     const url = new URL(req.url);
@@ -62,123 +57,84 @@ Deno.serve(async (req) => {
     const signature = req.headers.get('x-signature') ?? '';
 
     if (!resourceId || !requestId || !signature) {
-      return new Response(JSON.stringify({ error: 'invalid_webhook_headers' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(JSON.stringify({ error: 'invalid_webhook_headers' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { data: cred, error: credError } = await service
-      .from('mpago_credentials')
+    const { data: cred, error: credError } = await service.from('mpago_credentials')
       .select('access_token_secret_name,webhook_secret_name,active')
-      .eq('company_id', companyId)
-      .eq('active', true)
-      .limit(1)
-      .maybeSingle();
-
-    if (credError || !cred?.webhook_secret_name || !cred?.access_token_secret_name) {
-      return json({ error: 'mercado_pago_credentials_not_configured' }, 503);
-    }
+      .eq('company_id', companyId).eq('active', true).limit(1).maybeSingle();
+    if (credError || !cred?.webhook_secret_name || !cred?.access_token_secret_name) return json({ error: 'mercado_pago_credentials_not_configured' }, 503);
 
     const [{ data: webhookSecret }, { data: accessToken }] = await Promise.all([
       service.rpc('reveal_secret_value', { p_name: cred.webhook_secret_name }),
       service.rpc('reveal_secret_value', { p_name: cred.access_token_secret_name }),
     ]);
+    if (!webhookSecret || !accessToken) return json({ error: 'mercado_pago_secrets_not_available' }, 503);
 
-    if (!webhookSecret || !accessToken) {
-      return json({ error: 'mercado_pago_secrets_not_available' }, 503);
-    }
-
-    const signatureValid = await verifySignature(
-      String(webhookSecret),
-      resourceId,
-      requestId,
-      signature,
-    );
+    const signatureValid = await verifySignature(String(webhookSecret), resourceId, requestId, signature);
     if (signatureValid !== true) {
-      return new Response(JSON.stringify({ error: 'invalid_webhook_signature' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(JSON.stringify({ error: 'invalid_webhook_signature' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { data: event, error: eventError } = await service
-      .from('mpago_webhook_events')
-      .upsert(
-        {
-          company_id: companyId,
-          event_type: eventType,
-          mp_event_id: requestId,
-          mp_resource_id: resourceId,
-          action: payload.action ?? null,
-          raw_payload: payload,
-          signature_valid: true,
-          processed: false,
-        },
-        { onConflict: 'mp_event_id,event_type' },
-      )
-      .select('id,processed')
-      .single();
-
+    const { data: event, error: eventError } = await service.from('mpago_webhook_events').upsert({
+      company_id: companyId,
+      event_type: eventType,
+      mp_event_id: requestId,
+      mp_resource_id: resourceId,
+      action: payload.action ?? null,
+      raw_payload: payload,
+      signature_valid: true,
+      processed: false,
+    }, { onConflict: 'mp_event_id,event_type' }).select('id,processed').single();
     if (eventError) throw eventError;
     if (event?.processed) return json({ ok: true, duplicate: true });
 
     if (eventType === 'payment' && resourceId) {
-      const mpResp = await fetch(
-        `https://api.mercadopago.com/v1/payments/${encodeURIComponent(resourceId)}`,
-        { headers: { Authorization: `Bearer ${String(accessToken)}` } },
-      );
+      const mpResp = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(resourceId)}`, { headers: { Authorization: `Bearer ${String(accessToken)}` } });
       if (!mpResp.ok) return json({ error: 'mercado_pago_payment_lookup_failed' }, 502);
 
       const mpData = await mpResp.json();
       const status = String(mpData.status ?? 'pending');
-      const patch: Record<string, unknown> = {
-        status,
-        updated_at: new Date().toISOString(),
-      };
+      const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
       if (status === 'approved') patch.approved_at = new Date().toISOString();
       if (status === 'rejected') patch.rejected_at = new Date().toISOString();
       if (status === 'refunded') patch.refunded_at = new Date().toISOString();
 
-      const { data: payment, error: paymentError } = await service
-        .from('mpago_payments')
-        .update(patch)
-        .eq('company_id', companyId)
-        .eq('mp_payment_id', resourceId)
-        .select('*')
-        .maybeSingle();
+      const { data: payment, error: paymentError } = await service.from('mpago_payments').update(patch)
+        .eq('company_id', companyId).eq('mp_payment_id', resourceId).select('*').maybeSingle();
       if (paymentError) throw paymentError;
 
-      if (
-        payment?.context_type === 'chrismed_appointment' &&
-        payment.context_id &&
-        companyId === CHRISMED_COMPANY_ID
-      ) {
-        const nextAppointmentStatus = mpData.status === 'approved'
+      if (payment?.context_type === 'chrismed_appointment' && payment.context_id && companyId === CHRISMED_COMPANY_ID) {
+        const nextAppointmentStatus = status === 'approved'
           ? 'confirmed'
-          : ['rejected', 'cancelled', 'refunded', 'charged_back'].includes(String(mpData.status))
-            ? 'cancelled'
-            : 'pending_payment';
+          : ['rejected', 'cancelled', 'refunded', 'charged_back'].includes(status) ? 'cancelled' : 'pending_payment';
 
-        const { data: appointment, error: appointmentError } = await service
-          .from('chrismed_appointments')
+        const { data: appointment, error: appointmentError } = await service.from('chrismed_appointments')
           .update({ status: nextAppointmentStatus, updated_at: new Date().toISOString() })
-          .eq('id', payment.context_id)
-          .eq('company_id', CHRISMED_COMPANY_ID)
-          .eq('payment_id', payment.id)
-          .select('id,patient_name,patient_email,starts_at,ends_at')
-          .maybeSingle();
+          .eq('id', payment.context_id).eq('company_id', CHRISMED_COMPANY_ID).eq('payment_id', payment.id)
+          .select('id,patient_name,patient_email,starts_at,ends_at').maybeSingle();
         if (appointmentError) throw appointmentError;
 
-        if (appointment && nextAppointmentStatus === 'confirmed') {
-          const { data: contactEmails, error: contactEmailsError } = await service
-            .rpc('get_chrismed_contact_emails');
-          if (contactEmailsError) throw contactEmailsError;
+        if (status === 'approved') {
+          await service.from('chrismed_coupon_redemptions').update({
+            status: 'redeemed', redeemed_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+          }).eq('appointment_id', payment.context_id).eq('payment_id', payment.id).eq('status', 'reserved');
+        } else if (['rejected', 'cancelled', 'charged_back'].includes(status)) {
+          await service.from('chrismed_coupon_redemptions').update({
+            status: 'released', released_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+          }).eq('appointment_id', payment.context_id).eq('payment_id', payment.id).eq('status', 'reserved');
+        } else if (status === 'refunded') {
+          await service.from('chrismed_coupon_redemptions').update({
+            status: 'cancelled', released_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+          }).eq('appointment_id', payment.context_id).eq('payment_id', payment.id).in('status', ['reserved', 'redeemed']);
+        }
 
+        if (appointment && nextAppointmentStatus === 'confirmed') {
+          const { data: contactEmails, error: contactEmailsError } = await service.rpc('get_chrismed_contact_emails');
+          if (contactEmailsError) throw contactEmailsError;
           const contacts = Array.isArray(contactEmails) ? contactEmails[0] : contactEmails;
           const patientChannelEmail = contacts?.patient_email || 'sac@chrismed.com.br';
           const managementEmail = patientChannelEmail;
-
           const basePayload = {
             appointment_id: appointment.id,
             first_name: appointment.patient_name.split(' ')[0] || 'cliente',
@@ -186,73 +142,34 @@ Deno.serve(async (req) => {
             ends_at: appointment.ends_at,
           };
           const jobs = [
-            [
-              'appointment_confirmed',
-              appointment.patient_email,
-              new Date().toISOString(),
-              `appointment:${appointment.id}:confirmed:email`,
-            ],
-            [
-              'appointment_reminder_24h',
-              appointment.patient_email,
-              new Date(
-                Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 86400000),
-              ).toISOString(),
-              `appointment:${appointment.id}:reminder-24h:email`,
-            ],
-            [
-              'appointment_reminder_2h',
-              appointment.patient_email,
-              new Date(
-                Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 7200000),
-              ).toISOString(),
-              `appointment:${appointment.id}:reminder-2h:email`,
-            ],
-            [
-              'appointment_confirmed_management',
-              managementEmail,
-              new Date().toISOString(),
-              `appointment:${appointment.id}:management:email`,
-            ],
+            ['appointment_confirmed', appointment.patient_email, new Date().toISOString(), `appointment:${appointment.id}:confirmed:email`],
+            ['appointment_reminder_24h', appointment.patient_email, new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 86400000)).toISOString(), `appointment:${appointment.id}:reminder-24h:email`],
+            ['appointment_reminder_2h', appointment.patient_email, new Date(Math.max(Date.now(), new Date(appointment.starts_at).getTime() - 7200000)).toISOString(), `appointment:${appointment.id}:reminder-2h:email`],
+            ['appointment_confirmed_management', managementEmail, new Date().toISOString(), `appointment:${appointment.id}:management:email`],
           ];
-
           for (const [eventCode, recipient, availableAt, idempotencyKey] of jobs) {
-            await service.from('chrismed_communication_outbox').upsert(
-              {
-                company_id: CHRISMED_COMPANY_ID,
-                event_code: eventCode,
-                channel: 'email',
-                recipient,
-                payload: basePayload,
-                idempotency_key: idempotencyKey,
-                status: 'pending',
-                attempts: 0,
-                available_at: availableAt,
-                from_email: patientChannelEmail,
-                reply_to_email: patientChannelEmail,
-              },
-              { onConflict: 'idempotency_key', ignoreDuplicates: true },
-            );
+            await service.from('chrismed_communication_outbox').upsert({
+              company_id: CHRISMED_COMPANY_ID,
+              event_code: eventCode,
+              channel: 'email',
+              recipient,
+              payload: basePayload,
+              idempotency_key: idempotencyKey,
+              status: 'pending',
+              attempts: 0,
+              available_at: availableAt,
+              from_email: patientChannelEmail,
+              reply_to_email: patientChannelEmail,
+            }, { onConflict: 'idempotency_key', ignoreDuplicates: true });
           }
         }
       }
     }
 
-    await service
-      .from('mpago_webhook_events')
-      .update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-        processing_error: null,
-      })
-      .eq('id', event.id);
-
+    await service.from('mpago_webhook_events').update({ processed: true, processed_at: new Date().toISOString(), processing_error: null }).eq('id', event.id);
     return json({ ok: true });
   } catch (error) {
     console.error('[mpago-webhook]', error);
-    return new Response(JSON.stringify({ error: 'webhook_processing_failed' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(JSON.stringify({ error: 'webhook_processing_failed' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
