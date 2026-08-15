@@ -11,22 +11,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, QrCode, Copy } from "lucide-react";
-import { QrPng } from "@/components/demo/QrPng";
+import { CheckCircle2, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/riomed/checkout")({
-  head: () => ({ meta: [{ title: "Checkout · Rio Med" }] }),
+  head: () => ({ meta: [{ title: "Solicitar pedido · Rio Med" }] }),
   component: Page,
 });
 
 const TOKEN_KEY = "riomed_cart_token";
 const DELIVERY_KEY = "riomed_cart_delivery";
 
-function fmtBOB(v: number) {
-  return new Intl.NumberFormat("es-BO", { style: "currency", currency: "BOB" }).format(v || 0);
+function fmtBOB(value: number) {
+  return new Intl.NumberFormat("es-BO", { style: "currency", currency: "BOB" }).format(value || 0);
 }
-function fmtUSD(v: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v || 0);
+function fmtUSD(value: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value || 0);
 }
 
 function Page() {
@@ -37,21 +36,20 @@ function Page() {
   const [cart, setCart] = useState<any>(null);
   const [done, setDone] = useState<{ code: string; total: number; currency: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [rate, setRate] = useState(6.96);
+  const [rate, setRate] = useState<number | null>(null);
   const [accept, setAccept] = useState(false);
-  const [delivery, setDelivery] = useState<"pickup"|"delivery">("pickup");
+  const [delivery, setDelivery] = useState<"pickup" | "delivery">("pickup");
   const [form, setForm] = useState({
     contactName: "", contactEmail: "", contactPhone: "", contactDoc: "",
-    companyName: "", audience: "public" as "public"|"b2b"|"hospital"|"rental",
+    companyName: "", audience: "public" as "public" | "b2b" | "hospital" | "rental",
     addressLine: "", city: "", notes: "",
   });
 
   useEffect(() => {
-    const t = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
-    if (typeof window !== "undefined") setDelivery((localStorage.getItem(DELIVERY_KEY) as any) ?? "pickup");
-    cotFn().then(r => setRate(r.rate)).catch(() => {});
-    if (!t) return;
-    fetchCart({ data: { sessionToken: t } }).then(setCart);
+    const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
+    if (typeof window !== "undefined") setDelivery((localStorage.getItem(DELIVERY_KEY) as "pickup" | "delivery") ?? "pickup");
+    cotFn().then((result) => setRate(Number(result.rate) || null)).catch(() => setRate(null));
+    if (token) fetchCart({ data: { sessionToken: token } }).then(setCart).catch(() => setCart(null));
   }, []);
 
   const subtotal = Number(cart?.cart?.total ?? 0);
@@ -60,65 +58,52 @@ function Page() {
 
   const submit = async () => {
     if (!accept) { toast.error("Acepta los términos para continuar"); return; }
-    const t = localStorage.getItem(TOKEN_KEY)!;
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { toast.error("Carrito no encontrado"); return; }
     setBusy(true);
     try {
-      const r = await submitFn({ data: {
-        sessionToken: t,
-        contactName: form.contactName, contactEmail: form.contactEmail || undefined,
-        contactPhone: form.contactPhone, contactDoc: form.contactDoc || undefined,
-        companyName: form.companyName || undefined, audience: form.audience,
+      const result = await submitFn({ data: {
+        sessionToken: token,
+        contactName: form.contactName,
+        contactEmail: form.contactEmail || undefined,
+        contactPhone: form.contactPhone,
+        contactDoc: form.contactDoc || undefined,
+        companyName: form.companyName || undefined,
+        audience: form.audience,
         address: {
-          line: form.addressLine, city: form.city,
-          delivery_mode: delivery, delivery_fee: deliveryFee,
+          line: form.addressLine,
+          city: form.city,
+          delivery_mode: delivery,
+          delivery_fee: deliveryFee,
           accepted_terms_at: new Date().toISOString(),
         },
-        notes: [
-          delivery === "delivery" ? "Envío (+10%)" : "Retira en tienda",
-          form.notes,
-        ].filter(Boolean).join(" · ") || undefined,
+        notes: [delivery === "delivery" ? "Envío solicitado (+10% estimado)" : "Retira en tienda", form.notes].filter(Boolean).join(" · ") || undefined,
       } });
       localStorage.removeItem(TOKEN_KEY);
-      setDone({ code: r.quoteCode, total: grand, currency: cart?.cart?.currency ?? "BOB" });
-    } catch (e: any) { toast.error(e?.message ?? "Erro"); }
-    finally { setBusy(false); }
+      setDone({ code: result.quoteCode, total: grand, currency: cart?.cart?.currency ?? "BOB" });
+    } catch (e: any) {
+      toast.error(e?.message ?? "No pudimos registrar la solicitud");
+    } finally {
+      setBusy(false);
+    }
   };
 
   if (done) {
-    const qrPayload = JSON.stringify({
-      v: 1, type: "qr_simple_bo",
-      merchant: "RIOMED-BO",
-      order: done.code,
-      amount: done.total.toFixed(2),
-      currency: done.currency,
-      issued_at: new Date().toISOString(),
-    });
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <Card className="max-w-lg w-full">
           <CardContent className="p-8 text-center space-y-4">
             <CheckCircle2 className="h-12 w-12 mx-auto text-emerald-500" />
-            <h2 className="text-2xl font-bold">¡Pedido recibido!</h2>
+            <h2 className="text-2xl font-bold">¡Solicitud recibida!</h2>
             <p className="text-muted-foreground">
-              Cotización <strong className="font-mono">{done.code}</strong> · Total <strong>{fmtBOB(done.total)}</strong> <span className="text-xs">(≈ {fmtUSD(done.total / rate)})</span>
+              Cotización <strong className="font-mono">{done.code}</strong> · valor estimado <strong>{fmtBOB(done.total)}</strong>
+              {rate ? <span className="text-xs"> (≈ {fmtUSD(done.total / rate)})</span> : null}.
             </p>
-
-            <div className="border-2 border-dashed rounded-2xl p-5 bg-white">
-              <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-600 mb-3">
-                <QrCode className="h-4 w-4" /> QR Simple Bolivia (simulado)
-              </div>
-              <div className="flex justify-center"><QrPng value={qrPayload} size={220} alt="QR de pago BOB" /></div>
-              <p className="text-[11px] text-slate-500 mt-3">
-                Escaneá este QR con tu app bancaria para simular el pago. En producción, el QR es emitido por el banco adquirente (BCP, BNB, Mercantil Santa Cruz).
-              </p>
-              <button onClick={() => { navigator.clipboard.writeText(qrPayload); toast.success("Payload copiado"); }}
-                className="text-xs mt-2 inline-flex items-center gap-1 text-slate-600 hover:text-slate-900">
-                <Copy className="h-3 w-3" /> Copiar payload
-              </button>
+            <div className="rounded-xl border bg-white p-4 text-sm text-slate-600">
+              No se realizó ningún cobro. El equipo de Rio Med revisará disponibilidad, entrega y condiciones comerciales antes de confirmar el pedido y la forma de pago.
             </div>
-
             <div className="flex gap-2 justify-center pt-2">
-              <Button variant="outline" onClick={() => navigate({ to: "/riomed/cotizar" })}>Seguir comprando</Button>
+              <Button variant="outline" onClick={() => navigate({ to: "/riomed/cotizar" })}>Nueva cotización</Button>
               <Button onClick={() => navigate({ to: "/riomed" })}>Ir al inicio</Button>
             </div>
           </CardContent>
@@ -129,10 +114,10 @@ function Page() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b bg-white"><div className="max-w-3xl mx-auto px-4 py-4"><h1 className="font-bold text-lg">Finalizar pedido</h1></div></header>
+      <header className="border-b bg-white"><div className="max-w-3xl mx-auto px-4 py-4"><h1 className="font-bold text-lg">Solicitar pedido</h1></div></header>
       <section className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         <Card>
-          <CardHeader><CardTitle className="text-base">Contato</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Contacto</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1"><Label htmlFor="co-name">Nombre*</Label><Input id="co-name" value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} /></div>
             <div className="space-y-1"><Label htmlFor="co-phone">Teléfono / WhatsApp*</Label><Input id="co-phone" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></div>
@@ -141,7 +126,7 @@ function Page() {
             <div className="space-y-1 sm:col-span-2"><Label htmlFor="co-company">Empresa / Institución</Label><Input id="co-company" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} /></div>
             <div className="space-y-1">
               <Label htmlFor="co-profile">Perfil</Label>
-              <Select value={form.audience} onValueChange={(v: any) => setForm({ ...form, audience: v })}>
+              <Select value={form.audience} onValueChange={(value: any) => setForm({ ...form, audience: value })}>
                 <SelectTrigger id="co-profile"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="public">Consumidor</SelectItem>
@@ -155,60 +140,33 @@ function Page() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Entrega ({delivery === "delivery" ? "Envío +10%" : "Retira en tienda"})</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Entrega ({delivery === "delivery" ? "Envío +10% estimado" : "Retira en tienda"})</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 grid grid-cols-2 gap-2">
-              <button onClick={() => setDelivery("pickup")}
-                className={`rounded-xl border-2 p-3 text-left ${delivery==="pickup" ? "border-primary bg-primary/5" : "border-slate-200"}`}>
-                <div className="text-sm font-bold">Retira en tienda</div>
-                <div className="text-xs text-slate-500">Sin costo adicional</div>
+              <button type="button" onClick={() => setDelivery("pickup")} className={`rounded-xl border-2 p-3 text-left ${delivery === "pickup" ? "border-primary bg-primary/5" : "border-slate-200"}`}>
+                <div className="text-sm font-bold">Retira en tienda</div><div className="text-xs text-slate-500">Sin costo adicional</div>
               </button>
-              <button onClick={() => setDelivery("delivery")}
-                className={`rounded-xl border-2 p-3 text-left ${delivery==="delivery" ? "border-primary bg-primary/5" : "border-slate-200"}`}>
-                <div className="text-sm font-bold">Envío</div>
-                <div className="text-xs text-slate-500">+10% sobre el subtotal</div>
+              <button type="button" onClick={() => setDelivery("delivery")} className={`rounded-xl border-2 p-3 text-left ${delivery === "delivery" ? "border-primary bg-primary/5" : "border-slate-200"}`}>
+                <div className="text-sm font-bold">Envío</div><div className="text-xs text-slate-500">Estimación +10%, sujeto a validación</div>
               </button>
             </div>
-            {delivery === "delivery" && (
-              <>
-                <div className="space-y-1 sm:col-span-2"><Label htmlFor="co-address">Dirección</Label><Input id="co-address" value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} /></div>
-                <div className="space-y-1"><Label htmlFor="co-city">Ciudad</Label><Input id="co-city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-              </>
-            )}
+            {delivery === "delivery" && <>
+              <div className="space-y-1 sm:col-span-2"><Label htmlFor="co-address">Dirección</Label><Input id="co-address" value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} /></div>
+              <div className="space-y-1"><Label htmlFor="co-city">Ciudad</Label><Input id="co-city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
+            </>}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base">Observaciones</CardTitle></CardHeader>
-          <CardContent><Label htmlFor="co-notes" className="sr-only">Observaciones</Label><Textarea id="co-notes" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></CardContent>
-        </Card>
+        <Card><CardHeader><CardTitle className="text-base">Observaciones</CardTitle></CardHeader><CardContent><Label htmlFor="co-notes" className="sr-only">Observaciones</Label><Textarea id="co-notes" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></CardContent></Card>
 
         <Card>
           <CardContent className="p-4 space-y-3">
             <div className="flex justify-between text-sm"><span className="text-slate-500">Subtotal</span><span>{fmtBOB(subtotal)}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-slate-500">{delivery === "delivery" ? "Envío (10%)" : "Retirada"}</span><span>{fmtBOB(deliveryFee)}</span></div>
-            <div className="border-t pt-2 flex justify-between items-baseline">
-              <span className="text-xs uppercase text-slate-500 tracking-wide">Total a pagar</span>
-              <div className="text-right">
-                <div className="text-2xl font-bold">{fmtBOB(grand)}</div>
-                <div className="text-[11px] text-slate-500">≈ {fmtUSD(grand / rate)}</div>
-              </div>
-            </div>
-
-            <label className="flex items-start gap-2 text-xs pt-3 border-t cursor-pointer">
-              <Checkbox checked={accept} onCheckedChange={(v) => setAccept(!!v)} />
-              <span>
-                Acepto los <a href="/legal" className="underline text-primary" target="_blank">términos y condiciones</a>,
-                la política de privacidad y autorizo el contacto comercial de Rio Med para concretar este pedido.
-              </span>
-            </label>
-
-            <Button className="w-full" disabled={busy || !accept || !form.contactName || !form.contactPhone} onClick={submit}>
-              {busy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Generar QR de pago
-            </Button>
-            <p className="text-[11px] text-slate-500 text-center">
-              Al confirmar, generamos un QR Simple Bolivia (BOB) y nuestro equipo comercial valida el pedido en horas hábiles.
-            </p>
+            <div className="flex justify-between text-sm"><span className="text-slate-500">{delivery === "delivery" ? "Envío estimado (10%)" : "Retirada"}</span><span>{fmtBOB(deliveryFee)}</span></div>
+            <div className="border-t pt-2 flex justify-between items-baseline"><span className="text-xs uppercase text-slate-500 tracking-wide">Valor estimado</span><div className="text-right"><div className="text-2xl font-bold">{fmtBOB(grand)}</div>{rate ? <div className="text-[11px] text-slate-500">≈ {fmtUSD(grand / rate)}</div> : null}</div></div>
+            <label className="flex items-start gap-2 text-xs pt-3 border-t cursor-pointer"><Checkbox checked={accept} onCheckedChange={(value) => setAccept(!!value)} /><span>Acepto los <a href="/legal" className="underline text-primary" target="_blank" rel="noreferrer">términos y condiciones</a>, la política de privacidad y autorizo el contacto comercial de Rio Med.</span></label>
+            <Button className="w-full" disabled={busy || !accept || !form.contactName || !form.contactPhone || !cart?.cart?.items_count} onClick={submit}>{busy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Enviar para cotización y validación</Button>
+            <p className="text-[11px] text-slate-500 text-center">Este envío no realiza cobro. Disponibilidad, entrega, valor final y forma de pago serán confirmados por Rio Med.</p>
           </CardContent>
         </Card>
       </section>
