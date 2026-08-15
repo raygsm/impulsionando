@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck, Award, Users, Clock, ArrowRight } from "lucide-react";
+import { ShieldCheck, Award, ArrowRight, Workflow, Headphones, Handshake, FileText } from "lucide-react";
 import { WmpShell } from "@/components/wmp/WmpShell";
 import { WMP_CERTIFICACOES } from "@/data/wmp-content";
 
 export const Route = createFileRoute("/wmp/sobre")({
   head: () => ({
     meta: [
-      { title: "Sobre a WMP — 15 anos de palco, som e produção" },
-      { name: "description", content: "Wagner Miller Produções: 15 anos de palco, +850 eventos, ART, laudos e engenharia de som aplicada. Autoridade em produção de eventos premium." },
-      { property: "og:title", content: "WMP — 15 anos entregando som, luz e palco" },
-      { property: "og:description", content: "De técnicos formados a produção plena. Conheça a estrutura e a metodologia da WMP." },
+      { title: "Sobre a WMP — Wagner Miller Produções" },
+      { name: "description", content: "Conheça a WMP — Wagner Miller Produções: produção e operação de eventos, DJs, som, luz, audiovisual, parceiros e gestão integrada pelo ecossistema Impulsionando." },
+      { property: "og:title", content: "WMP — Wagner Miller Produções" },
+      { property: "og:description", content: "Produção e operação de eventos com briefing, proposta comercial, parceiros, equipamentos, agenda e atendimento integrado pelo Milito." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,12 +18,11 @@ export const Route = createFileRoute("/wmp/sobre")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "LocalBusiness",
+          "@type": "Organization",
           name: "Wagner Miller Produções (WMP)",
-          description: "Produção de eventos com som, iluminação, palco e telão. Pré-diagnóstico acústico, ART e laudo de dB.",
+          description: "Produção e operação de eventos, DJs, som, iluminação, audiovisual e rede de parceiros.",
           areaServed: "Brasil",
           address: { "@type": "PostalAddress", addressRegion: "RJ", addressCountry: "BR" },
-          foundingDate: "2010",
         }),
       },
     ],
@@ -36,14 +35,12 @@ function WmpSobre() {
     <WmpShell breadcrumbs={[{ label: "Sobre" }]}>
       <section className="wmp-stage-bg">
         <div className="mx-auto max-w-4xl px-6 pt-16 pb-14 text-center">
-          <span className="wmp-chip mb-4"><Award className="size-3" /> Nossa história</span>
+          <span className="wmp-chip mb-4"><Award className="size-3" /> Wagner Miller Produções</span>
           <h1 className="wmp-display text-4xl md:text-6xl mb-5 leading-[1.05]">
-            15 anos ligando o som<br />que emociona quem escuta.
+            Produção, operação e experiência<br />conectadas em uma única jornada.
           </h1>
           <p className="opacity-80 text-lg max-w-2xl mx-auto">
-            A WMP nasceu no palco. Wagner Miller começou como técnico de som em bandas locais
-            e, evento após evento, montou uma produtora que hoje atende de casamentos íntimos
-            a festivais com milhares de pessoas — sempre com engenharia aplicada e sem improviso.
+            A WMP organiza a contratação e a operação de eventos reunindo atendimento, briefing, DJs e parceiros, equipamentos, agenda, proposta comercial e acompanhamento em um mesmo ecossistema.
           </p>
         </div>
       </section>
@@ -51,14 +48,14 @@ function WmpSobre() {
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid md:grid-cols-4 gap-6 text-center">
           {[
-            { i: Clock, n: "15 anos", l: "de palco" },
-            { i: Users, n: "+850", l: "eventos entregues" },
-            { i: ShieldCheck, n: "100%", l: "com plano B documentado" },
-            { i: Award, n: "ART + Laudo", l: "em eventos de médio e grande porte" },
+            { i: Workflow, n: "Briefing", l: "estrutura definida a partir da necessidade real" },
+            { i: Headphones, n: "Operação", l: "equipamentos e mão de obra tratados separadamente" },
+            { i: Handshake, n: "Parceiros", l: "DJs, técnicos e fornecedores por perfil e disponibilidade" },
+            { i: FileText, n: "Proposta", l: "condição comercial antes da formalização contratual" },
           ].map(({ i: Icon, n, l }) => (
             <div key={l} className="wmp-surface p-6">
               <Icon className="size-8 mx-auto mb-3" style={{ color: "var(--wmp-gold)" }} />
-              <div className="wmp-display text-3xl" style={{ color: "var(--wmp-gold)" }}>{n}</div>
+              <div className="wmp-display text-2xl" style={{ color: "var(--wmp-gold)" }}>{n}</div>
               <div className="text-xs uppercase tracking-wider mt-1 opacity-70">{l}</div>
             </div>
           ))}
@@ -69,10 +66,10 @@ function WmpSobre() {
         <h2 className="wmp-display text-3xl md:text-4xl text-center mb-10">Como trabalhamos</h2>
         <ol className="grid md:grid-cols-4 gap-6">
           {[
-            { n: 1, t: "Briefing inteligente", d: "Formulário com pré-diagnóstico acústico gera estrutura sugerida antes da visita." },
-            { n: 2, t: "Proposta em 24h", d: "Escopo, cronograma, plano B e valor detalhados por escrito." },
-            { n: 3, t: "Execução com engenharia", d: "ART, laudo de dB, técnicos dedicados e checklist minuto a minuto." },
-            { n: 4, t: "Pós-evento", d: "Relatório técnico, feedback e ajuste da rede de parceiros para o próximo." },
+            { n: 1, t: "Briefing", d: "O cliente informa o tipo de evento, data, local, estrutura desejada e necessidades específicas." },
+            { n: 2, t: "Composição", d: "A WMP dimensiona serviços, equipe, DJs, parceiros e equipamentos conforme o escopo real." },
+            { n: 3, t: "Proposta comercial", d: "Primeiro são apresentados serviço, data ou período e preço. O contrato vem somente após a concordância inicial." },
+            { n: 4, t: "Operação e relacionamento", d: "Agenda, execução, registros, protocolos e histórico ficam integrados para acompanhamento e recorrência." },
           ].map((s) => (
             <li key={s.n} className="wmp-surface p-6">
               <div className="wmp-display text-4xl mb-2" style={{ color: "var(--wmp-gold)" }}>{s.n}</div>
@@ -84,7 +81,7 @@ function WmpSobre() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <h2 className="wmp-display text-3xl md:text-4xl text-center mb-10">Garantias técnicas</h2>
+        <h2 className="wmp-display text-3xl md:text-4xl text-center mb-10">Compromissos operacionais</h2>
         <div className="grid md:grid-cols-2 gap-4">
           {WMP_CERTIFICACOES.map((c) => (
             <div key={c.titulo} className="wmp-surface p-6 flex gap-4">
@@ -101,9 +98,9 @@ function WmpSobre() {
       <section className="mx-auto max-w-3xl px-6 py-16 text-center">
         <div className="wmp-surface p-10">
           <h2 className="wmp-display text-2xl md:text-3xl mb-4">Vamos produzir o seu evento?</h2>
-          <p className="opacity-80 mb-6">Briefing em 60 segundos, proposta em 24 horas.</p>
+          <p className="opacity-80 mb-6">Conte ao Milito ou preencha o briefing para iniciar sua proposta.</p>
           <Link to="/wmp/orcamento" className="wmp-cta">
-            Quero meu orçamento <ArrowRight className="size-4" />
+            Solicitar proposta <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
