@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
 import { Heart, MapPin, Briefcase, GraduationCap, Calendar, Search, Settings } from "lucide-react";
 import { compatibilityScore, type EmpresaConfig } from "@/lib/talentos-score";
+import { getCurrentCompanyId } from "@/lib/current-company";
 
 export const Route = createFileRoute("/_authenticated/empresa/talentos")({
   component: EmpresaTalentos,
@@ -73,15 +73,16 @@ function EmpresaTalentos() {
   useEffect(() => {
     carregar();
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data: comp } = await sb.from("companies").select("id, niche").eq("owner_id", u.user.id).maybeSingle();
-      if (!comp) return;
-      const { data: cfg } = await sb.from("talentos_company_settings")
-        .select("cidades_interesse, bairros_interesse, nicho").eq("company_id", comp.id).maybeSingle();
-      setEmpresaCfg({ ...(cfg ?? {}), nicho: cfg?.nicho ?? comp.niche });
+      try {
+        const companyId = await getCurrentCompanyId();
+        if (!companyId) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: cfg } = await (supabase as any).from("talentos_company_settings")
+          .select("cidades_interesse, bairros_interesse, nicho").eq("company_id", companyId).maybeSingle();
+        setEmpresaCfg(cfg ?? {});
+      } catch (error) {
+        console.warn("[talentos] company context unavailable", error);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -95,18 +96,9 @@ function EmpresaTalentos() {
     );
   }, [list, busca]);
 
-  async function favoritar(candidato_id: string) {
-    const { data: userRes } = await supabase.auth.getUser();
-    if (!userRes.user) { toast.error("Faça login"); return; }
+  async function favoritar(candidatoId: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from("talentos_matches").upsert({
-      company_id: userRes.user.id,
-      candidato_id,
-      vaga_id: null,
-      stage: "favorito",
-      score: 70,
-      motivos: ["Salvo manualmente"],
-    }, { onConflict: "company_id,candidato_id,vaga_id" });
+    const { error } = await (supabase as any).rpc("talentos_favorite_candidate", { p_candidate_id: candidatoId });
     if (error) toast.error(error.message);
     else toast.success("Candidato salvo em favoritos");
   }
