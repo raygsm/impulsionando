@@ -55,37 +55,49 @@ function toOliverHistory(history: Awaited<ReturnType<typeof listConversationHist
   }).slice(-20);
 }
 
+/**
+ * Oliver precisa permanecer disponível mesmo se a camada de persistência
+ * omnichannel estiver temporariamente degradada. O ledger enriquece a jornada,
+ * mas nunca pode impedir a chamada ao cérebro OpenAI.
+ */
 export const askOliverOmnichannel = createServerFn({ method: 'POST' })
   .inputValidator(validate)
   .handler(async ({ data }) => {
     const lastUser = [...data.messages].reverse().find((message) => message.role === 'user');
     if (!lastUser?.content.trim()) throw new Error('Empty conversation');
 
-    // Não mescla automaticamente identidades de canais. O chat público recebe
-    // apenas um identificador anônimo e estável criado pelo navegador.
     const externalUserId = data.sessionId ?? `web:chrismed:ephemeral:${crypto.randomUUID()}`;
-
-    const ledger = await recordInboundMessage({
-      agentKey: 'chrismed-oliver',
-      channel: 'web_chat',
-      provider: 'chrismed_front',
-      externalUserId,
-      bodyText: lastUser.content,
-      endpointAddress: 'https://chrismed.impulsionando.com.br',
-      metadata: {
-        pathname: data.pathname ?? null,
-        lang: data.lang ?? 'pt',
-        source: 'chrismed_oliver_web_chat',
-        health_context: true,
-      },
-    });
-
+    let conversationId: string | null = null;
+    let endpointId: string | null = null;
     let messages = data.messages;
+
     try {
-      const persisted = toOliverHistory(await listConversationHistory(ledger.conversation_id, 30));
-      if (persisted.length) messages = persisted;
+      const ledger = await recordInboundMessage({
+        agentKey: 'chrismed-oliver',
+        channel: 'web_chat',
+        provider: 'chrismed_front',
+        externalUserId,
+        bodyText: lastUser.content,
+        endpointAddress: 'https://chrismed.impulsionando.com.br',
+        metadata: {
+          pathname: data.pathname ?? null,
+          lang: data.lang ?? 'pt',
+          source: 'chrismed_oliver_web_chat',
+          health_context: true,
+        },
+      });
+
+      conversationId = ledger.conversation_id;
+      endpointId = ledger.endpoint_id;
+
+      try {
+        const persisted = toOliverHistory(await listConversationHistory(ledger.conversation_id, 30));
+        if (persisted.length) messages = persisted;
+      } catch (error) {
+        console.error('[askOliverOmnichannel] history read failed; continuing with browser history', error);
+      }
     } catch (error) {
-      console.error('[askOliverOmnichannel] history read failed', error);
+      console.error('[askOliverOmnichannel] ledger unavailable; Oliver will continue online without persistence', error);
     }
 
     const result = await askOliver({
@@ -97,14 +109,14 @@ export const askOliverOmnichannel = createServerFn({ method: 'POST' })
     });
 
     const reply = String(result.reply ?? '').trim();
-    if (reply) {
+    if (reply && conversationId) {
       try {
         await recordOutboundMessage({
-          conversationId: ledger.conversation_id,
+          conversationId,
           bodyText: reply,
           channel: 'web_chat',
           provider: 'chrismed_front',
-          endpointId: ledger.endpoint_id,
+          endpointId,
           status: result.error ? 'DEGRADED' : 'SENT',
           metadata: {
             source: 'chrismed_oliver_web_chat',
@@ -113,12 +125,13 @@ export const askOliverOmnichannel = createServerFn({ method: 'POST' })
           },
         });
       } catch (error) {
-        console.error('[askOliverOmnichannel] outbound ledger failed', error);
+        console.error('[askOliverOmnichannel] outbound ledger failed; reply already delivered', error);
       }
     }
 
     return {
       ...result,
-      conversationId: ledger.conversation_id,
+      conversationId,
+      persistence: conversationId ? 'online' : 'degraded',
     };
   });
