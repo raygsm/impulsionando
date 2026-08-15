@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { analyzeWmpBriefingImage } from "@/lib/wmp/evidence-analysis.server";
 
 const BUCKET = "wmp-briefing-evidence";
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
@@ -80,15 +81,16 @@ export const Route = createFileRoute("/api/wmp/briefing/$id/evidence")({
         });
         if (uploadError) return json({ ok: false, error: "storage_upload_failed" }, 502);
 
+        const isImage = value.type.startsWith("image/");
         const evidence = {
           storage_bucket: BUCKET,
           storage_path: storagePath,
           original_name: safeOriginalName(value.name),
           mime_type: value.type,
           size_bytes: value.size,
-          category: value.type.startsWith("image/") ? "image" : value.type.startsWith("video/") ? "video" : "document",
+          category: isImage ? "image" : value.type.startsWith("video/") ? "video" : "document",
           uploaded_at: new Date().toISOString(),
-          analysis_status: value.type.startsWith("image/") ? "pending" : "not_applicable",
+          analysis_status: isImage ? "pending" : "not_applicable",
         };
 
         const { error: appendError } = await supabaseAdmin.rpc("wmp_append_briefing_evidence", {
@@ -100,7 +102,23 @@ export const Route = createFileRoute("/api/wmp/briefing/$id/evidence")({
           return json({ ok: false, error: "evidence_link_failed" }, 500);
         }
 
-        return json({ ok: true, evidence: { ...evidence, storage_bucket: undefined } });
+        let analysis = null;
+        let analysisStatus: "not_applicable" | "completed" | "pending" = isImage ? "pending" : "not_applicable";
+        if (isImage) {
+          try {
+            analysis = await analyzeWmpBriefingImage({ briefingId, storagePath, mimeType: value.type });
+            analysisStatus = analysis ? "completed" : "pending";
+          } catch {
+            // O arquivo permanece privado e vinculado ao briefing. A análise pode ser reprocessada depois.
+            analysisStatus = "pending";
+          }
+        }
+
+        return json({
+          ok: true,
+          evidence: { ...evidence, storage_bucket: undefined, analysis_status: analysisStatus },
+          analysis,
+        });
       },
     },
   },
