@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserPlus, Heart, CalendarCheck2, CheckCircle2, Users, Settings } from "lucide-react";
+import { getCurrentCompanyId } from "@/lib/current-company";
 
 export const Route = createFileRoute("/_authenticated/empresa/talentos/candidatos")({
   component: CandidatosDashboard,
@@ -42,17 +43,22 @@ function CandidatosDashboard() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) { setLoading(false); return; }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data, error } = await sb.from("talentos_matches")
-        .select("id, candidato_id, stage, score, contratado_em, desligado_em, candidato:talentos_candidatos(nome, cargo_desejado, cidade, estado, foto_url, faixa_etaria, disponibilidade)")
-        .eq("company_id", u.user.id)
-        .order("created_at", { ascending: false });
-      setLoading(false);
-      if (error) { toast.error(error.message); return; }
-      setMatches((data ?? []) as Match[]);
+      try {
+        const companyId = await getCurrentCompanyId();
+        if (!companyId) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sb = supabase as any;
+        const { data, error } = await sb.from("talentos_matches")
+          .select("id, candidato_id, stage, score, contratado_em, desligado_em, candidato:talentos_candidatos(nome, cargo_desejado, cidade, estado, foto_url, faixa_etaria, disponibilidade)")
+          .eq("company_id", companyId)
+          .order("created_at", { ascending: false });
+        if (error) { toast.error(error.message); return; }
+        setMatches((data ?? []) as Match[]);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Não foi possível carregar o pipeline.");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -65,6 +71,7 @@ function CandidatosDashboard() {
   }), [matches]);
 
   async function moverPara(matchId: string, novoStage: Stage) {
+    // RLS guarantees the match belongs to the authenticated user's canonical company.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const patch: Record<string, unknown> = { stage: novoStage };
