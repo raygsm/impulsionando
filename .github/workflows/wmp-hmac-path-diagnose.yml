@@ -1,0 +1,53 @@
+name: WMP HMAC path diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-hmac-path-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Probe origin and public edge
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-security.env | head -n1)"
+          test -n "$secret"
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpPathProbe\",\"event_code\":\"wmp.path.probe\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"path-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          for target in origin public; do
+            if [ "$target" = origin ]; then
+              url="http://$ip:3000/api/public/hooks/n8n-verify"
+              extra=(-H 'Host: wmp.impulsionando.com.br')
+            else
+              url='https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
+              extra=()
+            fi
+            gc="$(curl -sS -o "/tmp/$target-get" -w '%{http_code}' --max-time 15 "${extra[@]}" "$url" || true)"
+            pc="$(curl -sS -o "/tmp/$target-post" -w '%{http_code}' --max-time 15 -X POST "${extra[@]}" "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" || true)"
+            echo "$target GET=$gc GET_BODY=$(head -c 180 /tmp/$target-get)"
+            echo "$target POST=$pc POST_BODY=$(head -c 240 /tmp/$target-post)"
+          done
+          REMOTE
