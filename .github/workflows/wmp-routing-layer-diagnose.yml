@@ -1,0 +1,55 @@
+name: WMP routing layer diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-routing-layer-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Probe candidate routing layers
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          CANDIDATE='/var/www/impulsionando-core/releases/d2f1c53d13649f45d0355a69b06bf8b562d766e3'
+          ORIGINAL="$(readlink -f /var/www/impulsionando-core/current)"
+          test -f "$CANDIDATE/.output/server/index.mjs"
+          restore(){ sudo ln -sfn "$ORIGINAL" /var/www/impulsionando-core/current; sudo systemctl restart impulsionando-core; }
+          trap restore EXIT
+          sudo ln -sfn "$CANDIDATE" /var/www/impulsionando-core/current
+          sudo systemctl restart impulsionando-core
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/ >/dev/null 2>&1 && break || sleep 1; done
+
+          probe(){
+            label="$1"; shift
+            code="$(curl -sS -o /tmp/wmp-route-body -w '%{http_code}' --max-time 15 "$@" || true)"
+            body="$(head -c 100 /tmp/wmp-route-body 2>/dev/null | tr '\n' ' ' || true)"
+            printf '%s => HTTP %s BODY %s\n' "$label" "$code" "$body"
+          }
+
+          for path in / /djs /empresas /orcamento /parceiro /onde-estou /auth /dashboard /seguranca/senha /wmp /wmp/djs /wmp/empresas /wmp/onde-estou; do
+            probe "PUBLIC_HTML $path" -L -H 'Accept: text/html,application/xhtml+xml' "https://wmp.impulsionando.com.br$path"
+          done
+
+          for path in / /djs /empresas /orcamento /parceiro /onde-estou /auth /dashboard /seguranca/senha /wmp /wmp/djs /wmp/empresas /wmp/onde-estou; do
+            probe "LOCAL_WMP_HOST $path" -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://127.0.0.1:3000$path"
+          done
+
+          for path in /auth /dashboard /seguranca/senha; do
+            probe "LOCAL_APEX_HOST $path" -H 'Host: impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://127.0.0.1:3000$path"
+          done
+          REMOTE
