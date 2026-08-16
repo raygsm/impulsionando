@@ -179,7 +179,7 @@ export function toWmpInternalPathname(host: string | null | undefined, pathname:
 
 /**
  * Se o host atual for um subdomínio descontinuado, devolve a URL absoluta
- * do subdomínio oficial preservando path/search/hash.
+ * do subdomínio oficial preservando query/hash e normalizando namespaces internos.
  */
 export function deprecatedSubdomainRedirect(loc: {
   hostname: string;
@@ -196,7 +196,11 @@ export function deprecatedSubdomainRedirect(loc: {
     const canonical = DEPRECATED_SUBDOMAIN_ALIAS[firstSeg];
     if (!canonical) return null;
     const proto = loc.protocol === "http:" ? "http:" : "https:";
-    return `${proto}//${canonical}.${root}${loc.pathname}${loc.search}${loc.hash}`;
+    let publicPath = loc.pathname || "/";
+    if (canonical === "colors" && (publicPath === "/colors" || publicPath.startsWith("/colors/"))) {
+      publicPath = publicPath.slice("/colors".length) || "/";
+    }
+    return `${proto}//${canonical}.${root}${publicPath}${loc.search}${loc.hash}`;
   }
   return null;
 }
