@@ -13,7 +13,7 @@ export const Route = createFileRoute("/colors/produto/$slug")({
     if(!p)return {meta:[{title:"Produto — Colors Saúde"}]};
     const title=`${p.name} — Colors Saúde`;
     const desc=`Conheça ${p.name}, produto oficial Colors Saúde. Compra pelos canais oficiais, atendimento pela Íris e suporte integrado.`;
-    const url=`https://colors.impulsionando.com.br/colors/produto/${p.slug}`;
+    const url=`https://colors.impulsionando.com.br/produto/${p.slug}`;
     return {meta:[{title},{name:"description",content:desc},{property:"og:title",content:title},{property:"og:description",content:desc},{property:"og:type",content:"product"},{property:"og:url",content:url}],links:[{rel:"canonical",href:url}],scripts:[{type:"application/ld+json",children:JSON.stringify({"@context":"https://schema.org","@type":"Product",name:p.name,description:desc,brand:{"@type":"Brand",name:"Colors Saúde"}})}]};
   },
   component: ProductPage,
