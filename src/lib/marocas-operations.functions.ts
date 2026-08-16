@@ -51,48 +51,93 @@ async function createTurnover(
   const gapMinutes = Math.floor((new Date(input.nextCheckinAt).getTime() - new Date(input.checkoutAt).getTime()) / 60000)
   const priority = gapMinutes < 180 ? 'urgente' : gapMinutes < 300 ? 'alta' : 'normal'
 
-  const { data: template } = await supabase
+  const { data: template, error: templateError } = await supabase
     .from('marocas_checklist_templates')
     .select('id,items')
     .eq('apartment_id', input.apartmentId)
     .eq('service_type', 'limpeza')
     .eq('active', true)
     .maybeSingle()
+  if (templateError) throw templateError
 
-  const { data: turnover, error: turnoverError } = await supabase
+  const { data: existingTurnover, error: existingError } = await supabase
     .from('marocas_turnovers')
-    .upsert({
-      apartment_id: input.apartmentId,
-      previous_reservation_id: input.previousReservationId,
-      next_reservation_id: input.nextReservationId,
-      checkout_at: input.checkoutAt,
-      next_checkin_at: input.nextCheckinAt,
-      priority,
-    }, { onConflict: 'company_id,apartment_id,previous_reservation_id,next_reservation_id', ignoreDuplicates: false })
     .select('id,service_id')
-    .single()
-  if (turnoverError) throw turnoverError
+    .eq('apartment_id', input.apartmentId)
+    .eq('previous_reservation_id', input.previousReservationId)
+    .eq('next_reservation_id', input.nextReservationId)
+    .maybeSingle()
+  if (existingError) throw existingError
 
-  if (!turnover.service_id) {
-    const { data: service, error: serviceError } = await supabase
-      .from('marocas_services')
+  let turnover = existingTurnover
+  if (!turnover) {
+    const { data: insertedTurnover, error: insertError } = await supabase
+      .from('marocas_turnovers')
       .insert({
         apartment_id: input.apartmentId,
-        reservation_id: input.previousReservationId,
-        turnover_id: turnover.id,
-        checklist_template_id: template?.id ?? null,
-        service_type: 'limpeza',
-        status: 'agendado',
-        priority: priority === 'urgente' ? 'urgente' : priority === 'alta' ? 'alta' : 'media',
-        scheduled_for: input.checkoutAt,
-        scheduled_end_at: input.nextCheckinAt,
-        checklist: Array.isArray(template?.items) ? template.items : [],
-        notes: 'Serviço gerado automaticamente a partir de giro entre reservas.',
+        previous_reservation_id: input.previousReservationId,
+        next_reservation_id: input.nextReservationId,
+        checkout_at: input.checkoutAt,
+        next_checkin_at: input.nextCheckinAt,
+        priority,
       })
-      .select('id')
+      .select('id,service_id')
       .single()
-    if (serviceError) throw serviceError
-    const { error: linkError } = await supabase.from('marocas_turnovers').update({ service_id: service.id }).eq('id', turnover.id)
+
+    if (insertError) {
+      // Uma requisição concorrente pode ter criado o mesmo giro entre o SELECT e o INSERT.
+      // Nesse caso, recupera a linha protegida pelo índice único parcial sem criar duplicidade.
+      if (insertError.code !== '23505') throw insertError
+      const { data: racedTurnover, error: racedError } = await supabase
+        .from('marocas_turnovers')
+        .select('id,service_id')
+        .eq('apartment_id', input.apartmentId)
+        .eq('previous_reservation_id', input.previousReservationId)
+        .eq('next_reservation_id', input.nextReservationId)
+        .single()
+      if (racedError) throw racedError
+      turnover = racedTurnover
+    } else {
+      turnover = insertedTurnover
+    }
+  }
+
+  if (!turnover.service_id) {
+    const { data: existingService, error: existingServiceError } = await supabase
+      .from('marocas_services')
+      .select('id')
+      .eq('turnover_id', turnover.id)
+      .maybeSingle()
+    if (existingServiceError) throw existingServiceError
+
+    let service = existingService
+    if (!service) {
+      const { data: insertedService, error: serviceError } = await supabase
+        .from('marocas_services')
+        .insert({
+          apartment_id: input.apartmentId,
+          reservation_id: input.previousReservationId,
+          turnover_id: turnover.id,
+          checklist_template_id: template?.id ?? null,
+          service_type: 'limpeza',
+          status: 'agendado',
+          priority: priority === 'urgente' ? 'urgente' : priority === 'alta' ? 'alta' : 'media',
+          scheduled_for: input.checkoutAt,
+          scheduled_end_at: input.nextCheckinAt,
+          checklist: Array.isArray(template?.items) ? template.items : [],
+          notes: 'Serviço gerado automaticamente a partir de giro entre reservas.',
+        })
+        .select('id')
+        .single()
+      if (serviceError) throw serviceError
+      service = insertedService
+    }
+
+    const { error: linkError } = await supabase
+      .from('marocas_turnovers')
+      .update({ service_id: service.id })
+      .eq('id', turnover.id)
+      .is('service_id', null)
     if (linkError) throw linkError
   }
 }
