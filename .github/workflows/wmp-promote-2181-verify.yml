@@ -1,0 +1,135 @@
+name: WMP promote 2181 and verify
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-promote-2181-verify.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wmp-promote-2181-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for i in $(seq 1 10); do
+            ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts && exit 0
+            sleep $((i * 3))
+          done
+          exit 41
+
+      - name: Promote release and verify WMP origin
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          RELEASE='/var/www/impulsionando-core/releases/2181d9f560eaa025590855e25030d254cf9b431d'
+          COMPOSE='/opt/impulsionando/deploy/hostinger/docker-compose.yml'
+          test -f "$RELEASE/.output/server/index.mjs"
+          test -f "$RELEASE/scripts/start-core-runtime.mjs"
+          sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env
+          sudo ln -sfn "$RELEASE" /var/www/impulsionando-core/current
+          sudo systemctl restart impulsionando-core
+          for i in $(seq 1 30); do curl -fsS --max-time 5 http://127.0.0.1:3000/ >/dev/null 2>&1 && break; [ "$i" -lt 30 ] || exit 42; sleep 1; done
+
+          printf 'node_modules\n' > "$RELEASE/.dockerignore"
+          cat >/tmp/Dockerfile.wmp-2181 <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          sudo docker build -f /tmp/Dockerfile.wmp-2181 -t impulsionando-core:latest "$RELEASE" >/tmp/wmp-2181-build.log
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+          for i in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+            if [ -n "$ip" ] && curl -fsS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/auth" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || exit 43
+            sleep 2
+          done
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /cases /pacotes; do
+            code="$(curl -sS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/wmp -w '%{http_code}' "http://$ip:3000$path")"
+            echo "WMP_ORIGIN $path HTTP=$code"
+            [ "$code" = '200' ] || exit 44
+          done
+          echo WMP_ORIGIN_2181_PASS
+          REMOTE
+
+      - name: Verify WMP public routes
+        run: |
+          set -euo pipefail
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /cases /pacotes; do
+            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/wmp -w '%{http_code}' --max-time 30 "https://wmp.impulsionando.com.br$path?wmp_2181=${GITHUB_RUN_ID}" || true)"
+            echo "WMP_PUBLIC $path HTTP=$code"
+            [ "$code" = '200' ] || exit 50
+          done
+
+      - name: Verify Core HMAC and canonical n8n webhooks
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          SEC='/etc/impulsionando-security.env'
+          VERIFY='https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
+          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
+          test -n "$secret"
+          get_code="$(curl -sS -o /tmp/get -w '%{http_code}' --max-time 20 "$VERIFY")"
+          echo "VERIFY_GET=$get_code body=$(head -c 180 /tmp/get)"
+          [ "$get_code" = '200' ] || exit 60
+
+          make_payload() {
+            id="$1"; event="$2"; correlation="$3"
+            printf '{"workflow_name":"%s","event_code":"%s","tenant_slug":"wmp","correlation_id":"%s","company_id":null,"dispatched_at":"%s","data":{"probe":true}}' "$id" "$event" "$correlation" "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          }
+
+          direct_payload="$(make_payload wmpLeadIntake01 wmp.lead.received direct-$(date +%s))"
+          direct_sig="$(printf '%s' "$direct_payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          direct_code="$(curl -sS -o /tmp/direct -w '%{http_code}' --max-time 20 -X POST "$VERIFY" -H 'content-type: application/json' -H "x-impulsionando-signature: $direct_sig" --data-binary "$direct_payload")"
+          echo "VERIFY_DIRECT_SIGNED=$direct_code body=$(head -c 240 /tmp/direct)"
+          [ "$direct_code" = '200' ] || exit 61
+          grep -q '"authorized":true' /tmp/direct || exit 62
+
+          probe() {
+            id="$1"; path="$2"; event="$3"; url="https://n8n.impulsionando.com.br/webhook/$path"
+            payload="$(make_payload "$id" "$event" "probe-$id-$(date +%s)")"
+            unsigned="$(curl -sS -o /tmp/u -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' --data-binary "$payload")"
+            echo "$id unsigned=$unsigned"
+            [ "$unsigned" = '401' ] || exit 63
+            sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+            signed="$(curl -sS -o /tmp/s -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload")"
+            echo "$id signed=$signed body=$(head -c 220 /tmp/s)"
+            [ "$signed" = '200' ] || exit 64
+            grep -q '"ok":true' /tmp/s || exit 65
+          }
+          probe wmpLeadIntake01 wmp-lead-intake wmp.lead.received
+          probe wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent
+          probe wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered
+          probe wmpPostEvent01 wmp-post-event-relationship wmp.event.completed
+          echo WMP_HMAC_N8N_PASS
+          REMOTE
