@@ -1,0 +1,52 @@
+name: Colors Edge Audit
+
+on:
+  push:
+    paths:
+      - .github/workflows/colors-edge-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Audit Colors edge only
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== CORE TRAEFIK LABELS ==='
+          sudo docker inspect -f '{{json .Config.Labels}}' impulsionando-core | jq -r 'to_entries[] | select(.key|startswith("traefik.")) | "\(.key)=\(.value)"' | sort || true
+          echo '=== EDGE CONTAINERS ==='
+          sudo docker ps --format '{{.Names}}' | grep -E 'traefik|impulsionando-core' || true
+          probe() {
+            scheme="$1"; path="$2"; accept="$3"
+            if [ "$scheme" = https ]; then tls='-k'; port=443; else tls=''; port=80; fi
+            code="$(curl $tls -sS -H 'Host: colorssaude.impulsionando.com.br' -H "Accept: $accept" -D /tmp/colors-edge-headers -o /tmp/colors-edge-body -w '%{http_code}' --max-time 15 "$scheme://127.0.0.1:$port$path" || true)"
+            echo "COLORS_TRAEFIK_PUBLIC_LISTENER scheme=$scheme path=$path HTTP=$code"
+            grep -Ei '^(server|location|cf-cache-status|content-type):' /tmp/colors-edge-headers || true
+            head -c 160 /tmp/colors-edge-body | tr '\n' ' '; echo
+          }
+          probe http / 'text/html,application/xhtml+xml'
+          probe http /agenda 'text/html,application/xhtml+xml'
+          probe http /api/public/webhooks/maisfy-colors 'application/json'
+          probe https / 'text/html,application/xhtml+xml'
+          probe https /agenda 'text/html,application/xhtml+xml'
+          probe https /api/public/webhooks/maisfy-colors 'application/json'
+          REMOTE
