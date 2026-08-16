@@ -171,6 +171,11 @@ describe("tenant landing resolution", () => {
     expect(tenantLandingTargetForHost("wmp.impulsionando.com.br")).toBe("/wmp");
   });
 
+  it("routes the private Tour host to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("tour.impulsionando.com.br")).toBe("/tour");
+    expect(tenantLandingTargetForHost("impulsionando-tour.impulsionando.com.br")).toBe("/tour");
+  });
+
   it("keeps the legacy CHRISMED domain compatible", () => {
     expect(tenantLandingTargetForHost("agenda.chrismed.com.br")).toBe("/chrismed");
   });
