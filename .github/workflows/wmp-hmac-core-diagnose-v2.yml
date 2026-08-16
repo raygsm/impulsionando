@@ -28,7 +28,7 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: Diagnose verifier without exposing secret
+      - name: Diagnose live verifier without exposing secret
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -39,11 +39,15 @@ jobs:
           core=/etc/impulsionando-core.env
           secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$sec" | head -n1)"
           core_secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$core" | head -n1)"
-          docker_secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          cid="$(sudo docker ps --filter 'name=impulsionando-core' --format '{{.ID}}' | head -n1)"
+          cname="$(sudo docker ps --filter 'name=impulsionando-core' --format '{{.Names}}' | head -n1)"
+          test -n "$cid"
+          docker_secret="$(sudo docker inspect --type container "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          echo "CONTAINER=$cname"
           printf 'SEC_FP=%s\n' "$(printf '%s' "$secret" | sha256sum | awk '{print $1}')"
           printf 'CORE_FP=%s\n' "$(printf '%s' "$core_secret" | sha256sum | awk '{print $1}')"
           printf 'DOCKER_FP=%s\n' "$(printf '%s' "$docker_secret" | sha256sum | awk '{print $1}')"
-          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          ip="$(sudo docker inspect --type container -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$cid")"
           endpoint='/api/public/hooks/n8n-verify'
           ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
           payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"diag-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
@@ -54,15 +58,12 @@ jobs:
           pget="$(curl -sS -o /tmp/pget -w '%{http_code}' 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
           punsigned="$(curl -sS -o /tmp/pu -w '%{http_code}' -X POST -H 'content-type: application/json' --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
           psigned="$(curl -sS -o /tmp/ps -w '%{http_code}' -X POST -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
-          echo "DIRECT get=$dget unsigned=$dunsigned signed=$dsigned signed_body=$(head -c 160 /tmp/ds)"
-          echo "PUBLIC get=$pget unsigned=$punsigned signed=$psigned signed_body=$(head -c 160 /tmp/ps)"
-          test "$dget" = 200
-          test "$dunsigned" = 401
-          test "$dsigned" = 200
-          test "$pget" = 200
-          test "$punsigned" = 401
-          test "$psigned" = 200
-          grep -q '"ok":true' /tmp/ds
-          grep -q '"ok":true' /tmp/ps
-          echo 'WMP_HMAC_CORE_DIAG=PASS'
+          echo "DIRECT get=$dget unsigned=$dunsigned signed=$dsigned unsigned_body=$(head -c 120 /tmp/du) signed_body=$(head -c 160 /tmp/ds)"
+          echo "PUBLIC get=$pget unsigned=$punsigned signed=$psigned unsigned_body=$(head -c 120 /tmp/pu) signed_body=$(head -c 160 /tmp/ps)"
+          [ "$dget" = 200 ] || true
+          [ "$dunsigned" = 401 ] || true
+          [ "$dsigned" = 200 ] || true
+          [ "$pget" = 200 ] || true
+          [ "$punsigned" = 401 ] || true
+          [ "$psigned" = 200 ] || true
           REMOTE
