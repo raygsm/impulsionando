@@ -17,10 +17,61 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
-    name: Validate CHRISMED public production
+  repair-and-smoke:
+    name: Restore and validate CHRISMED production
     runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
     steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Restore CHRISMED Traefik router
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.chrismed.yml
+          cd /opt/impulsionando/deploy/hostinger
+          test -f "$base"
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core:
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.chrismed.entrypoints: websecure
+                traefik.http.routers.chrismed.rule: Host(`chrismed.impulsionando.com.br`)
+                traefik.http.routers.chrismed.service: impulsionando-core
+                traefik.http.routers.chrismed.tls: "true"
+                traefik.http.routers.chrismed.tls.certresolver: letsencrypt
+                traefik.http.routers.chrismed.priority: "300"
+                traefik.http.services.impulsionando-core.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
+          for attempt in $(seq 1 60); do
+            code="$(curl -k -sS --resolve 'chrismed.impulsionando.com.br:443:127.0.0.1' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/chrismed-home -w '%{http_code}' --max-time 15 'https://chrismed.impulsionando.com.br/' || true)"
+            [ "$code" = '200' ] && break
+            if [ "$attempt" -eq 60 ]; then
+              echo "CHRISMED restore failed HTTP=$code"
+              sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' || true
+              sudo docker logs --tail 120 impulsionando-core || true
+              exit 61
+            fi
+            sleep 2
+          done
+          echo 'CHRISMED_ROUTER_RESTORED=PASS'
+          REMOTE
+
       - name: Check critical public routes
         run: |
           set -euo pipefail
@@ -39,7 +90,6 @@ jobs:
               grep -Eqi "$expected" "$out" || { echo "Expected page signature not found for $url"; exit 1; }
             fi
           }
-
           check home 'https://chrismed.impulsionando.com.br/' 'CHRISMED|CrisMed'
           check agendar 'https://chrismed.impulsionando.com.br/agendar' 'Agendar|consulta|CHRISMED|CrisMed'
           check eventos 'https://chrismed.impulsionando.com.br/eventos' 'Eventos|evento|CHRISMED|CrisMed'
@@ -51,7 +101,6 @@ jobs:
           set -euo pipefail
           code="$(curl --location --silent --show-error --output /tmp/chrismed-alth.html --write-out '%{http_code}' --max-time 30 'https://chrismed.impulsionando.com.br/alth')"
           printf '/alth -> HTTP %s\n' "$code"
-          # /alth may redirect or return 404; it must never be a successful canonical management page.
           if [ "$code" = '200' ] && grep -Eqi 'Gestão CHRISMED|Centro operacional' /tmp/chrismed-alth.html; then
             echo 'Legacy /alth is incorrectly serving the management page.'
             exit 1
