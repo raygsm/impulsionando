@@ -144,15 +144,27 @@ jobs:
             local url="https://n8n.impulsionando.com.br/webhook/${path}"
             local payload code signature
             payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"${TENANT_SLUG}\",\"correlation_id\":\"unsigned-${id}\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
-            code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$payload")"
-            echo "COLORS_N8N_UNSIGNED id=$id HTTP=$code"
+            code=000
+            for attempt in $(seq 1 12); do
+              code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$payload" || true)"
+              echo "COLORS_N8N_UNSIGNED id=$id attempt=$attempt HTTP=$code"
+              [ "$code" = '401' ] && break
+              sleep 5
+            done
             [ "$code" = '401' ] || exit 52
+
             payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"${TENANT_SLUG}\",\"correlation_id\":\"signed-${id}-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
             signature="$(make_signature "$payload")"
-            code="$(curl -sS -o "/tmp/${id}-signed.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" -d "$payload")"
-            echo "COLORS_N8N_SIGNED id=$id HTTP=$code"
+            code=000
+            for attempt in $(seq 1 6); do
+              code="$(curl -sS -o "/tmp/${id}-signed.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" -d "$payload" || true)"
+              echo "COLORS_N8N_SIGNED id=$id attempt=$attempt HTTP=$code"
+              if [ "$code" = '200' ] && grep -q '"ok":true' "/tmp/${id}-signed.out"; then break; fi
+              sleep 3
+            done
             [ "$code" = '200' ] || exit 53
             grep -q '"ok":true' "/tmp/${id}-signed.out" || exit 54
+
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
             sudo docker exec -i -e WF_ID="$id" "$C" node - <<'NODE'
           const fs=require('fs');
