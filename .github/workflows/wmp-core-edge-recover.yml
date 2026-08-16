@@ -1,0 +1,95 @@
+name: WMP recover canonical Core edge
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-core-edge-recover.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then exit 0; fi
+            sleep 3
+          done
+          exit 41
+      - name: Recover canonical Docker edge and prove HMAC
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/impulsionando/deploy/hostinger
+          COMPOSE=docker-compose.yml
+          test -f "$COMPOSE"
+          test -f /etc/impulsionando-core.env
+          sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env
+
+          echo 'CORE_EDGE_RECOVERY=start'
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+
+          cid=''
+          for attempt in $(seq 1 45); do
+            cid="$(sudo docker compose -f "$COMPOSE" ps -q impulsionando-core | head -n1)"
+            state=''
+            if [ -n "$cid" ]; then state="$(sudo docker inspect --type container -f '{{.State.Status}}' "$cid" 2>/dev/null || true)"; fi
+            echo "CORE_CONTAINER attempt=$attempt state=${state:-missing}"
+            [ "$state" = running ] && break
+            if [ "$attempt" -eq 45 ]; then
+              sudo docker compose -f "$COMPOSE" ps -a || true
+              [ -n "$cid" ] && sudo docker inspect --type container "$cid" --format 'state={{json .State}}' || true
+              exit 91
+            fi
+            sleep 2
+          done
+
+          core_secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-core.env | head -n1)"
+          docker_secret="$(sudo docker inspect --type container "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          core_fp="$(printf '%s' "$core_secret" | sha256sum | awk '{print $1}')"
+          docker_fp="$(printf '%s' "$docker_secret" | sha256sum | awk '{print $1}')"
+          echo "CORE_ENV_FP=$core_fp"
+          echo "DOCKER_ENV_FP=$docker_fp"
+          [ "$core_fp" = "$docker_fp" ]
+
+          ip="$(sudo docker inspect --type container -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$cid")"
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou; do
+            code="$(curl -sS -o /tmp/p -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000$path")"
+            echo "DIRECT_ROUTE $path HTTP=$code"
+            [ "$code" = 200 ]
+          done
+
+          endpoint=/api/public/hooks/n8n-verify
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"recover-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$core_secret" -hex | awk '{print $2}')"
+
+          for target in "http://$ip:3000$endpoint" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'; do
+            extra=()
+            case "$target" in http://*) extra=(-H 'Host: wmp.impulsionando.com.br');; esac
+            get="$(curl -sS -o /tmp/get -w '%{http_code}' "${extra[@]}" "$target")"
+            unsigned="$(curl -sS -o /tmp/unsigned -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' --data-binary "$payload" "$target")"
+            signed="$(curl -sS -o /tmp/signed -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" "$target")"
+            echo "HMAC target=$target get=$get unsigned=$unsigned signed=$signed body=$(head -c 140 /tmp/signed)"
+            [ "$get" = 200 ]
+            [ "$unsigned" = 401 ]
+            [ "$signed" = 200 ]
+            grep -q '"ok":true' /tmp/signed
+          done
+          echo 'WMP_CANONICAL_CORE_EDGE_HMAC=PASS'
+          REMOTE
