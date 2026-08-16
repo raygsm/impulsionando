@@ -61,6 +61,12 @@ describe("WMP clean public path routing", () => {
     expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/parceiro/cadastro")).toBe("/wmp/parceiro/cadastro");
   });
 
+  it("keeps global auth and password recovery routes outside the WMP namespace", () => {
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/auth")).toBe("/auth");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/reset-password")).toBe("/reset-password");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/reset-password-sent")).toBe("/reset-password-sent");
+  });
+
   it("does not double-prefix internal WMP routes", () => {
     expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/wmp/djs")).toBe("/wmp/djs");
   });
