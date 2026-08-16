@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      DOMAIN: colors.impulsionando.com.br
+      DOMAIN: colorssaude.impulsionando.com.br
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -65,18 +65,18 @@ jobs:
           sudo docker inspect "$container" >/dev/null
           for attempt in $(seq 1 45); do
             ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container" 2>/dev/null || true)"
-            if [ -n "$ip" ] && curl -fsS -H 'Host: colors.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
+            if [ -n "$ip" ] && curl -fsS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
             [ "$attempt" -lt 45 ] || { sudo docker logs --tail 120 "$container"; exit 31; }
             sleep 2
           done
           ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container")"
           for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta; do
-            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
+            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
             echo "COLORS_EDGE_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 32
           done
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-edge-api-probe -w '%{http_code}' "http://$ip:3000$path")"
+            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-edge-api-probe -w '%{http_code}' "http://$ip:3000$path")"
             echo "COLORS_EDGE_API_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 33
           done
