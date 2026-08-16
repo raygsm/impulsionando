@@ -43,14 +43,18 @@ jobs:
           SECURITY_ENV=/etc/impulsionando-security.env
           CORE_ENV=/etc/impulsionando-core.env
 
+          echo '== RioMed n8n: Core verifier readiness =='
           verifier_code="$(curl -sS -o /tmp/riomed-verifier-get.out -w '%{http_code}' --max-time 20 "$CORE_VERIFY")"
-          echo "CORE_VERIFIER_GET_HTTP=$verifier_code"
-          [ "$verifier_code" = '200' ] || { cat /tmp/riomed-verifier-get.out; exit 50; }
-          sudo docker inspect "$C" >/dev/null
+          echo "CORE_VERIFIER_GET_HTTP=$verifier_code body=$(head -c 240 /tmp/riomed-verifier-get.out || true)"
+          [ "$verifier_code" = '200' ] || exit 50
+
+          echo '== RioMed n8n: container readiness =='
+          sudo docker inspect "$C" --format '{{.State.Status}} {{.Config.Image}}'
 
           create_workflow() {
             local id="$1" name="$2" path="$3" slug="$4" webhook_id="$5"
             local file="/tmp/${id}-core-verified.json"
+            echo "CREATE_WORKFLOW id=$id slug=$slug path=$path"
             cat >"$file" <<JSON
           {
             "id":"${id}",
@@ -92,13 +96,15 @@ jobs:
           }
           JSON
             sudo docker cp "$file" "$C:$file"
-            sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
-            sudo docker exec "$C" n8n publish:workflow --id="$id" >/dev/null
-            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
+            echo "IMPORT $id"
+            sudo docker exec "$C" n8n import:workflow --input="$file"
+            echo "PUBLISH $id"
+            sudo docker exec "$C" n8n publish:workflow --id="$id"
+            echo "ACTIVATE $id"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
           }
 
-          workflows='\
-          rmLeadIntake01|RioMed Lead Intake|riomed-lead-intake|rio-med.lead.intake|riomed-lead-intake-v1|LEAD_CREATED
+          workflows='rmLeadIntake01|RioMed Lead Intake|riomed-lead-intake|rio-med.lead.intake|riomed-lead-intake-v1|LEAD_CREATED
           rmLeadAssign01|RioMed Lead Assignment|riomed-lead-assignment|rio-med.lead.assignment|riomed-lead-assignment-v1|SELLER_ASSIGNMENT_REQUIRED
           rmQuoteLife01|RioMed Quote Lifecycle|riomed-quote-lifecycle|rio-med.quote.lifecycle|riomed-quote-lifecycle-v1|QUOTE_REQUESTED
           rmMeetingLife01|RioMed Meeting Lifecycle|riomed-meeting-lifecycle|rio-med.meeting.lifecycle|riomed-meeting-lifecycle-v1|MEETING_REQUESTED
@@ -115,19 +121,28 @@ jobs:
           rmIntegrationErr01|RioMed Integration Error|riomed-integration-error|rio-med.integration.error|riomed-integration-error-v1|INTEGRATION_ERROR
           rmInventoryAlert01|RioMed Inventory Alerts|riomed-inventory-alerts|rio-med.inventory.alerts|riomed-inventory-alerts-v1|STOCK_CRITICAL'
 
+          echo '== RioMed n8n: import/publish/activate =='
           while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            name="$(printf '%s' "$name" | xargs)"
+            path="$(printf '%s' "$path" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
+            webhook="$(printf '%s' "$webhook" | xargs)"
+            event="$(printf '%s' "$event" | xargs)"
             [ -n "$id" ] || continue
             create_workflow "$id" "$name" "$path" "$slug" "$webhook"
           done <<EOF
           $workflows
           EOF
 
+          echo '== RioMed n8n: restart and health =='
           sudo docker restart "$C" >/dev/null
+          healthy=0
           for i in $(seq 1 45); do
-            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
-            [ "$i" -lt 45 ] || exit 51
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then healthy=1; break; fi
             sleep 2
           done
+          [ "$healthy" = '1' ] || exit 51
 
           make_signature() {
             local payload="$1" secret
@@ -140,16 +155,17 @@ jobs:
             local id="$1" path="$2" slug="$3" event="$4"
             local url="https://n8n.impulsionando.com.br/webhook/${path}"
             local payload code signature
+            echo "PROBE id=$id slug=$slug"
             payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"rio-med\",\"correlation_id\":\"unsigned-${id}\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
             code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$payload")"
-            echo "${id}_unsigned_http=$code"
+            echo "${id}_unsigned_http=$code body=$(head -c 260 "/tmp/${id}-unsigned.out" || true)"
             [ "$code" = '401' ] || exit 52
 
             payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"rio-med\",\"correlation_id\":\"signed-${id}-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
             signature="$(make_signature "$payload")"
             code="$(curl -sS -o "/tmp/${id}-signed.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" -d "$payload")"
-            echo "${id}_signed_http=$code"
-            [ "$code" = '200' ] || { cat "/tmp/${id}-signed.out"; exit 53; }
+            echo "${id}_signed_http=$code body=$(head -c 320 "/tmp/${id}-signed.out" || true)"
+            [ "$code" = '200' ] || exit 53
             grep -q '"ok":true' "/tmp/${id}-signed.out" || exit 54
 
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
@@ -160,22 +176,31 @@ jobs:
           const w=Array.isArray(r)?r[0]:r;
           const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
           const names=(w.nodes||[]).map(n=>n.name);
+          console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,nodes:names}));
           if(!w.active||!w.activeVersionId||!hook?.webhookId||!names.includes('Verify signature in Core')||!names.includes('Respond Security Result')) process.exit(55);
           NODE
           }
 
+          echo '== RioMed n8n: signed/unsigned probes =='
           while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            path="$(printf '%s' "$path" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
+            event="$(printf '%s' "$event" | xargs)"
             [ -n "$id" ] || continue
             probe_workflow "$id" "$path" "$slug" "$event"
           done <<EOF
           $workflows
           EOF
 
+          echo '== RioMed n8n: bind verified workflows to Core =='
           SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
           SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
           test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY"
 
           while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
             [ -n "$id" ] || continue
             curl -fsS --max-time 20 -X PATCH \
               "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.${slug}&version=eq.1" \
