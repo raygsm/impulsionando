@@ -96,7 +96,8 @@ jobs:
           [ "$core_ok" = true ] || exit 42
           [ "$n8n_ok" = true ] || exit 43
 
-          core_hash="$(sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1 | sha256sum | cut -d' ' -f1")"
+          core_value="$(sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1")"
+          core_hash="$(printf '%s' "$core_value" | sha256sum | cut -d' ' -f1)"
           n8n_hash="$(sudo docker exec "$N8N_CONTAINER" sh -lc 'printf %s "$IMPULSIONANDO_WEBHOOK_SECRET" | sha256sum | cut -d" " -f1')"
           if [ "$core_hash" != "$n8n_hash" ]; then
             echo 'CORE_N8N_HMAC_MATCH=false'
