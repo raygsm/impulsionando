@@ -3,7 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
-import { canonicalTenantHostRedirect, tenantLandingTargetForHost } from "./lib/subdomain";
+import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toWmpInternalPathname } from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -37,11 +37,6 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
-/**
- * Cabeçalhos de segurança aplicados no servidor/CDN.
- * A teleconsulta CHRISMED usa um player Jitsi embutido no próprio portal.
- * Câmera/microfone permanecem restritos ao próprio origin e ao host do player.
- */
 const CSP_DIRECTIVES = [
   "default-src 'self' https: data: blob:",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://*.lovable.app https://*.lovable.dev https://sdk.mercadopago.com https://http2.mlstatic.com",
@@ -83,6 +78,12 @@ function applySecurityHeaders(response: Response): Response {
   });
 }
 
+function isHtmlDocumentRequest(request: Request): boolean {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  const accept = request.headers.get("accept") ?? "";
+  return accept.includes("text/html") || accept.includes("application/xhtml+xml");
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
@@ -102,8 +103,15 @@ export default {
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
       const internalChrismedPathname = toChrismedInternalPathname(url.hostname, url.pathname);
+      const internalWmpPathname = isHtmlDocumentRequest(request)
+        ? toWmpInternalPathname(url.hostname, url.pathname)
+        : url.pathname;
+
       if (internalChrismedPathname !== url.pathname) {
         url.pathname = internalChrismedPathname;
+        routedRequest = new Request(url, request);
+      } else if (internalWmpPathname !== url.pathname) {
+        url.pathname = internalWmpPathname;
         routedRequest = new Request(url, request);
       } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
         url.pathname = tenantTarget;
