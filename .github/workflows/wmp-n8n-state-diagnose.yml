@@ -1,0 +1,58 @@
+name: WMP n8n state diagnose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wmp-n8n-state-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Inspect WMP workflows and n8n persistence metadata
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          echo "N8N_VERSION=$(sudo docker exec "$C" n8n --version)"
+          sudo docker exec "$C" sh -lc 'printf "DB_TYPE=%s\n" "${DB_TYPE:-sqlite}"; printf "WEBHOOK_URL_SET=%s\n" "$([ -n "${WEBHOOK_URL:-}" ] && echo true || echo false)"; printf "N8N_HOST=%s\n" "${N8N_HOST:-}"'
+
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjBookingLifecycle01 wmpPostEventRelationship01; do
+            echo "== $id =="
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-state.json" >/dev/null
+            sudo docker exec -i -e WMP_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WMP_ID;
+          const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-state.json`,'utf8'));
+          const w=Array.isArray(raw)?raw[0]:raw;
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,versionId:w.versionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,responseMode:hook?.parameters?.responseMode}));
+          NODE
+          done
+
+          echo '== Runtime webhook probes =='
+          for path in wmp-lead-intake wmp-proposal-lifecycle wmp-dj-booking-lifecycle wmp-post-event-relationship; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -d '{}')"
+            echo "$path=$code"
+          done
+          REMOTE
