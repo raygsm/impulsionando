@@ -1,0 +1,150 @@
+name: Patch Core deploy edge synchronization
+
+on:
+  push:
+    paths:
+      - .github/workflows/patch-core-deploy-edge.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch deploy workflow deterministically
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('.github/workflows/deploy-core-frontend.yml')
+          s = p.read_text()
+
+          old_install = "          ssh \"${DEPLOY_USER}@${DEPLOY_HOST}\" 'sudo install -o root -g root -m 0600 /tmp/impulsionando-core.env /etc/impulsionando-core.env && rm -f /tmp/impulsionando-core.env'"
+          new_install = r'''          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE_ENV'
+          set -euo pipefail
+          incoming=/tmp/impulsionando-core.env
+          security=/etc/impulsionando-security.env
+          if grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=$' "$incoming" && sudo test -f "$security" && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' "$security"; then
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$security" | head -n1)"
+            tmp="$(mktemp)"
+            grep -v '^IMPULSIONANDO_WEBHOOK_SECRET=' "$incoming" > "$tmp"
+            printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "$secret" >> "$tmp"
+            install -m 0600 "$tmp" "$incoming"
+            rm -f "$tmp"
+            unset secret
+          fi
+          sudo install -o root -g root -m 0600 "$incoming" /etc/impulsionando-core.env
+          rm -f "$incoming"
+          REMOTE_ENV'''
+          if old_install in s:
+              s = s.replace(old_install, new_install)
+          elif 'REMOTE_ENV' not in s:
+              raise SystemExit('environment install marker not found')
+
+          marker = '      - name: Validate public Core, WMP, CHRISMED and Colors\n'
+          edge_step = r'''      - name: Promote the same release to Traefik Docker edge
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
+          set -euo pipefail
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          test -f "$COMPOSE"
+          test -f "$RELEASE_DIR/.output/server/index.mjs"
+          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
+          if [ -n "$old_image" ]; then
+            printf '%s\n' "$old_image" | sudo tee /var/www/impulsionando-core/.previous-edge-image >/dev/null
+            sudo docker tag "$old_image" impulsionando-core:deploy-rollback
+          fi
+
+          cat > /tmp/Dockerfile.impulsionando-runtime <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+
+          sudo docker build -f /tmp/Dockerfile.impulsionando-runtime -t impulsionando-core:latest "$RELEASE_DIR"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+
+          for attempt in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+            if [ -n "$ip" ] && curl -fsS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/auth" >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -eq 45 ]; then
+              sudo docker logs --tail 120 impulsionando-core || true
+              exit 47
+            fi
+            sleep 2
+          done
+
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro; do
+            code="$(curl -sS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
+            echo "CORE_EDGE_PROBE $path HTTP=$code"
+            [ "$code" = 200 ] || exit 48
+          done
+          echo 'CORE_TRAEFIK_EDGE=PASS'
+          REMOTE
+
+'''
+          if 'Promote the same release to Traefik Docker edge' not in s:
+              if marker not in s:
+                  raise SystemExit('public validation marker not found')
+              s = s.replace(marker, edge_step + marker)
+
+          # WMP clean routes depend on an HTML navigation request; make smoke tests represent a browser.
+          s = re.sub(
+              r"curl --fail --location --silent --show-error --max-time 30 (https://wmp\.impulsionando\.com\.br/[^ >]*)",
+              r"curl --fail --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' \1",
+              s,
+          )
+          s = s.replace(
+              '          grep -qi "Acessar\\|Entrar\\|conta" /tmp/wmp-auth.html\n',
+              '          ! grep -qi "Not Found" /tmp/wmp-auth.html\n',
+          )
+
+          rollback_marker = '          sudo ln -sfn "$PREVIOUS_RELEASE" /var/www/impulsionando-core/current\n'
+          edge_rollback = r'''          if sudo docker image inspect impulsionando-core:deploy-rollback >/dev/null 2>&1; then
+            sudo docker tag impulsionando-core:deploy-rollback impulsionando-core:latest
+            cd /opt/impulsionando/deploy/hostinger
+            sudo docker compose -f docker-compose.yml up -d --no-build --force-recreate impulsionando-core || true
+          fi
+'''
+          if 'docker image inspect impulsionando-core:deploy-rollback' not in s:
+              if rollback_marker not in s:
+                  raise SystemExit('rollback marker not found')
+              s = s.replace(rollback_marker, edge_rollback + rollback_marker)
+
+          p.write_text(s)
+          PY
+          git diff --check
+          grep -q 'Promote the same release to Traefik Docker edge' .github/workflows/deploy-core-frontend.yml
+          grep -q 'CORE_TRAEFIK_EDGE=PASS' .github/workflows/deploy-core-frontend.yml
+          grep -q 'REMOTE_ENV' .github/workflows/deploy-core-frontend.yml
+      - name: Commit canonical deploy fix
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'Deploy workflow already patched.'
+            exit 0
+          fi
+          git config user.name 'Impulsionando Ops'
+          git config user.email 'ops@impulsionando.com.br'
+          git add .github/workflows/deploy-core-frontend.yml
+          git commit -m 'fix(core): synchronize Docker edge on canonical deploy'
+          git push origin main
