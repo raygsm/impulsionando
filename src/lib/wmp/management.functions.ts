@@ -46,9 +46,10 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
       .maybeSingle()
     if (categorySet.error) throw categorySet.error
 
-    const [briefings, corporateDates, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories] = await Promise.all([
+    const [briefings, corporateDates, events, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories] = await Promise.all([
       context.supabase.from('wmp_briefings').select('id,status,contratante_nome,contratante_empresa,contratante_email,contratante_telefone,evento_tipo,evento_data,evento_cidade,evento_estado,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
       context.supabase.from('wmp_briefing_dates').select('id,briefing_id,event_date,start_time,end_time,venue_name,venue_cep,venue_address,venue_bairro,venue_city,venue_state,venue_municipio_ibge,status,notes,created_at').eq('tenant_id', id).gte('event_date', new Date().toISOString().slice(0, 10)).order('event_date', { ascending: true }).order('start_time', { ascending: true }).limit(1000),
+      context.supabase.from('wmp_events').select('id,briefing_id,briefing_date_id,proposal_id,opportunity_id,source,status,public_status,title,event_type,event_date,start_time,end_time,venue_name,venue_address,venue_bairro,venue_city,venue_state,audience_estimate,confirmed_at,started_at,completed_at,cancelled_at,created_at').eq('tenant_id', id).order('event_date', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false }).limit(500),
       context.supabase.from('wmp_parceiros').select('id,status,nome,nome_artistico,email,telefone,categoria,cidade,estado,experiencia_anos,created_at').eq('tenant_id', id).order('created_at', { ascending: false }).limit(200),
       context.supabase.from('wmp_dj_bookings').select('id,parceiro_id,proposal_id,event_name,event_date,venue_name,city,state,status,fee_cents,response_deadline,accepted_at,declined_at,meal_allowance_cents,parking_allowance_cents,meal_provided_by_contractor,parking_provided_by_contractor,logistics,created_at').eq('tenant_id', id).order('event_date', { ascending: true }).limit(300),
       context.supabase.from('wmp_dj_availability').select('id,parceiro_id,date,start_time,end_time,status,city,state,notes').eq('tenant_id', id).gte('date', new Date().toISOString().slice(0, 10)).order('date', { ascending: true }).limit(500),
@@ -64,14 +65,14 @@ export const getWmpOperations = createServerFn({ method: 'POST' })
         : Promise.resolve({ data: [], error: null }),
     ])
 
-    const all = { briefings, corporateDates, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories }
+    const all = { briefings, corporateDates, events, partners, bookings, availability, equipment, rentals, payouts, tickets, manufacturers, models, referenceRequests, categories }
     for (const [key, result] of Object.entries(all)) {
       if ((result as any).error) throw new Error(`${key}: ${(result as any).error.message}`)
     }
     return Object.fromEntries(Object.entries(all).map(([key, result]) => [key, (result as any).data ?? []]))
   })
 
-const tableSchema = z.enum(['wmp_briefings', 'wmp_briefing_dates', 'wmp_parceiros', 'wmp_dj_bookings', 'wmp_dj_availability', 'wmp_equipment_rentals', 'wmp_equipment_rental_payouts'])
+const tableSchema = z.enum(['wmp_briefings', 'wmp_briefing_dates', 'wmp_events', 'wmp_parceiros', 'wmp_dj_bookings', 'wmp_dj_availability', 'wmp_equipment_rentals', 'wmp_equipment_rental_payouts'])
 
 const djLifecycleEvents: Record<string, string> = {
   OFFERED: 'wmp.dj.offered',
@@ -81,6 +82,7 @@ const djLifecycleEvents: Record<string, string> = {
 }
 
 const corporateDateStatuses = new Set(['REQUESTED', 'QUOTED', 'CONFIRMED', 'CANCELLED'])
+const eventStatuses = new Set(['PLANNED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
 
 export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -93,6 +95,46 @@ export const updateWmpOperationalStatus = createServerFn({ method: 'POST' })
     const id = await tenantId(context)
     const normalizedStatus = data.status.toUpperCase()
     const now = new Date().toISOString()
+
+    if (data.table === 'wmp_events') {
+      if (!eventStatuses.has(normalizedStatus)) throw new Error('Status inválido para evento WMP.')
+      const { data: current, error: readError } = await context.supabase
+        .from('wmp_events')
+        .select('id,proposal_id,briefing_id,briefing_date_id,title,event_type,event_date,venue_name,status')
+        .eq('tenant_id', id)
+        .eq('id', data.id)
+        .single()
+      if (readError) throw readError
+      if (current.status === normalizedStatus) return { ok: true, automation: null, unchanged: true }
+      if (['COMPLETED', 'CANCELLED'].includes(current.status)) throw new Error(`Evento encerrado não pode mudar de ${current.status} para ${normalizedStatus}.`)
+
+      const patch: Record<string, unknown> = { status: normalizedStatus, updated_at: now }
+      if (normalizedStatus === 'CONFIRMED') patch.confirmed_at = now
+      if (normalizedStatus === 'IN_PROGRESS') patch.started_at = now
+      if (normalizedStatus === 'COMPLETED') patch.completed_at = now
+      if (normalizedStatus === 'CANCELLED') patch.cancelled_at = now
+
+      const { error } = await context.supabase.from('wmp_events').update(patch).eq('tenant_id', id).eq('id', current.id).eq('status', current.status)
+      if (error) throw error
+
+      const automation = normalizedStatus === 'COMPLETED'
+        ? await dispatchN8nByEvent('wmp.event.completed', {
+            event_id: current.id,
+            proposal_id: current.proposal_id,
+            briefing_id: current.briefing_id,
+            briefing_date_id: current.briefing_date_id,
+            title: current.title,
+            event_type: current.event_type,
+            event_date: current.event_date,
+            venue_name: current.venue_name,
+            previous_status: current.status,
+            status: normalizedStatus,
+            completed_at: now,
+          }, null, 'wmp')
+        : null
+
+      return { ok: true, automation, previous_status: current.status, status: normalizedStatus }
+    }
 
     if (data.table === 'wmp_briefing_dates') {
       if (!corporateDateStatuses.has(normalizedStatus)) throw new Error('Status inválido para data corporativa.')
