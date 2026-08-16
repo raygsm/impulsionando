@@ -1,0 +1,95 @@
+name: Colors Traefik TLS Router Fix
+
+on:
+  push:
+    paths:
+      - .github/workflows/colors-traefik-router-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: colors-traefik-router-fix
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Install explicit Colors HTTPS router with rollback
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.colors.yml
+          backup="${override}.bak.$(date +%Y%m%d%H%M%S)"
+          domain='colorssaude.impulsionando.com.br'
+          cd /opt/impulsionando/deploy/hostinger
+          test -f "$base"
+          if [ -f "$override" ]; then sudo cp -a "$override" "$backup"; fi
+
+          rollback() {
+            echo 'COLORS_TRAEFIK_ROUTER_ROLLBACK=START'
+            if [ -f "$backup" ]; then
+              sudo cp -a "$backup" "$override"
+              sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core || true
+            else
+              sudo rm -f "$override"
+              sudo docker compose -f "$base" up -d --no-build --force-recreate impulsionando-core || true
+            fi
+          }
+          trap rollback ERR
+
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core:
+              labels:
+                traefik.http.routers.colorssaude.entrypoints: websecure
+                traefik.http.routers.colorssaude.rule: Host(`colorssaude.impulsionando.com.br`)
+                traefik.http.routers.colorssaude.service: impulsionando-core
+                traefik.http.routers.colorssaude.tls: "true"
+                traefik.http.routers.colorssaude.tls.certresolver: letsencrypt
+                traefik.http.routers.colorssaude.priority: "200"
+          YAML
+
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
+
+          for attempt in $(seq 1 45); do
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 ColorsRouterFix/1.0' -o /tmp/colors-router-ready -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
+            [ "$code" = '200' ] && break
+            [ "$attempt" -lt 45 ] || { echo "COLORS_ROUTER_READY_HTTP=$code"; exit 51; }
+            sleep 2
+          done
+
+          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos; do
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 ColorsRouterFix/1.0' -o /tmp/colors-router-html -w '%{http_code}' --max-time 20 "https://$domain$path")"
+            echo "COLORS_TLS_ROUTE $path HTTP=$code"
+            [ "$code" = '200' ] || exit 52
+          done
+          for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: application/json' -H 'User-Agent: Mozilla/5.0 ColorsRouterFix/1.0' -o /tmp/colors-router-api -w '%{http_code}' --max-time 20 "https://$domain$path")"
+            echo "COLORS_TLS_API $path HTTP=$code"
+            [ "$code" = '200' ] || exit 53
+          done
+
+          labels="$(sudo docker inspect -f '{{json .Config.Labels}}' impulsionando-core)"
+          printf '%s' "$labels" | jq -e '."traefik.http.routers.colorssaude.rule" == "Host(`colorssaude.impulsionando.com.br`)"' >/dev/null
+          trap - ERR
+          echo 'COLORS_TRAEFIK_TLS_ROUTER=PASS'
+          REMOTE
