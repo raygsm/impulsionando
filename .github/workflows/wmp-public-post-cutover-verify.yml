@@ -1,0 +1,71 @@
+name: WMP public post-cutover verify
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-public-post-cutover-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DOMAIN: wmp.impulsionando.com.br
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Confirm Cloudflare origin now targets deploy host
+        run: |
+          set -euo pipefail
+          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          origin="$(getent ahostsv4 "$DEPLOY_HOST" | awk 'NR==1{print $1}')"
+          test -n "$origin"
+          curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/wmp-dns.json
+          jq -e '.success == true' /tmp/wmp-dns.json >/dev/null
+          jq -e --arg ip "$origin" '.result[] | select(.type=="A" and .content==$ip and .proxied==true)' /tmp/wmp-dns.json >/dev/null
+          echo 'WMP_CLOUDFLARE_ORIGIN=PASS'
+
+      - name: Verify public WMP routes
+        run: |
+          set -euo pipefail
+          failed=0
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /cases /pacotes; do
+            code=000
+            for attempt in $(seq 1 12); do
+              code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/wmp-page -w '%{http_code}' --max-time 20 "https://$DOMAIN$path?cutover_verify=$(date +%s)-$attempt" || true)"
+              [ "$code" = '200' ] && break
+              sleep 5
+            done
+            echo "PUBLIC_WMP $path HTTP=$code"
+            [ "$code" = '200' ] || failed=1
+          done
+          [ "$failed" = '0' ]
+          echo 'WMP_PUBLIC_ROUTES=PASS'
+
+      - name: Verify auth is WMP administrative entry
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
+            "https://$DOMAIN/auth?verify=$(date +%s)" -o /tmp/wmp-auth.html
+          grep -Eqi 'WMP|Wagner Miller|Acesso administrativo' /tmp/wmp-auth.html
+          ! grep -qi 'Not Found' /tmp/wmp-auth.html
+          echo 'WMP_AUTH_CONTENT=PASS'
+
+      - name: Reject legacy fabricated public markers
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
+            "https://$DOMAIN/?verify=$(date +%s)" -o /tmp/wmp-home.html
+          forbidden=('+850' 'R$ 2.900' 'R$ 7.400' 'Tech Corp' 'Festival Sertanejo de Verão' '8.000 pessoas' 'resposta garantida')
+          for marker in "${forbidden[@]}"; do
+            if grep -Fqi "$marker" /tmp/wmp-home.html; then
+              echo "::error::Legacy public marker still present: $marker"
+              exit 20
+            fi
+          done
+          echo 'WMP_LEGACY_PUBLIC_MARKERS=ABSENT'
