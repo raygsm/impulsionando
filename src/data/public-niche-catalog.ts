@@ -6,6 +6,8 @@ import {
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { COMMERCIAL_NICHE_PLAYBOOK } from "@/data/commercial-niche-playbook";
 
+export const PUBLIC_NICHE_CATALOG_VERSION = "2026-08-15-v2";
+
 export type PublicNiche = {
   slug: string;
   label: string;
