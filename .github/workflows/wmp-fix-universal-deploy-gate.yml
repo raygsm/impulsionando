@@ -1,0 +1,48 @@
+name: WMP fix universal deploy gate
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-fix-universal-deploy-gate.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch canonical universal deploy gate
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/deploy-core-frontend.yml')
+          s = p.read_text()
+          old_probe = 'code="$(curl --location --silent --show-error --max-time 30 -H \'Accept: text/html,application/xhtml+xml\' -H \'Cache-Control: no-cache\' -o /tmp/probe.html -w \'%{http_code}\' "$url?deploy_verify=${GITHUB_SHA}" || true)"'
+          new_probe = 'code="$(curl --location --silent --show-error --max-time 30 -H \'Accept: text/html,application/xhtml+xml\' -H \'Cache-Control: no-cache\' -o /tmp/probe.html -w \'%{http_code}\' "$url" || true)"'
+          if old_probe not in s:
+              raise SystemExit('expected probe pattern not found')
+          s = s.replace(old_probe, new_probe, 1)
+          old_content = '-o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/?deploy_content=${GITHUB_SHA}"'
+          new_content = '-o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/"'
+          if old_content not in s:
+              raise SystemExit('expected WMP content probe pattern not found')
+          s = s.replace(old_content, new_content, 1)
+          old_marker = 'echo "::warning::Legacy WMP marker still public: $marker"'
+          new_marker = 'echo "::error::Legacy WMP marker still public: $marker"\n              exit 49'
+          if old_marker not in s:
+              raise SystemExit('expected legacy marker warning not found')
+          s = s.replace(old_marker, new_marker, 1)
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- .github/workflows/deploy-core-frontend.yml
+          git config user.name 'Raygs Lima Monnerat'
+          git config user.email '185018474+raygsm@users.noreply.github.com'
+          git add .github/workflows/deploy-core-frontend.yml
+          git commit -m 'fix(deploy): validate real tenant URLs and block fake WMP content'
+          git push origin HEAD:main
