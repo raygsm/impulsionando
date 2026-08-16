@@ -38,11 +38,11 @@ jobs:
           sudo docker exec "$container" n8n export:workflow --all --output=/tmp/impulsionando-workflows.json >/tmp/n8n-export.log 2>&1
           sudo docker cp "$container:/tmp/impulsionando-workflows.json" /tmp/impulsionando-workflows.json
           echo '== n8n workflow inventory =='
-          jq -r '.[] | [.id,.name,(.active|tostring)] | @tsv' /tmp/impulsionando-workflows.json | sort
-          echo '== WMP workflow candidates and webhook nodes =='
-          jq -r '.[] | select(((.id // "") | ascii_downcase | contains("wmp")) or ((.name // "") | ascii_downcase | contains("wmp"))) | {id,name,active,nodes:[(.nodes // [])[] | select(.type=="n8n-nodes-base.webhook") | {name,webhookId,path:(.parameters.path // null),httpMethod:(.parameters.httpMethod // null),responseMode:(.parameters.responseMode // null)}]}' /tmp/impulsionando-workflows.json
-          echo '== representative active webhook workflows =='
-          jq -r '[.[] | select(.active==true) | select(any((.nodes // [])[]; .type=="n8n-nodes-base.webhook"))][0:8] | .[] | {id,name,active,nodes:[(.nodes // [])[] | {name,type,parameters}]}' /tmp/impulsionando-workflows.json
+          jq -r '.[] | [.id,.name,(.active|tostring),(.activeVersionId // "null")] | @tsv' /tmp/impulsionando-workflows.json | sort
+          echo '== WMP lifecycle persistence =='
+          jq -r '.[] | select(.id=="wmpLeadIntake01" or .id=="wmpProposalLifecycle01" or .id=="wmpDjBookingLifecycle01" or .id=="wmpPostEventRelationship01") | {id,name,active,activeVersionId,versionId,nodes:[(.nodes // [])[] | {id,name,type,webhookId,parameters}]}' /tmp/impulsionando-workflows.json
+          echo '== representative known-good active webhook =='
+          jq -r '[.[] | select(.active==true) | select(any((.nodes // [])[]; .type=="n8n-nodes-base.webhook" and (.webhookId // "") != ""))][0:3] | .[] | {id,name,active,activeVersionId,nodes:[(.nodes // [])[] | select(.type=="n8n-nodes-base.webhook") | {id,name,webhookId,parameters}]}' /tmp/impulsionando-workflows.json
           echo '== totals =='
           jq -r '"total=" + (length|tostring) + " active=" + ([.[]|select(.active==true)]|length|tostring)' /tmp/impulsionando-workflows.json
           rm -f /tmp/impulsionando-workflows.json /tmp/n8n-export.log
