@@ -48,6 +48,7 @@ export const Route = createFileRoute('/api/public/hooks/n8n-verify')({
           event_code: parsed.event_code,
           tenant_slug: parsed.tenant_slug,
           correlation_id: parsed.correlation_id,
+          payload: parsed,
         })
       },
       GET: async () => Response.json({ ok: true, auth: 'hmac', purpose: 'n8n_dispatch_verifier' }),
