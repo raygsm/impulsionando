@@ -28,42 +28,27 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: Diagnose live verifier without exposing secret
+      - name: Inspect live Docker topology
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
         run: |
           ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
-          sec=/etc/impulsionando-security.env
-          core=/etc/impulsionando-core.env
-          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$sec" | head -n1)"
-          core_secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$core" | head -n1)"
-          cid="$(sudo docker ps --filter 'name=impulsionando-core' --format '{{.ID}}' | head -n1)"
-          cname="$(sudo docker ps --filter 'name=impulsionando-core' --format '{{.Names}}' | head -n1)"
-          test -n "$cid"
-          docker_secret="$(sudo docker inspect --type container "$cid" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
-          echo "CONTAINER=$cname"
-          printf 'SEC_FP=%s\n' "$(printf '%s' "$secret" | sha256sum | awk '{print $1}')"
-          printf 'CORE_FP=%s\n' "$(printf '%s' "$core_secret" | sha256sum | awk '{print $1}')"
-          printf 'DOCKER_FP=%s\n' "$(printf '%s' "$docker_secret" | sha256sum | awk '{print $1}')"
-          ip="$(sudo docker inspect --type container -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$cid")"
-          endpoint='/api/public/hooks/n8n-verify'
-          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-          payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"diag-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
-          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
-          dget="$(curl -sS -o /tmp/dget -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' "http://$ip:3000$endpoint" || true)"
-          dunsigned="$(curl -sS -o /tmp/du -w '%{http_code}' -X POST -H 'Host: wmp.impulsionando.com.br' -H 'content-type: application/json' --data-binary "$payload" "http://$ip:3000$endpoint" || true)"
-          dsigned="$(curl -sS -o /tmp/ds -w '%{http_code}' -X POST -H 'Host: wmp.impulsionando.com.br' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" "http://$ip:3000$endpoint" || true)"
-          pget="$(curl -sS -o /tmp/pget -w '%{http_code}' 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
-          punsigned="$(curl -sS -o /tmp/pu -w '%{http_code}' -X POST -H 'content-type: application/json' --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
-          psigned="$(curl -sS -o /tmp/ps -w '%{http_code}' -X POST -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
-          echo "DIRECT get=$dget unsigned=$dunsigned signed=$dsigned unsigned_body=$(head -c 120 /tmp/du) signed_body=$(head -c 160 /tmp/ds)"
-          echo "PUBLIC get=$pget unsigned=$punsigned signed=$psigned unsigned_body=$(head -c 120 /tmp/pu) signed_body=$(head -c 160 /tmp/ps)"
-          [ "$dget" = 200 ] || true
-          [ "$dunsigned" = 401 ] || true
-          [ "$dsigned" = 200 ] || true
-          [ "$pget" = 200 ] || true
-          [ "$punsigned" = 401 ] || true
-          [ "$psigned" = 200 ] || true
+          echo '=== RUNNING CONTAINERS ==='
+          sudo docker ps --format 'NAME={{.Names}} IMAGE={{.Image}} PORTS={{.Ports}}'
+          echo '=== ALL CORE-LIKE CONTAINERS ==='
+          sudo docker ps -a --format 'ID={{.ID}} NAME={{.Names}} IMAGE={{.Image}} STATUS={{.Status}}' | grep -Ei 'core|impulsionando' || true
+          echo '=== COMPOSE SERVICES ==='
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f docker-compose.yml ps -a || true
+          echo '=== CORE SERVICE CONFIG (SECRET VALUES REDACTED) ==='
+          sudo awk '
+            /^  impulsionando-core:/ {show=1}
+            show && /^  [a-zA-Z0-9_-]+:/ && $1 != "impulsionando-core:" && NR>1 {exit}
+            show {gsub(/(SECRET|KEY|TOKEN|PASSWORD):.*/,"\\1: [REDACTED]"); print}
+          ' docker-compose.yml || true
+          echo '=== SYSTEMD ==='
+          sudo systemctl is-active impulsionando-core || true
+          sudo systemctl status impulsionando-core --no-pager -n 5 || true
           REMOTE
