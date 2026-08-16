@@ -1,0 +1,31 @@
+name: Colors Origin Identity Audit
+
+on:
+  push:
+    paths:
+      - .github/workflows/colors-origin-identity-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+    steps:
+      - name: Compare origin identities without exposing addresses
+        run: |
+          set -euo pipefail
+          deploy_ip="$(getent ahostsv4 "$DEPLOY_HOST" | awk 'NR==1{print $1}')"
+          vps_ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test -n "$deploy_ip"
+          test -n "$vps_ip"
+          if [ "$deploy_ip" = "$vps_ip" ]; then
+            echo 'COLORS_ORIGIN_IDENTITY=SAME'
+          else
+            echo 'COLORS_ORIGIN_IDENTITY=DIFFERENT'
+          fi
