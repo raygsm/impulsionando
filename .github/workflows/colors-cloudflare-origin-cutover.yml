@@ -131,41 +131,42 @@ jobs:
             done
           }
 
-          ready=0
-          for attempt in $(seq 1 60); do
-            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public-ready -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
-            if [ "$code" = '200' ]; then
-              ready=1
-              echo "COLORS_PUBLIC_DNS_READY=PASS attempt=$attempt"
-              break
-            fi
-            echo "COLORS_PUBLIC_DNS_WAIT attempt=$attempt HTTP=$code"
-            sleep 5
-          done
-          if [ "$ready" != '1' ]; then
-            rollback_dns
-            exit 40
-          fi
+          probe_html() {
+            path="$1"
+            code=000
+            for attempt in $(seq 1 12); do
+              code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D /tmp/colors-public-headers -o /tmp/colors-public -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
+              echo "PUBLIC_COLORS $path attempt=$attempt HTTP=$code"
+              [ "$code" = '200' ] && return 0
+              sleep 5
+            done
+            grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-headers || true
+            head -c 200 /tmp/colors-public | tr '\n' ' '; echo
+            return 1
+          }
+
+          probe_api() {
+            path="$1"
+            code=000
+            for attempt in $(seq 1 12); do
+              code="$(curl -sS -L -A 'ColorsProviderHealth/1.0' -H 'Accept: application/json' -H 'Cache-Control: no-cache, no-store' -D /tmp/colors-public-api-headers -o /tmp/colors-public-api -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
+              echo "PUBLIC_COLORS_API $path attempt=$attempt HTTP=$code"
+              [ "$code" = '200' ] && return 0
+              sleep 5
+            done
+            grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-api-headers || true
+            head -c 200 /tmp/colors-public-api | tr '\n' ' '; echo
+            return 1
+          }
 
           failed=0
           for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos; do
-            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D /tmp/colors-public-headers -o /tmp/colors-public -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
-            echo "PUBLIC_COLORS $path HTTP=$code"
-            if [ "$code" != '200' ]; then
-              grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-headers || true
-              head -c 200 /tmp/colors-public | tr '\n' ' '; echo
-              failed=1
-            fi
+            probe_html "$path" || failed=1
           done
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code="$(curl -sS -L -A 'ColorsProviderHealth/1.0' -H 'Accept: application/json' -H 'Cache-Control: no-cache, no-store' -D /tmp/colors-public-api-headers -o /tmp/colors-public-api -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
-            echo "PUBLIC_COLORS_API $path HTTP=$code"
-            if [ "$code" != '200' ]; then
-              grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-api-headers || true
-              head -c 200 /tmp/colors-public-api | tr '\n' ' '; echo
-              failed=1
-            fi
+            probe_api "$path" || failed=1
           done
+
           if [ "$failed" = '0' ]; then
             echo 'COLORS_PUBLIC_ORIGIN_CUTOVER=PASS'
             exit 0
@@ -181,4 +182,4 @@ jobs:
           path: /tmp/colors-dns-before.json
           retention-days: 30
 
-# Origin TLS and public route health are hard gates; canonical DNS targets the validated VPS origin only.
+# Origin TLS and public route health are hard gates; each public route gets propagation retries before rollback.
