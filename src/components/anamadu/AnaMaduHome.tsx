@@ -17,21 +17,6 @@ type CatalogResponse = {
   items: CatalogItem[];
 };
 
-const FALLBACK: CatalogItem[] = [
-  { name: 'Colar Dupla Colours', price: 89, priceLabel: 'R$ 89,00', url: 'https://www.anamadu.com.br/produtos/', status: 'available' },
-  { name: 'Brinco Globo', price: 35, priceLabel: 'R$ 35,00', url: 'https://www.anamadu.com.br/produtos/', status: 'available' },
-  { name: 'Colar Sete Chakras', price: 75, priceLabel: 'R$ 75,00', url: 'https://www.anamadu.com.br/produtos/colar-sete-chakras/', status: 'available' },
-  { name: 'Pulseira Coração', price: 59, priceLabel: 'R$ 59,00', url: 'https://www.anamadu.com.br/produtos/', status: 'available' },
-  { name: 'Gargantilha Planetas', price: 97, priceLabel: 'R$ 97,00', url: 'https://www.anamadu.com.br/produtos/', status: 'available' },
-  { name: 'Gargantilha Pedras 2mm Inox', price: 110, priceLabel: 'R$ 110,00', url: 'https://www.anamadu.com.br/colecoes/', status: 'available' },
-  { name: 'Gargantilhas de Pedras 3mm', price: 95, priceLabel: 'R$ 95,00', url: 'https://www.anamadu.com.br/colecoes/', status: 'available' },
-  { name: 'Colar Água Marinha Lapidada', price: 69, priceLabel: 'R$ 69,00', url: 'https://www.anamadu.com.br/produtos/colar-agua-marinha-lapidada/', status: 'available' },
-  { name: 'Anel Ágata Rosa Inox', price: 69, priceLabel: 'R$ 69,00', url: 'https://www.anamadu.com.br/produtos/anel-agata-rosa-inox-h0im0/', status: 'available' },
-  { name: 'Drusa de Cristal', price: 95, priceLabel: 'R$ 95,00', url: 'https://www.anamadu.com.br/produtos/drusa-de-cristal/', status: 'available' },
-  { name: 'Colar Quartzo Rosa Bruto', price: 95, priceLabel: 'R$ 95,00', url: 'https://www.anamadu.com.br/produtos/colar-quartzo-rosa-bruto-fcbwj/', status: 'available' },
-  { name: 'Pulseira Turmalina Negra', price: 39, priceLabel: 'R$ 39,00', url: 'https://www.anamadu.com.br/produtos/pulseira-turmalina-negra/', status: 'available' },
-];
-
 function track(event: string, payload: Record<string, unknown> = {}) {
   if (typeof window === 'undefined') return;
   const dataLayer = (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer ?? [];
@@ -58,23 +43,29 @@ function captureAttribution() {
 }
 
 export function AnaMaduHome() {
-  const [catalog, setCatalog] = useState<CatalogItem[]>(FALLBACK);
+  const [catalog, setCatalog] = useState<CatalogItem[]>([]);
+  const [catalogState, setCatalogState] = useState<'loading' | 'ready' | 'unavailable'>('loading');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'todos' | 'ate50' | '50a100' | 'acima100'>('todos');
-  const [syncLabel, setSyncLabel] = useState('Catálogo Ana Madú');
+  const [syncLabel, setSyncLabel] = useState('Consultando catálogo real…');
 
   useEffect(() => {
     captureAttribution();
     fetch('/api/anamadu/catalog')
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('catalog_unavailable')))
       .then((data: CatalogResponse) => {
-        if (data.items?.length) {
-          setCatalog(data.items);
-          setSyncLabel(`${data.count} peças sincronizadas`);
-          track('anamadu_catalog_loaded', { item_count: data.count });
-        }
+        if (!data.items?.length) throw new Error('catalog_empty');
+        setCatalog(data.items);
+        setCatalogState('ready');
+        setSyncLabel(`${data.count} peças sincronizadas`);
+        track('anamadu_catalog_loaded', { item_count: data.count, source: data.source });
       })
-      .catch(() => setSyncLabel('Catálogo disponível'));
+      .catch(() => {
+        setCatalog([]);
+        setCatalogState('unavailable');
+        setSyncLabel('Catálogo temporariamente indisponível');
+        track('anamadu_catalog_unavailable');
+      });
   }, []);
 
   const visible = useMemo(() => {
@@ -119,22 +110,25 @@ export function AnaMaduHome() {
           </div>
 
           <div className="grid content-end gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-[32px] border border-white/60 bg-white/55 p-6 backdrop-blur"><Gem className="mb-8 size-9" /><div className="text-xs uppercase tracking-[0.22em] text-stone-500">Tradicional</div><h2 className="mt-2 text-2xl font-bold">Descubra sua próxima peça</h2><p className="mt-2 text-sm leading-relaxed text-stone-600">Coleções, pedras, presentes e achados autorais para comprar agora.</p></div>
-            <div id="ourives" className="rounded-[32px] bg-stone-950 p-6 text-white"><WandSparkles className="mb-8 size-9 text-amber-200" /><div className="text-xs uppercase tracking-[0.22em] text-stone-400">Ourives</div><h2 className="mt-2 text-2xl font-bold">Uma joia começa pela conversa</h2><p className="mt-2 text-sm leading-relaxed text-stone-300">Curadoria de pedras, briefing assistido pela Anita e projeto sob medida com atendimento premium.</p><button onClick={() => track('anamadu_ourives_interest')} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-amber-200">Iniciar projeto <ArrowRight className="size-4" /></button></div>
+            <div className="rounded-[32px] border border-white/60 bg-white/55 p-6 backdrop-blur"><Gem className="mb-8 size-9" /><div className="text-xs uppercase tracking-[0.22em] text-stone-500">Tradicional</div><h2 className="mt-2 text-2xl font-bold">Descubra sua próxima peça</h2><p className="mt-2 text-sm leading-relaxed text-stone-600">Coleções, pedras, presentes e achados autorais disponíveis no catálogo real.</p></div>
+            <div id="ourives" className="rounded-[32px] bg-stone-950 p-6 text-white"><WandSparkles className="mb-8 size-9 text-amber-200" /><div className="text-xs uppercase tracking-[0.22em] text-stone-400">Ourives</div><h2 className="mt-2 text-2xl font-bold">Uma joia começa pela conversa</h2><p className="mt-2 text-sm leading-relaxed text-stone-300">Curadoria de pedras, briefing assistido pela Annita e projeto sob medida com atendimento consultivo.</p><button onClick={() => track('anamadu_ourives_interest')} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-amber-200">Iniciar projeto <ArrowRight className="size-4" /></button></div>
           </div>
         </div>
       </section>
 
       <section id="catalogo" className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div><div className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">{syncLabel}</div><h2 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Encontre a peça certa</h2><p className="mt-3 max-w-xl text-stone-600">Busque por nome e faixa de preço. O catálogo é sincronizado com a loja atual para reduzir divergências de preço e disponibilidade.</p></div>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div><div className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">{syncLabel}</div><h2 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Encontre a peça certa</h2><p className="mt-3 max-w-xl text-stone-600">Busque por nome e faixa de preço. Preço e disponibilidade só são exibidos quando retornados pela fonte operacional consultada.</p></div>
+          {catalogState === 'ready' && <div className="flex flex-col gap-2 sm:flex-row">
             <label className="flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-3"><Search className="size-4 text-stone-500" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar peça..." className="w-56 bg-transparent text-sm outline-none" /></label>
             <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} className="rounded-full border border-stone-300 bg-white px-4 py-3 text-sm outline-none"><option value="todos">Todos os preços</option><option value="ate50">Até R$ 50</option><option value="50a100">R$ 50 a R$ 100</option><option value="acima100">Acima de R$ 100</option></select>
-          </div>
+          </div>}
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {catalogState === 'loading' && <div className="mt-10 rounded-3xl border border-stone-200 bg-white p-10 text-center text-stone-600">Consultando o catálogo oficial…</div>}
+        {catalogState === 'unavailable' && <div className="mt-10 rounded-3xl border border-amber-300 bg-amber-50 p-10 text-center text-stone-700"><strong className="block text-stone-950">Não vamos mostrar dados desatualizados.</strong><span className="mt-2 block">O catálogo operacional não respondeu agora. Fale com a Annita ou acesse a loja atual para consultar produtos e condições vigentes.</span><div className="mt-5 flex flex-wrap justify-center gap-3"><a href="https://www.anamadu.com.br/" target="_blank" rel="noreferrer" className="rounded-full bg-stone-950 px-5 py-2.5 text-sm font-semibold text-white">Acessar loja atual</a><button type="button" onClick={() => track('anamadu_catalog_unavailable_annita_intent')} className="rounded-full border border-stone-400 px-5 py-2.5 text-sm font-semibold">Falar com Annita</button></div></div>}
+
+        {catalogState === 'ready' && <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visible.slice(0, 60).map((item) => (
             <article key={item.url + item.name} className="group overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
               <button type="button" onClick={() => openItem(item)} className="block w-full text-left">
@@ -142,20 +136,21 @@ export function AnaMaduHome() {
                   {item.image ? <img src={item.image} alt={item.name} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="flex size-full items-center justify-center"><Gem className="size-14 text-stone-500/60" /></div>}
                   <div className="absolute right-3 top-3 rounded-full bg-white/90 p-2"><Heart className="size-4" /></div>
                   {item.status === 'sold_out' && <div className="absolute left-3 top-3 rounded-full bg-stone-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">Esgotado</div>}
+                  {item.status === 'unknown' && <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-stone-700">Disponibilidade a confirmar</div>}
                 </div>
                 <div className="p-5"><h3 className="min-h-12 font-semibold leading-snug">{item.name}</h3><div className="mt-3 flex items-end justify-between gap-3"><strong className="text-lg">{item.priceLabel}</strong><span className="inline-flex items-center gap-1 text-xs font-semibold">Ver peça <ArrowRight className="size-3.5" /></span></div></div>
               </button>
             </article>
           ))}
-        </div>
-        {!visible.length && <div className="mt-10 rounded-3xl border border-dashed border-stone-300 p-10 text-center text-stone-600">Nenhuma peça encontrada com esses filtros. Experimente outro termo ou peça ajuda à Anita.</div>}
-        {catalog.length > 60 && <div className="mt-8 text-center text-xs text-stone-500">Mostrando 60 de {catalog.length} itens sincronizados nesta visualização.</div>}
+        </div>}
+        {catalogState === 'ready' && !visible.length && <div className="mt-10 rounded-3xl border border-dashed border-stone-300 p-10 text-center text-stone-600">Nenhuma peça encontrada com esses filtros. Experimente outro termo ou peça ajuda à Annita.</div>}
+        {catalogState === 'ready' && catalog.length > 60 && <div className="mt-8 text-center text-xs text-stone-500">Mostrando 60 de {catalog.length} itens sincronizados nesta visualização.</div>}
       </section>
 
       <section id="historia" className="bg-stone-950 text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 lg:grid-cols-3 lg:px-8">
           <div className="lg:col-span-2"><div className="text-xs uppercase tracking-[0.22em] text-amber-200">Ana Madú</div><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Artesanal no toque. Inteligente na experiência.</h2><p className="mt-6 max-w-2xl text-lg leading-relaxed text-stone-300">A nova experiência une a identidade autoral da marca a um atendimento digital capaz de entender contexto, origem da campanha e intenção de compra sem transformar a jornada em um formulário frio.</p></div>
-          <div className="space-y-3"><div className="rounded-3xl border border-white/10 p-5"><ShieldCheck className="mb-4 size-5 text-amber-200" /><strong className="block">Informação responsável</strong><p className="mt-2 text-sm leading-relaxed text-stone-400">Sem inventar procedência, propriedades, autenticidade, preço ou disponibilidade.</p></div><div className="rounded-3xl border border-white/10 p-5"><Sparkles className="mb-4 size-5 text-amber-200" /><strong className="block">Anita acompanha a jornada</strong><p className="mt-2 text-sm leading-relaxed text-stone-400">Descoberta, presente, catálogo, Ourives, pós-venda e continuidade entre canais.</p></div></div>
+          <div className="space-y-3"><div className="rounded-3xl border border-white/10 p-5"><ShieldCheck className="mb-4 size-5 text-amber-200" /><strong className="block">Informação responsável</strong><p className="mt-2 text-sm leading-relaxed text-stone-400">Sem inventar procedência, propriedades, autenticidade, preço ou disponibilidade.</p></div><div className="rounded-3xl border border-white/10 p-5"><Sparkles className="mb-4 size-5 text-amber-200" /><strong className="block">Annita acompanha a jornada</strong><p className="mt-2 text-sm leading-relaxed text-stone-400">Descoberta, presente, catálogo, Ourives, pós-venda e continuidade entre canais.</p></div></div>
         </div>
       </section>
 
