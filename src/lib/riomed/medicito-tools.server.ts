@@ -13,6 +13,14 @@ function clean(value: string | null | undefined, max = 300) {
   return (value ?? "").trim().slice(0, max);
 }
 
+function cleanSearchTerm(value: string) {
+  return clean(value, 120)
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}\s._\/-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function auditTool(ctx: MedicitoToolContext, action: string, after: Record<string, unknown>) {
   try {
     await supabaseAdmin.from("audit_logs").insert({
@@ -38,7 +46,8 @@ export function buildMedicitoTools(ctx: MedicitoToolContext) {
         limit: z.number().int().min(1).max(12).default(8),
       }),
       execute: async ({ query, limit }) => {
-        const q = clean(query, 120).replace(/[,%()]/g, " ").replace(/\s+/g, " ");
+        const q = cleanSearchTerm(query);
+        if (q.length < 2) return { ok: false, query: q, count: 0, products: [], reason: "search_term_invalid" };
         const { data, error } = await supabaseAdmin
           .from("riomed_products")
           .select("id,sku,name,description,category,modality,price_sale,price_rental_daily,price_rental_monthly,currency,stock,image_url,metadata")
