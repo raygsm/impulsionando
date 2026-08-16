@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const APP_ROLES = ["admin", "white_label", "gestor", "operador", "profissional", "consumidor"] as const;
+const APP_ROLES = ["admin", "white_label", "gestor", "financeiro", "operador", "profissional", "consumidor"] as const;
 export type AppRole = (typeof APP_ROLES)[number];
 export const ALL_APP_ROLES = APP_ROLES;
 
