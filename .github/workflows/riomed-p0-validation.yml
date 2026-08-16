@@ -17,7 +17,7 @@ permissions:
 
 concurrency:
   group: riomed-p0-validation
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -35,12 +35,17 @@ jobs:
         run: |
           set -euo pipefail
           test -f src/routes/api/riomed/medicito/chat.ts
+          test -f src/routes/api/riomed/medicito/upload.ts
           test -f src/routes/riomed.medicito.tsx
           test -f src/lib/riomed/medicito-tools.server.ts
           grep -q 'allowFallback: false' src/routes/api/riomed/medicito/chat.ts
           grep -q 'buildMedicitoTools' src/routes/api/riomed/medicito/chat.ts
           grep -q 'stopWhen: stepCountIs(5)' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'type: "image"' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'riomed_medicito_uploads' src/routes/api/riomed/medicito/upload.ts
+          grep -q 'MAX_BYTES = 8 \* 1024 \* 1024' src/routes/api/riomed/medicito/upload.ts
           grep -q 'JSON.stringify({ text: userMessage' src/routes/riomed.medicito.tsx
+          grep -q 'uploadId' src/routes/riomed.medicito.tsx
           grep -q 'riomed:web:' src/routes/riomed.medicito.tsx
           ! grep -q 'LOVABLE_API_KEY' src/routes/api/riomed/medicito/chat.ts
           ! grep -q 'createLovableAiGatewayProvider' src/routes/api/riomed/medicito/chat.ts
