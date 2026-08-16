@@ -1,0 +1,68 @@
+name: WMP diagnose canonical Core HMAC v2
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-hmac-core-diagnose-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then exit 0; fi
+            sleep 3
+          done
+          exit 41
+      - name: Diagnose verifier without exposing secret
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          sec=/etc/impulsionando-security.env
+          core=/etc/impulsionando-core.env
+          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$sec" | head -n1)"
+          core_secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$core" | head -n1)"
+          docker_secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          printf 'SEC_FP=%s\n' "$(printf '%s' "$secret" | sha256sum | awk '{print $1}')"
+          printf 'CORE_FP=%s\n' "$(printf '%s' "$core_secret" | sha256sum | awk '{print $1}')"
+          printf 'DOCKER_FP=%s\n' "$(printf '%s' "$docker_secret" | sha256sum | awk '{print $1}')"
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          endpoint='/api/public/hooks/n8n-verify'
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"diag-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          dget="$(curl -sS -o /tmp/dget -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' "http://$ip:3000$endpoint" || true)"
+          dunsigned="$(curl -sS -o /tmp/du -w '%{http_code}' -X POST -H 'Host: wmp.impulsionando.com.br' -H 'content-type: application/json' --data-binary "$payload" "http://$ip:3000$endpoint" || true)"
+          dsigned="$(curl -sS -o /tmp/ds -w '%{http_code}' -X POST -H 'Host: wmp.impulsionando.com.br' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" "http://$ip:3000$endpoint" || true)"
+          pget="$(curl -sS -o /tmp/pget -w '%{http_code}' 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
+          punsigned="$(curl -sS -o /tmp/pu -w '%{http_code}' -X POST -H 'content-type: application/json' --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
+          psigned="$(curl -sS -o /tmp/ps -w '%{http_code}' -X POST -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' || true)"
+          echo "DIRECT get=$dget unsigned=$dunsigned signed=$dsigned signed_body=$(head -c 160 /tmp/ds)"
+          echo "PUBLIC get=$pget unsigned=$punsigned signed=$psigned signed_body=$(head -c 160 /tmp/ps)"
+          test "$dget" = 200
+          test "$dunsigned" = 401
+          test "$dsigned" = 200
+          test "$pget" = 200
+          test "$punsigned" = 401
+          test "$psigned" = 200
+          grep -q '"ok":true' /tmp/ds
+          grep -q '"ok":true' /tmp/ps
+          echo 'WMP_HMAC_CORE_DIAG=PASS'
+          REMOTE
