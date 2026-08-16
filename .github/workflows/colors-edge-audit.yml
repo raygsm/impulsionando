@@ -31,22 +31,42 @@ jobs:
           set -euo pipefail
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
+          domain='colorssaude.impulsionando.com.br'
           echo '=== CORE TRAEFIK LABELS ==='
           sudo docker inspect -f '{{json .Config.Labels}}' impulsionando-core | jq -r 'to_entries[] | select(.key|startswith("traefik.")) | "\(.key)=\(.value)"' | sort || true
           echo '=== EDGE CONTAINERS ==='
           sudo docker ps --format '{{.Names}}' | grep -E 'traefik|impulsionando-core' || true
-          probe() {
-            scheme="$1"; path="$2"; accept="$3"
-            if [ "$scheme" = https ]; then tls='-k'; port=443; else tls=''; port=80; fi
-            code="$(curl $tls -sS -H 'Host: colorssaude.impulsionando.com.br' -H "Accept: $accept" -D /tmp/colors-edge-headers -o /tmp/colors-edge-body -w '%{http_code}' --max-time 15 "$scheme://127.0.0.1:$port$path" || true)"
-            echo "COLORS_TRAEFIK_PUBLIC_LISTENER scheme=$scheme path=$path HTTP=$code"
-            grep -Ei '^(server|location|cf-cache-status|content-type):' /tmp/colors-edge-headers || true
+
+          probe_http() {
+            path="$1"; accept="$2"
+            code="$(curl -sS -H "Host: $domain" -H "Accept: $accept" -D /tmp/colors-edge-headers -o /tmp/colors-edge-body -w '%{http_code}' --max-time 15 "http://127.0.0.1$path" || true)"
+            echo "COLORS_TRAEFIK_HTTP path=$path HTTP=$code"
+            grep -Ei '^(server|location|content-type):' /tmp/colors-edge-headers || true
             head -c 160 /tmp/colors-edge-body | tr '\n' ' '; echo
           }
-          probe http / 'text/html,application/xhtml+xml'
-          probe http /agenda 'text/html,application/xhtml+xml'
-          probe http /api/public/webhooks/maisfy-colors 'application/json'
-          probe https / 'text/html,application/xhtml+xml'
-          probe https /agenda 'text/html,application/xhtml+xml'
-          probe https /api/public/webhooks/maisfy-colors 'application/json'
+
+          probe_https_sni() {
+            path="$1"; accept="$2"
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H "Accept: $accept" -H 'User-Agent: Mozilla/5.0 ColorsEdgeAudit/1.0' -D /tmp/colors-edge-headers -o /tmp/colors-edge-body -w '%{http_code}' --max-time 20 "https://$domain$path" || true)"
+            echo "COLORS_TRAEFIK_HTTPS_SNI path=$path HTTP=$code"
+            grep -Ei '^(server|location|content-type):' /tmp/colors-edge-headers || true
+            head -c 200 /tmp/colors-edge-body | tr '\n' ' '; echo
+          }
+
+          probe_http / 'text/html,application/xhtml+xml'
+          probe_http /agenda 'text/html,application/xhtml+xml'
+          probe_http /api/public/webhooks/maisfy-colors 'application/json'
+
+          probe_https_sni / 'text/html,application/xhtml+xml'
+          probe_https_sni /super-green-black 'text/html,application/xhtml+xml'
+          probe_https_sni /agenda 'text/html,application/xhtml+xml'
+          probe_https_sni /eventos 'text/html,application/xhtml+xml'
+          probe_https_sni /suporte 'text/html,application/xhtml+xml'
+          probe_https_sni /afiliados 'text/html,application/xhtml+xml'
+          probe_https_sni /rastreio 'text/html,application/xhtml+xml'
+          probe_https_sni /entrar 'text/html,application/xhtml+xml'
+          probe_https_sni /criar-conta 'text/html,application/xhtml+xml'
+          probe_https_sni /api/public/webhooks/maisfy-colors 'application/json'
+          probe_https_sni /api/public/webhooks/monetizze-colors 'application/json'
+          probe_https_sni /api/public/webhooks/perfectpay-colors 'application/json'
           REMOTE
