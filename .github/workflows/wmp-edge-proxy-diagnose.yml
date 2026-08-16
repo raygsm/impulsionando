@@ -1,0 +1,47 @@
+name: WMP edge proxy diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-edge-proxy-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Identify Docker edge proxy and WMP routing
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== containers / published ports ==='
+          sudo docker ps --format 'NAME={{.Names}} IMAGE={{.Image}} PORTS={{.Ports}}'
+          echo '=== containers owning 80/443 ==='
+          for c in $(sudo docker ps -q); do
+            ports="$(sudo docker inspect -f '{{json .NetworkSettings.Ports}}' "$c")"
+            if printf '%s' "$ports" | grep -Eq '80/tcp|443/tcp'; then
+              name="$(sudo docker inspect -f '{{.Name}}' "$c" | sed 's#^/##')"
+              image="$(sudo docker inspect -f '{{.Config.Image}}' "$c")"
+              echo "EDGE_CONTAINER=$name IMAGE=$image"
+              echo 'LABELS:'
+              sudo docker inspect -f '{{range $k,$v := .Config.Labels}}{{$k}}={{$v}}{{println}}{{end}}' "$c" | grep -Ei 'traefik|caddy|nginx|host|router|proxy' || true
+              echo 'MOUNTS:'
+              sudo docker inspect -f '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}' "$c" || true
+              echo 'NETWORKS:'
+              sudo docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{$v.IPAddress}}{{println}}{{end}}' "$c" || true
+            fi
+          done
+          echo '=== WMP references under common proxy config locations ==='
+          sudo grep -R -n -E 'wmp\.impulsionando\.com\.br|wmp' /opt /etc /root 2>/dev/null | grep -E 'traefik|caddy|nginx|proxy|docker|compose|wmp' | head -n 250 || true
+          REMOTE
