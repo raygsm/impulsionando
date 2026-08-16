@@ -39,6 +39,10 @@ jobs:
           sudo docker cp "$container:/tmp/impulsionando-workflows.json" /tmp/impulsionando-workflows.json
           echo '== n8n workflow inventory =='
           jq -r '.[] | [.id,.name,(.active|tostring)] | @tsv' /tmp/impulsionando-workflows.json | sort
+          echo '== WMP workflow candidates and webhook nodes =='
+          jq -r '.[] | select(((.id // "") | ascii_downcase | contains("wmp")) or ((.name // "") | ascii_downcase | contains("wmp"))) | {id,name,active,nodes:[(.nodes // [])[] | select(.type=="n8n-nodes-base.webhook") | {name,webhookId,path:(.parameters.path // null),httpMethod:(.parameters.httpMethod // null),responseMode:(.parameters.responseMode // null)}]}' /tmp/impulsionando-workflows.json
+          echo '== representative active webhook workflows =='
+          jq -r '[.[] | select(.active==true) | select(any((.nodes // [])[]; .type=="n8n-nodes-base.webhook"))][0:8] | .[] | {id,name,active,nodes:[(.nodes // [])[] | {name,type,parameters}]}' /tmp/impulsionando-workflows.json
           echo '== totals =='
           jq -r '"total=" + (length|tostring) + " active=" + ([.[]|select(.active==true)]|length|tostring)' /tmp/impulsionando-workflows.json
           rm -f /tmp/impulsionando-workflows.json /tmp/n8n-export.log
