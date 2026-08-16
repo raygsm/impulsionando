@@ -23,7 +23,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           : > ~/.ssh/known_hosts
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
-      - name: Inspect verifier nodes
+      - name: Inspect verifier input chain
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -38,9 +38,9 @@ jobs:
           const id=process.env.WID;
           const raw=JSON.parse(fs.readFileSync('/tmp/'+id+'-v.json','utf8'));
           const w=Array.isArray(raw)?raw[0]:raw;
-          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
-          const v=(w.nodes||[]).find(n=>n.name==='Verify signature in Core'||(n.type==='n8n-nodes-base.httpRequest'&&String(n.parameters?.url||'').includes('n8n-verify')));
-          console.log(JSON.stringify({id,hookParameters:hook?.parameters,verifierName:v?.name,verifierTypeVersion:v?.typeVersion,verifierParameters:v?.parameters},null,2));
+          console.log('WORKFLOW='+id);
+          console.log('NODES='+JSON.stringify((w.nodes||[]).map(n=>({name:n.name,type:n.type,parameters:n.parameters})),null,2));
+          console.log('CONNECTIONS='+JSON.stringify(w.connections||{},null,2));
           NODE
           done
           REMOTE
