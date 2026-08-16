@@ -2,14 +2,8 @@
 /**
  * Gate de consistência do catálogo público de nichos.
  *
- * O frontend passou a ter UMA fonte pública: `public-niche-catalog.ts`.
- * Este prebuild não exige mais `NICHO_CARDS`/`MACRO_NICHOS`, porque essas
- * listas paralelas eram justamente a causa de segmentos invisíveis no front.
- *
- * Invariantes:
- *  1. Todo slug publicado em GROUPS existe em NICHO_DETAILS ou no playbook comercial.
- *  2. Nichos críticos de demanda histórica permanecem publicados.
- *  3. A rota `/nichos/$slug` suporta tanto nichos canônicos quanto playbooks.
+ * A fonte pública é `public-niche-catalog.ts`; superfícies públicas devem
+ * consumi-la sem reintroduzir listas paralelas.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -67,16 +61,17 @@ try {
     if (!published.has(slug)) errors.push(`Segmento crítico ausente do catálogo público: "${slug}".`);
   }
 
-  const requiredCatalogConsumers = [
+  for (const [name, src] of [
     ["/escolher-nicho", escolherSrc],
     ["/nichos", hubSrc],
     ["PublicHeader", headerSrc],
-  ];
-  for (const [name, src] of requiredCatalogConsumers) {
+  ]) {
     if (!src.includes("PUBLIC_NICHE")) errors.push(`${name} não consome mais a fonte pública unificada.`);
   }
 
-  if (!routeSrc.includes("findNichePlaybook") || !routeSrc.includes("findNicho")) {
+  const supportsCanonical = routeSrc.includes("findNicho(") && routeSrc.includes('kind: "canonical"');
+  const supportsPlaybooks = routeSrc.includes("COMMERCIAL_NICHE_PLAYBOOK.find") && routeSrc.includes('kind: "playbook"');
+  if (!supportsCanonical || !supportsPlaybooks) {
     errors.push("A rota /nichos/$slug não suporta simultaneamente nichos canônicos e playbooks comerciais.");
   }
 } catch (err) {
