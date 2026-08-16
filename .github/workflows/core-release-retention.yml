@@ -1,0 +1,69 @@
+name: Core Release Retention
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retain:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Keep current, rollback and four newest extra releases
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -o ServerAliveInterval=20 -o ServerAliveCountMax=6 "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          BASE=/var/www/impulsionando-core/releases
+          CURRENT="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
+          PREVIOUS="$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
+          test -n "$CURRENT"
+          test -f "$CURRENT/.output/server/index.mjs"
+          case "$CURRENT" in "$BASE"/*) ;; *) exit 80;; esac
+
+          mapfile -t NEWEST < <(sudo find "$BASE" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | awk '{print $2}' | head -n 6)
+          keep_file="$(mktemp)"
+          trap 'rm -f "$keep_file"' EXIT
+          printf '%s\n' "$CURRENT" > "$keep_file"
+          if [ -n "$PREVIOUS" ] && [ -f "$PREVIOUS/.output/server/index.mjs" ]; then printf '%s\n' "$PREVIOUS" >> "$keep_file"; fi
+          printf '%s\n' "${NEWEST[@]}" >> "$keep_file"
+          sort -u "$keep_file" -o "$keep_file"
+
+          removed=0
+          while IFS= read -r dir; do
+            [ -n "$dir" ] || continue
+            grep -Fxq "$dir" "$keep_file" && continue
+            case "$dir" in "$BASE"/*) ;; *) exit 81;; esac
+            sudo rm -rf -- "$dir"
+            removed=$((removed+1))
+          done < <(sudo find "$BASE" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort)
+
+          sudo journalctl --vacuum-size=200M >/dev/null 2>&1 || true
+          npm cache clean --force >/dev/null 2>&1 || true
+          echo "CORE_RELEASES_REMOVED=$removed"
+          echo "CORE_RELEASES_REMAINING=$(sudo find "$BASE" -mindepth 1 -maxdepth 1 -type d | wc -l)"
+          df -h /
+          FREE_KB="$(df -Pk / | awk 'NR==2{print $4}')"
+          [ "$FREE_KB" -ge 8388608 ] || { echo 'Core release retention left less than 8 GiB free'; exit 82; }
+          curl --fail --silent --show-error --max-time 10 http://127.0.0.1:3000/ >/dev/null
+          echo 'CORE_RELEASE_RETENTION=PASS'
+          REMOTE
