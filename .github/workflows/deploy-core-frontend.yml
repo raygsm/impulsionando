@@ -189,6 +189,10 @@ jobs:
           tar -C release -czf /tmp/impulsionando-core-release.tgz .
           scp /tmp/impulsionando-core-release.tgz deploy/impulsionando-core.service "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
 
+      - name: Arm rollback guard
+        id: rollback_guard
+        run: echo 'armed=true' >> "$GITHUB_OUTPUT"
+
       - name: Activate release on systemd runtime
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
@@ -352,7 +356,7 @@ jobs:
           echo 'PUBLIC_CORE_VALIDATION=PASS'
 
       - name: Roll back failed release and edge
-        if: failure()
+        if: ${{ failure() && steps.rollback_guard.outputs.armed == 'true' }}
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
