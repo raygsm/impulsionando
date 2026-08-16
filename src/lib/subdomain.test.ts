@@ -52,28 +52,28 @@ describe("canonicalTenantHostRedirect", () => {
 
 describe("Colors clean public path routing", () => {
   it("maps the Colors root to its internal namespace", () => {
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/")).toBe("/colors");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/")).toBe("/colors");
   });
 
   it("maps critical clean Colors pages to the internal namespace", () => {
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/super-green-black")).toBe("/colors/super-green-black");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/agenda")).toBe("/colors/agenda");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/eventos")).toBe("/colors/eventos");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/suporte")).toBe("/colors/suporte");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/afiliados")).toBe("/colors/afiliados");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/rastreio")).toBe("/colors/rastreio");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/entrar")).toBe("/colors/entrar");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/criar-conta")).toBe("/colors/criar-conta");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/super-green-black")).toBe("/colors/super-green-black");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/agenda")).toBe("/colors/agenda");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/eventos")).toBe("/colors/eventos");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/suporte")).toBe("/colors/suporte");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/afiliados")).toBe("/colors/afiliados");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/rastreio")).toBe("/colors/rastreio");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/entrar")).toBe("/colors/entrar");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/criar-conta")).toBe("/colors/criar-conta");
   });
 
   it("does not double-prefix internal Colors routes", () => {
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/colors/agenda")).toBe("/colors/agenda");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/colors/agenda")).toBe("/colors/agenda");
   });
 
   it("never rewrites Colors APIs or static assets", () => {
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/api/public/webhooks/maisfy-colors")).toBe("/api/public/webhooks/maisfy-colors");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/assets/app.js")).toBe("/assets/app.js");
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/robots.txt")).toBe("/robots.txt");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/api/public/webhooks/maisfy-colors")).toBe("/api/public/webhooks/maisfy-colors");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/assets/app.js")).toBe("/assets/app.js");
+    expect(toColorsInternalPathname("colorssaude.impulsionando.com.br", "/robots.txt")).toBe("/robots.txt");
   });
 
   it("does not rewrite another tenant host", () => {
@@ -112,49 +112,49 @@ describe("WMP clean public path routing", () => {
   });
 
   it("does not rewrite another tenant host", () => {
-    expect(toWmpInternalPathname("colors.impulsionando.com.br", "/djs")).toBe("/djs");
+    expect(toWmpInternalPathname("colorssaude.impulsionando.com.br", "/djs")).toBe("/djs");
   });
 });
 
 describe("deprecatedSubdomainRedirect", () => {
-  it("root do subdomínio legado", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br" }))
-      .toBe("https://colors.impulsionando.com.br/");
+  it("redirects the former Colors host to the canonical Colors Saúde host", () => {
+    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors.impulsionando.com.br" }))
+      .toBe("https://colorssaude.impulsionando.com.br/");
   });
 
-  it("remove o namespace técnico /colors de URL legada", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br", pathname: "/colors/super-green-black" }))
-      .toBe("https://colors.impulsionando.com.br/super-green-black");
+  it("removes the internal /colors namespace from the former host", () => {
+    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors.impulsionando.com.br", pathname: "/colors/super-green-black" }))
+      .toBe("https://colorssaude.impulsionando.com.br/super-green-black");
   });
 
-  it("preserva query e hash usando URL pública limpa", () => {
+  it("preserves query and hash on the canonical Colors Saúde URL", () => {
     expect(deprecatedSubdomainRedirect({
       ...base,
-      hostname: "colorssaude.impulsionando.com.br",
+      hostname: "colors.impulsionando.com.br",
       pathname: "/colors",
       search: "?utm_source=email&utm_campaign=x",
       hash: "#produtos",
-    })).toBe("https://colors.impulsionando.com.br/?utm_source=email&utm_campaign=x#produtos");
+    })).toBe("https://colorssaude.impulsionando.com.br/?utm_source=email&utm_campaign=x#produtos");
   });
 
-  it("cobre também o alias colors-saude", () => {
+  it("covers the colors-saude alias", () => {
     expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors-saude.impulsionando.com.br" }))
-      .toBe("https://colors.impulsionando.com.br/");
+      .toBe("https://colorssaude.impulsionando.com.br/");
   });
 
-  it("retorna null para subdomínio oficial", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors.impulsionando.com.br" }))
+  it("returns null for the official Colors Saúde host", () => {
+    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br" }))
       .toBeNull();
   });
 
-  it("retorna null para host fora do domínio raiz", () => {
+  it("returns null for a host outside the root domain", () => {
     expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.outro-dominio.com" }))
       .toBeNull();
   });
 
-  it("mantém http:// quando o request original é http", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, protocol: "http:", hostname: "colorssaude.impulsionando.com.br" }))
-      .toBe("http://colors.impulsionando.com.br/");
+  it("preserves http:// when the original request is http", () => {
+    expect(deprecatedSubdomainRedirect({ ...base, protocol: "http:", hostname: "colors.impulsionando.com.br" }))
+      .toBe("http://colorssaude.impulsionando.com.br/");
   });
 });
 
@@ -163,8 +163,8 @@ describe("tenant landing resolution", () => {
     expect(tenantLandingTargetForHost("chrismed.impulsionando.com.br")).toBe("/chrismed");
   });
 
-  it("routes Colors to its dedicated landing", () => {
-    expect(tenantLandingTargetForHost("colors.impulsionando.com.br")).toBe("/colors");
+  it("routes Colors Saúde to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("colorssaude.impulsionando.com.br")).toBe("/colors");
   });
 
   it("routes WMP to its dedicated landing", () => {
