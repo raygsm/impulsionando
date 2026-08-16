@@ -17,6 +17,8 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   wmp: "/wmp",
   garrido: "/garrido",
   anamadu: "/anamadu",
+  tour: "/tour",
+  "impulsionando-tour": "/tour",
   impulsity: "/vitrine/impulsity",
   dqa: "/vitrine/dqa-panini",
   "plataforma-saude": "/vitrine/patricia-lenine",
