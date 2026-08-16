@@ -91,13 +91,11 @@ function RiomedLayout() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           {/* Logo */}
           <Link to="/riomed" className="flex items-center gap-2 shrink-0">
-            {s?.logo_url ? (
-              <img src={s.logo_url} alt={s?.brand_name ?? "Rio Med"} className="h-10" />
-            ) : (
-              <span className="text-2xl font-extrabold tracking-tight text-[color:var(--riomed-primary)]">
-                {s?.brand_name ?? "Rio Med"}
-              </span>
-            )}
+            <img
+              src="/__l5e/assets-v1/4066b94d-f9a6-431a-81f4-82a420c64bc3/riomed-logo.png"
+              alt="RIO MED — Equipos & Insumos Médicos"
+              className="h-11 w-auto object-contain"
+            />
           </Link>
 
           {/* Nav desktop */}

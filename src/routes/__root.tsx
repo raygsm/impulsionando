@@ -20,6 +20,7 @@ import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { TenantHostFallback } from "@/components/app/TenantHostFallback";
 import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";
+import { MedicitoConcierge } from "@/components/riomed/MedicitoConcierge";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 import {
@@ -420,6 +421,9 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isRiomedRoute =
+    pathname.startsWith("/riomed") ||
+    (typeof window !== "undefined" && window.location.hostname.toLowerCase().startsWith("riomed."));
   const isChrismedRoute =
     pathname.startsWith("/chrismed") ||
     pathname === "/alth" ||
@@ -446,7 +450,8 @@ function RootComponent() {
       {!isChrismedRoute && pathname !== "/auth" && <PoweredByImpulsionando />}
       <LGPDBanner />
       {/* Concierge Impulsionito — oculto na CHRISMED para não concorrer com Oliver. */}
-      {!isChrismedRoute && <ImpulsionitoConcierge />}
+      {!isChrismedRoute && !isRiomedRoute && <ImpulsionitoConcierge />}
+      {isRiomedRoute && <MedicitoConcierge />}
       <DemoAccessGate />
     </QueryClientProvider>
   );
