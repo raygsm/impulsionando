@@ -46,17 +46,17 @@ jobs:
                 "id":"${id}-webhook","name":"WMP Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"${webhook_id}"
               },
               {
-                "parameters":{"jsCode":"const crypto = require('crypto');\nconst item = \$input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst secret = \$env.IMPULSIONANDO_WEBHOOK_SECRET;\nif (!secret) throw new Error('missing_hmac_secret');\nconst expected = crypto.createHmac('sha256', secret).update(canonical).digest('hex');\nconst a = Buffer.from(sig, 'utf8');\nconst b = Buffer.from(expected, 'utf8');\nif (a.length !== b.length || !crypto.timingSafeEqual(a,b)) throw new Error('invalid_signature');\nconst payload = typeof raw === 'string' ? JSON.parse(raw) : raw;\nif (!payload || payload.tenant_slug !== 'wmp' || !payload.event_code || !payload.correlation_id) throw new Error('invalid_wmp_lifecycle_payload');\nreturn [{json: payload}];"},
+                "parameters":{"jsCode":"const crypto = require('crypto');\nconst item = \$input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst secret = \$env.IMPULSIONANDO_WEBHOOK_SECRET;\nlet authorized = false;\nlet error = 'invalid_signature';\nlet payload = null;\ntry {\n  if (!secret) { error = 'missing_hmac_secret'; }\n  else if (!sig) { error = 'missing_signature'; }\n  else {\n    const expected = crypto.createHmac('sha256', secret).update(canonical).digest('hex');\n    const a = Buffer.from(sig, 'utf8');\n    const b = Buffer.from(expected, 'utf8');\n    if (a.length === b.length && crypto.timingSafeEqual(a,b)) {\n      payload = typeof raw === 'string' ? JSON.parse(raw) : raw;\n      if (payload && payload.tenant_slug === 'wmp' && payload.event_code && payload.correlation_id) { authorized = true; error = null; }\n      else error = 'invalid_wmp_lifecycle_payload';\n    }\n  }\n} catch (e) { error = 'verification_error'; }\nreturn [{json:{authorized,error,payload}}];"},
                 "id":"${id}-verify-hmac","name":"Verify HMAC and WMP Payload","type":"n8n-nodes-base.code","typeVersion":2,"position":[260,0]
               },
               {
-                "parameters":{"respondWith":"json","responseBody":"={{ { ok: true, workflow: '${slug}', event_code: \$json.event_code || null, correlation_id: \$json.correlation_id || null, accepted_at: \$now } }}","options":{"responseCode":200}},
-                "id":"${id}-respond-ok","name":"Respond 200","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[520,0]
+                "parameters":{"respondWith":"json","responseBody":"={{ { ok: \$json.authorized === true, workflow: '${slug}', error: \$json.authorized === true ? null : \$json.error, event_code: \$json.payload?.event_code || null, correlation_id: \$json.payload?.correlation_id || null, accepted_at: \$json.authorized === true ? \$now : null } }}","options":{"responseCode":"={{ \$json.authorized === true ? 200 : 401 }}"}},
+                "id":"${id}-respond","name":"Respond Security Result","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[520,0]
               }
             ],
             "connections":{
               "WMP Lifecycle Webhook":{"main":[[{"node":"Verify HMAC and WMP Payload","type":"main","index":0}]]},
-              "Verify HMAC and WMP Payload":{"main":[[{"node":"Respond 200","type":"main","index":0}]]}
+              "Verify HMAC and WMP Payload":{"main":[[{"node":"Respond Security Result","type":"main","index":0}]]}
             },
             "settings":{"executionOrder":"v1"}
           }
@@ -77,10 +77,7 @@ jobs:
           echo '== Wait for n8n =='
           ready=0
           for i in $(seq 1 45); do
-            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then
-              ready=1
-              break
-            fi
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then ready=1; break; fi
             sleep 2
           done
           [ "$ready" -eq 1 ] || { echo 'n8n healthz did not recover'; exit 32; }
@@ -90,12 +87,11 @@ jobs:
             local url="https://n8n.impulsionando.com.br/webhook/${path}"
             echo "== Probe ${id} =="
 
-            local unsigned_code
-            unsigned_code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "{\"tenant_slug\":\"wmp\",\"event_code\":\"${event}\",\"correlation_id\":\"unsigned-security-probe\"}")"
-            echo "${id}_unsigned_http=$unsigned_code"
-            case "$unsigned_code" in
-              2*|3*) echo "SECURITY FAILURE: unsigned ${id} request was accepted"; exit 33 ;;
-            esac
+            local unsigned_code unsigned_body
+            unsigned_body="/tmp/${id}-unsigned.out"
+            unsigned_code="$(curl -sS -o "$unsigned_body" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "{\"tenant_slug\":\"wmp\",\"event_code\":\"${event}\",\"correlation_id\":\"unsigned-security-probe\"}")"
+            echo "${id}_unsigned_http=$unsigned_code body=$(head -c 240 "$unsigned_body")"
+            [ "$unsigned_code" = '401' ] || { echo "SECURITY FAILURE: unsigned ${id} did not return 401"; exit 33; }
 
             sudo docker exec -i -e WMP_PROBE_URL="$url" -e WMP_PROBE_EVENT="$event" -e WMP_PROBE_ID="$id" "$C" node - <<'NODE'
           const crypto = require('crypto');
@@ -106,7 +102,7 @@ jobs:
           const payload = JSON.stringify({workflow_name:id,event_code:eventCode,tenant_slug:'wmp',correlation_id:`signed-security-probe-${id}-${Date.now()}`,company_id:null,dispatched_at:new Date().toISOString(),data:{security_probe:true}});
           const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
           fetch(url,{method:'POST',headers:{'content-type':'application/json','x-impulsionando-signature':signature},body:payload})
-            .then(async r=>{ const text=await r.text(); console.log(`${id}_signed_http=${r.status} body=${text.slice(0,300)}`); if(!r.ok) process.exit(34); })
+            .then(async r=>{ const text=await r.text(); console.log(`${id}_signed_http=${r.status} body=${text.slice(0,300)}`); if(r.status!==200 || !text.includes('"ok":true')) process.exit(34); })
             .catch(e=>{ console.error(e.message); process.exit(35); });
           NODE
 
@@ -120,7 +116,7 @@ jobs:
           const names=(w.nodes||[]).map(n=>n.name);
           const summary={id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,webhookId:webhook?.webhookId,path:webhook?.parameters?.path,nodes:names};
           console.log(JSON.stringify(summary));
-          if(!w.active||!w.activeVersionId||!webhook?.webhookId||!names.includes('Verify HMAC and WMP Payload'))process.exit(36);
+          if(!w.active||!w.activeVersionId||!webhook?.webhookId||!names.includes('Verify HMAC and WMP Payload')||!names.includes('Respond Security Result'))process.exit(36);
           NODE
           }
 
