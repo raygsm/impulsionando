@@ -17,7 +17,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Install and verify HMAC-protected WMP lead intake
+      - name: Install and verify HMAC-protected WMP lifecycle workflows
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -25,7 +25,6 @@ jobs:
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          URL=https://n8n.impulsionando.com.br/webhook/wmp-lead-intake
 
           echo '== Runtime prerequisite =='
           if ! sudo docker exec "$C" sh -lc '[ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]'; then
@@ -34,37 +33,46 @@ jobs:
           fi
           echo 'IMPULSIONANDO_WEBHOOK_SECRET_PRESENT=true'
 
-          cat >/tmp/wmp-lead.json <<'JSON'
+          create_workflow() {
+            local id="$1" name="$2" path="$3" slug="$4"
+            local file="/tmp/${id}.json"
+            cat >"$file" <<JSON
           {
-            "id":"wmpLeadIntake01",
-            "name":"WMP Lead Intake",
+            "id":"${id}",
+            "name":"${name}",
             "active":false,
             "nodes":[
               {
-                "parameters":{"httpMethod":"POST","path":"wmp-lead-intake","responseMode":"responseNode","options":{"rawBody":true}},
-                "id":"wmp-lead-webhook","name":"WMP Lead","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]
+                "parameters":{"httpMethod":"POST","path":"${path}","responseMode":"responseNode","options":{"rawBody":true}},
+                "id":"${id}-webhook","name":"WMP Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]
               },
               {
-                "parameters":{"functionCode":"const crypto = require('crypto');\nconst item = $input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst expected = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(canonical).digest('hex');\nconst a = Buffer.from(sig, 'utf8');\nconst b = Buffer.from(expected, 'utf8');\nif (a.length !== b.length || !crypto.timingSafeEqual(a,b)) throw new Error('invalid_signature');\nreturn [{json: typeof raw === 'string' ? JSON.parse(raw) : raw}];"},
-                "id":"verify-hmac","name":"Verify HMAC","type":"n8n-nodes-base.function","typeVersion":1,"position":[260,0]
+                "parameters":{"functionCode":"const crypto = require('crypto');\nconst item = $input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst expected = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(canonical).digest('hex');\nconst a = Buffer.from(sig, 'utf8');\nconst b = Buffer.from(expected, 'utf8');\nif (a.length !== b.length || !crypto.timingSafeEqual(a,b)) throw new Error('invalid_signature');\nconst payload = typeof raw === 'string' ? JSON.parse(raw) : raw;\nif (!payload || payload.tenant_slug !== 'wmp' || !payload.event_code || !payload.correlation_id) throw new Error('invalid_wmp_lifecycle_payload');\nreturn [{json: payload}];"},
+                "id":"${id}-verify-hmac","name":"Verify HMAC and WMP Payload","type":"n8n-nodes-base.function","typeVersion":1,"position":[260,0]
               },
               {
-                "parameters":{"respondWith":"json","responseBody":"={{ { ok: true, workflow: 'wmp_lead_intake', event_code: $json.event_code || null, correlation_id: $json.correlation_id || null } }}","options":{"responseCode":200}},
-                "id":"respond-ok","name":"Respond 200","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[520,0]
+                "parameters":{"respondWith":"json","responseBody":"={{ { ok: true, workflow: '${slug}', event_code: $json.event_code || null, correlation_id: $json.correlation_id || null, accepted_at: $now } }}","options":{"responseCode":200}},
+                "id":"${id}-respond-ok","name":"Respond 200","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[520,0]
               }
             ],
             "connections":{
-              "WMP Lead":{"main":[[{"node":"Verify HMAC","type":"main","index":0}]]},
-              "Verify HMAC":{"main":[[{"node":"Respond 200","type":"main","index":0}]]}
+              "WMP Lifecycle Webhook":{"main":[[{"node":"Verify HMAC and WMP Payload","type":"main","index":0}]]},
+              "Verify HMAC and WMP Payload":{"main":[[{"node":"Respond 200","type":"main","index":0}]]}
             },
             "settings":{"executionOrder":"v1"}
           }
           JSON
+            sudo docker cp "$file" "$C:$file"
+            sudo docker exec "$C" n8n import:workflow --input="$file"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
+            sudo docker exec "$C" n8n publish:workflow --id="$id"
+          }
 
-          sudo docker cp /tmp/wmp-lead.json "$C:/tmp/wmp-lead.json"
-          sudo docker exec "$C" n8n import:workflow --input=/tmp/wmp-lead.json
-          sudo docker exec "$C" n8n update:workflow --id=wmpLeadIntake01 --active=true
-          sudo docker exec "$C" n8n publish:workflow --id=wmpLeadIntake01
+          create_workflow 'wmpLeadIntake01' 'WMP Lead Intake' 'wmp-lead-intake' 'wmp_lead_intake'
+          create_workflow 'wmpProposalLifecycle01' 'WMP Proposal Lifecycle' 'wmp-proposal-lifecycle' 'wmp_proposal_lifecycle'
+          create_workflow 'wmpDjBookingLifecycle01' 'WMP DJ Booking Lifecycle' 'wmp-dj-booking-lifecycle' 'wmp_dj_booking_lifecycle'
+          create_workflow 'wmpPostEventRelationship01' 'WMP Post Event Relationship' 'wmp-post-event-relationship' 'wmp_post_event_relationship'
+
           sudo docker restart "$C" >/dev/null
 
           echo '== Wait for n8n =='
@@ -78,28 +86,45 @@ jobs:
           done
           [ "$ready" -eq 1 ] || { echo 'n8n healthz did not recover'; exit 32; }
 
-          echo '== Unsigned request must be rejected =='
-          UNSIGNED_CODE="$(curl -sS -o /tmp/wmp-unsigned.out -w '%{http_code}' --max-time 20 -X POST "$URL" -H 'content-type: application/json' -d '{"tenant_slug":"wmp","event_code":"wmp.lead.received","correlation_id":"unsigned-security-probe"}')"
-          echo "unsigned_http=$UNSIGNED_CODE"
-          case "$UNSIGNED_CODE" in
-            2*|3*) echo 'SECURITY FAILURE: unsigned WMP webhook request was accepted'; exit 33 ;;
-          esac
+          probe_workflow() {
+            local id="$1" path="$2" event="$3"
+            local url="https://n8n.impulsionando.com.br/webhook/${path}"
+            echo "== Probe ${id} =="
+            UNSIGNED_CODE="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "{\"tenant_slug\":\"wmp\",\"event_code\":\"${event}\",\"correlation_id\":\"unsigned-security-probe\"}")"
+            echo "${id}_unsigned_http=$UNSIGNED_CODE"
+            case "$UNSIGNED_CODE" in
+              2*|3*) echo "SECURITY FAILURE: unsigned ${id} request was accepted"; exit 33 ;;
+            esac
 
-          echo '== Signed request must succeed =='
-          sudo docker exec -e WMP_PROBE_URL="$URL" "$C" node - <<'NODE'
+            sudo docker exec -e WMP_PROBE_URL="$url" -e WMP_PROBE_EVENT="$event" -e WMP_PROBE_ID="$id" "$C" node - <<'NODE'
           const crypto = require('crypto');
           const url = process.env.WMP_PROBE_URL;
+          const eventCode = process.env.WMP_PROBE_EVENT;
+          const id = process.env.WMP_PROBE_ID;
           const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET;
-          const payload = JSON.stringify({tenant_slug:'wmp',event_code:'wmp.lead.received',correlation_id:`signed-security-probe-${Date.now()}`});
+          const payload = JSON.stringify({workflow_name:id,event_code:eventCode,tenant_slug:'wmp',correlation_id:`signed-security-probe-${id}-${Date.now()}`,company_id:null,dispatched_at:new Date().toISOString(),data:{security_probe:true}});
           const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
           fetch(url,{method:'POST',headers:{'content-type':'application/json','x-impulsionando-signature':signature},body:payload})
-            .then(async r=>{ console.log(`signed_http=${r.status}`); if(!r.ok) process.exit(34); })
+            .then(async r=>{ const text=await r.text(); console.log(`${id}_signed_http=${r.status} body=${text.slice(0,300)}`); if(!r.ok) process.exit(34); })
             .catch(e=>{ console.error(e.message); process.exit(35); });
           NODE
 
-          echo '== Persistent active state =='
-          sudo docker exec "$C" n8n export:workflow --id=wmpLeadIntake01 --output=/tmp/wmp-lead-export.json >/dev/null
-          sudo docker exec "$C" node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/wmp-lead-export.json','utf8'));const w=Array.isArray(r)?r[0]:r;const names=(w.nodes||[]).map(n=>n.name);console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,nodes:names},null,2));if(!w.active||!w.activeVersionId||!names.includes('Verify HMAC'))process.exit(36)"
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-export.json" >/dev/null
+            sudo docker exec -e WMP_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WMP_ID;
+          const r=JSON.parse(fs.readFileSync(`/tmp/${id}-export.json`,'utf8'));
+          const w=Array.isArray(r)?r[0]:r;
+          const names=(w.nodes||[]).map(n=>n.name);
+          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,nodes:names},null,2));
+          if(!w.active||!w.activeVersionId||!names.includes('Verify HMAC and WMP Payload'))process.exit(36);
+          NODE
+          }
 
-          echo 'WMP_N8N_HMAC_SECURITY=PASS'
+          probe_workflow 'wmpLeadIntake01' 'wmp-lead-intake' 'wmp.lead.received'
+          probe_workflow 'wmpProposalLifecycle01' 'wmp-proposal-lifecycle' 'wmp.proposal.sent'
+          probe_workflow 'wmpDjBookingLifecycle01' 'wmp-dj-booking-lifecycle' 'wmp.dj.offered'
+          probe_workflow 'wmpPostEventRelationship01' 'wmp-post-event-relationship' 'wmp.event.completed'
+
+          echo 'WMP_N8N_LIFECYCLE_HMAC_SECURITY=PASS'
           REMOTE
