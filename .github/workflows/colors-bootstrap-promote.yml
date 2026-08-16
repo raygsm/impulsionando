@@ -21,7 +21,7 @@ jobs:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      TARGET_RELEASE_SHA: d0d216fb44faed4da1e31801c998b5f7434484a6
+      TARGET_RELEASE_SHA: 2a3d64b6b426a872c5f186384c338ee729664917
     steps:
       - name: Configure SSH
         run: |
@@ -104,20 +104,20 @@ jobs:
 
           for attempt in $(seq 1 45); do
             ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-            if [ -n "$ip" ] && curl -fsS -H 'Host: colors.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
+            if [ -n "$ip" ] && curl -fsS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
             [ "$attempt" -lt 45 ] || exit 44
             sleep 2
           done
           ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
 
           for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos; do
-            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-bootstrap-probe -w '%{http_code}' "http://$ip:3000$path")"
+            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-bootstrap-probe -w '%{http_code}' "http://$ip:3000$path")"
             echo "COLORS_BOOTSTRAP_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 45
           done
 
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-bootstrap-api-probe -w '%{http_code}' "http://$ip:3000$path")"
+            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-bootstrap-api-probe -w '%{http_code}' "http://$ip:3000$path")"
             echo "COLORS_BOOTSTRAP_API_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 47
           done
