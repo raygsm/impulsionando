@@ -15,11 +15,11 @@ export const Route = createFileRoute("/riomed/medicito")({
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 function sessionId() {
-  if (typeof window === "undefined") return "server";
+  if (typeof window === "undefined") return "riomed:web:server";
   const key = "riomed-medicito-session";
   const current = window.sessionStorage.getItem(key);
-  if (current) return current;
-  const next = crypto.randomUUID();
+  if (current?.startsWith("riomed:")) return current;
+  const next = `riomed:web:${crypto.randomUUID()}`;
   window.sessionStorage.setItem(key, next);
   return next;
 }
@@ -49,7 +49,7 @@ function MedicitoPage() {
           "content-type": "application/json",
           "x-riomed-session": sessionId(),
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ text: userMessage, pathname: window.location.pathname }),
       });
 
       if (!response.ok) {
