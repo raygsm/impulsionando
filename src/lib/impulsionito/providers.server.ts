@@ -1,17 +1,9 @@
 /**
  * Camada de Provedores LLM — server-only.
  *
- * Ordem de resolução:
- *   1. Provedor pedido pelo cliente (llm.provider) — se a chave existir.
- *   2. Cadeia de fallback declarada pelo cliente (llm.fallback[]) — em ordem.
- *   3. OpenAI se OPENAI_API_KEY existir.
- *   4. Gemini via Lovable AI Gateway (LOVABLE_API_KEY) — sempre disponível
- *      neste projeto (chave provisionada pelo Lovable).
- *
- * "Claude" e "Ollama" ficam declarados como IDs mas ainda não instanciam
- * modelo — retornam null e a cadeia segue para o próximo provedor. Isso
- * permite trocar o provedor ativo apenas pela UI (Centro de Inteligência
- * → Configurações → Motor LLM) sem tocar em código.
+ * Cada cliente pode exigir provedor estrito sem alterar o comportamento
+ * dos demais clientes. Quando allowFallback=false, somente o provedor
+ * explicitamente solicitado é considerado.
  */
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
@@ -49,28 +41,33 @@ function tryProvider(id: LlmProviderId, requestedModel: string | undefined): Res
     const key = process.env.LOVABLE_API_KEY;
     if (!key) return null;
     const provider = createLovableAiGatewayProvider(key);
-    // Se o cliente pediu "gpt-*", cai no default do Gemini.
     const finalId = modelId.startsWith("google/") ? modelId : DEFAULT_MODEL_BY_PROVIDER.gemini;
     return { provider: "gemini", model: provider(finalId), modelId: finalId };
   }
 
-  // Claude e Ollama: reservados. Retornam null para que o chain siga.
   return null;
 }
 
 export interface ResolveOptions {
   llm?: Partial<LlmConfig>;
+  /**
+   * false = fail closed no provedor solicitado. Útil para clientes que
+   * proíbem fallback por política, como a RioMed.
+   */
+  allowFallback?: boolean;
 }
 
-/**
- * Resolve o provedor real que atenderá a requisição, aplicando fallback.
- * Lança se nenhum provedor estiver disponível (nem OpenAI nem Gemini).
- */
 export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
   const requested: LlmProviderId = opts.llm?.provider ?? "openai";
-  const fallback: LlmProviderId[] = opts.llm?.fallback ?? ["gemini"];
   const model = opts.llm?.model;
 
+  if (opts.allowFallback === false) {
+    const resolved = tryProvider(requested, model);
+    if (resolved) return resolved;
+    throw new Error(`llm_provider_unavailable:${requested}`);
+  }
+
+  const fallback: LlmProviderId[] = opts.llm?.fallback ?? ["gemini"];
   const chain: LlmProviderId[] = [];
   const seen = new Set<LlmProviderId>();
   for (const id of [requested, ...fallback, "openai", "gemini"] as LlmProviderId[]) {
@@ -87,7 +84,6 @@ export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
   throw new Error("no_llm_provider_available");
 }
 
-/** Introspecção usada pelo endpoint /api/public/health (leitura em backend). */
 export function detectAvailableProviders(): Record<LlmProviderId, boolean> {
   return {
     openai: !!process.env.OPENAI_API_KEY,
