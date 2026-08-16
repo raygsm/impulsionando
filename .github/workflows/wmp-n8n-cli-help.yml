@@ -64,6 +64,7 @@ jobs:
             sudo docker cp "$file" "$C:$file"
             sudo docker exec "$C" n8n import:workflow --input="$file"
             sudo docker exec "$C" n8n publish:workflow --id="$id"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
           }
 
           create_workflow 'wmpLeadIntake01' 'WMP Lead Intake' 'wmp-lead-intake' 'wmp_lead_intake' 'wmp-lead-intake-webhook-v2'
