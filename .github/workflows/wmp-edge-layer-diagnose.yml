@@ -1,0 +1,55 @@
+name: WMP edge layer diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-edge-layer-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Compare container, local Traefik and public edge
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-security.env | head -n1)"
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpEdgeProbe\",\"event_code\":\"wmp.edge.probe\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"edge-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+
+          probe() {
+            label="$1"; shift
+            curl -k -sS -D "/tmp/$label.h" -o "/tmp/$label.b" -w "$label HTTP=%{http_code}\n" --max-time 20 -X POST "$@" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" || true
+            echo "$label HEADERS=$(tr '\n' ' ' < /tmp/$label.h | head -c 500)"
+            echo "$label BODY=$(head -c 300 /tmp/$label.b)"
+          }
+
+          probe container -H 'Host: wmp.impulsionando.com.br' "http://$ip:3000/api/public/hooks/n8n-verify"
+          probe localtraefik -H 'Host: wmp.impulsionando.com.br' 'https://127.0.0.1/api/public/hooks/n8n-verify'
+          probe public 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
+
+          echo '=== DNS ==='
+          getent ahostsv4 wmp.impulsionando.com.br | head -n 8 || true
+          echo '=== LOCAL LISTENERS ==='
+          sudo ss -lntp | grep -E ':(80|443|3000) ' || true
+          REMOTE
