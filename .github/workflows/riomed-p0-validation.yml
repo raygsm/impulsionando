@@ -1,0 +1,48 @@
+name: RioMed P0 Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/routes/riomed*'
+      - 'src/routes/api/riomed/**'
+      - 'src/lib/riomed/**'
+      - 'src/lib/impulsionito/providers.server.ts'
+      - 'supabase/migrations/*riomed*'
+      - '.github/workflows/riomed-*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: riomed-p0-validation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Contract checks
+        run: |
+          set -euo pipefail
+          test -f src/routes/api/riomed/medicito/chat.ts
+          test -f src/routes/riomed.medicito.tsx
+          test -f src/lib/riomed/medicito-tools.server.ts
+          grep -q 'allowFallback: false' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'buildMedicitoTools' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'stopWhen: stepCountIs(5)' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'JSON.stringify({ text: userMessage' src/routes/riomed.medicito.tsx
+          grep -q 'riomed:web:' src/routes/riomed.medicito.tsx
+          ! grep -q 'LOVABLE_API_KEY' src/routes/api/riomed/medicito/chat.ts
+          ! grep -q 'createLovableAiGatewayProvider' src/routes/api/riomed/medicito/chat.ts
+      - name: Build universal Core with RioMed changes
+        run: npm run build
