@@ -1,0 +1,57 @@
+name: Colors Public Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-public-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Validate Colors production
+    runs-on: ubuntu-latest
+    steps:
+      - name: DNS diagnostics
+        run: |
+          set -u
+          for host in impulsionando.com.br wmp.impulsionando.com.br chrismed.impulsionando.com.br colors.impulsionando.com.br; do
+            echo "=== DNS $host ==="
+            getent ahostsv4 "$host" || true
+          done
+
+      - name: Probe Colors critical routes
+        run: |
+          set -u
+          failures=0
+          probe_html() {
+            url="$1"
+            label="$2"
+            body="$(mktemp)"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o "$body" -w '%{http_code}' "${url}?colors_smoke=${GITHUB_SHA}" || true)"
+            echo "COLORS_PUBLIC_PROBE $label HTTP=$code URL=$url"
+            if [ "$code" != '200' ]; then
+              echo "::error title=Colors public probe failed::$label returned HTTP $code at $url"
+              failures=$((failures + 1))
+            fi
+            rm -f "$body"
+          }
+
+          probe_html 'https://colors.impulsionando.com.br/' 'colors-home'
+          probe_html 'https://colors.impulsionando.com.br/super-green-black' 'colors-sgb'
+          probe_html 'https://colors.impulsionando.com.br/agenda' 'colors-agenda'
+          probe_html 'https://colors.impulsionando.com.br/eventos' 'colors-eventos'
+          probe_html 'https://colors.impulsionando.com.br/suporte' 'colors-suporte'
+          probe_html 'https://colors.impulsionando.com.br/afiliados' 'colors-afiliados'
+          probe_html 'https://colors.impulsionando.com.br/rastreio' 'colors-rastreio'
+          probe_html 'https://colors.impulsionando.com.br/entrar' 'colors-entrar'
+          probe_html 'https://colors.impulsionando.com.br/criar-conta' 'colors-criar-conta'
+
+          if [ "$failures" -ne 0 ]; then
+            echo "::error title=Colors smoke failed::$failures critical route(s) failed"
+            exit 1
+          fi
+          echo 'COLORS_PUBLIC_SMOKE=PASS'
