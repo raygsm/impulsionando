@@ -70,16 +70,16 @@ jobs:
             echo 'Existing docker-compose.override.yml is not managed by WMP security; refusing to overwrite.'
             exit 41
           fi
-          if [ ! -e "$N8N_OVERRIDE" ]; then
-            cat > /tmp/docker-compose.override.yml <<'YAML'
+          cat > /tmp/docker-compose.override.yml <<'YAML'
           services:
             n8n:
               env_file:
                 - /etc/impulsionando-security.env
+              environment:
+                NODE_FUNCTION_ALLOW_BUILTIN: crypto
           YAML
-            sudo install -o root -g root -m 0644 /tmp/docker-compose.override.yml "$N8N_OVERRIDE"
-            rm -f /tmp/docker-compose.override.yml
-          fi
+          sudo install -o root -g root -m 0644 /tmp/docker-compose.override.yml "$N8N_OVERRIDE"
+          rm -f /tmp/docker-compose.override.yml
 
           sudo systemctl daemon-reload
           sudo systemctl restart impulsionando-core
@@ -91,10 +91,13 @@ jobs:
             if sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.'"; then core_ok=true; fi
           fi
           n8n_ok="$(sudo docker exec "$N8N_CONTAINER" sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
+          crypto_ok="$(sudo docker exec "$N8N_CONTAINER" sh -lc 'if [ "${NODE_FUNCTION_ALLOW_BUILTIN:-}" = "crypto" ]; then echo true; else echo false; fi')"
           echo "CORE_HMAC_PRESENT=$core_ok"
           echo "N8N_HMAC_PRESENT=$n8n_ok"
+          echo "N8N_CRYPTO_WHITELISTED=$crypto_ok"
           [ "$core_ok" = true ] || exit 42
           [ "$n8n_ok" = true ] || exit 43
+          [ "$crypto_ok" = true ] || exit 47
 
           core_value="$(sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1")"
           core_hash="$(printf '%s' "$core_value" | sha256sum | cut -d' ' -f1)"
