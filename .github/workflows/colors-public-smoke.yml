@@ -26,10 +26,8 @@ jobs:
       - name: DNS diagnostics
         run: |
           set -u
-          for host in impulsionando.com.br wmp.impulsionando.com.br chrismed.impulsionando.com.br colors.impulsionando.com.br; do
-            echo "=== DNS $host ==="
-            getent ahostsv4 "$host" || true
-          done
+          echo '=== DNS colors.impulsionando.com.br ==='
+          getent ahostsv4 colors.impulsionando.com.br || true
 
       - name: Probe Colors critical routes
         run: |
@@ -51,7 +49,7 @@ jobs:
             url="$1"
             label="$2"
             body="$(mktemp)"
-            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o "$body" -w '%{http_code}' "$url" || true)"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o "$body" -w '%{http_code}' "${url}?colors_smoke=${GITHUB_SHA}" || true)"
             echo "COLORS_API_PROBE $label HTTP=$code URL=$url"
             if [ "$code" != '200' ]; then
               echo "::error title=Colors API probe failed::$label returned HTTP $code at $url"
