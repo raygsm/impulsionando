@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { randomUUID } from "crypto";
-import { streamText, type ModelMessage } from "ai";
+import { stepCountIs, streamText, type ModelMessage } from "ai";
 import { resolveProvider } from "@/lib/impulsionito/providers.server";
+import { buildMedicitoTools } from "@/lib/riomed/medicito-tools.server";
 import {
   listConversationHistory,
   recordInboundMessage,
@@ -46,44 +47,46 @@ async function getRuntimeAndContext() {
   if (runtimeError) throw runtimeError;
   if (!runtime?.agent_id) throw new Error("medicito_runtime_not_configured");
 
-  const { data: products } = await supabaseAdmin
+  const { count: productCount } = await supabaseAdmin
     .from("riomed_products")
-    .select("id,sku,name,description,category,modality,price_sale,price_rental_daily,price_rental_monthly,currency,stock,is_active,metadata")
+    .select("id", { count: "exact", head: true })
     .eq("company_id", tenant.company_id)
-    .eq("is_active", true)
-    .order("display_order", { ascending: true })
-    .limit(80);
+    .eq("is_active", true);
 
-  const { data: sellers } = await supabaseAdmin
+  const { count: sellerCount } = await supabaseAdmin
     .from("riomed_sellers")
-    .select("id,full_name,territory,status,metadata")
+    .select("id", { count: "exact", head: true })
     .eq("company_id", tenant.company_id)
-    .eq("status", "active")
-    .limit(40);
+    .eq("status", "active");
 
-  return { tenant, runtime, products: products ?? [], sellers: sellers ?? [] };
+  return { tenant, runtime, productCount: productCount ?? 0, sellerCount: sellerCount ?? 0 };
 }
 
 function buildSystemPrompt(ctx: Awaited<ReturnType<typeof getRuntimeAndContext>>) {
-  const inventory = ctx.products.length
-    ? JSON.stringify(ctx.products.map((p: any) => ({
-        sku: p.sku,
-        name: p.name,
-        description: p.description,
-        category: p.category,
-        modality: p.modality,
-        price_sale: p.price_sale,
-        price_rental_daily: p.price_rental_daily,
-        price_rental_monthly: p.price_rental_monthly,
-        currency: p.currency,
-        stock: p.stock,
-        metadata: p.metadata,
-      })))
-    : "[]";
-  const sellers = ctx.sellers.length
-    ? JSON.stringify(ctx.sellers.map((s: any) => ({ full_name: s.full_name, territory: s.territory, metadata: s.metadata })))
-    : "[]";
-  return `Você é MEDICITO — SEU CONCIERGE MÉDICO, agente oficial da RioMed e CLIENT_INSTANCE do Impulsionito.\n\nMISSÃO\nAtender, qualificar, vender de forma consultiva, orientar sobre catálogo, locação, manutenção e suporte, registrar contexto no Core e encaminhar para especialista quando necessário.\n\nREGRAS ABSOLUTAS\n- Nunca invente estoque, preço, prazo, fabricante, modelo, SKU, garantia, compatibilidade, condição, localização, certificação ou informação clínica.\n- Nunca faça diagnóstico, prescrição ou orientação médica individual.\n- Se o dado objetivo não estiver no contexto validado desta requisição, diga que precisa ser confirmado no sistema RioMed ou por um especialista.\n- Use apenas OpenAI nesta instância. Se o provedor estiver indisponível, falhe de forma segura; não use fallback Lovable/Gemini.\n- Para produto, use estoque e preços somente quando presentes no INVENTÁRIO VALIDADO.\n- Se o inventário estiver vazio, explique que o catálogo real ainda não está publicado no Core; não fabrique exemplos como se fossem produtos existentes.\n- Quando houver vendedor disponível, ofereça agendamento ou encaminhamento, mas não prometa agenda/horário sem consulta específica.\n- Responda no idioma do usuário quando claramente identificável. Na dúvida, use português do Brasil.\n- Em imagem/placa/peça, trate identificação como hipótese com confiança alta/média/baixa e peça foto adicional/código quando necessário.\n\nTENANT\nlocale padrão=${ctx.tenant.locale}; timezone=${ctx.tenant.timezone}; estratégia=${ctx.runtime.config?.locale_strategy ?? "contextual"}.\n\nINVENTÁRIO VALIDADO\n${inventory}\n\nVENDEDORES ATIVOS VALIDADOS\n${sellers}`;
+  return `Você é MEDICITO — SEU CONCIERGE MÉDICO, agente oficial da RioMed e CLIENT_INSTANCE do Impulsionito.
+
+MISSÃO
+Atender, qualificar, vender de forma consultiva, orientar sobre catálogo, locação, manutenção e suporte, registrar contexto no Core e encaminhar para especialista quando necessário.
+
+REGRAS ABSOLUTAS
+- Nunca invente estoque, preço, prazo, fabricante, modelo, SKU, garantia, compatibilidade, condição, localização, certificação ou informação clínica.
+- Nunca faça diagnóstico, prescrição ou orientação médica individual.
+- Para qualquer afirmação objetiva sobre produto, estoque, preço, SKU ou vendedor, consulte a ferramenta apropriada nesta mesma conversa.
+- Se a ferramenta não encontrar dado, diga claramente que o dado não está disponível no Core RioMed.
+- Use apenas OpenAI nesta instância. Se o provedor estiver indisponível, falhe de forma segura; não use fallback Lovable/Gemini.
+- Só use create_lead quando o usuário pedir contato, cotação, locação, manutenção ou atendimento e tiver fornecido nome e telefone.
+- Só use create_support_ticket quando o usuário pedir explicitamente abertura de suporte/manutenção e tiver fornecido nome, telefone e descrição suficiente.
+- Não crie pedido, cobrança, pagamento, contrato de locação ou cotação financeira sem fluxo homologado.
+- Quando houver vendedor disponível, você pode oferecer encaminhamento, mas nunca prometa horário sem consulta de agenda.
+- Responda no idioma do usuário quando claramente identificável. Na dúvida, use português do Brasil.
+- Em imagem/placa/peça, não afirme identificação visual como fato até a ferramenta multimodal estar homologada; peça foto/código adicional quando necessário.
+
+ESTADO REAL DO CORE NESTA REQUISIÇÃO
+Produtos ativos cadastrados=${ctx.productCount}; vendedores ativos cadastrados=${ctx.sellerCount}.
+Se qualquer contagem for zero, não fabrique registros para contornar a ausência.
+
+CONTEXTO
+locale padrão=${ctx.tenant.locale}; timezone=${ctx.tenant.timezone}; estratégia=${ctx.runtime.config?.locale_strategy ?? "contextual"}.`;
 }
 
 function trackedTextStream(source: ReadableStream<string>, onComplete: (text: string) => Promise<void>) {
@@ -119,11 +122,13 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
         try { body = await request.json(); } catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
         const text = typeof body?.text === "string"
           ? body.text.trim()
-          : Array.isArray(body?.messages)
-            ? ([...body.messages].reverse().find((m: any) => m?.role === "user" && typeof (m?.text ?? m?.content) === "string")?.text
-              ?? [...body.messages].reverse().find((m: any) => m?.role === "user" && typeof (m?.text ?? m?.content) === "string")?.content
-              ?? "").trim()
-            : "";
+          : typeof body?.message === "string"
+            ? body.message.trim()
+            : Array.isArray(body?.messages)
+              ? ([...body.messages].reverse().find((m: any) => m?.role === "user" && typeof (m?.text ?? m?.content) === "string")?.text
+                ?? [...body.messages].reverse().find((m: any) => m?.role === "user" && typeof (m?.text ?? m?.content) === "string")?.content
+                ?? "").trim()
+              : "";
         if (!text) return Response.json({ error: "empty_message" }, { status: 400 });
         if (text.length > 12000) return Response.json({ error: "message_too_large" }, { status: 413 });
 
@@ -163,11 +168,19 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
         }
 
         const system = buildSystemPrompt(context);
+        const tools = buildMedicitoTools({
+          tenantId: context.tenant.id,
+          companyId: context.tenant.company_id,
+          conversationId: ledger.conversation_id,
+        });
+
         try {
           const result = streamText({
             model: resolved.model,
             system,
             messages: modelMessages.slice(-30),
+            tools,
+            stopWhen: stepCountIs(5),
             temperature: 0.2,
             maxOutputTokens: 1200,
           });
@@ -186,6 +199,7 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
                 root_agent_key: "impulsionito-core",
                 prompt_source: context.runtime.system_prompt_ref,
                 strict_provider: true,
+                tools_enabled: Object.keys(tools),
               },
             });
           });
