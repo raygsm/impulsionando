@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { stepCountIs, streamText, type ModelMessage } from "ai";
 import { resolveProvider } from "@/lib/impulsionito/providers.server";
 import { buildMedicitoTools } from "@/lib/riomed/medicito-tools.server";
@@ -11,10 +11,16 @@ import {
 } from "@/lib/agents/omnichannel.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const IMAGE_BUCKET = "riomed-medicito-images";
+
 function sessionId(request: Request): string {
   const supplied = request.headers.get("x-riomed-session")?.trim() ?? "";
   if (/^riomed:[A-Za-z0-9:_-]{8,200}$/.test(supplied)) return supplied;
   return `riomed:web:${randomUUID()}`;
+}
+
+function sessionHash(session: string) {
+  return createHash("sha256").update(session).digest("hex");
 }
 
 function historyToMessages(history: Awaited<ReturnType<typeof listConversationHistory>>): ModelMessage[] {
@@ -62,7 +68,62 @@ async function getRuntimeAndContext() {
   return { tenant, runtime, productCount: productCount ?? 0, sellerCount: sellerCount ?? 0 };
 }
 
-function buildSystemPrompt(ctx: Awaited<ReturnType<typeof getRuntimeAndContext>>) {
+async function consumeUploadedImage(args: {
+  uploadId: string;
+  externalSession: string;
+  tenantId: string;
+  companyId: string;
+  conversationId: string;
+}) {
+  if (!/^[0-9a-f-]{36}$/i.test(args.uploadId)) throw new Error("invalid_upload_id");
+  const hash = sessionHash(args.externalSession);
+  const { data: upload, error } = await supabaseAdmin
+    .from("riomed_medicito_uploads")
+    .select("id,object_path,media_type,size_bytes,status,expires_at")
+    .eq("id", args.uploadId)
+    .eq("tenant_id", args.tenantId)
+    .eq("company_id", args.companyId)
+    .eq("session_hash", hash)
+    .eq("status", "uploaded")
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle();
+  if (error) throw new Error(`upload_lookup_failed:${error.message}`);
+  if (!upload) throw new Error("upload_not_available");
+
+  const { data: blob, error: downloadError } = await supabaseAdmin.storage.from(IMAGE_BUCKET).download(upload.object_path);
+  if (downloadError || !blob) throw new Error("image_download_failed");
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  if (bytes.byteLength !== Number(upload.size_bytes) || bytes.byteLength > 8 * 1024 * 1024) throw new Error("image_integrity_failed");
+
+  const { error: updateError } = await supabaseAdmin
+    .from("riomed_medicito_uploads")
+    .update({ conversation_id: args.conversationId, status: "consumed", consumed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", upload.id)
+    .eq("status", "uploaded");
+  if (updateError) throw new Error(`upload_consume_failed:${updateError.message}`);
+
+  return { bytes, mediaType: upload.media_type as string, uploadId: upload.id as string };
+}
+
+function attachImageToLastUserMessage(messages: ModelMessage[], text: string, image: { bytes: Uint8Array; mediaType: string }) {
+  const next = [...messages];
+  for (let i = next.length - 1; i >= 0; i--) {
+    if (next[i]?.role === "user") {
+      next[i] = {
+        role: "user",
+        content: [
+          { type: "text", text },
+          { type: "image", image: image.bytes, mediaType: image.mediaType },
+        ],
+      };
+      return next;
+    }
+  }
+  next.push({ role: "user", content: [{ type: "text", text }, { type: "image", image: image.bytes, mediaType: image.mediaType }] });
+  return next;
+}
+
+function buildSystemPrompt(ctx: Awaited<ReturnType<typeof getRuntimeAndContext>>, hasImage: boolean) {
   return `Você é MEDICITO — SEU CONCIERGE MÉDICO, agente oficial da RioMed e CLIENT_INSTANCE do Impulsionito.
 
 MISSÃO
@@ -79,10 +140,11 @@ REGRAS ABSOLUTAS
 - Não crie pedido, cobrança, pagamento, contrato de locação ou cotação financeira sem fluxo homologado.
 - Quando houver vendedor disponível, você pode oferecer encaminhamento, mas nunca prometa horário sem consulta de agenda.
 - Responda no idioma do usuário quando claramente identificável. Na dúvida, use português do Brasil.
-- Em imagem/placa/peça, não afirme identificação visual como fato até a ferramenta multimodal estar homologada; peça foto/código adicional quando necessário.
+- Quando houver imagem nesta requisição, analise apenas o que é visualmente sustentado. Informe nível de confiança (alta/média/baixa), diferencie leitura visível de hipótese e nunca afirme compatibilidade, SKU, preço ou estoque com base só na imagem. Use as ferramentas do Core para procurar correspondências depois da análise visual.
+- Se a imagem não permitir identificação confiável, peça nova foto, ângulo, etiqueta, placa, código, modelo ou conector.
 
 ESTADO REAL DO CORE NESTA REQUISIÇÃO
-Produtos ativos cadastrados=${ctx.productCount}; vendedores ativos cadastrados=${ctx.sellerCount}.
+Produtos ativos cadastrados=${ctx.productCount}; vendedores ativos cadastrados=${ctx.sellerCount}; imagem privada anexada=${hasImage ? "sim" : "não"}.
 Se qualquer contagem for zero, não fabrique registros para contornar a ausência.
 
 CONTEXTO
@@ -131,6 +193,8 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
               : "";
         if (!text) return Response.json({ error: "empty_message" }, { status: 400 });
         if (text.length > 12000) return Response.json({ error: "message_too_large" }, { status: 413 });
+        const uploadId = typeof body?.uploadId === "string" ? body.uploadId.trim() : null;
+        const externalSession = sessionId(request);
 
         let ledger: InboundLedger;
         try {
@@ -138,10 +202,15 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
             agentKey: "riomed-medicito",
             channel: "web_chat",
             provider: "riomed_front",
-            externalUserId: sessionId(request),
+            externalUserId: externalSession,
             bodyText: text,
             endpointAddress: "https://riomed.impulsionando.com.br",
-            metadata: { source: "riomed_medicito_web", pathname: typeof body?.pathname === "string" ? body.pathname.slice(0, 300) : "/" },
+            metadata: {
+              source: "riomed_medicito_web",
+              pathname: typeof body?.pathname === "string" ? body.pathname.slice(0, 300) : "/",
+              has_image: Boolean(uploadId),
+              upload_id: uploadId,
+            },
           });
         } catch (error) {
           console.error("[riomed/medicito] inbound ledger failed", error);
@@ -155,9 +224,26 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
           return Response.json({ error: "runtime_unavailable" }, { status: 503 });
         }
 
+        let image: { bytes: Uint8Array; mediaType: string; uploadId: string } | null = null;
+        if (uploadId) {
+          try {
+            image = await consumeUploadedImage({
+              uploadId,
+              externalSession,
+              tenantId: context.tenant.id,
+              companyId: context.tenant.company_id,
+              conversationId: ledger.conversation_id,
+            });
+          } catch (error) {
+            console.error("[riomed/medicito] image unavailable", error);
+            return Response.json({ error: "image_not_available" }, { status: 400 });
+          }
+        }
+
         let modelMessages: ModelMessage[] = [];
         try { modelMessages = historyToMessages(await listConversationHistory(ledger.conversation_id, 30)); }
         catch { modelMessages = [{ role: "user", content: text }]; }
+        if (image) modelMessages = attachImageToLastUserMessage(modelMessages, text, image);
 
         let resolved;
         try {
@@ -167,7 +253,7 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
           return Response.json({ error: "openai_unavailable" }, { status: 503 });
         }
 
-        const system = buildSystemPrompt(context);
+        const system = buildSystemPrompt(context, Boolean(image));
         const tools = buildMedicitoTools({
           tenantId: context.tenant.id,
           companyId: context.tenant.company_id,
@@ -200,6 +286,8 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
                 prompt_source: context.runtime.system_prompt_ref,
                 strict_provider: true,
                 tools_enabled: Object.keys(tools),
+                multimodal: Boolean(image),
+                upload_id: image?.uploadId ?? null,
               },
             });
           });
@@ -211,6 +299,7 @@ export const Route = createFileRoute("/api/riomed/medicito/chat")({
               "X-Root-Agent-Key": "impulsionito-core",
               "X-Conversation-Id": ledger.conversation_id,
               "X-LLM-Provider": "openai",
+              "X-Multimodal": image ? "1" : "0",
             },
           });
         } catch (error) {
