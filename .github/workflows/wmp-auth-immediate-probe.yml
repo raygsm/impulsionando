@@ -1,0 +1,18 @@
+name: WMP auth immediate probe
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-auth-immediate-probe.yml
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe current public edge
+        run: |
+          set -euo pipefail
+          for path in / /auth /dashboard /djs; do
+            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/body -w '%{http_code}' --max-time 15 "https://wmp.impulsionando.com.br$path?now=$(date +%s)" || true)"
+            echo "WMP_NOW $path HTTP=$code"
+          done
