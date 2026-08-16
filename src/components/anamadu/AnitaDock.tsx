@@ -12,12 +12,11 @@ const ACTIONS: Action[] = [
 ];
 
 function sessionId() {
-  const key = 'anamadu.anita.session.v1';
-  let value = localStorage.getItem(key);
-  if (!value) {
-    value = `anamadu:${crypto.randomUUID()}`;
-    localStorage.setItem(key, value);
-  }
+  const key = 'anamadu.annita.session.v1';
+  const legacyKey = 'anamadu.anita.session.v1';
+  let value = localStorage.getItem(key) ?? localStorage.getItem(legacyKey);
+  if (!value) value = `anamadu:${crypto.randomUUID()}`;
+  localStorage.setItem(key, value);
   return value;
 }
 
@@ -61,7 +60,7 @@ export function AnitaDock() {
         headers: { 'content-type': 'application/json', 'x-anamadu-session': sessionId() },
         body: JSON.stringify({ text, attribution: attribution() }),
       });
-      if (!response.ok || !response.body) throw new Error('anita_unavailable');
+      if (!response.ok || !response.body) throw new Error('annita_unavailable');
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
@@ -80,18 +79,18 @@ export function AnitaDock() {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} aria-label="Falar com Anita" className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-white shadow-2xl transition hover:-translate-y-0.5">
-        <Sparkles className="size-4" /> Falar com Anita
+      <button type="button" onClick={() => setOpen(true)} aria-label="Falar com Annita" className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-white shadow-2xl transition hover:-translate-y-0.5">
+        <Sparkles className="size-4" /> Falar com Annita
       </button>
     );
   }
 
   return (
-    <section role="dialog" aria-label="Anita — consultora virtual Ana Madú" className="fixed bottom-4 right-4 z-50 flex h-[min(700px,calc(100dvh-32px))] w-[min(440px,calc(100vw-32px))] flex-col overflow-hidden rounded-[28px] border border-stone-200 bg-[#fffdf8] shadow-2xl">
+    <section role="dialog" aria-label="Annita — consultora virtual Ana Madú" className="fixed bottom-4 right-4 z-50 flex h-[min(700px,calc(100dvh-32px))] w-[min(440px,calc(100vw-32px))] flex-col overflow-hidden rounded-[28px] border border-stone-200 bg-[#fffdf8] shadow-2xl">
       <header className="flex items-center gap-3 border-b border-stone-200 bg-stone-950 p-4 text-white">
         <div className="flex size-11 items-center justify-center rounded-full bg-amber-200 text-stone-950"><Bot className="size-5" /></div>
-        <div className="min-w-0 flex-1"><strong className="block text-base">Anita</strong><div className="truncate text-xs text-stone-300">Consultora virtual Ana Madú · powered by Impulsionito</div></div>
-        <button type="button" onClick={() => setOpen(false)} aria-label="Fechar Anita" className="rounded-full p-2 hover:bg-white/10"><X className="size-5" /></button>
+        <div className="min-w-0 flex-1"><strong className="block text-base">Annita</strong><div className="truncate text-xs text-stone-300">Consultora virtual Ana Madú · powered by Impulsionito</div></div>
+        <button type="button" onClick={() => setOpen(false)} aria-label="Fechar Annita" className="rounded-full p-2 hover:bg-white/10"><X className="size-5" /></button>
       </header>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
@@ -109,8 +108,8 @@ export function AnitaDock() {
       </div>
 
       <form className="border-t border-stone-200 p-3" onSubmit={(event) => { event.preventDefault(); void sendText(input); }}>
-        <div className="flex gap-2"><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ex.: presente até R$ 100, ametista..." aria-label="Mensagem para Anita" className="min-w-0 flex-1 rounded-full border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-stone-700" /><button disabled={busy || !input.trim()} aria-label="Enviar" className="flex size-12 items-center justify-center rounded-full bg-stone-950 text-white disabled:opacity-40"><Send className="size-4" /></button></div>
-        <p className="mt-2 px-1 text-[10px] leading-relaxed text-stone-500">A Anita não inventa preço, estoque, origem ou propriedades de pedras. Quando necessário, encaminha seu atendimento para uma pessoa.</p>
+        <div className="flex gap-2"><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ex.: presente até R$ 100, ametista..." aria-label="Mensagem para Annita" className="min-w-0 flex-1 rounded-full border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-stone-700" /><button disabled={busy || !input.trim()} aria-label="Enviar" className="flex size-12 items-center justify-center rounded-full bg-stone-950 text-white disabled:opacity-40"><Send className="size-4" /></button></div>
+        <p className="mt-2 px-1 text-[10px] leading-relaxed text-stone-500">A Annita não inventa preço, estoque, origem ou propriedades de pedras. Quando necessário, encaminha seu atendimento para uma pessoa.</p>
       </form>
     </section>
   );
