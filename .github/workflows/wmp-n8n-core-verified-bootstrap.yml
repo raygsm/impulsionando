@@ -1,0 +1,155 @@
+name: WMP n8n Core-verified bootstrap
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Install and prove Core-verified WMP lifecycle workflows
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          CORE_VERIFY='https://impulsionando.com.br/api/public/hooks/n8n-verify'
+          SECURITY_ENV=/etc/impulsionando-security.env
+
+          echo '== Core verifier readiness =='
+          verifier_code="$(curl -sS -o /tmp/wmp-verifier-get.out -w '%{http_code}' --max-time 20 "$CORE_VERIFY")"
+          echo "CORE_VERIFIER_GET_HTTP=$verifier_code"
+          [ "$verifier_code" = '200' ] || { cat /tmp/wmp-verifier-get.out; exit 50; }
+
+          create_workflow() {
+            local id="$1" name="$2" path="$3" slug="$4" webhook_id="$5"
+            local file="/tmp/${id}-core-verified.json"
+            cat >"$file" <<JSON
+          {
+            "id":"${id}",
+            "name":"${name}",
+            "active":false,
+            "nodes":[
+              {
+                "parameters":{"httpMethod":"POST","path":"${path}","responseMode":"responseNode","options":{}},
+                "id":"${id}-webhook","name":"WMP Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"${webhook_id}"
+              },
+              {
+                "parameters":{
+                  "method":"POST",
+                  "url":"${CORE_VERIFY}",
+                  "sendHeaders":true,
+                  "headerParameters":{"parameters":[
+                    {"name":"x-impulsionando-signature","value":"={{ \$json.headers?.['x-impulsionando-signature'] || '' }}"},
+                    {"name":"Content-Type","value":"application/json"}
+                  ]},
+                  "sendBody":true,
+                  "contentType":"raw",
+                  "rawContentType":"application/json",
+                  "body":"={{ JSON.stringify(\$json.body) }}",
+                  "options":{"response":{"response":{"fullResponse":true,"neverError":true,"responseFormat":"json"}},"timeout":15000}
+                },
+                "id":"${id}-core-verify","name":"Verify signature in Core","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[260,0]
+              },
+              {
+                "parameters":{"jsCode":"const r = \$input.first().json;\nconst body = r.body || {};\nconst authorized = Number(r.statusCode) === 200 && body.authorized === true && body.ok === true;\nreturn [{json:{authorized,statusCode:Number(r.statusCode)||0,error:authorized?null:(body.error||'verification_failed'),verification:body,payload:authorized?(body.payload||null):null}}];"},
+                "id":"${id}-normalize","name":"Normalize verification result","type":"n8n-nodes-base.code","typeVersion":2,"position":[520,0]
+              },
+              {
+                "parameters":{"respondWith":"json","responseBody":"={{ { ok: \$json.authorized === true, workflow: '${slug}', error: \$json.authorized === true ? null : \$json.error, event_code: \$json.payload?.event_code || null, correlation_id: \$json.payload?.correlation_id || null, accepted_at: \$json.authorized === true ? \$now : null } }}","options":{"responseCode":"={{ \$json.authorized === true ? 200 : 401 }}"}},
+                "id":"${id}-respond","name":"Respond Security Result","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[780,0]
+              }
+            ],
+            "connections":{
+              "WMP Lifecycle Webhook":{"main":[[{"node":"Verify signature in Core","type":"main","index":0}]]},
+              "Verify signature in Core":{"main":[[{"node":"Normalize verification result","type":"main","index":0}]]},
+              "Normalize verification result":{"main":[[{"node":"Respond Security Result","type":"main","index":0}]]}
+            },
+            "settings":{"executionOrder":"v1"}
+          }
+          JSON
+            sudo docker cp "$file" "$C:$file"
+            sudo docker exec "$C" n8n import:workflow --input="$file"
+            sudo docker exec "$C" n8n publish:workflow --id="$id"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
+          }
+
+          create_workflow 'wmpLeadIntake01' 'WMP Lead Intake' 'wmp-lead-intake' 'wmp_lead_intake' 'wmp-lead-intake-webhook-v3'
+          create_workflow 'wmpProposalLifecycle01' 'WMP Proposal Lifecycle' 'wmp-proposal-lifecycle' 'wmp_proposal_lifecycle' 'wmp-proposal-lifecycle-webhook-v2'
+          create_workflow 'wmpDjBookingLifecycle01' 'WMP DJ Booking Lifecycle' 'wmp-dj-booking-lifecycle' 'wmp_dj_booking_lifecycle' 'wmp-dj-booking-lifecycle-webhook-v2'
+          create_workflow 'wmpPostEventRelationship01' 'WMP Post Event Relationship' 'wmp-post-event-relationship' 'wmp_post_event_relationship' 'wmp-post-event-relationship-webhook-v2'
+
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 45); do
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || exit 51
+            sleep 2
+          done
+
+          make_signature() {
+            local payload="$1"
+            local secret
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+            test -n "$secret"
+            printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}'
+          }
+
+          probe_workflow() {
+            local id="$1" path="$2" event="$3"
+            local url="https://n8n.impulsionando.com.br/webhook/${path}"
+            local unsigned_payload="{\"workflow_name\":\"${id}\",\"event_code\":\"${event}\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"unsigned-${id}\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            local unsigned_code
+            unsigned_code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$unsigned_payload")"
+            echo "${id}_unsigned_http=$unsigned_code body=$(head -c 260 "/tmp/${id}-unsigned.out")"
+            [ "$unsigned_code" = '401' ] || exit 52
+
+            local signed_payload signature signed_code
+            signed_payload="{\"workflow_name\":\"${id}\",\"event_code\":\"${event}\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"signed-${id}-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            signature="$(make_signature "$signed_payload")"
+            signed_code="$(curl -sS -o "/tmp/${id}-signed.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" -d "$signed_payload")"
+            echo "${id}_signed_http=$signed_code body=$(head -c 320 "/tmp/${id}-signed.out")"
+            [ "$signed_code" = '200' ] || exit 53
+            grep -q '"ok":true' "/tmp/${id}-signed.out" || exit 54
+
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
+            sudo docker exec -i -e WMP_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WMP_ID;
+          const r=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));
+          const w=Array.isArray(r)?r[0]:r;
+          const names=(w.nodes||[]).map(n=>n.name);
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          const out={id:w.id,active:w.active,activeVersionId:w.activeVersionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,nodes:names};
+          console.log(JSON.stringify(out));
+          if(!w.active||!w.activeVersionId||!hook?.webhookId||!names.includes('Verify signature in Core')||!names.includes('Respond Security Result'))process.exit(55);
+          NODE
+          }
+
+          probe_workflow 'wmpLeadIntake01' 'wmp-lead-intake' 'wmp.lead.received'
+          probe_workflow 'wmpProposalLifecycle01' 'wmp-proposal-lifecycle' 'wmp.proposal.sent'
+          probe_workflow 'wmpDjBookingLifecycle01' 'wmp-dj-booking-lifecycle' 'wmp.dj.offered'
+          probe_workflow 'wmpPostEventRelationship01' 'wmp-post-event-relationship' 'wmp.event.completed'
+
+          echo 'WMP_N8N_CORE_VERIFIED_LIFECYCLES=PASS'
+          REMOTE
