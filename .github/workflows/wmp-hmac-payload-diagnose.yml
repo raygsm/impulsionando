@@ -1,0 +1,44 @@
+name: WMP HMAC payload diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-hmac-payload-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Prove direct Core signature and n8n forwarding
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          SEC=/etc/impulsionando-security.env
+          secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpLeadIntake01\",\"event_code\":\"wmp.lead.received\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"hmac-diag-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          direct="$(curl -sS -o /tmp/direct -w '%{http_code}' --max-time 20 -X POST 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload")"
+          echo "DIRECT_CORE_HTTP=$direct body=$(head -c 250 /tmp/direct)"
+          [ "$direct" = 200 ] || exit 70
+
+          via="$(curl -sS -o /tmp/via -w '%{http_code}' --max-time 20 -X POST 'https://n8n.impulsionando.com.br/webhook/wmp-lead-intake' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload")"
+          echo "VIA_N8N_HTTP=$via body=$(head -c 250 /tmp/via)"
+          [ "$via" = 200 ] || exit 71
+          REMOTE
