@@ -3,13 +3,13 @@ import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
 import { AnaMaduHome } from "@/components/anamadu/AnaMaduHome";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
+import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
 import { useEffect } from "react";
 
 // Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
 // Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
 // Sem entrada explícita, cai no fallback /vitrine/{public_slug}.
 const SUBDOMAIN_LANDING: Record<string, string> = {
-  // Landings dedicadas
   marocas: "/marocas",
   colors: "/colors",
   chrismed: "/chrismed",
@@ -17,7 +17,6 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   wmp: "/wmp",
   garrido: "/garrido",
   anamadu: "/anamadu",
-  // Sem landing dedicada → vitrine pública do tenant
   impulsity: "/vitrine/impulsity",
   dqa: "/vitrine/dqa-panini",
   "plataforma-saude": "/vitrine/patricia-lenine",
@@ -25,7 +24,6 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   "impulsionando-brasil": "/vitrine/impulsionando-brasil",
 };
 
-// Domínios de clientes (white-label) → rota dedicada.
 const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
@@ -37,9 +35,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Impulsionando Tecnologia — Sistemas modulares e automação" },
-      { name: "description", content: "Plataforma SaaS multiempresa: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque e BI. Tecnologia, automação e sistemas inteligentes para empresas que precisam crescer com controle." },
+      { name: "description", content: "Plataforma SaaS multiempresa: CRM, agenda online, pagamentos, estoque, BI e automação. Tecnologia e sistemas inteligentes para empresas que precisam crescer com controle." },
       { property: "og:title", content: "Impulsionando Tecnologia — Sistemas modulares e automação" },
-      { property: "og:description", content: "SaaS multiempresa modular: CRM, agenda, WhatsApp, pagamentos, emissão fiscal, estoque e BI." },
+      { property: "og:description", content: "Ecossistema modular para CRM, agenda, operação, pagamentos, estoque, BI e automação." },
       { property: "og:url", content: "https://impulsionando.com.br/" },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/" }],
@@ -50,14 +48,10 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname.toLowerCase();
-    if (host === "chrismed.impulsionando.com.br") {
-      return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
-    }
-    if (host === "anamadu.impulsionando.com.br") {
-      return <><AnaMaduRootMetadata /><AnaMaduHome /><AnitaDock /></>;
-    }
+    if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
+    if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduHome /><AnitaDock /></>;
   }
-  return <HomePage />;
+  return <><HomePage /><CpDiscoveryPopup /></>;
 }
 
 function ChrismedRootMetadata() {
