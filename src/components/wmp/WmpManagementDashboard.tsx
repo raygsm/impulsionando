@@ -1,15 +1,16 @@
-import { CalendarDays, FileText, Headphones, Package, Settings, ShieldCheck, Sparkles, Users, WalletCards, Workflow } from 'lucide-react'
+import { CalendarDays, FileText, Headphones, Package, PackagePlus, Settings, ShieldCheck, Sparkles, Users, WalletCards, Workflow } from 'lucide-react'
 
 const modules = [
   { title: 'Propostas', description: 'Criação, envio, negociação, aceite e histórico de versões.', href: '/wmp/propostas', icon: FileText, enabled: true },
   { title: 'Contratos e cláusulas', description: 'Governança jurídica versionada. Contrato só é liberado após aceite comercial e com cláusulas ativas.', href: '/wmp/contratos/clausulas', icon: ShieldCheck, enabled: true },
   { title: 'CRM e clientes', description: 'Briefings, leads, qualificação, contatos e evolução comercial.', href: '/wmp/operacao?area=crm', icon: Users, enabled: true },
-  { title: 'Agenda e eventos', description: 'Bookings, datas, locais, prazos, cachês e status operacional.', href: '/wmp/operacao?area=agenda', icon: CalendarDays, enabled: true },
+  { title: 'Agenda e eventos', description: 'Demandas corporativas, bookings, datas, locais, prazos, cachês e status operacional.', href: '/wmp/operacao?area=agenda', icon: CalendarDays, enabled: true },
   { title: 'DJs e parceiros', description: 'Cadastros, aprovação, disponibilidade, convites e confirmações.', href: '/wmp/operacao?area=djs', icon: Headphones, enabled: true },
   { title: 'Equipamentos e locações', description: 'Catálogo canônico, fabricante, modelo, quantidade, locação, proprietários e curadoria.', href: '/wmp/equipamentos', icon: Package, enabled: true },
+  { title: 'Cadastrar equipamento', description: 'Inclua o primeiro item real ou amplie o inventário com proprietário, beneficiário, custo, locação e quantidade.', href: '/wmp/equipamentos/novo', icon: PackagePlus, enabled: true },
   { title: 'Financeiro e repasses', description: 'Locações, beneficiários, valores e acompanhamento de repasses.', href: '/wmp/operacao?area=finance', icon: WalletCards, enabled: true },
   { title: 'Milito', description: 'Conversas encerradas, protocolos, elegibilidade e exportações.', href: '/wmp/operacao?area=millito', icon: Sparkles, enabled: true },
-  { title: 'Automações e jornadas', description: 'Comunicação de leads, propostas, equipe e pós-evento.', icon: Workflow, enabled: false },
+  { title: 'Automações e jornadas', description: 'Intakes ativos; lifecycle de proposta, DJ e pós-evento aguardam workflow n8n real para ativação.', icon: Workflow, enabled: false },
   { title: 'Configurações', description: 'Dados da WMP, permissões, integrações e parâmetros operacionais.', icon: Settings, enabled: false },
 ] as const
 
