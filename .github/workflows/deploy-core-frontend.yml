@@ -46,6 +46,7 @@ jobs:
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
       - name: Verify runtime output
         run: |
+          set -euo pipefail
           test -f .output/server/index.mjs
           test -d .output/public
           test -f scripts/start-core-runtime.mjs
@@ -78,11 +79,24 @@ jobs:
           path: release
 
       - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
+          set -euo pipefail
           install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          : > ~/.ssh/known_hosts
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              echo "SSH_KEYSCAN=PASS attempt=$attempt"
+              exit 0
+            fi
+            sleep $((attempt * 3))
+          done
+          echo '::error::VPS SSH unavailable after bounded retries'
+          exit 41
 
       - name: Prepare server-side Core environment
         env:
@@ -148,17 +162,34 @@ jobs:
           } > "$env_file"
           chmod 0600 "$env_file"
           scp "$env_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-core.env"
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'sudo install -o root -g root -m 0600 /tmp/impulsionando-core.env /etc/impulsionando-core.env && rm -f /tmp/impulsionando-core.env'
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE_ENV'
+          set -euo pipefail
+          incoming=/tmp/impulsionando-core.env
+          security=/etc/impulsionando-security.env
+          if grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=$' "$incoming" && sudo test -f "$security" && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' "$security"; then
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$security" | head -n1)"
+            tmp="$(mktemp)"
+            grep -v '^IMPULSIONANDO_WEBHOOK_SECRET=' "$incoming" > "$tmp"
+            printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "$secret" >> "$tmp"
+            install -m 0600 "$tmp" "$incoming"
+            rm -f "$tmp"
+            unset secret
+          fi
+          sudo install -o root -g root -m 0600 "$incoming" /etc/impulsionando-core.env
+          rm -f "$incoming"
+          sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env
+          REMOTE_ENV
 
       - name: Upload release
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
         run: |
+          set -euo pipefail
           tar -C release -czf /tmp/impulsionando-core-release.tgz .
           scp /tmp/impulsionando-core-release.tgz deploy/impulsionando-core.service "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
 
-      - name: Activate release
+      - name: Activate release on systemd runtime
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -202,64 +233,107 @@ jobs:
           if sudo grep -q '^PULSONITOR_ENABLED=true$' /etc/impulsionando-core.env; then
             grep -q '\[Pulsonitor\] started' "$journal_file"
           fi
-          if sudo grep -q '^COLORS_AUTOMATION_ENABLED=true$' /etc/impulsionando-core.env && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env; then
+          if sudo grep -q '^COLORS_AUTOMATION_ENABLED=true$' /etc/impulsionando-core.env; then
             grep -q '\[Colors Automation\] started' "$journal_file"
           fi
           rm -f "$journal_file"
           REMOTE
 
-      - name: Validate public Core, WMP, CHRISMED and Colors
+      - name: Promote the same release to Traefik Docker edge
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          RELEASE_DIR="/var/www/impulsionando-core/releases/${GITHUB_SHA}"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_DIR='${RELEASE_DIR}' bash -s" <<'REMOTE'
+          set -euo pipefail
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          test -f "$COMPOSE"
+          test -f "$RELEASE_DIR/.output/server/index.mjs"
+
+          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
+          if [ -n "$old_image" ]; then
+            printf '%s\n' "$old_image" | sudo tee /var/www/impulsionando-core/.previous-edge-image >/dev/null
+            sudo docker tag "$old_image" impulsionando-core:deploy-rollback
+          fi
+
+          printf 'node_modules\n' > "$RELEASE_DIR/.dockerignore"
+          cat > /tmp/Dockerfile.impulsionando-runtime <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+
+          sudo docker build -f /tmp/Dockerfile.impulsionando-runtime -t impulsionando-core:latest "$RELEASE_DIR"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+
+          for attempt in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+            if [ -n "$ip" ] && curl -fsS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/auth" >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -eq 45 ]; then
+              sudo docker logs --tail 120 impulsionando-core || true
+              exit 47
+            fi
+            sleep 2
+          done
+
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
+          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou; do
+            code="$(curl -sS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
+            echo "CORE_EDGE_PROBE $path HTTP=$code"
+            [ "$code" = '200' ] || exit 48
+          done
+          echo 'CORE_TRAEFIK_EDGE=PASS'
+          REMOTE
+
+      - name: Validate public Core and critical tenant routes
         run: |
           set -euo pipefail
-          curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
-          grep -qi "Impulsionando" /tmp/impulsionando.html
+          probe_html() {
+            url="$1"
+            label="$2"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/probe.html -w '%{http_code}' "$url?deploy_verify=${GITHUB_SHA}" || true)"
+            echo "PUBLIC_PROBE $label HTTP=$code"
+            [ "$code" = '200' ]
+          }
 
-          # WMP: critical public conversion routes and auth must all answer after every Core deploy.
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/ >/tmp/wmp-home.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/djs >/tmp/wmp-djs.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/empresas >/tmp/wmp-empresas.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/orcamento >/tmp/wmp-orcamento.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/parceiro >/tmp/wmp-parceiro.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/onde-estou >/tmp/wmp-onde-estou.html
-          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/auth >/tmp/wmp-auth.html
-          grep -qi "WMP\|Wagner Miller" /tmp/wmp-home.html
-          grep -qi "DJ" /tmp/wmp-djs.html
-          grep -qi "hotel\|empresa" /tmp/wmp-empresas.html
-          grep -qi "briefing\|orçamento\|orcamento" /tmp/wmp-orcamento.html
-          grep -qi "parceiro\|DJ" /tmp/wmp-parceiro.html
-          grep -qi "Onde Estou\|agenda" /tmp/wmp-onde-estou.html
-          grep -qi "Acessar\|Entrar\|conta" /tmp/wmp-auth.html
+          probe_html 'https://impulsionando.com.br/' 'core-home'
+          probe_html 'https://wmp.impulsionando.com.br/' 'wmp-home'
+          probe_html 'https://wmp.impulsionando.com.br/auth' 'wmp-auth'
+          probe_html 'https://wmp.impulsionando.com.br/dashboard' 'wmp-dashboard'
+          probe_html 'https://wmp.impulsionando.com.br/seguranca/senha' 'wmp-password'
+          probe_html 'https://wmp.impulsionando.com.br/djs' 'wmp-djs'
+          probe_html 'https://wmp.impulsionando.com.br/empresas' 'wmp-empresas'
+          probe_html 'https://wmp.impulsionando.com.br/orcamento' 'wmp-orcamento'
+          probe_html 'https://wmp.impulsionando.com.br/parceiro' 'wmp-parceiro'
+          probe_html 'https://wmp.impulsionando.com.br/onde-estou' 'wmp-onde-estou'
+          probe_html 'https://wmp.impulsionando.com.br/cases' 'wmp-cases'
+          probe_html 'https://wmp.impulsionando.com.br/pacotes' 'wmp-pacotes'
+          probe_html 'https://chrismed.impulsionando.com.br/' 'chrismed-home'
+          probe_html 'https://chrismed.impulsionando.com.br/auth' 'chrismed-auth'
+          probe_html 'https://colors.impulsionando.com.br/' 'colors-home'
 
-          # CHRISMED: every critical public route must answer successfully after each Core deploy.
-          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed-home.html
-          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agendar >/tmp/chrismed-agendar.html
-          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/eventos >/tmp/chrismed-eventos.html
-          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/auth >/tmp/chrismed-auth.html
-          curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/agenda/profissional >/tmp/chrismed-profissional.html
-          grep -qi "CHRISMED\|CrisMed" /tmp/chrismed-home.html
+          curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
+            -o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/?deploy_content=${GITHUB_SHA}"
+          grep -qi 'WMP\|Wagner Miller' /tmp/wmp-home.html
+          for marker in '+850' 'R$ 2.900' 'R$ 7.400' 'Tech Corp' 'Festival Sertanejo de Verão' '8.000 pessoas' 'resposta garantida'; do
+            if grep -Fqi "$marker" /tmp/wmp-home.html; then
+              echo "::error::Legacy WMP marker still public: $marker"
+              exit 49
+            fi
+          done
+          echo 'PUBLIC_CORE_VALIDATION=PASS'
 
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/ >/tmp/colors-home.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/agenda >/tmp/colors-agenda.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/eventos >/tmp/colors-eventos.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/suporte >/tmp/colors-suporte.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/super-green-black >/tmp/colors-sgb.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/rastreio >/tmp/colors-rastreio.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/privacidade >/tmp/colors-privacy.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/termos >/tmp/colors-terms.html
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/monetizze-colors >/tmp/colors-monetizze.json
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/perfectpay-colors >/tmp/colors-perfectpay.json
-          curl --fail --location --silent --show-error --max-time 30 https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors >/tmp/colors-maisfy.json
-
-          grep -qi "Colors" /tmp/colors-home.html
-          grep -qi "Agende" /tmp/colors-agenda.html
-          grep -qi "Eventos" /tmp/colors-eventos.html
-          grep -qi "Suporte\|atendimento" /tmp/colors-suporte.html
-          grep -qi "Super Green Black" /tmp/colors-sgb.html
-          grep -qi "Rastre" /tmp/colors-rastreio.html
-          grep -qi "Privacidade" /tmp/colors-privacy.html
-          grep -qi "Termos" /tmp/colors-terms.html
-
-      - name: Roll back failed release
+      - name: Roll back failed release and edge
         if: failure()
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
@@ -267,18 +341,23 @@ jobs:
         run: |
           ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
           set -euo pipefail
-          PREVIOUS_RELEASE="$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
-          if [ -z "$PREVIOUS_RELEASE" ] || [ ! -f "$PREVIOUS_RELEASE/.output/server/index.mjs" ]; then
-            echo "No valid previous Core release is available for rollback."
-            exit 45
+
+          if sudo docker image inspect impulsionando-core:deploy-rollback >/dev/null 2>&1; then
+            sudo docker tag impulsionando-core:deploy-rollback impulsionando-core:latest
+            cd /opt/impulsionando/deploy/hostinger
+            sudo docker compose -f docker-compose.yml up -d --no-build --force-recreate impulsionando-core || true
           fi
-          sudo ln -sfn "$PREVIOUS_RELEASE" /var/www/impulsionando-core/current
-          sudo systemctl restart impulsionando-core
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error --max-time 5 http://127.0.0.1:3000/ >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
+
+          PREVIOUS_RELEASE="$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
+          if [ -n "$PREVIOUS_RELEASE" ] && [ -f "$PREVIOUS_RELEASE/.output/server/index.mjs" ]; then
+            sudo ln -sfn "$PREVIOUS_RELEASE" /var/www/impulsionando-core/current
+            sudo systemctl restart impulsionando-core
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent --show-error --max-time 5 http://127.0.0.1:3000/ >/dev/null; then
+                exit 0
+              fi
+              sleep 1
+            done
+          fi
           exit 46
           REMOTE
