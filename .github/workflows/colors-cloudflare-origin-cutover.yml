@@ -137,3 +137,5 @@ jobs:
           name: colors-dns-backup-${{ github.run_id }}
           path: /tmp/colors-dns-before.json
           retention-days: 30
+
+# Production cutover triggered only after the Colors origin and regression probes were green.
