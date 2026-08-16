@@ -1,0 +1,38 @@
+name: WMP Cloudflare current origin audit
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-cloudflare-current-origin-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DOMAIN: wmp.impulsionando.com.br
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Compare Cloudflare record with canonical VPS
+        run: |
+          set -euo pipefail
+          for value in VPS_HOST CF_API_TOKEN CF_ZONE_ID; do test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }; done
+          CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          VPS_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test -n "$VPS_IP"
+          echo "CANONICAL_VPS_IP=$VPS_IP"
+          curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" -o /tmp/wmp-dns.json
+          jq -e '.success == true' /tmp/wmp-dns.json >/dev/null
+          jq -r '.result[] | [.id,.type,.name,.content,(.proxied|tostring)] | @tsv' /tmp/wmp-dns.json | while IFS=$'\t' read -r id type name content proxied; do
+            echo "CF_RECORD type=$type name=$name content=$content proxied=$proxied id=$id"
+          done
+          matches="$(jq --arg ip "$VPS_IP" '[.result[] | select(.type=="A" and .content==$ip)] | length' /tmp/wmp-dns.json)"
+          echo "CF_MATCHES_CANONICAL_VPS=$matches"
