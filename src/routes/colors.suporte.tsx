@@ -8,7 +8,7 @@ export const Route = createFileRoute("/colors/suporte")({
   head: () => ({ meta: [
     { title: "Suporte Colors Saúde — atendimento com protocolo" },
     { name: "description", content: "Abra um atendimento Colors Saúde para pedido, rastreio, pagamento, produto, afiliados, eventos ou outras necessidades." },
-  ], links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/colors/suporte" }] }),
+  ], links: [{ rel: "canonical", href: "https://colors.impulsionando.com.br/suporte" }] }),
   component: ColorsSupport,
 });
 function tracking(){if(typeof window==="undefined")return{};const q=new URLSearchParams(window.location.search);return{utmSource:q.get("utm_source")??undefined,utmMedium:q.get("utm_medium")??undefined,utmCampaign:q.get("utm_campaign")??undefined,utmContent:q.get("utm_content")??undefined,utmTerm:q.get("utm_term")??undefined};}
