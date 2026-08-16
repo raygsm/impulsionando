@@ -1,161 +1,73 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { breadcrumbJsonLd } from "@/lib/seo";
-import { ArrowRight, MessageCircle, Target } from "lucide-react";
+import { ArrowRight, MessageCircle, Search, Target } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
-import { WhatsAppBlock } from "@/components/marketing/WhatsAppBlock";
-import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
-import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
-import { getDemoNichoLink } from "@/lib/demoResolver";
-import { trackFunnelCta } from "@/lib/funnelTracking";
+import { PUBLIC_NICHE_GROUPS, PUBLIC_NICHES } from "@/data/public-niche-catalog";
 import { openImpulsionito } from "@/lib/impulsionito-tracking";
 
 export const Route = createFileRoute("/nichos/")({
   head: () => ({
     meta: [
-      { title: "Soluções por nicho — Impulsionando Tecnologia" },
-      {
-        name: "description",
-        content:
-          "Clínicas, bares e restaurantes, microcervejarias, fornecedores, serviços, e-commerce, fitness e White Label. Escolha seu nicho e veja como a plataforma resolve.",
-      },
-      { property: "og:title", content: "Soluções por nicho — Impulsionando Tecnologia" },
-      {
-        property: "og:description",
-        content:
-          "Cada nicho com suas dores, jornada prática, módulos recomendados e demonstração pronta.",
-      },
+      { title: "Soluções por segmento — Impulsionando Tecnologia" },
+      { name: "description", content: "Soluções para supermercados, materiais de construção, corretoras, farmácias, saúde, alimentação, varejo, serviços, indústria, educação, turismo e muito mais." },
+      { property: "og:title", content: "Soluções por segmento — Impulsionando Tecnologia" },
+      { property: "og:description", content: "Cada segmento com dores, jornada, relacionamento, recorrência e ganhos comerciais próprios." },
       { property: "og:url", content: "https://impulsionando.com.br/nichos" },
-    
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/nichos" }],
-    scripts: [
-      breadcrumbJsonLd([
-        { name: "Início", path: "/" },
-        { name: "Nichos", path: "/nichos" },
-      ]),
-    ],
+    scripts: [breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Nichos", path: "/nichos" }])],
   }),
   component: NichosIndex,
 });
 
 function NichosIndex() {
+  const [query, setQuery] = useState("");
+  const normalized = query.trim().toLocaleLowerCase("pt-BR");
+  const groups = useMemo(() => PUBLIC_NICHE_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !normalized || `${item.label} ${item.description}`.toLocaleLowerCase("pt-BR").includes(normalized)),
+  })).filter((group) => group.items.length > 0), [normalized]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-
-      {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
-        <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs mb-4">
-            <Target className="w-3.5 h-3.5" /> Soluções por nicho
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight max-w-3xl">
-            Escolha o seu nicho. Veja a plataforma funcionando para a sua realidade.
-          </h1>
-          <p className="mt-4 text-lg text-white/85 max-w-3xl leading-relaxed">
-            Cada nicho com dores próprias, jornada prática, módulos recomendados e demonstração pronta —
-            sem promessa genérica.
-          </p>
+        <div className="pointer-events-none absolute -bottom-32 -right-32 h-[500px] w-[500px] rounded-full bg-accent/30 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs backdrop-blur"><Target className="h-3.5 w-3.5" /> {PUBLIC_NICHES.length} jornadas comerciais publicadas</div>
+          <h1 className="max-w-4xl text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Encontre a sua realidade. Veja como a Impulsionando conecta operação, venda e relacionamento no seu segmento.</h1>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/85">Não é uma apresentação genérica. Cada jornada parte da perda silenciosa do setor, mostra como PDV, ERP, CRM, automação, pesquisas e Impulsionito trabalham juntos e conduz para contratação.</p>
+          <div className="relative mt-7 max-w-xl text-foreground"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"/><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Busque seu segmento..." className="h-12 bg-background pl-11 shadow-lg"/></div>
         </div>
       </section>
 
-      {/* GRID DE NICHOS — agrupado por categoria principal (Saúde primeiro) */}
-      <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
-        {MACRO_NICHOS.map((cat) => {
-          const items = cat.slugs
-            .map((s) => NICHO_DETAILS.find((n) => n.slug === s))
-            .filter((n): n is (typeof NICHO_DETAILS)[number] => !!n);
-          if (items.length === 0) return null;
-          return (
-            <div key={cat.slug}>
-              <div className="mb-4">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{cat.label}</h2>
-                <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{cat.description}</p>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map((n) => {
-                  const Icon = n.icon;
-                  return (
-                    <Card key={n.slug} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground shrink-0">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="font-semibold tracking-tight leading-tight">{n.shortLabel}</div>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed flex-1">{n.cardDesc}</p>
-                      <div className="mt-4 flex gap-2">
-                        <Button asChild size="sm" className="flex-1 gap-1.5 bg-gradient-primary">
-                          <Link to="/nichos/$slug" params={{ slug: n.slug }}>
-                            Ver nicho <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                        </Button>
-                        {n.demoRoute && (() => {
-                          const link = getDemoNichoLink(n.slug);
-                          return (
-                            <Button asChild size="sm" variant="outline">
-                              <Link
-                                to={link.to}
-                                params={link.params}
-                                data-nicho={n.slug}
-                                data-resolved={link.slug}
-                                onClick={() => trackFunnelCta({
-                                  cta: "nichos-abrir-demo",
-                                  origem: "nichos-hub",
-                                  nicho_pedido: n.slug,
-                                  alias_resolvido: link.slug,
-                                  isFallback: link.isFallback,
-                                  rotaDestino: `/demo/nicho/${link.slug}`,
-                                })}
-                              >Demo</Link>
-                            </Button>
-                          );
-                        })()}
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="pt-4">
-          <WhatsAppBlock />
-        </div>
-
-
-        <Card className="mt-10 p-8 lg:p-10 bg-gradient-primary text-primary-foreground border-0 shadow-elegant overflow-hidden relative">
-          <div className="pointer-events-none absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-accent/20 blur-3xl" />
-          <div className="relative max-w-2xl space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-bold leading-tight tracking-tight">
-              Não encontrou seu nicho?
-            </h2>
-            <p className="text-white/85 leading-relaxed">
-              A plataforma é modular. Fale com a gente que montamos a configuração ideal para o seu
-              modelo de negócio.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Button type="button" size="lg" className="gap-2 shadow-lg" onClick={() => openImpulsionito("nichos-hub")}>
-                <MessageCircle className="w-4 h-4" /> Falar com o Impulsionito
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
-              >
-                <Link to="/orcamento">Montar orçamento</Link>
-              </Button>
+      <section className="mx-auto w-full max-w-6xl space-y-12 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        {groups.map((group) => (
+          <div key={group.slug}>
+            <div className="mb-4"><h2 className="text-xl font-bold tracking-tight sm:text-2xl">{group.label}</h2><p className="mt-1 max-w-3xl text-sm text-muted-foreground">{group.description}</p></div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                return <Card key={item.slug} className="flex flex-col p-6 transition-all hover:-translate-y-0.5 hover:shadow-elegant">
+                  <div className="mb-3 flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-primary text-primary-foreground"><Icon className="h-5 w-5"/></div><div className="font-semibold leading-tight tracking-tight">{item.label}</div></div>
+                  <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                  <Button asChild size="sm" className="mt-4 gap-1.5 bg-gradient-primary"><Link to="/nichos/$slug" params={{ slug: item.slug }}>Ver jornada <ArrowRight className="h-3.5 w-3.5"/></Link></Button>
+                </Card>;
+              })}
             </div>
           </div>
+        ))}
+
+        <Card className="relative mt-10 overflow-hidden border-0 bg-gradient-primary p-8 text-primary-foreground shadow-elegant lg:p-10">
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-[400px] w-[400px] rounded-full bg-accent/20 blur-3xl" />
+          <div className="relative max-w-2xl space-y-4"><h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">Seu segmento ainda não apareceu exatamente como você chama?</h2><p className="leading-relaxed text-white/85">O Impulsionito faz o diagnóstico e monta a configuração a partir da sua operação, não de um rótulo genérico.</p><div className="flex flex-wrap gap-2 pt-2"><Button type="button" size="lg" className="gap-2 shadow-lg" onClick={() => openImpulsionito("nichos-hub")}><MessageCircle className="h-4 w-4"/>Falar com o Impulsionito</Button><Button asChild size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"><Link to="/orcamento">Montar orçamento</Link></Button></div></div>
         </Card>
       </section>
-
       <PublicFooter />
     </div>
   );
