@@ -1,0 +1,205 @@
+name: Colors n8n Core-verified bootstrap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-n8n-core-verified-bootstrap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: colors-n8n-core-verified-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Install verify activate and bind Colors workflows
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          CORE_VERIFY='https://impulsionando.com.br/api/public/hooks/n8n-verify'
+          SECURITY_ENV=/etc/impulsionando-security.env
+          CORE_ENV=/etc/impulsionando-core.env
+          TENANT_SLUG='colors-saude'
+
+          verifier_code="$(curl -sS -o /tmp/colors-verifier-get.out -w '%{http_code}' --max-time 20 "$CORE_VERIFY")"
+          echo "COLORS_CORE_VERIFIER_GET_HTTP=$verifier_code"
+          [ "$verifier_code" = '200' ] || exit 50
+          sudo docker inspect "$C" >/dev/null
+
+          create_workflow() {
+            local id="$1" name="$2" path="$3" slug="$4" webhook_id="$5"
+            local file="/tmp/${id}-colors-verified.json"
+            cat >"$file" <<JSON
+          {
+            "id":"${id}",
+            "name":"${name}",
+            "active":false,
+            "nodes":[
+              {
+                "parameters":{"httpMethod":"POST","path":"${path}","responseMode":"responseNode","options":{}},
+                "id":"${id}-webhook","name":"Colors Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"${webhook_id}"
+              },
+              {
+                "parameters":{
+                  "method":"POST","url":"${CORE_VERIFY}","sendHeaders":true,
+                  "headerParameters":{"parameters":[
+                    {"name":"x-impulsionando-signature","value":"={{ \$json.headers?.['x-impulsionando-signature'] || '' }}"},
+                    {"name":"Content-Type","value":"application/json"}
+                  ]},
+                  "sendBody":true,"contentType":"raw","rawContentType":"application/json",
+                  "body":"={{ JSON.stringify(\$json.body) }}",
+                  "options":{"response":{"response":{"fullResponse":true,"neverError":true,"responseFormat":"json"}},"timeout":15000}
+                },
+                "id":"${id}-core-verify","name":"Verify signature in Core","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[260,0]
+              },
+              {
+                "parameters":{"jsCode":"const r = \$input.first().json;\nconst body = r.body || {};\nconst authorized = Number(r.statusCode) === 200 && body.authorized === true && body.ok === true && body.tenant_slug === '${TENANT_SLUG}';\nreturn [{json:{authorized,statusCode:Number(r.statusCode)||0,error:authorized?null:(body.error||'verification_failed'),verification:body,payload:authorized?(body.payload||null):null}}];"},
+                "id":"${id}-normalize","name":"Normalize verification result","type":"n8n-nodes-base.code","typeVersion":2,"position":[520,0]
+              },
+              {
+                "parameters":{"respondWith":"json","responseBody":"={{ { ok: \$json.authorized === true, workflow: '${slug}', error: \$json.authorized === true ? null : \$json.error, event_code: \$json.payload?.event_code || null, correlation_id: \$json.payload?.correlation_id || null, accepted_at: \$json.authorized === true ? \$now : null } }}","options":{"responseCode":"={{ \$json.authorized === true ? 200 : 401 }}"}},
+                "id":"${id}-respond","name":"Respond Security Result","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[780,0]
+              }
+            ],
+            "connections":{
+              "Colors Lifecycle Webhook":{"main":[[{"node":"Verify signature in Core","type":"main","index":0}]]},
+              "Verify signature in Core":{"main":[[{"node":"Normalize verification result","type":"main","index":0}]]},
+              "Normalize verification result":{"main":[[{"node":"Respond Security Result","type":"main","index":0}]]}
+            },
+            "settings":{"executionOrder":"v1"}
+          }
+          JSON
+            sudo docker cp "$file" "$C:$file"
+            sudo docker exec "$C" n8n import:workflow --input="$file"
+            sudo docker exec "$C" n8n publish:workflow --id="$id"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
+          }
+
+          workflows='csAffiliateRel01|Colors Affiliate Relationship|colors-affiliate-relationship|colors-saude.affiliate.relationship|colors-affiliate-relationship-v1|AFFILIATE_ATTRIBUTED
+          csAppointment01|Colors Appointment Lifecycle|colors-appointment-lifecycle|colors-saude.appointment.lifecycle|colors-appointment-lifecycle-v1|APPOINTMENT_REQUESTED
+          csCheckoutLife01|Colors Checkout Lifecycle|colors-checkout-lifecycle|colors-saude.checkout.lifecycle|colors-checkout-lifecycle-v1|CHECKOUT_STARTED
+          csCustomerRel01|Colors Customer Relationship|colors-customer-relationship|colors-saude.customer.relationship|colors-customer-relationship-v1|ORDER_DELIVERED
+          csEventReg01|Colors Event Registration|colors-event-registration|colors-saude.event.registration|colors-event-registration-v1|EVENT_REGISTRATION_CREATED
+          csOrderTrack01|Colors Order Tracking|colors-order-tracking|colors-saude.order.tracking|colors-order-tracking-v1|TRACKING_CREATED
+          csSupportLife01|Colors Support Lifecycle|colors-support-lifecycle|colors-saude.support.lifecycle|colors-support-lifecycle-v1|SUPPORT_TICKET_CREATED'
+
+          while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            name="$(printf '%s' "$name" | xargs)"
+            path="$(printf '%s' "$path" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
+            webhook="$(printf '%s' "$webhook" | xargs)"
+            [ -n "$id" ] || continue
+            create_workflow "$id" "$name" "$path" "$slug" "$webhook"
+          done <<EOF
+          $workflows
+          EOF
+
+          sudo docker restart "$C" >/dev/null
+          healthy=0
+          for i in $(seq 1 45); do
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then healthy=1; break; fi
+            sleep 2
+          done
+          [ "$healthy" = '1' ] || exit 51
+
+          make_signature() {
+            local payload="$1" secret
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+            test -n "$secret"
+            printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}'
+          }
+
+          probe_workflow() {
+            local id="$1" path="$2" slug="$3" event="$4"
+            local url="https://n8n.impulsionando.com.br/webhook/${path}"
+            local payload code signature
+            payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"${TENANT_SLUG}\",\"correlation_id\":\"unsigned-${id}\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            code="$(curl -sS -o "/tmp/${id}-unsigned.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$payload")"
+            echo "COLORS_N8N_UNSIGNED id=$id HTTP=$code"
+            [ "$code" = '401' ] || exit 52
+
+            payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"${TENANT_SLUG}\",\"correlation_id\":\"signed-${id}-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            signature="$(make_signature "$payload")"
+            code="$(curl -sS -o "/tmp/${id}-signed.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" -d "$payload")"
+            echo "COLORS_N8N_SIGNED id=$id HTTP=$code"
+            [ "$code" = '200' ] || exit 53
+            grep -q '"ok":true' "/tmp/${id}-signed.out" || exit 54
+
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
+            sudo docker exec -i -e WF_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WF_ID;
+          const r=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));
+          const w=Array.isArray(r)?r[0]:r;
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          const names=(w.nodes||[]).map(n=>n.name);
+          if(!w.active||!w.activeVersionId||!hook?.webhookId||!names.includes('Verify signature in Core')||!names.includes('Respond Security Result')) process.exit(55);
+          NODE
+          }
+
+          while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            path="$(printf '%s' "$path" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
+            event="$(printf '%s' "$event" | xargs)"
+            [ -n "$id" ] || continue
+            probe_workflow "$id" "$path" "$slug" "$event"
+          done <<EOF
+          $workflows
+          EOF
+
+          SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
+          SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
+          test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY"
+          TENANT_ID="$(curl -fsS --max-time 20 "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.${TENANT_SLUG}&active=eq.true&select=id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq -r '.[0].id // empty')"
+          test -n "$TENANT_ID"
+
+          while IFS='|' read -r id name path slug webhook event; do
+            id="$(printf '%s' "$id" | xargs)"
+            path="$(printf '%s' "$path" | xargs)"
+            slug="$(printf '%s' "$slug" | xargs)"
+            [ -n "$id" ] || continue
+            webhook_url="https://n8n.impulsionando.com.br/webhook/${path}"
+            registry_id="$(curl -fsS --max-time 20 "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.${slug}&version=eq.1&select=id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq -r '.[0].id // empty')"
+            test -n "$registry_id"
+            curl -fsS --max-time 20 -X PATCH \
+              "$SUPABASE_URL/rest/v1/n8n_workflow_registry?id=eq.${registry_id}" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' \
+              -d "{\"n8n_workflow_id\":\"${id}\",\"status\":\"ACTIVE\"}" >/dev/null
+            state_payload="$(jq -nc --arg tenant "$TENANT_ID" --arg registry "$registry_id" --arg url "$webhook_url" '{tenant_id:$tenant,registry_id:$registry,status:"ACTIVE",config:{webhook_url:$url,verified:true,verified_at:(now|todateiso8601)}}')"
+            curl -fsS --max-time 20 -X POST \
+              "$SUPABASE_URL/rest/v1/tenant_workflow_state?on_conflict=tenant_id,registry_id" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' \
+              -d "$state_payload" >/dev/null
+          done <<EOF
+          $workflows
+          EOF
+
+          unset SERVICE_KEY
+          echo 'COLORS_N8N_CORE_VERIFIED_LIFECYCLES=PASS'
+          REMOTE
