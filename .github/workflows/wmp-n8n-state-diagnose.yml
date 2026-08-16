@@ -34,6 +34,7 @@ jobs:
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
+          echo 'DIAG_VERSION=2'
           echo "N8N_VERSION=$(sudo docker exec "$C" n8n --version)"
           sudo docker exec "$C" sh -lc 'printf "DB_TYPE=%s\n" "${DB_TYPE:-sqlite}"; printf "WEBHOOK_URL_SET=%s\n" "$([ -n "${WEBHOOK_URL:-}" ] && echo true || echo false)"; printf "N8N_HOST=%s\n" "${N8N_HOST:-}"'
 
