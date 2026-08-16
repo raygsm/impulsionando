@@ -1,6 +1,10 @@
 name: Ana Madu Traefik Router Persistence
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/anamadu-traefik-router-persist.yml
   workflow_run:
     workflows: ["Deploy Core Frontend"]
     types: [completed]
@@ -15,7 +19,7 @@ concurrency:
 
 jobs:
   persist:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -57,6 +61,10 @@ jobs:
           current_rule="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.rule"}}' impulsionando-core 2>/dev/null || true)"
           current_resolver="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.tls.certresolver"}}' impulsionando-core 2>/dev/null || true)"
           if [ "$current_rule" != 'Host(`anamadu.impulsionando.com.br`)' ] || [ "$current_resolver" != 'letsencrypt' ]; then
+            stale_ids="$(sudo docker ps -a --format '{{.ID}} {{.Names}}' | awk '$2 ~ /^[a-f0-9]+_impulsionando-core$/ {print $1}')"
+            if [ -n "$stale_ids" ]; then
+              printf '%s\n' "$stale_ids" | xargs -r sudo docker rm -f
+            fi
             sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
           fi
 
