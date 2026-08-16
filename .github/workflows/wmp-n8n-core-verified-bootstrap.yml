@@ -95,10 +95,11 @@ jobs:
             sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
           }
 
+          # Reuse the canonical WMP workflow IDs already present in n8n. Do not create parallel lifecycle workflows.
           create_workflow 'wmpLeadIntake01' 'WMP Lead Intake' 'wmp-lead-intake' 'wmp_lead_intake' 'wmp-lead-intake-webhook-v3'
           create_workflow 'wmpProposalLifecycle01' 'WMP Proposal Lifecycle' 'wmp-proposal-lifecycle' 'wmp_proposal_lifecycle' 'wmp-proposal-lifecycle-webhook-v2'
-          create_workflow 'wmpDjBookingLifecycle01' 'WMP DJ Booking Lifecycle' 'wmp-dj-booking-lifecycle' 'wmp_dj_booking_lifecycle' 'wmp-dj-booking-lifecycle-webhook-v2'
-          create_workflow 'wmpPostEventRelationship01' 'WMP Post Event Relationship' 'wmp-post-event-relationship' 'wmp_post_event_relationship' 'wmp-post-event-relationship-webhook-v2'
+          create_workflow 'wmpDjLifecycle01' 'WMP DJ Booking Lifecycle' 'wmp-dj-booking-lifecycle' 'wmp_dj_booking_lifecycle' 'wmp-dj-booking-lifecycle-webhook-v2'
+          create_workflow 'wmpPostEvent01' 'WMP Post Event Relationship' 'wmp-post-event-relationship' 'wmp_post_event_relationship' 'wmp-post-event-relationship-webhook-v2'
 
           sudo docker restart "$C" >/dev/null
           for i in $(seq 1 45); do
@@ -148,8 +149,8 @@ jobs:
 
           probe_workflow 'wmpLeadIntake01' 'wmp-lead-intake' 'wmp.lead.received'
           probe_workflow 'wmpProposalLifecycle01' 'wmp-proposal-lifecycle' 'wmp.proposal.sent'
-          probe_workflow 'wmpDjBookingLifecycle01' 'wmp-dj-booking-lifecycle' 'wmp.dj.offered'
-          probe_workflow 'wmpPostEventRelationship01' 'wmp-post-event-relationship' 'wmp.event.completed'
+          probe_workflow 'wmpDjLifecycle01' 'wmp-dj-booking-lifecycle' 'wmp.dj.offered'
+          probe_workflow 'wmpPostEvent01' 'wmp-post-event-relationship' 'wmp.event.completed'
 
           echo 'WMP_N8N_CORE_VERIFIED_LIFECYCLES=PASS'
           REMOTE
