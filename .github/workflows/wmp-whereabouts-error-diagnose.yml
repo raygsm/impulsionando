@@ -1,0 +1,40 @@
+name: WMP whereabouts error diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-whereabouts-error-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Trigger candidate whereabouts locally and read relevant logs
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          CANDIDATE='/var/www/impulsionando-core/releases/d2f1c53d13649f45d0355a69b06bf8b562d766e3'
+          ORIGINAL="$(readlink -f /var/www/impulsionando-core/current)"
+          restore(){ sudo ln -sfn "$ORIGINAL" /var/www/impulsionando-core/current; sudo systemctl restart impulsionando-core; }
+          trap restore EXIT
+          sudo ln -sfn "$CANDIDATE" /var/www/impulsionando-core/current
+          sudo systemctl restart impulsionando-core
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/ >/dev/null 2>&1 && break || sleep 1; done
+          since="$(date -u '+%Y-%m-%d %H:%M:%S')"
+          code="$(curl -sS -o /tmp/whereabouts-body -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' http://127.0.0.1:3000/onde-estou || true)"
+          echo "WHEREABOUTS_HTTP=$code"
+          sleep 1
+          sudo journalctl --no-pager -u impulsionando-core --since "$since" | tail -n 120 | sed -E 's/(eyJ[a-zA-Z0-9._-]{20,})/[REDACTED_TOKEN]/g'
+          REMOTE
