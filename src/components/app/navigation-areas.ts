@@ -45,7 +45,6 @@ export const NAVIGATION_AREAS: Area[] = [
       { label: "Atividades Recentes", to: "/notifications" },
       { label: "Alertas", to: "/admin/action-center" },
     ],
-
   },
   {
     key: "clientes",
@@ -82,12 +81,13 @@ export const NAVIGATION_AREAS: Area[] = [
   {
     key: "financeiro",
     label: "Financeiro",
-    description: "Recebimentos, pagamentos, notas fiscais e conciliação.",
+    description: "Recebimentos, pagamentos, descontos, notas fiscais e conciliação.",
     icon: Wallet,
     accent: "primary",
     links: [
       { label: "Recebimentos", to: "/finance" },
       { label: "Pagamentos", to: "/admin/cobrancas" },
+      { label: "Cupons e Descontos", to: "/finance/cupons" },
       { label: "Assinaturas", to: "/admin/billing" },
       { label: "Mercado Pago", to: "/core/integracoes/diagnostico" },
       { label: "Repasses", to: "/core/financeiro-consolidado" },
@@ -152,6 +152,7 @@ export const NAVIGATION_AREAS: Area[] = [
     accent: "primary",
     links: [
       { label: "Financeiros", to: "/core/financeiro-master" },
+      { label: "Cupons e Descontos", to: "/finance/cupons" },
       { label: "Comerciais", to: "/admin/conversion-funnel" },
       { label: "Marketing", to: "/admin/attribution" },
       { label: "Operacionais", to: "/dashboards/operacao" },

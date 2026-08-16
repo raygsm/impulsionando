@@ -1,0 +1,88 @@
+name: Schema Snapshot Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - ".github/workflows/schema-snapshot-diagnostic.yml"
+  workflow_dispatch:
+
+jobs:
+  snapshot-restore-diagnostic:
+    name: Diagnosticar restauração do snapshot estrutural
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.8.1.085
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 55433:5432
+        options: >-
+          --health-cmd "pg_isready -U supabase_admin -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar segredos estruturais
+        env:
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          test -n "$SUPABASE_DB_HOST" || { echo "::error::SUPABASE_DB_HOST ausente"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::SUPABASE_DB_PASSWORD ausente"; exit 1; }
+      - name: Instalar cliente Postgres
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Gerar snapshot estrutural sem dados
+        env:
+          PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+          PGPORT: "5432"
+          PGDATABASE: postgres
+          PGUSER: postgres.${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGSSLMODE: require
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e PGHOST -e PGPORT -e PGDATABASE -e PGUSER -e PGPASSWORD -e PGSSLMODE \
+            postgres:17 \
+            pg_dump --schema=public --schema=private --schema-only --clean --if-exists \
+              --no-owner --no-privileges \
+            | sed -e '/^SET transaction_timeout = 0;$/d' \
+                  -e '/^CREATE SCHEMA public;$/a CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;' \
+            > /tmp/prod-schema.sql
+          test -s /tmp/prod-schema.sql
+      - name: Restaurar e publicar erro PostgreSQL exato
+        env:
+          PGPASSWORD: test
+        run: |
+          set -euo pipefail
+          psql -h localhost -p 55433 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          DO $bootstrap$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
+          END $bootstrap$;
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id uuid PRIMARY KEY,
+            email text,
+            raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+            created_at timestamptz,
+            updated_at timestamptz
+          );
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
+          SQL
+          if ! psql -h localhost -p 55433 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f /tmp/prod-schema.sql >/tmp/restore.log 2>&1; then
+            cat /tmp/restore.log
+            diagnostic="$(grep -E 'ERROR:|FATAL:|DETAIL:|HINT:|CONTEXT:|psql:.*ERROR' /tmp/restore.log | tail -n 10 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')"
+            if [ -z "$diagnostic" ]; then diagnostic="$(tail -n 15 /tmp/restore.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')"; fi
+            echo "::error::.Snapshot restore PostgreSQL: ${diagnostic:0:1800}"
+            exit 1
+          fi
+          echo "Snapshot estrutural restaurado com sucesso."

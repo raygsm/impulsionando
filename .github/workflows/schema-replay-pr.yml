@@ -121,8 +121,11 @@ jobs:
             fi
             echo "Aplicando $base"
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" >/tmp/migration.log 2>&1; then
-              echo "::error::Falha ao aplicar $base"
+              echo "::error file=$f::Falha ao aplicar $base"
               cat /tmp/migration.log
+              diagnostic="$(grep -E 'ERROR:|FATAL:|DETAIL:|HINT:|CONTEXT:|psql:.*ERROR' /tmp/migration.log | tail -n 8 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')"
+              if [ -z "$diagnostic" ]; then diagnostic="$(tail -n 12 /tmp/migration.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')"; fi
+              echo "::error file=$f::PostgreSQL: ${diagnostic:0:1800}"
               exit 1
             fi
           done

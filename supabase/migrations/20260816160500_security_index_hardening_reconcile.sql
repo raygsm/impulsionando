@@ -1,6 +1,5 @@
--- Historical security/index hardening was authored against a database that
--- already contained some functions/tables provisioned outside repository history.
--- Keep the hardening strict when objects exist, but make clean replay idempotent.
+-- Final reconciliation for objects that may be created after the historical
+-- hardening point during a clean repository replay. Idempotent on live schema.
 
 DO $$
 BEGIN
@@ -8,18 +7,14 @@ BEGIN
     EXECUTE 'revoke execute on function public.chrismed_create_patient_substitution_decision() from public, anon, authenticated';
     EXECUTE 'grant execute on function public.chrismed_create_patient_substitution_decision() to service_role';
   END IF;
-
   IF to_regprocedure('public.chrismed_notify_professional_cancellation()') IS NOT NULL THEN
     EXECUTE 'revoke execute on function public.chrismed_notify_professional_cancellation() from public, anon, authenticated';
     EXECUTE 'grant execute on function public.chrismed_notify_professional_cancellation() to service_role';
   END IF;
 END $$;
 
-drop index if exists public.uq_company_settings_company_key;
-
 DO $$
-DECLARE
-  r record;
+DECLARE r record;
 BEGIN
   FOR r IN
     SELECT * FROM (VALUES
@@ -57,11 +52,8 @@ BEGIN
   LOOP
     IF to_regclass(format('public.%I', r.table_name)) IS NOT NULL
        AND EXISTS (
-         SELECT 1
-         FROM information_schema.columns c
-         WHERE c.table_schema='public'
-           AND c.table_name=r.table_name
-           AND c.column_name=r.column_name
+         SELECT 1 FROM information_schema.columns c
+         WHERE c.table_schema='public' AND c.table_name=r.table_name AND c.column_name=r.column_name
        ) THEN
       EXECUTE format('create index if not exists %I on public.%I(%I)', r.index_name, r.table_name, r.column_name);
     END IF;
