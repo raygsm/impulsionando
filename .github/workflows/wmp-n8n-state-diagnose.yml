@@ -26,7 +26,7 @@ jobs:
           for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
           test -s ~/.ssh/known_hosts
 
-      - name: Inspect WMP workflows and n8n persistence metadata
+      - name: Inspect WMP workflow runtime and execution errors
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -34,13 +34,9 @@ jobs:
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          echo 'DIAG_VERSION=3'
+          echo 'DIAG_VERSION=4'
           echo "N8N_VERSION=$(sudo docker exec "$C" n8n --version)"
-          sudo docker exec "$C" sh -lc 'printf "DB_TYPE=%s\n" "${DB_TYPE:-sqlite}"; printf "WEBHOOK_URL_SET=%s\n" "$([ -n "${WEBHOOK_URL:-}" ] && echo true || echo false)"; printf "N8N_HOST=%s\n" "${N8N_HOST:-}"'
-          echo '== CLI publish help =='
-          sudo docker exec "$C" n8n publish:workflow --help || true
-          echo '== CLI update help =='
-          sudo docker exec "$C" n8n update:workflow --help || true
+          sudo docker exec "$C" sh -lc 'printf "DB_TYPE=%s\n" "${DB_TYPE:-sqlite}"; printf "WEBHOOK_URL_SET=%s\n" "$([ -n "${WEBHOOK_URL:-}" ] && echo true || echo false)"; printf "ENV_ACCESS_BLOCK=%s\n" "${N8N_BLOCK_ENV_ACCESS_IN_NODE:-unset}"; printf "BUILTIN_ALLOW=%s\n" "${NODE_FUNCTION_ALLOW_BUILTIN:-}"'
 
           for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjBookingLifecycle01 wmpPostEventRelationship01; do
             echo "== $id =="
@@ -51,13 +47,43 @@ jobs:
           const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-state.json`,'utf8'));
           const w=Array.isArray(raw)?raw[0]:raw;
           const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
-          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,versionId:w.versionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,responseMode:hook?.parameters?.responseMode}));
+          const code=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.code');
+          const respond=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.respondToWebhook');
+          console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,versionId:w.versionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,responseMode:hook?.parameters?.responseMode,codeName:code?.name,codeHasEnv:String(code?.parameters?.jsCode||'').includes('$env'),respond:respond?.parameters}));
           NODE
           done
 
-          echo '== Runtime webhook probes =='
-          for path in wmp-lead-intake wmp-proposal-lifecycle wmp-dj-booking-lifecycle wmp-post-event-relationship; do
-            code="$(curl -sS -o /tmp/${path}.body -w '%{http_code}' --max-time 15 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -d '{}')"
-            echo "$path=$code body=$(head -c 180 /tmp/${path}.body)"
-          done
+          echo '== Trigger one unsigned request =='
+          curl -sS -D /tmp/wmp-probe.headers -o /tmp/wmp-probe.body --max-time 20 -X POST 'https://n8n.impulsionando.com.br/webhook/wmp-lead-intake' -H 'content-type: application/json' -d '{"tenant_slug":"wmp","event_code":"wmp.lead.received","correlation_id":"runtime-diagnose"}' || true
+          echo 'HEADERS:'; head -n 20 /tmp/wmp-probe.headers || true
+          echo 'BODY:'; head -c 500 /tmp/wmp-probe.body || true; echo
+          sleep 2
+
+          echo '== n8n recent logs relevant to WMP/errors =='
+          sudo docker logs --since 3m "$C" 2>&1 | grep -Ei 'wmp|webhook|code node|environment|env|error|failed|respond' | tail -n 160 || true
+
+          echo '== Recent execution rows from SQLite =='
+          DB_PATH="$(sudo docker exec "$C" sh -lc 'for p in /home/node/.n8n/database.sqlite /root/.n8n/database.sqlite; do [ -f "$p" ] && { echo "$p"; break; }; done')"
+          echo "DB_PATH_PRESENT=$([ -n "$DB_PATH" ] && echo true || echo false)"
+          if [ -n "$DB_PATH" ]; then
+            sudo docker exec -i -e DB_PATH="$DB_PATH" "$C" node - <<'NODE'
+          const fs=require('fs');
+          try {
+            const Database=require('better-sqlite3');
+            const db=new Database(process.env.DB_PATH,{readonly:true});
+            const tables=db.prepare("select name from sqlite_master where type='table' and name like '%execution%'").all();
+            console.log('execution_tables='+JSON.stringify(tables));
+            for(const t of ['execution_entity','execution_data']){
+              if(tables.some(x=>x.name===t)){
+                const cols=db.prepare(`pragma table_info(${t})`).all();
+                console.log(`${t}_columns=`+JSON.stringify(cols.map(c=>c.name)));
+              }
+            }
+            if(tables.some(x=>x.name==='execution_entity')){
+              const rows=db.prepare("select id,workflowId,status,startedAt,stoppedAt from execution_entity where workflowId like 'wmp%' order by id desc limit 12").all();
+              console.log('recent_wmp_executions='+JSON.stringify(rows));
+            }
+          } catch(e) { console.log('sqlite_diag_error='+e.message); }
+          NODE
+          fi
           REMOTE
