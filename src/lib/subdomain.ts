@@ -9,6 +9,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   marocas: "/marocas",
   marcoas: "/marocas",
   colors: "/colors",
+  colorssaude: "/colors",
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
@@ -77,8 +78,8 @@ const RESERVED_SUBDOMAINS = new Set([
 ]);
 
 export const DEPRECATED_SUBDOMAIN_ALIAS: Record<string, string> = {
-  colorssaude: "colors",
-  "colors-saude": "colors",
+  colors: "colorssaude",
+  "colors-saude": "colorssaude",
 };
 
 export type TenantSubdomainMatch = {
@@ -134,7 +135,7 @@ const CLEAN_PATH_EXCLUDED_PREFIXES = [
 ];
 
 /**
- * Colors uses clean public URLs on colors.impulsionando.com.br while its
+ * Colors uses clean public URLs on colorssaude.impulsionando.com.br while its
  * TanStack route tree is namespaced under /colors. Map document requests such
  * as /agenda or /eventos to /colors/agenda and /colors/eventos without touching
  * APIs or static assets. Internal /colors paths remain idempotent.
@@ -142,7 +143,7 @@ const CLEAN_PATH_EXCLUDED_PREFIXES = [
 export function toColorsInternalPathname(host: string | null | undefined, pathname: string): string {
   if (!host) return pathname;
   const cleanHost = host.toLowerCase().split(":")[0];
-  if (cleanHost !== "colors.impulsionando.com.br") return pathname;
+  if (cleanHost !== "colorssaude.impulsionando.com.br") return pathname;
 
   const path = pathname || "/";
   if (path === "/colors" || path.startsWith("/colors/")) return path;
@@ -198,7 +199,7 @@ export function deprecatedSubdomainRedirect(loc: {
     if (!canonical) return null;
     const proto = loc.protocol === "http:" ? "http:" : "https:";
     let publicPath = loc.pathname || "/";
-    if (canonical === "colors" && (publicPath === "/colors" || publicPath.startsWith("/colors/"))) {
+    if (canonical === "colorssaude" && (publicPath === "/colors" || publicPath.startsWith("/colors/"))) {
       publicPath = publicPath.slice("/colors".length) || "/";
     }
     return `${proto}//${canonical}.${root}${publicPath}${loc.search}${loc.hash}`;
