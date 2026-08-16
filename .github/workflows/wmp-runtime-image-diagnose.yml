@@ -1,0 +1,56 @@
+name: WMP runtime image diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-runtime-image-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Run candidate image privately and probe
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          IMAGE='sha256:25e81a6183c8f2925331b29ae2a193b8bdac9da8c5ec56e714340e213a4cb3d9'
+          sudo docker image inspect "$IMAGE" >/dev/null
+          sudo docker rm -f impulsionando-core-candidate-test >/dev/null 2>&1 || true
+          cleanup(){ sudo docker rm -f impulsionando-core-candidate-test >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          sudo docker run -d --name impulsionando-core-candidate-test \
+            --env-file /opt/impulsionando/.env.production \
+            --env-file /etc/impulsionando-core.env \
+            -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            -p 127.0.0.1:39000:3000 "$IMAGE" >/dev/null
+          for i in $(seq 1 45); do
+            curl -fsS http://127.0.0.1:39000/ >/dev/null 2>&1 && break
+            [ "$i" -lt 45 ] || { sudo docker logs --tail 120 impulsionando-core-candidate-test; exit 40; }
+            sleep 2
+          done
+          probe(){
+            label="$1"; host="$2"; path="$3"
+            code="$(curl -sS -o /tmp/runtime-probe -w '%{http_code}' -H "Host: $host" -H 'Accept: text/html,application/xhtml+xml' "http://127.0.0.1:39000$path" || true)"
+            echo "$label HOST=$host PATH=$path HTTP=$code"
+          }
+          for p in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /wmp/djs; do
+            probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' "$p"
+          done
+          for p in /auth /dashboard /seguranca/senha; do
+            probe 'APEX_IMAGE' 'impulsionando.com.br' "$p"
+          done
+          echo '=== container logs tail ==='
+          sudo docker logs --tail 100 impulsionando-core-candidate-test 2>&1 | sed -E 's/(eyJ[a-zA-Z0-9._-]{20,})/[REDACTED_TOKEN]/g'
+          REMOTE
