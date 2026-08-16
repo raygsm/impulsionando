@@ -26,8 +26,8 @@ jobs:
       - name: DNS diagnostics
         run: |
           set -u
-          echo '=== DNS colors.impulsionando.com.br ==='
-          getent ahostsv4 colors.impulsionando.com.br || true
+          echo '=== DNS colorssaude.impulsionando.com.br ==='
+          getent ahostsv4 colorssaude.impulsionando.com.br || true
 
       - name: Probe Colors critical routes
         run: |
@@ -58,18 +58,18 @@ jobs:
             rm -f "$body"
           }
 
-          probe_html 'https://colors.impulsionando.com.br/' 'colors-home'
-          probe_html 'https://colors.impulsionando.com.br/super-green-black' 'colors-sgb'
-          probe_html 'https://colors.impulsionando.com.br/agenda' 'colors-agenda'
-          probe_html 'https://colors.impulsionando.com.br/eventos' 'colors-eventos'
-          probe_html 'https://colors.impulsionando.com.br/suporte' 'colors-suporte'
-          probe_html 'https://colors.impulsionando.com.br/afiliados' 'colors-afiliados'
-          probe_html 'https://colors.impulsionando.com.br/rastreio' 'colors-rastreio'
-          probe_html 'https://colors.impulsionando.com.br/entrar' 'colors-entrar'
-          probe_html 'https://colors.impulsionando.com.br/criar-conta' 'colors-criar-conta'
-          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors' 'colors-maisfy-health'
-          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/monetizze-colors' 'colors-monetizze-health'
-          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/perfectpay-colors' 'colors-perfectpay-health'
+          probe_html 'https://colorssaude.impulsionando.com.br/' 'colors-home'
+          probe_html 'https://colorssaude.impulsionando.com.br/super-green-black' 'colors-sgb'
+          probe_html 'https://colorssaude.impulsionando.com.br/agenda' 'colors-agenda'
+          probe_html 'https://colorssaude.impulsionando.com.br/eventos' 'colors-eventos'
+          probe_html 'https://colorssaude.impulsionando.com.br/suporte' 'colors-suporte'
+          probe_html 'https://colorssaude.impulsionando.com.br/afiliados' 'colors-afiliados'
+          probe_html 'https://colorssaude.impulsionando.com.br/rastreio' 'colors-rastreio'
+          probe_html 'https://colorssaude.impulsionando.com.br/entrar' 'colors-entrar'
+          probe_html 'https://colorssaude.impulsionando.com.br/criar-conta' 'colors-criar-conta'
+          probe_json 'https://colorssaude.impulsionando.com.br/api/public/webhooks/maisfy-colors' 'colors-maisfy-health'
+          probe_json 'https://colorssaude.impulsionando.com.br/api/public/webhooks/monetizze-colors' 'colors-monetizze-health'
+          probe_json 'https://colorssaude.impulsionando.com.br/api/public/webhooks/perfectpay-colors' 'colors-perfectpay-health'
 
           if [ "$failures" -ne 0 ]; then
             echo "::error title=Colors smoke failed::$failures critical route(s) failed"
