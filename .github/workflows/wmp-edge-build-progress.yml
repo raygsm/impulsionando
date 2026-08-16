@@ -1,0 +1,33 @@
+name: WMP edge build progress
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-edge-build-progress.yml
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Probe
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== build processes ==='
+          ps -eo pid,etime,cmd | grep -E 'docker build|buildkit|npm ci' | grep -v grep || true
+          echo '=== disk ==='
+          df -h /
+          echo '=== edge image tags ==='
+          sudo docker images --format '{{.Repository}}:{{.Tag}} {{.ID}} {{.CreatedSince}} {{.Size}}' | grep '^impulsionando-core:' || true
+          echo '=== core container ==='
+          sudo docker inspect impulsionando-core --format 'IMAGE={{.Image}} STARTED={{.State.StartedAt}} STATUS={{.State.Status}}' || true
+          REMOTE
