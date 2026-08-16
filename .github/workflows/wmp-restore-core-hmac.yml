@@ -31,12 +31,12 @@ jobs:
           done
           exit 41
 
-      - name: Wait for canonical Core verifier, restore n8n and remove temporary sidecar
+      - name: Verify canonical Core, restore n8n and remove temporary sidecar
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
         run: |
-          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           N8N=n8n-umlg-n8n-1
           SEC=/etc/impulsionando-security.env
@@ -45,25 +45,14 @@ jobs:
           secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
           test -n "$secret"
 
-          core_signed_probe() {
-            ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-            payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"core-probe-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
-            sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
-            code="$(curl -sS -o /tmp/core-signed -w '%{http_code}' --max-time 20 -X POST "$CORE" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" || true)"
-            [ "$code" = 200 ] && grep -q '"ok":true' /tmp/core-signed
-          }
-
-          for attempt in $(seq 1 60); do
-            if core_signed_probe; then
-              echo "CORE_HMAC_SIGNED=PASS attempt=$attempt"
-              break
-            fi
-            if [ "$attempt" -eq 60 ]; then
-              echo 'CORE_HMAC_SIGNED=TIMEOUT'
-              exit 80
-            fi
-            sleep 10
-          done
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          payload="{\"workflow_name\":\"wmpCoreVerifierProbe\",\"event_code\":\"wmp.core.verify\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"core-probe-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+          sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          code="$(curl -sS -o /tmp/core-signed -w '%{http_code}' --max-time 20 -X POST "$CORE" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" || true)"
+          echo "CORE_HMAC_SIGNED HTTP=$code"
+          [ "$code" = 200 ] || exit 80
+          grep -q '"ok":true' /tmp/core-signed || exit 80
+          echo 'CORE_HMAC_SIGNED=PASS'
 
           for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
             file="/tmp/$id-core.json"
