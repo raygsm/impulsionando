@@ -107,7 +107,7 @@ jobs:
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          CORE_VERIFY='https://impulsionando.com.br/api/public/hooks/n8n-verify'
+          CORE_VERIFY='https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
           SEC='/etc/impulsionando-security.env'
           [ "$(curl -sS -o /tmp/v -w '%{http_code}' --max-time 20 "$CORE_VERIFY")" = '200' ] || exit 60
           test -n "$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
