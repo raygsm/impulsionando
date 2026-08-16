@@ -1,0 +1,47 @@
+name: Colors Origin Diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/colors-origin-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Probe current Colors origin
+        run: |
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -u
+          container='impulsionando-core'
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container" 2>/dev/null || true)"
+          echo "CONTAINER_IP=$ip"
+          failures=0
+          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta; do
+            body="$(mktemp)"
+            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o "$body" -w '%{http_code}' "http://$ip:3000$path" || true)"
+            bytes="$(wc -c < "$body" | tr -d ' ')"
+            title="$(grep -io '<title>[^<]*' "$body" | head -n1 | sed 's/<title>//I' || true)"
+            echo "COLORS_ORIGIN path=$path http=$code bytes=$bytes title=$title"
+            if [ "$code" != '200' ]; then failures=$((failures+1)); fi
+            rm -f "$body"
+          done
+          echo "COLORS_ORIGIN_FAILURES=$failures"
+          [ "$failures" -eq 0 ]
+          REMOTE
