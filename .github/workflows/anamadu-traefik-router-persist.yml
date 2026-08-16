@@ -61,11 +61,13 @@ jobs:
           current_rule="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.rule"}}' impulsionando-core 2>/dev/null || true)"
           current_resolver="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.tls.certresolver"}}' impulsionando-core 2>/dev/null || true)"
           if [ "$current_rule" != 'Host(`anamadu.impulsionando.com.br`)' ] || [ "$current_resolver" != 'letsencrypt' ]; then
+            sudo docker compose -f "$base" -f "$override" rm -sf impulsionando-core || true
+            sudo docker rm -f impulsionando-core 2>/dev/null || true
             stale_ids="$(sudo docker ps -a --format '{{.ID}} {{.Names}}' | awk '$2 ~ /^[a-f0-9]+_impulsionando-core$/ {print $1}')"
             if [ -n "$stale_ids" ]; then
               printf '%s\n' "$stale_ids" | xargs -r sudo docker rm -f
             fi
-            sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
+            sudo docker compose -f "$base" -f "$override" up -d --no-build impulsionando-core
           fi
 
           for attempt in $(seq 1 60); do
