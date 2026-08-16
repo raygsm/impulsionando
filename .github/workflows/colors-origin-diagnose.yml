@@ -27,7 +27,9 @@ jobs:
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
       - name: Probe current Colors origin
         run: |
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          report="$(mktemp)"
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' >"$report" <<'REMOTE'
           set -u
           container='impulsionando-core'
           ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container" 2>/dev/null || true)"
@@ -43,5 +45,24 @@ jobs:
             rm -f "$body"
           done
           echo "COLORS_ORIGIN_FAILURES=$failures"
-          [ "$failures" -eq 0 ]
           REMOTE
+          cat "$report"
+          failures=0
+          while IFS= read -r line; do
+            case "$line" in
+              COLORS_ORIGIN\ path=*)
+                path="$(printf '%s' "$line" | sed -n 's/^COLORS_ORIGIN path=\([^ ]*\).*/\1/p')"
+                code="$(printf '%s' "$line" | sed -n 's/.* http=\([^ ]*\).*/\1/p')"
+                if [ "$code" != '200' ]; then
+                  echo "::error title=Colors origin route failed::$path returned HTTP $code on current Traefik Core"
+                  failures=$((failures + 1))
+                fi
+                ;;
+            esac
+          done < "$report"
+          rm -f "$report"
+          if [ "$failures" -ne 0 ]; then
+            echo "::error title=Colors origin validation failed::$failures route(s) are not HTTP 200"
+            exit 1
+          fi
+          echo 'COLORS_ORIGIN=PASS'
