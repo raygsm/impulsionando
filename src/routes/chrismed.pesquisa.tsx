@@ -13,33 +13,15 @@ import { toast } from 'sonner';
 
 const searchSchema = z.object({ token: fallback(z.string().uuid().optional(), undefined) });
 
-type Question = {
-  key?: string;
-  id?: string;
-  label?: string;
-  question?: string;
-  type?: string;
-  required?: boolean;
-  min?: number;
-  max?: number;
-};
-
-type SurveyForm = {
-  survey_id: string;
-  audience_type: string;
-  recipient_name: string | null;
-  completed: boolean;
-  questions: Question[];
-};
+type Question = { key?: string; id?: string; label?: string; question?: string; type?: string; required?: boolean; min?: number; max?: number; };
+type SurveyForm = { survey_id: string; audience_type: string; recipient_name: string | null; completed: boolean; questions: Question[]; };
 
 export const Route = createFileRoute('/chrismed/pesquisa')({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({
-    meta: [
-      { title: 'Pesquisa de experiência · CHRISMED' },
-      { name: 'description', content: 'Conte para a CHRISMED como foi sua experiência. Sua opinião orienta melhorias reais no atendimento e nos eventos.' },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: 'Pesquisa de experiência · CHRISMED' },
+    { name: 'description', content: 'Conte para a CHRISMED como foi sua experiência. Sua opinião orienta melhorias reais no atendimento e nos eventos.' },
+  ] }),
   component: ChrismedSurveyPage,
 });
 
@@ -52,7 +34,6 @@ function ChrismedSurveyPage() {
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
   const [nps, setNps] = useState<number | null>(null);
   const [csat, setCsat] = useState<number | null>(null);
-  const [comments, setComments] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -60,43 +41,36 @@ function ChrismedSurveyPage() {
       if (!token) { setLoading(false); return; }
       const { data, error } = await (supabase as any).rpc('chrismed_get_survey_form', { p_token: token });
       if (cancelled) return;
-      if (error || !data) {
-        setForm(null);
-      } else {
-        setForm(data as SurveyForm);
-        if ((data as SurveyForm).completed) setDone(true);
-      }
+      if (error || !data) setForm(null);
+      else { setForm(data as SurveyForm); if ((data as SurveyForm).completed) setDone(true); }
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [token]);
 
   const dynamicQuestions = useMemo(() => Array.isArray(form?.questions) ? form!.questions : [], [form]);
+  const hasDynamicNps = dynamicQuestions.some((q) => q.type === 'nps_0_10' || q.key === 'nps');
 
   async function submit() {
     if (!token || !form) return;
     const missingRequired = dynamicQuestions.find((q, index) => {
       if (!q.required) return false;
+      if (q.type === 'nps_0_10' || q.key === 'nps') return nps === null;
       const key = q.key ?? q.id ?? `q_${index}`;
       return answers[key] === undefined || answers[key] === '';
     });
-    if (missingRequired) {
-      toast.error('Responda às perguntas obrigatórias antes de enviar.');
-      return;
-    }
+    if (missingRequired) return toast.error('Responda às perguntas obrigatórias antes de enviar.');
+
+    const derivedCsat = csat ?? (typeof answers.overall === 'number' ? Number(answers.overall) : null);
     setSubmitting(true);
-    const payload = { ...answers, comments: comments.trim() || undefined };
     const { data, error } = await (supabase as any).rpc('chrismed_submit_experience_survey', {
       p_token: token,
-      p_answers: payload,
+      p_answers: answers,
       p_nps: nps,
-      p_csat: csat,
+      p_csat: derivedCsat,
     });
     setSubmitting(false);
-    if (error || !data?.saved) {
-      toast.error('Não foi possível salvar sua pesquisa agora.');
-      return;
-    }
+    if (error || !data?.saved) return toast.error('Não foi possível salvar sua pesquisa agora.');
     setDone(true);
   }
 
@@ -118,19 +92,16 @@ function ChrismedSurveyPage() {
               {dynamicQuestions.map((q, index) => {
                 const key = q.key ?? q.id ?? `q_${index}`;
                 const label = q.label ?? q.question ?? `Pergunta ${index + 1}`;
-                const type = q.type ?? 'rating';
-                if (type === 'text' || type === 'textarea') {
-                  return <div key={key}><Label>{label}{q.required ? ' *' : ''}</Label><Textarea className="mt-2" value={String(answers[key] ?? '')} onChange={(e) => setAnswers((prev) => ({ ...prev, [key]: e.target.value }))} /></div>;
-                }
+                const type = q.type ?? 'scale_1_5';
+                if (type === 'text' || type === 'textarea') return <div key={key}><Label>{label}{q.required ? ' *' : ''}</Label><Textarea className="mt-2" value={String(answers[key] ?? '')} onChange={(e) => setAnswers((prev) => ({ ...prev, [key]: e.target.value }))} /></div>;
+                if (type === 'nps_0_10' || key === 'nps') return <RatingQuestion key={key} label={label} min={0} max={10} value={nps} onChange={(value) => { setNps(value); setAnswers((prev) => ({ ...prev, [key]: value })); }} />;
                 const min = q.min ?? 1;
                 const max = q.max ?? 5;
                 return <RatingQuestion key={key} label={label} min={min} max={max} value={typeof answers[key] === 'number' ? Number(answers[key]) : null} onChange={(value) => setAnswers((prev) => ({ ...prev, [key]: value }))} />;
               })}
 
-              <RatingQuestion label="De 0 a 10, quanto você recomendaria a CHRISMED para alguém?" min={0} max={10} value={nps} onChange={setNps} />
+              {!hasDynamicNps && <RatingQuestion label="De 0 a 10, quanto você recomendaria a CHRISMED para alguém?" min={0} max={10} value={nps} onChange={setNps} />}
               <RatingQuestion label="Em uma escala de 1 a 5, qual sua satisfação geral?" min={1} max={5} value={csat} onChange={setCsat} />
-
-              <div><Label>Quer deixar algum comentário, elogio ou sugestão?</Label><Textarea className="mt-2" rows={4} value={comments} onChange={(e) => setComments(e.target.value)} placeholder="Conte o que faria diferença para você numa próxima experiência." /></div>
 
               <Button className="w-full bg-[var(--chrismed-ink)] text-white hover:bg-[var(--chrismed-forest)]" disabled={submitting} onClick={() => void submit()}>{submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Enviar pesquisa</Button>
               <p className="text-center text-[11px] leading-5 text-[var(--chrismed-mist)]">As respostas são usadas para melhoria da experiência e gestão de qualidade da CHRISMED.</p>
