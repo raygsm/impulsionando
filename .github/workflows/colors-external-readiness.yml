@@ -1,0 +1,76 @@
+name: Colors External Readiness
+
+on:
+  push:
+    paths:
+      - .github/workflows/colors-external-readiness.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      COLORS_META_APP_SECRET: ${{ secrets.COLORS_META_APP_SECRET }}
+      COLORS_META_VERIFY_TOKEN: ${{ secrets.COLORS_META_VERIFY_TOKEN }}
+      COLORS_META_WHATSAPP_TOKEN: ${{ secrets.COLORS_META_WHATSAPP_TOKEN }}
+      COLORS_META_PHONE_NUMBER_ID: ${{ secrets.COLORS_META_PHONE_NUMBER_ID }}
+      COLORS_META_PAGE_TOKEN: ${{ secrets.COLORS_META_PAGE_TOKEN }}
+      COLORS_META_PAGE_ID: ${{ secrets.COLORS_META_PAGE_ID }}
+      COLORS_META_IG_ACCOUNT_ID: ${{ secrets.COLORS_META_IG_ACCOUNT_ID }}
+      COLORS_MAISFY_WEBHOOK_SECRET: ${{ secrets.COLORS_MAISFY_WEBHOOK_SECRET }}
+      COLORS_MAISFY_WEBHOOK_TOKEN: ${{ secrets.COLORS_MAISFY_WEBHOOK_TOKEN }}
+      COLORS_MONETIZZE_UNIQUE_KEY: ${{ secrets.COLORS_MONETIZZE_UNIQUE_KEY }}
+      COLORS_PERFECTPAY_WEBHOOK_TOKEN: ${{ secrets.COLORS_PERFECTPAY_WEBHOOK_TOKEN }}
+      COLORS_GROUP_URL: ${{ secrets.COLORS_GROUP_URL }}
+      CHRISMED_REFERRAL_SECRET: ${{ secrets.CHRISMED_REFERRAL_SECRET }}
+    steps:
+      - name: Report required secret presence without exposing values
+        run: |
+          set -u
+          missing=0
+          check() {
+            name="$1"
+            if [ -n "${!name:-}" ]; then
+              echo "COLORS_SECRET $name=PRESENT"
+            else
+              echo "::warning title=Colors external credential missing::$name is not configured in production"
+              echo "COLORS_SECRET $name=MISSING"
+              missing=$((missing + 1))
+            fi
+          }
+          for name in COLORS_META_APP_SECRET COLORS_META_VERIFY_TOKEN COLORS_META_WHATSAPP_TOKEN COLORS_META_PHONE_NUMBER_ID COLORS_META_PAGE_TOKEN COLORS_META_PAGE_ID COLORS_META_IG_ACCOUNT_ID COLORS_MAISFY_WEBHOOK_SECRET COLORS_MAISFY_WEBHOOK_TOKEN COLORS_MONETIZZE_UNIQUE_KEY COLORS_PERFECTPAY_WEBHOOK_TOKEN COLORS_GROUP_URL CHRISMED_REFERRAL_SECRET; do check "$name"; done
+          echo "COLORS_EXTERNAL_SECRET_MISSING=$missing"
+
+      - name: Healthcheck WhatsApp Cloud API when configured
+        if: ${{ env.COLORS_META_WHATSAPP_TOKEN != '' && env.COLORS_META_PHONE_NUMBER_ID != '' }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 -H "Authorization: Bearer $COLORS_META_WHATSAPP_TOKEN" -o /tmp/wa.json -w '%{http_code}' "https://graph.facebook.com/v23.0/$COLORS_META_PHONE_NUMBER_ID?fields=id,display_phone_number,verified_name")"
+          echo "COLORS_META_WHATSAPP_HTTP=$code"
+          [ "$code" = '200' ] || { echo '::error title=Colors WhatsApp credential invalid::Meta Graph did not accept the configured phone/token'; exit 20; }
+          jq -e '.id != null' /tmp/wa.json >/dev/null
+          echo 'COLORS_META_WHATSAPP=PASS'
+
+      - name: Healthcheck Facebook Page when configured
+        if: ${{ env.COLORS_META_PAGE_TOKEN != '' && env.COLORS_META_PAGE_ID != '' }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 -H "Authorization: Bearer $COLORS_META_PAGE_TOKEN" -o /tmp/fb.json -w '%{http_code}' "https://graph.facebook.com/v23.0/$COLORS_META_PAGE_ID?fields=id,name,instagram_business_account")"
+          echo "COLORS_META_FACEBOOK_HTTP=$code"
+          [ "$code" = '200' ] || { echo '::error title=Colors Facebook credential invalid::Meta Graph did not accept the configured Page token'; exit 21; }
+          jq -e '.id != null' /tmp/fb.json >/dev/null
+          echo 'COLORS_META_FACEBOOK=PASS'
+
+      - name: Healthcheck Instagram account when configured
+        if: ${{ env.COLORS_META_PAGE_TOKEN != '' && env.COLORS_META_IG_ACCOUNT_ID != '' }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 -H "Authorization: Bearer $COLORS_META_PAGE_TOKEN" -o /tmp/ig.json -w '%{http_code}' "https://graph.facebook.com/v23.0/$COLORS_META_IG_ACCOUNT_ID?fields=id,username")"
+          echo "COLORS_META_INSTAGRAM_HTTP=$code"
+          [ "$code" = '200' ] || { echo '::error title=Colors Instagram credential invalid::Meta Graph did not accept the configured Instagram account/token'; exit 22; }
+          jq -e '.id != null' /tmp/ig.json >/dev/null
+          echo 'COLORS_META_INSTAGRAM=PASS'
