@@ -1,5 +1,5 @@
 /**
- * Domain routing tests for canonical tenant hosts and WMP clean paths.
+ * Domain routing tests for canonical tenant hosts and clean tenant paths.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -7,6 +7,7 @@ import {
   deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
+  toColorsInternalPathname,
   toWmpInternalPathname,
 } from "./subdomain";
 
@@ -46,6 +47,37 @@ describe("canonicalTenantHostRedirect", () => {
   it("does not redirect an already public CHRISMED path", () => {
     expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/agendar" }))
       .toBeNull();
+  });
+});
+
+describe("Colors clean public path routing", () => {
+  it("maps the Colors root to its internal namespace", () => {
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/")).toBe("/colors");
+  });
+
+  it("maps critical clean Colors pages to the internal namespace", () => {
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/super-green-black")).toBe("/colors/super-green-black");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/agenda")).toBe("/colors/agenda");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/eventos")).toBe("/colors/eventos");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/suporte")).toBe("/colors/suporte");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/afiliados")).toBe("/colors/afiliados");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/rastreio")).toBe("/colors/rastreio");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/entrar")).toBe("/colors/entrar");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/criar-conta")).toBe("/colors/criar-conta");
+  });
+
+  it("does not double-prefix internal Colors routes", () => {
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/colors/agenda")).toBe("/colors/agenda");
+  });
+
+  it("never rewrites Colors APIs or static assets", () => {
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/api/public/webhooks/maisfy-colors")).toBe("/api/public/webhooks/maisfy-colors");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/assets/app.js")).toBe("/assets/app.js");
+    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/robots.txt")).toBe("/robots.txt");
+  });
+
+  it("does not rewrite another tenant host", () => {
+    expect(toColorsInternalPathname("wmp.impulsionando.com.br", "/agenda")).toBe("/agenda");
   });
 });
 
@@ -90,19 +122,19 @@ describe("deprecatedSubdomainRedirect", () => {
       .toBe("https://colors.impulsionando.com.br/");
   });
 
-  it("preserva path", () => {
+  it("remove o namespace técnico /colors de URL legada", () => {
     expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br", pathname: "/colors/super-green-black" }))
-      .toBe("https://colors.impulsionando.com.br/colors/super-green-black");
+      .toBe("https://colors.impulsionando.com.br/super-green-black");
   });
 
-  it("preserva query e hash", () => {
+  it("preserva query e hash usando URL pública limpa", () => {
     expect(deprecatedSubdomainRedirect({
       ...base,
       hostname: "colorssaude.impulsionando.com.br",
       pathname: "/colors",
       search: "?utm_source=email&utm_campaign=x",
       hash: "#produtos",
-    })).toBe("https://colors.impulsionando.com.br/colors?utm_source=email&utm_campaign=x#produtos");
+    })).toBe("https://colors.impulsionando.com.br/?utm_source=email&utm_campaign=x#produtos");
   });
 
   it("cobre também o alias colors-saude", () => {
@@ -129,6 +161,10 @@ describe("deprecatedSubdomainRedirect", () => {
 describe("tenant landing resolution", () => {
   it("routes CHRISMED to its dedicated landing", () => {
     expect(tenantLandingTargetForHost("chrismed.impulsionando.com.br")).toBe("/chrismed");
+  });
+
+  it("routes Colors to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("colors.impulsionando.com.br")).toBe("/colors");
   });
 
   it("routes WMP to its dedicated landing", () => {
