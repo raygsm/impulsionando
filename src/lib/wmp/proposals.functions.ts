@@ -81,7 +81,7 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
     const tenantId = await getWmpTenantId(context.supabase)
     const { data: proposal, error } = await context.supabase
       .from('wmp_proposals')
-      .select('id,proposal_number,status,current_version,opportunity_id')
+      .select('id,proposal_number,status,current_version,opportunity_id,event_snapshot')
       .eq('tenant_id', tenantId)
       .eq('id', data.proposal_id)
       .single()
@@ -113,6 +113,20 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
         .eq('id', proposal.id)
         .eq('status', proposal.status)
       if (proposalError) throw proposalError
+    }
+
+    if (data.transition === 'ACCEPTED') {
+      const eventSnapshot = (proposal.event_snapshot ?? {}) as Record<string, unknown>
+      const briefingDateId = typeof eventSnapshot.briefing_date_id === 'string' ? eventSnapshot.briefing_date_id : null
+      if (briefingDateId) {
+        const { error: dateError } = await context.supabase
+          .from('wmp_briefing_dates')
+          .update({ status: 'CONFIRMED', updated_at: now })
+          .eq('tenant_id', tenantId)
+          .eq('id', briefingDateId)
+          .in('status', ['REQUESTED', 'QUOTED', 'CONFIRMED'])
+        if (dateError) throw dateError
+      }
     }
 
     const automation = await dispatchN8nByEvent(rule.event, {
