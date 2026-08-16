@@ -123,3 +123,5 @@ jobs:
           trap - ERR
           echo 'COLORS_BOOTSTRAP_ORIGIN=PASS'
           REMOTE
+
+# Triggered after the canonical release containing Colors clean-path routing was queued.
