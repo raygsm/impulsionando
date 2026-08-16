@@ -12,18 +12,31 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure SSH
+      - name: Configure SSH with bounded retries
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
+          set -euo pipefail
           install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          : > ~/.ssh/known_hosts
+          for i in $(seq 1 10); do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              echo "SSH_KEYSCAN=PASS attempt=$i"
+              exit 0
+            fi
+            sleep $((i * 3))
+          done
+          echo '::error::VPS SSH keyscan unavailable after bounded retries'
+          exit 1
       - name: Run candidate image privately and probe
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
         run: |
-          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           IMAGE='sha256:25e81a6183c8f2925331b29ae2a193b8bdac9da8c5ec56e714340e213a4cb3d9'
           sudo docker image inspect "$IMAGE" >/dev/null
@@ -41,16 +54,21 @@ jobs:
             sleep 2
           done
           probe(){
-            label="$1"; host="$2"; path="$3"
+            label="$1"; host="$2"; path="$3"; expected="$4"
             code="$(curl -sS -o /tmp/runtime-probe -w '%{http_code}' -H "Host: $host" -H 'Accept: text/html,application/xhtml+xml' "http://127.0.0.1:39000$path" || true)"
             echo "$label HOST=$host PATH=$path HTTP=$code"
+            [ "$code" = "$expected" ]
           }
-          for p in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /wmp/djs; do
-            probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' "$p"
-          done
-          for p in /auth /dashboard /seguranca/senha; do
-            probe 'APEX_IMAGE' 'impulsionando.com.br' "$p"
-          done
-          echo '=== container logs tail ==='
-          sudo docker logs --tail 100 impulsionando-core-candidate-test 2>&1 | sed -E 's/(eyJ[a-zA-Z0-9._-]{20,})/[REDACTED_TOKEN]/g'
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/auth' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/dashboard' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/seguranca/senha' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/djs' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/empresas' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/orcamento' 200
+          probe 'WMP_IMAGE' 'wmp.impulsionando.com.br' '/parceiro' 200
+          probe 'APEX_IMAGE' 'impulsionando.com.br' '/auth' 200
+          probe 'APEX_IMAGE' 'impulsionando.com.br' '/dashboard' 200
+          probe 'APEX_IMAGE' 'impulsionando.com.br' '/seguranca/senha' 200
+          echo 'WMP_PRIVATE_RUNTIME=PASS'
           REMOTE
