@@ -47,11 +47,11 @@ jobs:
                 "id":"${id}-webhook","name":"WMP Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0]
               },
               {
-                "parameters":{"functionCode":"const crypto = require('crypto');\nconst item = $input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst expected = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(canonical).digest('hex');\nconst a = Buffer.from(sig, 'utf8');\nconst b = Buffer.from(expected, 'utf8');\nif (a.length !== b.length || !crypto.timingSafeEqual(a,b)) throw new Error('invalid_signature');\nconst payload = typeof raw === 'string' ? JSON.parse(raw) : raw;\nif (!payload || payload.tenant_slug !== 'wmp' || !payload.event_code || !payload.correlation_id) throw new Error('invalid_wmp_lifecycle_payload');\nreturn [{json: payload}];"},
+                "parameters":{"functionCode":"const crypto = require('crypto');\nconst item = \$input.first().json;\nconst sig = String(item.headers?.['x-impulsionando-signature'] || '');\nconst raw = item.body;\nconst canonical = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst expected = crypto.createHmac('sha256', \$env.IMPULSIONANDO_WEBHOOK_SECRET).update(canonical).digest('hex');\nconst a = Buffer.from(sig, 'utf8');\nconst b = Buffer.from(expected, 'utf8');\nif (a.length !== b.length || !crypto.timingSafeEqual(a,b)) throw new Error('invalid_signature');\nconst payload = typeof raw === 'string' ? JSON.parse(raw) : raw;\nif (!payload || payload.tenant_slug !== 'wmp' || !payload.event_code || !payload.correlation_id) throw new Error('invalid_wmp_lifecycle_payload');\nreturn [{json: payload}];"},
                 "id":"${id}-verify-hmac","name":"Verify HMAC and WMP Payload","type":"n8n-nodes-base.function","typeVersion":1,"position":[260,0]
               },
               {
-                "parameters":{"respondWith":"json","responseBody":"={{ { ok: true, workflow: '${slug}', event_code: $json.event_code || null, correlation_id: $json.correlation_id || null, accepted_at: $now } }}","options":{"responseCode":200}},
+                "parameters":{"respondWith":"json","responseBody":"={{ { ok: true, workflow: '${slug}', event_code: \$json.event_code || null, correlation_id: \$json.correlation_id || null, accepted_at: \$now } }}","options":{"responseCode":200}},
                 "id":"${id}-respond-ok","name":"Respond 200","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[520,0]
               }
             ],
