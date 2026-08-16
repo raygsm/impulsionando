@@ -12,6 +12,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
+  anamadu: "/anamadu",
   garrido: "/garrido",
   impulsity: "/vitrine/impulsity",
   dqa: "/vitrine/dqa-panini",
