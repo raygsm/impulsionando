@@ -1,0 +1,82 @@
+name: WMP VPS Safe Cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wmp-vps-safe-cleanup.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Reclaim only regenerable disk space
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          BASE=/var/www/impulsionando-core/releases
+          CURRENT="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
+          PREVIOUS="$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
+
+          echo '== BEFORE =='
+          df -h /
+          test -n "$CURRENT"
+          test -f "$CURRENT/.output/server/index.mjs"
+          case "$CURRENT" in "$BASE"/*) ;; *) echo 'Current release outside expected base'; exit 70;; esac
+          if [ -n "$PREVIOUS" ] && [ -f "$PREVIOUS/.output/server/index.mjs" ]; then
+            case "$PREVIOUS" in "$BASE"/*) ;; *) echo 'Previous release outside expected base'; exit 71;; esac
+          else
+            PREVIOUS=''
+          fi
+          echo "CURRENT=$CURRENT"
+          echo "PREVIOUS=${PREVIOUS:-none}"
+
+          echo '== REMOVE OLD CORE RELEASES =='
+          removed=0
+          while IFS= read -r dir; do
+            [ -n "$dir" ] || continue
+            [ "$dir" = "$CURRENT" ] && continue
+            [ -n "$PREVIOUS" ] && [ "$dir" = "$PREVIOUS" ] && continue
+            case "$dir" in "$BASE"/*) ;; *) echo "Refusing unexpected path: $dir"; exit 72;; esac
+            sudo rm -rf -- "$dir"
+            removed=$((removed+1))
+          done < <(sudo find "$BASE" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort)
+          echo "OLD_RELEASES_REMOVED=$removed"
+
+          echo '== SAFE CACHE CLEANUP =='
+          npm cache clean --force >/dev/null 2>&1 || true
+          sudo rm -rf /root/.npm/_cacache 2>/dev/null || true
+          sudo apt-get clean || true
+          sudo journalctl --vacuum-size=200M >/dev/null 2>&1 || true
+          sudo docker image prune -f >/dev/null 2>&1 || true
+          sudo docker builder prune -f --filter 'until=24h' >/dev/null 2>&1 || true
+
+          echo '== AFTER =='
+          df -h /
+          df -ih /
+          FREE_KB="$(df -Pk / | awk 'NR==2{print $4}')"
+          echo "FREE_KB=$FREE_KB"
+          [ "$FREE_KB" -ge 5242880 ] || { echo 'Less than 5 GiB free after safe cleanup'; exit 73; }
+          test -f "$CURRENT/.output/server/index.mjs"
+          curl --fail --silent --show-error --max-time 10 http://127.0.0.1:3000/ >/dev/null
+          echo 'WMP_VPS_SAFE_CLEANUP=PASS'
+          REMOTE
