@@ -3,7 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
-import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toWmpInternalPathname } from "./lib/subdomain";
+import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toColorsInternalPathname, toWmpInternalPathname } from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -103,12 +103,18 @@ export default {
       let routedRequest = request;
       const tenantTarget = tenantLandingTargetForHost(url.host);
       const internalChrismedPathname = toChrismedInternalPathname(url.hostname, url.pathname);
+      const internalColorsPathname = isHtmlDocumentRequest(request)
+        ? toColorsInternalPathname(url.hostname, url.pathname)
+        : url.pathname;
       const internalWmpPathname = isHtmlDocumentRequest(request)
         ? toWmpInternalPathname(url.hostname, url.pathname)
         : url.pathname;
 
       if (internalChrismedPathname !== url.pathname) {
         url.pathname = internalChrismedPathname;
+        routedRequest = new Request(url, request);
+      } else if (internalColorsPathname !== url.pathname) {
+        url.pathname = internalColorsPathname;
         routedRequest = new Request(url, request);
       } else if (internalWmpPathname !== url.pathname) {
         url.pathname = internalWmpPathname;
