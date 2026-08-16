@@ -1,0 +1,55 @@
+name: WMP Traefik API route diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-traefik-api-route-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Inspect active Traefik routing
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== CORE LABELS ==='
+          sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' | python3 -m json.tool || true
+          echo '=== CONTAINERS + TRAEFIK LABELS ==='
+          for c in $(sudo docker ps --format '{{.Names}}'); do
+            labels="$(sudo docker inspect "$c" --format '{{json .Config.Labels}}' 2>/dev/null || true)"
+            if printf '%s' "$labels" | grep -qi 'traefik'; then
+              echo "--- $c ---"
+              printf '%s\n' "$labels" | python3 -m json.tool | grep -E 'traefik.http.routers|traefik.http.services|traefik.enable' || true
+            fi
+          done
+          echo '=== COMPOSE ROUTING LINES ==='
+          if [ -f /opt/impulsionando/deploy/hostinger/docker-compose.yml ]; then
+            sudo grep -nE 'impulsionando-core|traefik|Host\(|PathPrefix|priority' /opt/impulsionando/deploy/hostinger/docker-compose.yml || true
+          fi
+          echo '=== TRAEFIK DYNAMIC FILES ==='
+          sudo find /opt/impulsionando /etc/traefik -maxdepth 5 -type f \( -name '*.yml' -o -name '*.yaml' -o -name '*.toml' \) 2>/dev/null | while read f; do
+            if sudo grep -qiE 'wmp\.impulsionando\.com\.br|PathPrefix\(`/api|PathPrefix\("/api|impulsionando-core' "$f"; then
+              echo "--- $f ---"
+              sudo grep -nE 'wmp\.impulsionando\.com\.br|PathPrefix|impulsionando-core|priority|service:' "$f" || true
+            fi
+          done
+          REMOTE
