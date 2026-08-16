@@ -26,7 +26,6 @@ export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "www.agenda.chrismed.com.br": "/chrismed",
   "colors.impulsionando.lovable.app": "/colors",
   "colorsaude.lovable.app": "/colors",
-  "colorssaude.lovable.app": "/colors",
 };
 
 /** Canonical host redirects for tenant landings that must not live on the apex. */
@@ -123,6 +122,34 @@ export function tenantLandingTargetForHost(host: string | null | undefined): str
   return match ? tenantSubdomainTarget(match.slug) : null;
 }
 
+const CLEAN_PATH_EXCLUDED_PREFIXES = [
+  "/api/",
+  "/assets/",
+  "/.well-known/",
+  "/favicon",
+  "/robots",
+  "/sitemap",
+  "/manifest",
+];
+
+/**
+ * Colors uses clean public URLs on colors.impulsionando.com.br while its
+ * TanStack route tree is namespaced under /colors. Map document requests such
+ * as /agenda or /eventos to /colors/agenda and /colors/eventos without touching
+ * APIs or static assets. Internal /colors paths remain idempotent.
+ */
+export function toColorsInternalPathname(host: string | null | undefined, pathname: string): string {
+  if (!host) return pathname;
+  const cleanHost = host.toLowerCase().split(":")[0];
+  if (cleanHost !== "colors.impulsionando.com.br") return pathname;
+
+  const path = pathname || "/";
+  if (path === "/colors" || path.startsWith("/colors/")) return path;
+  if (CLEAN_PATH_EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))) return path;
+
+  return path === "/" ? "/colors" : `/colors${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 /**
  * WMP uses clean public URLs on its canonical host while its TanStack route tree
  * is intentionally namespaced under /wmp. This maps document requests such as
@@ -145,17 +172,7 @@ export function toWmpInternalPathname(host: string | null | undefined, pathname:
     "/reset-password-sent",
   ]);
   if (globalCoreRoutes.has(path)) return path;
-
-  const excludedPrefixes = [
-    "/api/",
-    "/assets/",
-    "/.well-known/",
-    "/favicon",
-    "/robots",
-    "/sitemap",
-    "/manifest",
-  ];
-  if (excludedPrefixes.some((prefix) => path.startsWith(prefix))) return path;
+  if (CLEAN_PATH_EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))) return path;
 
   return path === "/" ? "/wmp" : `/wmp${path.startsWith("/") ? path : `/${path}`}`;
 }
