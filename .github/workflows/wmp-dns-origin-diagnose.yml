@@ -1,0 +1,30 @@
+name: WMP DNS origin diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-dns-origin-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare WMP DNS with configured VPS without exposing VPS address
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          dns_ips="$(getent ahostsv4 wmp.impulsionando.com.br | awk '{print $1}' | sort -u)"
+          echo 'WMP_DNS_IP_COUNT='$(printf '%s\n' "$dns_ips" | sed '/^$/d' | wc -l)
+          if printf '%s\n' "$dns_ips" | grep -Fxq "$VPS_HOST"; then
+            echo 'WMP_DNS_POINTS_TO_CONFIGURED_VPS=yes'
+          else
+            echo 'WMP_DNS_POINTS_TO_CONFIGURED_VPS=no'
+          fi
+          public_code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -o /dev/null -w '%{http_code}' --max-time 20 https://wmp.impulsionando.com.br/auth || true)"
+          origin_code="$(curl -sS -L --resolve "wmp.impulsionando.com.br:443:${VPS_HOST}" -H 'Accept: text/html,application/xhtml+xml' -o /dev/null -w '%{http_code}' --max-time 20 https://wmp.impulsionando.com.br/auth || true)"
+          echo "PUBLIC_AUTH_HTTP=$public_code"
+          echo "DIRECT_CONFIGURED_VPS_AUTH_HTTP=$origin_code"
