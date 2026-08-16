@@ -126,7 +126,8 @@ export function tenantLandingTargetForHost(host: string | null | undefined): str
 /**
  * WMP uses clean public URLs on its canonical host while its TanStack route tree
  * is intentionally namespaced under /wmp. This maps document requests such as
- * /djs or /empresas to the internal route without touching APIs or static files.
+ * /djs or /empresas to the internal route without touching APIs, static files,
+ * or global Core authentication/recovery routes.
  */
 export function toWmpInternalPathname(host: string | null | undefined, pathname: string): string {
   if (!host) return pathname;
@@ -135,6 +136,13 @@ export function toWmpInternalPathname(host: string | null | undefined, pathname:
 
   const path = pathname || "/";
   if (path === "/wmp" || path.startsWith("/wmp/")) return path;
+
+  const globalCoreRoutes = new Set([
+    "/auth",
+    "/reset-password",
+    "/reset-password-sent",
+  ]);
+  if (globalCoreRoutes.has(path)) return path;
 
   const excludedPrefixes = [
     "/api/",
