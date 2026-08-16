@@ -1,0 +1,47 @@
+name: Core edge split-brain audit
+
+on:
+  push:
+    paths:
+      - .github/workflows/core-edge-splitbrain-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Audit Core and Traefik topology
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== Core container ==='
+          sudo docker inspect impulsionando-core --format 'IMAGE={{.Config.Image}} CREATED={{.Created}} STATUS={{.State.Status}}' || true
+          sudo docker inspect impulsionando-core --format '{{range $k,$v := .Config.Labels}}{{$k}}={{$v}}{{println}}{{end}}' | sort || true
+          echo '=== Core container mounts/networks ==='
+          sudo docker inspect impulsionando-core --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}' || true
+          sudo docker inspect impulsionando-core --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} IP={{$v.IPAddress}}{{println}}{{end}}' || true
+          echo '=== Core image metadata ==='
+          img="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
+          [ -z "$img" ] || sudo docker image inspect "$img" --format 'ID={{.Id}} CREATED={{.Created}} SIZE={{.Size}}' || true
+          echo '=== Traefik compose ==='
+          sudo sed -n '1,260p' /docker/traefik/docker-compose.yml 2>/dev/null || true
+          echo '=== Hostinger Core compose ==='
+          sudo sed -n '1,260p' /opt/impulsionando/deploy/hostinger/docker-compose.yml 2>/dev/null || true
+          echo '=== Other compose candidates ==='
+          sudo find /docker /opt/impulsionando -maxdepth 4 \( -name 'docker-compose.yml' -o -name 'compose.yml' -o -name 'compose.yaml' \) -print 2>/dev/null | sort
+          echo '=== systemd Core ==='
+          sudo systemctl status impulsionando-core --no-pager -l | sed -n '1,80p' || true
+          echo '=== current release ==='
+          readlink -f /var/www/impulsionando-core/current || true
+          REMOTE
