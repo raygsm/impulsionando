@@ -42,7 +42,7 @@ begin
     return new;
   end if;
 
-  select coalesce(nullif(trade_name,''),nullif(name,''),'Empresa')
+  select coalesce(nullif(name,''),'Empresa')
     into v_company_name
   from public.companies
   where id=new.company_id;
