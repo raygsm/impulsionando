@@ -6,6 +6,14 @@ on:
     branches: [main]
     paths:
       - .github/workflows/colors-public-smoke.yml
+      - src/routes/api/public/webhooks/maisfy-colors.ts
+      - src/routes/api/public/webhooks/monetizze-colors.ts
+      - src/routes/api/public/webhooks/perfectpay-colors.ts
+      - src/routes/api/public/hooks/meta-colors.ts
+      - src/routes/colors*
+      - src/components/colors/**
+      - src/lib/colors-*
+      - src/lib/subdomain.ts
 
 permissions:
   contents: read
@@ -39,6 +47,18 @@ jobs:
             fi
             rm -f "$body"
           }
+          probe_json() {
+            url="$1"
+            label="$2"
+            body="$(mktemp)"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o "$body" -w '%{http_code}' "$url" || true)"
+            echo "COLORS_API_PROBE $label HTTP=$code URL=$url"
+            if [ "$code" != '200' ]; then
+              echo "::error title=Colors API probe failed::$label returned HTTP $code at $url"
+              failures=$((failures + 1))
+            fi
+            rm -f "$body"
+          }
 
           probe_html 'https://colors.impulsionando.com.br/' 'colors-home'
           probe_html 'https://colors.impulsionando.com.br/super-green-black' 'colors-sgb'
@@ -49,11 +69,12 @@ jobs:
           probe_html 'https://colors.impulsionando.com.br/rastreio' 'colors-rastreio'
           probe_html 'https://colors.impulsionando.com.br/entrar' 'colors-entrar'
           probe_html 'https://colors.impulsionando.com.br/criar-conta' 'colors-criar-conta'
+          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors' 'colors-maisfy-health'
+          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/monetizze-colors' 'colors-monetizze-health'
+          probe_json 'https://colors.impulsionando.com.br/api/public/webhooks/perfectpay-colors' 'colors-perfectpay-health'
 
           if [ "$failures" -ne 0 ]; then
             echo "::error title=Colors smoke failed::$failures critical route(s) failed"
             exit 1
           fi
           echo 'COLORS_PUBLIC_SMOKE=PASS'
-
-# Independent production verification triggered after the final Colors DNS cutover.
