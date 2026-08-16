@@ -1,0 +1,80 @@
+name: WMP candidate route diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-candidate-route-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Temporarily activate candidate and probe every route
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          CANDIDATE='/var/www/impulsionando-core/releases/d2f1c53d13649f45d0355a69b06bf8b562d766e3'
+          ORIGINAL="$(readlink -f /var/www/impulsionando-core/current)"
+          test -f "$CANDIDATE/.output/server/index.mjs"
+          restore() {
+            sudo ln -sfn "$ORIGINAL" /var/www/impulsionando-core/current
+            sudo systemctl restart impulsionando-core
+            for i in $(seq 1 30); do curl -fsS --max-time 3 http://127.0.0.1:3000/ >/dev/null 2>&1 && break || sleep 1; done
+          }
+          trap restore EXIT
+
+          sudo ln -sfn "$CANDIDATE" /var/www/impulsionando-core/current
+          sudo systemctl restart impulsionando-core
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 3 http://127.0.0.1:3000/ >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 30 ] || { sudo journalctl --no-pager -u impulsionando-core -n 100; exit 20; }
+            sleep 1
+          done
+
+          probe() {
+            url="$1"
+            code="$(curl -sS -L -o /tmp/probe.out -w '%{http_code}' --max-time 30 "$url" || true)"
+            final="$(curl -sS -L -o /dev/null -w '%{url_effective}' --max-time 30 "$url" || true)"
+            printf 'PROBE %s => HTTP %s FINAL %s\n' "$url" "$code" "$final"
+          }
+
+          probe 'https://impulsionando.com.br/'
+          probe 'https://wmp.impulsionando.com.br/'
+          probe 'https://wmp.impulsionando.com.br/djs'
+          probe 'https://wmp.impulsionando.com.br/empresas'
+          probe 'https://wmp.impulsionando.com.br/orcamento'
+          probe 'https://wmp.impulsionando.com.br/parceiro'
+          probe 'https://wmp.impulsionando.com.br/onde-estou'
+          probe 'https://wmp.impulsionando.com.br/auth'
+          probe 'https://wmp.impulsionando.com.br/dashboard'
+          probe 'https://wmp.impulsionando.com.br/seguranca/senha'
+          probe 'https://chrismed.impulsionando.com.br/'
+          probe 'https://chrismed.impulsionando.com.br/agendar'
+          probe 'https://chrismed.impulsionando.com.br/eventos'
+          probe 'https://chrismed.impulsionando.com.br/auth'
+          probe 'https://chrismed.impulsionando.com.br/agenda/profissional'
+          probe 'https://colors.impulsionando.com.br/'
+          probe 'https://colors.impulsionando.com.br/agenda'
+          probe 'https://colors.impulsionando.com.br/eventos'
+          probe 'https://colors.impulsionando.com.br/suporte'
+          probe 'https://colors.impulsionando.com.br/super-green-black'
+          probe 'https://colors.impulsionando.com.br/rastreio'
+          probe 'https://colors.impulsionando.com.br/privacidade'
+          probe 'https://colors.impulsionando.com.br/termos'
+          probe 'https://colors.impulsionando.com.br/api/public/webhooks/monetizze-colors'
+          probe 'https://colors.impulsionando.com.br/api/public/webhooks/perfectpay-colors'
+          probe 'https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors'
+          REMOTE
