@@ -32,6 +32,7 @@ jobs:
         run: |
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
+          echo 'AUDIT_VERSION=2'
           echo '== FILESYSTEM =='
           df -hT /
           df -ih /
