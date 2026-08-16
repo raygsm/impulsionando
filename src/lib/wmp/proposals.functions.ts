@@ -72,6 +72,103 @@ const transitionRules: Record<ProposalTransition, { allowed: string[]; event: st
   WON: { allowed: ['SIGNED', 'WON'], event: 'wmp.proposal.won' },
 }
 
+const stringValue = (value: unknown) => typeof value === 'string' && value.trim() ? value.trim() : null
+const numberValue = (value: unknown) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed) : null
+}
+
+async function ensureConfirmedWmpEvent(params: {
+  context: any
+  tenantId: string
+  proposal: any
+  now: string
+}) {
+  const { context, tenantId, proposal, now } = params
+  const snapshot = (proposal.event_snapshot ?? {}) as Record<string, unknown>
+  const briefingDateId = stringValue(snapshot.briefing_date_id)
+
+  let briefingDate: any = null
+  if (briefingDateId) {
+    const { data, error } = await context.supabase
+      .from('wmp_briefing_dates')
+      .select('id,briefing_id,event_date,start_time,end_time,venue_name,venue_cep,venue_address,venue_bairro,venue_city,venue_state,venue_municipio_ibge,notes')
+      .eq('tenant_id', tenantId)
+      .eq('id', briefingDateId)
+      .maybeSingle()
+    if (error) throw error
+    briefingDate = data
+  }
+
+  let briefing: any = null
+  const briefingId = proposal.briefing_id ?? briefingDate?.briefing_id ?? null
+  if (briefingId) {
+    const { data, error } = await context.supabase
+      .from('wmp_briefings')
+      .select('id,evento_tipo,evento_data,evento_horario_inicio,evento_horario_fim,evento_publico_estimado,evento_endereco,evento_bairro,evento_cidade,evento_estado,evento_cep,evento_municipio_ibge')
+      .eq('tenant_id', tenantId)
+      .eq('id', briefingId)
+      .maybeSingle()
+    if (error) throw error
+    briefing = data
+  }
+
+  const eventDate = briefingDate?.event_date ?? stringValue(snapshot.event_date) ?? briefing?.evento_data ?? null
+  const title = stringValue(snapshot.event_name) ?? stringValue(snapshot.name) ?? stringValue(proposal.title) ?? `Evento ${proposal.proposal_number}`
+  const venueName = briefingDate?.venue_name ?? stringValue(snapshot.venue_name) ?? stringValue(snapshot.location) ?? null
+  const eventRow = {
+    tenant_id: tenantId,
+    briefing_id: briefingId,
+    briefing_date_id: briefingDate?.id ?? null,
+    proposal_id: proposal.id,
+    opportunity_id: proposal.opportunity_id ?? null,
+    source: 'CUSTOMER',
+    status: 'CONFIRMED',
+    public_status: 'DRAFT',
+    title,
+    event_type: stringValue(snapshot.event_type) ?? stringValue(snapshot.type) ?? briefing?.evento_tipo ?? null,
+    event_date: eventDate,
+    start_time: briefingDate?.start_time ?? stringValue(snapshot.start_time) ?? briefing?.evento_horario_inicio ?? null,
+    end_time: briefingDate?.end_time ?? stringValue(snapshot.end_time) ?? briefing?.evento_horario_fim ?? null,
+    timezone: 'America/Sao_Paulo',
+    venue_name: venueName,
+    venue_address: briefingDate?.venue_address ?? stringValue(snapshot.venue_address) ?? briefing?.evento_endereco ?? null,
+    venue_bairro: briefingDate?.venue_bairro ?? stringValue(snapshot.venue_bairro) ?? briefing?.evento_bairro ?? null,
+    venue_city: briefingDate?.venue_city ?? stringValue(snapshot.venue_city) ?? stringValue(snapshot.city) ?? briefing?.evento_cidade ?? null,
+    venue_state: briefingDate?.venue_state ?? stringValue(snapshot.venue_state) ?? stringValue(snapshot.state) ?? briefing?.evento_estado ?? null,
+    venue_cep: briefingDate?.venue_cep ?? stringValue(snapshot.venue_cep) ?? briefing?.evento_cep ?? null,
+    venue_municipio_ibge: briefingDate?.venue_municipio_ibge ?? stringValue(snapshot.venue_municipio_ibge) ?? briefing?.evento_municipio_ibge ?? null,
+    audience_estimate: numberValue(snapshot.audience) ?? numberValue(snapshot.audience_estimate) ?? briefing?.evento_publico_estimado ?? null,
+    notes: briefingDate?.notes ?? stringValue(snapshot.notes) ?? null,
+    confirmed_at: now,
+    updated_at: now,
+  }
+
+  const { data: existing, error: existingError } = await context.supabase
+    .from('wmp_events')
+    .select('id,status')
+    .eq('tenant_id', tenantId)
+    .eq('proposal_id', proposal.id)
+    .maybeSingle()
+  if (existingError) throw existingError
+
+  if (existing) {
+    if (!['COMPLETED', 'CANCELLED'].includes(existing.status)) {
+      const { error } = await context.supabase.from('wmp_events').update(eventRow).eq('tenant_id', tenantId).eq('id', existing.id)
+      if (error) throw error
+    }
+    return existing.id as string
+  }
+
+  const { data: created, error: createError } = await context.supabase
+    .from('wmp_events')
+    .insert({ ...eventRow, created_by: context.userId })
+    .select('id')
+    .single()
+  if (createError) throw createError
+  return created.id as string
+}
+
 export const transitionWmpProposal = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { proposal_id: string; transition: ProposalTransition }) => z.object({
     proposal_id: z.string().uuid(),
@@ -81,7 +178,7 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
     const tenantId = await getWmpTenantId(context.supabase)
     const { data: proposal, error } = await context.supabase
       .from('wmp_proposals')
-      .select('id,proposal_number,status,current_version,opportunity_id,event_snapshot')
+      .select('id,proposal_number,title,briefing_id,status,current_version,opportunity_id,event_snapshot')
       .eq('tenant_id', tenantId)
       .eq('id', data.proposal_id)
       .single()
@@ -115,6 +212,7 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
       if (proposalError) throw proposalError
     }
 
+    let operationalEventId: string | null = null
     if (data.transition === 'ACCEPTED') {
       const eventSnapshot = (proposal.event_snapshot ?? {}) as Record<string, unknown>
       const briefingDateId = typeof eventSnapshot.briefing_date_id === 'string' ? eventSnapshot.briefing_date_id : null
@@ -127,12 +225,14 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
           .in('status', ['REQUESTED', 'QUOTED', 'CONFIRMED'])
         if (dateError) throw dateError
       }
+      operationalEventId = await ensureConfirmedWmpEvent({ context, tenantId, proposal, now })
     }
 
     const automation = await dispatchN8nByEvent(rule.event, {
       proposal_id: proposal.id,
       proposal_number: proposal.proposal_number,
       opportunity_id: proposal.opportunity_id,
+      operational_event_id: operationalEventId,
       transition: data.transition,
       transitioned_at: now,
     }, null, 'wmp')
@@ -140,6 +240,7 @@ export const transitionWmpProposal = createServerFn({ method: 'POST' }).middlewa
     return {
       proposal_id: proposal.id,
       proposal_number: proposal.proposal_number,
+      operational_event_id: operationalEventId,
       status: data.transition,
       automation,
     }
