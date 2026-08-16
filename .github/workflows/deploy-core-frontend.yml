@@ -197,12 +197,15 @@ jobs:
             sleep 1
           done
 
+          journal_file="$(mktemp)"
+          sudo journalctl --no-pager -u impulsionando-core -n 160 > "$journal_file"
           if sudo grep -q '^PULSONITOR_ENABLED=true$' /etc/impulsionando-core.env; then
-            sudo journalctl --no-pager -u impulsionando-core -n 160 | grep -q '\[Pulsonitor\] started'
+            grep -q '\[Pulsonitor\] started' "$journal_file"
           fi
           if sudo grep -q '^COLORS_AUTOMATION_ENABLED=true$' /etc/impulsionando-core.env && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env; then
-            sudo journalctl --no-pager -u impulsionando-core -n 160 | grep -q '\[Colors Automation\] started'
+            grep -q '\[Colors Automation\] started' "$journal_file"
           fi
+          rm -f "$journal_file"
           REMOTE
 
       - name: Validate public Core, WMP, CHRISMED and Colors
@@ -211,19 +214,21 @@ jobs:
           curl --fail --location --silent --show-error --max-time 30 https://impulsionando.com.br/ >/tmp/impulsionando.html
           grep -qi "Impulsionando" /tmp/impulsionando.html
 
-          # WMP: critical public conversion routes must all answer after every Core deploy.
+          # WMP: critical public conversion routes and auth must all answer after every Core deploy.
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/ >/tmp/wmp-home.html
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/djs >/tmp/wmp-djs.html
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/empresas >/tmp/wmp-empresas.html
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/orcamento >/tmp/wmp-orcamento.html
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/parceiro >/tmp/wmp-parceiro.html
           curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/onde-estou >/tmp/wmp-onde-estou.html
+          curl --fail --location --silent --show-error --max-time 30 https://wmp.impulsionando.com.br/auth >/tmp/wmp-auth.html
           grep -qi "WMP\|Wagner Miller" /tmp/wmp-home.html
           grep -qi "DJ" /tmp/wmp-djs.html
           grep -qi "hotel\|empresa" /tmp/wmp-empresas.html
           grep -qi "briefing\|orçamento\|orcamento" /tmp/wmp-orcamento.html
           grep -qi "parceiro\|DJ" /tmp/wmp-parceiro.html
           grep -qi "Onde Estou\|agenda" /tmp/wmp-onde-estou.html
+          grep -qi "Acessar\|Entrar\|conta" /tmp/wmp-auth.html
 
           # CHRISMED: every critical public route must answer successfully after each Core deploy.
           curl --fail --location --silent --show-error --max-time 30 https://chrismed.impulsionando.com.br/ >/tmp/chrismed-home.html
