@@ -1,7 +1,5 @@
 /**
- * Testes de deprecatedSubdomainRedirect — garantem que qualquer path do
- * host legado é redirecionado para o subdomínio oficial preservando
- * pathname, search e hash.
+ * Domain routing tests for canonical tenant hosts and WMP clean paths.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -9,17 +7,15 @@ import {
   deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
+  toWmpInternalPathname,
 } from "./subdomain";
 
 const base = { protocol: "https:", pathname: "/", search: "", hash: "" };
 
 describe("canonicalTenantHostRedirect", () => {
   it("moves the CHRISMED landing from the apex to its tenant subdomain", () => {
-    expect(canonicalTenantHostRedirect({
-      ...base,
-      hostname: "impulsionando.com.br",
-      pathname: "/chrismed",
-    })).toBe("https://chrismed.impulsionando.com.br/");
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "impulsionando.com.br", pathname: "/chrismed" }))
+      .toBe("https://chrismed.impulsionando.com.br/");
   });
 
   it("preserves CHRISMED nested paths, query and hash", () => {
@@ -33,35 +29,50 @@ describe("canonicalTenantHostRedirect", () => {
   });
 
   it("moves the legacy agenda host to the official tenant subdomain", () => {
-    expect(canonicalTenantHostRedirect({
-      ...base,
-      hostname: "agenda.chrismed.com.br",
-      pathname: "/chrismed/contato",
-    })).toBe("https://chrismed.impulsionando.com.br/contato");
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "agenda.chrismed.com.br", pathname: "/chrismed/contato" }))
+      .toBe("https://chrismed.impulsionando.com.br/contato");
   });
 
   it("cleans the internal CHRISMED route from the canonical host", () => {
-    expect(canonicalTenantHostRedirect({
-      ...base,
-      hostname: "chrismed.impulsionando.com.br",
-      pathname: "/chrismed",
-    })).toBe("https://chrismed.impulsionando.com.br/");
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/chrismed" }))
+      .toBe("https://chrismed.impulsionando.com.br/");
   });
 
   it("removes the internal CHRISMED prefix from nested canonical paths", () => {
-    expect(canonicalTenantHostRedirect({
-      ...base,
-      hostname: "chrismed.impulsionando.com.br",
-      pathname: "/chrismed/agendar",
-    })).toBe("https://chrismed.impulsionando.com.br/agendar");
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/chrismed/agendar" }))
+      .toBe("https://chrismed.impulsionando.com.br/agendar");
   });
 
   it("does not redirect an already public CHRISMED path", () => {
-    expect(canonicalTenantHostRedirect({
-      ...base,
-      hostname: "chrismed.impulsionando.com.br",
-      pathname: "/agendar",
-    })).toBeNull();
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/agendar" }))
+      .toBeNull();
+  });
+});
+
+describe("WMP clean public path routing", () => {
+  it("maps the WMP root to its internal namespace", () => {
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/")).toBe("/wmp");
+  });
+
+  it("maps clean public WMP pages to the internal namespace", () => {
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/djs")).toBe("/wmp/djs");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/empresas")).toBe("/wmp/empresas");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/orcamento")).toBe("/wmp/orcamento");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/parceiro/cadastro")).toBe("/wmp/parceiro/cadastro");
+  });
+
+  it("does not double-prefix internal WMP routes", () => {
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/wmp/djs")).toBe("/wmp/djs");
+  });
+
+  it("never rewrites APIs or static assets", () => {
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/api/wmp/millito/chat")).toBe("/api/wmp/millito/chat");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/assets/app.js")).toBe("/assets/app.js");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/robots.txt")).toBe("/robots.txt");
+  });
+
+  it("does not rewrite another tenant host", () => {
+    expect(toWmpInternalPathname("colors.impulsionando.com.br", "/djs")).toBe("/djs");
   });
 });
 
@@ -72,11 +83,8 @@ describe("deprecatedSubdomainRedirect", () => {
   });
 
   it("preserva path", () => {
-    expect(deprecatedSubdomainRedirect({
-      ...base,
-      hostname: "colorssaude.impulsionando.com.br",
-      pathname: "/colors/super-green-black",
-    })).toBe("https://colors.impulsionando.com.br/colors/super-green-black");
+    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colorssaude.impulsionando.com.br", pathname: "/colors/super-green-black" }))
+      .toBe("https://colors.impulsionando.com.br/colors/super-green-black");
   });
 
   it("preserva query e hash", () => {
@@ -105,17 +113,18 @@ describe("deprecatedSubdomainRedirect", () => {
   });
 
   it("mantém http:// quando o request original é http", () => {
-    expect(deprecatedSubdomainRedirect({
-      ...base,
-      protocol: "http:",
-      hostname: "colorssaude.impulsionando.com.br",
-    })).toBe("http://colors.impulsionando.com.br/");
+    expect(deprecatedSubdomainRedirect({ ...base, protocol: "http:", hostname: "colorssaude.impulsionando.com.br" }))
+      .toBe("http://colors.impulsionando.com.br/");
   });
 });
 
 describe("tenant landing resolution", () => {
   it("routes CHRISMED to its dedicated landing", () => {
     expect(tenantLandingTargetForHost("chrismed.impulsionando.com.br")).toBe("/chrismed");
+  });
+
+  it("routes WMP to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("wmp.impulsionando.com.br")).toBe("/wmp");
   });
 
   it("keeps the legacy CHRISMED domain compatible", () => {
