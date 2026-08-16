@@ -45,15 +45,24 @@ jobs:
           sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
 
           cid=''
-          for attempt in $(seq 1 45); do
+          ip=''
+          for attempt in $(seq 1 60); do
             cid="$(sudo docker compose -f "$COMPOSE" ps -q impulsionando-core | head -n1)"
             state=''
-            if [ -n "$cid" ]; then state="$(sudo docker inspect --type container -f '{{.State.Status}}' "$cid" 2>/dev/null || true)"; fi
-            echo "CORE_CONTAINER attempt=$attempt state=${state:-missing}"
-            [ "$state" = running ] && break
-            if [ "$attempt" -eq 45 ]; then
+            if [ -n "$cid" ]; then
+              state="$(sudo docker inspect --type container -f '{{.State.Status}}' "$cid" 2>/dev/null || true)"
+              ip="$(sudo docker inspect --type container -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$cid" 2>/dev/null || true)"
+            fi
+            if [ "$state" = running ] && [ -n "$ip" ]; then
+              code="$(curl -sS --max-time 3 -o /tmp/ready -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/auth" || true)"
+            else
+              code=000
+            fi
+            echo "CORE_READY attempt=$attempt state=${state:-missing} http=$code"
+            [ "$code" = 200 ] && break
+            if [ "$attempt" -eq 60 ]; then
               sudo docker compose -f "$COMPOSE" ps -a || true
-              [ -n "$cid" ] && sudo docker inspect --type container "$cid" --format 'state={{json .State}}' || true
+              [ -n "$cid" ] && sudo docker logs --tail 120 "$cid" || true
               exit 91
             fi
             sleep 2
@@ -67,9 +76,8 @@ jobs:
           echo "DOCKER_ENV_FP=$docker_fp"
           [ "$core_fp" = "$docker_fp" ]
 
-          ip="$(sudo docker inspect --type container -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$cid")"
           for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou; do
-            code="$(curl -sS -o /tmp/p -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000$path")"
+            code="$(curl -sS --max-time 10 -o /tmp/p -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000$path")"
             echo "DIRECT_ROUTE $path HTTP=$code"
             [ "$code" = 200 ]
           done
@@ -82,9 +90,9 @@ jobs:
           for target in "http://$ip:3000$endpoint" 'https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'; do
             extra=()
             case "$target" in http://*) extra=(-H 'Host: wmp.impulsionando.com.br');; esac
-            get="$(curl -sS -o /tmp/get -w '%{http_code}' "${extra[@]}" "$target")"
-            unsigned="$(curl -sS -o /tmp/unsigned -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' --data-binary "$payload" "$target")"
-            signed="$(curl -sS -o /tmp/signed -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" "$target")"
+            get="$(curl -sS --max-time 15 -o /tmp/get -w '%{http_code}' "${extra[@]}" "$target")"
+            unsigned="$(curl -sS --max-time 15 -o /tmp/unsigned -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' --data-binary "$payload" "$target")"
+            signed="$(curl -sS --max-time 15 -o /tmp/signed -w '%{http_code}' -X POST "${extra[@]}" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" "$target")"
             echo "HMAC target=$target get=$get unsigned=$unsigned signed=$signed body=$(head -c 140 /tmp/signed)"
             [ "$get" = 200 ]
             [ "$unsigned" = 401 ]
