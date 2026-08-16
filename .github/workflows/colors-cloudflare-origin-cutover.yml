@@ -122,24 +122,43 @@ jobs:
       - name: Public verification with DNS rollback on failure
         run: |
           set -euo pipefail
+          rollback_dns() {
+            echo '::error::Public Colors validation failed; restoring previous Cloudflare state.'
+            new_id="$(jq -r '.result.id // empty' /tmp/colors-dns-created.json)"
+            if [ -n "$new_id" ]; then
+              curl --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$new_id" >/dev/null || true
+            fi
+            jq -c '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | del(.id,.zone_id,.zone_name,.created_on,.modified_on,.meta,.proxiable,.locked,.comment_modified_on,.tags_modified_on)' /tmp/colors-dns-before.json | while read -r payload; do
+              curl --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" >/dev/null || true
+            done
+          }
+
+          ready=0
+          for attempt in $(seq 1 120); do
+            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public-ready -w '%{http_code}' --max-time 15 "https://$DOMAIN/?colors_dns_ready=${GITHUB_SHA}" || true)"
+            if [ "$code" = '200' ]; then
+              ready=1
+              echo "COLORS_PUBLIC_DNS_READY=PASS attempt=$attempt"
+              break
+            fi
+            echo "COLORS_PUBLIC_DNS_WAIT attempt=$attempt HTTP=$code"
+            sleep 5
+          done
+          if [ "$ready" != '1' ]; then
+            rollback_dns
+            exit 40
+          fi
+
           failed=0
           for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta; do
-            code=000
-            for attempt in $(seq 1 18); do
-              code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public -w '%{http_code}' --max-time 20 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
-              [ "$code" = '200' ] && break
-              sleep 5
-            done
+            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public -w '%{http_code}' --max-time 30 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
             echo "PUBLIC_COLORS $path HTTP=$code"
             [ "$code" = '200' ] || failed=1
           done
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code=000
-            for attempt in $(seq 1 18); do
-              code="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o /tmp/colors-public-api -w '%{http_code}' --max-time 20 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
-              [ "$code" = '200' ] && break
-              sleep 5
-            done
+            code="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o /tmp/colors-public-api -w '%{http_code}' --max-time 30 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
             echo "PUBLIC_COLORS_API $path HTTP=$code"
             [ "$code" = '200' ] || failed=1
           done
@@ -147,16 +166,7 @@ jobs:
             echo 'COLORS_PUBLIC_ORIGIN_CUTOVER=PASS'
             exit 0
           fi
-          echo '::error::Public Colors validation failed; restoring previous Cloudflare state.'
-          new_id="$(jq -r '.result.id // empty' /tmp/colors-dns-created.json)"
-          if [ -n "$new_id" ]; then
-            curl --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$new_id" >/dev/null || true
-          fi
-          jq -c '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | del(.id,.zone_id,.zone_name,.created_on,.modified_on,.meta,.proxiable,.locked,.comment_modified_on,.tags_modified_on)' /tmp/colors-dns-before.json | while read -r payload; do
-            curl --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" >/dev/null || true
-          done
+          rollback_dns
           exit 40
 
       - name: Upload DNS backup
