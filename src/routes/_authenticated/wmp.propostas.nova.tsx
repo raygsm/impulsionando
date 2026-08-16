@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
 import { createWmpProposalDraft, listWmpServices, sendWmpProposal } from '@/lib/wmp/proposals.functions'
+import { getWmpCorporateProposalPrefill, markWmpCorporateDateQuoted } from '@/lib/wmp/corporate-proposal.functions'
 
 export const Route = createFileRoute('/_authenticated/wmp/propostas/nova')({ component: Page })
 
@@ -29,13 +30,40 @@ function Page() {
   const [parkingProvided, setParkingProvided] = useState(false)
   const [proposal, setProposal] = useState<any>(null)
   const [busy, setBusy] = useState(false)
+  const [prefillBusy, setPrefillBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [briefingDateId, setBriefingDateId] = useState<string | null>(null)
+  const [briefingId, setBriefingId] = useState<string | null>(null)
 
   useEffect(() => {
     listWmpServices().then((rows: any) => {
       setServices(rows)
       if (rows?.[0]?.code) setService(rows[0].code)
     }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const id = new URLSearchParams(window.location.search).get('briefing_date_id')
+    if (!id) return
+    setBriefingDateId(id)
+    setPrefillBusy(true)
+    setMessage('')
+    void getWmpCorporateProposalPrefill({ data: { briefing_date_id: id } })
+      .then((prefill: any) => {
+        setBriefingId(prefill.briefing_id)
+        setName(prefill.client?.company || prefill.client?.name || '')
+        setEmail(prefill.client?.email || '')
+        setPhone(prefill.client?.phone || '')
+        setDocument(prefill.client?.document || '')
+        setEventName(prefill.client?.company ? `${prefill.client.company} — ${prefill.event?.type || 'Evento'}` : (prefill.event?.type || 'Evento WMP'))
+        setEventDate(prefill.event?.event_date || '')
+        setLocation([prefill.event?.venue_name, prefill.event?.venue_address, prefill.event?.venue_bairro, prefill.event?.venue_city, prefill.event?.venue_state].filter(Boolean).join(' · '))
+        setAudience(prefill.event?.audience ? String(prefill.event.audience) : '')
+        setMessage('Dados carregados da agenda corporativa. Revise serviço, escopo, preço e custos antes de salvar a proposta preliminar.')
+      })
+      .catch((err: any) => setMessage(err?.message ?? 'Não foi possível carregar os dados da agenda corporativa.'))
+      .finally(() => setPrefillBusy(false))
   }, [])
 
   const financials = useMemo(() => {
@@ -58,8 +86,9 @@ function Page() {
     setMessage('')
     try {
       if (financials.total <= 0) throw new Error('Informe um valor total maior que zero.')
-      const row = await createWmpProposalDraft({ data: {
+      const row: any = await createWmpProposalDraft({ data: {
         title: `${eventName} — ${name}`,
+        briefing_id: briefingId || undefined,
         client_snapshot: { name, email, phone: phone || null, document: document || null },
         event_snapshot: {
           event_name: eventName,
@@ -67,6 +96,7 @@ function Page() {
           event_date: eventDate || null,
           location: location || null,
           audience: audience ? Number(audience) : null,
+          briefing_date_id: briefingDateId,
         },
         commercial_summary: {
           service,
@@ -85,8 +115,13 @@ function Page() {
         },
       } })
       setProposal(row)
+      if (briefingDateId) {
+        await markWmpCorporateDateQuoted({ data: { briefing_date_id: briefingDateId, proposal_id: row.id } })
+      }
       if (!financials.ok) {
         setMessage('Proposta salva, porém bloqueada para envio: ajuste os valores até atingir pelo menos 10% de margem bruta e 15% de margem líquida operacional.')
+      } else if (briefingDateId) {
+        setMessage('Proposta preliminar criada e a data corporativa foi marcada como QUOTED.')
       }
     } catch (err: any) {
       setMessage(err?.message ?? 'Não foi possível gerar a proposta.')
@@ -112,8 +147,10 @@ function Page() {
   }
 
   return <div className="mx-auto max-w-5xl space-y-6 p-6">
-    <div className="flex flex-wrap gap-2 text-sm"><a className="rounded-md border px-3 py-2" href="/wmp/propostas">Todas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/enviadas">Enviadas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/aceitas">Aceitas</a></div>
+    <div className="flex flex-wrap gap-2 text-sm"><a className="rounded-md border px-3 py-2" href="/wmp/propostas">Todas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/enviadas">Enviadas</a><a className="rounded-md border px-3 py-2" href="/wmp/propostas/aceitas">Aceitas</a>{briefingDateId&&<a className="rounded-md border px-3 py-2" href="/wmp/operacao?area=agenda">Voltar à agenda</a>}</div>
     <div><p className="text-sm text-muted-foreground">WMP — Wagner Miller Produções</p><h1 className="text-3xl font-semibold">Nova proposta comercial preliminar</h1><p className="mt-1 max-w-3xl text-sm text-muted-foreground">Primeiro registre serviço, data e preço. O contrato formal só avança depois do aceite comercial. A proteção financeira bloqueia propostas abaixo de 10% de margem bruta ou 15% de margem líquida operacional.</p></div>
+
+    {prefillBusy&&<div className="flex items-center gap-2 rounded-lg border p-4 text-sm"><Loader2 className="size-4 animate-spin"/>Carregando dados da agenda corporativa...</div>}
 
     {!proposal ? <form onSubmit={createProposal} className="grid gap-4 rounded-xl border bg-card p-6 md:grid-cols-2">
       <label className="space-y-1"><span className="text-sm font-medium">Potencial cliente *</span><input required value={name} onChange={e=>setName(e.target.value)} className="w-full rounded-md border px-3 py-2"/></label>
@@ -149,7 +186,7 @@ function Page() {
         </div>
       </div>
 
-      <div className="md:col-span-2 flex justify-end"><button disabled={busy || financials.total <= 0} className="rounded-md bg-primary px-5 py-2 text-primary-foreground disabled:opacity-50">{busy ? 'Gerando...' : 'Salvar proposta preliminar'}</button></div>
+      <div className="md:col-span-2 flex justify-end"><button disabled={busy || prefillBusy || financials.total <= 0} className="rounded-md bg-primary px-5 py-2 text-primary-foreground disabled:opacity-50">{busy ? 'Gerando...' : 'Salvar proposta preliminar'}</button></div>
     </form> : <div className="space-y-4 rounded-xl border bg-card p-6">
       <div><p className="text-sm text-muted-foreground">Proposta gerada</p><p className="font-mono text-lg font-semibold">{proposal.proposal_number}</p><p className="text-sm">Status: {proposal.status}</p></div>
       <div className={`rounded-lg border p-4 ${financials.ok ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-destructive/30 bg-destructive/10'}`}><p className="font-medium">Margem bruta {financials.grossMarginPct.toFixed(2)}% · líquida operacional {financials.netMarginPct.toFixed(2)}%</p>{!financials.ok && <p className="mt-1 text-sm">O envio está bloqueado até os custos/preço serem revisados em uma nova versão.</p>}</div>
