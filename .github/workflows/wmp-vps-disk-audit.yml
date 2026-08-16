@@ -23,35 +23,25 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
 
-      - name: Audit disk without deleting data
+      - name: Quick disk and cleanup progress probe
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
         run: |
           ssh "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
-          echo 'AUDIT_VERSION=2'
-          echo '== FILESYSTEM =='
+          BASE=/var/www/impulsionando-core/releases
+          echo 'QUICK_AUDIT_VERSION=3'
           df -hT /
           df -ih /
-          echo '== CORE LINKS =='
-          readlink -f /var/www/impulsionando-core/current 2>/dev/null || true
-          sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true
-          echo '== CORE RELEASES =='
-          sudo du -sh /var/www/impulsionando-core/releases 2>/dev/null || true
-          sudo find /var/www/impulsionando-core/releases -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n 30 || true
-          echo '== TOP /var =='
-          sudo du -x -h -d 2 /var 2>/dev/null | sort -h | tail -n 30 || true
-          echo '== TOP /home =='
-          sudo du -x -h -d 2 /home 2>/dev/null | sort -h | tail -n 30 || true
-          echo '== NPM CACHES =='
-          sudo du -sh /root/.npm /home/*/.npm 2>/dev/null || true
-          echo '== JOURNAL =='
-          sudo journalctl --disk-usage || true
-          echo '== DOCKER =='
-          sudo docker system df || true
-          echo '== LARGE LOGS =='
-          sudo find /var/log -xdev -type f -size +50M -printf '%s %p\n' 2>/dev/null | sort -nr | head -n 20 || true
+          echo "RELEASE_COUNT=$(sudo find "$BASE" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)"
+          echo "CURRENT=$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
+          echo "PREVIOUS=$(sudo cat /var/www/impulsionando-core/.previous-release 2>/dev/null || true)"
+          echo 'ACTIVE_DISK_PROCESSES:'
+          ps -eo pid,etime,comm,args | grep -E '[r]m -rf|[d]u -x|[d]u -sh|docker builder prune|npm cache clean' | head -n 30 || true
+          echo 'ROOT_USAGE_TOP:'
+          sudo du -x -s /var/www/impulsionando-core /var/lib/docker /var/log /home 2>/dev/null | sort -n || true
           REMOTE
