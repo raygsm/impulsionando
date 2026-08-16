@@ -1,0 +1,41 @@
+name: WMP proxy diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-proxy-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Inspect WMP proxy without secrets
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          echo '=== nginx version ==='
+          sudo nginx -v 2>&1 || true
+          echo '=== enabled sites ==='
+          sudo find /etc/nginx/sites-enabled -maxdepth 1 -type l -o -type f 2>/dev/null | sort || true
+          echo '=== WMP references in nginx config ==='
+          sudo grep -R -n -E 'wmp\.impulsionando\.com\.br|server_name|proxy_pass|location ' /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null | sed -n '1,260p' || true
+          echo '=== listening processes ==='
+          sudo ss -ltnp | grep -E ':80 |:443 |:3000 ' || true
+          echo '=== direct nginx localhost Host probes ==='
+          for p in / /auth /dashboard /djs /empresas /orcamento /parceiro /onde-estou; do
+            code="$(curl -sS -o /tmp/nginx-probe -w '%{http_code}' -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://127.0.0.1${p}" || true)"
+            printf '%s => %s\n' "$p" "$code"
+          done
+          REMOTE
