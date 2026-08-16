@@ -33,7 +33,7 @@ jobs:
           C=n8n-umlg-n8n-1
           for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-v.json" >/dev/null
-            sudo docker exec -e WID="$id" "$C" node - <<'NODE'
+            sudo docker exec -i -e WID="$id" "$C" node - <<'NODE'
           const fs=require('fs');
           const id=process.env.WID;
           const raw=JSON.parse(fs.readFileSync('/tmp/'+id+'-v.json','utf8'));
