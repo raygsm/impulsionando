@@ -34,6 +34,7 @@ jobs:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
         run: |
+          # Final registration pass after canonical HMAC import.
           ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
@@ -46,11 +47,9 @@ jobs:
             sudo docker exec -e WID="$id" -e CORE="$CORE" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-pre.json','utf8')),w=Array.isArray(r)?r[0]:r,n=(w.nodes||[]).find(x=>x.name==='Verify signature in Core'||(x.type==='n8n-nodes-base.httpRequest'&&String(x.parameters?.url||'').includes('n8n-verify')));console.log(JSON.stringify({id,verifier:n?.parameters?.url}));if(n?.parameters?.url!==process.env.CORE)process.exit(2);"
           done
 
-          echo '== deactivate legacy duplicate workflows =='
           sudo docker exec "$C" n8n update:workflow --id=wmpDjBookingLifecycle01 --active=false || true
           sudo docker exec "$C" n8n update:workflow --id=wmpPostEventRelationship01 --active=false || true
 
-          echo '== publish canonical workflows =='
           for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
             sudo docker exec "$C" n8n publish:workflow --id="$id"
           done
@@ -62,13 +61,11 @@ jobs:
             sleep 2
           done
 
-          echo '== verify legacy workflows inactive =='
           for id in wmpDjBookingLifecycle01 wmpPostEventRelationship01; do
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-retired.json" >/dev/null
-            sudo docker exec -e WID="$id" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-retired.json','utf8')),w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId}));if(w.active)process.exit(1);"
+            sudo docker exec -e WID="$id" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-retired.json','utf8')),w=Array.isArray(r)?r[0]:r;if(w.active)process.exit(1);"
           done
 
-          echo '== verify canonical workflows active =='
           for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-canonical.json" >/dev/null
             sudo docker exec -e WID="$id" -e CORE="$CORE" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-canonical.json','utf8')),w=Array.isArray(r)?r[0]:r,h=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook'),v=(w.nodes||[]).find(n=>n.name==='Verify signature in Core'||(n.type==='n8n-nodes-base.httpRequest'&&String(n.parameters?.url||'').includes('n8n-verify')));console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,path:h?.parameters?.path,webhookId:h?.webhookId,verifier:v?.parameters?.url}));if(!w.active||!w.activeVersionId||!h?.parameters?.path||v?.parameters?.url!==process.env.CORE)process.exit(1);"
