@@ -50,7 +50,7 @@ jobs:
           sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
           code="$(curl -sS -o /tmp/core-signed -w '%{http_code}' --max-time 20 -X POST "$CORE" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload" || true)"
           echo "CORE_HMAC_SIGNED HTTP=$code"
-          [ "$code" = 200 ] || exit 80
+          [ "$code" = 200 ] || { head -c 400 /tmp/core-signed 2>/dev/null || true; exit 80; }
           grep -q '"ok":true' /tmp/core-signed || exit 80
           echo 'CORE_HMAC_SIGNED=PASS'
 
