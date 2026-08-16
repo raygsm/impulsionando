@@ -1,0 +1,74 @@
+name: Ana Madu Traefik Router Persistence
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: anamadu-traefik-router-persist
+  cancel-in-progress: false
+
+jobs:
+  persist:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Restore explicit Ana Madu TLS router if needed
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.anamadu.yml
+          domain='anamadu.impulsionando.com.br'
+          cd /opt/impulsionando/deploy/hostinger
+          test -f "$base"
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core:
+              labels:
+                traefik.http.routers.anamadu.entrypoints: websecure
+                traefik.http.routers.anamadu.rule: Host(`anamadu.impulsionando.com.br`)
+                traefik.http.routers.anamadu.service: impulsionando-core
+                traefik.http.routers.anamadu.tls: "true"
+                traefik.http.routers.anamadu.tls.certresolver: letsencrypt
+                traefik.http.routers.anamadu.priority: "200"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+
+          current_rule="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.rule"}}' impulsionando-core 2>/dev/null || true)"
+          current_resolver="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.tls.certresolver"}}' impulsionando-core 2>/dev/null || true)"
+          if [ "$current_rule" != 'Host(`anamadu.impulsionando.com.br`)' ] || [ "$current_resolver" != 'letsencrypt' ]; then
+            sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
+          fi
+
+          for attempt in $(seq 1 60); do
+            code="$(curl -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 AnaMaduPersist/1.0' -o /tmp/anamadu-persist -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
+            [ "$code" = '200' ] && break
+            [ "$attempt" -lt 60 ] || {
+              echo "::error::Ana Madu HTTPS probe failed with HTTP=$code"
+              sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' || true
+              exit 61
+            }
+            sleep 2
+          done
+          echo 'ANAMADU_TRAEFIK_TLS_ROUTER=PASS'
+          REMOTE
