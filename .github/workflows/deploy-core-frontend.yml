@@ -301,7 +301,7 @@ jobs:
           probe_html() {
             url="$1"
             label="$2"
-            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/probe.html -w '%{http_code}' "$url?deploy_verify=${GITHUB_SHA}" || true)"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/probe.html -w '%{http_code}' "$url" || true)"
             echo "PUBLIC_PROBE $label HTTP=$code"
             [ "$code" = '200' ]
           }
@@ -324,13 +324,14 @@ jobs:
           probe_html 'https://anamadu.impulsionando.com.br/' 'anamadu-home'
 
           curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
-            -o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/?deploy_content=${GITHUB_SHA}"
+            -o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/"
           if ! grep -qi 'WMP\|Wagner Miller' /tmp/wmp-home.html; then
             echo '::warning::WMP identity marker not found; keeping deployment because availability gates passed'
           fi
           for marker in '+850' 'R$ 2.900' 'R$ 7.400' 'Tech Corp' 'Festival Sertanejo de Verão' '8.000 pessoas' 'resposta garantida'; do
             if grep -Fqi "$marker" /tmp/wmp-home.html; then
-              echo "::warning::Legacy WMP marker still public: $marker"
+              echo "::error::Legacy WMP marker still public: $marker"
+              exit 49
             fi
           done
           echo 'PUBLIC_CORE_VALIDATION=PASS'
