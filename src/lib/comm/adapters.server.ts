@@ -1,6 +1,9 @@
 /**
  * Adapters do Centro de Comunicação — Impulsionando.
- * Cada adapter registra resultado auditável e respeita a configuração real da empresa.
+ * Fontes canônicas live:
+ * - email: message_outbox -> fila global de e-mail
+ * - canais externos: communication_channel_endpoints
+ * - n8n: n8n_workflow_registry
  */
 import { createHmac } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -24,38 +27,13 @@ export interface DispatchInput {
   resolved_template_id: string | null;
 }
 
-interface ChannelConfig {
-  enabled: boolean;
+type Endpoint = {
   provider: string | null;
-  provider_config: Record<string, unknown>;
-  n8n_webhook_url: string | null;
-  n8n_secret_ref: string | null;
-  rate_limit_per_min: number;
-}
-
-const db = supabaseAdmin as unknown as {
-  from: (table: string) => {
-    select: (cols: string) => {
-      eq: (col: string, val: unknown) => {
-        eq: (col: string, val: unknown) => {
-          maybeSingle: () => Promise<{ data: ChannelConfig | null }>;
-        };
-      };
-    };
-    insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-  };
+  status: string;
+  address: string | null;
+  secret_reference: string | null;
+  config: Record<string, unknown> | null;
 };
-
-async function loadChannelConfig(companyId: string | null, channel: string): Promise<ChannelConfig | null> {
-  if (!companyId) return null;
-  const { data } = await db
-    .from("core_comm_channel_config")
-    .select("enabled, provider, provider_config, n8n_webhook_url, n8n_secret_ref, rate_limit_per_min")
-    .eq("company_id", companyId)
-    .eq("channel", channel)
-    .maybeSingle();
-  return data ?? null;
-}
 
 function renderTemplate(body: string | null, vars: Record<string, unknown>): string {
   if (!body) return "";
@@ -65,34 +43,48 @@ function renderTemplate(body: string | null, vars: Record<string, unknown>): str
   });
 }
 
+async function loadActiveEndpoint(companyId: string | null, channel: string): Promise<Endpoint | null> {
+  if (!companyId) return null;
+  const { data: tenant, error: tenantError } = await supabaseAdmin
+    .from("communication_tenants")
+    .select("id")
+    .eq("company_id", companyId)
+    .maybeSingle();
+  if (tenantError || !tenant?.id) return null;
+
+  const { data, error } = await supabaseAdmin
+    .from("communication_channel_endpoints")
+    .select("provider,status,address,secret_reference,config")
+    .eq("tenant_id", tenant.id)
+    .eq("channel", channel)
+    .eq("status", "ACTIVE")
+    .order("is_primary", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return (data as Endpoint | null) ?? null;
+}
+
 export async function sendNotification(d: DispatchInput): Promise<AdapterResult> {
   if (!d.user_id) return { status: "skipped", reason: "no_user_id" };
-  const body = renderTemplate(d.body_md, d.payload);
-  const { error } = await db.from("notifications").insert({
+  const { error } = await supabaseAdmin.from("notifications").insert({
     user_id: d.user_id,
     company_id: d.company_id,
     category: d.event_code,
     severity: "info",
     title: d.subject ?? d.event_code,
-    message: body || null,
+    message: renderTemplate(d.body_md, d.payload) || null,
   });
   if (error) return { status: "failed", error: error.message, retryable: true };
   return { status: "sent", providerMessageId: d.id };
 }
 
 export async function sendImpulsionito(d: DispatchInput): Promise<AdapterResult> {
-  const { error } = await db.from("impulsionito_training_snapshots").insert({
+  const { error } = await supabaseAdmin.from("impulsionito_training_snapshots").insert({
     company_id: d.company_id ?? "00000000-0000-0000-0000-000000000000",
     source: "comm_center",
     metrics: { event_code: d.event_code, dispatch_id: d.id },
-    sample: {
-      comm_dispatch_id: d.id,
-      event_code: d.event_code,
-      user_id: d.user_id,
-      body: renderTemplate(d.body_md, d.payload),
-      subject: d.subject,
-      vars: d.payload,
-    },
+    sample: { comm_dispatch_id: d.id, event_code: d.event_code, user_id: d.user_id, body: renderTemplate(d.body_md, d.payload), subject: d.subject, vars: d.payload },
   });
   if (error) return { status: "failed", error: error.message, retryable: true };
   return { status: "sent", providerMessageId: d.id };
@@ -100,16 +92,13 @@ export async function sendImpulsionito(d: DispatchInput): Promise<AdapterResult>
 
 export async function sendEmail(d: DispatchInput): Promise<AdapterResult> {
   if (!d.destination) return { status: "skipped", reason: "no_destination" };
-  const cfg = await loadChannelConfig(d.company_id, "email");
-  if (!cfg?.enabled) return { status: "skipped", reason: "email_not_configured_for_company" };
-  const body = renderTemplate(d.body_html ?? d.body_md, d.payload);
-  const { error } = await db.from("message_outbox").insert({
+  const { error } = await supabaseAdmin.from("message_outbox").insert({
     company_id: d.company_id,
     event_code: d.event_code,
     channel: "email",
     recipient_email: d.destination,
     subject: renderTemplate(d.subject, d.payload) || d.event_code,
-    body,
+    body: renderTemplate(d.body_html ?? d.body_md, d.payload),
     payload: { comm_dispatch_id: d.id, purpose: d.payload.purpose ?? "transactional", ...d.payload },
     status: "queued",
     scheduled_at: new Date().toISOString(),
@@ -123,16 +112,17 @@ export async function sendEmail(d: DispatchInput): Promise<AdapterResult> {
 
 export async function sendWhatsApp(d: DispatchInput): Promise<AdapterResult> {
   if (!d.destination) return { status: "skipped", reason: "no_destination_phone" };
-  const cfg = await loadChannelConfig(d.company_id, "whatsapp");
-  if (!cfg?.enabled) return { status: "skipped", reason: "whatsapp_not_configured_for_company" };
-  const body = renderTemplate(d.body_md, d.payload);
-  const { error } = await db.from("message_outbox").insert({
+  const endpoint = await loadActiveEndpoint(d.company_id, "whatsapp");
+  if (!endpoint) return { status: "skipped", reason: "whatsapp_endpoint_not_active" };
+  if (!endpoint.provider || endpoint.provider === "unbound") return { status: "skipped", reason: "whatsapp_provider_unbound" };
+
+  const { error } = await supabaseAdmin.from("message_outbox").insert({
     company_id: d.company_id,
     event_code: d.event_code,
     channel: "whatsapp",
     recipient_phone: d.destination,
-    body,
-    payload: { comm_dispatch_id: d.id, provider: cfg.provider, ...d.payload },
+    body: renderTemplate(d.body_md, d.payload),
+    payload: { comm_dispatch_id: d.id, provider: endpoint.provider, endpoint_address: endpoint.address, ...d.payload },
     status: "queued",
     scheduled_at: new Date().toISOString(),
     reference_type: "core_comm_dispatch",
@@ -140,31 +130,37 @@ export async function sendWhatsApp(d: DispatchInput): Promise<AdapterResult> {
     idempotency_key: `core-comm-whatsapp-${d.id}`,
   });
   if (error) return { status: "failed", error: error.message, retryable: true };
-  return { status: "sent", providerMessageId: d.id, meta: { via: "message_outbox", outbox_state: "queued", provider: cfg.provider } };
+  return { status: "sent", providerMessageId: d.id, meta: { via: "message_outbox", outbox_state: "queued", provider: endpoint.provider } };
 }
 
 export async function sendPush(_d: DispatchInput): Promise<AdapterResult> {
   return { status: "skipped", reason: "push_not_configured" };
 }
 
+async function resolveN8nWorkflow(d: DispatchInput) {
+  const requested = typeof d.payload.n8n_workflow_slug === "string" ? d.payload.n8n_workflow_slug : d.event_code;
+  const { data, error } = await supabaseAdmin
+    .from("n8n_workflow_registry")
+    .select("workflow_slug,n8n_workflow_id,status,config")
+    .eq("workflow_slug", requested)
+    .eq("status", "ACTIVE")
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as { workflow_slug: string; n8n_workflow_id: string | null; status: string; config: Record<string, unknown> | null };
+}
+
 export async function sendN8n(d: DispatchInput): Promise<AdapterResult> {
-  const cfg = await loadChannelConfig(d.company_id, "n8n");
-  if (!cfg?.enabled || !cfg.n8n_webhook_url) return { status: "skipped", reason: "n8n_not_configured_for_company" };
-  const secret = cfg.n8n_secret_ref ? process.env[cfg.n8n_secret_ref] ?? "" : "";
-  const body = JSON.stringify({
-    dispatch_id: d.id,
-    event_code: d.event_code,
-    company_id: d.company_id,
-    user_id: d.user_id,
-    destination: d.destination,
-    subject: d.subject,
-    body_md: d.body_md,
-    payload: d.payload,
-    ts: new Date().toISOString(),
-  });
+  const workflow = await resolveN8nWorkflow(d);
+  if (!workflow) return { status: "skipped", reason: "n8n_workflow_not_active" };
+  const webhookUrl = typeof workflow.config?.webhook_url === "string" ? workflow.config.webhook_url : null;
+  if (!webhookUrl) return { status: "skipped", reason: "n8n_active_without_published_webhook", meta: { workflow_id: workflow.n8n_workflow_id } };
+
+  const secretRef = typeof workflow.config?.secret_ref === "string" ? workflow.config.secret_ref : null;
+  const secret = secretRef ? process.env[secretRef] ?? "" : "";
+  const body = JSON.stringify({ dispatch_id: d.id, event_code: d.event_code, company_id: d.company_id, user_id: d.user_id, destination: d.destination, subject: d.subject, body_md: d.body_md, payload: d.payload, ts: new Date().toISOString() });
   const signature = secret ? createHmac("sha256", secret).update(body).digest("hex") : "";
   try {
-    const resp = await fetch(cfg.n8n_webhook_url, {
+    const resp = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Impulsionando-Signature": signature, "X-Impulsionando-Event": d.event_code },
       body,
@@ -174,7 +170,7 @@ export async function sendN8n(d: DispatchInput): Promise<AdapterResult> {
       return { status: "failed", error: `n8n_http_${resp.status}: ${txt.slice(0, 500)}`, retryable: resp.status >= 500 };
     }
     const respJson = (await resp.json().catch(() => ({}))) as { execution_id?: string };
-    return { status: "sent", providerMessageId: respJson?.execution_id ?? null, meta: { http: resp.status } };
+    return { status: "sent", providerMessageId: respJson.execution_id ?? workflow.n8n_workflow_id, meta: { http: resp.status, workflow_slug: workflow.workflow_slug } };
   } catch (err) {
     return { status: "failed", error: `n8n_fetch_error: ${(err as Error).message}`, retryable: true };
   }
