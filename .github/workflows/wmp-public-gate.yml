@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           base='https://wmp.impulsionando.com.br'
-          paths=( '/' '/orcamento' '/pacotes' '/cases' '/sobre' '/faq' '/parceiro' '/parceiro/cadastro' '/onde-estou' )
+          paths=( '/' '/djs' '/empresas' '/orcamento' '/pacotes' '/cases' '/sobre' '/faq' '/parceiro' '/parceiro/cadastro' '/onde-estou' )
           for path in "${paths[@]}"; do
             code=$(curl -sS -L --max-time 20 -o /tmp/wmp-body -w '%{http_code}' "$base$path")
             echo "$path -> HTTP $code"
@@ -28,28 +28,46 @@ jobs:
             fi
           done
 
-      - name: Reject stale or unvalidated WMP content
+      - name: Validate current WMP journey markers
         shell: bash
         run: |
           set -euo pipefail
           base='https://wmp.impulsionando.com.br'
           home=$(mktemp)
+          djs=$(mktemp)
+          empresas=$(mktemp)
+          cases=$(mktemp)
           curl -sS -L --max-time 20 "$base/" -o "$home"
+          curl -sS -L --max-time 20 "$base/djs" -o "$djs"
+          curl -sS -L --max-time 20 "$base/empresas" -o "$empresas"
+          curl -sS -L --max-time 20 "$base/cases" -o "$cases"
 
-          required=(
-            'O Milito acompanha a jornada comercial e operacional'
-            'Solicitar proposta'
-            'Onde estou'
+          declare -A checks=(
+            ["$home"]='O Milito acompanha a jornada comercial e operacional|Solicitar proposta|Onde estou'
+            ["$djs"]='DJ|Milito'
+            ["$empresas"]='Hotéis|Empresas|datas'
+            ["$cases"]='Portfólio|WMP'
           )
-          for marker in "${required[@]}"; do
-            if ! grep -Fqi "$marker" "$home"; then
-              echo "::error::WMP production is missing current marker: $marker"
-              exit 1
-            fi
+
+          for file in "${!checks[@]}"; do
+            IFS='|' read -r -a markers <<< "${checks[$file]}"
+            for marker in "${markers[@]}"; do
+              if ! grep -Fqi "$marker" "$file"; then
+                echo "::error::WMP production is missing current marker: $marker"
+                exit 1
+              fi
+            done
           done
 
+      - name: Reject stale or unvalidated WMP content
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://wmp.impulsionando.com.br'
+          pages=( '/' '/cases' '/pacotes' )
           forbidden=(
             '+850'
+            '850+ eventos'
             'R$ 2.900'
             'R$2.900'
             'R$ 7.400'
@@ -60,12 +78,20 @@ jobs:
             'Festival Sertanejo de Verão'
             'Convenção Corporativa Tech'
             'Fernanda Ribeiro'
+            'Rafael e Camila Torres'
+            'Marcelo Andrade'
+            'festival com 8.000 pessoas'
           )
-          for marker in "${forbidden[@]}"; do
-            if grep -Fqi "$marker" "$home"; then
-              echo "::error::WMP production still exposes stale/unvalidated content: $marker"
-              exit 1
-            fi
+
+          for path in "${pages[@]}"; do
+            body=$(mktemp)
+            curl -sS -L --max-time 20 "$base$path" -o "$body"
+            for marker in "${forbidden[@]}"; do
+              if grep -Fqi "$marker" "$body"; then
+                echo "::error::WMP production $path still exposes stale/unvalidated content: $marker"
+                exit 1
+              fi
+            done
           done
 
       - name: Validate Milito public integration
@@ -73,9 +99,11 @@ jobs:
         run: |
           set -euo pipefail
           base='https://wmp.impulsionando.com.br'
-          home=$(mktemp)
-          curl -sS -L --max-time 20 "$base/" -o "$home"
-          if ! grep -Fqi 'Milito' "$home"; then
-            echo '::error::Milito is not visible on WMP public experience'
-            exit 1
-          fi
+          for path in '/' '/djs' '/empresas' '/orcamento'; do
+            body=$(mktemp)
+            curl -sS -L --max-time 20 "$base$path" -o "$body"
+            if ! grep -Fqi 'Milito' "$body"; then
+              echo "::error::Milito is not visible on WMP public experience: $path"
+              exit 1
+            fi
+          done
