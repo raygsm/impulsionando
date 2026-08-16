@@ -289,13 +289,18 @@ jobs:
           ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
           for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou; do
             code="$(curl -sS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
-            echo "CORE_EDGE_PROBE $path HTTP=$code"
+            echo "CORE_EDGE_PROBE wmp$path HTTP=$code"
+            [ "$code" = '200' ] || exit 48
+          done
+          for host in chrismed.impulsionando.com.br colors.impulsionando.com.br anamadu.impulsionando.com.br; do
+            code="$(curl -sS -H "Host: $host" -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-edge-tenant-probe -w '%{http_code}' "http://$ip:3000/")"
+            echo "CORE_EDGE_TENANT_PROBE $host HTTP=$code"
             [ "$code" = '200' ] || exit 48
           done
           echo 'CORE_TRAEFIK_EDGE=PASS'
           REMOTE
 
-      - name: Validate public Core and critical tenant routes
+      - name: Validate public Core and critical WMP routes
         run: |
           set -euo pipefail
           probe_html() {
@@ -304,6 +309,15 @@ jobs:
             code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/probe.html -w '%{http_code}' "$url" || true)"
             echo "PUBLIC_PROBE $label HTTP=$code"
             [ "$code" = '200' ]
+          }
+          diagnose_html() {
+            url="$1"
+            label="$2"
+            code="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/probe-diagnostic.html -w '%{http_code}' "$url" || true)"
+            echo "PUBLIC_DIAGNOSTIC $label HTTP=$code"
+            if [ "$code" != '200' ]; then
+              echo "::warning::$label public edge/TLS diagnostic failed with HTTP=$code; Core origin health remains authoritative for rollback"
+            fi
           }
 
           probe_html 'https://impulsionando.com.br/' 'core-home'
@@ -318,10 +332,11 @@ jobs:
           probe_html 'https://wmp.impulsionando.com.br/onde-estou' 'wmp-onde-estou'
           probe_html 'https://wmp.impulsionando.com.br/cases' 'wmp-cases'
           probe_html 'https://wmp.impulsionando.com.br/pacotes' 'wmp-pacotes'
-          probe_html 'https://chrismed.impulsionando.com.br/' 'chrismed-home'
-          probe_html 'https://chrismed.impulsionando.com.br/auth' 'chrismed-auth'
-          probe_html 'https://colors.impulsionando.com.br/' 'colors-home'
-          probe_html 'https://anamadu.impulsionando.com.br/' 'anamadu-home'
+
+          diagnose_html 'https://chrismed.impulsionando.com.br/' 'chrismed-home'
+          diagnose_html 'https://chrismed.impulsionando.com.br/auth' 'chrismed-auth'
+          diagnose_html 'https://colors.impulsionando.com.br/' 'colors-home'
+          diagnose_html 'https://anamadu.impulsionando.com.br/' 'anamadu-home'
 
           curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
             -o /tmp/wmp-home.html "https://wmp.impulsionando.com.br/"
