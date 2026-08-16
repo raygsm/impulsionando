@@ -19,21 +19,20 @@ jobs:
     environment: production
     env:
       DOMAIN: colorssaude.impulsionando.com.br
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
-      - name: Resolve validated origin and current Cloudflare state
+      - name: Resolve validated VPS origin and current Cloudflare state
         run: |
           set -euo pipefail
-          for value in DEPLOY_HOST VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
+          for value in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
             test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }
           done
           CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          ORIGIN_IP="$(getent ahostsv4 "$DEPLOY_HOST" | awk 'NR==1{print $1}')"
+          ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           test -n "$ORIGIN_IP"
           printf 'CF_ZONE_ID=%s\nORIGIN_IP=%s\n' "$CF_ZONE_ID" "$ORIGIN_IP" >> "$GITHUB_ENV"
           curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
@@ -41,7 +40,7 @@ jobs:
           jq -e '.success == true' /tmp/colors-dns-before.json >/dev/null
           count="$(jq '[.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME")] | length' /tmp/colors-dns-before.json)"
           echo "COLORS_ROUTING_RECORD_COUNT=$count"
-          echo "COLORS_ORIGIN_IP=$ORIGIN_IP"
+          echo 'COLORS_VALIDATED_ORIGIN=VPS'
 
       - name: Configure SSH with retries
         run: |
@@ -134,7 +133,7 @@ jobs:
 
           ready=0
           for attempt in $(seq 1 60); do
-            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D /tmp/colors-ready-headers -o /tmp/colors-public-ready -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
+            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public-ready -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
             if [ "$code" = '200' ]; then
               ready=1
               echo "COLORS_PUBLIC_DNS_READY=PASS attempt=$attempt"
@@ -182,4 +181,4 @@ jobs:
           path: /tmp/colors-dns-before.json
           retention-days: 30
 
-# Origin TLS and public route health are hard gates; cache purge is best-effort.
+# Origin TLS and public route health are hard gates; canonical DNS targets the validated VPS origin only.
