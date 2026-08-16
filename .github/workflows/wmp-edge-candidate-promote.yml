@@ -1,0 +1,104 @@
+name: WMP edge candidate promote
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-edge-candidate-promote.yml
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Build candidate edge image, promote and prove WMP routes
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          CANDIDATE='/var/www/impulsionando-core/releases/d2f1c53d13649f45d0355a69b06bf8b562d766e3'
+          COMPOSE='/opt/impulsionando/deploy/hostinger/docker-compose.yml'
+          SECURITY_ENV='/etc/impulsionando-security.env'
+          CORE_ENV='/etc/impulsionando-core.env'
+          test -f "$CANDIDATE/.output/server/index.mjs"
+          test -f "$CANDIDATE/scripts/start-core-runtime.mjs"
+          test -f "$COMPOSE"
+
+          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core)"
+          echo "OLD_EDGE_IMAGE_ID=$old_image"
+          sudo docker tag "$old_image" impulsionando-core:wmp-pre-edge-fix
+
+          # Keep the Core env synchronized with the VPS-only shared HMAC without exposing the value.
+          if sudo test -f "$SECURITY_ENV" && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' "$SECURITY_ENV"; then
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+            tmp="$(mktemp)"
+            sudo awk '!/^IMPULSIONANDO_WEBHOOK_SECRET=/' "$CORE_ENV" > "$tmp"
+            printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "$secret" >> "$tmp"
+            sudo install -o root -g root -m 0600 "$tmp" "$CORE_ENV"
+            rm -f "$tmp"
+            unset secret
+          fi
+          sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' "$CORE_ENV"
+
+          cat > /tmp/Dockerfile.impulsionando-runtime <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+
+          sudo docker build -f /tmp/Dockerfile.impulsionando-runtime -t impulsionando-core:latest "$CANDIDATE"
+          cd /opt/impulsionando/deploy/hostinger
+
+          rollback(){
+            echo 'EDGE_ROLLBACK=START'
+            sudo docker tag impulsionando-core:wmp-pre-edge-fix impulsionando-core:latest || true
+            sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core || true
+            echo 'EDGE_ROLLBACK=DONE'
+          }
+          trap 'rc=$?; if [ $rc -ne 0 ]; then rollback; fi; exit $rc' EXIT
+
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+          for i in $(seq 1 45); do
+            if sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || { sudo docker logs --tail 100 impulsionando-core; exit 31; }
+            sleep 2
+          done
+
+          probe(){
+            url="$1"; expected="$2"
+            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -o /tmp/edge-probe -w '%{http_code}' --max-time 30 "$url")"
+            echo "EDGE_PROBE $url HTTP=$code"
+            [ "$code" = "$expected" ]
+          }
+
+          probe 'https://wmp.impulsionando.com.br/' 200
+          probe 'https://wmp.impulsionando.com.br/auth' 200
+          probe 'https://wmp.impulsionando.com.br/dashboard' 200
+          probe 'https://wmp.impulsionando.com.br/seguranca/senha' 200
+          probe 'https://wmp.impulsionando.com.br/djs' 200
+          probe 'https://wmp.impulsionando.com.br/empresas' 200
+          probe 'https://wmp.impulsionando.com.br/orcamento' 200
+          probe 'https://wmp.impulsionando.com.br/parceiro' 200
+
+          # Ensure the public edge really moved away from the stale image.
+          new_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core)"
+          echo "NEW_EDGE_IMAGE_ID=$new_image"
+          [ "$new_image" != "$old_image" ]
+          echo 'WMP_EDGE_PROMOTION=PASS'
+          trap - EXIT
+          REMOTE
