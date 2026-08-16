@@ -1,0 +1,42 @@
+name: WMP HMAC fingerprint diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-hmac-fingerprint-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Compare secret fingerprints without exposing values
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          fingerprint() { printf '%s' "$1" | sha256sum | awk '{print $1}'; }
+          sec="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-security.env | head -n1)"
+          core="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-core.env | head -n1)"
+          docker_secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          printf 'SECURITY_PRESENT=%s FP=%s\n' "$([ -n "$sec" ] && echo yes || echo no)" "$(fingerprint "$sec")"
+          printf 'CORE_ENV_PRESENT=%s FP=%s\n' "$([ -n "$core" ] && echo yes || echo no)" "$(fingerprint "$core")"
+          printf 'DOCKER_ENV_PRESENT=%s FP=%s\n' "$([ -n "$docker_secret" ] && echo yes || echo no)" "$(fingerprint "$docker_secret")"
+          [ -n "$sec" ] && [ -n "$core" ] && [ -n "$docker_secret" ] || exit 70
+          [ "$(fingerprint "$sec")" = "$(fingerprint "$core")" ] || echo 'SECURITY_CORE_MISMATCH=1'
+          [ "$(fingerprint "$sec")" = "$(fingerprint "$docker_secret")" ] || echo 'SECURITY_DOCKER_MISMATCH=1'
+          REMOTE
