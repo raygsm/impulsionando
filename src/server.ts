@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleN8nHmacVerifier } from "./lib/n8n-hmac-verifier.server";
 import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
 import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toColorsInternalPathname, toWmpInternalPathname } from "./lib/subdomain";
 
@@ -97,6 +98,10 @@ export default {
       });
       if (canonicalTenantUrl) {
         return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
+      }
+
+      if (url.pathname === "/api/public/hooks/n8n-verify") {
+        return applySecurityHeaders(await handleN8nHmacVerifier(request));
       }
 
       const handler = await getServerEntry();
