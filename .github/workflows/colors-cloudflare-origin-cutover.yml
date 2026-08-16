@@ -75,6 +75,11 @@ jobs:
             echo "COLORS_EDGE_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 32
           done
+          for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
+            code="$(curl -sS -H 'Host: colors.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-edge-api-probe -w '%{http_code}' "http://$ip:3000$path")"
+            echo "COLORS_EDGE_API_PROBE $path HTTP=$code"
+            [ "$code" = '200' ] || exit 33
+          done
           echo 'COLORS_TRAEFIK_ORIGIN_READY=PASS'
           REMOTE
 
@@ -96,7 +101,15 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          jq -nc --arg a "https://$DOMAIN/" --arg b "https://$DOMAIN/super-green-black" --arg c "https://$DOMAIN/agenda" --arg d "https://$DOMAIN/eventos" '{files:[$a,$b,$c,$d]}' >/tmp/colors-purge.json
+          jq -nc \
+            --arg a "https://$DOMAIN/" \
+            --arg b "https://$DOMAIN/super-green-black" \
+            --arg c "https://$DOMAIN/agenda" \
+            --arg d "https://$DOMAIN/eventos" \
+            --arg e "https://$DOMAIN/api/public/webhooks/maisfy-colors" \
+            --arg f "https://$DOMAIN/api/public/webhooks/monetizze-colors" \
+            --arg g "https://$DOMAIN/api/public/webhooks/perfectpay-colors" \
+            '{files:[$a,$b,$c,$d,$e,$f,$g]}' >/tmp/colors-purge.json
           if ! curl --fail --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
             --data @/tmp/colors-purge.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -o /tmp/colors-purge-result.json; then
             echo '::warning title=Cloudflare cache purge unavailable::DNS token lacks cache-purge permission; continuing because DNS cutover and public health are independently validated.'
@@ -118,6 +131,16 @@ jobs:
               sleep 5
             done
             echo "PUBLIC_COLORS $path HTTP=$code"
+            [ "$code" = '200' ] || failed=1
+          done
+          for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
+            code=000
+            for attempt in $(seq 1 18); do
+              code="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o /tmp/colors-public-api -w '%{http_code}' --max-time 20 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
+              [ "$code" = '200' ] && break
+              sleep 5
+            done
+            echo "PUBLIC_COLORS_API $path HTTP=$code"
             [ "$code" = '200' ] || failed=1
           done
           if [ "$failed" = '0' ]; then
