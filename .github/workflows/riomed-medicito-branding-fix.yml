@@ -1,0 +1,222 @@
+name: RioMed Medicito branding fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/riomed-medicito-branding-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: riomed-medicito-branding-fix
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Publish RioMed-specific Medicito and official branding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('src/routes/__root.tsx')
+          text = root.read_text()
+          imp = 'import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";'
+          med = 'import { MedicitoConcierge } from "@/components/riomed/MedicitoConcierge";'
+          if med not in text:
+              text = text.replace(imp, imp + '\n' + med)
+          marker = '  const isChrismedRoute =\n'
+          if 'const isRiomedRoute =' not in text:
+              text = text.replace(marker, '  const isRiomedRoute =\n    pathname.startsWith("/riomed") ||\n    (typeof window !== "undefined" && window.location.hostname.toLowerCase().startsWith("riomed."));\n' + marker)
+          text = text.replace(
+              '{!isChrismedRoute && <ImpulsionitoConcierge />}',
+              '{!isChrismedRoute && !isRiomedRoute && <ImpulsionitoConcierge />}\n      {isRiomedRoute && <MedicitoConcierge />}',
+          )
+          root.write_text(text)
+
+          route = Path('src/routes/riomed.tsx')
+          text = route.read_text()
+          old = '''            {s?.logo_url ? (\n              <img src={s.logo_url} alt={s?.brand_name ?? "Rio Med"} className="h-10" />\n            ) : (\n              <span className="text-2xl font-extrabold tracking-tight text-[color:var(--riomed-primary)]">\n                {s?.brand_name ?? "Rio Med"}\n              </span>\n            )}'''
+          new = '''            <img\n              src="/__l5e/assets-v1/4066b94d-f9a6-431a-81f4-82a420c64bc3/riomed-logo.png"\n              alt="RIO MED — Equipos & Insumos Médicos"\n              className="h-11 w-auto object-contain"\n            />'''
+          if old in text:
+              text = text.replace(old, new)
+          route.write_text(text)
+
+          component = Path('src/components/riomed/MedicitoConcierge.tsx')
+          component.parent.mkdir(parents=True, exist_ok=True)
+          component.write_text(r'''import { FormEvent, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Bot, Loader2, Maximize2, Minimize2, Send, Sparkles, X } from "lucide-react";
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+function sessionId() {
+  if (typeof window === "undefined") return "riomed:web:server";
+  const key = "riomed-medicito-session";
+  const current = window.sessionStorage.getItem(key);
+  if (current?.startsWith("riomed:")) return current;
+  const next = `riomed:web:${crypto.randomUUID()}`;
+  window.sessionStorage.setItem(key, next);
+  return next;
+}
+
+export function MedicitoConcierge() {
+  const [open, setOpen] = useState(false);
+  const [minimized, setMinimized] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open || minimized) return;
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }));
+  }, [open, minimized, messages]);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const text = input.trim();
+    if (!text || sending) return;
+    setInput("");
+    setSending(true);
+    setError(null);
+    setMessages((current) => [...current, { role: "user", content: text }, { role: "assistant", content: "" }]);
+    try {
+      const response = await fetch("/api/riomed/medicito/chat", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-riomed-session": sessionId(),
+        },
+        body: JSON.stringify({ text, pathname: window.location.pathname }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Não foi possível falar com o Medicito agora.");
+      }
+      if (!response.body) throw new Error("O canal do Medicito não retornou conteúdo.");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        accumulated += decoder.decode(value, { stream: true });
+        setMessages((current) => {
+          const next = [...current];
+          next[next.length - 1] = { role: "assistant", content: accumulated };
+          return next;
+        });
+      }
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "Falha temporária no atendimento.";
+      setError(message);
+      setMessages((current) => {
+        const next = [...current];
+        if (next.at(-1)?.role === "assistant" && !next.at(-1)?.content) next.pop();
+        return next;
+      });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Abrir Medicito, seu concierge médico"
+        className="fixed bottom-5 left-5 z-[70] flex items-center gap-3 rounded-full border border-cyan-200 bg-white px-3 py-2.5 shadow-2xl transition hover:-translate-y-0.5 hover:shadow-cyan-900/20"
+      >
+        <span className="grid h-11 w-11 place-items-center rounded-full bg-[#0f5694] text-white shadow-inner"><Bot className="h-6 w-6" /></span>
+        <span className="hidden pr-2 text-left sm:block">
+          <span className="block text-sm font-extrabold text-[#0f5694]">Medicito</span>
+          <span className="block text-[11px] font-medium text-slate-500">Seu Concierge Médico</span>
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <section className={`fixed bottom-5 left-5 z-[70] w-[calc(100vw-2.5rem)] max-w-[390px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ${minimized ? "max-w-[300px]" : ""}`}>
+      <header className="flex items-center gap-3 bg-gradient-to-r from-[#0f5694] to-[#0c7fbd] px-4 py-3 text-white">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 ring-1 ring-white/20"><Bot className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-100"><Sparkles className="h-3.5 w-3.5" /> Inteligência RioMed</div>
+          <div className="truncate text-sm font-extrabold">Medicito — Seu Concierge Médico</div>
+        </div>
+        <button type="button" onClick={() => setMinimized((v) => !v)} className="rounded-lg p-1.5 hover:bg-white/10" aria-label={minimized ? "Expandir Medicito" : "Minimizar Medicito"}>
+          {minimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1.5 hover:bg-white/10" aria-label="Fechar Medicito"><X className="h-4 w-4" /></button>
+      </header>
+
+      {!minimized && (
+        <>
+          <div className="h-[330px] space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">
+            {messages.length === 0 && (
+              <div className="rounded-xl border border-cyan-100 bg-white p-4 text-sm text-slate-700 shadow-sm">
+                <strong className="text-[#0f5694]">Olá, eu sou o Medicito.</strong>
+                <p className="mt-1.5 leading-relaxed">Posso ajudar com equipamentos, peças, cotação, locação, manutenção, suporte e atendimento comercial da RioMed.</p>
+                <Link to="/riomed/medicito" className="mt-3 inline-flex font-bold text-[#0c7fbd] hover:underline">Abrir atendimento completo e enviar foto →</Link>
+              </div>
+            )}
+            {messages.map((message, index) => (
+              <div key={`${message.role}-${index}`} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[86%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${message.role === "user" ? "bg-[#0f5694] text-white" : "border bg-white text-slate-800"}`}>
+                  {message.content || <span className="inline-flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Pensando…</span>}
+                </div>
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+
+          <form onSubmit={submit} className="border-t bg-white p-3">
+            {error && <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>}
+            <div className="flex gap-2">
+              <input
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                maxLength={2000}
+                placeholder="Como posso ajudar?"
+                className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#0c7fbd] focus:ring-2 focus:ring-cyan-100"
+                disabled={sending}
+              />
+              <button type="submit" disabled={!input.trim() || sending} className="grid w-11 place-items-center rounded-xl bg-[#0f5694] text-white disabled:opacity-50" aria-label="Enviar ao Medicito">
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </button>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-slate-500">
+              <span>Não realiza diagnóstico médico.</span>
+              <Link to="/riomed/medicito" className="font-bold text-[#0c7fbd] hover:underline">Atendimento completo</Link>
+            </div>
+          </form>
+        </>
+      )}
+    </section>
+  );
+}
+''')
+          PY
+
+          git config user.name "Impulsionando Automation"
+          git config user.email "automation@impulsionando.com.br"
+          git add src/routes/__root.tsx src/routes/riomed.tsx src/components/riomed/MedicitoConcierge.tsx
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git commit -m "fix(riomed): publish Medicito concierge and official branding"
+          git push origin HEAD:main
