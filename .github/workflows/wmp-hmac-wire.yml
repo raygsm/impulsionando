@@ -1,0 +1,118 @@
+name: WMP HMAC Wiring
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wmp-hmac-wire.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Persist one HMAC secret for Core and n8n without exposing it
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          SECURITY_ENV=/etc/impulsionando-security.env
+          CORE_ENV=/etc/impulsionando-core.env
+          CORE_DROPIN=/etc/systemd/system/impulsionando-core.service.d/20-shared-hmac.conf
+          N8N_DIR=/docker/n8n-umlg
+          N8N_OVERRIDE="$N8N_DIR/docker-compose.override.yml"
+          N8N_CONTAINER=n8n-umlg-n8n-1
+
+          tmp="$(mktemp)"
+          trap 'rm -f "$tmp"' EXIT
+
+          existing=''
+          if sudo test -s "$SECURITY_ENV"; then
+            existing="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n 1)"
+          fi
+          if [ -z "$existing" ] && sudo test -s "$CORE_ENV"; then
+            existing="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$CORE_ENV" | head -n 1)"
+          fi
+          if [ -z "$existing" ]; then
+            existing="$(openssl rand -hex 32)"
+            echo 'HMAC_SOURCE=generated_on_vps'
+          else
+            echo 'HMAC_SOURCE=preserved_existing_server_secret'
+          fi
+          test "${#existing}" -ge 32
+
+          printf 'IMPULSIONANDO_WEBHOOK_SECRET=%s\n' "$existing" > "$tmp"
+          chmod 0600 "$tmp"
+          sudo install -o root -g root -m 0600 "$tmp" "$SECURITY_ENV"
+
+          sudo install -d -m 0755 "$(dirname "$CORE_DROPIN")"
+          cat > /tmp/20-shared-hmac.conf <<'EOF'
+          [Service]
+          EnvironmentFile=/etc/impulsionando-security.env
+          EOF
+          sudo install -o root -g root -m 0644 /tmp/20-shared-hmac.conf "$CORE_DROPIN"
+          rm -f /tmp/20-shared-hmac.conf
+
+          cd "$N8N_DIR"
+          if [ -e "$N8N_OVERRIDE" ] && ! sudo grep -q 'impulsionando-security.env' "$N8N_OVERRIDE"; then
+            echo 'Existing docker-compose.override.yml is not managed by WMP security; refusing to overwrite.'
+            exit 41
+          fi
+          if [ ! -e "$N8N_OVERRIDE" ]; then
+            cat > /tmp/docker-compose.override.yml <<'YAML'
+          services:
+            n8n:
+              env_file:
+                - /etc/impulsionando-security.env
+          YAML
+            sudo install -o root -g root -m 0644 /tmp/docker-compose.override.yml "$N8N_OVERRIDE"
+            rm -f /tmp/docker-compose.override.yml
+          fi
+
+          sudo systemctl daemon-reload
+          sudo systemctl restart impulsionando-core
+          sudo docker compose up -d n8n >/dev/null
+
+          core_ok=false
+          core_pid="$(systemctl show -p MainPID --value impulsionando-core)"
+          if [ -n "$core_pid" ] && [ "$core_pid" != '0' ]; then
+            if sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.'"; then core_ok=true; fi
+          fi
+          n8n_ok="$(sudo docker exec "$N8N_CONTAINER" sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
+          echo "CORE_HMAC_PRESENT=$core_ok"
+          echo "N8N_HMAC_PRESENT=$n8n_ok"
+          [ "$core_ok" = true ] || exit 42
+          [ "$n8n_ok" = true ] || exit 43
+
+          core_hash="$(sudo sh -c "tr '\000' '\n' < /proc/$core_pid/environ | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1 | sha256sum | cut -d' ' -f1")"
+          n8n_hash="$(sudo docker exec "$N8N_CONTAINER" sh -lc 'printf %s "$IMPULSIONANDO_WEBHOOK_SECRET" | sha256sum | cut -d" " -f1')"
+          if [ "$core_hash" != "$n8n_hash" ]; then
+            echo 'CORE_N8N_HMAC_MATCH=false'
+            exit 44
+          fi
+          echo 'CORE_N8N_HMAC_MATCH=true'
+
+          for i in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 5 http://127.0.0.1:3000/ >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 30 ] || exit 45
+            sleep 1
+          done
+          for i in $(seq 1 30); do
+            if sudo docker exec "$N8N_CONTAINER" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 30 ] || exit 46
+            sleep 1
+          done
+          echo 'WMP_SHARED_HMAC_WIRING=PASS'
+          REMOTE
