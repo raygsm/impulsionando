@@ -1,0 +1,43 @@
+name: Ana Madu Public Edge Diagnose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/anamadu-edge-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_IP: ${{ secrets.VPS_HOST }}
+    steps:
+      - name: Diagnose Ana Madu public edge
+        run: |
+          set -euo pipefail
+          h='anamadu.impulsionando.com.br'
+          dns_raw="$(dig +short "$h" A || true)"
+          cname_raw="$(dig +short "$h" CNAME || true)"
+          public_code="$(curl -skL --max-time 20 -o /dev/null -w '%{http_code}' "https://$h" || true)"
+          public_server="$(curl -skI --max-time 15 "https://$h" 2>/dev/null | awk -F': ' 'tolower($1)=="server"{print $2}' | tr -d '\r' | head -n1 || true)"
+          origin_code='SKIPPED'
+          if [ -n "${EXPECTED_IP:-}" ]; then
+            origin_code="$(curl -sk --connect-timeout 5 --max-time 15 --resolve "$h:443:$EXPECTED_IP" -o /dev/null -w '%{http_code}' "https://$h" || true)"
+          fi
+          direct='no'
+          if [ -n "${EXPECTED_IP:-}" ] && printf '%s\n' "$dns_raw" | grep -Fxq "$EXPECTED_IP"; then direct='yes'; fi
+          echo "ANAMADU_DNS_A=${dns_raw:-NONE}"
+          echo "ANAMADU_CNAME=${cname_raw:-NONE}"
+          echo "ANAMADU_PUBLIC_HTTP=${public_code:-000}"
+          echo "ANAMADU_PUBLIC_SERVER=${public_server:-UNKNOWN}"
+          echo "ANAMADU_ORIGIN_HTTP=${origin_code:-000}"
+          echo "ANAMADU_DIRECT_TO_VPS=$direct"
+          if [ "${origin_code:-000}" = '200' ] && [ "${public_code:-000}" != '200' ]; then
+            echo '::error::PUBLIC_EDGE_MISMATCH origin=200 public!=200'
+            exit 42
+          fi
+          [ "${public_code:-000}" = '200' ]
