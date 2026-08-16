@@ -12,6 +12,7 @@ Environment=NITRO_HOST=127.0.0.1
 Environment=NITRO_PORT=3000
 EnvironmentFile=-/etc/impulsionando-core.env
 # The deployment workflow replaces this with the Node binary discovered on the host.
+# CHRISMED router persistence is enforced after Core deployments.
 ExecStart=/usr/bin/env node scripts/start-core-runtime.mjs
 Restart=always
 RestartSec=5
