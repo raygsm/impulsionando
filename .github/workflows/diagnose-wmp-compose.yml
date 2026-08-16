@@ -16,7 +16,7 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-      - name: Audit production HMAC wiring safely
+      - name: Audit production HMAC wiring and compose metadata safely
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -29,16 +29,18 @@ jobs:
           core=false
           if sudo test -s /etc/impulsionando-core.env && sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env; then core=true; fi
           echo "CORE_HMAC_PRESENT=$core"
-          if sudo docker container inspect n8n-umlg-n8n-1 >/dev/null 2>&1; then
-            n8n="$(sudo docker exec n8n-umlg-n8n-1 sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
+          C=n8n-umlg-n8n-1
+          if sudo docker container inspect "$C" >/dev/null 2>&1; then
+            n8n="$(sudo docker exec "$C" sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
             echo "N8N_HMAC_PRESENT=$n8n"
+            echo '== n8n compose metadata =='
+            sudo docker inspect "$C" --format 'project={{index .Config.Labels "com.docker.compose.project"}}'
+            sudo docker inspect "$C" --format 'service={{index .Config.Labels "com.docker.compose.service"}}'
+            sudo docker inspect "$C" --format 'working_dir={{index .Config.Labels "com.docker.compose.project.working_dir"}}'
+            sudo docker inspect "$C" --format 'config_files={{index .Config.Labels "com.docker.compose.project.config_files"}}'
+            echo '== n8n environment variable names only =='
+            sudo docker inspect "$C" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed 's/=.*//' | sort -u
           else
             echo 'N8N_HMAC_PRESENT=false'
-          fi
-          if sudo docker container inspect impulsionando-core >/dev/null 2>&1; then
-            core_container="$(sudo docker exec impulsionando-core sh -lc 'if [ -n "${IMPULSIONANDO_WEBHOOK_SECRET:-}" ]; then echo true; else echo false; fi')"
-            echo "CORE_CONTAINER_HMAC_PRESENT=$core_container"
-          else
-            echo 'CORE_CONTAINER_HMAC_PRESENT=not_applicable'
           fi
           REMOTE
