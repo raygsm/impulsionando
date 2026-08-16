@@ -1,0 +1,53 @@
+name: WMP n8n current webhook diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-n8n-current-webhook-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Inspect canonical workflows and registered webhooks
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          echo "N8N_VERSION=$(sudo docker exec "$C" n8n --version)"
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
+            echo "== $id =="
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id.json" >/dev/null
+            sudo docker exec -i -e WID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WID;
+          const raw=JSON.parse(fs.readFileSync('/tmp/'+id+'.json','utf8'));
+          const w=Array.isArray(raw)?raw[0]:raw;
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          const verifier=(w.nodes||[]).find(n=>n.name==='Verify signature in Core' || n.name==='Verify signature internally');
+          console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId,versionId:w.versionId,webhookId:hook?.webhookId,path:hook?.parameters?.path,httpMethod:hook?.parameters?.httpMethod,verifierUrl:verifier?.parameters?.url}));
+          NODE
+          done
+          echo '== CLI workflow commands =='
+          sudo docker exec "$C" n8n --help 2>/dev/null | grep -E 'workflow|publish|update' || true
+          echo '== Recent webhook/runtime logs =='
+          sudo docker logs --since 10m "$C" 2>&1 | grep -Ei 'wmp|webhook|activate|workflow|error' | tail -n 180 || true
+          REMOTE
