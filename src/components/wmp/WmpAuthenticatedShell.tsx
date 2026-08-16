@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { LogOut, Menu, X } from 'lucide-react'
+import { KeyRound, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/integrations/supabase/client'
@@ -41,7 +41,10 @@ export function WmpAuthenticatedShell({ children }: { children: React.ReactNode 
               <a key={item.label} href={item.to} className="rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white">{item.label}</a>
             ))}
           </nav>
-          <Button variant="ghost" size="sm" onClick={signOut} className="ml-auto hidden text-white hover:bg-white/10 hover:text-white xl:inline-flex">
+          <a href="/seguranca/senha" className="ml-auto hidden items-center rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white xl:inline-flex">
+            <KeyRound className="mr-2 h-4 w-4" /> Alterar senha
+          </a>
+          <Button variant="ghost" size="sm" onClick={signOut} className="hidden text-white hover:bg-white/10 hover:text-white xl:inline-flex">
             <LogOut className="mr-2 h-4 w-4" /> Sair
           </Button>
           <Button variant="ghost" size="icon" className="ml-auto text-white hover:bg-white/10 hover:text-white xl:hidden" onClick={() => setOpen((v) => !v)} aria-label="Abrir menu">
@@ -54,7 +57,10 @@ export function WmpAuthenticatedShell({ children }: { children: React.ReactNode 
               {NAV.map((item) => (
                 <a key={item.label} href={item.to} onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/85 hover:bg-white/10">{item.label}</a>
               ))}
-              <button type="button" onClick={signOut} className="mt-2 flex items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#f4cf87] hover:bg-white/10">
+              <a href="/seguranca/senha" onClick={() => setOpen(false)} className="mt-2 flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-white/85 hover:bg-white/10">
+                <KeyRound className="mr-2 h-4 w-4" /> Alterar senha
+              </a>
+              <button type="button" onClick={signOut} className="flex items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#f4cf87] hover:bg-white/10">
                 <LogOut className="mr-2 h-4 w-4" /> Sair
               </button>
             </nav>
