@@ -1,0 +1,94 @@
+name: WMP n8n canonical cutover
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-n8n-canonical-cutover.yml
+
+permissions:
+  contents: read
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Retire duplicate WMP webhooks and prove canonical workflows
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          SEC=/etc/impulsionando-security.env
+
+          echo '== deactivate legacy duplicate workflows =='
+          sudo docker exec "$C" n8n update:workflow --id=wmpDjBookingLifecycle01 --active=false || true
+          sudo docker exec "$C" n8n update:workflow --id=wmpPostEventRelationship01 --active=false || true
+
+          echo '== publish canonical workflows =='
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
+            sudo docker exec "$C" n8n publish:workflow --id="$id"
+          done
+
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 45); do
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || exit 61
+            sleep 2
+          done
+
+          echo '== verify legacy workflows inactive =='
+          for id in wmpDjBookingLifecycle01 wmpPostEventRelationship01; do
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-retired.json" >/dev/null
+            sudo docker exec -e WID="$id" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-retired.json','utf8')),w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId}));if(w.active)process.exit(1);"
+          done
+
+          echo '== verify canonical workflows active =='
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-canonical.json" >/dev/null
+            sudo docker exec -e WID="$id" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-canonical.json','utf8')),w=Array.isArray(r)?r[0]:r,h=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,path:h?.parameters?.path,webhookId:h?.webhookId}));if(!w.active||!w.activeVersionId||!h?.parameters?.path)process.exit(1);"
+          done
+
+          sign() {
+            payload="$1"
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
+            test -n "$secret"
+            printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}'
+          }
+
+          probe() {
+            id="$1"; path="$2"; event="$3"
+            url="https://n8n.impulsionando.com.br/webhook/$path"
+            ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            unsigned="{\"workflow_name\":\"$id\",\"event_code\":\"$event\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"unsigned-$id-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+            uc="$(curl -sS -o /tmp/u -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$unsigned")"
+            echo "$id unsigned=$uc body=$(head -c 180 /tmp/u)"
+            [ "$uc" = '401' ] || exit 62
+
+            signed="{\"workflow_name\":\"$id\",\"event_code\":\"$event\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"signed-$id-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+            sig="$(sign "$signed")"
+            sc="$(curl -sS -o /tmp/s -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$signed")"
+            echo "$id signed=$sc body=$(head -c 220 /tmp/s)"
+            [ "$sc" = '200' ] || exit 63
+            grep -q '"ok":true' /tmp/s || exit 64
+          }
+
+          probe wmpLeadIntake01 wmp-lead-intake wmp.lead.received
+          probe wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent
+          probe wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered
+          probe wmpPostEvent01 wmp-post-event-relationship wmp.event.completed
+
+          echo 'WMP_N8N_CANONICAL_CUTOVER=PASS'
+          REMOTE
