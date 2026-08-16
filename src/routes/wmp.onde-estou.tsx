@@ -4,7 +4,14 @@ import { createServerFn } from '@tanstack/react-start'
 import { WmpShell } from '@/components/wmp/WmpShell'
 import { listPublicWhereabouts } from '@/lib/wmp/whereabouts.server'
 
-const loadWhereabouts = createServerFn({ method: 'GET' }).handler(async () => listPublicWhereabouts())
+const loadWhereabouts = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    return await listPublicWhereabouts()
+  } catch (error) {
+    console.error('[WMP Onde Estou] public agenda unavailable', error)
+    return []
+  }
+})
 
 export const Route = createFileRoute('/wmp/onde-estou')({
   head: () => ({
