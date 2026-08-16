@@ -61,23 +61,21 @@ jobs:
           set -euo pipefail
           ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
-          container='impulsionando-core'
-          sudo docker inspect "$container" >/dev/null
+          domain='colorssaude.impulsionando.com.br'
           for attempt in $(seq 1 45); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container" 2>/dev/null || true)"
-            if [ -n "$ip" ] && curl -fsS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
-            [ "$attempt" -lt 45 ] || { sudo docker logs --tail 120 "$container"; exit 31; }
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 ColorsCutover/1.0' -o /tmp/colors-edge-ready -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
+            [ "$code" = '200' ] && break
+            [ "$attempt" -lt 45 ] || exit 31
             sleep 2
           done
-          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container")"
-          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta; do
-            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-edge-probe -w '%{http_code}' "http://$ip:3000$path")"
-            echo "COLORS_EDGE_PROBE $path HTTP=$code"
+          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos; do
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 ColorsCutover/1.0' -o /tmp/colors-edge-probe -w '%{http_code}' --max-time 20 "https://$domain$path")"
+            echo "COLORS_EDGE_TLS_PROBE $path HTTP=$code"
             [ "$code" = '200' ] || exit 32
           done
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code="$(curl -sS -H 'Host: colorssaude.impulsionando.com.br' -H 'Accept: application/json' -o /tmp/colors-edge-api-probe -w '%{http_code}' "http://$ip:3000$path")"
-            echo "COLORS_EDGE_API_PROBE $path HTTP=$code"
+            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: application/json' -H 'User-Agent: ColorsProviderHealth/1.0' -o /tmp/colors-edge-api-probe -w '%{http_code}' --max-time 20 "https://$domain$path")"
+            echo "COLORS_EDGE_TLS_API $path HTTP=$code"
             [ "$code" = '200' ] || exit 33
           done
           echo 'COLORS_TRAEFIK_ORIGIN_READY=PASS'
@@ -112,16 +110,15 @@ jobs:
             '{files:[$a,$b,$c,$d,$e,$f,$g]}' >/tmp/colors-purge.json
           if ! curl --fail --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
             --data @/tmp/colors-purge.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -o /tmp/colors-purge-result.json; then
-            echo '::warning title=Cloudflare cache purge unavailable::DNS token lacks cache-purge permission; continuing because DNS cutover and public health are independently validated.'
+            echo '::warning title=Cloudflare cache purge unavailable::DNS token lacks cache-purge permission; public verification remains the hard gate.'
             exit 0
           fi
-          if ! jq -e '.success == true' /tmp/colors-purge-result.json >/dev/null; then
-            echo '::warning title=Cloudflare cache purge rejected::Continuing to public verification.'
-          fi
+          jq -e '.success == true' /tmp/colors-purge-result.json >/dev/null || true
 
       - name: Public verification with DNS rollback on failure
         run: |
           set -euo pipefail
+          browser_ua='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 Safari/537.36'
           rollback_dns() {
             echo '::error::Public Colors validation failed; restoring previous Cloudflare state.'
             new_id="$(jq -r '.result.id // empty' /tmp/colors-dns-created.json)"
@@ -136,8 +133,8 @@ jobs:
           }
 
           ready=0
-          for attempt in $(seq 1 120); do
-            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public-ready -w '%{http_code}' --max-time 15 "https://$DOMAIN/?colors_dns_ready=${GITHUB_SHA}" || true)"
+          for attempt in $(seq 1 60); do
+            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D /tmp/colors-ready-headers -o /tmp/colors-public-ready -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
             if [ "$code" = '200' ]; then
               ready=1
               echo "COLORS_PUBLIC_DNS_READY=PASS attempt=$attempt"
@@ -152,15 +149,23 @@ jobs:
           fi
 
           failed=0
-          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta; do
-            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public -w '%{http_code}' --max-time 30 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
+          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos; do
+            code="$(curl -sS -L -A "$browser_ua" -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D /tmp/colors-public-headers -o /tmp/colors-public -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
             echo "PUBLIC_COLORS $path HTTP=$code"
-            [ "$code" = '200' ] || failed=1
+            if [ "$code" != '200' ]; then
+              grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-headers || true
+              head -c 200 /tmp/colors-public | tr '\n' ' '; echo
+              failed=1
+            fi
           done
           for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
-            code="$(curl -sS -L -H 'Accept: application/json' -H 'Cache-Control: no-cache' -o /tmp/colors-public-api -w '%{http_code}' --max-time 30 "https://$DOMAIN$path?colors_cutover=${GITHUB_SHA}" || true)"
+            code="$(curl -sS -L -A 'ColorsProviderHealth/1.0' -H 'Accept: application/json' -H 'Cache-Control: no-cache, no-store' -D /tmp/colors-public-api-headers -o /tmp/colors-public-api -w '%{http_code}' --max-time 30 "https://$DOMAIN$path" || true)"
             echo "PUBLIC_COLORS_API $path HTTP=$code"
-            [ "$code" = '200' ] || failed=1
+            if [ "$code" != '200' ]; then
+              grep -Ei '^(server|cf-ray|cf-cache-status|location|content-type):' /tmp/colors-public-api-headers || true
+              head -c 200 /tmp/colors-public-api | tr '\n' ' '; echo
+              failed=1
+            fi
           done
           if [ "$failed" = '0' ]; then
             echo 'COLORS_PUBLIC_ORIGIN_CUTOVER=PASS'
@@ -177,4 +182,4 @@ jobs:
           path: /tmp/colors-dns-before.json
           retention-days: 30
 
-# Cache purge is best-effort; origin and public route health remain hard gates.
+# Origin TLS and public route health are hard gates; cache purge is best-effort.
