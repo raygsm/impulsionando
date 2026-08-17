@@ -43,10 +43,11 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
-      - name: Validate every tenant at Traefik origin
+      - name: Validate tenant subdomains at Traefik origin
         run: |
           set -euo pipefail
-          domains='chrismed.impulsionando.com.br colorssaude.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          # Colors Saúde is intentionally excluded: its sole public host is colorssaude.com.br.
+          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$domains' bash -s" <<'REMOTE'
           set -euo pipefail
           for domain in $DOMAINS; do
@@ -64,7 +65,8 @@ jobs:
       - name: Reconcile Cloudflare DNS to validated VPS
         run: |
           set -euo pipefail
-          domains='chrismed.impulsionando.com.br colorssaude.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          # Never add a Colors subdomain here. Colors uses only colorssaude.com.br.
+          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           for domain in $domains; do
             curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
               "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
@@ -83,10 +85,10 @@ jobs:
             fi
           done
 
-      - name: Validate public HTTPS for every client
+      - name: Validate public HTTPS for every subdomain client
         run: |
           set -euo pipefail
-          domains='chrismed.impulsionando.com.br colorssaude.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           failed=0
           for domain in $domains; do
             code=000
