@@ -1,0 +1,81 @@
+name: Colors n8n Code forward diagnose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-n8n-code-forward-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Verify Code node exact forward
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          cat >/tmp/colorsCodeForward01.json <<'JSON'
+          {
+            "id":"colorsCodeForward01","name":"Colors Code Forward Diagnostic","active":false,
+            "nodes":[
+              {"parameters":{"httpMethod":"POST","path":"colors-code-forward","responseMode":"responseNode","options":{}},"id":"code-hook","name":"Diagnostic Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-code-forward-v1"},
+              {"parameters":{"jsCode":"const input = $input.first().json;\nconst body = JSON.stringify(input.body);\nconst signature = input.headers?.['x-impulsionando-signature'] || '';\nconst response = await fetch('https://colorssaude.impulsionando.com.br/api/public/hooks/n8n-verify', {method:'POST',headers:{'content-type':'application/json','x-impulsionando-signature':signature},body});\nlet data = {}; try { data = await response.json(); } catch {}\nreturn [{json:{statusCode:response.status,body:data}}];"},"id":"code-forward","name":"Forward HMAC via Code","type":"n8n-nodes-base.code","typeVersion":2,"position":[300,0]},
+              {"parameters":{"respondWith":"json","responseBody":"={{ { statusCode: $json.statusCode, ok: $json.body?.ok === true, authorized: $json.body?.authorized === true, error: $json.body?.error || null } }}","options":{"responseCode":200}},"id":"code-response","name":"Diagnostic Response","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[600,0]}
+            ],
+            "connections":{"Diagnostic Webhook":{"main":[[{"node":"Forward HMAC via Code","type":"main","index":0}]]},"Forward HMAC via Code":{"main":[[{"node":"Diagnostic Response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"}
+          }
+          JSON
+          sudo docker cp /tmp/colorsCodeForward01.json "$C:/tmp/colorsCodeForward01.json"
+          sudo docker exec "$C" n8n import:workflow --input=/tmp/colorsCodeForward01.json >/dev/null
+          sudo docker exec "$C" n8n publish:workflow --id=colorsCodeForward01 >/dev/null
+          sudo docker exec "$C" n8n update:workflow --id=colorsCodeForward01 --active=true >/dev/null
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 45); do
+            sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
+            [ "$i" -lt 45 ] || exit 70
+            sleep 2
+          done
+          payload='{"workflow_name":"colors-saude.affiliate.relationship","event_code":"AFFILIATE_ATTRIBUTED","tenant_slug":"colors-saude","correlation_id":"colors-code-forward","company_id":null,"dispatched_at":"2026-08-17T00:00:00.000Z","data":{"probe":true}}'
+          secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          signature="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          unsigned=000
+          signed=000
+          for i in $(seq 1 15); do
+            unsigned="$(curl -sS -o /tmp/colors-code-unsigned.out -w '%{http_code}' --max-time 25 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-code-forward' -H 'content-type: application/json' --data-binary "$payload" || true)"
+            [ "$unsigned" = 200 ] && break
+            sleep 3
+          done
+          echo "COLORS_CODE_FORWARD_UNSIGNED_OUTER=$unsigned"
+          [ "$unsigned" = 200 ] || exit 71
+          unsigned_inner="$(jq -r '.statusCode // 0' /tmp/colors-code-unsigned.out)"
+          echo "COLORS_CODE_FORWARD_UNSIGNED_INNER=$unsigned_inner"
+          [ "$unsigned_inner" = 401 ] || exit 72
+          signed="$(curl -sS -o /tmp/colors-code-signed.out -w '%{http_code}' --max-time 25 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-code-forward' -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" --data-binary "$payload")"
+          echo "COLORS_CODE_FORWARD_SIGNED_OUTER=$signed"
+          [ "$signed" = 200 ] || exit 73
+          signed_inner="$(jq -r '.statusCode // 0' /tmp/colors-code-signed.out)"
+          signed_ok="$(jq -r '.ok // false' /tmp/colors-code-signed.out)"
+          signed_auth="$(jq -r '.authorized // false' /tmp/colors-code-signed.out)"
+          echo "COLORS_CODE_FORWARD_SIGNED_INNER=$signed_inner OK=$signed_ok AUTH=$signed_auth"
+          [ "$signed_inner" = 200 ] && [ "$signed_ok" = true ] && [ "$signed_auth" = true ] || exit 74
+          echo 'COLORS_N8N_CODE_FORWARD=PASS'
+          REMOTE
