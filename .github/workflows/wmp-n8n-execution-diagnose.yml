@@ -24,7 +24,7 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: Inspect execution backend safely
+      - name: Inspect sqlite execution storage safely
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -32,10 +32,10 @@ jobs:
           ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          echo '== n8n database mode =='
-          sudo docker inspect "$C" -f '{{range .Config.Env}}{{println .}}{{end}}' | grep -E '^(DB_TYPE|DB_POSTGRESDB_HOST|DB_POSTGRESDB_DATABASE|DB_POSTGRESDB_USER)=' || true
-          echo '== related containers =='
-          sudo docker ps --format '{{.Names}}' | grep -Ei 'n8n|postgres|redis' || true
-          echo '== n8n cli relevant commands =='
-          sudo docker exec "$C" n8n --help 2>/dev/null | grep -Ei 'execution|export|workflow' | head -80 || true
+          echo '== sqlite files =='
+          sudo docker exec "$C" sh -lc 'find /home/node/.n8n -maxdepth 2 -type f -name "*.sqlite" -o -name "database.sqlite" 2>/dev/null | head -20'
+          echo '== sqlite cli =='
+          sudo docker exec "$C" sh -lc 'command -v sqlite3 || true'
+          echo '== export entities help =='
+          sudo docker exec "$C" n8n export:entities --help 2>&1 | head -120 || true
           REMOTE
