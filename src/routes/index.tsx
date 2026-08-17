@@ -15,6 +15,7 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
+  csi: "/csi",
   garrido: "/garrido",
   anamadu: "/anamadu",
   tour: "/tour",
