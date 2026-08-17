@@ -12,14 +12,29 @@ const DispatcherPayloadSchema = z.object({
   data: z.record(z.unknown()),
 })
 
-function verifySignature(rawBody: string, signature: string | null, secret: string): boolean {
+function verifySignature(body: string, signature: string | null, secret: string): boolean {
   if (!signature || !secret) return false
   const normalized = signature.startsWith('sha256=') ? signature.slice(7) : signature
   if (!/^[a-f0-9]{64}$/i.test(normalized)) return false
-  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  const expected = createHmac('sha256', secret).update(body).digest('hex')
   const actual = Buffer.from(normalized, 'hex')
   const wanted = Buffer.from(expected, 'hex')
   return actual.length === wanted.length && timingSafeEqual(actual, wanted)
+}
+
+function signedBodyCandidates(rawBody: string): string[] {
+  const candidates = [rawBody]
+  try {
+    const decoded = JSON.parse(rawBody)
+    if (typeof decoded === 'string') {
+      candidates.push(decoded)
+    } else if (decoded && typeof decoded === 'object') {
+      candidates.push(JSON.stringify(decoded))
+    }
+  } catch {
+    // Raw body remains the only candidate.
+  }
+  return [...new Set(candidates)]
 }
 
 export const Route = createFileRoute('/api/public/hooks/n8n-verify')({
@@ -30,13 +45,15 @@ export const Route = createFileRoute('/api/public/hooks/n8n-verify')({
         const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? ''
         if (!secret) return Response.json({ ok: false, authorized: false, error: 'hmac_not_configured' }, { status: 503 })
 
-        if (!verifySignature(rawBody, request.headers.get('x-impulsionando-signature'), secret)) {
+        const signature = request.headers.get('x-impulsionando-signature')
+        const verifiedBody = signedBodyCandidates(rawBody).find((candidate) => verifySignature(candidate, signature, secret))
+        if (!verifiedBody) {
           return Response.json({ ok: false, authorized: false, error: 'invalid_signature' }, { status: 401 })
         }
 
         let parsed: z.infer<typeof DispatcherPayloadSchema>
         try {
-          parsed = DispatcherPayloadSchema.parse(JSON.parse(rawBody))
+          parsed = DispatcherPayloadSchema.parse(JSON.parse(verifiedBody))
         } catch {
           return Response.json({ ok: false, authorized: false, error: 'invalid_dispatch_payload' }, { status: 422 })
         }
