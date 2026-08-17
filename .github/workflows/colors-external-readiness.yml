@@ -28,22 +28,27 @@ jobs:
       COLORS_GROUP_URL: ${{ secrets.COLORS_GROUP_URL }}
       CHRISMED_REFERRAL_SECRET: ${{ secrets.CHRISMED_REFERRAL_SECRET }}
     steps:
-      - name: Report required secret presence without exposing values
+      - name: Validate required production credentials without exposing values
         run: |
-          set -u
+          set -euo pipefail
           missing=0
           check() {
             name="$1"
             if [ -n "${!name:-}" ]; then
               echo "COLORS_SECRET $name=PRESENT"
             else
-              echo "::warning title=Colors external credential missing::$name is not configured in production"
+              echo "::error title=Colors external credential missing::$name is not configured in production"
               echo "COLORS_SECRET $name=MISSING"
               missing=$((missing + 1))
             fi
           }
           for name in COLORS_META_APP_SECRET COLORS_META_VERIFY_TOKEN COLORS_META_WHATSAPP_TOKEN COLORS_META_PHONE_NUMBER_ID COLORS_META_PAGE_TOKEN COLORS_META_PAGE_ID COLORS_META_IG_ACCOUNT_ID COLORS_MAISFY_WEBHOOK_SECRET COLORS_MAISFY_WEBHOOK_TOKEN COLORS_MONETIZZE_UNIQUE_KEY COLORS_PERFECTPAY_WEBHOOK_TOKEN COLORS_GROUP_URL CHRISMED_REFERRAL_SECRET; do check "$name"; done
           echo "COLORS_EXTERNAL_SECRET_MISSING=$missing"
+          if [ "$missing" -gt 0 ]; then
+            echo "::error title=Colors external readiness blocked::$missing required production credential(s) are missing"
+            exit 10
+          fi
+          echo 'COLORS_EXTERNAL_CREDENTIALS=PASS'
 
       - name: Healthcheck WhatsApp Cloud API when configured
         if: ${{ env.COLORS_META_WHATSAPP_TOKEN != '' && env.COLORS_META_PHONE_NUMBER_ID != '' }}
