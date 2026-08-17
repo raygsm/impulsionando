@@ -7,14 +7,8 @@ import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
 import { useEffect } from "react";
 
-// Mapeamento de subdomínio → rota landing do cliente (CORE Impulsionando).
-// Todo cliente ativo com subdomínio *.impulsionando.com.br entra aqui.
-// Sem entrada explícita, cai no fallback /vitrine/{public_slug}.
 const SUBDOMAIN_LANDING: Record<string, string> = {
   marocas: "/marocas",
-  colors: "/colors",
-  colorsaude: "/colors",
-  "colors-saude": "/colors",
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
@@ -33,8 +27,7 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
 const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
-  "colors.impulsionando.lovable.app": "/colors",
-  "colorsaude.lovable.app": "/colors",
+  "colorssaude.com.br": "/colors",
 };
 
 export const Route = createFileRoute("/")({
@@ -54,7 +47,7 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname.toLowerCase();
-    if (host === "colorssaude.impulsionando.com.br" || host === "colors.impulsionando.com.br") {
+    if (host === "colorssaude.com.br") {
       return <><ColorsRootMetadata /><ColorsRootPage /></>;
     }
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
@@ -70,7 +63,7 @@ function ColorsRootPage() {
 
 function ColorsRootMetadata() {
   useEffect(() => {
-    const canonicalUrl = "https://colorssaude.impulsionando.com.br/";
+    const canonicalUrl = "https://colorssaude.com.br/";
     document.title = "Colors Saúde — Produtos oficiais, Íris, suporte, afiliados e eventos";
 
     const canonicals = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="canonical"]'));
