@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Install Chromium
-        run: bunx playwright install --with-deps chromium
+        run: ./node_modules/.bin/playwright install --with-deps chromium
       - name: Verify Colors survives hydration
         run: |
           cat >/tmp/colors-hydration.mjs <<'EOF'
