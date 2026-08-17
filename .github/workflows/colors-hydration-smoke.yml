@@ -22,12 +22,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: npm ci --no-audit --no-fund
       - name: Install Chromium
-        run: ./node_modules/.bin/playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       - name: Verify Colors survives hydration
         run: |
           cat >/tmp/colors-hydration.mjs <<'EOF'
@@ -64,4 +67,4 @@ jobs:
           await browser.close();
           throw lastError || new Error('Colors hydration smoke failed');
           EOF
-          bun /tmp/colors-hydration.mjs
+          node /tmp/colors-hydration.mjs
