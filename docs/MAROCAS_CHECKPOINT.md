@@ -1,125 +1,129 @@
 # MAROCAS — CHECKPOINT DE EXECUÇÃO
 
-Data: 2026-08-16
+Atualizado em: 2026-08-17
 Projeto pai: Impulsionando sistemas / Impulsionando Tecnologia
-Cliente: Marocas
+Cliente exclusivo: Marocas
 Agente central: Impulsionito
 Instância especializada: Maruquito
-Regra de continuidade: ao receber “Continue” ou “Retome do último checkpoint”, verificar o estado real e seguir deste ponto sem reiniciar nem repetir trabalho concluído.
+
+## Regra de continuidade
+Ao receber “Continue” ou “Retome do último checkpoint”, verificar primeiro GitHub e Supabase live e seguir deste ponto sem reiniciar nem repetir trabalho concluído.
 
 ## Infraestrutura correta
-- NÃO usar Vercel neste ecossistema.
-- Código/versionamento: GitHub.
-- Banco/backend/auth: Supabase.
-- Hospedagem/aplicações: Hostinger/VPS Hostinger.
-- DNS/SSL/proxy/proteção: Cloudflare.
-- Automações: n8n próprio na VPS Hostinger.
-- Qualquer referência anterior a bloqueio por Vercel está revogada e deve ser ignorada.
+- NÃO usar Vercel.
+- GitHub: código/versionamento.
+- Supabase: banco/backend/auth.
+- Hostinger/VPS Hostinger: hospedagem/aplicações.
+- Cloudflare: DNS/SSL/proxy/proteção.
+- n8n próprio na VPS Hostinger: automações.
 
-## Cliente-piloto real para homologação
-- Loft Copanema é cliente/imóvel real da operação Marocas.
-- URL informada pelo proprietário: https://airbnb.com.br/h/loftcopanema
-- Usar como primeiro caso E2E real da Marocas.
-- Não inventar reservas, hóspedes, datas, preços, pagamentos, códigos de acesso, estoque ou status.
-- Jornada alvo: reserva real -> checkout -> janela operacional -> limpeza -> checklist -> reposição -> evidências -> conferência -> imóvel liberado -> próximo check-in.
+## Piloto real
+Loft Copanema é cliente/imóvel real da Marocas.
+URL informada: https://airbnb.com.br/h/loftcopanema
+Usar como primeiro E2E real, sem inventar reserva, hóspede, data, valor, pagamento, código de acesso, estoque ou status.
+Jornada alvo: reserva real -> checkout -> janela operacional -> limpeza -> checklist -> reposição -> evidências -> conferência -> imóvel liberado -> próximo check-in.
 
-## Estado real consolidado
+## Maruquito
+- `communication_agents`: Maruquito ativo no tenant Marocas.
+- runtime: `marocas-maruquito`, `CLIENT_INSTANCE`, root Impulsionito, `system_prompt_ref=marocas/maruquito/v1`.
+- `/api/impulsionito/chat` resolve `/marocas` server-side para Maruquito.
+- navegador não pode trocar tenant/agent arbitrariamente.
+- FAB convertido para chat real.
+- regra explícita: nunca inventar preços, reservas, pagamentos, equipe, estoque, acessos ou status.
+Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
 
-### Maruquito
-- `communication_agents`: agente Maruquito ativo no tenant Marocas.
-- `communication_agent_runtime`: `marocas-maruquito`, `CLIENT_INSTANCE`, root Impulsionito, `system_prompt_ref=marocas/maruquito/v1`.
-- Endpoint `/api/impulsionito/chat` resolve `/marocas` server-side para `marocas-maruquito`, sem confiar em tenant/agent key enviados pelo navegador.
-- FAB Maruquito convertido de menu estático para chat real usando transporte do Impulsionito.
-- Política explícita de não inventar preços, status, reservas, pagamentos, equipe, estoque, acesso ou diagnóstico.
-- Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
+## Reservas, giro e limpeza
+Migrations aplicadas no live:
+- `marocas_reservations_turnovers_checklists_v1`
+- `marocas_service_completion_guards_v1`
 
-### Backend Marocas existente
-Existem estruturas reais para imóveis, proprietários, profissionais, serviços, suprimentos, manutenção, orçamentos de manutenção, demonstrativos e relatórios. O estado inicial auditado das principais tabelas operacionais era zero registros reais; telas ainda utilizavam mocks em pontos importantes.
-
-### Reservas e giro entre hóspedes
-Migration aplicada no Supabase live: `marocas_reservations_turnovers_checklists_v1`.
-Criados:
+Estruturas:
 - `marocas_reservations`
 - `marocas_turnovers`
 - `marocas_checklist_templates`
+- vínculos em `marocas_services`
 
-`marocas_turnovers` calcula no banco:
-- `window_minutes`
-- `window_status`: `impossivel`, `critica`, `apertada`, `confortavel`.
-
-`marocas_services` recebeu vínculos para reserva, giro, checklist e horário final previsto.
-RLS foi habilitado nas novas tabelas com isolamento por empresa + equipe Impulsionando.
-Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
-
-### Fluxo de reserva real
-Arquivo: `src/lib/marocas-operations.functions.ts`.
-- lista reservas reais;
-- lista giros reais;
-- cria reserva autenticada;
-- rejeita sobreposição no mesmo imóvel;
-- busca reserva anterior/seguinte;
-- cria giro quando necessário;
-- gera serviço de limpeza vinculado ao giro;
-- utiliza checklist ativo do imóvel quando configurado;
-- trata corrida de criação sem depender de inferência de índice parcial no upsert.
-Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
-
-### Telas sem mocks
-`/marocas/app/anfitriao/reservas`
-- removido `MOCK_RESERVAS`;
-- lista fonte real;
-- cadastro de reserva real;
-- sem preço fictício.
-
-`/marocas/app/anfitriao/limpezas`
-- removido `MOCK_AGENDA`;
-- removido SLA fictício `2h 12min`;
-- exibe giros reais, janela operacional e risco;
-- duração média só é exibida com dados efetivamente medidos.
-
-Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
-
-### Guarda P0 de conclusão
-Migration aplicada no Supabase live: `marocas_service_completion_guards_v1`.
-- índice único de serviço por giro;
-- trigger `trg_marocas_enforce_service_completion`;
-- giro não pode ser concluído sem checklist ativo;
-- checklist obrigatório precisa estar completo;
-- fotos de antes/depois são exigidas conforme template;
-- `completed_at` é preenchido na conclusão.
+Janela do giro calculada no banco: impossível/crítica/apertada/confortável.
+Serviço de limpeza é gerado a partir do giro e vinculado a checklist.
+Conclusão protegida por trigger: checklist e fotos obrigatórias conforme template.
 Status: 🟡 IMPLEMENTADO — TESTE E2E PENDENTE.
 
-## Drift identificado no Core Agenda
-Em 2026-08-16 foi confirmado que o código atual do Core já usa `agenda_appointments`, `agenda_services`, `agenda_locations`, `agenda_rooms`, `agenda_rules`, `agenda_settings` e `agenda_oncall_shifts`, mas essas tabelas não existem no Supabase live atual. A migration histórica de Agenda existe no repositório, porém não aparece no histórico de migrations do live atual, que começa em 2026-07-30. Não criar agenda paralela da Marocas. Antes de ligar limpeza/turnover à agenda, reconciliar o Core Agenda de forma segura e compatível com o schema live.
-Status: 🟠 PARCIAL / DRIFT CÓDIGO-BANCO CONFIRMADO.
+## Evidências/fotos seguras
+Migration live: `marocas_service_evidence_security_v1`.
+Bucket existente reaproveitado: `marocas-fotos`, privado, JPEG/PNG/WebP, 15 MB, vazio no momento da migração.
+Criada `marocas_service_evidence` com caminho obrigatório `<apartment_id>/<service_id>/...`.
+Acesso passou a ser por necessidade operacional:
+- equipe Impulsionando autorizada;
+- proprietário do imóvel;
+- profissional efetivamente designado ao serviço.
+Upload é restrito ao profissional designado ou staff; update/delete somente staff.
+Status: 🟡 IMPLEMENTADO — TESTE E2E DE UPLOAD PENDENTE.
+
+## Segredos de acesso do imóvel
+Migration live: `marocas_property_access_vault_v1`.
+Supabase Vault confirmado instalado (`supabase_vault`).
+Criadas:
+- `marocas_property_access_secrets` — apenas metadados; plaintext não vai para tabela comum;
+- `marocas_property_access_events` — auditoria de create/reveal/deny/deactivate.
+
+RPCs server-only:
+- `marocas_store_property_secret(...)`
+- `marocas_reveal_property_secret(...)`
+
+Permissões validadas no live:
+- anon: EXECUTE = false
+- authenticated: EXECUTE = false
+- service_role: EXECUTE = true
+
+Profissional só pode revelar segredo quando designado ao serviço do imóvel e dentro da janela operacional; toda revelação é auditada. Proprietário e staff seguem regras próprias de autorização.
+Status: 🟡 IMPLEMENTADO — TESTE E2E SERVER-SIDE PENDENTE.
+
+## Core Agenda — drift reconciliado parcialmente
+Foi confirmado que o live já possuía partes do Core Agenda (`agenda_professionals`, `agenda_schedules`, `agenda_blocks`), mas faltavam entidades que o código atual usa. A migration histórica dependia de estruturas legadas como `public.permissions`, inexistente no live; por isso NÃO foi reaplicada integralmente.
+
+Migration incremental aplicada: `core_agenda_reconcile_marocas_bridge_v1`.
+Criados/restaurados:
+- `agenda_services`
+- `agenda_appointments`
+
+`marocas_services` recebeu `agenda_appointment_id`.
+Trigger ativo: `trg_marocas_sync_service_to_core_agenda`.
+O compromisso universal representa a janela operacional real do giro (`checkout` até próximo `check-in`), não uma duração fictícia de limpeza. A agenda identifica o imóvel, não o hóspede, reduzindo PII.
+Validação live:
+- agenda_services existe = true
+- agenda_appointments existe = true
+- coluna de vínculo Marocas existe = true
+- trigger de sync existe = true
+- registros atuais = 0, portanto nenhum dado fictício foi criado.
+Status: 🟡 IMPLEMENTADO — TESTE E2E COM DADOS REAIS PENDENTE.
 
 ## Segurança
-RLS básico por empresa existe, mas ainda não atende integralmente aos perfis finos exigidos (proprietário, profissional designado, prestador, dados financeiros e acesso sensível). Dados de fechadura/cofre/senha ainda precisam de uma estrutura dedicada com need-to-know e auditoria. Não considerar segurança Marocas concluída.
+Novas tabelas Marocas possuem RLS/políticas. As novas RPCs de Vault não geraram alerta por execução anon/authenticated. Continua dívida preexistente do projeto em helpers globais, inclusive `marocas_company_id()` como SECURITY DEFINER executável por authenticated. Não alterar helper global sem mapear dependências.
+Segurança fina ainda precisa ser completada em todos os módulos Marocas, especialmente papéis, finanças e prestadores.
 Status geral: 🟠 PARCIAL.
 
-O advisor do Supabase também sinalizou dívida de segurança global preexistente no projeto, inclusive `marocas_company_id()` como SECURITY DEFINER executável por authenticated. Inspecionar função e dependências antes de alterar privilégios.
+## Telas reais já convertidas
+- `/marocas/app/anfitriao/reservas`: sem MOCK_RESERVAS; leitura/cadastro real.
+- `/marocas/app/anfitriao/limpezas`: sem MOCK_AGENDA e sem SLA fictício; mostra giros reais.
+Status: 🟡 IMPLEMENTADO — TESTE EXTERNO PENDENTE.
 
-## Deploy/hospedagem
-Validar exclusivamente no pipeline real GitHub -> Hostinger/VPS + Cloudflare. Não usar Vercel.
-Status: 🟠 PIPELINE REAL AINDA PRECISA SER AUDITADO/HOMOLOGADO.
-
-## Pendências P0/P1 imediatas
-1. Reconciliar Core Agenda entre código e Supabase live sem criar módulo paralelo Marocas.
-2. Integrar serviço de giro com a agenda universal do Core depois da reconciliação.
-3. Executar E2E autenticado com o Loft Copanema usando apenas dados reais: imóvel -> duas reservas reais -> giro -> limpeza -> checklist -> fotos -> conclusão.
-4. Implementar RLS/RBAC fino por perfil e imóvel designado.
-5. Criar armazenamento seguro de códigos/senhas/chaves/cofre com acesso auditável e need-to-know.
-6. Conectar Maruquito a tools reais de consulta/ação; identidade e roteamento estão prontos, mas consultas operacionais tool-first ainda não estão integralmente implementadas.
-7. Auditar e remover mocks restantes de todas as rotas Marocas.
-8. Evoluir reposição para estrutura transacional/Core Inventory; o MVP atual ainda usa `notes` JSON para parte do pedido de suprimento.
-9. Implementar ocorrências gerais e vínculo com tickets universais.
-10. Validar CRM, contratos, pagamentos, planos recorrentes, templates, jornadas, n8n, analytics, UTM, SEO, mobile, logs e backups.
-11. Auditar pipeline GitHub -> Hostinger/VPS + Cloudflare e validar build/deploy real.
+## Próximas prioridades
+1. Criar fluxo server-side do frontend para upload/registro de evidências e revelação segura do Vault.
+2. Validar sync Marocas -> Core Agenda com primeiro dado real do Loft Copanema.
+3. Completar RBAC/RLS fino: proprietário, profissional designado, supervisor, manutenção, administrativo/master.
+4. Auditar/remover mocks restantes das rotas Marocas.
+5. Estruturar ocorrência + tickets universais.
+6. Evoluir reposição/inventário para Core Inventory sem JSON em notes como estado principal.
+7. Conectar Maruquito a tools reais de reservas, limpeza, janela, reposição, manutenção, tickets e agenda.
+8. Validar planos recorrentes, CRM, contratos, pagamentos, templates, jornadas, n8n, analytics, UTM, SEO, mobile, logs e backups.
+9. Auditar pipeline real GitHub -> Hostinger/VPS + Cloudflare e validar build/deploy.
+10. Executar E2E completo do Loft Copanema com dados reais.
 
 ## Progresso consolidado
-- 43% produzido.
-- 57% restante.
-- Percentual é estimativa operacional e deve ser recalculado conforme P0/P1 forem comprovadamente concluídos.
+- 68% produzido.
+- 32% restante.
+Percentual é estimativa operacional e só sobe com implementação/evidência real.
 
 ## Regra de status
-Nunca declarar 🟢 sem evidência real de teste. Nunca usar “MAROCAS — GO-LIVE APROVADO” enquanto qualquer P0 estiver pendente.
+Nunca declarar 🟢 sem teste comprovado.
+Nunca usar “MAROCAS — GO-LIVE APROVADO” enquanto qualquer P0 estiver pendente.
