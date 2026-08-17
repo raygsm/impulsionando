@@ -9,6 +9,13 @@ import {
 } from './oliver-store';
 import type { OliverContextEventDetail } from '@/content/chrismed/oliver-contexts';
 
+function shouldOpenOliverFromUrl(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  const value = (params.get('oliver') ?? '').trim().toLowerCase();
+  return ['open', 'chat', 'conversar', '1', 'true'].includes(value);
+}
+
 export function ChrismedOliverProvider({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -22,6 +29,9 @@ export function ChrismedOliverProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('chrismed:oliver:open', onOpen);
     window.addEventListener('chrismed:oliver:context', onContext as EventListener);
+    if (shouldOpenOliverFromUrl()) {
+      requestAnimationFrame(() => openChrismedOliver());
+    }
     return () => {
       window.removeEventListener('chrismed:oliver:open', onOpen);
       window.removeEventListener('chrismed:oliver:context', onContext as EventListener);
@@ -34,6 +44,9 @@ export function ChrismedOliverProvider({ children }: { children: ReactNode }) {
       return;
     }
     clearChrismedOliverRouteState();
+    if (shouldOpenOliverFromUrl()) {
+      requestAnimationFrame(() => openChrismedOliver());
+    }
   }, [pathname]);
 
   return (
