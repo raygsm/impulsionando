@@ -209,12 +209,17 @@ function MobileDrawer({ lang, pathname, onClose }: { lang: Lang; pathname: strin
       <aside className="absolute inset-y-0 right-0 flex h-dvh w-[min(100vw,25rem)] flex-col bg-[var(--chrismed-forest-deep)] text-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div className="rounded-lg bg-white px-3 py-2"><ChrismedWordmark variant="sm" /></div><button type="button" onClick={onClose} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 hover:bg-white/10" aria-label="Fechar menu"><X className="h-5 w-5" /></button></div>
         <nav className="flex-1 overflow-y-auto px-5 py-3" aria-label="Menu principal">{NAV.map((item) => isGroup(item) ? <MobileSection key={item.key} group={item} lang={lang} pathname={pathname} onClose={onClose} /> : <Link key={item.to} to={item.to} onClick={onClose} className={cn("block border-b border-white/10 py-4 text-[14px] font-medium text-white/88", pathname === item.to && "text-[var(--chrismed-amber-soft)]")}>{item.labels[lang]}</Link>)}</nav>
-        <div className="space-y-2 border-t border-white/10 bg-black/10 p-4">
-          <a href="/auth?persona=patient&next=%2Fchrismed%2Fminha-conta" onClick={onClose} className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><CircleUserRound className="h-4 w-4 text-[var(--chrismed-amber)]" /> Área do Paciente</a>
-          <a href="/auth?persona=professional&next=%2Fchrismed%2Fagenda%2Fprofissional" onClick={onClose} className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><Stethoscope className="h-4 w-4 text-[var(--chrismed-amber)]" /> Área do Profissional da Saúde</a>
-          <Link to="/chrismed/ocupacional" onClick={onClose} className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><Building2 className="h-4 w-4 text-[var(--chrismed-amber)]" /> Área da Empresa</Link>
-          <Link to="/chrismed/agendar" onClick={onClose} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--chrismed-amber)] px-4 text-sm font-extrabold text-[var(--chrismed-forest-deep)]"><CalendarCheck className="h-4 w-4" /> Agendar atendimento</Link>
-          <div className="flex justify-center pt-2"><LangSwitcher lang={lang} /></div>
+        <div className="border-t border-white/10 bg-black/10 p-4">
+          <div className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--chrismed-amber-soft)]">Áreas de acesso</div>
+          <nav aria-label="Áreas de acesso CHRISMED" className="space-y-2">
+            <a href="/auth?persona=patient&next=%2Fchrismed%2Fminha-conta" onClick={onClose} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><CircleUserRound className="h-4 w-4 text-[var(--chrismed-amber)]" /> Pacientes</a>
+            <a href="/auth?persona=professional&next=%2Fchrismed%2Fagenda%2Fprofissional" onClick={onClose} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><Stethoscope className="h-4 w-4 text-[var(--chrismed-amber)]" /> Profissionais da Saúde</a>
+            <a href="/ocupacional" onClick={onClose} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><Building2 className="h-4 w-4 text-[var(--chrismed-amber)]" /> Empresas</a>
+            <a href="/eventos" onClick={onClose} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><CalendarCheck className="h-4 w-4 text-[var(--chrismed-amber)]" /> Área de Eventos</a>
+            <a href="/auth?persona=admin&next=%2Fchrismed%2Fadmin" onClick={onClose} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-4 text-sm font-semibold text-white"><CircleUserRound className="h-4 w-4 text-[var(--chrismed-amber)]" /> Gestão CHRISMED</a>
+          </nav>
+          <Link to="/chrismed/agendar" onClick={onClose} className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--chrismed-amber)] px-4 text-sm font-extrabold text-[var(--chrismed-forest-deep)]"><CalendarCheck className="h-4 w-4" /> Agendar atendimento</Link>
+          <div className="flex justify-center pt-3"><LangSwitcher lang={lang} /></div>
         </div>
       </aside>
     </div>
@@ -251,6 +256,13 @@ export function ChrismedFooter() {
           <FooterCol title="Ecossistema" links={FOOTER_LINKS_2} />
           <div><div className="mb-3 text-[11px] uppercase tracking-[0.28em] text-white/50">Contato</div><ul className="space-y-2 text-[14px] text-white/80"><li>Copacabana · Rio de Janeiro</li><li>PT · EN · ES</li><li><Link to="/chrismed/contato" className="hover:text-[var(--chrismed-amber)]">Fale conosco</Link></li><li><Link to="/chrismed/privacidade" className="hover:text-[var(--chrismed-amber)]">Privacidade · LGPD</Link></li><li><Link to="/chrismed/termos" className="hover:text-[var(--chrismed-amber)]">Termos · Contratação</Link></li></ul></div>
         </div>
+        <nav aria-label="Áreas de acesso CHRISMED" className="mt-10 grid gap-2 border-t border-white/10 pt-6 sm:grid-cols-2 lg:grid-cols-5">
+          <a href="/auth?persona=patient&next=%2Fchrismed%2Fminha-conta" className="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80 hover:border-white/25 hover:text-white">Pacientes</a>
+          <a href="/auth?persona=professional&next=%2Fchrismed%2Fagenda%2Fprofissional" className="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80 hover:border-white/25 hover:text-white">Profissionais</a>
+          <a href="/ocupacional" className="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80 hover:border-white/25 hover:text-white">Empresas</a>
+          <a href="/eventos" className="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80 hover:border-white/25 hover:text-white">Eventos</a>
+          <a href="/auth?persona=admin&next=%2Fchrismed%2Fadmin" className="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80 hover:border-white/25 hover:text-white">Gestão CHRISMED</a>
+        </nav>
         <div className="mt-12 flex flex-col items-center justify-center gap-3 border-t border-white/10 pt-6 text-center text-[11px] uppercase tracking-[0.18em] text-white/45"><span>© {new Date().getFullYear()} CHRISMED · Todos os direitos reservados</span><span>Produzido e gerenciado por <a href="https://impulsionando.com.br" target="_blank" rel="noreferrer" className="text-[var(--chrismed-amber)] transition-colors hover:text-white">Impulsionando Tecnologia</a></span></div>
       </div>
     </footer>
