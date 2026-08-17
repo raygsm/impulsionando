@@ -33,7 +33,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify Colors survives hydration
         run: |
-          cat >/tmp/colors-hydration.mjs <<'EOF'
+          cat >colors-hydration.mjs <<'EOF'
           import { chromium } from '@playwright/test';
           const url = 'https://colorssaude.impulsionando.com.br/';
           const browser = await chromium.launch({ headless: true });
@@ -67,4 +67,4 @@ jobs:
           await browser.close();
           throw lastError || new Error('Colors hydration smoke failed');
           EOF
-          node /tmp/colors-hydration.mjs
+          node ./colors-hydration.mjs
