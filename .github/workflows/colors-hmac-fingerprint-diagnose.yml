@@ -1,0 +1,46 @@
+name: Colors HMAC fingerprint diagnose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-hmac-fingerprint-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Compare Colors Core HMAC sources without exposing values
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          fp() { printf '%s' "$1" | sha256sum | awk '{print $1}'; }
+          sec="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-security.env | head -n1)"
+          core="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' /etc/impulsionando-core.env | head -n1)"
+          live="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          echo "SECURITY_PRESENT=$([ -n "$sec" ] && echo yes || echo no)"
+          echo "CORE_ENV_PRESENT=$([ -n "$core" ] && echo yes || echo no)"
+          echo "LIVE_CORE_PRESENT=$([ -n "$live" ] && echo yes || echo no)"
+          [ -n "$live" ] || exit 70
+          [ -n "$sec" ] && [ "$(fp "$sec")" = "$(fp "$live")" ] && echo 'SECURITY_MATCHES_LIVE=yes' || echo 'SECURITY_MATCHES_LIVE=no'
+          [ -n "$core" ] && [ "$(fp "$core")" = "$(fp "$live")" ] && echo 'CORE_ENV_MATCHES_LIVE=yes' || echo 'CORE_ENV_MATCHES_LIVE=no'
+          echo 'COLORS_HMAC_SOURCE_DIAGNOSE=PASS'
+          REMOTE
