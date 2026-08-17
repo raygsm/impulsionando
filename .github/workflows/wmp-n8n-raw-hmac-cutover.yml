@@ -72,6 +72,7 @@ jobs:
           NODE
             sudo docker exec "$C" n8n import:workflow --input="/tmp/$id-raw.json"
             sudo docker exec "$C" n8n publish:workflow --id="$id"
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
           done
 
           sudo docker exec "$C" n8n unpublish:workflow --id=wmpDjBookingLifecycle01 || true
