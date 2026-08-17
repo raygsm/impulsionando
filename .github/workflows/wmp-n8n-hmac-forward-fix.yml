@@ -46,6 +46,7 @@ jobs:
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="$file" >/dev/null
             sudo docker exec -e WID="$id" -e CORE="$CORE" "$C" node -e "const fs=require('fs'),id=process.env.WID,p='/tmp/'+id+'-hmacfix.json',r=JSON.parse(fs.readFileSync(p,'utf8')),w=Array.isArray(r)?r[0]:r,v=(w.nodes||[]).find(n=>n.name==='Verify signature in Core'); if(!v)process.exit(2); v.parameters={method:'POST',url:process.env.CORE,sendHeaders:true,headerParameters:{parameters:[{name:'x-impulsionando-signature',value:'={{ \$(\'WMP Lifecycle Webhook\').item.json.headers?.[\'x-impulsionando-signature\'] || \'\' }}'},{name:'Content-Type',value:'application/json'}]},sendBody:true,contentType:'raw',rawContentType:'application/json',body:'={{ JSON.stringify(\$(\'WMP Lifecycle Webhook\').item.json.body) }}',options:{response:{response:{fullResponse:true,neverError:true,responseFormat:'json'}},timeout:15000}}; fs.writeFileSync(p,JSON.stringify([w]));"
             sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
             sudo docker exec "$C" n8n publish:workflow --id="$id" >/dev/null
           done
 
@@ -56,6 +57,11 @@ jobs:
             if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
             [ "$i" -lt 45 ] || exit 61
             sleep 2
+          done
+
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-prove.json" >/dev/null
+            sudo docker exec -e WID="$id" -e CORE="$CORE" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-prove.json','utf8')),w=Array.isArray(r)?r[0]:r,h=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook'),v=(w.nodes||[]).find(n=>n.name==='Verify signature in Core'); console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,path:h?.parameters?.path,verifier:v?.parameters?.url})); if(!w.active||!w.activeVersionId||!h?.parameters?.path||v?.parameters?.url!==process.env.CORE)process.exit(65);"
           done
 
           probe() {
