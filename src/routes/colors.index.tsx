@@ -16,15 +16,15 @@ export const Route = createFileRoute("/colors/")({
       { property: "og:title", content: "Colors Saúde — Uma marca. Uma jornada. Íris com você." },
       { property: "og:description", content: "Conheça os produtos oficiais Colors, fale com a Íris, agende uma conversa, participe de eventos e acesse suporte com protocolo." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://colorssaude.impulsionando.com.br/" },
+      { property: "og:url", content: "https://colorssaude.com.br/" },
       { property: "og:site_name", content: "Colors Saúde" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Colors Saúde" },
       { name: "twitter:description", content: "Produtos oficiais, Íris, suporte, agenda, afiliados e eventos." },
     ],
-    links: [{ rel: "canonical", href: "https://colorssaude.impulsionando.com.br/" }],
+    links: [{ rel: "canonical", href: "https://colorssaude.com.br/" }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify({
-      "@context":"https://schema.org", "@type":"Organization", name:"Colors Saúde", url:"https://colorssaude.impulsionando.com.br/",
+      "@context":"https://schema.org", "@type":"Organization", name:"Colors Saúde", url:"https://colorssaude.com.br/",
       description:"Ecossistema comercial e de relacionamento da Colors Saúde.",
       sameAs:["https://www.instagram.com/colorssaude/","https://www.youtube.com/@colorssaude","https://www.tiktok.com/@colorssaude"]
     }) }],
