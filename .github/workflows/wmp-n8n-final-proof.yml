@@ -1,0 +1,91 @@
+name: WMP n8n final proof
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-n8n-final-proof.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Prove active canonical paths and HMAC
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=6 "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          SEC=/etc/impulsionando-security.env
+          CORE='https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
+
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 45); do
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || exit 51
+            sleep 2
+          done
+          sleep 3
+
+          for id in wmpLeadIntake01 wmpProposalLifecycle01 wmpDjLifecycle01 wmpPostEvent01; do
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-proof.json" >/dev/null
+            sudo docker exec -i -e WID="$id" -e CORE="$CORE" "$C" node - <<'NODE'
+          const fs=require('fs'),id=process.env.WID,core=process.env.CORE;const r=JSON.parse(fs.readFileSync('/tmp/'+id+'-proof.json','utf8'));const w=Array.isArray(r)?r[0]:r;
+          const h=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');const v=(w.nodes||[]).find(n=>n.name==='Verify signature in Core');
+          console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,path:h?.parameters?.path,rawBody:h?.parameters?.options?.rawBody,contentType:v?.parameters?.contentType,input:v?.parameters?.inputDataFieldName,url:v?.parameters?.url}));
+          if(!w.active||!w.activeVersionId||h?.parameters?.options?.rawBody!==true||v?.parameters?.contentType!=='binaryData'||v?.parameters?.inputDataFieldName!=='data'||v?.parameters?.url!==core) process.exit(1);
+          NODE
+          done
+
+          recent="$(sudo docker logs --since 90s "$C" 2>&1 || true)"
+          if printf '%s\n' "$recent" | grep -F 'The URL path that the "WMP Lifecycle Webhook" node uses is already taken' >/dev/null; then
+            printf '%s\n' "$recent" | grep -F 'The URL path that the "WMP Lifecycle Webhook" node uses is already taken' | tail -n 10
+            exit 52
+          fi
+
+          sign() {
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
+            test -n "$secret"
+            printf '%s' "$1" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}'
+          }
+          probe() {
+            id="$1"; path="$2"; event="$3"
+            url="https://n8n.impulsionando.com.br/webhook/$path"
+            ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            unsigned="{\"workflow_name\":\"$id\",\"event_code\":\"$event\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"unsigned-$id-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+            uc="$(curl -sS -o /tmp/u-$id -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' --data-binary "$unsigned")"
+            echo "$id unsigned=$uc body=$(head -c 180 /tmp/u-$id)"
+            [ "$uc" = 401 ] || exit 61
+            signed="{\"workflow_name\":\"$id\",\"event_code\":\"$event\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"signed-$id-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
+            sig="$(sign "$signed")"
+            sc="$(curl -sS -o /tmp/s-$id -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$signed")"
+            echo "$id signed=$sc body=$(head -c 220 /tmp/s-$id)"
+            [ "$sc" = 200 ] || exit 62
+            grep -q '"ok":true' /tmp/s-$id || exit 63
+          }
+
+          probe wmpLeadIntake01 wmp-lead-intake wmp.lead.received
+          probe wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent
+          probe wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered
+          probe wmpPostEvent01 wmp-post-event-relationship wmp.event.completed
+
+          sudo docker rm -f wmp-hmac-verifier >/dev/null 2>&1 || true
+          sudo rm -f /opt/impulsionando/security/wmp-hmac-verifier.mjs
+          echo 'WMP_N8N_FINAL_PROOF=PASS'
+          REMOTE
