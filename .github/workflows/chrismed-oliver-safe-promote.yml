@@ -1,0 +1,97 @@
+name: CHRISMED Oliver Safe Promote
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-oliver-safe-promote.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrismed-oliver-safe-promote
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chrismed-oliver-direct-link-20260817
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Build candidate
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npx vitest run src/lib/subdomain.test.ts
+          npm run build
+          test -f .output/server/index.mjs
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload candidate
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/chrismed-oliver.tgz .output scripts package.json package-lock.json
+          scp /tmp/chrismed-oliver.tgz "$VPS_USER@$VPS_HOST:/tmp/chrismed-oliver.tgz"
+
+      - name: Start isolated candidate
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          release=/var/www/chrismed-oliver/candidate
+          sudo rm -rf "$release"
+          sudo mkdir -p "$release"
+          sudo tar -xzf /tmp/chrismed-oliver.tgz -C "$release"
+          sudo chown -R "$(id -u):$(id -g)" "$release"
+          cat >/tmp/Dockerfile.chrismed-oliver <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          sudo docker build -f /tmp/Dockerfile.chrismed-oliver -t impulsionando-core:chrismed-oliver "$release"
+          network="$(sudo docker inspect impulsionando-core --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' | awk '{print $1}')"
+          test -n "$network"
+          sudo docker rm -f chrismed-oliver-check >/dev/null 2>&1 || true
+          sudo docker run -d --name chrismed-oliver-check --env-file /etc/impulsionando-core.env --network "$network" impulsionando-core:chrismed-oliver >/dev/null
+          for attempt in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' chrismed-oliver-check 2>/dev/null || true)"
+            code="$(test -n "$ip" && curl -sS -H 'Host: chrismed.impulsionando.com.br' -o /tmp/candidate.html -w '%{http_code}' --max-time 10 "http://$ip:3000/?oliver=open" || true)"
+            [ "$code" = '200' ] && exit 0
+            sleep 2
+          done
+          sudo docker logs --tail 120 chrismed-oliver-check || true
+          exit 61
+          REMOTE
