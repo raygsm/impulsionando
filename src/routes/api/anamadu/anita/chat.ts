@@ -8,7 +8,7 @@ const SYSTEM = `Você é Annita, agente virtual oficial da Ana Madú e uma inst�
 
 REGRAS ABSOLUTAS:
 1. Nunca invente produto, preço, promoção, estoque, disponibilidade, prazo, política, desconto, condição comercial, evento, agenda, procedência, certificação, autenticidade, composição ou propriedade de pedra.
-2. Para qualquer informação dinâmica, use somente o contexto operacional fornecido pelo sistema nesta conversa. Se o dado não estiver presente ou não puder ser consultado, diga que precisa ser confirmado e conduza para a próxima validação.
+2. Para qualquer informação dinâmica, use somente o contexto operacional fornecido pelo Core da Impulsionando nesta conversa. Se o dado não estiver presente ou não puder ser consultado, diga que precisa ser confirmado e conduza para a próxima validação.
 3. Não trate exemplos, textos antigos, fallback ou memória do modelo como fonte de verdade operacional.
 4. Preserve contexto e não peça novamente dados já informados.
 5. Antes de responder, identifique internamente: quem é a pessoa, intenção, estágio da jornada, dados já fornecidos, informação que precisa consultar, próxima melhor ação e necessidade de handoff.
@@ -16,27 +16,17 @@ REGRAS ABSOLUTAS:
 7. Em caso de dúvida operacional não resolvida, preserve o histórico e encaminhe para humano sem obrigar o cliente a repetir a conversa.
 8. Trate dados pessoais com minimização e respeito à LGPD.
 9. Se a pessoa vier de campanha, use a atribuição apenas para contextualizar; nunca exponha IDs técnicos.
-10. A experiência de compra deve permanecer dentro do domínio Ana Madú. A Nuvemshop é motor transacional/backoffice quando integrada, não destino visual obrigatório do cliente.
-11. PIX direto só pode aparecer quando o Core e o ambiente informarem explicitamente que está habilitado e configurado.
-12. Em imagens, descreva apenas o que é visualmente observável. Não afirme tipo de gema, metal, autenticidade, pureza, quilate, procedência, certificação ou valor sem confirmação operacional/humana.
-13. Na linha Ourives, sua função é entender intenção, referências, formato, estilo, uso, preferências e restrições; organizar alternativas conceituais e preparar um briefing claro. A viabilidade técnica e o orçamento final são sempre analisados pela Ana Madú/humano responsável.
-14. Quando o cliente aprovar uma prancha/conceito Ourives, resuma objetivamente: peça, estilo, pedra/referência, metal/acabamento, restrições, imagens recebidas, dúvidas pendentes e o que precisa ser validado para orçamento.
+10. A experiência de compra permanece dentro da Ana Madú. O catálogo, carrinho e pedidos são próprios e operados pelo Core da Impulsionando.
+11. Nunca direcione o cliente para a antiga loja virtual para concluir compra.
+12. PIX ou qualquer meio de pagamento só pode aparecer quando o Core informar explicitamente que está homologado e disponível.
+13. Em imagens, descreva apenas o que é visualmente observável. Não afirme tipo de gema, metal, autenticidade, pureza, quilate, procedência, certificação ou valor sem confirmação operacional/humana.
+14. Na linha Ourives, sua função é entender intenção, referências, formato, estilo, uso, preferências e restrições; organizar alternativas conceituais e preparar um briefing claro. A viabilidade técnica e o orçamento final são sempre analisados pela Ana Madú/humano responsável.
+15. Quando o cliente aprovar uma prancha/conceito Ourives, resuma objetivamente: peça, estilo, pedra/referência, metal/acabamento, restrições, imagens recebidas, dúvidas pendentes e o que precisa ser validado para orçamento.
 
-A Ana Madú trabalha com um catálogo real sincronizado da loja oficial. Existe também uma jornada premium denominada Ourives para pedras mais raras e projetos personalizados. Não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente.`;
+A Ana Madú trabalha com catálogo próprio armazenado no Core da Impulsionando. Existe também uma jornada premium denominada Ourives para pedras mais raras e projetos personalizados. Não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente.`;
 
-type Attribution = {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_content?: string;
-  utm_term?: string;
-  gclid?: string;
-  fbclid?: string;
-  landing_page?: string;
-  referrer?: string;
-};
-
-type CatalogItem = { name?: string; priceLabel?: string; url?: string; status?: string };
+type Attribution = { utm_source?:string; utm_medium?:string; utm_campaign?:string; utm_content?:string; utm_term?:string; gclid?:string; fbclid?:string; landing_page?:string; referrer?:string };
+type CatalogItem = { id?:string; name?:string; priceLabel?:string; status?:string; category?:string };
 
 function sessionId(request: Request) {
   const supplied = request.headers.get('x-anamadu-session')?.trim() ?? '';
@@ -59,9 +49,7 @@ function needsCatalogLookup(text: string) {
 
 function validImages(input: unknown) {
   if (!Array.isArray(input)) return [] as string[];
-  return input
-    .filter((value): value is string => typeof value === 'string' && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(value) && value.length <= 3_000_000)
-    .slice(0, 3);
+  return input.filter((value): value is string => typeof value === 'string' && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(value) && value.length <= 3_000_000).slice(0, 3);
 }
 
 async function liveCatalogContext(request: Request, text: string) {
@@ -70,16 +58,16 @@ async function liveCatalogContext(request: Request, text: string) {
     const url = new URL('/api/anamadu/catalog', request.url);
     const response = await fetch(url, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(9000) });
     if (!response.ok) return '\nCATÁLOGO OPERACIONAL: consulta indisponível neste momento. Não informe preço, estoque ou disponibilidade por memória.';
-    const data = await response.json() as { syncedAt?: string; items?: CatalogItem[] };
+    const data = await response.json() as { syncedAt?: string; source?: string; items?: CatalogItem[] };
     const tokens = text.toLocaleLowerCase('pt-BR').split(/\s+/).filter((token) => token.length >= 3);
-    const items = (data.items ?? []).filter((item) => {
-      const name = String(item.name ?? '').toLocaleLowerCase('pt-BR');
-      return tokens.some((token) => name.includes(token));
+    const matched = (data.items ?? []).filter((item) => {
+      const haystack = `${item.name ?? ''} ${item.category ?? ''}`.toLocaleLowerCase('pt-BR');
+      return tokens.some((token) => haystack.includes(token));
     }).slice(0, 20);
-    const fallback = items.length ? items : (data.items ?? []).slice(0, 12);
-    if (!fallback.length) return '\nCATÁLOGO OPERACIONAL: nenhuma peça foi retornada pela sincronização. Não invente itens.';
-    const lines = fallback.map((item) => `- ${item.name ?? 'Sem nome'} | ${item.priceLabel ?? 'preço não informado'} | status=${item.status ?? 'unknown'} | ${item.url ?? ''}`);
-    return `\nCATÁLOGO OPERACIONAL CONSULTADO EM ${data.syncedAt ?? 'horário não informado'}:\n${lines.join('\n')}\nUse somente estes dados para preço/disponibilidade nesta resposta. Status unknown não significa disponível.`;
+    const fallback = matched.length ? matched : (data.items ?? []).slice(0, 12);
+    if (!fallback.length) return '\nCATÁLOGO OPERACIONAL: nenhum produto foi retornado pelo Core. Não invente itens.';
+    const lines = fallback.map((item) => `- id=${item.id ?? 'n/a'} | ${item.name ?? 'Sem nome'} | ${item.priceLabel ?? 'preço não informado'} | categoria=${item.category ?? 'não informada'} | status=${item.status ?? 'unknown'}`);
+    return `\nCATÁLOGO PRÓPRIO ANA MADÚ / CORE IMPULSIONANDO — consulta ${data.syncedAt ?? 'agora'}:\n${lines.join('\n')}\nUse somente estes dados para preço/disponibilidade nesta resposta. Status unknown não significa disponível.`;
   } catch {
     return '\nCATÁLOGO OPERACIONAL: consulta falhou. Não informe preço, estoque ou disponibilidade por memória.';
   }
@@ -107,64 +95,27 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
         });
 
         const history = toMessages(await listConversationHistory(ledger.conversation_id, 50));
-        const campaignContext = body?.attribution?.utm_campaign
-          ? `\nContexto interno da origem da sessão: campanha ${body.attribution.utm_campaign}; fonte ${body.attribution.utm_source ?? 'não informada'}; meio ${body.attribution.utm_medium ?? 'não informado'}. Não exponha identificadores técnicos ao cliente.`
-          : '';
+        const campaignContext = body?.attribution?.utm_campaign ? `\nContexto interno da origem da sessão: campanha ${body.attribution.utm_campaign}; fonte ${body.attribution.utm_source ?? 'não informada'}; meio ${body.attribution.utm_medium ?? 'não informado'}. Não exponha identificadores técnicos ao cliente.` : '';
         const catalogContext = await liveCatalogContext(request, text);
         const messages = [...history];
-        if (images.length) {
-          messages.push({
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Considere também estas referências visuais nesta resposta. Aplique as regras de observação visual e não faça afirmações materiais não verificadas.' },
-              ...images.map((image) => ({ type: 'image', image })),
-            ],
-          } as any);
-        }
+        if (images.length) messages.push({ role: 'user', content: [{ type: 'text', text: 'Considere estas referências visuais nesta resposta. Não faça afirmações materiais não verificadas.' }, ...images.map((image) => ({ type: 'image', image }))] } as any);
 
-        const resolved = resolveProvider({});
-        const result = streamText({
-          model: resolved.model,
-          system: SYSTEM + campaignContext + catalogContext,
-          messages,
-          temperature: 0.2,
-          maxOutputTokens: 1000,
-        });
+        const resolved = resolveProvider({ llm: { provider: 'openai', model: 'gpt-4o-mini' }, allowFallback: false });
+        const result = streamText({ model: resolved.model, system: SYSTEM + campaignContext + catalogContext, messages, temperature: 0.2, maxOutputTokens: 1000 });
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream<Uint8Array>({
           async start(controller) {
             let full = '';
             try {
-              for await (const chunk of result.textStream) {
-                full += chunk;
-                controller.enqueue(encoder.encode(chunk));
-              }
-              if (full.trim()) {
-                await recordOutboundMessage({
-                  conversationId: ledger.conversation_id,
-                  bodyText: full,
-                  channel: 'web_chat',
-                  provider: 'anamadu_front',
-                  endpointId: ledger.endpoint_id,
-                  metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', image_count: images.length, multimodal: images.length > 0 },
-                });
-              }
+              for await (const chunk of result.textStream) { full += chunk; controller.enqueue(encoder.encode(chunk)); }
+              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', llm_provider: 'openai', llm_model: resolved.modelId, image_count: images.length, multimodal: images.length > 0 } });
               controller.close();
-            } catch (error) {
-              controller.error(error);
-            }
+            } catch (error) { controller.error(error); }
           },
         });
 
-        return new Response(stream, {
-          headers: {
-            'content-type': 'text/plain; charset=utf-8',
-            'cache-control': 'no-store',
-            'x-conversation-id': ledger.conversation_id,
-            'x-annita-multimodal': images.length ? 'true' : 'false',
-          },
-        });
+        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': resolved.modelId, 'x-annita-multimodal': images.length ? 'true' : 'false' } });
       },
     },
   },
