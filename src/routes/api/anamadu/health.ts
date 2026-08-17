@@ -7,7 +7,7 @@ export const Route = createFileRoute('/api/anamadu/health')({
   server: {
     handlers: {
       GET: async () => {
-        const openaiConfigured = Boolean(process.env.OPENAI_API_KEY?.trim());
+        const openaiConfigured = Boolean(process.env.ANAMADU_OPENAI_API_KEY?.trim());
 
         const { data: tenant } = await (supabaseAdmin as any)
           .from('communication_tenants')
@@ -57,6 +57,8 @@ export const Route = createFileRoute('/api/anamadu/health')({
           ok: ready,
           tenant: Boolean(tenant?.active),
           openaiConfigured,
+          openaiCredentialScope: 'client_specific',
+          openaiCredentialName: 'Impulsionando — Ana Madú — Annita',
           catalog: {
             source: 'impulsionando_core',
             productCount,
