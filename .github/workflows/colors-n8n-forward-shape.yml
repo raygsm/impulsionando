@@ -1,0 +1,45 @@
+name: Colors n8n forward output shape
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-n8n-forward-shape.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Inspect response structure only
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          payload='{"workflow_name":"colors-saude.affiliate.relationship","event_code":"AFFILIATE_ATTRIBUTED","tenant_slug":"colors-saude","correlation_id":"colors-forward-shape","company_id":null,"dispatched_at":"2026-08-17T00:00:00.000Z","data":{"probe":true}}'
+          secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          signature="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
+          code="$(curl -sS -o /tmp/colors-forward-shape.out -w '%{http_code}' --max-time 25 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-forward-sender' -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" --data-binary "$payload")"
+          echo "COLORS_FORWARD_SHAPE_HTTP=$code"
+          [ "$code" = 200 ] || exit 70
+          echo -n 'COLORS_FORWARD_SHAPE_TYPE='; jq -r 'type' /tmp/colors-forward-shape.out
+          echo -n 'COLORS_FORWARD_SHAPE_KEYS='; jq -c 'if type=="object" then keys else [] end' /tmp/colors-forward-shape.out
+          echo -n 'COLORS_FORWARD_SHAPE_VALUE_TYPES='; jq -c 'if type=="object" then to_entries|map({key:.key,type:(.value|type)}) else [] end' /tmp/colors-forward-shape.out
+          echo 'COLORS_N8N_FORWARD_SHAPE=PASS'
+          REMOTE
