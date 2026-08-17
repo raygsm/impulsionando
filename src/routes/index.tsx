@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
+import { Route as ColorsIndexRoute } from "./colors.index";
 import { AnaMaduHome } from "@/components/anamadu/AnaMaduHome";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
@@ -12,6 +13,8 @@ import { useEffect } from "react";
 const SUBDOMAIN_LANDING: Record<string, string> = {
   marocas: "/marocas",
   colors: "/colors",
+  colorsaude: "/colors",
+  "colors-saude": "/colors",
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
@@ -51,10 +54,30 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname.toLowerCase();
+    if (host === "colorssaude.impulsionando.com.br" || host === "colors.impulsionando.com.br") {
+      return <><ColorsRootMetadata /><ColorsRootPage /></>;
+    }
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
     if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduHome /><AnitaDock /></>;
   }
   return <><HomePage /><CpDiscoveryPopup /></>;
+}
+
+function ColorsRootPage() {
+  const Component = ColorsIndexRoute.options.component;
+  return Component ? <Component /> : null;
+}
+
+function ColorsRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://colorssaude.impulsionando.com.br/";
+    document.title = "Colors Saúde — Produtos oficiais, Íris, suporte, afiliados e eventos";
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "Colors Saúde — Uma marca. Uma jornada. Íris com você.");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Colors Saúde: produtos oficiais, atendimento inteligente com a Íris, suporte, agenda, afiliados, eventos e rastreabilidade de jornada.");
+  }, []);
+  return null;
 }
 
 function ChrismedRootMetadata() {
