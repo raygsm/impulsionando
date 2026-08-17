@@ -3,13 +3,19 @@
  */
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
+const COLORS_CANONICAL_HOST = "colorssaude.com.br";
+const COLORS_LEGACY_HOSTS = new Set([
+  "colors.impulsionando.com.br",
+  "colorssaude.impulsionando.com.br",
+  "colors-saude.impulsionando.com.br",
+  "colors.impulsionando.lovable.app",
+  "colorsaude.lovable.app",
+]);
 
 /** Dedicated landings that replace the tenant's generic storefront. */
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   marocas: "/marocas",
   marcoas: "/marocas",
-  colors: "/colors",
-  colorssaude: "/colors",
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
@@ -25,15 +31,14 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   "impulsionando-brasil": "/vitrine/impulsionando-brasil",
 };
 
-/** Legacy custom hosts that still resolve to a Core tenant landing. */
+/** Custom hosts that resolve directly to a Core tenant landing. */
 export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
-  "colors.impulsionando.lovable.app": "/colors",
-  "colorsaude.lovable.app": "/colors",
+  [COLORS_CANONICAL_HOST]: "/colors",
 };
 
-/** Canonical host redirects for tenant landings that must not live on the apex. */
+/** Canonical host redirects for tenant landings that must not live on the apex or aliases. */
 export function canonicalTenantHostRedirect(loc: {
   hostname: string;
   pathname: string;
@@ -43,6 +48,22 @@ export function canonicalTenantHostRedirect(loc: {
 }): string | null {
   const host = loc.hostname.toLowerCase().split(":")[0];
   const path = loc.pathname || "/";
+  const proto = loc.protocol === "http:" ? "http:" : "https:";
+
+  if (host === "www.colorssaude.com.br" || COLORS_LEGACY_HOSTS.has(host)) {
+    const publicPath = path === "/colors" || path.startsWith("/colors/")
+      ? path.slice("/colors".length) || "/"
+      : path;
+    return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
+  }
+
+  const isColorsInternalPath = path === "/colors" || path.startsWith("/colors/");
+  const isImpulsionandoApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
+  if (isImpulsionandoApex && isColorsInternalPath) {
+    const publicPath = path.slice("/colors".length) || "/";
+    return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
+  }
+
   const isChrismedPath = path === "/chrismed" || path.startsWith("/chrismed/");
   const isApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
   const isOfficialChrismedHost = host === "chrismed.impulsionando.com.br";
@@ -53,7 +74,6 @@ export function canonicalTenantHostRedirect(loc: {
   if (!isChrismedPath && !isLegacyChrismedHost) return null;
   if (!isApex && !isLegacyChrismedHost && !isInternalChrismedPathOnOfficialHost) return null;
 
-  const proto = loc.protocol === "http:" ? "http:" : "https:";
   const publicPath = isChrismedPath
     ? path.slice("/chrismed".length) || "/"
     : path;
@@ -79,11 +99,6 @@ const RESERVED_SUBDOMAINS = new Set([
   "staging",
   "project",
 ]);
-
-export const DEPRECATED_SUBDOMAIN_ALIAS: Record<string, string> = {
-  colors: "colorssaude",
-  "colors-saude": "colorssaude",
-};
 
 export type TenantSubdomainMatch = {
   slug: string;
@@ -138,15 +153,15 @@ const CLEAN_PATH_EXCLUDED_PREFIXES = [
 ];
 
 /**
- * Colors uses clean public URLs on colorssaude.impulsionando.com.br while its
- * TanStack route tree is namespaced under /colors. Map document requests such
- * as /agenda or /eventos to /colors/agenda and /colors/eventos without touching
- * APIs or static assets. Internal /colors paths remain idempotent.
+ * Colors uses clean public URLs only on colorssaude.com.br while its TanStack
+ * route tree is namespaced under /colors. Map document requests such as /agenda
+ * or /eventos to /colors/agenda and /colors/eventos without touching APIs or
+ * static assets. Internal /colors paths remain idempotent.
  */
 export function toColorsInternalPathname(host: string | null | undefined, pathname: string): string {
   if (!host) return pathname;
   const cleanHost = host.toLowerCase().split(":")[0];
-  if (cleanHost !== "colorssaude.impulsionando.com.br") return pathname;
+  if (cleanHost !== COLORS_CANONICAL_HOST) return pathname;
 
   const path = pathname || "/";
   if (path === "/colors" || path.startsWith("/colors/")) return path;
@@ -183,8 +198,8 @@ export function toWmpInternalPathname(host: string | null | undefined, pathname:
 }
 
 /**
- * Se o host atual for um subdomínio descontinuado, devolve a URL absoluta
- * do subdomínio oficial preservando query/hash e normalizando namespaces internos.
+ * Compatibility wrapper retained for callers/tests. Legacy Colors aliases now
+ * always redirect to the sole canonical domain colorssaude.com.br.
  */
 export function deprecatedSubdomainRedirect(loc: {
   hostname: string;
@@ -193,19 +208,14 @@ export function deprecatedSubdomainRedirect(loc: {
   hash: string;
   protocol: string;
 }): string | null {
-  const h = loc.hostname.toLowerCase().split(":")[0];
-  for (const root of ROOT_DOMAINS) {
-    if (!h.endsWith("." + root)) continue;
-    const prefix = h.slice(0, -("." + root).length);
-    const firstSeg = prefix.split(".")[0];
-    const canonical = DEPRECATED_SUBDOMAIN_ALIAS[firstSeg];
-    if (!canonical) return null;
-    const proto = loc.protocol === "http:" ? "http:" : "https:";
-    let publicPath = loc.pathname || "/";
-    if (canonical === "colorssaude" && (publicPath === "/colors" || publicPath.startsWith("/colors/"))) {
-      publicPath = publicPath.slice("/colors".length) || "/";
-    }
-    return `${proto}//${canonical}.${root}${publicPath}${loc.search}${loc.hash}`;
+  const host = loc.hostname.toLowerCase().split(":")[0];
+  if (!COLORS_LEGACY_HOSTS.has(host)) return null;
+  const proto = loc.protocol === "http:" ? "http:" : "https:";
+  let publicPath = loc.pathname || "/";
+  if (publicPath === "/colors" || publicPath.startsWith("/colors/")) {
+    publicPath = publicPath.slice("/colors".length) || "/";
   }
-  return null;
+  return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
 }
+
+export { COLORS_CANONICAL_HOST };
