@@ -1,0 +1,64 @@
+name: WMP n8n sqlite host diagnose
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-n8n-sqlite-host-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Inspect SQLite snapshot
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          SNAP=/tmp/n8n-wmp-diagnose.sqlite
+          rm -f "$SNAP"
+          sudo docker cp "$C:/home/node/.n8n/database.sqlite" "$SNAP"
+          sudo chown "$(id -u):$(id -g)" "$SNAP"
+          python3 - "$SNAP" <<'PY'
+          import sqlite3,sys,json
+          p=sys.argv[1]
+          db=sqlite3.connect(f'file:{p}?mode=ro',uri=True)
+          db.row_factory=sqlite3.Row
+          tables=db.execute("select name,sql from sqlite_master where type='table' and lower(name) like '%webhook%' order by name").fetchall()
+          print('WEBHOOK_TABLES='+json.dumps([dict(r) for r in tables],ensure_ascii=False))
+          for t in tables:
+              name=t['name']
+              cols=db.execute(f'pragma table_info("{name.replace(chr(34), chr(34)*2)}")').fetchall()
+              print('COLUMNS '+name+'='+json.dumps([dict(r) for r in cols],ensure_ascii=False))
+              names={r['name'] for r in cols}
+              path_col=next((x for x in ('path','webhookPath') if x in names),None)
+              wf_col=next((x for x in ('workflowId','workflow_id') if x in names),None)
+              cond=[]; params=[]
+              if path_col:
+                  cond.append(f'"{path_col}" in (?,?)'); params += ['wmp-dj-booking-lifecycle','wmp-post-event-relationship']
+              if wf_col:
+                  cond.append(f'"{wf_col}" in (?,?,?,?)'); params += ['wmpDjBookingLifecycle01','wmpPostEventRelationship01','wmpDjLifecycle01','wmpPostEvent01']
+              if cond:
+                  rows=db.execute(f'select rowid,* from "{name}" where '+ ' or '.join(cond),params).fetchall()
+                  print('ROWS '+name+'='+json.dumps([dict(r) for r in rows],ensure_ascii=False))
+          db.close()
+          PY
+          rm -f "$SNAP"
+          REMOTE
