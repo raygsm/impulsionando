@@ -24,7 +24,7 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: List exported execution entities
+      - name: Inspect exported entity archive
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -34,5 +34,6 @@ jobs:
           C=n8n-umlg-n8n-1
           sudo docker exec "$C" sh -lc 'rm -rf /tmp/wmp-exec-export && mkdir -p /tmp/wmp-exec-export'
           sudo docker exec "$C" n8n export:entities --outputDir=/tmp/wmp-exec-export --includeExecutionHistoryDataTables=true --includeDataTableRows=false >/dev/null
-          sudo docker exec "$C" sh -lc 'ls -lah /tmp/wmp-exec-export | head -120'
+          echo '== archive entries =='
+          sudo docker exec "$C" sh -lc 'unzip -l /tmp/wmp-exec-export/entities.zip 2>/dev/null | grep -Ei "execution|workflow" | tail -120' || true
           REMOTE
