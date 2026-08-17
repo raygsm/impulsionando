@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
 import { Route as ColorsIndexRoute } from "./colors.index";
-import { AnaMaduHome } from "@/components/anamadu/AnaMaduHome";
+import { AnaMaduStorefront } from "@/components/anamadu/AnaMaduStorefront";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
 import { useEffect } from "react";
@@ -51,7 +51,7 @@ function HomeWithSubdomainGuard() {
       return <><ColorsRootMetadata /><ColorsRootPage /></>;
     }
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
-    if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduHome /><AnitaDock /></>;
+    if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduStorefront /><AnitaDock /></>;
   }
   return <><HomePage /><CpDiscoveryPopup /></>;
 }
@@ -102,7 +102,7 @@ function AnaMaduRootMetadata() {
     document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
     document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "Ana Madú — Pedras naturais, peças autorais e Ourives");
-    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Peças autorais Ana Madú com pedras naturais, coleções, presentes e projetos personalizados Ourives com atendimento da Annita.");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Peças autorais Ana Madú com pedras naturais, catálogo completo, compra interna e projetos personalizados Ourives com atendimento da Annita.");
   }, []);
   return null;
 }
