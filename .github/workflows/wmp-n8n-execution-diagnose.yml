@@ -24,7 +24,7 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: Inspect sqlite execution storage safely
+      - name: Export and inspect latest WMP execution metadata
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -32,10 +32,10 @@ jobs:
           ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$U@$H" 'bash -s' <<'REMOTE'
           set -euo pipefail
           C=n8n-umlg-n8n-1
-          echo '== sqlite files =='
-          sudo docker exec "$C" sh -lc 'find /home/node/.n8n -maxdepth 2 -type f -name "*.sqlite" -o -name "database.sqlite" 2>/dev/null | head -20'
-          echo '== sqlite cli =='
-          sudo docker exec "$C" sh -lc 'command -v sqlite3 || true'
-          echo '== export entities help =='
-          sudo docker exec "$C" n8n export:entities --help 2>&1 | head -120 || true
+          sudo docker exec "$C" sh -lc 'rm -rf /tmp/wmp-exec-export && mkdir -p /tmp/wmp-exec-export'
+          sudo docker exec "$C" n8n export:entities --outputDir=/tmp/wmp-exec-export --includeExecutionHistoryDataTables=true --includeDataTableRows=false >/dev/null
+          echo '== execution export files =='
+          sudo docker exec "$C" sh -lc 'find /tmp/wmp-exec-export -maxdepth 2 -type f -printf "%f\n" | grep -Ei "execution|workflow" | sort | head -80'
+          echo '== file sizes =='
+          sudo docker exec "$C" sh -lc 'du -h /tmp/wmp-exec-export/* 2>/dev/null | grep -Ei "execution|workflow" | tail -40'
           REMOTE
