@@ -1,3 +1,4 @@
+# Manual WMP edge recovery trigger 2026-08-17
 name: WMP recover canonical Core edge
 
 on:
