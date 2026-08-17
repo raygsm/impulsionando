@@ -1,0 +1,64 @@
+name: Colors Hydration Final
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-hydration-final.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hydration-final:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify Colors frontend after hydration
+        run: |
+          cat >colors-hydration-final.mjs <<'EOF'
+          import { chromium } from '@playwright/test';
+          const url = 'https://colorssaude.impulsionando.com.br/';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+          let lastError = null;
+          for (let attempt = 1; attempt <= 6; attempt++) {
+            try {
+              await page.goto(`${url}?hydration_final=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+              await page.waitForTimeout(3500);
+              const body = await page.locator('body').innerText();
+              const title = await page.title();
+              const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+              const hasColors = body.includes('Colors Saúde');
+              const hasSgb = body.includes('Super Green Black');
+              const hasIris = body.includes('Íris');
+              const genericTitle = title.includes('Impulsionando Tecnologia — Sistemas modulares e automação');
+              const canonicalOk = canonical === url;
+              console.log(`COLORS_FINAL_HYDRATION attempt=${attempt} hasColors=${hasColors} hasSgb=${hasSgb} hasIris=${hasIris} genericTitle=${genericTitle} canonical=${canonical}`);
+              if (hasColors && hasSgb && hasIris && !genericTitle && canonicalOk) {
+                console.log('COLORS_FINAL_HYDRATION=PASS');
+                await browser.close();
+                process.exit(0);
+              }
+              lastError = new Error('Colors canonical frontend markers did not survive hydration');
+            } catch (error) {
+              lastError = error;
+              console.log(`COLORS_FINAL_HYDRATION_RETRY attempt=${attempt} error=${String(error?.message || error).slice(0, 180)}`);
+            }
+            await page.waitForTimeout(5000);
+          }
+          await browser.close();
+          throw lastError || new Error('Colors final hydration failed');
+          EOF
+          node ./colors-hydration-final.mjs
