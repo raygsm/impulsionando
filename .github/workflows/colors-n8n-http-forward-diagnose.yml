@@ -25,7 +25,7 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
-      - name: Measure n8n HTTP Request transport
+      - name: Measure n8n HTTP Request transport after receiver readiness
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -37,7 +37,7 @@ jobs:
           {
             "id":"colorsForwardReceiver01","name":"Colors Forward Receiver","active":false,
             "nodes":[
-              {"parameters":{"httpMethod":"POST","path":"colors-forward-receiver","responseMode":"responseNode","options":{}},"id":"recv-hook","name":"Receiver Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-forward-receiver-v1"},
+              {"parameters":{"httpMethod":"POST","path":"colors-forward-receiver","responseMode":"responseNode","options":{}},"id":"recv-hook","name":"Receiver Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-forward-receiver-v2"},
               {"parameters":{"respondWith":"json","responseBody":"={{ { bodyString: JSON.stringify($json.body), signatureValue: ($json.headers?.['x-impulsionando-signature'] || ''), contentType: ($json.headers?.['content-type'] || '') } }}","options":{"responseCode":200}},"id":"recv-response","name":"Receiver Response","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[300,0]}
             ],
             "connections":{"Receiver Webhook":{"main":[[{"node":"Receiver Response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"}
@@ -47,8 +47,8 @@ jobs:
           {
             "id":"colorsForwardSender01","name":"Colors Forward Sender","active":false,
             "nodes":[
-              {"parameters":{"httpMethod":"POST","path":"colors-forward-sender","responseMode":"responseNode","options":{}},"id":"send-hook","name":"Sender Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-forward-sender-v1"},
-              {"parameters":{"method":"POST","url":"https://n8n.impulsionando.com.br/webhook/colors-forward-receiver","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-impulsionando-signature","value":"={{ $json.headers?.['x-impulsionando-signature'] || '' }}"},{"name":"Content-Type","value":"application/json"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ JSON.stringify($json.body) }}","options":{"response":{"response":{"fullResponse":false,"neverError":true,"responseFormat":"json"}},"timeout":15000}},"id":"send-http","name":"Forward Exactly Like Colors","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[300,0]},
+              {"parameters":{"httpMethod":"POST","path":"colors-forward-sender","responseMode":"responseNode","options":{}},"id":"send-hook","name":"Sender Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-forward-sender-v2"},
+              {"parameters":{"method":"POST","url":"https://n8n.impulsionando.com.br/webhook/colors-forward-receiver","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-impulsionando-signature","value":"={{ $json.headers?.['x-impulsionando-signature'] || '' }}"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ JSON.stringify($json.body) }}","options":{"response":{"response":{"fullResponse":true,"neverError":true,"responseFormat":"json"}},"timeout":15000}},"id":"send-http","name":"Forward Exactly Like Colors","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[300,0]},
               {"parameters":{"respondWith":"json","responseBody":"={{ $json }}","options":{"responseCode":200}},"id":"send-response","name":"Sender Response","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[600,0]}
             ],
             "connections":{"Sender Webhook":{"main":[[{"node":"Forward Exactly Like Colors","type":"main","index":0}]]},"Forward Exactly Like Colors":{"main":[[{"node":"Sender Response","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"}
@@ -66,26 +66,38 @@ jobs:
             [ "$i" -lt 45 ] || exit 70
             sleep 2
           done
+          probe='{"probe":"receiver-ready"}'
+          for i in $(seq 1 15); do
+            ready="$(curl -sS -o /tmp/colors-receiver-ready.out -w '%{http_code}' --max-time 15 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-forward-receiver' -H 'content-type: application/json' --data-binary "$probe" || true)"
+            [ "$ready" = 200 ] && break
+            sleep 3
+          done
+          echo "COLORS_FORWARD_RECEIVER_READY_HTTP=$ready"
+          [ "$ready" = 200 ] || exit 71
+
           payload='{"workflow_name":"colors-saude.affiliate.relationship","event_code":"AFFILIATE_ATTRIBUTED","tenant_slug":"colors-saude","correlation_id":"colors-forward-test","company_id":null,"dispatched_at":"2026-08-17T00:00:00.000Z","data":{"probe":true}}'
           secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
           signature="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
           original_hash="$(printf '%s' "$payload" | sha256sum | awk '{print $1}')"
           code=000
-          for i in $(seq 1 12); do
+          for i in $(seq 1 15); do
             code="$(curl -sS -o /tmp/colors-forward.out -w '%{http_code}' --max-time 25 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-forward-sender' -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" --data-binary "$payload" || true)"
             [ "$code" = 200 ] && break
             sleep 3
           done
-          [ "$code" = 200 ] || exit 71
-          forwarded="$(jq -r '.bodyString' /tmp/colors-forward.out)"
-          received_signature="$(jq -r '.signatureValue' /tmp/colors-forward.out)"
+          echo "COLORS_FORWARD_SENDER_HTTP=$code"
+          [ "$code" = 200 ] || exit 72
+          status="$(jq -r '.statusCode // .status // 0' /tmp/colors-forward.out)"
+          echo "COLORS_FORWARD_INNER_HTTP=$status"
+          body_json="$(jq -c '.body // {}' /tmp/colors-forward.out)"
+          forwarded="$(jq -r '.body.bodyString // empty' /tmp/colors-forward.out)"
+          received_signature="$(jq -r '.body.signatureValue // empty' /tmp/colors-forward.out)"
+          content_type="$(jq -r '.body.contentType // empty' /tmp/colors-forward.out)"
           forwarded_hash="$(printf '%s' "$forwarded" | sha256sum | awk '{print $1}')"
           echo "COLORS_HTTP_FORWARD_BODY_MATCH=$([ "$original_hash" = "$forwarded_hash" ] && echo yes || echo no)"
           echo "COLORS_HTTP_FORWARD_SIGNATURE_MATCH=$([ "$signature" = "$received_signature" ] && echo yes || echo no)"
           echo "COLORS_HTTP_FORWARD_BODY_LENGTH=${#forwarded}"
-          echo "COLORS_HTTP_FORWARD_CONTENT_TYPE=$(jq -r '.contentType' /tmp/colors-forward.out)"
-          if [ "$original_hash" != "$forwarded_hash" ]; then
-            echo "COLORS_HTTP_FORWARD_BODY_JSON_TYPE=$(jq -r 'type' <<<"$forwarded" 2>/dev/null || echo invalid)"
-          fi
+          echo "COLORS_HTTP_FORWARD_CONTENT_TYPE=$content_type"
+          [ "$status" = 200 ] || { echo "COLORS_FORWARD_BODY_SHAPE=$body_json"; exit 73; }
           echo 'COLORS_N8N_HTTP_FORWARD_DIAGNOSE=PASS'
           REMOTE
