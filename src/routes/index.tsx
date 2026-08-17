@@ -72,10 +72,21 @@ function ColorsRootMetadata() {
   useEffect(() => {
     const canonicalUrl = "https://colorssaude.impulsionando.com.br/";
     document.title = "Colors Saúde — Produtos oficiais, Íris, suporte, afiliados e eventos";
-    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
-    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
-    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "Colors Saúde — Uma marca. Uma jornada. Íris com você.");
-    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Colors Saúde: produtos oficiais, atendimento inteligente com a Íris, suporte, agenda, afiliados, eventos e rastreabilidade de jornada.");
+
+    const canonicals = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="canonical"]'));
+    if (canonicals.length === 0) {
+      const canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      canonical.href = canonicalUrl;
+      document.head.appendChild(canonical);
+    } else {
+      canonicals[0].setAttribute("href", canonicalUrl);
+      canonicals.slice(1).forEach((canonical) => canonical.remove());
+    }
+
+    document.querySelectorAll<HTMLMetaElement>('meta[property="og:url"]').forEach((meta) => meta.setAttribute("content", canonicalUrl));
+    document.querySelectorAll<HTMLMetaElement>('meta[property="og:title"]').forEach((meta) => meta.setAttribute("content", "Colors Saúde — Uma marca. Uma jornada. Íris com você."));
+    document.querySelectorAll<HTMLMetaElement>('meta[name="description"]').forEach((meta) => meta.setAttribute("content", "Colors Saúde: produtos oficiais, atendimento inteligente com a Íris, suporte, agenda, afiliados, eventos e rastreabilidade de jornada."));
   }, []);
   return null;
 }
