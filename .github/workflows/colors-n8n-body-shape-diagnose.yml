@@ -25,7 +25,7 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts
-      - name: Measure n8n JSON serialization without secrets
+      - name: Measure n8n body and HMAC header transport without exposing values
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -39,10 +39,10 @@ jobs:
             "name":"Colors Body Shape Diagnostic",
             "active":false,
             "nodes":[
-              {"parameters":{"httpMethod":"POST","path":"colors-body-shape-diagnostic","responseMode":"responseNode","options":{}},"id":"colors-body-shape-hook","name":"Diagnostic Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-body-shape-v1"},
-              {"parameters":{"respondWith":"json","responseBody":"={{ { bodyString: JSON.stringify($json.body), bodyObject: $json.body } }}","options":{"responseCode":200}},"id":"colors-body-shape-response","name":"Echo Body Shape","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[300,0]}
+              {"parameters":{"httpMethod":"POST","path":"colors-body-shape-diagnostic","responseMode":"responseNode","options":{}},"id":"colors-body-shape-hook","name":"Diagnostic Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"colors-body-shape-v2"},
+              {"parameters":{"respondWith":"json","responseBody":"={{ { bodyString: JSON.stringify($json.body), signatureValue: ($json.headers?.['x-impulsionando-signature'] || ''), headerKeys: Object.keys($json.headers || {}) } }}","options":{"responseCode":200}},"id":"colors-body-shape-response","name":"Echo Transport Shape","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[300,0]}
             ],
-            "connections":{"Diagnostic Webhook":{"main":[[{"node":"Echo Body Shape","type":"main","index":0}]]}},
+            "connections":{"Diagnostic Webhook":{"main":[[{"node":"Echo Transport Shape","type":"main","index":0}]]}},
             "settings":{"executionOrder":"v1"}
           }
           JSON
@@ -57,30 +57,25 @@ jobs:
             sleep 2
           done
           payload='{"workflow_name":"colors-saude.affiliate.relationship","event_code":"AFFILIATE_ATTRIBUTED","tenant_slug":"colors-saude","correlation_id":"colors-body-shape","company_id":null,"dispatched_at":"2026-08-17T00:00:00.000Z","data":{"probe":true}}'
+          secret="$(sudo docker inspect impulsionando-core --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' | head -n1)"
+          test -n "$secret"
+          signature="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
           original_hash="$(printf '%s' "$payload" | sha256sum | awk '{print $1}')"
           code=000
           for i in $(seq 1 12); do
-            code="$(curl -sS -o /tmp/colors-body-shape.out -w '%{http_code}' --max-time 20 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-body-shape-diagnostic' -H 'content-type: application/json' --data-binary "$payload" || true)"
+            code="$(curl -sS -o /tmp/colors-body-shape.out -w '%{http_code}' --max-time 20 -X POST 'https://n8n.impulsionando.com.br/webhook/colors-body-shape-diagnostic' -H 'content-type: application/json' -H "x-impulsionando-signature: $signature" --data-binary "$payload" || true)"
             [ "$code" = 200 ] && break
             sleep 3
           done
           [ "$code" = 200 ] || exit 71
           echoed="$(jq -r '.bodyString' /tmp/colors-body-shape.out)"
+          received_signature="$(jq -r '.signatureValue' /tmp/colors-body-shape.out)"
           echoed_hash="$(printf '%s' "$echoed" | sha256sum | awk '{print $1}')"
           echo "COLORS_BODY_HASH_MATCH=$([ "$original_hash" = "$echoed_hash" ] && echo yes || echo no)"
-          echo "COLORS_BODY_ORIGINAL_LENGTH=${#payload}"
-          echo "COLORS_BODY_ECHOED_LENGTH=${#echoed}"
-          if [ "$original_hash" != "$echoed_hash" ]; then
-            python3 - "$payload" "$echoed" <<'PY'
-          import sys
-          a,b=sys.argv[1],sys.argv[2]
-          for i,(x,y) in enumerate(zip(a,b)):
-              if x!=y:
-                  print(f'COLORS_BODY_FIRST_DIFF_INDEX={i} ORIGINAL_CODE={ord(x)} ECHOED_CODE={ord(y)}')
-                  break
-          else:
-              if len(a)!=len(b): print(f'COLORS_BODY_FIRST_DIFF_INDEX={min(len(a),len(b))} LENGTH_ONLY=yes')
-          PY
-          fi
-          echo 'COLORS_N8N_BODY_SHAPE_DIAGNOSE=PASS'
+          echo "COLORS_SIGNATURE_PRESENT=$([ -n "$received_signature" ] && echo yes || echo no)"
+          echo "COLORS_SIGNATURE_LENGTH=${#received_signature}"
+          echo "COLORS_SIGNATURE_MATCH=$([ "$signature" = "$received_signature" ] && echo yes || echo no)"
+          keys="$(jq -r '.headerKeys | join(",")' /tmp/colors-body-shape.out)"
+          echo "COLORS_SIGNATURE_KEY_PRESENT=$([[ ",$keys," == *,x-impulsionando-signature,* ]] && echo yes || echo no)"
+          echo 'COLORS_N8N_TRANSPORT_DIAGNOSE=PASS'
           REMOTE
