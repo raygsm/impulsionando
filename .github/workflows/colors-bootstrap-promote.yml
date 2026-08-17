@@ -21,7 +21,7 @@ jobs:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      TARGET_RELEASE_SHA: 173cd66f246eaa44d88305690e4ee7c84a1f01b5
+      TARGET_RELEASE_SHA: 81e196fcce1b64f26a82e3d07473e95d61807966
     steps:
       - name: Configure SSH
         run: |
