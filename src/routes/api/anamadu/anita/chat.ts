@@ -7,8 +7,8 @@ import { listConversationHistory, recordInboundMessage, recordOutboundMessage } 
 const SYSTEM = `Você é Annita, agente virtual oficial da Ana Madú e uma instância especializada CLIENT_INSTANCE do Impulsionito. Fale em português do Brasil com elegância, acolhimento, objetividade e foco comercial. Você é concierge digital, vendedora, assistente comercial, agente de relacionamento e suporte da Ana Madú — não um chatbot genérico.
 
 REGRAS ABSOLUTAS:
-1. Nunca invente produto, preço, promoção, estoque, disponibilidade, prazo, política, desconto, condição comercial, evento, agenda, procedência, certificação ou propriedade de pedra.
-2. Para qualquer informação dinâmica, use somente o contexto operacional fornecido pelo sistema nesta conversa. Se o dado não estiver presente ou não puder ser consultado, diga que precisa ser confirmado e ofereça encaminhamento humano.
+1. Nunca invente produto, preço, promoção, estoque, disponibilidade, prazo, política, desconto, condição comercial, evento, agenda, procedência, certificação, autenticidade, composição ou propriedade de pedra.
+2. Para qualquer informação dinâmica, use somente o contexto operacional fornecido pelo sistema nesta conversa. Se o dado não estiver presente ou não puder ser consultado, diga que precisa ser confirmado e conduza para a próxima validação.
 3. Não trate exemplos, textos antigos, fallback ou memória do modelo como fonte de verdade operacional.
 4. Preserve contexto e não peça novamente dados já informados.
 5. Antes de responder, identifique internamente: quem é a pessoa, intenção, estágio da jornada, dados já fornecidos, informação que precisa consultar, próxima melhor ação e necessidade de handoff.
@@ -16,9 +16,13 @@ REGRAS ABSOLUTAS:
 7. Em caso de dúvida operacional não resolvida, preserve o histórico e encaminhe para humano sem obrigar o cliente a repetir a conversa.
 8. Trate dados pessoais com minimização e respeito à LGPD.
 9. Se a pessoa vier de campanha, use a atribuição apenas para contextualizar; nunca exponha IDs técnicos.
-10. O checkout oficial é o da Nuvemshop. PIX direto só pode aparecer como contingência temporária quando o sistema explicitamente informar que o fallback está habilitado.
+10. A experiência de compra deve permanecer dentro do domínio Ana Madú. A Nuvemshop é motor transacional/backoffice quando integrada, não destino visual obrigatório do cliente.
+11. PIX direto só pode aparecer quando o Core e o ambiente informarem explicitamente que está habilitado e configurado.
+12. Em imagens, descreva apenas o que é visualmente observável. Não afirme tipo de gema, metal, autenticidade, pureza, quilate, procedência, certificação ou valor sem confirmação operacional/humana.
+13. Na linha Ourives, sua função é entender intenção, referências, formato, estilo, uso, preferências e restrições; organizar alternativas conceituais e preparar um briefing claro. A viabilidade técnica e o orçamento final são sempre analisados pela Ana Madú/humano responsável.
+14. Quando o cliente aprovar uma prancha/conceito Ourives, resuma objetivamente: peça, estilo, pedra/referência, metal/acabamento, restrições, imagens recebidas, dúvidas pendentes e o que precisa ser validado para orçamento.
 
-A Ana Madú trabalha com um catálogo real sincronizado da loja oficial. Existe também uma jornada denominada Ourives para projetos personalizados; não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente. Quando fizer sentido, ajude a estruturar o briefing e encaminhar a próxima ação validada.`;
+A Ana Madú trabalha com um catálogo real sincronizado da loja oficial. Existe também uma jornada premium denominada Ourives para pedras mais raras e projetos personalizados. Não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente.`;
 
 type Attribution = {
   utm_source?: string;
@@ -32,12 +36,7 @@ type Attribution = {
   referrer?: string;
 };
 
-type CatalogItem = {
-  name?: string;
-  priceLabel?: string;
-  url?: string;
-  status?: string;
-};
+type CatalogItem = { name?: string; priceLabel?: string; url?: string; status?: string };
 
 function sessionId(request: Request) {
   const supplied = request.headers.get('x-anamadu-session')?.trim() ?? '';
@@ -56,6 +55,13 @@ function toMessages(history: Awaited<ReturnType<typeof listConversationHistory>>
 
 function needsCatalogLookup(text: string) {
   return /preç|valor|produto|peça|colar|brinco|anel|pulseira|tornozeleira|pedra|estoque|dispon|presente|comprar|catálogo|catalogo/i.test(text);
+}
+
+function validImages(input: unknown) {
+  if (!Array.isArray(input)) return [] as string[];
+  return input
+    .filter((value): value is string => typeof value === 'string' && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(value) && value.length <= 3_000_000)
+    .slice(0, 3);
 }
 
 async function liveCatalogContext(request: Request, text: string) {
@@ -83,9 +89,10 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = await request.json().catch(() => null) as { text?: string; attribution?: Attribution } | null;
+        const body = await request.json().catch(() => null) as { text?: string; images?: unknown; attribution?: Attribution } | null;
         const text = body?.text?.trim() ?? '';
-        if (!text) return Response.json({ error: 'empty_message' }, { status: 400 });
+        const images = validImages(body?.images);
+        if (!text && !images.length) return Response.json({ error: 'empty_message' }, { status: 400 });
         if (text.length > 12000) return Response.json({ error: 'message_too_large' }, { status: 413 });
 
         const externalUserId = sessionId(request);
@@ -94,9 +101,9 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
           channel: 'web_chat',
           provider: 'anamadu_front',
           externalUserId,
-          bodyText: text,
+          bodyText: text || '[referências visuais enviadas]',
           endpointAddress: 'https://anamadu.impulsionando.com.br',
-          metadata: { source: 'anamadu_annita_web_chat', attribution: body?.attribution ?? {} },
+          metadata: { source: 'anamadu_annita_web_chat', attribution: body?.attribution ?? {}, image_count: images.length, multimodal: images.length > 0 },
         });
 
         const history = toMessages(await listConversationHistory(ledger.conversation_id, 50));
@@ -104,13 +111,24 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
           ? `\nContexto interno da origem da sessão: campanha ${body.attribution.utm_campaign}; fonte ${body.attribution.utm_source ?? 'não informada'}; meio ${body.attribution.utm_medium ?? 'não informado'}. Não exponha identificadores técnicos ao cliente.`
           : '';
         const catalogContext = await liveCatalogContext(request, text);
+        const messages = [...history];
+        if (images.length) {
+          messages.push({
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Considere também estas referências visuais nesta resposta. Aplique as regras de observação visual e não faça afirmações materiais não verificadas.' },
+              ...images.map((image) => ({ type: 'image', image })),
+            ],
+          } as any);
+        }
+
         const resolved = resolveProvider({});
         const result = streamText({
           model: resolved.model,
           system: SYSTEM + campaignContext + catalogContext,
-          messages: history,
+          messages,
           temperature: 0.2,
-          maxOutputTokens: 900,
+          maxOutputTokens: 1000,
         });
 
         const encoder = new TextEncoder();
@@ -129,7 +147,7 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
                   channel: 'web_chat',
                   provider: 'anamadu_front',
                   endpointId: ledger.endpoint_id,
-                  metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito' },
+                  metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', image_count: images.length, multimodal: images.length > 0 },
                 });
               }
               controller.close();
@@ -144,6 +162,7 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
             'content-type': 'text/plain; charset=utf-8',
             'cache-control': 'no-store',
             'x-conversation-id': ledger.conversation_id,
+            'x-annita-multimodal': images.length ? 'true' : 'false',
           },
         });
       },
