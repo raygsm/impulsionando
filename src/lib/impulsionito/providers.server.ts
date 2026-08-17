@@ -1,9 +1,9 @@
 /**
  * Camada de Provedores LLM — server-only.
  *
- * Cada cliente pode exigir provedor estrito sem alterar o comportamento
- * dos demais clientes. Quando allowFallback=false, somente o provedor
- * explicitamente solicitado é considerado.
+ * Cada cliente pode exigir provedor e credencial estritos sem alterar o
+ * comportamento dos demais clientes. Quando allowFallback=false, somente o
+ * provedor explicitamente solicitado é considerado.
  */
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
@@ -23,11 +23,19 @@ export interface ResolvedProvider {
   modelId: string;
 }
 
-function tryProvider(id: LlmProviderId, requestedModel: string | undefined): ResolvedProvider | null {
+interface ProviderCredentialOverrides {
+  openaiApiKey?: string;
+}
+
+function tryProvider(
+  id: LlmProviderId,
+  requestedModel: string | undefined,
+  credentials: ProviderCredentialOverrides = {},
+): ResolvedProvider | null {
   const modelId = requestedModel && requestedModel.trim() ? requestedModel.trim() : DEFAULT_MODEL_BY_PROVIDER[id];
 
   if (id === "openai") {
-    const key = process.env.OPENAI_API_KEY;
+    const key = credentials.openaiApiKey?.trim() || process.env.OPENAI_API_KEY?.trim();
     if (!key) return null;
     const provider = createOpenAICompatible({
       name: "openai",
@@ -50,19 +58,19 @@ function tryProvider(id: LlmProviderId, requestedModel: string | undefined): Res
 
 export interface ResolveOptions {
   llm?: Partial<LlmConfig>;
-  /**
-   * false = fail closed no provedor solicitado. Útil para clientes que
-   * proíbem fallback por política, como a RioMed.
-   */
+  /** false = fail closed no provedor solicitado. */
   allowFallback?: boolean;
+  /** Credencial OpenAI específica do cliente/instância. Nunca expor no client. */
+  openaiApiKey?: string;
 }
 
 export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
   const requested: LlmProviderId = opts.llm?.provider ?? "openai";
   const model = opts.llm?.model;
+  const credentials = { openaiApiKey: opts.openaiApiKey };
 
   if (opts.allowFallback === false) {
-    const resolved = tryProvider(requested, model);
+    const resolved = tryProvider(requested, model, credentials);
     if (resolved) return resolved;
     throw new Error(`llm_provider_unavailable:${requested}`);
   }
@@ -77,7 +85,7 @@ export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
   }
 
   for (const id of chain) {
-    const resolved = tryProvider(id, id === requested ? model : undefined);
+    const resolved = tryProvider(id, id === requested ? model : undefined, credentials);
     if (resolved) return resolved;
   }
 
