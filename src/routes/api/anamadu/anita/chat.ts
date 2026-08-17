@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { randomUUID } from 'crypto';
 import { streamText, type ModelMessage } from 'ai';
-import { resolveProvider } from '@/lib/impulsionito/providers.server';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { listConversationHistory, recordInboundMessage, recordOutboundMessage } from '@/lib/agents/omnichannel.server';
+
+const MODEL_ID = 'gpt-4o-mini';
 
 const SYSTEM = `Você é Annita, agente virtual oficial da Ana Madú e uma instância especializada CLIENT_INSTANCE do Impulsionito. Fale em português do Brasil com elegância, acolhimento, objetividade e foco comercial. Você é concierge digital, vendedora, assistente comercial, agente de relacionamento e suporte da Ana Madú — não um chatbot genérico.
 
@@ -52,6 +54,17 @@ function validImages(input: unknown) {
   return input.filter((value): value is string => typeof value === 'string' && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(value) && value.length <= 3_000_000).slice(0, 3);
 }
 
+function annitaModel() {
+  const key = process.env.ANAMADU_OPENAI_API_KEY?.trim();
+  if (!key) throw new Error('anamadu_openai_key_unavailable');
+  const provider = createOpenAICompatible({
+    name: 'openai-anamadu',
+    baseURL: 'https://api.openai.com/v1',
+    headers: { Authorization: `Bearer ${key}` },
+  });
+  return provider(MODEL_ID);
+}
+
 async function liveCatalogContext(request: Request, text: string) {
   if (!needsCatalogLookup(text)) return '';
   try {
@@ -83,6 +96,13 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
         if (!text && !images.length) return Response.json({ error: 'empty_message' }, { status: 400 });
         if (text.length > 12000) return Response.json({ error: 'message_too_large' }, { status: 413 });
 
+        let model;
+        try {
+          model = annitaModel();
+        } catch {
+          return Response.json({ error: 'annita_ai_unavailable', provider: 'openai', credentialScope: 'client_specific' }, { status: 503 });
+        }
+
         const externalUserId = sessionId(request);
         const ledger = await recordInboundMessage({
           agentKey: 'anamadu-anita',
@@ -100,8 +120,7 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
         const messages = [...history];
         if (images.length) messages.push({ role: 'user', content: [{ type: 'text', text: 'Considere estas referências visuais nesta resposta. Não faça afirmações materiais não verificadas.' }, ...images.map((image) => ({ type: 'image', image }))] } as any);
 
-        const resolved = resolveProvider({ llm: { provider: 'openai', model: 'gpt-4o-mini' }, allowFallback: false });
-        const result = streamText({ model: resolved.model, system: SYSTEM + campaignContext + catalogContext, messages, temperature: 0.2, maxOutputTokens: 1000 });
+        const result = streamText({ model, system: SYSTEM + campaignContext + catalogContext, messages, temperature: 0.2, maxOutputTokens: 1000 });
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream<Uint8Array>({
@@ -109,13 +128,13 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
             let full = '';
             try {
               for await (const chunk of result.textStream) { full += chunk; controller.enqueue(encoder.encode(chunk)); }
-              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', llm_provider: 'openai', llm_model: resolved.modelId, image_count: images.length, multimodal: images.length > 0 } });
+              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', llm_provider: 'openai', llm_model: MODEL_ID, credential_scope: 'client_specific', image_count: images.length, multimodal: images.length > 0 } });
               controller.close();
             } catch (error) { controller.error(error); }
           },
         });
 
-        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': resolved.modelId, 'x-annita-multimodal': images.length ? 'true' : 'false' } });
+        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': MODEL_ID, 'x-annita-credential-scope': 'client-specific', 'x-annita-multimodal': images.length ? 'true' : 'false' } });
       },
     },
   },
