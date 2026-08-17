@@ -24,7 +24,7 @@ jobs:
             sleep 3
           done
           exit 41
-      - name: Find latest WMP lead execution id
+      - name: Parse latest execution entities safely
         env:
           H: ${{ secrets.VPS_HOST }}
           U: ${{ secrets.VPS_USER }}
@@ -34,5 +34,6 @@ jobs:
           C=n8n-umlg-n8n-1
           sudo docker exec "$C" sh -lc 'rm -rf /tmp/wmp-exec-export && mkdir -p /tmp/wmp-exec-export'
           sudo docker exec "$C" n8n export:entities --outputDir=/tmp/wmp-exec-export --includeExecutionHistoryDataTables=true --includeDataTableRows=false >/dev/null
-          sudo docker exec "$C" sh -lc 'unzip -p /tmp/wmp-exec-export/entities.zip "executionentity*.jsonl" | grep '"'"'"workflowId":"wmpLeadIntake01"'"'"' | tail -8 | sed -E '"'"'s/("id":"[^"]+"|"status":"[^"]+"|"startedAt":"[^"]+"|"stoppedAt":"[^"]+").*/\1/'"'"''
+          sudo docker exec "$C" sh -lc 'unzip -p /tmp/wmp-exec-export/entities.zip "executionentity*.jsonl" > /tmp/all-executionentity.jsonl'
+          sudo docker exec "$C" node -e "const fs=require('fs');const lines=fs.readFileSync('/tmp/all-executionentity.jsonl','utf8').trim().split(/\n/);const rows=lines.map(x=>{try{return JSON.parse(x)}catch{return null}}).filter(Boolean);console.log('count='+rows.length);console.log('keys='+Object.keys(rows.at(-1)||{}).join(','));for(const r of rows.filter(x=>String(x.workflowId||'').toLowerCase().includes('wmp')||String(x.workflowName||'').toLowerCase().includes('wmp')).slice(-12)){console.log(JSON.stringify({id:r.id,workflowId:r.workflowId,workflowName:r.workflowName,status:r.status,startedAt:r.startedAt,stoppedAt:r.stoppedAt,mode:r.mode}));}"
           REMOTE
