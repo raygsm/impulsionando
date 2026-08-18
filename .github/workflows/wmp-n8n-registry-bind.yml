@@ -59,7 +59,7 @@ jobs:
           prove() {
             local id="$1" path="$2" event="$3" slug="$4"
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-bind.json" >/dev/null
-            sudo docker exec -i -e WID="$id" "$C" node - <<'NODE'
+            sudo docker exec -i -e WID="$id" -e EXPECTED_PATH="$path" "$C" node - <<'NODE'
           const fs=require('fs');
           const id=process.env.WID;
           const r=JSON.parse(fs.readFileSync(`/tmp/${id}-bind.json`,'utf8'));
@@ -80,13 +80,9 @@ NODE
             grep -q '"ok":true' "/tmp/$id-bind-probe.out" || exit 57
           }
 
-          export EXPECTED_PATH=wmp-lead-intake
           prove wmpLeadIntake01 wmp-lead-intake wmp.lead.received wmp_lead_intake
-          export EXPECTED_PATH=wmp-proposal-lifecycle
           prove wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent wmp_proposal_lifecycle
-          export EXPECTED_PATH=wmp-dj-booking-lifecycle
           prove wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered wmp_dj_booking_lifecycle
-          export EXPECTED_PATH=wmp-post-event-relationship
           prove wmpPostEvent01 wmp-post-event-relationship wmp.event.completed wmp_post_event_relationship
 
           SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
