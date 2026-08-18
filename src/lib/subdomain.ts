@@ -3,11 +3,10 @@
  */
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
-const COLORS_CANONICAL_HOST = "colorssaude.com.br";
+const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
 const COLORS_LEGACY_HOSTS = new Set([
   "colors.impulsionando.com.br",
-  "colorssaude.impulsionando.com.br",
   "colors-saude.impulsionando.com.br",
   "colors.impulsionando.lovable.app",
   "colorsaude.lovable.app",
@@ -51,7 +50,7 @@ export function canonicalTenantHostRedirect(loc: {
 
   if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return null;
 
-  if (host === "www.colorssaude.com.br" || COLORS_LEGACY_HOSTS.has(host)) {
+  if (COLORS_LEGACY_HOSTS.has(host)) {
     const publicPath = path === "/colors" || path.startsWith("/colors/")
       ? path.slice("/colors".length) || "/"
       : path;
