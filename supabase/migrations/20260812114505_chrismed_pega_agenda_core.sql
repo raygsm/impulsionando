@@ -113,6 +113,10 @@ end;$$;
 revoke all on function public.chrismed_release_appointment_to_pega_agenda(uuid,text,integer) from public,anon;
 grant execute on function public.chrismed_release_appointment_to_pega_agenda(uuid,text,integer) to authenticated;
 
+-- An earlier migration defines the same argument signature with a different
+-- return type. PostgreSQL cannot change a function return type with
+-- CREATE OR REPLACE, so clean schema replays must drop the old contract first.
+drop function if exists public.agenda_claim_open_slot(uuid,uuid,text,text);
 create or replace function public.agenda_claim_open_slot(_slot_id uuid,_professional_id uuid,_ip text default null,_user_agent text default null) returns jsonb language plpgsql security definer set search_path=public,auth as $$
 declare v_slot public.agenda_open_slots%rowtype; v_prof public.agenda_professionals%rowtype; v_rows integer;
 begin
