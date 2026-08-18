@@ -53,21 +53,14 @@ jobs:
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
 
-      - name: Package release and credential
+      - name: Package release
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
-          ANAMADU_OPENAI_API_KEY: ${{ secrets.ANAMADU_OPENAI_API_KEY }}
         run: |
           set -euo pipefail
-          test -n "${ANAMADU_OPENAI_API_KEY:-}"
           tar -czf /tmp/anamadu-current.tgz .output scripts package.json package-lock.json
-          secret_file="$(mktemp)"
-          trap 'rm -f "$secret_file"' EXIT
-          printf 'ANAMADU_OPENAI_API_KEY=%s\n' "$ANAMADU_OPENAI_API_KEY" > "$secret_file"
-          chmod 0600 "$secret_file"
           scp /tmp/anamadu-current.tgz "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/anamadu-current.tgz"
-          scp "$secret_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/anamadu-openai.env"
 
       - name: Publish same release to systemd and Traefik
         env:
@@ -83,14 +76,7 @@ jobs:
           envfile=/etc/impulsionando-core.env
           test -f "$base"
           sudo test -f "$envfile"
-          test -s /tmp/anamadu-openai.env
-
-          tmp="$(mktemp)"
-          sudo grep -v '^ANAMADU_OPENAI_API_KEY=' "$envfile" > "$tmp" || true
-          sudo cat /tmp/anamadu-openai.env >> "$tmp"
-          sudo install -o root -g root -m 0600 "$tmp" "$envfile"
-          rm -f "$tmp" /tmp/anamadu-openai.env
-          sudo grep -q '^ANAMADU_OPENAI_API_KEY=.' "$envfile"
+          sudo grep -q '^OPENAI_API_KEY=.' "$envfile"
 
           mkdir -p "$release"
           tar -xzf /tmp/anamadu-current.tgz -C "$release"
@@ -150,6 +136,7 @@ jobs:
             sleep 2
           done
           grep -q '"openaiConfigured":true' /tmp/a-health
+          grep -q '"openaiCredentialScope":"impulsionando_central"' /tmp/a-health
           grep -Eq '"productCount":[1-9][0-9]*' /tmp/a-health
           echo "ANAMADU_EDGE_PASS home=$home health=$health catalog=$catalog"
           REMOTE
@@ -164,6 +151,7 @@ jobs:
             echo "PUBLIC home=$home health=$health catalog=$catalog attempt=$attempt"
             if [ "$home" = '200' ] && [ "$health" = '200' ] && [ "$catalog" = '200' ]; then
               grep -q '"openaiConfigured":true' /tmp/public-health
+              grep -q '"openaiCredentialScope":"impulsionando_central"' /tmp/public-health
               grep -Eq '"productCount":[1-9][0-9]*' /tmp/public-health
               exit 0
             fi
