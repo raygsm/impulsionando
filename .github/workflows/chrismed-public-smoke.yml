@@ -96,6 +96,41 @@ jobs:
           check auth 'https://chrismed.impulsionando.com.br/auth' 'Entrar|Acesso|CHRISMED|CrisMed'
           check profissional 'https://chrismed.impulsionando.com.br/agenda/profissional' 'Profissional|Agenda|CHRISMED|CrisMed'
 
+      - name: Reject development and mock copy in production
+        run: |
+          set -euo pipefail
+          for file in /tmp/chrismed-home.html /tmp/chrismed-agendar.html /tmp/chrismed-eventos.html /tmp/chrismed-auth.html /tmp/chrismed-profissional.html; do
+            if grep -Eqi 'Dados de demonstração|Pendente Codex|backend \(Codex\)|mock visual|frontend-only' "$file"; then
+              echo "Development/mock copy leaked into production: $file"
+              grep -Ein 'Dados de demonstração|Pendente Codex|backend \(Codex\)|mock visual|frontend-only' "$file" || true
+              exit 1
+            fi
+          done
+          echo 'CHRISMED_PRODUCTION_COPY=PASS'
+
+      - name: Verify deployed coupon bundle contract
+        run: |
+          set -euo pipefail
+          html=/tmp/chrismed-agendar.html
+          : > /tmp/chrismed-js-bundle.txt
+          grep -Eo 'src="[^"]+\.js[^"]*"' "$html" | sed -E 's/^src="|"$//g' | while read -r asset; do
+            case "$asset" in
+              http*) url="$asset" ;;
+              /*) url="https://chrismed.impulsionando.com.br$asset" ;;
+              *) url="https://chrismed.impulsionando.com.br/$asset" ;;
+            esac
+            curl --location --silent --show-error --max-time 30 "$url" >> /tmp/chrismed-js-bundle.txt
+            printf '\n' >> /tmp/chrismed-js-bundle.txt
+          done
+          test -s /tmp/chrismed-js-bundle.txt
+          grep -Fq 'chrismed_set_coupon_checkout_intent' /tmp/chrismed-js-bundle.txt || { echo 'Correct coupon RPC is not in deployed bundle'; exit 1; }
+          grep -Fq 'Fechar janela do cupom' /tmp/chrismed-js-bundle.txt || { echo 'Coupon close control is not in deployed bundle'; exit 1; }
+          if grep -Fq 'chrismed_apply_coupon_checkout_v2' /tmp/chrismed-js-bundle.txt; then
+            echo 'Obsolete coupon RPC is still in deployed bundle'
+            exit 1
+          fi
+          echo 'CHRISMED_COUPON_BUNDLE=PASS'
+
       - name: Verify legacy typo is not canonical
         run: |
           set -euo pipefail
