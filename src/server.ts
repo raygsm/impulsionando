@@ -85,11 +85,44 @@ function isHtmlDocumentRequest(request: Request): boolean {
   return accept.includes("text/html") || accept.includes("application/xhtml+xml");
 }
 
-function wmpRootBootstrapResponse(request: Request): Response {
+const WMP_GLOBAL_PATHS = new Set([
+  "/auth",
+  "/dashboard",
+  "/seguranca/senha",
+  "/reset-password",
+  "/reset-password-sent",
+]);
+
+const WMP_BYPASS_PREFIXES = [
+  "/api/",
+  "/assets/",
+  "/.well-known/",
+  "/favicon",
+  "/robots",
+  "/sitemap",
+  "/manifest",
+];
+
+function shouldBootstrapWmpDocument(url: URL, request: Request): boolean {
+  if (!isHtmlDocumentRequest(request)) return false;
+  if (url.hostname.toLowerCase() !== "wmp.impulsionando.com.br") return false;
+  const path = url.pathname || "/";
+  if (path === "/wmp" || path.startsWith("/wmp/")) return false;
+  if (WMP_GLOBAL_PATHS.has(path)) return false;
+  if (WMP_BYPASS_PREFIXES.some((prefix) => path.startsWith(prefix))) return false;
+  return true;
+}
+
+function wmpBootstrapResponse(request: Request, url: URL): Response {
+  const cleanPath = url.pathname || "/";
+  const targetPath = cleanPath === "/" ? "/wmp/" : `/wmp${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
+  const target = `${targetPath}${url.search}${url.hash}`;
+  const escapedTarget = JSON.stringify(target);
+  const escapedHref = target.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const headers = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
   if (request.method === "HEAD") return new Response(null, { status: 200, headers });
   return new Response(
-    '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WMP — Wagner Miller Produções</title><meta http-equiv="refresh" content="0;url=/wmp/"><script>location.replace("/wmp/"+location.search+location.hash)</script></head><body><main><p>WMP — Wagner Miller Produções</p><p><a href="/wmp/">Continuar para WMP</a></p></main></body></html>',
+    `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WMP — Wagner Miller Produções</title><meta http-equiv="refresh" content="0;url=${escapedHref}"><script>location.replace(${escapedTarget})</script></head><body><main><p>WMP — Wagner Miller Produções</p><p><a href="${escapedHref}">Continuar para WMP</a></p></main></body></html>`,
     { status: 200, headers },
   );
 }
@@ -99,15 +132,13 @@ export default {
     try {
       const url = new URL(request.url);
 
-      // Keep the WMP deploy health gate on HTTP 200 while preventing the universal
-      // app from hydrating the visible root path as Impulsionando. This tiny root
-      // document never boots TanStack; it immediately moves the browser to /wmp/.
-      if (
-        isHtmlDocumentRequest(request) &&
-        url.hostname.toLowerCase() === "wmp.impulsionando.com.br" &&
-        (url.pathname === "/" || url.pathname === "")
-      ) {
-        return applySecurityHeaders(wmpRootBootstrapResponse(request));
+      // Public WMP paths are namespaced internally under /wmp. An invisible SSR
+      // rewrite leaves the browser on the clean path and lets TanStack hydrate a
+      // different route. Serve a 200 bootstrap document instead, preserving the
+      // deploy health contract while moving the browser to the canonical app path
+      // before the universal client bundle is ever loaded.
+      if (shouldBootstrapWmpDocument(url, request)) {
+        return applySecurityHeaders(wmpBootstrapResponse(request, url));
       }
 
       const canonicalTenantUrl = canonicalTenantHostRedirect({
