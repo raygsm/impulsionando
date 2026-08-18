@@ -68,10 +68,10 @@ function validImages(input: unknown) {
 }
 
 function annitaModel() {
-  const key = process.env.ANAMADU_OPENAI_API_KEY?.trim();
-  if (!key) throw new Error('anamadu_openai_key_unavailable');
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) throw new Error('impulsionando_openai_key_unavailable');
   const provider = createOpenAICompatible({
-    name: 'openai-anamadu',
+    name: 'openai-impulsionando',
     baseURL: 'https://api.openai.com/v1',
     headers: { Authorization: `Bearer ${key}` },
   });
@@ -113,7 +113,7 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
         try {
           model = annitaModel();
         } catch {
-          return Response.json({ error: 'annita_ai_unavailable', provider: 'openai', credentialScope: 'client_specific' }, { status: 503 });
+          return Response.json({ error: 'annita_ai_unavailable', provider: 'openai', credentialScope: 'impulsionando_central' }, { status: 503 });
         }
 
         const externalUserId = sessionId(request);
@@ -141,13 +141,13 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
             let full = '';
             try {
               for await (const chunk of result.textStream) { full += chunk; controller.enqueue(encoder.encode(chunk)); }
-              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', specialty: 'gemology_and_ourives', llm_provider: 'openai', llm_model: MODEL_ID, credential_scope: 'client_specific', image_count: images.length, multimodal: images.length > 0 } });
+              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', specialty: 'gemology_and_ourives', llm_provider: 'openai', llm_model: MODEL_ID, credential_scope: 'impulsionando_central', image_count: images.length, multimodal: images.length > 0 } });
               controller.close();
             } catch (error) { controller.error(error); }
           },
         });
 
-        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': MODEL_ID, 'x-annita-credential-scope': 'client-specific', 'x-annita-specialty': 'gemology-and-ourives', 'x-annita-multimodal': images.length ? 'true' : 'false' } });
+        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': MODEL_ID, 'x-annita-credential-scope': 'impulsionando-central', 'x-annita-specialty': 'gemology-and-ourives', 'x-annita-multimodal': images.length ? 'true' : 'false' } });
       },
     },
   },
