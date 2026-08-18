@@ -25,19 +25,17 @@ export type OliverContextEventDetail = Partial<Omit<OliverContext, 'quickReplies
   quickReplies?: OliverQuickReply[] | string[];
 };
 
-const CTA_AGENDAR = 'Ir para o agendamento';
-
 export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
   home: {
     key: 'home',
     eyebrow: 'CHRISMED',
     greeting:
-      'Sou Oliver, concierge da CHRISMED. Posso orientar sobre modalidades, autoridade médica ou próximos passos administrativos.',
+      'Sou Oliver, concierge da CHRISMED. Posso orientar pacientes, profissionais da saúde, empresas e equipes de RH ou SST para o caminho correto.',
     quickReplies: [
       { label: 'Quero agendar', kind: 'navigate', to: '/chrismed/agendar' },
       { label: 'Conhecer a Dra. Christiane', kind: 'navigate', to: '/chrismed/dra-cristiane' },
       { label: 'Medicina Ambulatorial', kind: 'navigate', to: '/chrismed/clinica' },
-      { label: 'Empresas · Medicina Ocupacional', kind: 'navigate', to: '/chrismed/ocupacional' },
+      { label: 'Empresas · Saúde Corporativa', kind: 'navigate', to: '/chrismed/medicina-ocupacional' },
     ],
   },
   dra: {
@@ -67,34 +65,46 @@ export const OLIVER_CONTEXTS: Record<string, OliverContext> = {
   },
   ocupacional: {
     key: 'ocupacional',
-    eyebrow: 'Medicina Ocupacional',
+    eyebrow: 'CHRISMED Saúde Corporativa',
     greeting:
-      'Posso ajudar com ASO, exames ocupacionais ou atendimento para sua empresa.',
+      'Posso orientar sua empresa sobre medicina ocupacional, ASO, PCMSO, gestão de colaboradores, programas de saúde, indicadores e jornadas corporativas. Primeiro, identifique seu papel para eu direcionar corretamente.',
     quickReplies: [
       {
-        label: 'Sou uma empresa',
+        label: 'Sou RH ou Gestão de Pessoas',
         kind: 'info',
         message:
-          'A equipe CHRISMED orienta a implantação conforme o perfil da empresa: unidades, volume de colaboradores e periodicidade. Deixe empresa, responsável e melhor horário de contato.',
+          'Para RH, a CHRISMED organiza agenda, ASOs, convocações, pendências, comunicação, campanhas e indicadores. Informe empresa, CNPJ, número aproximado de colaboradores, quantidade de unidades/cidades e principal necessidade para dimensionarmos a operação.',
+      },
+      {
+        label: 'Sou de SST',
+        kind: 'info',
+        message:
+          'Para SST, o foco é PCMSO, ASO, riscos, periodicidades, exames complementares, documentos, vencimentos e rastreabilidade. Informe empresa, CNPJ, número de colaboradores, unidades, principais riscos e como a operação é feita hoje.',
+      },
+      {
+        label: 'Sou da Diretoria',
+        kind: 'info',
+        message:
+          'Para diretoria, a CHRISMED estrutura governança, previsibilidade, indicadores, utilização, pendências, custo e expansão dos programas de saúde. Informe empresa, porte aproximado, unidades e o resultado que deseja melhorar.',
+      },
+      {
+        label: 'Sou de Compras ou Financeiro',
+        kind: 'info',
+        message:
+          'Podemos estruturar escopo, SLA, volume, custo por colaborador ou atendimento, centros de custo e modelo contratual. Informe empresa, CNPJ, quantidade aproximada de vidas, cidades e serviços que precisam ser cotados.',
       },
       {
         label: 'Sou colaborador',
         kind: 'info',
         message:
-          'Se sua empresa já é cliente CHRISMED, você receberá pelo RH as instruções e o link do agendamento. Se ainda não, oriente sua empresa a iniciar o atendimento com a CHRISMED.',
+          'Se sua empresa já é atendida pela CHRISMED, use as instruções recebidas do RH ou informe o nome da empresa e o tipo de atendimento necessário. Dados clínicos individuais permanecem protegidos e não são compartilhados com áreas administrativas da empresa fora das hipóteses permitidas.',
       },
-      { label: 'Agendar ASO', kind: 'navigate', to: '/chrismed/agendar' },
+      { label: 'Agendar ASO', kind: 'navigate', to: '/chrismed/agendar', search: { service: 'aso' } },
       {
-        label: 'Consultar orientações',
+        label: 'Quero uma apresentação corporativa',
         kind: 'info',
         message:
-          'Os exames ocupacionais confirmados na CHRISMED são: admissional, periódico, retorno ao trabalho, mudança de função e demissional (ASO). As condições e a preparação são apresentadas durante o agendamento.',
-      },
-      {
-        label: 'Falar com a equipe',
-        kind: 'info',
-        message:
-          'A equipe CHRISMED responde no próximo horário administrativo. Deixe nome, empresa (quando aplicável) e contato preferencial.',
+          'Para preparar uma apresentação adequada, informe: nome, empresa, cargo/setor, CNPJ, número aproximado de colaboradores, cidades/unidades, principal necessidade, prazo, telefone, e-mail e melhor horário de contato.',
       },
     ],
   },
@@ -166,7 +176,7 @@ export function resolveOliverContext(pathname: string): OliverContext {
   if (pathname === '/chrismed' || pathname === '/chrismed/') return OLIVER_CONTEXTS.home;
   if (pathname.startsWith('/chrismed/dra-cristiane')) return OLIVER_CONTEXTS.dra;
   if (pathname.startsWith('/chrismed/clinica')) return OLIVER_CONTEXTS.ambulatorial;
-  if (pathname.startsWith('/chrismed/ocupacional')) return OLIVER_CONTEXTS.ocupacional;
+  if (pathname.startsWith('/chrismed/ocupacional') || pathname.startsWith('/chrismed/medicina-ocupacional') || pathname.startsWith('/chrismed/empresa')) return OLIVER_CONTEXTS.ocupacional;
   if (pathname.startsWith('/chrismed/internacional')) return OLIVER_CONTEXTS.gms;
   if (pathname.startsWith('/chrismed/agendar')) return OLIVER_CONTEXTS.agendar;
   if (pathname.startsWith('/chrismed/medicos')) return OLIVER_CONTEXTS.medicos;
