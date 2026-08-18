@@ -14,6 +14,20 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Verify published WMP domain-lock release marker
+        run: |
+          set -euo pipefail
+          marker_url='https://wmp.impulsionando.com.br/.well-known/wmp-domain-lock.txt'
+          marker_file="$(mktemp)"
+          code="$(curl --silent --show-error --max-time 30 -H 'Cache-Control: no-cache' -o "$marker_file" -w '%{http_code}' "$marker_url")"
+          echo "WMP_RELEASE_MARKER HTTP=$code"
+          [ "$code" = '200' ] || { echo '::error::WMP release marker unavailable'; exit 77; }
+          grep -Fxq 'WMP_DOMAIN_LOCK_RELEASE=2026-08-18-v1' "$marker_file" || { echo '::error::Unexpected WMP release marker'; exit 78; }
+          grep -Fxq 'WMP_CANONICAL_HOST=wmp.impulsionando.com.br' "$marker_file" || { echo '::error::Unexpected WMP canonical host marker'; exit 79; }
+          grep -Fxq 'WMP_DOMAIN_ISOLATION=ENFORCED' "$marker_file" || { echo '::error::WMP isolation marker missing'; exit 80; }
+          rm -f "$marker_file"
+          echo 'WMP_RELEASE_MARKER=PASS'
+
       - name: Verify WMP never leaves its canonical host
         id: domain_gate
         run: |
