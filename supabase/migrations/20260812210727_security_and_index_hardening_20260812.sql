@@ -1,7 +1,16 @@
-revoke execute on function public.chrismed_create_patient_substitution_decision() from public, anon, authenticated;
-revoke execute on function public.chrismed_notify_professional_cancellation() from public, anon, authenticated;
-grant execute on function public.chrismed_create_patient_substitution_decision() to service_role;
-grant execute on function public.chrismed_notify_professional_cancellation() to service_role;
+do $security$
+begin
+  if to_regprocedure('public.chrismed_create_patient_substitution_decision()') is not null then
+    execute 'revoke execute on function public.chrismed_create_patient_substitution_decision() from public, anon, authenticated';
+    execute 'grant execute on function public.chrismed_create_patient_substitution_decision() to service_role';
+  end if;
+
+  if to_regprocedure('public.chrismed_notify_professional_cancellation()') is not null then
+    execute 'revoke execute on function public.chrismed_notify_professional_cancellation() from public, anon, authenticated';
+    execute 'grant execute on function public.chrismed_notify_professional_cancellation() to service_role';
+  end if;
+end
+$security$;
 
 drop index if exists public.uq_company_settings_company_key;
 
