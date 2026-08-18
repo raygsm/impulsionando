@@ -1,92 +1,48 @@
-name: Colors legacy subdomain cleanup
+name: Colors subdomain DNS audit
 
 on:
-  push:
-    paths:
-      - .github/workflows/colors-cloudflare-origin-cutover.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: colors-legacy-subdomain-cleanup
+  group: colors-subdomain-dns-audit
   cancel-in-progress: false
 
 jobs:
-  cleanup:
+  audit:
     runs-on: ubuntu-latest
     environment: production
     env:
-      DOMAIN: colorssaude.com.br
+      DOMAIN: colorssaude.impulsionando.com.br
       CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       IMPULSIONANDO_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
-      - name: Validate available Cloudflare credentials
+      - name: Validate Cloudflare credentials
         run: |
           set -euo pipefail
           for value in CF_API_TOKEN IMPULSIONANDO_ZONE_ID; do
             test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }
           done
-          IMPULSIONANDO_ZONE_ID="$(printf '%s' "$IMPULSIONANDO_ZONE_ID" | tr -d '[:space:]')"
-          printf 'IMPULSIONANDO_ZONE_ID=%s\n' "$IMPULSIONANDO_ZONE_ID" >> "$GITHUB_ENV"
 
-      - name: Validate official Colors domain is reachable
+      - name: Audit official Colors subdomain without mutations
         run: |
           set -euo pipefail
-          code=000
-          for attempt in $(seq 1 6); do
-            code="$(curl -sS -L -A 'Mozilla/5.0 ColorsCanonical/1.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-official -w '%{http_code}' --max-time 30 "https://$DOMAIN/" || true)"
-            echo "COLORS_OFFICIAL_PUBLIC attempt=$attempt HTTP=$code"
-            [ "$code" = '200' ] && break
-            sleep 5
-          done
-          [ "$code" = '200' ] || { echo '::error::Official Colors domain is not reachable; legacy DNS cleanup aborted'; exit 20; }
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$IMPULSIONANDO_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" \
+            -o /tmp/colors-subdomain.json
+          jq -e '.success == true' /tmp/colors-subdomain.json >/dev/null
+          count="$(jq '[.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME")] | length' /tmp/colors-subdomain.json)"
+          echo "COLORS_SUBDOMAIN_DNS_RECORDS=$count"
+          [ "$count" -ge 1 ] || { echo '::error::Official Colors subdomain has no routable DNS record'; exit 20; }
 
-      - name: Backup legacy Colors DNS records
+      - name: Validate official Colors subdomain reachability
         run: |
           set -euo pipefail
-          : > /tmp/colors-legacy-before.ndjson
-          for legacy in colors.impulsionando.com.br colorssaude.impulsionando.com.br colors-saude.impulsionando.com.br; do
-            curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-              "https://api.cloudflare.com/client/v4/zones/$IMPULSIONANDO_ZONE_ID/dns_records?name=$legacy&per_page=100" -o /tmp/legacy-one.json
-            jq -e '.success == true' /tmp/legacy-one.json >/dev/null
-            jq -c --arg legacy "$legacy" '{legacy:$legacy,result:.result}' /tmp/legacy-one.json >> /tmp/colors-legacy-before.ndjson
-          done
-
-      - name: Delete duplicate Colors subdomains
-        run: |
-          set -euo pipefail
-          for legacy in colors.impulsionando.com.br colorssaude.impulsionando.com.br colors-saude.impulsionando.com.br; do
-            curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-              "https://api.cloudflare.com/client/v4/zones/$IMPULSIONANDO_ZONE_ID/dns_records?name=$legacy&per_page=100" -o /tmp/legacy-delete.json
-            jq -e '.success == true' /tmp/legacy-delete.json >/dev/null
-            jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/legacy-delete.json | while read -r id; do
-              [ -n "$id" ] || continue
-              curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-                "https://api.cloudflare.com/client/v4/zones/$IMPULSIONANDO_ZONE_ID/dns_records/$id" >/dev/null
-            done
-            echo "COLORS_LEGACY_DNS_DELETED $legacy"
-          done
-
-      - name: Verify no duplicate Colors DNS remains
-        run: |
-          set -euo pipefail
-          for legacy in colors.impulsionando.com.br colorssaude.impulsionando.com.br colors-saude.impulsionando.com.br; do
-            curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-              "https://api.cloudflare.com/client/v4/zones/$IMPULSIONANDO_ZONE_ID/dns_records?name=$legacy&per_page=100" -o /tmp/legacy-check.json
-            jq -e '.success == true' /tmp/legacy-check.json >/dev/null
-            count="$(jq '[.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME")] | length' /tmp/legacy-check.json)"
-            echo "COLORS_LEGACY_DNS_COUNT $legacy=$count"
-            [ "$count" = '0' ] || exit 41
-          done
-          echo 'COLORS_LEGACY_SUBDOMAINS=REMOVED'
-          echo 'COLORS_CANONICAL_DOMAIN=colorssaude.com.br'
-
-      - name: Upload DNS backup
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: colors-legacy-dns-backup-${{ github.run_id }}
-          path: /tmp/colors-legacy-before.ndjson
-          retention-days: 30
+          code="$(curl -sS -A 'Mozilla/5.0 ColorsSubdomainAudit/1.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-official -w '%{http_code}' --max-time 30 "https://$DOMAIN/" || true)"
+          echo "COLORS_SUBDOMAIN_PUBLIC_HTTP=$code"
+          [ "$code" != '000' ] || { echo '::error::Official Colors subdomain is unreachable'; exit 21; }
+          echo 'COLORS_CLIENT_OWNED_DOMAINS=UNTOUCHED'
