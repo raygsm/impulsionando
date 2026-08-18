@@ -1,0 +1,262 @@
+name: Provision Evolution API - Impulsionando
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - homologacao/impulsionando-go-live-20260817
+    paths:
+      - .github/workflows/provision-evolution-homologacao.yml
+
+concurrency:
+  group: provision-evolution-impulsionando
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    name: Provision private WhatsApp provider
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${VPS_HOST:-}"
+          test -n "${VPS_SSH_KEY:-}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Provision Evolution API v2.3.7 on the Core private network
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+
+          STACK_DIR=/opt/impulsionando/evolution
+          CORE_COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          CORE_ENV=/etc/impulsionando-core.env
+          CORE_ENV_BACKUP=/etc/impulsionando-core.env.pre-evolution
+          EVOLUTION_CONTAINER=impulsionando-evolution-api
+          EVOLUTION_INSTANCE=impulsionando-impulsionito
+
+          test -f "$CORE_COMPOSE"
+          sudo docker inspect impulsionando-core >/dev/null
+
+          CORE_NETWORK="$(sudo docker inspect impulsionando-core --format '{{range $name, $cfg := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' | head -n1)"
+          test -n "$CORE_NETWORK"
+
+          sudo install -d -m 0700 "$STACK_DIR"
+
+          if ! sudo test -f "$STACK_DIR/.env"; then
+            API_KEY="$(openssl rand -hex 32)"
+            DB_PASSWORD="$(openssl rand -hex 32)"
+            REDIS_PASSWORD="$(openssl rand -hex 32)"
+            tmp="$(mktemp)"
+            cat > "$tmp" <<EOF
+EVOLUTION_API_KEY=$API_KEY
+EVOLUTION_DB_PASSWORD=$DB_PASSWORD
+EVOLUTION_REDIS_PASSWORD=$REDIS_PASSWORD
+CORE_NETWORK=$CORE_NETWORK
+EOF
+            sudo install -o root -g root -m 0600 "$tmp" "$STACK_DIR/.env"
+            rm -f "$tmp"
+            unset API_KEY DB_PASSWORD REDIS_PASSWORD
+          else
+            tmp="$(mktemp)"
+            sudo grep -v '^CORE_NETWORK=' "$STACK_DIR/.env" > "$tmp"
+            printf 'CORE_NETWORK=%s\n' "$CORE_NETWORK" >> "$tmp"
+            sudo install -o root -g root -m 0600 "$tmp" "$STACK_DIR/.env"
+            rm -f "$tmp"
+          fi
+
+          sudo tee "$STACK_DIR/docker-compose.yml" >/dev/null <<'YAML'
+          services:
+            postgres:
+              image: postgres:16-alpine
+              container_name: impulsionando-evolution-postgres
+              restart: unless-stopped
+              environment:
+                POSTGRES_DB: evolution
+                POSTGRES_USER: evolution
+                POSTGRES_PASSWORD: ${EVOLUTION_DB_PASSWORD}
+              volumes:
+                - evolution_postgres_data:/var/lib/postgresql/data
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+              networks:
+                - evolution_private
+
+            redis:
+              image: redis:7-alpine
+              container_name: impulsionando-evolution-redis
+              restart: unless-stopped
+              command: ["redis-server", "--appendonly", "yes", "--requirepass", "${EVOLUTION_REDIS_PASSWORD}"]
+              volumes:
+                - evolution_redis_data:/data
+              healthcheck:
+                test: ["CMD-SHELL", "redis-cli -a \"${EVOLUTION_REDIS_PASSWORD}\" ping | grep PONG"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+              networks:
+                - evolution_private
+
+            evolution-api:
+              image: evoapicloud/evolution-api:v2.3.7
+              container_name: impulsionando-evolution-api
+              restart: unless-stopped
+              depends_on:
+                postgres:
+                  condition: service_healthy
+                redis:
+                  condition: service_healthy
+              environment:
+                SERVER_NAME: impulsionando-evolution
+                SERVER_TYPE: http
+                SERVER_PORT: 8080
+                SERVER_URL: http://impulsionando-evolution-api:8080
+                TELEMETRY_ENABLED: "false"
+                PROMETHEUS_METRICS: "false"
+                CORS_ORIGIN: "https://impulsionando.com.br"
+                CORS_METHODS: "GET,POST,PUT,DELETE"
+                CORS_CREDENTIALS: "true"
+                LOG_LEVEL: "ERROR,WARN,INFO"
+                LOG_BAILEYS: "error"
+                DEL_INSTANCE: "false"
+                DATABASE_PROVIDER: postgresql
+                DATABASE_CONNECTION_URI: postgresql://evolution:${EVOLUTION_DB_PASSWORD}@postgres:5432/evolution?schema=evolution_api
+                DATABASE_CONNECTION_CLIENT_NAME: impulsionando
+                DATABASE_SAVE_DATA_INSTANCE: "true"
+                DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+                DATABASE_SAVE_MESSAGE_UPDATE: "true"
+                DATABASE_SAVE_DATA_CONTACTS: "true"
+                DATABASE_SAVE_DATA_CHATS: "true"
+                DATABASE_SAVE_DATA_LABELS: "true"
+                DATABASE_SAVE_DATA_HISTORIC: "true"
+                CACHE_REDIS_ENABLED: "true"
+                CACHE_REDIS_URI: redis://:${EVOLUTION_REDIS_PASSWORD}@redis:6379/6
+                CACHE_REDIS_TTL: 604800
+                CACHE_REDIS_PREFIX_KEY: impulsionando_evolution
+                CACHE_REDIS_SAVE_INSTANCES: "false"
+                CACHE_LOCAL_ENABLED: "false"
+                WEBHOOK_GLOBAL_ENABLED: "false"
+                WEBSOCKET_ENABLED: "false"
+                RABBITMQ_ENABLED: "false"
+                SQS_ENABLED: "false"
+                KAFKA_ENABLED: "false"
+                OPENAI_ENABLED: "false"
+                N8N_ENABLED: "false"
+                AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+                AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "false"
+                CONFIG_SESSION_PHONE_CLIENT: Impulsionando
+                CONFIG_SESSION_PHONE_NAME: Chrome
+                QRCODE_LIMIT: 30
+                LANGUAGE: pt-BR
+              volumes:
+                - evolution_instances:/evolution/instances
+              expose:
+                - "8080"
+              networks:
+                - evolution_private
+                - core_private
+
+          volumes:
+            evolution_postgres_data:
+            evolution_redis_data:
+            evolution_instances:
+
+          networks:
+            evolution_private:
+              driver: bridge
+            core_private:
+              external: true
+              name: ${CORE_NETWORK}
+          YAML
+          sudo chmod 0600 "$STACK_DIR/docker-compose.yml"
+
+          cd "$STACK_DIR"
+          sudo docker compose --env-file .env pull
+          sudo docker compose --env-file .env up -d
+
+          for attempt in $(seq 1 60); do
+            if sudo docker run --rm --network "$CORE_NETWORK" curlimages/curl:8.12.1 -fsS --max-time 5 http://impulsionando-evolution-api:8080/ >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              sudo docker logs --tail 200 "$EVOLUTION_CONTAINER" || true
+              exit 61
+            fi
+            sleep 2
+          done
+
+          API_KEY="$(sudo sed -n 's/^EVOLUTION_API_KEY=//p' "$STACK_DIR/.env" | head -n1)"
+          test -n "$API_KEY"
+
+          # Create the dedicated Impulsionando instance idempotently. It remains unpaired until QR scan.
+          create_code="$(sudo docker run --rm --network "$CORE_NETWORK" curlimages/curl:8.12.1 -sS -o /tmp/evo-create.json -w '%{http_code}' \
+            -X POST http://impulsionando-evolution-api:8080/instance/create \
+            -H 'content-type: application/json' \
+            -H "apikey: $API_KEY" \
+            --data "{\"instanceName\":\"$EVOLUTION_INSTANCE\",\"qrcode\":true,\"integration\":\"WHATSAPP-BAILEYS\"}" || true)"
+          case "$create_code" in
+            200|201|409|403) ;;
+            *) echo "Unexpected Evolution instance create HTTP=$create_code"; sudo docker logs --tail 120 "$EVOLUTION_CONTAINER" || true; exit 62 ;;
+          esac
+
+          # Inject only server-side adapter references into the existing Core env.
+          sudo cp "$CORE_ENV" "$CORE_ENV_BACKUP"
+          tmp="$(mktemp)"
+          sudo grep -v '^IMPULSIONANDO_EVOLUTION_BASE_URL=' "$CORE_ENV" \
+            | grep -v '^IMPULSIONANDO_EVOLUTION_API_KEY=' \
+            | grep -v '^IMPULSIONANDO_EVOLUTION_INSTANCE=' > "$tmp"
+          printf 'IMPULSIONANDO_EVOLUTION_BASE_URL=http://impulsionando-evolution-api:8080\n' >> "$tmp"
+          printf 'IMPULSIONANDO_EVOLUTION_API_KEY=%s\n' "$API_KEY" >> "$tmp"
+          printf 'IMPULSIONANDO_EVOLUTION_INSTANCE=%s\n' "$EVOLUTION_INSTANCE" >> "$tmp"
+          sudo install -o root -g root -m 0600 "$tmp" "$CORE_ENV"
+          rm -f "$tmp"
+          unset API_KEY
+
+          # Recreate only the Core container so it receives the new environment.
+          cd /opt/impulsionando/deploy/hostinger
+          if ! sudo docker compose -f "$CORE_COMPOSE" up -d --no-build --force-recreate impulsionando-core; then
+            sudo cp "$CORE_ENV_BACKUP" "$CORE_ENV"
+            sudo docker compose -f "$CORE_COMPOSE" up -d --no-build --force-recreate impulsionando-core || true
+            exit 63
+          fi
+
+          for attempt in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null | head -c 80 || true)"
+            if [ -n "$ip" ] && curl -fsS -H 'Host: impulsionando.com.br' -H 'Accept: text/html' "http://$ip:3000/" >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -eq 45 ]; then
+              sudo cp "$CORE_ENV_BACKUP" "$CORE_ENV"
+              sudo docker compose -f "$CORE_COMPOSE" up -d --no-build --force-recreate impulsionando-core || true
+              exit 64
+            fi
+            sleep 2
+          done
+
+          state_code="$(sudo docker run --rm --network "$CORE_NETWORK" --env-file "$STACK_DIR/.env" curlimages/curl:8.12.1 -sS -o /tmp/evo-state.json -w '%{http_code}' \
+            -H "apikey: $(sudo sed -n 's/^EVOLUTION_API_KEY=//p' "$STACK_DIR/.env" | head -n1)" \
+            http://impulsionando-evolution-api:8080/instance/connectionState/$EVOLUTION_INSTANCE || true)"
+          echo "EVOLUTION_PROVIDER=PASS"
+          echo "EVOLUTION_PRIVATE_NETWORK=$CORE_NETWORK"
+          echo "EVOLUTION_INSTANCE=$EVOLUTION_INSTANCE"
+          echo "EVOLUTION_STATE_HTTP=$state_code"
+          echo "CORE_AFTER_EVOLUTION=PASS"
+          REMOTE
