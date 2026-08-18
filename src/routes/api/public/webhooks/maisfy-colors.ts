@@ -1,6 +1,6 @@
 /**
  * Maisfy -> Colors webhook.
- * Produção: https://colors.impulsionando.com.br/api/public/webhooks/maisfy-colors
+ * Produção: https://colorssaude.impulsionando.com.br/api/public/webhooks/maisfy-colors
  *
  * Contrato baseado no webhook oficial Maisfy: order.created, order.paid, order.canceled.
  * Autenticação aceita HMAC quando o emissor/bridge enviar assinatura, ou token secreto
