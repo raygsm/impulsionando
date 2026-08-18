@@ -1,0 +1,69 @@
+name: WMP domain isolation gate
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-wmp-domain-isolation:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify WMP never leaves its canonical host
+        run: |
+          set -euo pipefail
+
+          canonical_host='wmp.impulsionando.com.br'
+          paths=(
+            '/'
+            '/djs'
+            '/empresas'
+            '/orcamento'
+            '/parceiro'
+            '/onde-estou'
+            '/cases'
+            '/pacotes'
+          )
+
+          for path in "${paths[@]}"; do
+            url="https://${canonical_host}${path}"
+            headers="$(mktemp)"
+            body="$(mktemp)"
+
+            final_url="$(curl --location --silent --show-error --max-time 30 \
+              -H 'Accept: text/html,application/xhtml+xml' \
+              -H 'Cache-Control: no-cache' \
+              -D "$headers" -o "$body" -w '%{url_effective}' "$url")"
+
+            final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            echo "WMP_DOMAIN_GATE path=$path final_url=$final_url"
+
+            if [ "$final_host" != "$canonical_host" ]; then
+              echo "::error::WMP escaped canonical host: $url -> $final_url"
+              exit 70
+            fi
+
+            if grep -Eqi '^location:[[:space:]]*https?://(www\.)?impulsionando\.com\.br([/:]|$)' "$headers"; then
+              echo "::error::WMP response chain attempted redirect to Impulsionando apex for $url"
+              exit 71
+            fi
+
+            if ! grep -Eqi 'WMP|Wagner Miller' "$body"; then
+              echo "::error::WMP identity marker missing after navigation: $final_url"
+              exit 72
+            fi
+
+            if grep -Eqi '<title>[^<]*Impulsionando Tecnologia|Plataforma SaaS multiempresa' "$body"; then
+              echo "::error::Impulsionando institutional home detected on WMP host: $final_url"
+              exit 73
+            fi
+
+            rm -f "$headers" "$body"
+          done
+
+          echo 'WMP_DOMAIN_ISOLATION=PASS'
