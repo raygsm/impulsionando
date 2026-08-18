@@ -1,0 +1,56 @@
+name: CHRISMED E2E checkout hotfix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/chrismed-e2e-hotfix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch CHRISMED booking flow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/routes/chrismed.agendar.tsx')
+          s = p.read_text()
+          replacements = [
+            ('O checkout mantém apenas um hold temporário de 90s.', 'O checkout mantém apenas um hold temporário de 5 minutos.'),
+            ('const CHECKOUT_HOLD_SECONDS = 90;', 'const CHECKOUT_HOLD_SECONDS = 300;'),
+            ("const [modality, setModality] = useState<ChrismedModality | null>(occupationalService ? (search.service === 'aso' ? 'ocupacional' : 'pericia') : null);", "const [modality, setModality] = useState<ChrismedModality | null>(occupationalService ? (search.service === 'aso' ? 'ocupacional' : 'pericia') : null);\n  const [selectedOfferingSlug, setSelectedOfferingSlug] = useState<string | null>(null);"),
+            ("function applyCare360(mod: 'telemedicina' | 'domiciliar') {", "function applyCare360(mod: 'telemedicina' | 'domiciliar', offeringSlug: string | null = null) {"),
+            ("setSpecialty(CARE_360); if (doc) setDoctor(doc); setModality(mod); if (targetUnit) setUnit(targetUnit); setStep('schedule');", "setSelectedOfferingSlug(offeringSlug); setSpecialty(CARE_360); if (doc) setDoctor(doc); setModality(mod); if (targetUnit) setUnit(targetUnit); setStep('schedule');"),
+            ("const currentOffering = useMemo(() => modality ? offerings.find((o) => o.modality === modality) ?? null : null, [modality, offerings]);", "const currentOffering = useMemo(() => selectedOfferingSlug ? offerings.find((o) => o.slug === selectedOfferingSlug) ?? null : modality ? offerings.find((o) => o.modality === modality) ?? null : null, [modality, offerings, selectedOfferingSlug]);"),
+            ("}, [modality, specialty?.slug]);", "}, [modality, specialty?.slug, selectedOfferingSlug]);"),
+            ("setModality('presencial'); setSpecialty(null); setDoctor(null); setUnit(null); setStep('specialty');", "setSelectedOfferingSlug(null); setModality('presencial'); setSpecialty(null); setDoctor(null); setUnit(null); setStep('specialty');"),
+            ('<strong>90 segundos</strong>', '<strong>5 minutos</strong>'),
+          ]
+          for old, new in replacements:
+            if old not in s:
+              raise SystemExit(f'Expected snippet not found: {old[:100]}')
+            s = s.replace(old, new, 1)
+
+          needle = "})}</div>\n      <div className=\"mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5\">"
+          insert = "})}<button type=\"button\" onClick={() => applyCare360('telemedicina', 'homologacao-mercado-pago-1-real')} className=\"text-left rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-5 hover:border-amber-500 hover:shadow-sm transition-all\"><div className=\"h-11 w-11 rounded-lg bg-white text-amber-800 flex items-center justify-center mb-3\"><Video className=\"h-5 w-5\" /></div><div className=\"chrismed-serif text-lg text-[var(--chrismed-ink)]\">Teleconsulta — TESTE R$ 1,00</div><div className=\"text-sm text-[var(--chrismed-graphite)] mt-1\">Homologação temporária do Mercado Pago e bloqueio da agenda.</div><div className=\"mt-3 text-[10px] uppercase tracking-[0.14em] text-amber-800\">Temporário · remover após o teste</div></button>}</div>\n      <div className=\"mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5\">"
+          if needle not in s:
+            raise SystemExit('Modality insertion point not found')
+          s = s.replace(needle, insert, 1)
+          p.write_text(s)
+          PY
+      - name: Commit hotfix
+        run: |
+          git config user.name "impulsionando-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/routes/chrismed.agendar.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): expose R$1 E2E teleconsult and 5-minute hold"
+          git push origin main
