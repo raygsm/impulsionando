@@ -93,3 +93,6 @@ jobs:
           trap - ERR
           echo 'COLORS_TRAEFIK_TLS_ROUTER=PASS'
           REMOTE
+
+      - name: Reconciliation marker
+        run: echo 'COLORS_OFFICIAL_SUBDOMAIN_ONLY=2026-08-18'
