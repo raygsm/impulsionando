@@ -46,27 +46,30 @@ jobs:
       - name: Validate tenant subdomains at Traefik origin
         run: |
           set -euo pipefail
-          # Colors Saúde is intentionally excluded: its sole public host is colorssaude.com.br.
-          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$domains' bash -s" <<'REMOTE'
           set -euo pipefail
           for domain in $DOMAINS; do
             code=000
+            location=''
             for attempt in $(seq 1 30); do
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/1.0' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
-              echo "ORIGIN $domain attempt=$attempt HTTP=$code"
-              [ "$code" = '200' ] && break
+              headers="$(mktemp)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/2.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
+              location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
+              rm -f "$headers"
+              echo "ORIGIN $domain attempt=$attempt HTTP=$code LOCATION=${location:-none}"
+              if [ "$code" = '200' ] && [ -z "$location" ]; then break; fi
               sleep 2
             done
             [ "$code" = '200' ] || { echo "::error::Origin route unavailable for $domain"; exit 31; }
+            [ -z "$location" ] || { echo "::error::Unexpected origin redirect for $domain -> $location"; exit 32; }
           done
           REMOTE
 
       - name: Reconcile Cloudflare DNS to validated VPS
         run: |
           set -euo pipefail
-          # Never add a Colors subdomain here. Colors uses only colorssaude.com.br.
-          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           for domain in $domains; do
             curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
               "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
@@ -85,20 +88,26 @@ jobs:
             fi
           done
 
-      - name: Validate public HTTPS for every subdomain client
+      - name: Validate public HTTPS without cross-host redirects
         run: |
           set -euo pipefail
-          domains='chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
           failed=0
           for domain in $domains; do
             code=000
+            final_url=''
             for attempt in $(seq 1 18); do
-              code="$(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/1.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code}' --max-time 30 "https://$domain/" || true)"
-              echo "PUBLIC $domain attempt=$attempt HTTP=$code"
-              [ "$code" = '200' ] && break
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/2.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+              final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+              echo "PUBLIC $domain attempt=$attempt HTTP=$code FINAL=$final_url"
+              if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
               sleep 5
             done
-            if [ "$code" != '200' ]; then failed=1; echo "::error::Public tenant unavailable: $domain HTTP=$code"; fi
+            final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            if [ "$code" != '200' ] || [ "$final_host" != "$domain" ]; then
+              failed=1
+              echo "::error::Tenant invalid: $domain HTTP=$code FINAL=$final_url"
+            fi
           done
           [ "$failed" = '0' ] || exit 40
           echo 'ALL_CLIENT_SUBDOMAINS=PASS'
