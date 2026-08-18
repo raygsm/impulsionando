@@ -1,0 +1,90 @@
+name: Colors Edge Redirect Diagnose
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-edge-redirect-diagnose.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: colors-edge-redirect-diagnose
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DOMAIN: colorssaude.impulsionando.com.br
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+    steps:
+      - name: Validate credentials
+        run: |
+          set -euo pipefail
+          for v in CF_API_TOKEN CF_ZONE_ID VPS_HOST; do test -n "${!v}" || { echo "::error::Missing $v"; exit 2; }; done
+
+      - name: Resolve origin
+        run: |
+          set -euo pipefail
+          ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test -n "$ORIGIN_IP"
+          echo "ORIGIN_IP=$ORIGIN_IP" >> "$GITHUB_ENV"
+          echo "COLORS_ORIGIN_IP_RESOLVED=yes"
+
+      - name: Inspect Cloudflare DNS record
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
+          jq -e '.success == true' /tmp/dns.json >/dev/null
+          jq -c --arg d "$DOMAIN" '.result[] | {name,type,content,proxied,ttl}' /tmp/dns.json
+          count="$(jq '.result|length' /tmp/dns.json)"
+          [ "$count" -gt 0 ] || { echo '::error::Colors subdomain has no DNS record'; exit 10; }
+
+      - name: Inspect Cloudflare Page Rules for Colors only
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/pagerules?status=active&order=priority&direction=desc&per_page=100" -o /tmp/pagerules.json
+          jq -e '.success == true' /tmp/pagerules.json >/dev/null
+          jq -c --arg d "$DOMAIN" '.result[] | select((.targets|tostring|contains($d)) or (.actions|tostring|contains($d))) | {id,status,priority,targets,actions}' /tmp/pagerules.json || true
+
+      - name: Inspect zone rulesets for Colors redirect rules
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets" -o /tmp/rulesets.json
+          jq -e '.success == true' /tmp/rulesets.json >/dev/null
+          jq -r '.result[].id' /tmp/rulesets.json | while read -r id; do
+            [ -n "$id" ] || continue
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets/$id" -o "/tmp/ruleset-$id.json"
+            jq -c --arg d "$DOMAIN" '.result as $rs | ($rs.rules // [])[] | select((.expression // "" | contains($d)) or (.action_parameters // {} | tostring | contains($d))) | {ruleset_id:$rs.id,ruleset_name:$rs.name,phase:$rs.phase,rule_id:.id,action,enabled,expression,action_parameters,description}' "/tmp/ruleset-$id.json" || true
+          done
+
+      - name: Probe origin directly
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          code="$(curl -k -sS --resolve "$DOMAIN:443:$ORIGIN_IP" -D "$headers" -o /tmp/origin-body -w '%{http_code}' --max-time 25 "https://$DOMAIN/")"
+          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
+          echo "COLORS_ORIGIN_HTTP=$code"
+          echo "COLORS_ORIGIN_LOCATION=${location:-none}"
+          sed -n '1,25p' "$headers" | grep -Ei '^(HTTP/|location:|server:|cf-|x-|cache-control:)' || true
+
+      - name: Probe public edge without following redirects
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          code="$(curl -sS -D "$headers" -o /tmp/public-body -w '%{http_code}' --max-time 25 "https://$DOMAIN/")"
+          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
+          echo "COLORS_PUBLIC_HTTP=$code"
+          echo "COLORS_PUBLIC_LOCATION=${location:-none}"
+          sed -n '1,30p' "$headers" | grep -Ei '^(HTTP/|location:|server:|cf-|x-|cache-control:)' || true
+          echo 'COLORS_EDGE_DIAGNOSE=PASS'
