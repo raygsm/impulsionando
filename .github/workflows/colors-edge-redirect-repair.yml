@@ -1,0 +1,88 @@
+name: Colors Edge Redirect Repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-edge-redirect-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: colors-edge-redirect-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DOMAIN: colorssaude.impulsionando.com.br
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Guard exact scope
+        run: |
+          set -euo pipefail
+          [ "$DOMAIN" = 'colorssaude.impulsionando.com.br' ] || exit 2
+          test -n "$CF_API_TOKEN"
+          test -n "$CF_ZONE_ID"
+
+      - name: Delete legacy Page Rules for Colors subdomain only
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/pagerules?status=active&order=priority&direction=desc&per_page=100" -o /tmp/pagerules.json
+          jq -e '.success == true' /tmp/pagerules.json >/dev/null
+          jq -r --arg d "$DOMAIN" '.result[] | select((.targets|tostring|contains($d)) or (.actions|tostring|contains($d))) | .id' /tmp/pagerules.json | while read -r id; do
+            [ -n "$id" ] || continue
+            echo "Deleting Colors Page Rule $id"
+            curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/pagerules/$id" -o /tmp/page-delete.json
+            jq -e '.success == true' /tmp/page-delete.json >/dev/null
+          done
+
+      - name: Delete Colors redirect rules from zone rulesets only
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets" -o /tmp/rulesets.json
+          jq -e '.success == true' /tmp/rulesets.json >/dev/null
+          jq -r '.result[].id' /tmp/rulesets.json | while read -r rsid; do
+            [ -n "$rsid" ] || continue
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets/$rsid" -o "/tmp/rs-$rsid.json"
+            jq -r --arg d "$DOMAIN" '.result as $rs | ($rs.rules // [])[] | select(.action=="redirect") | select((.expression // "" | contains($d)) or (.action_parameters // {} | tostring | contains($d))) | .id' "/tmp/rs-$rsid.json" | while read -r rid; do
+              [ -n "$rid" ] || continue
+              echo "Deleting Colors redirect rule ruleset=$rsid rule=$rid"
+              curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets/$rsid/rules/$rid" -o /tmp/rule-delete.json
+              jq -e '.success == true' /tmp/rule-delete.json >/dev/null
+            done
+          done
+
+      - name: Purge Cloudflare cache for Colors official URLs
+        run: |
+          set -euo pipefail
+          jq -nc '{files:["https://colorssaude.impulsionando.com.br/","https://colorssaude.impulsionando.com.br/super-green-black","https://colorssaude.impulsionando.com.br/agenda","https://colorssaude.impulsionando.com.br/eventos","https://colorssaude.impulsionando.com.br/suporte","https://colorssaude.impulsionando.com.br/afiliados","https://colorssaude.impulsionando.com.br/rastreio"]}' >/tmp/purge.json
+          curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/purge.json \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -o /tmp/purge-result.json
+          jq -e '.success == true' /tmp/purge-result.json >/dev/null
+
+      - name: Verify public host does not redirect away
+        run: |
+          set -euo pipefail
+          for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio; do
+            headers="$(mktemp)"
+            code="$(curl -sS -D "$headers" -o /tmp/colors-edge-body -w '%{http_code}' --max-time 30 "https://$DOMAIN$path?edge_repair=${GITHUB_SHA}")"
+            location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
+            echo "COLORS_EDGE $path HTTP=$code LOCATION=${location:-none}"
+            if [ -n "$location" ]; then
+              host="$(printf '%s' "$location" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+              [ "$host" = "$DOMAIN" ] || { echo "::error::Unauthorized cross-host redirect $path -> $location"; exit 30; }
+            fi
+            rm -f "$headers"
+          done
+          echo 'COLORS_EDGE_REDIRECT_REPAIR=PASS'
