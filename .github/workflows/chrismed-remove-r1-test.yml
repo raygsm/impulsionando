@@ -1,0 +1,35 @@
+name: CHRISMED remove R1 test
+on:
+  push:
+    paths: ['.github/workflows/chrismed-remove-r1-test.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: Remove temporary R1 front references
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/chrismed.agendar.tsx'); s=p.read_text()
+          test='<button type="button" onClick={() => applyCare360(\'telemedicina\', \'homologacao-mercado-pago-1-real\')} className="order-2 text-left rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-5 hover:border-amber-500 hover:shadow-sm transition-all"><div className="h-11 w-11 rounded-lg bg-white text-amber-800 flex items-center justify-center mb-3"><Video className="h-5 w-5" /></div><div className="chrismed-serif text-lg text-[var(--chrismed-ink)]">Teleconsulta — TESTE R$ 1,00</div><div className="text-sm text-[var(--chrismed-graphite)] mt-1">Homologação temporária do Mercado Pago e bloqueio da agenda.</div><div className="mt-3 text-[10px] uppercase tracking-[0.14em] text-amber-800">Temporário · remover após o teste</div></button>'
+          s=s.replace(test,'')
+          s=s.replace("m === 'telemedicina' ? 'order-1' : m === 'presencial' ? 'order-3' : 'order-4'", "m === 'telemedicina' ? 'order-1' : m === 'presencial' ? 'order-2' : 'order-3'")
+          p.write_text(s)
+          p=Path('src/components/chrismed/ChrismedShell.tsx'); s=p.read_text()
+          line='      { to: "/chrismed/agendar", labels: { pt: "Teleconsulta — TESTE R$ 1,00", en: "Telehealth — R$1 TEST", es: "Teleconsulta — PRUEBA R$ 1,00" }, desc: { pt: "Homologação temporária do pagamento e bloqueio da agenda.", en: "Temporary payment and scheduling validation.", es: "Validación temporal del pago y bloqueo de agenda." } },\n'
+          s=s.replace(line,'')
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name impulsionando-bot
+          git config user.email actions@users.noreply.github.com
+          git add src/routes/chrismed.agendar.tsx src/components/chrismed/ChrismedShell.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): remove temporary R$1 teleconsult test"
+          git push origin main
