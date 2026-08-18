@@ -4,6 +4,7 @@
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
 const COLORS_CANONICAL_HOST = "colorssaude.com.br";
+export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
 const COLORS_LEGACY_HOSTS = new Set([
   "colors.impulsionando.com.br",
   "colorssaude.impulsionando.com.br",
@@ -49,6 +50,10 @@ export function canonicalTenantHostRedirect(loc: {
   const host = loc.hostname.toLowerCase().split(":")[0];
   const path = loc.pathname || "/";
   const proto = loc.protocol === "http:" ? "http:" : "https:";
+
+  // Absolute tenant isolation: WMP is never canonicalized to the Impulsionando apex
+  // or to another tenant by this universal helper.
+  if (host === WMP_CANONICAL_HOST) return null;
 
   if (host === "www.colorssaude.com.br" || COLORS_LEGACY_HOSTS.has(host)) {
     const publicPath = path === "/colors" || path.startsWith("/colors/")
@@ -152,6 +157,32 @@ const CLEAN_PATH_EXCLUDED_PREFIXES = [
   "/manifest",
 ];
 
+const WMP_GLOBAL_CORE_ROUTES = new Set([
+  "/auth",
+  "/dashboard",
+  "/seguranca/senha",
+  "/reset-password",
+  "/reset-password-sent",
+]);
+
+/**
+ * Returns a same-host WMP path when the browser is on the WMP canonical host but
+ * the visible path would otherwise hydrate as a universal/Core route. Never
+ * returns an absolute URL and therefore can never send WMP to another domain.
+ */
+export function wmpHostLockTarget(host: string | null | undefined, pathname: string): string | null {
+  if (!host) return null;
+  const cleanHost = host.toLowerCase().split(":")[0];
+  if (cleanHost !== WMP_CANONICAL_HOST) return null;
+
+  const path = pathname || "/";
+  if (path === "/wmp" || path.startsWith("/wmp/")) return null;
+  if (WMP_GLOBAL_CORE_ROUTES.has(path)) return null;
+  if (CLEAN_PATH_EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))) return null;
+
+  return path === "/" ? "/wmp/" : `/wmp${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 /**
  * Colors uses clean public URLs only on colorssaude.com.br while its TanStack
  * route tree is namespaced under /colors. Map document requests such as /agenda
@@ -177,24 +208,8 @@ export function toColorsInternalPathname(host: string | null | undefined, pathna
  * or global Core authentication/recovery/dashboard/security routes.
  */
 export function toWmpInternalPathname(host: string | null | undefined, pathname: string): string {
-  if (!host) return pathname;
-  const cleanHost = host.toLowerCase().split(":")[0];
-  if (cleanHost !== "wmp.impulsionando.com.br") return pathname;
-
-  const path = pathname || "/";
-  if (path === "/wmp" || path.startsWith("/wmp/")) return path;
-
-  const globalCoreRoutes = new Set([
-    "/auth",
-    "/dashboard",
-    "/seguranca/senha",
-    "/reset-password",
-    "/reset-password-sent",
-  ]);
-  if (globalCoreRoutes.has(path)) return path;
-  if (CLEAN_PATH_EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))) return path;
-
-  return path === "/" ? "/wmp" : `/wmp${path.startsWith("/") ? path : `/${path}`}`;
+  const locked = wmpHostLockTarget(host, pathname);
+  return locked ?? pathname;
 }
 
 /**
