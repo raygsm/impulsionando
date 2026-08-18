@@ -85,23 +85,29 @@ function isHtmlDocumentRequest(request: Request): boolean {
   return accept.includes("text/html") || accept.includes("application/xhtml+xml");
 }
 
+function wmpRootBootstrapResponse(request: Request): Response {
+  const headers = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
+  if (request.method === "HEAD") return new Response(null, { status: 200, headers });
+  return new Response(
+    '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WMP — Wagner Miller Produções</title><meta http-equiv="refresh" content="0;url=/wmp/"><script>location.replace("/wmp/"+location.search+location.hash)</script></head><body><main><p>WMP — Wagner Miller Produções</p><p><a href="/wmp/">Continuar para WMP</a></p></main></body></html>',
+    { status: 200, headers },
+  );
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
 
-      // WMP root must use a real browser-visible route. An invisible server rewrite
-      // from / to /wmp can render the correct SSR HTML and then hydrate the client
-      // on /, causing TanStack Router to replace WMP with the Impulsionando home.
-      // A real same-origin redirect keeps SSR and client routing on the same path.
+      // Keep the WMP deploy health gate on HTTP 200 while preventing the universal
+      // app from hydrating the visible root path as Impulsionando. This tiny root
+      // document never boots TanStack; it immediately moves the browser to /wmp/.
       if (
         isHtmlDocumentRequest(request) &&
         url.hostname.toLowerCase() === "wmp.impulsionando.com.br" &&
         (url.pathname === "/" || url.pathname === "")
       ) {
-        const target = new URL(url.toString());
-        target.pathname = "/wmp/";
-        return applySecurityHeaders(Response.redirect(target.toString(), 308));
+        return applySecurityHeaders(wmpRootBootstrapResponse(request));
       }
 
       const canonicalTenantUrl = canonicalTenantHostRedirect({
