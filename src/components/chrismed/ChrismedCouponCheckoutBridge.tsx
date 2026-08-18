@@ -7,6 +7,17 @@ import { toast } from 'sonner';
 
 function digits(value: string) { return value.replace(/\D/g, '').slice(0, 11); }
 function validEmail(value: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()); }
+function validCPF(value: string) {
+  const cpf = digits(value);
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+  const calculate = (length: number) => {
+    let sum = 0;
+    for (let i = 0; i < length; i += 1) sum += Number(cpf[i]) * (length + 1 - i);
+    const digit = (sum * 10) % 11;
+    return digit === 10 ? 0 : digit;
+  };
+  return calculate(9) === Number(cpf[9]) && calculate(10) === Number(cpf[10]);
+}
 
 export function ChrismedCouponCheckoutBridge() {
   const [active, setActive] = useState(false);
@@ -24,16 +35,42 @@ export function ChrismedCouponCheckoutBridge() {
     const sync = () => {
       if (!isAgenda()) { setActive(false); return; }
       const doc = document.querySelector<HTMLInputElement>('#doc');
-      const mail = document.querySelector<HTMLInputElement>('#email, input[type="email"]');
-      const first = document.querySelector<HTMLInputElement>('#first_name, #first-name, input[name="first_name"]');
-      const last = document.querySelector<HTMLInputElement>('#last_name, #last-name, input[name="last_name"]');
-      const phone = document.querySelector<HTMLInputElement>('#phone, input[type="tel"]');
+      const mail = document.querySelector<HTMLInputElement>('#em, input[type="email"]');
+      const first = document.querySelector<HTMLInputElement>('#fn, #first_name, #first-name, input[name="first_name"]');
+      const last = document.querySelector<HTMLInputElement>('#ln, #last_name, #last-name, input[name="last_name"]');
+      const phone = document.querySelector<HTMLInputElement>('#ph, #phone, input[type="tel"]');
       const currentCpf = digits(doc?.value ?? '');
       const currentEmail = (mail?.value ?? '').trim().toLowerCase();
+      const cpfOk = validCPF(currentCpf);
+      const formComplete = Boolean(doc && cpfOk && validEmail(currentEmail) && (first?.value ?? '').trim() && (last?.value ?? '').trim() && digits(phone?.value ?? '').length >= 10);
       setCpf(currentCpf);
       setEmail(currentEmail);
       setActive(Boolean(doc));
-      setComplete(Boolean(doc && currentCpf.length === 11 && validEmail(currentEmail) && (first?.value ?? '').trim() && (last?.value ?? '').trim() && digits(phone?.value ?? '').length >= 10));
+      setComplete(formComplete);
+
+      if (doc) {
+        doc.setAttribute('aria-invalid', currentCpf.length > 0 && !cpfOk ? 'true' : 'false');
+        const parent = doc.parentElement;
+        let warning = parent?.querySelector<HTMLElement>('[data-cpf-warning="chrismed"]') ?? null;
+        if (currentCpf.length > 0 && !cpfOk) {
+          if (!warning && parent) {
+            warning = document.createElement('p');
+            warning.dataset.cpfWarning = 'chrismed';
+            warning.className = 'mt-1 text-xs text-red-600';
+            warning.textContent = 'CPF inválido. Confira os números informados.';
+            parent.appendChild(warning);
+          }
+        } else if (warning) warning.remove();
+      }
+
+      const continueButton = Array.from(document.querySelectorAll<HTMLButtonElement>('button')).find((button) => button.textContent?.trim() === 'Continuar para confirmação');
+      if (continueButton) {
+        const baseValid = Boolean((first?.value ?? '').trim() && validEmail(currentEmail) && cpfOk);
+        continueButton.disabled = !baseValid;
+        continueButton.setAttribute('aria-disabled', baseValid ? 'false' : 'true');
+        if (!baseValid) continueButton.title = currentCpf.length > 0 && !cpfOk ? 'Informe um CPF válido para continuar.' : 'Preencha corretamente os dados obrigatórios para continuar.';
+        else continueButton.removeAttribute('title');
+      }
     };
     sync();
     const onInput = () => sync();
@@ -41,7 +78,7 @@ export function ChrismedCouponCheckoutBridge() {
     document.addEventListener('change', onInput, true);
     const observer = new MutationObserver(sync);
     observer.observe(document.body, { childList: true, subtree: true });
-    const timer = window.setInterval(sync, 750);
+    const timer = window.setInterval(sync, 500);
     return () => { document.removeEventListener('input', onInput, true); document.removeEventListener('change', onInput, true); observer.disconnect(); window.clearInterval(timer); };
   }, []);
 
@@ -49,9 +86,10 @@ export function ChrismedCouponCheckoutBridge() {
 
   async function applyCoupon() {
     if (!complete) return toast.error('Preencha todos os seus dados antes de tentar usar o cupom.');
+    if (!validCPF(cpf)) return toast.error('Informe um CPF válido antes de tentar usar o cupom.');
     if (!normalizedCode) return toast.error('Digite o código do cupom.');
     setBusy(true);
-    const { data, error } = await (supabase as any).rpc('chrismed_set_coupon_checkout_intent', { p_cpf: cpf, p_code: normalizedCode, p_email: email });
+    const { data, error } = await (supabase as any).rpc('chrismed_apply_coupon_checkout_v2', { p_cpf: cpf, p_code: normalizedCode, p_email: email });
     setBusy(false);
     if (error) return toast.error('Não foi possível validar o cupom agora. Tente novamente em alguns instantes.');
     const result = data as { ok?: boolean; reason?: string; code?: string; name?: string };
@@ -61,7 +99,7 @@ export function ChrismedCouponCheckoutBridge() {
         coupon_inactive: 'Este cupom está inativo.',
         coupon_not_started: 'Este cupom ainda não está vigente.',
         coupon_expired: 'Este cupom expirou.',
-        valid_cpf_required: 'Confira o CPF informado antes de usar o cupom.',
+        valid_cpf_required: 'O CPF informado não é válido. Confira os números e tente novamente.',
         coupon_required: 'Digite o código do cupom.',
         email_required_for_coupon: 'Preencha seu e-mail antes de tentar usar o cupom.',
         email_not_eligible_for_coupon: 'Este cupom não está disponível para o e-mail informado.',
