@@ -1,0 +1,81 @@
+name: WMP P0 Origin Redirect Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/wmp-origin-p0-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-wmp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Public WMP redirect chain
+        run: |
+          set -euo pipefail
+          echo '== public no-follow =='
+          curl -skI --max-time 20 https://wmp.impulsionando.com.br/ | sed -n '1,25p'
+          echo '== public effective URL =='
+          effective=$(curl -skL --max-time 30 -o /tmp/wmp.html -w '%{url_effective}|%{http_code}|%{num_redirects}' https://wmp.impulsionando.com.br/)
+          echo "$effective"
+          case "$effective" in
+            https://wmp.impulsionando.com.br/*'|200|'*) ;;
+            *) echo '::error::WMP public URL does not remain on WMP host'; exit 41 ;;
+          esac
+          grep -Eqi 'WMP|Wagner Miller' /tmp/wmp.html || { echo '::error::WMP identity missing from public body'; exit 42; }
+
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${VPS_HOST:-}"
+          test -n "${VPS_SSH_KEY:-}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Compare Core and reverse proxy without changes
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          ssh "${VPS_USER}@${VPS_HOST}" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          HOST=wmp.impulsionando.com.br
+          echo '== Core :3000 =='
+          core_headers=$(mktemp)
+          core_body=$(mktemp)
+          curl -sS -D "$core_headers" -H "Host: $HOST" http://127.0.0.1:3000/ -o "$core_body"
+          sed -n '1,20p' "$core_headers"
+          core_location=$(awk -F': ' 'tolower($1)=="location"{gsub("\r",""); print $2; exit}' "$core_headers")
+          if [ -n "$core_location" ] && printf '%s' "$core_location" | grep -q 'impulsionando.com.br'; then
+            echo "::error::Core origin redirects WMP: $core_location"
+            exit 51
+          fi
+          grep -Eqi 'WMP|Wagner Miller' "$core_body" || { echo '::error::Core origin body is not WMP'; exit 52; }
+
+          echo '== Nginx host configuration =='
+          sudo nginx -T 2>/dev/null | grep -n -B3 -A12 -E 'server_name[^;]*wmp\.impulsionando\.com\.br|wmp\.impulsionando\.com\.br' || true
+
+          echo '== Local TLS reverse proxy =='
+          if sudo ss -ltn | grep -q ':443 '; then
+            proxy_headers=$(mktemp)
+            curl -sk --resolve "$HOST:443:127.0.0.1" -D "$proxy_headers" https://$HOST/ -o /tmp/wmp-proxy-body || true
+            sed -n '1,20p' "$proxy_headers"
+            proxy_location=$(awk -F': ' 'tolower($1)=="location"{gsub("\r",""); print $2; exit}' "$proxy_headers")
+            if [ -n "$proxy_location" ] && printf '%s' "$proxy_location" | grep -Eq '^https?://(www\.)?impulsionando\.com\.br'; then
+              echo "::error::Reverse proxy redirects WMP to apex: $proxy_location"
+              exit 53
+            fi
+          fi
+
+          echo 'WMP_ORIGIN_DIAGNOSTIC=PASS'
+          REMOTE
