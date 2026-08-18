@@ -1,0 +1,74 @@
+name: Tenant Scope Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate declared tenant scope
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          scope="$(printf '%s\n' "$PR_BODY" | sed -nE 's/^[[:space:]]*TENANT_SCOPE:[[:space:]]*([A-Za-z0-9_-]+)[[:space:]]*$/\1/p' | head -n1 | tr '[:upper:]' '[:lower:]')"
+          [ -n "$scope" ] || { echo '::error::PR must declare TENANT_SCOPE: <tenant|ecosystem>'; exit 10; }
+          policy='.github/tenant-scope-policy.json'
+          jq -e . "$policy" >/dev/null
+          if [ "$scope" != 'ecosystem' ]; then
+            jq -e --arg s "$scope" '.tenants[$s] != null' "$policy" >/dev/null || { echo "::error::Unknown tenant scope: $scope"; exit 11; }
+          fi
+          mapfile -t changed < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          printf 'TENANT_SCOPE=%s\n' "$scope"
+          printf 'CHANGED_FILES=%s\n' "${#changed[@]}"
+          [ "$scope" = 'ecosystem' ] && { echo 'ECOSYSTEM_SCOPE=PASS'; exit 0; }
+
+          mapfile -t own_tokens < <(jq -r --arg s "$scope" '.tenants[$s].allowedPathTokens[]' "$policy")
+          mapfile -t other_tokens < <(jq -r --arg s "$scope" '.tenants | to_entries[] | select(.key != $s) | .value.allowedPathTokens[]' "$policy")
+          failed=0
+          for file in "${changed[@]}"; do
+            low="$(printf '%s' "$file" | tr '[:upper:]' '[:lower:]')"
+            if [ "$file" = '.github/tenant-scope-policy.json' ] || [ "$file" = '.github/workflows/tenant-scope-guard.yml' ]; then
+              echo "::error file=$file::Tenant PR cannot change governance guard/policy; use TENANT_SCOPE: ecosystem"
+              failed=1; continue
+            fi
+            for token in "${other_tokens[@]}"; do
+              if [[ "$low" == *"$token"* ]]; then
+                echo "::error file=$file::Cross-tenant change blocked: scope=$scope references sibling tenant token '$token'"
+                failed=1
+              fi
+            done
+            protected=0
+            while IFS= read -r p; do
+              p_low="$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')"
+              case "$p_low" in
+                *'*'*) pattern="$p_low"; [[ "$low" == $pattern* || "$low" == $pattern ]] && protected=1 ;;
+                *) [[ "$low" == "$p_low" || "$low" == "$p_low"* ]] && protected=1 ;;
+              esac
+            done < <(jq -r '.protectedSharedPaths[]' "$policy")
+            if [ "$protected" -eq 1 ]; then
+              echo "::error file=$file::Shared/core path blocked for tenant scope '$scope'. Use TENANT_SCOPE: ecosystem."
+              failed=1; continue
+            fi
+            own=0
+            for token in "${own_tokens[@]}"; do [[ "$low" == *"$token"* ]] && own=1; done
+            if [ "$own" -eq 0 ]; then
+              case "$low" in
+                docs/*|tests/*|.github/workflows/*"$scope"*) ;;
+                *) echo "::error file=$file::File is not demonstrably tenant-scoped to '$scope'. Use an isolated tenant path or TENANT_SCOPE: ecosystem."; failed=1 ;;
+              esac
+            fi
+          done
+          [ "$failed" -eq 0 ] || exit 20
+          echo 'TENANT_SCOPE_GUARD=PASS'
