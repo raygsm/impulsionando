@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "scripts/anamadu_catalog_import.py"
+      - "scripts/anamadu_catalog_import_v2.py"
       - ".github/workflows/anamadu-full-catalog-import.yml"
 
 concurrency:
@@ -40,7 +40,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANAMADU_STORAGE_BUCKET: anamadu-products
-        run: python scripts/anamadu_catalog_import.py
+        run: python scripts/anamadu_catalog_import_v2.py
 
       - name: Record import trigger
-        run: echo "ANA_MADU_FULL_IMPORT_TRIGGERED=${GITHUB_SHA}"
+        run: echo "ANA_MADU_FULL_IMPORT_V2_TRIGGERED=${GITHUB_SHA}"
