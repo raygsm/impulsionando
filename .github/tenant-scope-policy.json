@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "ecosystemScope": "ecosystem",
+  "protectedSharedPaths": [
+    "src/server.ts",
+    "src/lib/subdomain.ts",
+    "deploy/",
+    "docker-compose",
+    ".github/workflows/all-client",
+    ".github/workflows/deploy",
+    ".github/workflows/*global*",
+    "supabase/config.toml"
+  ],
+  "tenants": {
+    "colors": {
+      "aliases": ["colors", "colors-saude", "colorssaude", "iris"],
+      "allowedPathTokens": ["colors", "colors-saude", "colorssaude", "iris"]
+    },
+    "wmp": {
+      "aliases": ["wmp", "wagner-miller", "wagnermiller"],
+      "allowedPathTokens": ["wmp", "wagner-miller", "wagnermiller"]
+    },
+    "marocas": {
+      "aliases": ["marocas", "maruquito"],
+      "allowedPathTokens": ["marocas", "maruquito"]
+    },
+    "chrismed": {
+      "aliases": ["chrismed", "christiane"],
+      "allowedPathTokens": ["chrismed", "christiane"]
+    },
+    "riomed": {
+      "aliases": ["riomed", "rio-med", "medicito"],
+      "allowedPathTokens": ["riomed", "rio-med", "medicito"]
+    },
+    "anamadu": {
+      "aliases": ["anamadu", "ana-madu", "annita"],
+      "allowedPathTokens": ["anamadu", "ana-madu", "annita"]
+    },
+    "csi": {
+      "aliases": ["csi", "csi-invest"],
+      "allowedPathTokens": ["csi", "csi-invest"]
+    }
+  }
+}
