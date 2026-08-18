@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TicketPercent, CheckCircle2, X } from 'lucide-react';
+import { TicketPercent, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,7 +89,7 @@ export function ChrismedCouponCheckoutBridge() {
     if (!validCPF(cpf)) return toast.error('Informe um CPF válido antes de tentar usar o cupom.');
     if (!normalizedCode) return toast.error('Digite o código do cupom.');
     setBusy(true);
-    const { data, error } = await (supabase as any).rpc('chrismed_apply_coupon_checkout_v2', { p_cpf: cpf, p_code: normalizedCode, p_email: email });
+    const { data, error } = await (supabase as any).rpc('chrismed_set_coupon_checkout_intent', { p_cpf: cpf, p_code: normalizedCode, p_email: email });
     setBusy(false);
     if (error) return toast.error('Não foi possível validar o cupom agora. Tente novamente em alguns instantes.');
     const result = data as { ok?: boolean; reason?: string; code?: string; name?: string };
@@ -115,8 +115,8 @@ export function ChrismedCouponCheckoutBridge() {
 
   return (
     <aside className="fixed bottom-4 left-1/2 z-[72] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-2xl border border-[#cdbb8a] bg-[#fffdf8] p-4 shadow-[0_18px_60px_rgba(7,28,24,0.22)] sm:bottom-5" aria-label="Cupom CHRISMED">
-      <button type="button" onClick={() => setClosed(true)} className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d8cfb8] bg-white text-[#071c18] hover:bg-[#f5f1e7]" aria-label="Fechar cupom"><X className="h-4 w-4" /></button>
-      <div className="flex items-start gap-3 pr-8">
+      <button type="button" onClick={() => setClosed(true)} className="absolute right-2.5 top-2.5 z-[80] inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#b9ad8d] bg-white text-[24px] font-semibold leading-none text-[#071c18] shadow-sm transition hover:bg-[#f5f1e7] focus:outline-none focus:ring-2 focus:ring-[#0b2a24] focus:ring-offset-2" aria-label="Fechar janela do cupom" title="Fechar"><span aria-hidden="true">×</span></button>
+      <div className="flex items-start gap-3 pr-10">
         <div className="mt-0.5 rounded-xl bg-[#0b2a24] p-2.5 text-[#e8cd80]"><TicketPercent className="h-5 w-5" /></div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2"><strong className="text-sm text-[#071c18]">Tem um cupom?</strong>{applied && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800"><CheckCircle2 className="h-3.5 w-3.5" />{applied} aplicado</span>}</div>
