@@ -1,0 +1,140 @@
+name: WMP redirect restore
+
+on:
+  push:
+    paths:
+      - .github/workflows/wmp-redirect-restore.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wmp-redirect-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build current main and test only WMP routing
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npx vitest run src/lib/subdomain.test.ts -t 'WMP'
+          npm run build
+          test -f .output/server/index.mjs
+          test -f scripts/start-core-runtime.mjs
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 41
+
+      - name: Package current main
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/wmp-redirect-restore.tgz .output scripts/start-core-runtime.mjs package.json package-lock.json
+
+      - name: Publish same current main to Core edge with rollback
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          scp /tmp/wmp-redirect-restore.tgz "$U@$H:/tmp/wmp-redirect-restore.tgz"
+          ssh "$U@$H" "GITHUB_SHA='${GITHUB_SHA}' bash -s" <<'REMOTE'
+          set -euo pipefail
+          RELEASE="/var/www/impulsionando-core/releases/wmp-redirect-${GITHUB_SHA}"
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          mkdir -p "$RELEASE"
+          tar -xzf /tmp/wmp-redirect-restore.tgz -C "$RELEASE"
+          cd "$RELEASE"
+          npm ci --omit=dev --no-audit --no-fund >/dev/null
+          test -f .output/server/index.mjs
+          test -f scripts/start-core-runtime.mjs
+
+          OLD_IMAGE="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
+          if [ -n "$OLD_IMAGE" ]; then
+            sudo docker tag "$OLD_IMAGE" impulsionando-core:wmp-redirect-rollback
+          fi
+
+          printf 'node_modules\n' > .dockerignore
+          cat >/tmp/Dockerfile.wmp-redirect <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+
+          sudo docker build -f /tmp/Dockerfile.wmp-redirect -t impulsionando-core:wmp-redirect "$RELEASE" >/tmp/wmp-redirect-build.log
+          sudo docker tag impulsionando-core:wmp-redirect impulsionando-core:latest
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+
+          rollback(){
+            if sudo docker image inspect impulsionando-core:wmp-redirect-rollback >/dev/null 2>&1; then
+              sudo docker tag impulsionando-core:wmp-redirect-rollback impulsionando-core:latest
+              sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core || true
+            fi
+          }
+          trap 'rc=$?; if [ "$rc" -ne 0 ]; then rollback; fi; exit "$rc"' EXIT
+
+          for i in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+            if [ -n "$ip" ] && curl -fsS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/" >/tmp/wmp-origin.html 2>/dev/null; then
+              break
+            fi
+            [ "$i" -lt 45 ] || exit 42
+            sleep 2
+          done
+
+          grep -Eqi 'WMP|Wagner Miller' /tmp/wmp-origin.html || exit 43
+          if grep -Eqi '<title>[^<]*Impulsionando Tecnologia|Plataforma SaaS multiempresa' /tmp/wmp-origin.html; then exit 44; fi
+          trap - EXIT
+          echo WMP_REDIRECT_RESTORE_ORIGIN_PASS
+          REMOTE
+
+      - name: Validate public WMP remains on WMP host
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          final_url="$(curl --location --silent --show-error --max-time 30 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -D "$headers" -o "$body" -w '%{url_effective}' 'https://wmp.impulsionando.com.br/?restore=${GITHUB_RUN_ID}')"
+          final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+          echo "WMP_FINAL_URL=$final_url"
+          [ "$final_host" = 'wmp.impulsionando.com.br' ] || exit 50
+          ! grep -Eqi '^location:[[:space:]]*https?://(www\.)?impulsionando\.com\.br([/:]|$)' "$headers" || exit 51
+          grep -Eqi 'WMP|Wagner Miller' "$body" || exit 52
+          ! grep -Eqi '<title>[^<]*Impulsionando Tecnologia|Plataforma SaaS multiempresa' "$body" || exit 53
+          echo WMP_REDIRECT_RESTORE_PUBLIC_PASS
