@@ -9,6 +9,7 @@ import {
   tenantSubdomainTarget,
   toColorsInternalPathname,
   toWmpInternalPathname,
+  wmpHostLockTarget,
 } from "./subdomain";
 
 const base = { protocol: "https:", pathname: "/", search: "", hash: "" };
@@ -47,6 +48,13 @@ describe("canonicalTenantHostRedirect", () => {
   it("does not redirect an already public CHRISMED path", () => {
     expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/agendar" }))
       .toBeNull();
+  });
+
+  it("never canonicalizes the WMP host to another domain", () => {
+    for (const pathname of ["/", "/wmp", "/djs", "/empresas", "/orcamento", "/onde-estou"]) {
+      expect(canonicalTenantHostRedirect({ ...base, hostname: "wmp.impulsionando.com.br", pathname }))
+        .toBeNull();
+    }
   });
 
   it("redirects all former Colors aliases to colorssaude.com.br", () => {
@@ -123,7 +131,29 @@ describe("deprecatedSubdomainRedirect", () => {
 
 describe("WMP clean public path routing", () => {
   it("maps the WMP root to its internal namespace", () => {
-    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/")).toBe("/wmp");
+    expect(toWmpInternalPathname("wmp.impulsionando.com.br", "/")).toBe("/wmp/");
+  });
+
+  it("locks every public WMP route to a same-host internal path", () => {
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/")).toBe("/wmp/");
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/djs")).toBe("/wmp/djs");
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/empresas")).toBe("/wmp/empresas");
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/orcamento")).toBe("/wmp/orcamento");
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/onde-estou")).toBe("/wmp/onde-estou");
+  });
+
+  it("never returns a cross-domain target from the WMP host lock", () => {
+    for (const pathname of ["/", "/djs", "/empresas", "/orcamento", "/parceiro", "/onde-estou"]) {
+      const target = wmpHostLockTarget("wmp.impulsionando.com.br", pathname);
+      expect(target).not.toContain("impulsionando.com.br");
+      expect(target).not.toMatch(/^https?:\/\//);
+    }
+  });
+
+  it("leaves global Core and internal WMP routes alone", () => {
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/auth")).toBeNull();
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/dashboard")).toBeNull();
+    expect(wmpHostLockTarget("wmp.impulsionando.com.br", "/wmp/djs")).toBeNull();
   });
 
   it("does not rewrite Colors Saúde", () => {
