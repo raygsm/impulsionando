@@ -7,6 +7,7 @@ on:
       - homologacao/impulsionando-go-live-20260817
     paths:
       - .github/workflows/provision-evolution-homologacao.yml
+      - deploy/evolution/docker-compose.yml
 
 concurrency:
   group: provision-evolution-impulsionando
@@ -21,6 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Configure SSH
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -34,7 +38,19 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
-      - name: Provision Evolution API v2.3.7 on the Core private network
+      - name: Upload Evolution compose template
+        env:
+          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          test -n "${DEPLOY_HOST:-}"
+          test -n "${DEPLOY_USER:-}"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'sudo install -d -m 0700 /opt/impulsionando/evolution'
+          scp deploy/evolution/docker-compose.yml "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/impulsionando-evolution-compose.yml"
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" 'sudo install -o root -g root -m 0600 /tmp/impulsionando-evolution-compose.yml /opt/impulsionando/evolution/docker-compose.yml && rm -f /tmp/impulsionando-evolution-compose.yml'
+
+      - name: Provision provider on private Core network
         env:
           DEPLOY_HOST: ${{ secrets.VPS_HOST }}
           DEPLOY_USER: ${{ secrets.VPS_USER }}
@@ -51,12 +67,11 @@ jobs:
           EVOLUTION_INSTANCE=impulsionando-impulsionito
 
           test -f "$CORE_COMPOSE"
+          test -f "$STACK_DIR/docker-compose.yml"
           sudo docker inspect impulsionando-core >/dev/null
 
           CORE_NETWORK="$(sudo docker inspect impulsionando-core --format '{{range $name, $cfg := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' | head -n1)"
           test -n "$CORE_NETWORK"
-
-          sudo install -d -m 0700 "$STACK_DIR"
 
           if ! sudo test -f "$STACK_DIR/.env"; then
             API_KEY="$(openssl rand -hex 32)"
@@ -64,13 +79,12 @@ jobs:
             REDIS_PASSWORD="$(openssl rand -hex 32)"
             WEBHOOK_SECRET="$(openssl rand -hex 32)"
             tmp="$(mktemp)"
-            cat > "$tmp" <<EOF
-EVOLUTION_API_KEY=$API_KEY
-EVOLUTION_DB_PASSWORD=$DB_PASSWORD
-EVOLUTION_REDIS_PASSWORD=$REDIS_PASSWORD
-EVOLUTION_WEBHOOK_SECRET=$WEBHOOK_SECRET
-CORE_NETWORK=$CORE_NETWORK
-EOF
+            printf '%s\n' \
+              "EVOLUTION_API_KEY=$API_KEY" \
+              "EVOLUTION_DB_PASSWORD=$DB_PASSWORD" \
+              "EVOLUTION_REDIS_PASSWORD=$REDIS_PASSWORD" \
+              "EVOLUTION_WEBHOOK_SECRET=$WEBHOOK_SECRET" \
+              "CORE_NETWORK=$CORE_NETWORK" > "$tmp"
             sudo install -o root -g root -m 0600 "$tmp" "$STACK_DIR/.env"
             rm -f "$tmp"
             unset API_KEY DB_PASSWORD REDIS_PASSWORD WEBHOOK_SECRET
@@ -87,115 +101,8 @@ EOF
             rm -f "$tmp"
           fi
 
-          sudo tee "$STACK_DIR/docker-compose.yml" >/dev/null <<'YAML'
-          services:
-            postgres:
-              image: postgres:16-alpine
-              container_name: impulsionando-evolution-postgres
-              restart: unless-stopped
-              environment:
-                POSTGRES_DB: evolution
-                POSTGRES_USER: evolution
-                POSTGRES_PASSWORD: ${EVOLUTION_DB_PASSWORD}
-              volumes:
-                - evolution_postgres_data:/var/lib/postgresql/data
-              healthcheck:
-                test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-              networks:
-                - evolution_private
-
-            redis:
-              image: redis:7-alpine
-              container_name: impulsionando-evolution-redis
-              restart: unless-stopped
-              command: ["redis-server", "--appendonly", "yes", "--requirepass", "${EVOLUTION_REDIS_PASSWORD}"]
-              volumes:
-                - evolution_redis_data:/data
-              healthcheck:
-                test: ["CMD-SHELL", "redis-cli -a \"${EVOLUTION_REDIS_PASSWORD}\" ping | grep PONG"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-              networks:
-                - evolution_private
-
-            evolution-api:
-              image: evoapicloud/evolution-api:v2.3.7
-              container_name: impulsionando-evolution-api
-              restart: unless-stopped
-              depends_on:
-                postgres:
-                  condition: service_healthy
-                redis:
-                  condition: service_healthy
-              environment:
-                SERVER_NAME: impulsionando-evolution
-                SERVER_TYPE: http
-                SERVER_PORT: 8080
-                SERVER_URL: http://impulsionando-evolution-api:8080
-                TELEMETRY_ENABLED: "false"
-                PROMETHEUS_METRICS: "false"
-                CORS_ORIGIN: "https://impulsionando.com.br"
-                CORS_METHODS: "GET,POST,PUT,DELETE"
-                CORS_CREDENTIALS: "true"
-                LOG_LEVEL: "ERROR,WARN,INFO"
-                LOG_BAILEYS: "error"
-                DEL_INSTANCE: "false"
-                DATABASE_PROVIDER: postgresql
-                DATABASE_CONNECTION_URI: postgresql://evolution:${EVOLUTION_DB_PASSWORD}@postgres:5432/evolution?schema=evolution_api
-                DATABASE_CONNECTION_CLIENT_NAME: impulsionando
-                DATABASE_SAVE_DATA_INSTANCE: "true"
-                DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
-                DATABASE_SAVE_MESSAGE_UPDATE: "true"
-                DATABASE_SAVE_DATA_CONTACTS: "true"
-                DATABASE_SAVE_DATA_CHATS: "true"
-                DATABASE_SAVE_DATA_LABELS: "true"
-                DATABASE_SAVE_DATA_HISTORIC: "true"
-                CACHE_REDIS_ENABLED: "true"
-                CACHE_REDIS_URI: redis://:${EVOLUTION_REDIS_PASSWORD}@redis:6379/6
-                CACHE_REDIS_TTL: 604800
-                CACHE_REDIS_PREFIX_KEY: impulsionando_evolution
-                CACHE_REDIS_SAVE_INSTANCES: "false"
-                CACHE_LOCAL_ENABLED: "false"
-                WEBHOOK_GLOBAL_ENABLED: "false"
-                WEBSOCKET_ENABLED: "false"
-                RABBITMQ_ENABLED: "false"
-                SQS_ENABLED: "false"
-                KAFKA_ENABLED: "false"
-                OPENAI_ENABLED: "false"
-                N8N_ENABLED: "false"
-                AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
-                AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "false"
-                CONFIG_SESSION_PHONE_CLIENT: Impulsionando
-                CONFIG_SESSION_PHONE_NAME: Chrome
-                QRCODE_LIMIT: 30
-                LANGUAGE: pt-BR
-              volumes:
-                - evolution_instances:/evolution/instances
-              expose:
-                - "8080"
-              networks:
-                - evolution_private
-                - core_private
-
-          volumes:
-            evolution_postgres_data:
-            evolution_redis_data:
-            evolution_instances:
-
-          networks:
-            evolution_private:
-              driver: bridge
-            core_private:
-              external: true
-              name: ${CORE_NETWORK}
-          YAML
-          sudo chmod 0600 "$STACK_DIR/docker-compose.yml"
-
           cd "$STACK_DIR"
+          sudo docker compose --env-file .env config >/dev/null
           sudo docker compose --env-file .env pull
           sudo docker compose --env-file .env up -d
 
@@ -221,8 +128,12 @@ EOF
             -H "apikey: $API_KEY" \
             --data "{\"instanceName\":\"$EVOLUTION_INSTANCE\",\"qrcode\":true,\"integration\":\"WHATSAPP-BAILEYS\"}" || true)"
           case "$create_code" in
-            200|201|409|403) ;;
-            *) echo "Unexpected Evolution instance create HTTP=$create_code"; sudo docker logs --tail 120 "$EVOLUTION_CONTAINER" || true; exit 62 ;;
+            200|201|403|409) ;;
+            *)
+              echo "Unexpected Evolution instance create HTTP=$create_code"
+              sudo docker logs --tail 120 "$EVOLUTION_CONTAINER" || true
+              exit 62
+              ;;
           esac
 
           sudo cp "$CORE_ENV" "$CORE_ENV_BACKUP"
@@ -259,13 +170,9 @@ EOF
             sleep 2
           done
 
-          state_code="$(sudo docker run --rm --network "$CORE_NETWORK" curlimages/curl:8.12.1 -sS -o /tmp/evo-state.json -w '%{http_code}' \
-            -H "apikey: $(sudo sed -n 's/^EVOLUTION_API_KEY=//p' "$STACK_DIR/.env" | head -n1)" \
-            http://impulsionando-evolution-api:8080/instance/connectionState/$EVOLUTION_INSTANCE || true)"
-          echo "EVOLUTION_PROVIDER=PASS"
+          echo 'EVOLUTION_PROVIDER=PASS'
           echo "EVOLUTION_PRIVATE_NETWORK=$CORE_NETWORK"
           echo "EVOLUTION_INSTANCE=$EVOLUTION_INSTANCE"
-          echo "EVOLUTION_STATE_HTTP=$state_code"
-          echo "EVOLUTION_WEBHOOK_SECRET=CONFIGURED"
-          echo "CORE_AFTER_EVOLUTION=PASS"
+          echo 'EVOLUTION_WEBHOOK_SECRET=CONFIGURED'
+          echo 'CORE_AFTER_EVOLUTION=PASS'
           REMOTE
