@@ -2,6 +2,8 @@ const enabled = process.env.PULSONITOR_ENABLED === "true";
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const probeRegion = process.env.PULSONITOR_PROBE_REGION || "core-primary";
+const refreshMs = Math.max(5000, Number(process.env.PULSONITOR_REFRESH_MS || 5000));
+const maxConcurrency = Math.max(1, Number(process.env.PULSONITOR_MAX_CONCURRENCY || 8));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -45,33 +47,41 @@ async function registerCheck(target, result) {
 
 async function checkHttp(target) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), target.timeout_ms || 10000);
+  const timeoutMs = Math.max(1000, Number(target.timeout_ms || 10000));
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   const start = Date.now();
   try {
     const response = await fetch(target.target, {
       method: "GET",
       redirect: "follow",
       signal: controller.signal,
-      headers: { "User-Agent": "Impulsionando-Pulsonitor/1.0" },
+      cache: "no-store",
+      headers: {
+        "User-Agent": "Impulsionando-Pulsonitor/1.1",
+        Accept: "text/html,application/json;q=0.9,*/*;q=0.8",
+        "Cache-Control": "no-cache",
+      },
     });
     const latencyMs = Date.now() - start;
-    const expected = target.expected_status || 200;
+    const expected = Number(target.expected_status || 200);
+    const success = response.status === expected;
     return {
-      success: response.status === expected,
+      success,
       statusCode: response.status,
       latencyMs,
-      errorCode: response.status === expected ? null : "unexpected_status",
-      errorMessage: response.status === expected ? null : `Expected ${expected}, received ${response.status}`,
-      meta: { finalUrl: response.url },
+      errorCode: success ? null : "unexpected_status",
+      errorMessage: success ? null : `Expected ${expected}, received ${response.status}`,
+      meta: { finalUrl: response.url, redirected: response.redirected, timeoutMs },
     };
   } catch (error) {
+    const cause = error?.cause?.code || error?.cause?.message || null;
     return {
       success: false,
       statusCode: null,
       latencyMs: Date.now() - start,
       errorCode: error?.name === "AbortError" ? "timeout" : "network_error",
-      errorMessage: String(error?.message || error).slice(0, 800),
-      meta: {},
+      errorMessage: String(cause || error?.message || error).slice(0, 800),
+      meta: { timeoutMs, cause: cause ? String(cause).slice(0, 300) : null },
     };
   } finally {
     clearTimeout(timer);
@@ -90,8 +100,7 @@ async function runTarget(target) {
     });
     return;
   }
-  const result = await checkHttp(target);
-  await registerCheck(target, result);
+  await registerCheck(target, await checkHttp(target));
 }
 
 async function main() {
@@ -104,23 +113,26 @@ async function main() {
     return;
   }
 
-  console.log(`[Pulsonitor] started in ${probeRegion}`);
+  console.log(`[Pulsonitor] started in ${probeRegion}; concurrency=${maxConcurrency}`);
   const nextRun = new Map();
+  const running = new Set();
 
   while (true) {
     const now = Date.now();
     try {
       const targets = await loadTargets();
-      for (const target of targets) {
-        const dueAt = nextRun.get(target.id) || 0;
-        if (now < dueAt) continue;
-        nextRun.set(target.id, now + Math.max(30, target.interval_seconds || 30) * 1000);
-        runTarget(target).catch((error) => console.error(`[Pulsonitor] ${target.label}:`, error.message));
+      const due = targets.filter((target) => now >= (nextRun.get(target.id) || 0) && !running.has(target.id));
+      for (const target of due.slice(0, Math.max(0, maxConcurrency - running.size))) {
+        nextRun.set(target.id, now + Math.max(30, Number(target.interval_seconds || 30)) * 1000);
+        running.add(target.id);
+        runTarget(target)
+          .catch((error) => console.error(`[Pulsonitor] ${target.label}:`, error.message))
+          .finally(() => running.delete(target.id));
       }
     } catch (error) {
       console.error("[Pulsonitor] target refresh failed:", error.message);
     }
-    await sleep(5000);
+    await sleep(refreshMs);
   }
 }
 
