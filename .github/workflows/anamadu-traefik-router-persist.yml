@@ -37,7 +37,7 @@ jobs:
           ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
 
-      - name: Restore explicit Ana Madu TLS router and self-heal edge
+      - name: Restore Ana Madu router and rebuild unhealthy edge
         run: |
           set -euo pipefail
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
@@ -45,8 +45,13 @@ jobs:
           base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
           override=/opt/impulsionando/deploy/hostinger/docker-compose.anamadu.yml
           domain='anamadu.impulsionando.com.br'
-          cd /opt/impulsionando/deploy/hostinger
+          release="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
           test -f "$base"
+          test -n "$release"
+          test -f "$release/.output/server/index.mjs"
+          test -f "$release/scripts/start-core-runtime.mjs"
+          cd /opt/impulsionando/deploy/hostinger
+
           sudo tee "$override" >/dev/null <<'YAML'
           services:
             impulsionando-core:
@@ -60,40 +65,52 @@ jobs:
           YAML
           sudo docker compose -f "$base" -f "$override" config -q
 
-          current_rule="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.rule"}}' impulsionando-core 2>/dev/null || true)"
-          current_resolver="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.anamadu.tls.certresolver"}}' impulsionando-core 2>/dev/null || true)"
           current_ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
           direct_code='000'
           if [ -n "$current_ip" ]; then
             direct_code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/anamadu-direct -w '%{http_code}' --max-time 10 "http://$current_ip:3000/" || true)"
           fi
-          echo "ANAMADU_PREFLIGHT rule=${current_rule:-missing} resolver=${current_resolver:-missing} direct=$direct_code"
+          echo "ANAMADU_EDGE_BEFORE direct=$direct_code release=$release"
 
-          needs_recreate='no'
-          if [ "$current_rule" != 'Host(`anamadu.impulsionando.com.br`)' ] || [ "$current_resolver" != 'letsencrypt' ]; then needs_recreate='yes'; fi
-          case "$direct_code" in 2*|3*) ;; *) needs_recreate='yes' ;; esac
+          case "$direct_code" in
+            2*|3*) : ;;
+            *)
+              printf 'node_modules\n' > "$release/.dockerignore"
+              cat > /tmp/Dockerfile.anamadu-recovery <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+              sudo docker build -f /tmp/Dockerfile.anamadu-recovery -t impulsionando-core:latest "$release"
+              ;;
+          esac
 
-          if [ "$needs_recreate" = 'yes' ]; then
-            sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
-          fi
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
 
-          for attempt in $(seq 1 45); do
+          for attempt in $(seq 1 60); do
             ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
             if [ -n "$ip" ]; then
-              code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/anamadu-container -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"
-              case "$code" in 2*|3*) break ;; esac
+              home_code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/anamadu-container -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"
+              case "$home_code" in 2*|3*) break ;; esac
             fi
-            [ "$attempt" -lt 45 ] || { sudo docker logs --tail 160 impulsionando-core || true; exit 60; }
+            [ "$attempt" -lt 60 ] || { sudo docker logs --tail 200 impulsionando-core || true; exit 60; }
             sleep 2
           done
 
+          echo "ANAMADU_CONTAINER home=$home_code ip=$ip"
           for attempt in $(seq 1 60); do
-            code="$(curl -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 AnaMaduPersist/2.0' -o /tmp/anamadu-persist -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
-            [ "$code" = '200' ] && break
+            public_code="$(curl -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 AnaMaduRecovery/3.0' -o /tmp/anamadu-persist -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
+            [ "$public_code" = '200' ] && break
             [ "$attempt" -lt 60 ] || {
-              echo "::error::Ana Madu HTTPS probe failed with HTTP=$code"
+              echo "::error::Ana Madu local TLS probe failed with HTTP=$public_code"
               sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' || true
-              sudo docker logs --tail 160 impulsionando-core || true
+              sudo docker logs --tail 200 impulsionando-core || true
               exit 61
             }
             sleep 2
