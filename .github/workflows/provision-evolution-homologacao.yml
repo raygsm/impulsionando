@@ -62,17 +62,24 @@ jobs:
             API_KEY="$(openssl rand -hex 32)"
             DB_PASSWORD="$(openssl rand -hex 32)"
             REDIS_PASSWORD="$(openssl rand -hex 32)"
+            WEBHOOK_SECRET="$(openssl rand -hex 32)"
             tmp="$(mktemp)"
             cat > "$tmp" <<EOF
 EVOLUTION_API_KEY=$API_KEY
 EVOLUTION_DB_PASSWORD=$DB_PASSWORD
 EVOLUTION_REDIS_PASSWORD=$REDIS_PASSWORD
+EVOLUTION_WEBHOOK_SECRET=$WEBHOOK_SECRET
 CORE_NETWORK=$CORE_NETWORK
 EOF
             sudo install -o root -g root -m 0600 "$tmp" "$STACK_DIR/.env"
             rm -f "$tmp"
-            unset API_KEY DB_PASSWORD REDIS_PASSWORD
+            unset API_KEY DB_PASSWORD REDIS_PASSWORD WEBHOOK_SECRET
           else
+            if ! sudo grep -q '^EVOLUTION_WEBHOOK_SECRET=.' "$STACK_DIR/.env"; then
+              WEBHOOK_SECRET="$(openssl rand -hex 32)"
+              printf 'EVOLUTION_WEBHOOK_SECRET=%s\n' "$WEBHOOK_SECRET" | sudo tee -a "$STACK_DIR/.env" >/dev/null
+              unset WEBHOOK_SECRET
+            fi
             tmp="$(mktemp)"
             sudo grep -v '^CORE_NETWORK=' "$STACK_DIR/.env" > "$tmp"
             printf 'CORE_NETWORK=%s\n' "$CORE_NETWORK" >> "$tmp"
@@ -204,9 +211,10 @@ EOF
           done
 
           API_KEY="$(sudo sed -n 's/^EVOLUTION_API_KEY=//p' "$STACK_DIR/.env" | head -n1)"
+          WEBHOOK_SECRET="$(sudo sed -n 's/^EVOLUTION_WEBHOOK_SECRET=//p' "$STACK_DIR/.env" | head -n1)"
           test -n "$API_KEY"
+          test -n "$WEBHOOK_SECRET"
 
-          # Create the dedicated Impulsionando instance idempotently. It remains unpaired until QR scan.
           create_code="$(sudo docker run --rm --network "$CORE_NETWORK" curlimages/curl:8.12.1 -sS -o /tmp/evo-create.json -w '%{http_code}' \
             -X POST http://impulsionando-evolution-api:8080/instance/create \
             -H 'content-type: application/json' \
@@ -217,20 +225,20 @@ EOF
             *) echo "Unexpected Evolution instance create HTTP=$create_code"; sudo docker logs --tail 120 "$EVOLUTION_CONTAINER" || true; exit 62 ;;
           esac
 
-          # Inject only server-side adapter references into the existing Core env.
           sudo cp "$CORE_ENV" "$CORE_ENV_BACKUP"
           tmp="$(mktemp)"
           sudo grep -v '^IMPULSIONANDO_EVOLUTION_BASE_URL=' "$CORE_ENV" \
             | grep -v '^IMPULSIONANDO_EVOLUTION_API_KEY=' \
+            | grep -v '^IMPULSIONANDO_EVOLUTION_WEBHOOK_SECRET=' \
             | grep -v '^IMPULSIONANDO_EVOLUTION_INSTANCE=' > "$tmp"
           printf 'IMPULSIONANDO_EVOLUTION_BASE_URL=http://impulsionando-evolution-api:8080\n' >> "$tmp"
           printf 'IMPULSIONANDO_EVOLUTION_API_KEY=%s\n' "$API_KEY" >> "$tmp"
+          printf 'IMPULSIONANDO_EVOLUTION_WEBHOOK_SECRET=%s\n' "$WEBHOOK_SECRET" >> "$tmp"
           printf 'IMPULSIONANDO_EVOLUTION_INSTANCE=%s\n' "$EVOLUTION_INSTANCE" >> "$tmp"
           sudo install -o root -g root -m 0600 "$tmp" "$CORE_ENV"
           rm -f "$tmp"
-          unset API_KEY
+          unset API_KEY WEBHOOK_SECRET
 
-          # Recreate only the Core container so it receives the new environment.
           cd /opt/impulsionando/deploy/hostinger
           if ! sudo docker compose -f "$CORE_COMPOSE" up -d --no-build --force-recreate impulsionando-core; then
             sudo cp "$CORE_ENV_BACKUP" "$CORE_ENV"
@@ -251,12 +259,13 @@ EOF
             sleep 2
           done
 
-          state_code="$(sudo docker run --rm --network "$CORE_NETWORK" --env-file "$STACK_DIR/.env" curlimages/curl:8.12.1 -sS -o /tmp/evo-state.json -w '%{http_code}' \
+          state_code="$(sudo docker run --rm --network "$CORE_NETWORK" curlimages/curl:8.12.1 -sS -o /tmp/evo-state.json -w '%{http_code}' \
             -H "apikey: $(sudo sed -n 's/^EVOLUTION_API_KEY=//p' "$STACK_DIR/.env" | head -n1)" \
             http://impulsionando-evolution-api:8080/instance/connectionState/$EVOLUTION_INSTANCE || true)"
           echo "EVOLUTION_PROVIDER=PASS"
           echo "EVOLUTION_PRIVATE_NETWORK=$CORE_NETWORK"
           echo "EVOLUTION_INSTANCE=$EVOLUTION_INSTANCE"
           echo "EVOLUTION_STATE_HTTP=$state_code"
+          echo "EVOLUTION_WEBHOOK_SECRET=CONFIGURED"
           echo "CORE_AFTER_EVOLUTION=PASS"
           REMOTE
