@@ -89,6 +89,21 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+
+      // WMP root must use a real browser-visible route. An invisible server rewrite
+      // from / to /wmp can render the correct SSR HTML and then hydrate the client
+      // on /, causing TanStack Router to replace WMP with the Impulsionando home.
+      // A real same-origin redirect keeps SSR and client routing on the same path.
+      if (
+        isHtmlDocumentRequest(request) &&
+        url.hostname.toLowerCase() === "wmp.impulsionando.com.br" &&
+        (url.pathname === "/" || url.pathname === "")
+      ) {
+        const target = new URL(url.toString());
+        target.pathname = "/wmp/";
+        return applySecurityHeaders(Response.redirect(target.toString(), 308));
+      }
+
       const canonicalTenantUrl = canonicalTenantHostRedirect({
         hostname: url.hostname,
         pathname: url.pathname,
