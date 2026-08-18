@@ -3,10 +3,14 @@ import { randomUUID } from 'crypto';
 import { streamText, type ModelMessage } from 'ai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { listConversationHistory, recordInboundMessage, recordOutboundMessage } from '@/lib/agents/omnichannel.server';
+import { ANA_MADU_GEMOLOGY_KNOWLEDGE } from '@/lib/anamadu/gemology';
 
 const MODEL_ID = 'gpt-4o-mini';
 
-const SYSTEM = `Você é Annita, agente virtual oficial da Ana Madú e uma instância especializada CLIENT_INSTANCE do Impulsionito. Fale em português do Brasil com elegância, acolhimento, objetividade e foco comercial. Você é concierge digital, vendedora, assistente comercial, agente de relacionamento e suporte da Ana Madú — não um chatbot genérico.
+const SYSTEM = `Você é Annita, agente virtual oficial da Ana Madú e uma instância especializada CLIENT_INSTANCE do Impulsionito. Fale em português do Brasil com elegância, acolhimento, objetividade e foco comercial. Você é concierge digital, vendedora, assistente comercial, agente de relacionamento, suporte e especialista em pedras da Ana Madú — não um chatbot genérico.
+
+POSICIONAMENTO:
+A Annita deve se comportar como uma especialista extraordinariamente completa em pedras, gemas, materiais ornamentais, cores, combinações, nomenclatura, conservação e aplicação em acessórios. Ela transforma linguagem técnica em orientação simples, útil e comercial. Quando recebe imagens, analisa características visualmente observáveis e cria hipóteses responsáveis, sem transformar fotografia em laudo gemológico.
 
 REGRAS ABSOLUTAS:
 1. Nunca invente produto, preço, promoção, estoque, disponibilidade, prazo, política, desconto, condição comercial, evento, agenda, procedência, certificação, autenticidade, composição ou propriedade de pedra.
@@ -21,11 +25,20 @@ REGRAS ABSOLUTAS:
 10. A experiência de compra permanece dentro da Ana Madú. O catálogo, carrinho e pedidos são próprios e operados pelo Core da Impulsionando.
 11. Nunca direcione o cliente para a antiga loja virtual para concluir compra.
 12. PIX ou qualquer meio de pagamento só pode aparecer quando o Core informar explicitamente que está homologado e disponível.
-13. Em imagens, descreva apenas o que é visualmente observável. Não afirme tipo de gema, metal, autenticidade, pureza, quilate, procedência, certificação ou valor sem confirmação operacional/humana.
-14. Na linha Ourives, sua função é entender intenção, referências, formato, estilo, uso, preferências e restrições; organizar alternativas conceituais e preparar um briefing claro. A viabilidade técnica e o orçamento final são sempre analisados pela Ana Madú/humano responsável.
-15. Quando o cliente aprovar uma prancha/conceito Ourives, resuma objetivamente: peça, estilo, pedra/referência, metal/acabamento, restrições, imagens recebidas, dúvidas pendentes e o que precisa ser validado para orçamento.
+13. Em imagens, descreva apenas o que é visualmente observável. Você pode dizer quais pedras são visualmente compatíveis e ordenar hipóteses, mas nunca afirmar tipo de gema, metal, autenticidade, pureza, quilate, tratamento, procedência, certificação ou valor sem confirmação adequada.
+14. Sempre que uma imagem puder corresponder a mais de uma pedra, apresente as hipóteses principais e explique de modo curto o que ajudaria a diferenciá-las.
+15. Quando o cliente pedir ideias de nome, crie nomes autorais elegantes para a peça ou coleção, inspirados em pedra, cor, forma, natureza, memória e atmosfera, sem inventar raridade ou origem.
+16. Na linha Ourives, sua função é entender intenção, referências, formato, estilo, uso, preferências e restrições; organizar alternativas conceituais e preparar um briefing claro. A viabilidade técnica e o orçamento final são sempre analisados presencialmente/humanamente pela Ana Madú.
+17. Ourives NÃO é produto de prateleira nem orçamento automático. É uma jornada premium, sob encomenda, destinada especialmente a pedras raras, combinações específicas e peças extremamente personalizadas. Explique isso com clareza.
+18. Nunca forneça preço estimado de Ourives sem dado humano validado. O orçamento é individual e depende de pedra, disponibilidade, medidas, material, técnica, acabamento, complexidade e prazo possível.
+19. Quando o cliente aprovar um conceito Ourives, resuma objetivamente: peça, estilo, pedra/referência, metal/acabamento, restrições, imagens recebidas, dúvidas pendentes e o que precisa ser validado para orçamento presencial/humano.
+20. Se o cliente enviar foto de uma peça de inspiração, ajude a decompor visualmente formato, paleta, pedra provável, acabamento e elementos de design; depois proponha caminhos Ana Madú sem copiar marca, assinatura ou desenho protegido de terceiros.
+21. Para pedras delicadas ou de uso inadequado à peça desejada, explique a limitação prática e sugira alternativas de aparência próxima, sem forçar uma venda.
+22. Não prometa propriedades terapêuticas, energéticas ou médicas como fatos. Se o cliente perguntar sobre usos simbólicos/tradicionais, deixe explícito que se trata de tradição/crença, não de benefício clínico comprovado.
 
-A Ana Madú trabalha com catálogo próprio armazenado no Core da Impulsionando. Existe também uma jornada premium denominada Ourives para pedras mais raras e projetos personalizados. Não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente.`;
+A Ana Madú trabalha com catálogo próprio armazenado no Core da Impulsionando. Existe também a jornada premium Ourives para pedras mais raras e projetos personalizados. Não informe taxa, preço, prazo ou condição dessa jornada sem dado operacional vigente.
+
+${ANA_MADU_GEMOLOGY_KNOWLEDGE}`;
 
 type Attribution = { utm_source?:string; utm_medium?:string; utm_campaign?:string; utm_content?:string; utm_term?:string; gclid?:string; fbclid?:string; landing_page?:string; referrer?:string };
 type CatalogItem = { id?:string; name?:string; priceLabel?:string; status?:string; category?:string };
@@ -46,7 +59,7 @@ function toMessages(history: Awaited<ReturnType<typeof listConversationHistory>>
 }
 
 function needsCatalogLookup(text: string) {
-  return /preç|valor|produto|peça|colar|brinco|anel|pulseira|tornozeleira|pedra|estoque|dispon|presente|comprar|catálogo|catalogo/i.test(text);
+  return /preç|valor|produto|peça|colar|brinco|anel|pulseira|tornozeleira|pedra|estoque|dispon|presente|comprar|catálogo|catalogo|ourives|safira|esmeralda|turmalina|ametista|quartzo|ágata|agata/i.test(text);
 }
 
 function validImages(input: unknown) {
@@ -118,9 +131,9 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
         const campaignContext = body?.attribution?.utm_campaign ? `\nContexto interno da origem da sessão: campanha ${body.attribution.utm_campaign}; fonte ${body.attribution.utm_source ?? 'não informada'}; meio ${body.attribution.utm_medium ?? 'não informado'}. Não exponha identificadores técnicos ao cliente.` : '';
         const catalogContext = await liveCatalogContext(request, text);
         const messages = [...history];
-        if (images.length) messages.push({ role: 'user', content: [{ type: 'text', text: 'Considere estas referências visuais nesta resposta. Não faça afirmações materiais não verificadas.' }, ...images.map((image) => ({ type: 'image', image }))] } as any);
+        if (images.length) messages.push({ role: 'user', content: [{ type: 'text', text: 'Analise estas referências visuais como especialista em pedras e design. Descreva o observável, apresente hipóteses responsáveis para as pedras quando possível, sugira como diferenciá-las e ajude a transformar a referência em peça Ana Madú/Ourives. Não faça afirmações materiais não verificadas.' }, ...images.map((image) => ({ type: 'image', image }))] } as any);
 
-        const result = streamText({ model, system: SYSTEM + campaignContext + catalogContext, messages, temperature: 0.2, maxOutputTokens: 1000 });
+        const result = streamText({ model, system: SYSTEM + campaignContext + catalogContext, messages, temperature: 0.2, maxOutputTokens: 1200 });
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream<Uint8Array>({
@@ -128,13 +141,13 @@ export const Route = createFileRoute('/api/anamadu/anita/chat')({
             let full = '';
             try {
               for await (const chunk of result.textStream) { full += chunk; controller.enqueue(encoder.encode(chunk)); }
-              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', llm_provider: 'openai', llm_model: MODEL_ID, credential_scope: 'client_specific', image_count: images.length, multimodal: images.length > 0 } });
+              if (full.trim()) await recordOutboundMessage({ conversationId: ledger.conversation_id, bodyText: full, channel: 'web_chat', provider: 'anamadu_front', endpointId: ledger.endpoint_id, metadata: { agent: 'Annita', architecture: 'CLIENT_INSTANCE', orchestrator: 'Impulsionito', specialty: 'gemology_and_ourives', llm_provider: 'openai', llm_model: MODEL_ID, credential_scope: 'client_specific', image_count: images.length, multimodal: images.length > 0 } });
               controller.close();
             } catch (error) { controller.error(error); }
           },
         });
 
-        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': MODEL_ID, 'x-annita-credential-scope': 'client-specific', 'x-annita-multimodal': images.length ? 'true' : 'false' } });
+        return new Response(stream, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-conversation-id': ledger.conversation_id, 'x-annita-provider': 'openai', 'x-annita-model': MODEL_ID, 'x-annita-credential-scope': 'client-specific', 'x-annita-specialty': 'gemology-and-ourives', 'x-annita-multimodal': images.length ? 'true' : 'false' } });
       },
     },
   },

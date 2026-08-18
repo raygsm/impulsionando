@@ -1,0 +1,38 @@
+name: CHRISMED main menu R1 hotfix
+on:
+  push:
+    paths: ['.github/workflows/chrismed-menu-r1-hotfix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Add temporary R1 teleconsult to Atendimento menu
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/components/chrismed/ChrismedShell.tsx')
+          s=p.read_text()
+          anchor='      { to: "/chrismed/teleconsulta", labels: { pt: "Teleconsulta", en: "Telehealth", es: "Teleconsulta" }, desc: { pt: "Consulta médica por vídeo, onde você estiver.", en: "Medical consultation by video, wherever you are.", es: "Consulta médica por video, donde usted esté." } },\n'
+          item='      { to: "/chrismed/agendar", labels: { pt: "Teleconsulta — TESTE R$ 1,00", en: "Telehealth — R$1 TEST", es: "Teleconsulta — PRUEBA R$ 1,00" }, desc: { pt: "Homologação temporária do pagamento e bloqueio da agenda.", en: "Temporary payment and scheduling validation.", es: "Validación temporal del pago y bloqueo de agenda." } },\n'
+          if item in s:
+            raise SystemExit('R1 menu item already present')
+          if anchor not in s:
+            raise SystemExit('Teleconsulta menu anchor not found')
+          s=s.replace(anchor,anchor+item,1)
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name impulsionando-bot
+          git config user.email actions@users.noreply.github.com
+          git add src/components/chrismed/ChrismedShell.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): show R$1 teleconsult in Atendimento menu"
+          git push origin main

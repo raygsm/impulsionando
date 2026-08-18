@@ -1,0 +1,43 @@
+name: Ana Madu Full Catalog Import
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/anamadu_catalog_import.py"
+      - ".github/workflows/anamadu-full-catalog-import.yml"
+
+concurrency:
+  group: anamadu-full-catalog-import
+  cancel-in-progress: false
+
+jobs:
+  import-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install importer dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Validate required secrets
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+
+      - name: Import complete Ana Madu catalog into Core
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANAMADU_STORAGE_BUCKET: anamadu-products
+        run: python scripts/anamadu_catalog_import.py

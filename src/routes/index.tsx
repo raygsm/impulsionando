@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
 import { Route as ColorsIndexRoute } from "./colors.index";
+import { WmpHome } from "./wmp.index";
 import { AnaMaduStorefront } from "@/components/anamadu/AnaMaduStorefront";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
@@ -28,6 +29,8 @@ const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
   "colorssaude.com.br": "/colors",
+  "wmp.com.br": "/wmp",
+  "www.wmp.com.br": "/wmp",
 };
 
 export const Route = createFileRoute("/")({
@@ -51,6 +54,9 @@ function HomeWithSubdomainGuard() {
       return <><ColorsRootMetadata /><ColorsRootPage /></>;
     }
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
+    if (host === "wmp.impulsionando.com.br" || host === "wmp.com.br" || host === "www.wmp.com.br") {
+      return <><WmpRootMetadata /><WmpHome /></>;
+    }
     if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduStorefront /><AnitaDock /></>;
   }
   return <><HomePage /><CpDiscoveryPopup /></>;
@@ -91,6 +97,18 @@ function ChrismedRootMetadata() {
     document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
     document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "CHRISMED — Dra. Christiane Alencar");
+  }, []);
+  return null;
+}
+
+function WmpRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://wmp.impulsionando.com.br/";
+    document.title = "WMP — Wagner Miller Produções";
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "WMP — Wagner Miller Produções");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Produção de eventos, contratação de DJs, operação recorrente para hotéis e empresas e rede de parceiros, com briefing estruturado e acompanhamento pelo Milito.");
   }, []);
   return null;
 }
