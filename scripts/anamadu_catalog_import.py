@@ -9,7 +9,7 @@ SUPABASE_URL = os.environ['SUPABASE_URL'].rstrip('/')
 SERVICE_KEY = os.environ['SUPABASE_SERVICE_ROLE_KEY']
 BUCKET = os.environ.get('ANAMADU_STORAGE_BUCKET', 'anamadu-products')
 HEADERS = {'apikey': SERVICE_KEY, 'Authorization': f'Bearer {SERVICE_KEY}', 'Content-Type':'application/json'}
-SESSION = requests.Session(); SESSION.headers.update({'User-Agent':'Impulsionando-AnaMadu-Migrator/2.0'})
+SESSION = requests.Session(); SESSION.headers.update({'User-Agent':'Impulsionando-AnaMadu-Migrator/2.1'})
 
 
 def rest(path, params=None):
@@ -101,7 +101,7 @@ def parse_product(url):
         opts=list(dict.fromkeys(opts))
         if opts: selects.append({'name':str(label)[:120],'values':opts[:50]})
     body=soup.get_text(' ',strip=True).lower()
-    availability='sold_out' if ('esgotado' in body or 'sem estoque' in body) else ('available' if 'comprar' in body else 'unknown')
+    availability='sold_out' if ('esgotado' in body or 'sem estoque' in body) else 'unknown'
     cats=[]
     allowed={'COLARES','BRINCOS','ÁNEIS','ANEIS','PULSEIRAS','TORNOZELEIRAS','JAPAMALA','JAPAMALAS','PEDRAS PARA AMBIENTE','COLARES ÚNICOS (PEDRAS BRUTAS E LAPIDADAS)','COLEÇÃO CHAKRAS','COLEÇÃO COLOURS','COLEÇÃO ESCAPULÁRIOS','COLEÇÃO GLOBOS','COLEÇÃO HEMATITA','PROMOÇÃO','ÁGUA MARINHA (PEDRA DE 2026)'}
     for a in soup.find_all('a',href=True):
@@ -134,7 +134,7 @@ def upsert_product(cid,url,p):
         local=store_image(key,idx,img)
         if local: local_images.append(local)
     effective_images=local_images or p['images']
-    payload={'company_id':cid,'sku':sku,'name':p['name'],'brand':'Ana Madú','category':p['category'],'description':p['description'],'image_url':effective_images[0] if effective_images else None,'active':True,'metadata':{'sale_price':p['price'],'currency':'BRL','availability':p['availability'],'legacy_url':url,'migration_origin':BASE,'migration_mode':'full_crawl_v2','images':effective_images,'legacy_images':p['images'],'options':p['options'],'media_internalized':bool(local_images),'migrated_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}}
+    payload={'company_id':cid,'sku':sku,'name':p['name'],'brand':'Ana Madú','category':p['category'],'description':p['description'],'image_url':effective_images[0] if effective_images else None,'active':True,'metadata':{'sale_price':p['price'],'currency':'BRL','availability':p['availability'],'legacy_url':url,'migration_origin':BASE,'migration_mode':'full_crawl_v2_1','images':effective_images,'legacy_images':p['images'],'options':p['options'],'media_internalized':bool(local_images),'migrated_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}}
     r=requests.post(f'{SUPABASE_URL}/rest/v1/core_products?on_conflict=company_id,sku',headers={**HEADERS,'Prefer':'resolution=merge-duplicates,return=representation'},data=json.dumps(payload),timeout=30)
     r.raise_for_status(); row=(r.json() or [{}])[0]
     pid=row.get('id')
