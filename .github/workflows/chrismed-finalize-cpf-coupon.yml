@@ -1,0 +1,61 @@
+name: CHRISMED finalize CPF and coupon
+on:
+  push:
+    paths: ['.github/workflows/chrismed-finalize-cpf-coupon.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch booking CPF validation and patient-facing errors
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/chrismed.agendar.tsx')
+          s=p.read_text()
+          old="function isValidCPF(v: string) { return v.replace(/\\D/g, '').length === 11; }"
+          new="""function isValidCPF(v: string) {
+  const cpf = v.replace(/\\D/g, '');
+  if (cpf.length !== 11 || /^(\\d)\\1{10}$/.test(cpf)) return false;
+  const calc = (length: number) => {
+    let sum = 0;
+    for (let i = 0; i < length; i += 1) sum += Number(cpf[i]) * (length + 1 - i);
+    const digit = (sum * 10) % 11;
+    return digit === 10 ? 0 : digit;
+  };
+  return calc(9) === Number(cpf[9]) && calc(10) === Number(cpf[10]);
+}"""
+          if old not in s: raise SystemExit('CPF validator not found')
+          s=s.replace(old,new,1)
+          old_err='errorComponent: ({ error, reset }) => <div className="container py-12 text-center"><h1 className="text-2xl font-semibold mb-2">Ops, algo deu errado</h1><p className="text-muted-foreground mb-4">{String(error)}</p><Button onClick={reset}>Tentar novamente</Button></div>,'
+          new_err='errorComponent: ({ reset }) => <div className="container py-12 text-center"><h1 className="text-2xl font-semibold mb-2">Não foi possível abrir esta etapa</h1><p className="text-muted-foreground mb-4">Tente novamente. Se o problema continuar, fale com o atendimento CHRISMED.</p><Button onClick={reset}>Tentar novamente</Button></div>,'
+          if old_err in s: s=s.replace(old_err,new_err,1)
+          cpf_input='<Input id="doc" inputMode="numeric" value={patient.doc} onChange={(e) => setPatient({ ...patient, doc: maskCPF(e.target.value) })} placeholder="000.000.000-00" />'
+          cpf_new=cpf_input+'{patient.doc && !isValidCPF(patient.doc) && <p className="text-xs text-red-600 mt-1">CPF inválido. Confira os números informados.</p>}'
+          if cpf_input in s: s=s.replace(cpf_input,cpf_new,1)
+          s=s.replace("} catch (e) { toast.error(`Erro ao gerar PIX: ${(e as Error).message}`); }", "} catch { toast.error('Não foi possível gerar o pagamento agora. Confira seus dados e tente novamente.'); }")
+          p.write_text(s)
+
+          c=Path('src/components/chrismed/ChrismedCouponCheckoutBridge.tsx')
+          t=c.read_text()
+          t=t.replace("document.querySelector<HTMLInputElement>('#email, input[type=\"email\"]')", "document.querySelector<HTMLInputElement>('#em, input[type=\"email\"]')")
+          t=t.replace("document.querySelector<HTMLInputElement>('#first_name, #first-name, input[name=\"first_name\"]')", "document.querySelector<HTMLInputElement>('#fn, #first_name, #first-name, input[name=\"first_name\"]')")
+          t=t.replace("document.querySelector<HTMLInputElement>('#last_name, #last-name, input[name=\"last_name\"]')", "document.querySelector<HTMLInputElement>('#ln, #last_name, #last-name, input[name=\"last_name\"]')")
+          t=t.replace("document.querySelector<HTMLInputElement>('#phone, input[type=\"tel\"]')", "document.querySelector<HTMLInputElement>('#ph, #phone, input[type=\"tel\"]')")
+          t=t.replace("rpc('chrismed_set_coupon_checkout_intent', { p_cpf: cpf, p_code: normalizedCode, p_email: email })", "rpc('chrismed_apply_coupon_checkout_v2', { p_cpf: cpf, p_code: normalizedCode, p_email: email })")
+          c.write_text(t)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name impulsionando-bot
+          git config user.email actions@users.noreply.github.com
+          git add src/routes/chrismed.agendar.tsx src/components/chrismed/ChrismedCouponCheckoutBridge.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): enforce CPF checksum and coupon eligibility"
+          git push origin main
