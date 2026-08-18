@@ -19,7 +19,7 @@ export const Route = createFileRoute("/wmp/")({
   component: WmpHome,
 });
 
-function WmpHome() {
+export function WmpHome() {
   return (
     <WmpShell>
       <section className="wmp-stage-bg">
