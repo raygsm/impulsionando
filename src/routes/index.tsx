@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
 import { Route as ColorsIndexRoute } from "./colors.index";
+import { Route as WmpIndexRoute } from "./wmp.index";
 import { AnaMaduStorefront } from "@/components/anamadu/AnaMaduStorefront";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
@@ -47,6 +48,9 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname.toLowerCase();
+    if (host === "wmp.impulsionando.com.br") {
+      return <><WmpRootMetadata /><WmpRootPage /></>;
+    }
     if (host === "colorssaude.com.br") {
       return <><ColorsRootMetadata /><ColorsRootPage /></>;
     }
@@ -54,6 +58,24 @@ function HomeWithSubdomainGuard() {
     if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduStorefront /><AnitaDock /></>;
   }
   return <><HomePage /><CpDiscoveryPopup /></>;
+}
+
+function WmpRootPage() {
+  const Component = WmpIndexRoute.options.component;
+  return Component ? <Component /> : null;
+}
+
+function WmpRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://wmp.impulsionando.com.br/";
+    document.title = "WMP — Wagner Miller Produções";
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    canonical?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "WMP — Wagner Miller Produções");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "Produção de eventos, contratação de DJs, operação recorrente para hotéis e empresas e rede de parceiros WMP.");
+  }, []);
+  return null;
 }
 
 function ColorsRootPage() {
