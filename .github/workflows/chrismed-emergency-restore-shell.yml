@@ -1,0 +1,32 @@
+name: CHRISMED emergency restore shell
+on:
+  push:
+    paths: ['.github/workflows/chrismed-emergency-restore-shell.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Restore shell and remove obsolete R1 entry
+        run: |
+          git checkout db0b8ffbe2124b8282043d1ad99612236ba6e48a -- src/components/chrismed/ChrismedShell.tsx
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/components/chrismed/ChrismedShell.tsx')
+          s=p.read_text()
+          line='      { to: "/chrismed/agendar", labels: { pt: "Teleconsulta — TESTE R$ 1,00", en: "Telehealth — R$1 TEST", es: "Teleconsulta — PRUEBA R$ 1,00" }, desc: { pt: "Homologação temporária do pagamento e bloqueio da agenda.", en: "Temporary payment and scheduling validation.", es: "Validación temporal del pago y bloqueo de agenda." } },\n'
+          s=s.replace(line,'')
+          p.write_text(s)
+          PY
+          git config user.name impulsionando-bot
+          git config user.email actions@users.noreply.github.com
+          git add src/components/chrismed/ChrismedShell.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): restore shell and remove R1 test menu"
+          git push origin main
