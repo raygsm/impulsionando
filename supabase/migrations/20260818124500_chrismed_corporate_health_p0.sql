@@ -77,7 +77,6 @@ create table if not exists public.chrismed_corporate_programs (
 create index if not exists idx_chrismed_corporate_programs_account
   on public.chrismed_corporate_programs(account_id,status,program_type);
 
--- Pipeline comercial específico do tenant CHRISMED, reutilizando o Core CRM.
 insert into public.crm_pipelines(company_id,name,is_default)
 select t.company_id,'CHRISMED Saúde Corporativa',false
 from public.communication_tenants t
@@ -108,7 +107,6 @@ on conflict(pipeline_id,code) do update set
   is_lost=excluded.is_lost,
   active=true;
 
--- Tags de qualificação B2B no CRM universal.
 insert into public.crm_tags(company_id,name,slug)
 select t.company_id,x.name,x.slug
 from public.communication_tenants t
@@ -134,25 +132,35 @@ revoke all on public.chrismed_corporate_accounts,public.chrismed_corporate_conta
 grant all on public.chrismed_corporate_accounts,public.chrismed_corporate_contact_roles,public.chrismed_corporate_workers,public.chrismed_corporate_programs to service_role;
 grant select,insert,update on public.chrismed_corporate_accounts,public.chrismed_corporate_contact_roles,public.chrismed_corporate_workers,public.chrismed_corporate_programs to authenticated;
 
+drop policy if exists chrismed_corporate_accounts_access on public.chrismed_corporate_accounts;
 create policy chrismed_corporate_accounts_access on public.chrismed_corporate_accounts
 for all to authenticated
-using (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),tenant_id))
-with check (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),tenant_id));
+using (
+  public.is_impulsionando_staff((select auth.uid()))
+  or exists(select 1 from public.communication_tenants t where t.id=tenant_id and t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id))
+)
+with check (
+  public.is_impulsionando_staff((select auth.uid()))
+  or exists(select 1 from public.communication_tenants t where t.id=tenant_id and t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id))
+);
 
+drop policy if exists chrismed_corporate_contact_roles_access on public.chrismed_corporate_contact_roles;
 create policy chrismed_corporate_contact_roles_access on public.chrismed_corporate_contact_roles
 for all to authenticated
-using (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))))
-with check (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))));
+using (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))))
+with check (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))));
 
+drop policy if exists chrismed_corporate_workers_access on public.chrismed_corporate_workers;
 create policy chrismed_corporate_workers_access on public.chrismed_corporate_workers
 for all to authenticated
-using (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))))
-with check (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))));
+using (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))))
+with check (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))));
 
+drop policy if exists chrismed_corporate_programs_access on public.chrismed_corporate_programs;
 create policy chrismed_corporate_programs_access on public.chrismed_corporate_programs
 for all to authenticated
-using (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))))
-with check (exists(select 1 from public.chrismed_corporate_accounts a where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or public.user_belongs_to_company((select auth.uid()),a.tenant_id))));
+using (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))))
+with check (exists(select 1 from public.chrismed_corporate_accounts a join public.communication_tenants t on t.id=a.tenant_id where a.id=account_id and (public.is_impulsionando_staff((select auth.uid())) or (t.company_id is not null and public.user_belongs_to_company((select auth.uid()),t.company_id)))));
 
 comment on table public.chrismed_corporate_accounts is 'Contas B2B de Saúde Corporativa CHRISMED; dados clínicos individuais não pertencem a esta tabela.';
 comment on table public.chrismed_corporate_workers is 'Vínculo operacional do colaborador com conta corporativa; não armazenar prontuário ou conteúdo clínico neste registro.';
