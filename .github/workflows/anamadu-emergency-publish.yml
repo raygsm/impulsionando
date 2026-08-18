@@ -66,7 +66,8 @@ jobs:
           trap 'rm -f "$secret_file"' EXIT
           printf 'ANAMADU_OPENAI_API_KEY=%s\n' "$ANAMADU_OPENAI_API_KEY" > "$secret_file"
           chmod 0600 "$secret_file"
-          scp /tmp/anamadu-current.tgz "$secret_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
+          scp /tmp/anamadu-current.tgz "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/anamadu-current.tgz"
+          scp "$secret_file" "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/anamadu-openai.env"
 
       - name: Publish same release to systemd and Traefik
         env:
@@ -82,14 +83,13 @@ jobs:
           envfile=/etc/impulsionando-core.env
           test -f "$base"
           sudo test -f "$envfile"
+          test -s /tmp/anamadu-openai.env
 
-          incoming="$(ls /tmp/tmp.* 2>/dev/null | head -n1 || true)"
-          test -n "$incoming"
           tmp="$(mktemp)"
           sudo grep -v '^ANAMADU_OPENAI_API_KEY=' "$envfile" > "$tmp" || true
-          sudo cat "$incoming" >> "$tmp"
+          sudo cat /tmp/anamadu-openai.env >> "$tmp"
           sudo install -o root -g root -m 0600 "$tmp" "$envfile"
-          rm -f "$tmp" "$incoming"
+          rm -f "$tmp" /tmp/anamadu-openai.env
           sudo grep -q '^ANAMADU_OPENAI_API_KEY=.' "$envfile"
 
           mkdir -p "$release"
@@ -100,6 +100,7 @@ jobs:
           npm ci --omit=dev --no-audit --no-fund
           sudo ln -sfn "$release" /var/www/impulsionando-core/current
           sudo systemctl restart impulsionando-core
+
           for attempt in $(seq 1 45); do
             code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-systemd -w '%{http_code}' http://127.0.0.1:3000/ || true)"
             case "$code" in 2*|3*) break ;; esac
@@ -138,6 +139,7 @@ jobs:
 
           for attempt in $(seq 1 60); do
             ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+            home='000'; health='000'; catalog='000'
             if [ -n "$ip" ]; then
               home="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-home -w '%{http_code}' "http://$ip:3000/" || true)"
               health="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-health -w '%{http_code}' "http://$ip:3000/api/anamadu/health" || true)"
@@ -162,6 +164,7 @@ jobs:
             echo "PUBLIC home=$home health=$health catalog=$catalog attempt=$attempt"
             if [ "$home" = '200' ] && [ "$health" = '200' ] && [ "$catalog" = '200' ]; then
               grep -q '"openaiConfigured":true' /tmp/public-health
+              grep -Eq '"productCount":[1-9][0-9]*' /tmp/public-health
               exit 0
             fi
             sleep 3
