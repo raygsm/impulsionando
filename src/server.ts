@@ -107,6 +107,12 @@ function shouldBootstrapWmpDocument(url: URL, request: Request): boolean {
   if (!isHtmlDocumentRequest(request)) return false;
   if (url.hostname.toLowerCase() !== "wmp.impulsionando.com.br") return false;
   const path = url.pathname || "/";
+
+  // Root is intentionally NOT bootstrapped. The server internally renders /wmp
+  // while the browser remains on the clean WMP root. The client root route is
+  // host-locked to render WMP, so SSR and hydration stay on the same brand/front.
+  if (path === "/") return false;
+
   if (path === "/wmp" || path.startsWith("/wmp/")) return false;
   if (WMP_GLOBAL_PATHS.has(path)) return false;
   if (WMP_BYPASS_PREFIXES.some((prefix) => path.startsWith(prefix))) return false;
@@ -134,7 +140,7 @@ function wmpDomainLockResponse(request: Request): Response {
   };
   if (request.method === "HEAD") return new Response(null, { status: 200, headers });
   return new Response(
-    "WMP_DOMAIN_LOCK_RELEASE=2026-08-18-v1\nWMP_CANONICAL_HOST=wmp.impulsionando.com.br\nWMP_DOMAIN_ISOLATION=ENFORCED\n",
+    "WMP_DOMAIN_LOCK_RELEASE=2026-08-18-v2\nWMP_CANONICAL_HOST=wmp.impulsionando.com.br\nWMP_DOMAIN_ISOLATION=ENFORCED\nWMP_ROOT_HYDRATION=HOST_LOCKED\n",
     { status: 200, headers },
   );
 }
@@ -152,11 +158,6 @@ export default {
         return applySecurityHeaders(wmpDomainLockResponse(request));
       }
 
-      // Public WMP paths are namespaced internally under /wmp. An invisible SSR
-      // rewrite leaves the browser on the clean path and lets TanStack hydrate a
-      // different route. Serve a 200 bootstrap document instead, preserving the
-      // deploy health contract while moving the browser to the canonical app path
-      // before the universal client bundle is ever loaded.
       if (shouldBootstrapWmpDocument(url, request)) {
         return applySecurityHeaders(wmpBootstrapResponse(request, url));
       }
