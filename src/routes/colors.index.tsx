@@ -7,6 +7,8 @@ import AntiFakePopup from "@/components/colors/AntiFakePopup";
 import ComprarOriginalFab from "@/components/colors/ComprarOriginalFab";
 import { useEffect } from "react";
 
+const COLORS_PUBLIC_ORIGIN="https://colorssaude.impulsionando.com.br";
+
 export const Route = createFileRoute("/colors/")({
   head: () => ({
     meta: [
@@ -16,15 +18,15 @@ export const Route = createFileRoute("/colors/")({
       { property: "og:title", content: "Colors Saúde — Uma marca. Uma jornada. Íris com você." },
       { property: "og:description", content: "Conheça os produtos oficiais Colors, fale com a Íris, agende uma conversa, participe de eventos e acesse suporte com protocolo." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://colorssaude.com.br/" },
+      { property: "og:url", content: `${COLORS_PUBLIC_ORIGIN}/` },
       { property: "og:site_name", content: "Colors Saúde" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Colors Saúde" },
       { name: "twitter:description", content: "Produtos oficiais, Íris, suporte, agenda, afiliados e eventos." },
     ],
-    links: [{ rel: "canonical", href: "https://colorssaude.com.br/" }],
+    links: [{ rel: "canonical", href: `${COLORS_PUBLIC_ORIGIN}/` }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify({
-      "@context":"https://schema.org", "@type":"Organization", name:"Colors Saúde", url:"https://colorssaude.com.br/",
+      "@context":"https://schema.org", "@type":"Organization", name:"Colors Saúde", url:`${COLORS_PUBLIC_ORIGIN}/`,
       description:"Ecossistema comercial e de relacionamento da Colors Saúde.",
       sameAs:["https://www.instagram.com/colorssaude/","https://www.youtube.com/@colorssaude","https://www.tiktok.com/@colorssaude"]
     }) }],
