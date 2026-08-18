@@ -1,0 +1,114 @@
+name: WMP n8n verified registry bind
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wmp-n8n-registry-bind.yml
+  workflow_run:
+    workflows: ["WMP n8n Core-verified bootstrap"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bind:
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          for i in 1 2 3; do ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts && break || sleep 2; done
+          test -s ~/.ssh/known_hosts
+
+      - name: Verify canonical WMP workflows and bind registry
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=6 "$U@$H" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          SEC=/etc/impulsionando-security.env
+          CORE_ENV=/etc/impulsionando-core.env
+
+          sudo docker inspect "$C" >/dev/null
+          for i in $(seq 1 45); do
+            if sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || exit 51
+            sleep 2
+          done
+
+          sign() {
+            local secret
+            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
+            test -n "$secret"
+            printf '%s' "$1" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}'
+          }
+
+          prove() {
+            local id="$1" path="$2" event="$3" slug="$4"
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-bind.json" >/dev/null
+            sudo docker exec -i -e WID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');
+          const id=process.env.WID;
+          const r=JSON.parse(fs.readFileSync(`/tmp/${id}-bind.json`,'utf8'));
+          const w=Array.isArray(r)?r[0]:r;
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          const names=(w.nodes||[]).map(n=>n.name);
+          console.log(JSON.stringify({id:w.id,active:w.active,activeVersionId:w.activeVersionId,path:hook?.parameters?.path,nodes:names}));
+          if(!w.active||!w.activeVersionId||hook?.parameters?.path!==process.env.EXPECTED_PATH||!names.includes('Verify signature in Core')||!names.includes('Respond Security Result')) process.exit(55);
+NODE
+
+            local payload sig code url
+            payload="{\"workflow_name\":\"${slug}\",\"event_code\":\"${event}\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"registry-bind-${id}-$(date +%s)\",\"company_id\":null,\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true,\"registry_bind\":true}}"
+            sig="$(sign "$payload")"
+            url="https://n8n.impulsionando.com.br/webhook/${path}"
+            code="$(curl -sS -o "/tmp/$id-bind-probe.out" -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" --data-binary "$payload")"
+            echo "BIND_PROBE $slug HTTP=$code body=$(head -c 240 "/tmp/$id-bind-probe.out" || true)"
+            [ "$code" = '200' ] || exit 56
+            grep -q '"ok":true' "/tmp/$id-bind-probe.out" || exit 57
+          }
+
+          export EXPECTED_PATH=wmp-lead-intake
+          prove wmpLeadIntake01 wmp-lead-intake wmp.lead.received wmp_lead_intake
+          export EXPECTED_PATH=wmp-proposal-lifecycle
+          prove wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent wmp_proposal_lifecycle
+          export EXPECTED_PATH=wmp-dj-booking-lifecycle
+          prove wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered wmp_dj_booking_lifecycle
+          export EXPECTED_PATH=wmp-post-event-relationship
+          prove wmpPostEvent01 wmp-post-event-relationship wmp.event.completed wmp_post_event_relationship
+
+          SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
+          SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
+          test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY"
+
+          bind() {
+            local slug="$1" id="$2" path="$3"
+            local now
+            now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            curl -fsS --max-time 20 -X PATCH \
+              "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.${slug}&version=eq.1" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' \
+              -H 'Prefer: return=minimal' \
+              -d "{\"n8n_workflow_id\":\"${id}\",\"status\":\"ACTIVE\",\"config\":{\"webhook_url\":\"https://n8n.impulsionando.com.br/webhook/${path}\",\"canonical_n8n_url\":\"https://n8n.impulsionando.com.br\",\"verified_at\":\"${now}\",\"verification\":\"active published workflow plus signed Core HMAC probe\"}}" >/dev/null
+          }
+
+          bind wmp_lead_intake wmpLeadIntake01 wmp-lead-intake
+          bind wmp_proposal_lifecycle wmpProposalLifecycle01 wmp-proposal-lifecycle
+          bind wmp_dj_booking_lifecycle wmpDjLifecycle01 wmp-dj-booking-lifecycle
+          bind wmp_post_event_relationship wmpPostEvent01 wmp-post-event-relationship
+
+          unset SERVICE_KEY
+          echo 'WMP_N8N_VERIFIED_REGISTRY_BIND=PASS'
+          REMOTE
