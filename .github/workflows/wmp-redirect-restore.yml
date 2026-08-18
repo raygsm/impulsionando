@@ -16,7 +16,6 @@ concurrency:
 jobs:
   restore:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +43,8 @@ jobs:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           set -euo pipefail
+          test -n "${VPS_HOST:-}" || { echo '::error::Missing VPS_HOST'; exit 40; }
+          test -n "${VPS_SSH_KEY:-}" || { echo '::error::Missing VPS_SSH_KEY'; exit 40; }
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
@@ -67,6 +68,8 @@ jobs:
           U: ${{ secrets.VPS_USER }}
         run: |
           set -euo pipefail
+          test -n "${H:-}" || { echo '::error::Missing VPS_HOST'; exit 40; }
+          test -n "${U:-}" || { echo '::error::Missing VPS_USER'; exit 40; }
           scp /tmp/wmp-redirect-restore.tgz "$U@$H:/tmp/wmp-redirect-restore.tgz"
           ssh "$U@$H" "GITHUB_SHA='${GITHUB_SHA}' bash -s" <<'REMOTE'
           set -euo pipefail
@@ -137,4 +140,7 @@ jobs:
           ! grep -Eqi '^location:[[:space:]]*https?://(www\.)?impulsionando\.com\.br([/:]|$)' "$headers" || exit 51
           grep -Eqi 'WMP|Wagner Miller' "$body" || exit 52
           ! grep -Eqi '<title>[^<]*Impulsionando Tecnologia|Plataforma SaaS multiempresa' "$body" || exit 53
+          marker_code="$(curl -sS -o /tmp/wmp-marker -w '%{http_code}' --max-time 30 'https://wmp.impulsionando.com.br/wmp-domain-lock.txt')"
+          [ "$marker_code" = '200' ] || exit 54
+          grep -Fq 'WMP_ROOT_HYDRATION=HOST_LOCKED' /tmp/wmp-marker || exit 55
           echo WMP_REDIRECT_RESTORE_PUBLIC_PASS
