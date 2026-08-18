@@ -1,0 +1,41 @@
+name: CHRISMED R1 card order hotfix
+on:
+  push:
+    paths: ['.github/workflows/chrismed-r1-card-order-hotfix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Reorder public booking cards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/chrismed.agendar.tsx')
+          s=p.read_text()
+          old='className="text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all"'
+          new='className={`${m === \'telemedicina\' ? \'order-1\' : m === \'presencial\' ? \'order-3\' : \'order-4\'} text-left rounded-xl border border-[var(--chrismed-sand)] bg-[var(--chrismed-ivory)] p-5 hover:border-[var(--chrismed-champagne-deep)] hover:shadow-sm transition-all`}'
+          if old not in s:
+            raise SystemExit('Main modality card class not found')
+          s=s.replace(old,new,1)
+          old2='className="text-left rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-5 hover:border-amber-500 hover:shadow-sm transition-all"'
+          new2='className="order-2 text-left rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-5 hover:border-amber-500 hover:shadow-sm transition-all"'
+          if old2 not in s:
+            raise SystemExit('R$1 test card class not found')
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name impulsionando-bot
+          git config user.email actions@users.noreply.github.com
+          git add src/routes/chrismed.agendar.tsx
+          git diff --cached --check
+          git commit -m "fix(chrismed): place R$1 teleconsult immediately after teleconsult"
+          git push origin main
