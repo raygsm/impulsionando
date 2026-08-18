@@ -127,10 +127,30 @@ function wmpBootstrapResponse(request: Request, url: URL): Response {
   );
 }
 
+function wmpDomainLockResponse(request: Request): Response {
+  const headers = {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store, max-age=0",
+  };
+  if (request.method === "HEAD") return new Response(null, { status: 200, headers });
+  return new Response(
+    "WMP_DOMAIN_LOCK_RELEASE=2026-08-18-v1\nWMP_CANONICAL_HOST=wmp.impulsionando.com.br\nWMP_DOMAIN_ISOLATION=ENFORCED\n",
+    { status: 200, headers },
+  );
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+
+      if (
+        url.hostname.toLowerCase() === "wmp.impulsionando.com.br" &&
+        url.pathname === "/wmp-domain-lock.txt" &&
+        (request.method === "GET" || request.method === "HEAD")
+      ) {
+        return applySecurityHeaders(wmpDomainLockResponse(request));
+      }
 
       // Public WMP paths are namespaced internally under /wmp. An invisible SSR
       // rewrite leaves the browser on the clean path and lets TanStack hydrate a
