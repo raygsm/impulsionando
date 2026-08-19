@@ -5,6 +5,7 @@
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
 const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
+export const FEPERSONAL_CANONICAL_HOST = "fepersonal.impulsionando.com.br";
 const COLORS_LEGACY_HOSTS = new Set([
   "colors.impulsionando.com.br",
   "colors-saude.impulsionando.com.br",
@@ -19,6 +20,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   riomed: "/riomed",
   wmp: "/wmp",
   anamadu: "/anamadu",
+  fepersonal: "/fepersonal",
   garrido: "/garrido",
   colorssaude: "/colors",
   ip: "/tour",
@@ -35,6 +37,7 @@ export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
   [COLORS_CANONICAL_HOST]: "/colors",
+  [FEPERSONAL_CANONICAL_HOST]: "/fepersonal",
 };
 
 export function canonicalTenantHostRedirect(loc: {
@@ -48,7 +51,7 @@ export function canonicalTenantHostRedirect(loc: {
   const path = loc.pathname || "/";
   const proto = loc.protocol === "http:" ? "http:" : "https:";
 
-  if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return null;
+  if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST || host === FEPERSONAL_CANONICAL_HOST) return null;
 
   if (COLORS_LEGACY_HOSTS.has(host)) {
     const publicPath = path === "/colors" || path.startsWith("/colors/")
