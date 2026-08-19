@@ -120,6 +120,7 @@ jobs:
           if [ -n "$files" ]; then
             while IFS= read -r file; do
               [ -n "$file" ] || continue
+              [ "$file" = ".github/workflows/legacy-builder-purge.yml" ] && continue
               sed -i \
                 -e 's/createLovableAiGatewayProvider/createOpenAiGatewayProvider/g' \
                 -e 's/LOVABLE_API_KEY/OPENAI_API_KEY/g' \
@@ -129,7 +130,6 @@ jobs:
             done <<< "$files"
           fi
 
-          # Remove historical textual references from tracked text files while keeping this neutral purge workflow intact.
           refs=$(git grep -Il -i 'lovable' -- ':!package.json' ':!package-lock.json' ':!.github/workflows/legacy-builder-purge.yml' 2>/dev/null || true)
           if [ -n "$refs" ]; then
             while IFS= read -r file; do
@@ -161,17 +161,14 @@ jobs:
           npm run build
           test -f .output/server/index.mjs
 
-      - name: Commit validated purge
+      - name: Commit validated purge and remove purge workflow
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'Impulsionito Core Automation'
           git config user.email 'automation@impulsionando.com.br'
+          git rm -f .github/workflows/legacy-builder-purge.yml
           git add -A
-          if git diff --cached --quiet; then
-            echo 'No cleanup changes required.'
-            exit 0
-          fi
           git commit -m 'chore(core): permanently remove legacy builder and standardize OpenAI runtime'
           git pull --rebase origin main
           git push origin HEAD:main
