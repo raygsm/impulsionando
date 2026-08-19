@@ -2,24 +2,25 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeader, StatCard } from "@/components/app/PageElements";
-import { CardSkeleton } from "@/components/feedback";
-import { Building2, Users, Boxes, Tags, FileSearch, MapPin, LayoutGrid, RotateCcw, Star, Clock, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
-import { NicheOnboardingBanner } from "@/components/app/NicheOnboardingBanner";
-import { useDashboardWidgets, WIDGET_CATALOG, type WidgetId } from "@/hooks/use-dashboard-widgets";
-import { useFavorites } from "@/hooks/use-favorites";
-import { useRecentPages } from "@/hooks/use-recent-pages";
+import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { WmpManagementDashboard } from "@/components/wmp/WmpManagementDashboard";
+import {
+  ArrowRight,
+  Building2,
+  Cog,
+  Headphones,
+  Loader2,
+  MessageCircle,
+  Package,
+  Settings,
+  Sparkles,
+  Users,
+  Workflow,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Impulsionando" }] }),
@@ -100,116 +101,52 @@ function ChrismedDashboardEntry() {
   );
 }
 
-async function fetchStats() {
-  const counts = await Promise.all([
-    supabase.from("companies").select("*", { count: "exact", head: true }),
+async function fetchOverview() {
+  const [companies, conversations, whatsapp, workflows] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }).eq("is_active", true),
-    supabase.from("company_units").select("*", { count: "exact", head: true }),
-    supabase.from("user_profiles").select("*", { count: "exact", head: true }).eq("is_active", true),
-    supabase.from("niches").select("*", { count: "exact", head: true }),
-    supabase.from("modules").select("*", { count: "exact", head: true }),
-    supabase.from("audit_logs").select("*", { count: "exact", head: true }),
+    supabase.from("communication_conversations").select("*", { count: "exact", head: true }).in("status", ["open", "active", "pending"]),
+    supabase.from("communication_whatsapp_numbers").select("id,connection_status,health_status,is_enabled"),
+    supabase.from("n8n_workflow_registry").select("id,status,n8n_workflow_id"),
   ]);
+
+  const waRows = whatsapp.data ?? [];
+  const wfRows = workflows.data ?? [];
   return {
-    companies: counts[0].count ?? 0,
-    activeCompanies: counts[1].count ?? 0,
-    units: counts[2].count ?? 0,
-    users: counts[3].count ?? 0,
-    niches: counts[4].count ?? 0,
-    modules: counts[5].count ?? 0,
-    auditEvents: counts[6].count ?? 0,
+    activeCompanies: companies.count ?? 0,
+    openConversations: conversations.count ?? 0,
+    whatsappConnected: waRows.filter((x: any) => x.is_enabled && String(x.connection_status).toLowerCase() === "connected").length,
+    whatsappTotal: waRows.length,
+    workflowsActive: wfRows.filter((x: any) => x.status === "ACTIVE" && x.n8n_workflow_id).length,
+    workflowsTotal: wfRows.length,
   };
 }
 
-async function fetchRecentAudit() {
-  const { data } = await supabase
-    .from("audit_logs")
-    .select("id, action, entity, user_email, created_at, company_id")
-    .order("created_at", { ascending: false })
-    .limit(8);
-  return data ?? [];
-}
+type HubCardProps = {
+  title: string;
+  description: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  priority?: boolean;
+  badge?: string;
+};
 
-function CustomizeButton() {
-  const { isEnabled, toggle, reset } = useDashboardWidgets();
-  const groups = ["KPIs", "Painéis"] as const;
+function HubCard({ title, description, to, icon: Icon, priority, badge }: HubCardProps) {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <LayoutGrid className="w-4 h-4" /> Personalizar
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-72">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold">Widgets do dashboard</span>
-          <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={reset}>
-            <RotateCcw className="w-3 h-3" /> Resetar
-          </Button>
+    <Link to={to as never} className="group block h-full">
+      <Card className={`h-full p-5 transition-all hover:-translate-y-0.5 hover:shadow-md ${priority ? "border-primary/40 bg-primary/[0.03]" : ""}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className={`grid h-10 w-10 place-items-center rounded-xl ${priority ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {badge ? <Badge variant={priority ? "default" : "secondary"}>{badge}</Badge> : null}
         </div>
-        <div className="space-y-3">
-          {groups.map((g) => (
-            <div key={g}>
-              <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{g}</div>
-              <div className="space-y-1.5">
-                {WIDGET_CATALOG.filter((w) => w.group === g).map((w) => (
-                  <label key={w.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <Checkbox checked={isEnabled(w.id as WidgetId)} onCheckedChange={() => toggle(w.id as WidgetId)} />
-                    <span>{w.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+        <h2 className="mt-5 text-base font-semibold">{title}</h2>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{description}</p>
+        <div className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary">
+          Abrir <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function FavoritesPanel() {
-  const { favorites } = useFavorites();
-  return (
-    <Card className="p-6 shadow-card">
-      <div className="flex items-center gap-2 mb-3">
-        <Star className="w-4 h-4 text-yellow-500" />
-        <h2 className="font-semibold">Favoritos</h2>
-      </div>
-      {favorites.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Marque páginas como favoritas pelo ícone ★ no topo.</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {favorites.slice(0, 8).map((f) => (
-            <li key={f.to}>
-              <Link to={f.to as never} className="text-sm hover:underline">{f.label}</Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}
-
-function RecentsPanel() {
-  const recent = useRecentPages();
-  return (
-    <Card className="p-6 shadow-card">
-      <div className="flex items-center gap-2 mb-3">
-        <Clock className="w-4 h-4 text-muted-foreground" />
-        <h2 className="font-semibold">Acessadas recentemente</h2>
-      </div>
-      {recent.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Suas páginas recentes aparecerão aqui.</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {recent.slice(0, 8).map((r) => (
-            <li key={r.to}>
-              <Link to={r.to as never} className="text-sm hover:underline">{r.label}</Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
+      </Card>
+    </Link>
   );
 }
 
@@ -221,80 +158,82 @@ function DashboardPage() {
 
 function CoreDashboardPage() {
   const { data: me } = useCurrentUser();
-  const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ["dashboard-stats"], queryFn: fetchStats });
-  const { data: audit, isLoading: auditLoading } = useQuery({ queryKey: ["dashboard-audit"], queryFn: fetchRecentAudit });
-  const { isEnabled } = useDashboardWidgets();
+  const { data: overview } = useQuery({
+    queryKey: ["core-clean-overview"],
+    queryFn: fetchOverview,
+    refetchInterval: 30000,
+  });
 
   const greeting = me?.memberships[0]?.display_name ?? me?.user.email ?? "";
 
-  const anyStat = ["stat-companies","stat-units","stat-users","stat-niches","stat-modules","stat-audit"].some((id) => isEnabled(id as WidgetId));
-
   return (
-    <div>
+    <div className="mx-auto max-w-7xl space-y-7">
       <PageHeader
         title={`Olá, ${greeting}`}
-        description={me?.isSuperAdmin ? "Visão master consolidada de todos os clientes." : "Indicadores da sua empresa."}
-        action={
-          <div className="flex items-center gap-2">
-            {me?.isSuperAdmin && <Badge className="bg-gradient-primary">Super Admin</Badge>}
-            <CustomizeButton />
-          </div>
-        }
+        description="Escolha o que precisa operar agora. O restante fica fora do caminho."
+        action={me?.isSuperAdmin ? <Badge className="bg-gradient-primary">Gestão Impulsionando</Badge> : undefined}
       />
 
-      <NicheOnboardingBanner companyId={me?.memberships?.[0]?.company_id} />
-
-      {anyStat && (
-        statsLoading && !stats ? (
-          <div className="mb-8"><CardSkeleton count={4} className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" /></div>
-        ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          {isEnabled("stat-companies") && <StatCard label="Empresas" value={stats?.companies ?? "—"} hint={`${stats?.activeCompanies ?? 0} ativas`} icon={Building2} accent />}
-          {isEnabled("stat-units") && <StatCard label="Unidades" value={stats?.units ?? "—"} icon={MapPin} />}
-          {isEnabled("stat-users") && <StatCard label="Usuários ativos" value={stats?.users ?? "—"} icon={Users} />}
-          {isEnabled("stat-niches") && <StatCard label="Nichos" value={stats?.niches ?? "—"} icon={Tags} />}
-          {isEnabled("stat-modules") && <StatCard label="Módulos" value={stats?.modules ?? "—"} icon={Boxes} />}
-          {isEnabled("stat-audit") && <StatCard label="Eventos de auditoria" value={stats?.auditEvents ?? "—"} icon={FileSearch} />}
-        </div>
-        )
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {isEnabled("panel-audit") && (
-          <Card className="p-6 shadow-card lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-semibold">Auditoria recente</h2>
-                <p className="text-xs text-muted-foreground">Últimas ações registradas no sistema.</p>
+      <section className="rounded-2xl border border-primary/25 bg-primary/[0.035] p-5 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
+              <MessageCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-semibold">WhatsApp e Atendimento</h2>
+                <Badge>Prioridade</Badge>
+              </div>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                Conecte números, acompanhe a saúde do canal e responda conversas do cliente pelo próprio Core.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <span>{overview?.whatsappConnected ?? 0}/{overview?.whatsappTotal ?? 0} números conectados</span>
+                <span>•</span>
+                <span>{overview?.openConversations ?? 0} conversas abertas</span>
               </div>
             </div>
-            <div className="divide-y">
-              {auditLoading && Array.from({ length: 4 }).map((_, i) => (
-                <div key={`sk-a-${i}`} className="py-3 flex items-center justify-between gap-4">
-                  <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
-                  <div className="h-3 w-24 rounded bg-muted animate-pulse" />
-                </div>
-              ))}
-              {!auditLoading && (audit ?? []).length === 0 && (
-                <p className="text-sm text-muted-foreground py-6 text-center">Sem eventos registrados ainda.</p>
-              )}
-              {audit?.map((row) => (
-                <div key={row.id} className="py-3 flex items-center justify-between gap-4 text-sm">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Badge variant="outline" className="font-mono text-[10px]">{row.action}</Badge>
-                    <span className="font-medium truncate">{row.entity}</span>
-                    <span className="text-muted-foreground truncate">{row.user_email ?? "—"}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{new Date(row.created_at).toLocaleString("pt-BR")}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+          </div>
+          <Button asChild size="lg" className="gap-2">
+            <Link to={"/admin/comunicacao" as never}>Abrir atendimento <ArrowRight className="h-4 w-4" /></Link>
+          </Button>
+        </div>
+      </section>
 
-        {isEnabled("panel-favorites") && <FavoritesPanel />}
-        {isEnabled("panel-recents") && <RecentsPanel />}
-      </div>
+      <section>
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Áreas principais</p>
+            <h2 className="mt-1 text-xl font-semibold">Cinco caminhos. Nada de labirinto.</h2>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <HubCard title="Gestão" description="Clientes, equipe, agenda, operações e acompanhamento diário." to="/inicio" icon={Users} />
+          <HubCard title="Comunicação" description="WhatsApp, e-mail, conversas, templates, tickets e Impulsionito." to="/admin/comunicacao" icon={Headphones} priority badge="WhatsApp" />
+          <HubCard title="ERP" description="Financeiro, pedidos, produtos, estoque, documentos e cobrança." to="/dashboards/operacao" icon={Package} />
+          <HubCard title="Growth" description="CRM, captação, conversão, retenção, campanhas e jornadas." to="/crm/board" icon={Sparkles} />
+          <HubCard title="Configurações" description="Integrações, usuários, permissões, domínios, segurança e módulos." to="/settings" icon={Settings} />
+        </div>
+      </section>
+
+      {me?.isSuperAdmin ? (
+        <section className="grid gap-4 md:grid-cols-3">
+          <Card className="p-5">
+            <div className="flex items-center gap-3"><Building2 className="h-5 w-5 text-primary" /><span className="text-sm font-medium">Clientes ativos</span></div>
+            <div className="mt-3 text-3xl font-semibold">{overview?.activeCompanies ?? "—"}</div>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center gap-3"><Workflow className="h-5 w-5 text-primary" /><span className="text-sm font-medium">Automações n8n</span></div>
+            <div className="mt-3 text-3xl font-semibold">{overview ? `${overview.workflowsActive}/${overview.workflowsTotal}` : "—"}</div>
+            <p className="mt-1 text-xs text-muted-foreground">Ativas e vinculadas ao runtime</p>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center gap-3"><Cog className="h-5 w-5 text-primary" /><span className="text-sm font-medium">Administração avançada</span></div>
+            <Button asChild variant="outline" size="sm" className="mt-4"><Link to={"/admin/master-hub" as never}>Abrir controles técnicos</Link></Button>
+          </Card>
+        </section>
+      ) : null}
     </div>
   );
 }
