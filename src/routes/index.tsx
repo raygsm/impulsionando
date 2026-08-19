@@ -3,6 +3,7 @@ import { HomePage } from "@/components/marketing/HomePage";
 import { ChrismedHomePage } from "./chrismed.index";
 import { Route as ColorsIndexRoute } from "./colors.index";
 import { Route as WmpIndexRoute } from "./wmp.index";
+import { Route as CsiIndexRoute } from "./csi.index";
 import { AnaMaduStorefront } from "@/components/anamadu/AnaMaduStorefront";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
@@ -48,16 +49,30 @@ export const Route = createFileRoute("/")({
 function HomeWithSubdomainGuard() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname.toLowerCase();
-    if (host === "wmp.impulsionando.com.br") {
-      return <><WmpRootMetadata /><WmpRootPage /></>;
-    }
-    if (host === "colorssaude.com.br") {
-      return <><ColorsRootMetadata /><ColorsRootPage /></>;
-    }
+    if (host === "wmp.impulsionando.com.br") return <><WmpRootMetadata /><WmpRootPage /></>;
+    if (host === "csi.impulsionando.com.br") return <><CsiRootMetadata /><CsiRootPage /></>;
+    if (host === "colorssaude.com.br") return <><ColorsRootMetadata /><ColorsRootPage /></>;
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
     if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduStorefront /><AnitaDock /></>;
   }
   return <><HomePage /><CpDiscoveryPopup /></>;
+}
+
+function CsiRootPage() {
+  const Component = CsiIndexRoute.options.component;
+  return Component ? <Component /> : null;
+}
+
+function CsiRootMetadata() {
+  useEffect(() => {
+    const canonicalUrl = "https://csi.impulsionando.com.br/";
+    document.title = "CSI Invest — Inteligência, patrimônio e mercado";
+    document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", canonicalUrl);
+    document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", "CSI Invest — Mercado, patrimônio e inteligência");
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", "CSI Invest: inteligência de mercado, patrimônio, indicadores, notícias, alertas e acompanhamento em ambiente privado.");
+  }, []);
+  return null;
 }
 
 function WmpRootPage() {
@@ -87,7 +102,6 @@ function ColorsRootMetadata() {
   useEffect(() => {
     const canonicalUrl = "https://colorssaude.com.br/";
     document.title = "Colors Saúde — Produtos oficiais, Íris, suporte, afiliados e eventos";
-
     const canonicals = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="canonical"]'));
     if (canonicals.length === 0) {
       const canonical = document.createElement("link");
@@ -98,7 +112,6 @@ function ColorsRootMetadata() {
       canonicals[0].setAttribute("href", canonicalUrl);
       canonicals.slice(1).forEach((canonical) => canonical.remove());
     }
-
     document.querySelectorAll<HTMLMetaElement>('meta[property="og:url"]').forEach((meta) => meta.setAttribute("content", canonicalUrl));
     document.querySelectorAll<HTMLMetaElement>('meta[property="og:title"]').forEach((meta) => meta.setAttribute("content", "Colors Saúde — Uma marca. Uma jornada. Íris com você."));
     document.querySelectorAll<HTMLMetaElement>('meta[name="description"]').forEach((meta) => meta.setAttribute("content", "Colors Saúde: produtos oficiais, atendimento inteligente com a Íris, suporte, agenda, afiliados, eventos e rastreabilidade de jornada."));
