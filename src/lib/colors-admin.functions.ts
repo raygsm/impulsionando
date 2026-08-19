@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const getColorsCockpit=createServerFn({method:"GET"}).middleware([requireSupabaseAuth]).handler(async({context})=>{
- const sb:any=context.supabase;const{data:tenant}=await sb.from("communication_tenants").select("id,company_id,settings").eq("slug","colors-saude").maybeSingle();if(!tenant?.id||!tenant?.company_id)throw new Error("Colors tenant missing");
+ const sb:any=context.supabase;const{data:tenant}=await sb.from("communication_tenants").select("id,company_id,settings").eq("slug","colorssaude").maybeSingle();if(!tenant?.id||!tenant?.company_id)throw new Error("Configuração da Colors Saúde indisponível.");
  const since30=new Date(Date.now()-30*86400000).toISOString();const today=new Date();today.setHours(0,0,0,0);const todayIso=today.toISOString();
  const [contacts,opps,tickets,orders,appointments,events,affiliates,channels,workflows,health,queue,iris]=await Promise.all([
   sb.from("colors_contacts").select("id,lifecycle_stage,lead_score,next_best_action",{count:"exact"}),
