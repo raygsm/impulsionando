@@ -1,0 +1,18 @@
+{
+  "generated_at_utc": "2026-08-19T20:37:46Z",
+  "vps_text": "ssh=ok\nhost_ip=187.77.232.52\nn8n_container=present\nn8n_state=running\nn8n_health=ok\ncore_env=present\nsecurity_env=present\nmultitenant_container=missing\n",
+  "n8n": {
+    "total": 79,
+    "active_bound": 36,
+    "ready_unbound": 43
+  },
+  "domains": {
+    "total": 21,
+    "active_issued": 4,
+    "pending": 17
+  },
+  "cloudflare": {
+    "records_to_187": 7,
+    "records_missing_or_wrong": 14
+  }
+}
