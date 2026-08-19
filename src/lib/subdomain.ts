@@ -1,16 +1,11 @@
 /**
  * Detecção de subdomínio de tenant (client-side/server-side helpers).
+ * Colors Saúde possui UM ÚNICO host válido: colorssaude.impulsionando.com.br.
  */
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
-const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
+export const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
-const COLORS_LEGACY_HOSTS = new Set([
-  "colors.impulsionando.com.br",
-  "colors-saude.impulsionando.com.br",
-  "colors.impulsionando.lovable.app",
-  "colorsaude.lovable.app",
-]);
 
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   marocas: "/marocas",
@@ -49,13 +44,6 @@ export function canonicalTenantHostRedirect(loc: {
   const proto = loc.protocol === "http:" ? "http:" : "https:";
 
   if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return null;
-
-  if (COLORS_LEGACY_HOSTS.has(host)) {
-    const publicPath = path === "/colors" || path.startsWith("/colors/")
-      ? path.slice("/colors".length) || "/"
-      : path;
-    return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
-  }
 
   const isColorsInternalPath = path === "/colors" || path.startsWith("/colors/");
   const isImpulsionandoApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
@@ -140,19 +128,12 @@ export function toWmpInternalPathname(host: string | null | undefined, pathname:
   return locked ?? pathname;
 }
 
-export function deprecatedSubdomainRedirect(loc: {
+export function deprecatedSubdomainRedirect(_loc: {
   hostname: string;
   pathname: string;
   search: string;
   hash: string;
   protocol: string;
 }): string | null {
-  const host = loc.hostname.toLowerCase().split(":")[0];
-  if (!COLORS_LEGACY_HOSTS.has(host)) return null;
-  const proto = loc.protocol === "http:" ? "http:" : "https:";
-  let publicPath = loc.pathname || "/";
-  if (publicPath === "/colors" || publicPath.startsWith("/colors/")) publicPath = publicPath.slice("/colors".length) || "/";
-  return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
+  return null;
 }
-
-export { COLORS_CANONICAL_HOST };
