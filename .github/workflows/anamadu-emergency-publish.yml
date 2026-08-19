@@ -8,6 +8,7 @@ on:
       - .github/workflows/anamadu-emergency-publish.yml
       - src/components/anamadu/**
       - src/lib/anamadu/**
+      - src/lib/agents/omnichannel.server.ts
       - src/routes/api/anamadu/**
       - src/routes/anamadu.tsx
       - src/routes/index.tsx
