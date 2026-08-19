@@ -1,4 +1,4 @@
-# Forced definitive purge trigger: 2026-08-19T17:36:00-03:00
+# Forced definitive purge trigger: 2026-08-19T17:38:00-03:00
 name: Purge Lovable dependencies
 
 on:
@@ -29,11 +29,7 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Remove Lovable packages from manifests and lockfiles
+      - name: Remove all Lovable packages using canonical npm lock
         shell: bash
         run: |
           set -euo pipefail
@@ -43,14 +39,18 @@ jobs:
             @lovable.dev/mcp-js \
             @lovable.dev/webhooks-js \
             @lovable.dev/vite-tanstack-config
-          bun install --lockfile-only
+          rm -f bun.lock
 
-      - name: Assert zero Lovable package dependency
+      - name: Assert zero Lovable dependency in canonical manifests
         shell: bash
         run: |
           set -euo pipefail
-          if grep -Rni --include='package.json' --include='package-lock.json' --include='bun.lock' '@lovable.dev' .; then
-            echo '::error::Lovable package reference remains in dependency manifests'
+          if grep -Rni --include='package.json' --include='package-lock.json' '@lovable.dev' .; then
+            echo '::error::Lovable package reference remains in npm manifests'
+            exit 1
+          fi
+          if grep -Rni --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' '@lovable.dev' src vite.config.ts server.ts 2>/dev/null; then
+            echo '::error::Lovable runtime import remains in source'
             exit 1
           fi
 
@@ -72,11 +72,12 @@ jobs:
           set -euo pipefail
           git config user.name 'Impulsionito Core Automation'
           git config user.email 'automation@impulsionando.com.br'
-          git add package.json package-lock.json bun.lock src/routeTree.gen.ts || true
+          git add package.json package-lock.json src/routeTree.gen.ts || true
+          git rm -f bun.lock 2>/dev/null || true
           if git diff --cached --quiet; then
             echo 'No dependency changes required.'
             exit 0
           fi
-          git commit -m 'chore(core): remove all Lovable package dependencies'
+          git commit -m 'chore(core): remove all Lovable package dependencies and retire bun lock'
           git pull --rebase origin main
           git push origin HEAD:main
