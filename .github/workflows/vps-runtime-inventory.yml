@@ -1,0 +1,64 @@
+name: VPS runtime inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/vps-runtime-inventory.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Inventory runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' >docs/ops/vps-runtime-inventory.txt
+          set -euo pipefail
+          echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo '--- docker ps ---'
+          sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+          echo '--- images ---'
+          sudo docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedSince}}' | head -80
+          echo '--- compose files ---'
+          sudo find /opt/impulsionando -maxdepth 4 -type f \( -name 'docker-compose*.yml' -o -name 'compose*.yml' \) -print 2>/dev/null | sort
+          echo '--- main compose services ---'
+          if sudo test -f /opt/impulsionando/deploy/hostinger/docker-compose.yml; then
+            cd /opt/impulsionando/deploy/hostinger
+            sudo docker compose -f docker-compose.yml config --services || true
+            echo '--- traefik labels in compose ---'
+            sudo grep -nE 'traefik|Host|loadbalancer|image:' docker-compose.yml | head -160 || true
+          fi
+          REMOTE
+      - name: Commit inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/vps-runtime-inventory.txt
+          git commit -m 'chore(go-live): record VPS runtime inventory' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
