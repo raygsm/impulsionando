@@ -5,6 +5,8 @@ on:
     paths:
       - .github/workflows/all-client-subdomains-reconcile.yml
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: read
@@ -70,7 +72,7 @@ jobs:
             location=''
             for attempt in $(seq 1 30); do
               headers="$(mktemp)"
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/3.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/3.1' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
               location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
               rm -f "$headers"
               echo "ORIGIN $domain attempt=$attempt HTTP=$code LOCATION=${location:-none}"
@@ -107,11 +109,12 @@ jobs:
         run: |
           set -euo pipefail
           failed=0
+          : > /tmp/verified-domains
           for domain in $DOMAINS; do
             code=000
             final_url=''
             for attempt in $(seq 1 18); do
-              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/3.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/3.1' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
               final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               echo "PUBLIC $domain attempt=$attempt HTTP=$code FINAL=$final_url"
               if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
@@ -121,7 +124,35 @@ jobs:
             if [ "$code" != '200' ] || [ "$final_host" != "$domain" ]; then
               failed=1
               echo "::error::Tenant invalid: $domain HTTP=$code FINAL=$final_url"
+            else
+              echo "$domain" >> /tmp/verified-domains
             fi
           done
           [ "$failed" = '0' ] || exit 40
           echo "ALL_CLIENT_SUBDOMAINS=PASS count=$TENANT_COUNT"
+
+      - name: Persist only verified DNS and SSL status in Core
+        run: |
+          set -euo pipefail
+          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            subdomain="${domain%.impulsionando.com.br}"
+            payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
+            curl --fail --silent --show-error -X PATCH \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H 'Content-Type: application/json' \
+              -H 'Prefer: return=minimal' \
+              --data "$payload" \
+              "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$subdomain"
+            endpoint_payload="$(jq -nc '{status:"active",monitoring_enabled:true}')"
+            curl --fail --silent --show-error -X PATCH \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H 'Content-Type: application/json' \
+              -H 'Prefer: return=minimal' \
+              --data "$endpoint_payload" \
+              "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.website&url=eq.https%3A%2F%2F$domain"
+            echo "CORE_STATUS_VERIFIED $domain"
+          done < /tmp/verified-domains
