@@ -1,0 +1,30 @@
+name: Trigger canonical subdomain reconciliation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/trigger-subdomain-reconcile.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch canonical reconciler
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPO/actions/workflows/all-client-subdomains-reconcile.yml/dispatches" \
+            -d '{"ref":"main"}'
+          echo "CANONICAL_SUBDOMAIN_RECONCILE_DISPATCHED=1"
