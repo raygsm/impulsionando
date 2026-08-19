@@ -1,3 +1,4 @@
+# Forced definitive purge trigger: 2026-08-19T17:36:00-03:00
 name: Purge Lovable dependencies
 
 on:
@@ -41,8 +42,7 @@ jobs:
             @lovable.dev/email-js \
             @lovable.dev/mcp-js \
             @lovable.dev/webhooks-js \
-            @lovable.dev/vite-tanstack-config \
-            --save
+            @lovable.dev/vite-tanstack-config
           bun install --lockfile-only
 
       - name: Assert zero Lovable package dependency
