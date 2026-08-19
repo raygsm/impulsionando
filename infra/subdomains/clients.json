@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "zone": "impulsionando.com.br",
+  "clients": [
+    {"slug":"csi","domain":"csi.impulsionando.com.br","route":"/csi","enabled":true},
+    {"slug":"wmp","domain":"wmp.impulsionando.com.br","route":"/wmp","enabled":true},
+    {"slug":"chrismed","domain":"chrismed.impulsionando.com.br","route":"/chrismed","enabled":true},
+    {"slug":"anamadu","domain":"anamadu.impulsionando.com.br","route":"/anamadu","enabled":true},
+    {"slug":"marocas","domain":"marocas.impulsionando.com.br","route":"/marocas","enabled":true},
+    {"slug":"riomed","domain":"riomed.impulsionando.com.br","route":"/riomed","enabled":true}
+  ]
+}
