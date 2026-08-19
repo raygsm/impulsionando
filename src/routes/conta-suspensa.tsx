@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMyBillingStatus } from "@/lib/billing.functions";
+import { getBillingPaymentPublicConfig } from "@/lib/billing-payment-config.functions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, CreditCard, Loader2, LockKeyhole, QrCode, ShieldCheck } from "lucide-react";
+import { Copy, CreditCard, Loader2, LockKeyhole, QrCode, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/conta-suspensa")({
@@ -24,22 +25,82 @@ type PixPayment = {
   status: string | null;
 };
 
+type MpCardFormData = {
+  paymentMethodId?: string;
+  issuerId?: string;
+  cardholderEmail?: string;
+  token?: string;
+  installments?: string | number;
+  identificationNumber?: string;
+  identificationType?: string;
+};
+
+type MpCardForm = {
+  getCardFormData: () => MpCardFormData;
+  unmount?: () => void;
+};
+
+declare global {
+  interface Window {
+    MercadoPago?: new (publicKey: string, options?: { locale?: string }) => {
+      cardForm: (config: Record<string, unknown>) => MpCardForm;
+    };
+  }
+}
+
+function loadMercadoPagoSdk(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.MercadoPago) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>('script[data-impulsionando-mp-sdk="true"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("MercadoPago.js indisponível")), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://sdk.mercadopago.com/js/v2";
+    script.async = true;
+    script.dataset.impulsionandoMpSdk = "true";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("MercadoPago.js indisponível"));
+    document.head.appendChild(script);
+  });
+}
+
 function SuspendedPage() {
   const { companyId } = useActiveCompany();
-  const fn = useServerFn(getMyBillingStatus);
+  const billingFn = useServerFn(getMyBillingStatus);
+  const paymentConfigFn = useServerFn(getBillingPaymentPublicConfig);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [creatingPix, setCreatingPix] = useState(false);
   const [pix, setPix] = useState<PixPayment | null>(null);
+  const [showCard, setShowCard] = useState(false);
+  const [cardReady, setCardReady] = useState(false);
+  const [cardSubmitting, setCardSubmitting] = useState(false);
+  const [payerEmail, setPayerEmail] = useState("");
+  const cardFormRef = useRef<MpCardForm | null>(null);
 
   const { data } = useQuery({
     queryKey: ["my-billing-status", companyId],
     enabled: !!companyId,
-    queryFn: () => fn({ data: { companyId } }),
-    refetchInterval: 15_000,
+    queryFn: () => billingFn({ data: { companyId } }),
+    refetchInterval: 10_000,
+  });
+
+  const { data: paymentConfig } = useQuery({
+    queryKey: ["billing-payment-public-config"],
+    queryFn: () => paymentConfigFn(),
+    staleTime: 10 * 60_000,
   });
 
   const inv = (data && "openInvoice" in data ? data.openInvoice : null) ?? null;
   const contract = (data && "contract" in data ? data.contract : null) ?? null;
+
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data: auth }) => setPayerEmail(auth.user?.email ?? ""));
+  }, []);
 
   useEffect(() => {
     if (contract && contract.status !== "suspended") {
@@ -47,6 +108,104 @@ function SuspendedPage() {
       navigate({ to: "/dashboard" });
     }
   }, [contract, navigate]);
+
+  useEffect(() => {
+    if (!showCard || !inv?.id || !inv.amount || !paymentConfig?.publicKey) return;
+    let cancelled = false;
+
+    const initialize = async () => {
+      try {
+        setCardReady(false);
+        await loadMercadoPagoSdk();
+        if (cancelled || !window.MercadoPago) return;
+        const mp = new window.MercadoPago(paymentConfig.publicKey, { locale: "pt-BR" });
+        const cardForm = mp.cardForm({
+          amount: String(Number(inv.amount).toFixed(2)),
+          iframe: true,
+          form: {
+            id: "billing-card-form",
+            cardNumber: { id: "billing-card-number", placeholder: "Número do cartão" },
+            expirationDate: { id: "billing-card-expiration", placeholder: "MM/AA" },
+            securityCode: { id: "billing-card-security", placeholder: "CVV" },
+            cardholderName: { id: "billing-card-holder", placeholder: "Nome impresso no cartão" },
+            issuer: { id: "billing-card-issuer", placeholder: "Banco emissor" },
+            installments: { id: "billing-card-installments", placeholder: "Parcelas" },
+            identificationType: { id: "billing-card-document-type", placeholder: "Documento" },
+            identificationNumber: { id: "billing-card-document", placeholder: "CPF/CNPJ" },
+            cardholderEmail: { id: "billing-card-email", placeholder: "E-mail" },
+          },
+          callbacks: {
+            onFormMounted: (error: unknown) => {
+              if (error) {
+                console.error("[billing-card] mount", error);
+                toast.error("Não foi possível carregar o pagamento por cartão.");
+                return;
+              }
+              setCardReady(true);
+            },
+            onSubmit: async (event: Event) => {
+              event.preventDefault();
+              if (cardSubmitting) return;
+              const formData = cardForm.getCardFormData();
+              if (!formData.token || !formData.paymentMethodId) {
+                toast.error("Revise os dados do cartão antes de continuar.");
+                return;
+              }
+              setCardSubmitting(true);
+              try {
+                const { data: result, error } = await supabase.functions.invoke("billing-create-payment", {
+                  body: {
+                    invoice_id: inv.id,
+                    payment_method: "credit_card",
+                    token: formData.token,
+                    payment_method_id: formData.paymentMethodId,
+                    issuer_id: formData.issuerId || undefined,
+                    installments: Math.max(1, Number(formData.installments || 1)),
+                    identification: formData.identificationType && formData.identificationNumber
+                      ? { type: formData.identificationType, number: formData.identificationNumber }
+                      : undefined,
+                  },
+                });
+                if (error) throw error;
+                if (!result?.ok) throw new Error(result?.error || "Pagamento não processado");
+
+                if (result.status === "approved") {
+                  toast.success("Pagamento aprovado. Reativando seu acesso…");
+                  await queryClient.invalidateQueries({ queryKey: ["my-billing-status", companyId] });
+                } else if (result.status === "pending" || result.status === "in_process") {
+                  toast.success("Pagamento recebido e em análise. A reativação ocorrerá automaticamente após a confirmação.");
+                } else {
+                  toast.error("O pagamento não foi aprovado. Você pode revisar os dados e tentar novamente.");
+                }
+              } catch (error) {
+                console.error("[billing-card] payment", error);
+                toast.error("Não foi possível concluir o pagamento por cartão. Tente novamente.");
+              } finally {
+                setCardSubmitting(false);
+              }
+            },
+            onFetching: () => {
+              const progress = document.getElementById("billing-card-progress") as HTMLProgressElement | null;
+              progress?.removeAttribute("value");
+              return () => progress?.setAttribute("value", "0");
+            },
+          },
+        });
+        cardFormRef.current = cardForm;
+      } catch (error) {
+        console.error("[billing-card] sdk", error);
+        toast.error("Pagamento por cartão temporariamente indisponível.");
+      }
+    };
+
+    void initialize();
+    return () => {
+      cancelled = true;
+      try { cardFormRef.current?.unmount?.(); } catch { /* SDK cleanup best-effort */ }
+      cardFormRef.current = null;
+      setCardReady(false);
+    };
+  }, [showCard, inv?.id, inv?.amount, paymentConfig?.publicKey, companyId, queryClient]);
 
   const effectivePix = pix?.pix_copy_paste || inv?.pix_copy_paste || null;
   const qrBase64 = pix?.pix_qr_code_base64 || null;
@@ -61,8 +220,8 @@ function SuspendedPage() {
       if (error) throw error;
       if (!result?.ok) throw new Error(result?.error || "Não foi possível gerar o Pix");
       setPix({
-        pix_copy_paste: result.pix_copy_paste ?? null,
-        pix_qr_code_base64: result.pix_qr_code_base64 ?? null,
+        pix_copy_paste: result.pix_copy_paste ?? result.qr_code ?? null,
+        pix_qr_code_base64: result.pix_qr_code_base64 ?? result.qr_code_base64 ?? null,
         payment_id: result.payment_id ?? null,
         status: result.status ?? null,
       });
@@ -99,7 +258,7 @@ function SuspendedPage() {
       <div className="absolute inset-0 bg-white/55 backdrop-blur-[3px]" />
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
-        <Card className="w-full max-w-lg border-0 p-7 shadow-2xl md:p-9">
+        <Card className="w-full max-w-xl border-0 p-7 shadow-2xl md:p-9">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-amber-700"><LockKeyhole className="h-7 w-7" /></div>
           <div className="mt-5 text-center">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-muted-foreground">Assinatura Impulsionando</p>
@@ -131,14 +290,45 @@ function SuspendedPage() {
               </>
             )}
 
-            <Button size="lg" variant="outline" className="h-12 gap-2" disabled title="Tokenização transparente de cartão permanece bloqueada até o teste E2E com SDK Mercado Pago.">
-              <CreditCard className="h-4 w-4" /> Cartão de crédito — validação final
-            </Button>
+            {!showCard ? (
+              <Button size="lg" variant="outline" className="h-12 gap-2" disabled={!inv?.id || !paymentConfig?.publicKey} onClick={() => setShowCard(true)}>
+                <CreditCard className="h-4 w-4" /> Pagar com cartão de crédito
+              </Button>
+            ) : (
+              <div className="rounded-2xl border bg-background p-4">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div><div className="font-semibold">Cartão de crédito</div><div className="text-xs text-muted-foreground">Dados protegidos pelo Mercado Pago</div></div>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => setShowCard(false)} aria-label="Fechar cartão"><X className="h-4 w-4" /></Button>
+                </div>
+                <form id="billing-card-form" className="grid gap-3">
+                  <div id="billing-card-number" className="h-11 rounded-md border bg-white px-3 py-2" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div id="billing-card-expiration" className="h-11 rounded-md border bg-white px-3 py-2" />
+                    <div id="billing-card-security" className="h-11 rounded-md border bg-white px-3 py-2" />
+                  </div>
+                  <input id="billing-card-holder" className="h-11 rounded-md border bg-background px-3 text-sm" placeholder="Nome impresso no cartão" autoComplete="cc-name" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <select id="billing-card-issuer" className="h-11 rounded-md border bg-background px-3 text-sm"><option value="">Banco emissor</option></select>
+                    <select id="billing-card-installments" className="h-11 rounded-md border bg-background px-3 text-sm"><option value="">Parcelas</option></select>
+                  </div>
+                  <div className="grid grid-cols-[120px_1fr] gap-3">
+                    <select id="billing-card-document-type" className="h-11 rounded-md border bg-background px-3 text-sm"><option value="">Documento</option></select>
+                    <input id="billing-card-document" className="h-11 rounded-md border bg-background px-3 text-sm" placeholder="CPF/CNPJ" inputMode="numeric" />
+                  </div>
+                  <input id="billing-card-email" type="email" defaultValue={payerEmail} className="h-11 rounded-md border bg-background px-3 text-sm" placeholder="E-mail" autoComplete="email" />
+                  <progress id="billing-card-progress" value="0" className="h-1 w-full" />
+                  <Button type="submit" size="lg" className="h-12 gap-2" disabled={!cardReady || cardSubmitting}>
+                    {cardSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                    {cardSubmitting ? "Processando…" : `Pagar ${inv ? fmt(Number(inv.amount)) : ""}`}
+                  </Button>
+                </form>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex items-start gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
             <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
-            <span>O valor é obtido diretamente da fatura no Core. A confirmação é acompanhada automaticamente e o acesso é reativado assim que o Mercado Pago confirmar a baixa.</span>
+            <span>O valor é obtido diretamente da fatura no Core. Pix e cartão são processados pelo Mercado Pago; dados sensíveis do cartão não passam pelo servidor da Impulsionando. A baixa reativa o acesso automaticamente.</span>
           </div>
 
           <div className="mt-6 text-center text-xs text-muted-foreground">Seu restante do Core permanece protegido e indisponível enquanto houver suspensão.</div>
