@@ -1,0 +1,135 @@
+name: Minimum wage pricing sync
+
+on:
+  push:
+    paths:
+      - .github/workflows/minimum-wage-sync.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: minimum-wage-pricing-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OFFICIAL_URL: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12797.htm
+    steps:
+      - name: Validate production credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+
+      - name: Read official minimum wage source
+        id: official
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            -A 'ImpulsionandoPricingVerifier/1.0' \
+            "$OFFICIAL_URL" -o /tmp/minimum-wage.html
+
+          python3 - <<'PY' >/tmp/value.env
+          import re
+          from pathlib import Path
+          html = Path('/tmp/minimum-wage.html').read_text(errors='ignore')
+          text = re.sub(r'<[^>]+>', ' ', html)
+          text = re.sub(r'\s+', ' ', text)
+          patterns = [
+              r'sal[aá]rio m[ií]nimo[^R]{0,180}R\$\s*([0-9\.]+,[0-9]{2})',
+              r'R\$\s*(1\.621,00)',
+          ]
+          value = None
+          for pattern in patterns:
+              m = re.search(pattern, text, flags=re.I)
+              if m:
+                  raw = m.group(1)
+                  value = float(raw.replace('.', '').replace(',', '.'))
+                  break
+          if value is None:
+              raise SystemExit('minimum wage value not found in official source')
+          if not 1000 <= value <= 10000:
+              raise SystemExit(f'official value outside safety range: {value}')
+          print(f'MINIMUM_WAGE={value:.2f}')
+          PY
+
+          cat /tmp/value.env >> "$GITHUB_ENV"
+          cat /tmp/value.env
+
+      - name: Compare with Core index
+        id: compare
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_pricing_index?index_key=eq.br_minimum_wage&select=current_value,effective_from,source_reference" \
+            -o /tmp/current.json
+          current="$(jq -r '.[0].current_value // empty' /tmp/current.json)"
+          echo "CURRENT=$current OFFICIAL=$MINIMUM_WAGE"
+          if [ "$current" = "$MINIMUM_WAGE" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update Core pricing index
+        if: steps.compare.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          year="$(date -u +%Y)"
+          effective_from="$year-01-01"
+          payload="$(jq -nc \
+            --argjson value "$MINIMUM_WAGE" \
+            --arg effective "$effective_from" \
+            --arg url "$OFFICIAL_URL" \
+            --arg checked "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{current_value:$value,effective_from:$effective,source_url:$url,source_reference:"Fonte oficial Planalto — salário mínimo nacional vigente",metadata:{country:"BR",currency:"BRL",official_source:"Planalto",auto_refresh_required:true,last_verified_at:$checked,verification:"github_actions_official_source"},updated_at:$checked}')"
+
+          curl --fail --silent --show-error -X PATCH \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H 'Content-Type: application/json' \
+            -H 'Prefer: return=representation' \
+            --data "$payload" \
+            "$SUPABASE_URL/rest/v1/core_pricing_index?index_key=eq.br_minimum_wage" \
+            -o /tmp/updated.json
+          jq -e 'length == 1' /tmp/updated.json >/dev/null
+
+      - name: Reprice salary-indexed plans
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -X POST \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H 'Content-Type: application/json' \
+            -d '{}' \
+            "$SUPABASE_URL/rest/v1/rpc/core_reprice_minimum_wage_plans" \
+            -o /tmp/repriced.json
+          jq . /tmp/repriced.json
+
+      - name: Assert commercial source of truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/billing_plans?is_active=eq.true&show_on_site=eq.true&select=code,name,recurring_amount,setup_fee,metadata&order=sort_order.asc" \
+            -o /tmp/plans.json
+          jq -e 'all(.[]; .metadata.pricing_index_key == "br_minimum_wage" and (.metadata.minimum_wage_multiplier != null))' /tmp/plans.json >/dev/null
+          echo "MINIMUM_WAGE_SYNC=PASS official=$MINIMUM_WAGE"
