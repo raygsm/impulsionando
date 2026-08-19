@@ -1,0 +1,72 @@
+name: Go-live build proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/go-live-build-proof.yml
+      - src/**
+      - package.json
+      - package-lock.json
+      - vite.config.ts
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: go-live-build-proof-v1
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build current main
+        id: build
+        continue-on-error: true
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        shell: bash
+        run: |
+          set +e
+          npm ci --no-audit --no-fund >/tmp/npm-ci.log 2>&1
+          ci_rc=$?
+          if [ "$ci_rc" -eq 0 ]; then npm run build >/tmp/build.log 2>&1; build_rc=$?; else build_rc=99; : >/tmp/build.log; fi
+          echo "ci_rc=$ci_rc" >> "$GITHUB_OUTPUT"
+          echo "build_rc=$build_rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Record proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          ci_rc='${{ steps.build.outputs.ci_rc }}'; build_rc='${{ steps.build.outputs.build_rc }}'
+          status=FAIL; if [ "$ci_rc" = 0 ] && [ "$build_rc" = 0 ] && [ -f .output/server/index.mjs ]; then status=PASS; fi
+          {
+            echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "sha=$GITHUB_SHA"
+            echo "npm_ci_rc=$ci_rc"
+            echo "build_rc=$build_rc"
+            echo "status=$status"
+            echo '--- npm ci tail ---'; tail -80 /tmp/npm-ci.log || true
+            echo '--- build tail ---'; tail -160 /tmp/build.log || true
+          } >docs/ops/go-live-build-proof.txt
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/go-live-build-proof.txt
+          git commit -m 'chore(go-live): record current-main build proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
+          [ "$status" = PASS ]
