@@ -17,16 +17,11 @@ const CORE_HOSTS = new Set<string>([
   "0.0.0.0",
   "impulsionando.com.br",
   "www.impulsionando.com.br",
-  "impulsionando.lovable.app",
 ]);
 
 function isCoreHost(host: string): boolean {
   if (!host) return true;
-  if (CORE_HOSTS.has(host)) return true;
-  // Subdomínios de preview e edição do Lovable são CORE
-  if (host.endsWith(".lovable.app") && host.includes("-preview--")) return true;
-  if (host.endsWith(".lovable.dev")) return true;
-  return false;
+  return CORE_HOSTS.has(host);
 }
 
 export function useTenant(): {
