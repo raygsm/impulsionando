@@ -153,6 +153,6 @@ jobs:
               -H 'Content-Type: application/json' \
               -H 'Prefer: return=minimal' \
               --data "$endpoint_payload" \
-              "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.website&url=eq.https%3A%2F%2F$domain"
+              "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.public_site&url=eq.https%3A%2F%2F$domain"
             echo "CORE_STATUS_VERIFIED $domain"
           done < /tmp/verified-domains
