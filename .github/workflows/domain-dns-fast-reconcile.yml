@@ -1,0 +1,122 @@
+name: Tenant DNS fast reconcile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/domain-dns-fast-reconcile.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: all-client-subdomains-reconcile
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate canonical origin and discover domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST CF_API_TOKEN CF_ZONE_ID SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do test -n "${!v}"; done
+          ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ip" = '187.77.232.52'
+          echo "ORIGIN_IP=$ip" >> "$GITHUB_ENV"
+          echo "CF_ZONE_ID=$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=not.is.null&subdomain=neq.impulsionando&select=subdomain,root_domain&order=subdomain.asc" -o /tmp/ids.json
+          jq -r '.[]|(.subdomain+"."+(.root_domain//"impulsionando.com.br"))' /tmp/ids.json >/tmp/domains.txt
+          test -s /tmp/domains.txt
+
+      - name: Reconcile Cloudflare records
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/records.json
+            jq -e '.success==true' /tmp/records.json >/dev/null
+            good="$(jq -r --arg ip "$ORIGIN_IP" '.result[]|select(.type=="A" and .content==$ip and .proxied==true)|.id' /tmp/records.json|head -n1)"
+            if [ -z "$good" ]; then
+              jq -r '.result[]|select(.type=="A" or .type=="AAAA" or .type=="CNAME")|.id' /tmp/records.json | while read -r id; do
+                [ -n "$id" ] && curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
+              done
+              jq -nc --arg name "$domain" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}' >/tmp/new.json
+              curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/created.json
+              jq -e '.success==true' /tmp/created.json >/dev/null
+            fi
+            echo "DNS_RECONCILED $domain"
+          done </tmp/domains.txt
+
+      - name: Verify every public host against existing wildcard Core
+        shell: bash
+        run: |
+          set -euo pipefail
+          : >/tmp/proven.txt
+          : >/tmp/failures.txt
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            code=000; final='-'
+            for attempt in $(seq 1 24); do
+              read -r code final < <(curl -sS -L -A 'ImpulsionandoGoLive/5.0' -o /tmp/body -w '%{http_code} %{url_effective}' --max-time 20 "https://$domain/" || echo '000 -')
+              host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+              if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then break; fi
+              sleep 3
+            done
+            host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then
+              echo "$domain" >>/tmp/proven.txt
+            else
+              echo "$domain|$code|$final" >>/tmp/failures.txt
+            fi
+          done </tmp/domains.txt
+          cat /tmp/failures.txt || true
+
+          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            sub="${domain%.impulsionando.com.br}"
+            payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
+            curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' --data "$payload" \
+              "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$sub" >/dev/null
+          done </tmp/proven.txt
+
+          total="$(wc -l </tmp/domains.txt | tr -d ' ')"
+          proven="$(wc -l </tmp/proven.txt | tr -d ' ')"
+          failed="$(wc -l </tmp/failures.txt | tr -d ' ')"
+          mkdir -p docs/ops
+          jq -n --arg generated_at_utc "$now" --argjson total "$total" --argjson active_issued "$proven" --argjson pending "$failed" \
+            --rawfile failures /tmp/failures.txt '{generated_at_utc:$generated_at_utc,total:$total,active_issued:$active_issued,pending:$pending,failures:$failures,origin_ip:"187.77.232.52",runtime:"impulsionando-core wildcard Traefik"}' \
+            >docs/ops/domain-go-live-proof.json
+          [ "$failed" -eq 0 ]
+
+      - name: Commit proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f docs/ops/domain-go-live-proof.json ]; then exit 0; fi
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/domain-go-live-proof.json
+          git commit -m 'chore(go-live): record domain proof from canonical wildcard Core' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
