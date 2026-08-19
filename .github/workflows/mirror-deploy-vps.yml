@@ -1,32 +1,43 @@
-name: Mirror Deploy Impulsionando → VPS (187)
+name: VPS Recovery Deploy Impulsionando (187)
 
-# Regra inquebrável: TODO build publicado no IP 185 (Lovable) é replicado
-# imutavelmente para o IP 187 (VPS Hostinger) logo após o push em main.
-# Cada release é imutável, versionada por timestamp + SHA, e o symlink
-# `current` só troca depois do build bem-sucedido.
+# Workflow manual de contingencia para a infraestrutura definitiva da Impulsionando.
+# A unica origem de deploy e o repositorio raygsm/impulsionando e o unico destino
+# operacional e a VPS Hostinger 187.77.232.52. Nao existe espelhamento de ambiente antigo.
+# Cada release e imutavel, versionada por timestamp + SHA, e o symlink `current`
+# so troca depois do build bem-sucedido.
 #
-# Secrets obrigatórios (GitHub → Settings → Secrets → Actions):
-#   VPS_HOST         IP da VPS (187.x.x.x)
-#   VPS_USER         usuário SSH (ex.: deploy)
+# Secrets obrigatorios (GitHub -> Settings -> Secrets -> Actions):
+#   VPS_HOST         deve resolver para 187.77.232.52
+#   VPS_USER         usuario SSH (ex.: deploy)
 #   VPS_SSH_KEY      chave privada ED25519 autorizada na VPS
-#   VPS_PORT         (opcional) porta SSH, padrão 22
+#   VPS_PORT         opcional, porta SSH, padrao 22
 
 on:
-  # Legado preservado somente para recuperação manual. O deploy automático
-  # oficial é o workflow Deploy Core Frontend, que publica artefatos prontos.
+  # Contingencia manual. O deploy automatico oficial continua sendo
+  # o workflow Deploy Core Frontend, que publica os artefatos na VPS 187.
   workflow_dispatch:
 
 concurrency:
-  group: mirror-deploy-impulsionando-vps
+  group: recovery-deploy-impulsionando-vps-187
   cancel-in-progress: false
 
 jobs:
-  mirror:
+  deploy:
     runs-on: ubuntu-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      EXPECTED_VPS_HOST: 187.77.232.52
     steps:
-      - name: Replicar build na VPS
+      - name: Validar VPS definitiva
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ secrets.VPS_HOST }}" != "$EXPECTED_VPS_HOST" ]; then
+            echo "::error::VPS_HOST deve ser exatamente $EXPECTED_VPS_HOST"
+            exit 1
+          fi
+
+      - name: Publicar release na VPS 187
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -54,37 +65,34 @@ jobs:
             printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" >>"$ENV_TMP"
             install -m 0600 "$ENV_TMP" "$SHARED/.env"
             rm -f "$ENV_TMP"
+
             git clone --depth=1 https://github.com/raygsm/impulsionando.git $TARGET
             cd $TARGET
 
-            # .env compartilhado (nunca versionado, gerenciado por operador)
             if [ -f "$SHARED/.env" ]; then ln -sf $SHARED/.env $TARGET/.env; fi
 
             npm ci
             npm run prebuild
             node --max-old-space-size=4096 node_modules/vite/bin/vite.js build
-
-            # Health check pré-troca — se build quebrar, symlink NÃO é atualizado.
             test -d $TARGET/.output || test -d $TARGET/dist
 
             ln -sfn $TARGET $APP_ROOT/current
-
-            # Retenção: mantém as 7 releases mais recentes.
             ls -1dt $RELEASES/*/ | tail -n +8 | xargs -r rm -rf
 
             pm2 reload impulsionando --update-env || \
               pm2 start $APP_ROOT/current/deploy/ecosystem.config.cjs --name impulsionando
             pm2 save
 
-            echo "Mirror ${TS}-${SHA_SHORT} publicado no IP 187."
+            echo "Release ${TS}-${SHA_SHORT} publicada na VPS 187.77.232.52."
 
-      - name: Smoke test HTTP na VPS
+      - name: Smoke test HTTP na VPS 187
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           for host in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br; do
             code=$(curl -sk -o /dev/null -w "%{http_code}" --resolve $host:443:${{ secrets.VPS_HOST }} https://$host/ || echo "000")
-            echo "VPS $host → $code"
+            echo "VPS 187 $host -> $code"
             if [ "$code" != "200" ] && [ "$code" != "301" ] && [ "$code" != "302" ]; then
-              echo "::warning::Host $host respondeu $code na VPS"
+              echo "::warning::Host $host respondeu $code na VPS 187"
             fi
           done
