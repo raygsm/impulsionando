@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createOpenAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 
@@ -52,15 +52,19 @@ async function persist(
   if (error) throw new Error(error.message);
 }
 
+function getOpenAiProvider() {
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) throw new Error("OPENAI_API_KEY ausente");
+  return createOpenAiGatewayProvider(key);
+}
+
 export const extractCurriculo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
-    const gateway = createLovableAiGatewayProvider(key);
+    const provider = getOpenAiProvider();
     const { output } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model: provider("gpt-4o-mini"),
       output: Output.object({ schema: ExtractSchema }),
       system: SYSTEM,
       prompt: `Extraia do currículo a seguir.\n\n---\n${data.texto}\n---`,
@@ -74,16 +78,14 @@ export const extractCurriculoFromFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractFileInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
-    const gateway = createLovableAiGatewayProvider(key);
+    const provider = getOpenAiProvider();
 
     const match = /^data:([^;]+);base64,(.+)$/.exec(data.file_data_url);
     if (!match) throw new Error("Arquivo inválido");
     const mediaType = match[1];
 
     const { output } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model: provider("gpt-4o-mini"),
       output: Output.object({ schema: ExtractSchema }),
       system: SYSTEM,
       messages: [{
