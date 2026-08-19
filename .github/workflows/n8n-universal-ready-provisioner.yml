@@ -1,0 +1,147 @@
+name: n8n universal READY provisioner
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/n8n-universal-ready-provisioner.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "23 */2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n8n-universal-ready-provisioner
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Validate definitive VPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VPS_HOST" && test -n "$VPS_USER" && test -n "$VPS_SSH_KEY"
+          ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ip" = "187.77.232.52" || { echo "::error::Unexpected VPS $ip"; exit 1; }
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+
+      - name: Provision, probe and bind every READY workflow
+        shell: bash
+        run: |
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          CORE_VERIFY='https://impulsionando.com.br/api/public/hooks/n8n-verify'
+          CORE_ENV=/etc/impulsionando-core.env
+          SECURITY_ENV=/etc/impulsionando-security.env
+
+          sudo docker inspect "$C" --format '{{.State.Status}}' | grep -q running
+          SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
+          SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
+          SIGNING_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+          test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY" && test -n "$SIGNING_SECRET"
+
+          curl -fsS --max-time 30 \
+            "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=workflow_slug,version,description,config&order=workflow_slug.asc" \
+            -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" > /tmp/ready.json
+          jq -e 'type=="array"' /tmp/ready.json >/dev/null
+          total="$(jq 'length' /tmp/ready.json)"
+          echo "READY_TO_PROVISION=$total"
+          [ "$total" -gt 0 ] || { echo 'N8N_UNIVERSAL_READY_PROVISIONER=NOOP'; exit 0; }
+
+          slugify() { printf '%s' "$1" | tr '[:upper:]._' '[:lower:]---' | tr -cd 'a-z0-9-'; }
+          make_id() { printf 'iu%s' "$(printf '%s' "$1" | sha256sum | cut -c1-20)"; }
+          sign_payload() { printf '%s' "$1" | openssl dgst -sha256 -hmac "$SIGNING_SECRET" -hex | awk '{print $2}'; }
+
+          provision_one() {
+            local slug="$1" version="$2" tenant="$3" title="$4"
+            local id path file webhook_id payload sig code
+            id="$(make_id "${slug}:v${version}")"
+            path="core-$(slugify "$slug")-v${version}"
+            webhook_id="${id}-hook"
+            file="/tmp/${id}.json"
+            [ -n "$tenant" ] || tenant='impulsionando'
+            title="${title:-$slug}"
+
+            jq -n \
+              --arg id "$id" --arg name "Impulsionando | $title" --arg path "$path" --arg hook "$webhook_id" \
+              --arg verify "$CORE_VERIFY" --arg slug "$slug" --arg tenant "$tenant" \
+              '{id:$id,name:$name,active:false,nodes:[
+                {parameters:{httpMethod:"POST",path:$path,responseMode:"responseNode",options:{}},id:($id+"-webhook"),name:"Core Event Webhook",type:"n8n-nodes-base.webhook",typeVersion:2,position:[0,0],webhookId:$hook},
+                {parameters:{method:"POST",url:$verify,sendHeaders:true,headerParameters:{parameters:[{name:"x-impulsionando-signature",value:"={{ $json.headers?.[\"x-impulsionando-signature\"] || \"\" }}"},{name:"Content-Type",value:"application/json"}]},sendBody:true,contentType:"raw",rawContentType:"application/json",body:"={{ JSON.stringify($json.body) }}",options:{response:{response:{fullResponse:true,neverError:true,responseFormat:"json"}},timeout:15000}},id:($id+"-verify"),name:"Verify signature in Core",type:"n8n-nodes-base.httpRequest",typeVersion:4.2,position:[260,0]},
+                {parameters:{jsCode:("const r=$input.first().json; const b=r.body||{}; const ok=Number(r.statusCode)===200 && b.authorized===true && b.ok===true && b.tenant_slug===\""+$tenant+"\"; return [{json:{authorized:ok,statusCode:Number(r.statusCode)||0,error:ok?null:(b.error||\"verification_failed\"),verification:b,payload:ok?(b.payload||null):null}}];")},id:($id+"-normalize"),name:"Normalize verification result",type:"n8n-nodes-base.code",typeVersion:2,position:[520,0]},
+                {parameters:{respondWith:"json",responseBody:("={{ { ok: $json.authorized === true, workflow: \""+$slug+"\", error: $json.authorized === true ? null : $json.error, event_code: $json.payload?.event_code || null, correlation_id: $json.payload?.correlation_id || null, accepted_at: $json.authorized === true ? $now : null } }}"),options:{responseCode:"={{ $json.authorized === true ? 200 : 401 }}"}},id:($id+"-respond"),name:"Respond Security Result",type:"n8n-nodes-base.respondToWebhook",typeVersion:1.4,position:[780,0]}
+              ],connections:{"Core Event Webhook":{main:[[{node:"Verify signature in Core",type:"main",index:0}]]},"Verify signature in Core":{main:[[{node:"Normalize verification result",type:"main",index:0}]]},"Normalize verification result":{main:[[{node:"Respond Security Result",type:"main",index:0}]]}},settings:{executionOrder:"v1"}}' > "$file"
+
+            sudo docker cp "$file" "$C:$file"
+            sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
+            sudo docker exec "$C" n8n publish:workflow --id="$id" >/dev/null
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
+
+            sudo docker restart "$C" >/dev/null
+            for i in $(seq 1 30); do
+              sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
+              [ "$i" -lt 30 ] || return 20
+              sleep 2
+            done
+
+            payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"unsigned-$id\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            code="$(curl -sS -o /tmp/${id}-unsigned -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -d "$payload" || true)"
+            [ "$code" = 401 ] || { echo "PROBE_UNSIGNED_FAIL slug=$slug http=$code"; return 21; }
+
+            payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"signed-$id-$(date +%s)\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            sig="$(sign_payload "$payload")"
+            code="$(curl -sS -o /tmp/${id}-signed -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
+            [ "$code" = 200 ] && grep -q '"ok":true' /tmp/${id}-signed || { echo "PROBE_SIGNED_FAIL slug=$slug http=$code"; return 22; }
+
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
+            sudo docker exec -e WF_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs'); const id=process.env.WF_ID;
+          const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));
+          const w=Array.isArray(raw)?raw[0]:raw;
+          const hook=(w.nodes||[]).find(n=>n.type==='n8n-nodes-base.webhook');
+          const names=(w.nodes||[]).map(n=>n.name);
+          if(!w.active||!w.activeVersionId||!hook?.webhookId||!names.includes('Verify signature in Core')||!names.includes('Respond Security Result')) process.exit(1);
+          NODE
+
+            curl -fsS --max-time 20 -X PATCH \
+              "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.$slug&version=eq.$version" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' \
+              -d "{\"n8n_workflow_id\":\"$id\",\"status\":\"ACTIVE\"}" >/dev/null
+            curl -fsS --max-time 20 -X PATCH \
+              "$SUPABASE_URL/rest/v1/communication_automations?automation_key=eq.$slug&version=eq.$version" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' \
+              -d "{\"n8n_workflow_id\":\"$id\",\"status\":\"ACTIVE\"}" >/dev/null || true
+            echo "PROVISIONED slug=$slug runtime=$id tenant=$tenant"
+          }
+
+          failures=0
+          while IFS=$'\t' read -r slug version tenant title; do
+            [ -n "$slug" ] || continue
+            provision_one "$slug" "$version" "$tenant" "$title" || failures=$((failures+1))
+          done < <(jq -r '.[] | [.workflow_slug, (.version|tostring), (.config.tenant_slug // "impulsionando"), (.description // .workflow_slug)] | @tsv' /tmp/ready.json)
+
+          remaining="$(curl -fsS --max-time 20 "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq 'length')"
+          echo "N8N_UNIVERSAL_READY_PROVISIONER remaining=$remaining failures=$failures"
+          [ "$failures" -eq 0 ] && [ "$remaining" -eq 0 ]
+          REMOTE
