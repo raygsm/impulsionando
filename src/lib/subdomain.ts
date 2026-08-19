@@ -5,7 +5,7 @@
  * pelo caminho interno estável no domínio principal.
  */
 
-const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
+const ROOT_DOMAINS = ["impulsionando.com.br"];
 export const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
 
@@ -126,14 +126,4 @@ export function toColorsInternalPathname(host: string | null | undefined, pathna
 export function toWmpInternalPathname(host: string | null | undefined, pathname: string): string {
   const locked = wmpHostLockTarget(host, pathname);
   return locked ?? pathname;
-}
-
-export function deprecatedSubdomainRedirect(_loc: {
-  hostname: string;
-  pathname: string;
-  search: string;
-  hash: string;
-  protocol: string;
-}): string | null {
-  return null;
 }
