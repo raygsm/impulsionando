@@ -8,10 +8,7 @@ const corsHeaders = {
 };
 
 function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
+  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 async function verifySignature(secret: string, dataId: string, requestId: string, signature: string) {
@@ -85,12 +82,14 @@ Deno.serve(async (req) => {
         .eq('company_id', companyId).eq('mp_payment_id', resourceId).select('*').maybeSingle();
       if (paymentError) throw paymentError;
 
-      // Billing da Impulsionando: a fatura e o valor são definidos no servidor.
-      // Quando o Mercado Pago confirma a cobrança vinculada a billing_invoice,
-      // delegamos a baixa/reativação para a função canônica do Core.
       if (payment?.context_type === 'billing_invoice' && payment.context_id && status === 'approved') {
         const { error: billingError } = await service.rpc('billing_mark_paid', { _invoice_id: payment.context_id });
         if (billingError) throw billingError;
+      }
+
+      if (payment?.context_type === 'clube_membership_invoice' && payment.context_id && status === 'approved') {
+        const { error: clubError } = await service.rpc('clube_mark_invoice_paid', { p_invoice_id: payment.context_id });
+        if (clubError) throw clubError;
       }
 
       if (payment?.context_type === 'chrismed_appointment' && payment.context_id && companyId === CHRISMED_COMPANY_ID) {
