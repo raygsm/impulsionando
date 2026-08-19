@@ -1,0 +1,167 @@
+name: CHRISMED reconnect Oliver and WhatsApp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-reconnect-live.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrismed-reconnect-live
+  cancel-in-progress: true
+
+jobs:
+  reconnect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate existing OpenAI credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${OPENAI_API_KEY:-}"
+          code="$(curl -sS -o /tmp/openai.json -w '%{http_code}' --max-time 20 https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY")"
+          test "$code" = '200'
+          echo 'OPENAI_CREDENTIAL=VALID'
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+
+      - name: Reconnect Oliver and prepare CHRISMED QR
+        shell: bash
+        run: |
+          set -euo pipefail
+          keyfile="$(mktemp)"
+          printf '%s' "$OPENAI_API_KEY" > "$keyfile"
+          chmod 600 "$keyfile"
+          scp "$keyfile" "$VPS_USER@$VPS_HOST:/tmp/chrismed-openai.key"
+          rm -f "$keyfile"
+
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          ENV_FILE=/etc/impulsionando-core.env
+          CORE=impulsionando-core
+          EVO=impulsionando-evolution-api
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+
+          sudo test -f "$ENV_FILE"
+          sudo test -f "$COMPOSE"
+          sudo docker inspect "$CORE" >/dev/null
+          sudo docker inspect "$EVO" >/dev/null
+
+          OPENAI_KEY="$(cat /tmp/chrismed-openai.key)"
+          rm -f /tmp/chrismed-openai.key
+          test -n "$OPENAI_KEY"
+
+          EVO_KEY="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
+          test -n "$EVO_KEY"
+
+          core_network="$(sudo docker inspect "$CORE" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | head -n1)"
+          test -n "$core_network"
+          if ! sudo docker inspect "$EVO" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | grep -Fxq "$core_network"; then
+            sudo docker network connect "$core_network" "$EVO"
+          fi
+
+          set_env() {
+            local key="$1" value="$2" tmp
+            tmp="$(mktemp)"
+            sudo awk -F= -v k="$key" '$1!=k{print}' "$ENV_FILE" > "$tmp"
+            printf '%s=%s\n' "$key" "$value" >> "$tmp"
+            sudo install -o root -g root -m 0600 "$tmp" "$ENV_FILE"
+            rm -f "$tmp"
+          }
+
+          set_env OPENAI_API_KEY "$OPENAI_KEY"
+          set_env CHRISMED_EVOLUTION_BASE_URL 'http://impulsionando-evolution-api:8080'
+          set_env CHRISMED_EVOLUTION_API_KEY "$EVO_KEY"
+          unset OPENAI_KEY EVO_KEY
+
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate "$CORE"
+
+          for i in $(seq 1 40); do
+            state="$(sudo docker inspect "$CORE" --format '{{.State.Status}}' 2>/dev/null || true)"
+            [ "$state" = running ] && break
+            [ "$i" -lt 40 ] || exit 51
+            sleep 2
+          done
+
+          sudo docker exec -i "$CORE" node - <<'NODE'
+          const required=['OPENAI_API_KEY','CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY'];
+          for (const key of required) {
+            if (!process.env[key]) { console.error(`missing:${key}`); process.exit(1); }
+          }
+
+          const openai = await fetch('https://api.openai.com/v1/models', {
+            headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+          });
+          if (!openai.ok) { console.error(`openai_http=${openai.status}`); process.exit(2); }
+
+          const base = process.env.CHRISMED_EVOLUTION_BASE_URL.replace(/\/$/, '');
+          const headers = { apikey: process.env.CHRISMED_EVOLUTION_API_KEY, 'content-type': 'application/json' };
+          const instance = 'chrismed-oliver';
+
+          let stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+          if (stateResp.status === 404) {
+            const created = await fetch(`${base}/instance/create`, {
+              method: 'POST', headers,
+              body: JSON.stringify({ instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' }),
+            });
+            if (!created.ok && created.status !== 409) {
+              console.error(`evolution_create_http=${created.status}`); process.exit(3);
+            }
+          }
+
+          const connect = await fetch(`${base}/instance/connect/${instance}`, { headers });
+          if (!connect.ok) { console.error(`evolution_connect_http=${connect.status}`); process.exit(4); }
+          const data = await connect.json();
+          const qrReady = Boolean(data?.base64 || data?.qrcode?.base64 || data?.data?.Qrcode || data?.data?.qrcode || data?.pairingCode || data?.qrcode?.pairingCode);
+
+          stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+          let state = null;
+          try {
+            const body = await stateResp.json();
+            state = body?.instance?.state || body?.state || body?.data?.state || null;
+          } catch {}
+          const connected = ['open','connected','CONNECTED'].includes(String(state));
+          if (!connected && !qrReady) { console.error('evolution_pairing_not_ready'); process.exit(5); }
+          console.log(JSON.stringify({ openai:true, evolution:true, instance, connected, qr_ready:qrReady }));
+          NODE
+          REMOTE
+
+      - name: Synchronize CHRISMED channel metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          tenant="$(curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.chrismed&active=eq.true&select=id" | jq -r '.[0].id // empty')"
+          test -n "$tenant"
+          payload='{"provider":"evolution_api","status":"PENDING_CONNECTION","secret_reference":"CHRISMED_EVOLUTION_API_KEY","webhook_path":"/api/communication/whatsapp/chrismed","last_error":null}'
+          curl -fsS -X PATCH \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H 'Content-Type: application/json' \
+            -H 'Prefer: return=minimal' \
+            --data "$payload" \
+            "$SUPABASE_URL/rest/v1/communication_channel_endpoints?tenant_id=eq.$tenant&channel=eq.whatsapp&is_primary=eq.true" >/dev/null
+          echo 'CHRISMED_WHATSAPP=PAIRING_READY'
