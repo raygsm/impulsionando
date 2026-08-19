@@ -24,7 +24,7 @@ function ChrismedWordmark({ variant = "default" }: { variant?: "default" | "sm" 
 
 export type Lang = "pt" | "en" | "es";
 
-type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; setLang?: Lang };
+type NavLeaf = { to: string; labels: Record<Lang, string>; desc?: Record<Lang, string>; setLang?: Lang; native?: boolean };
 type NavGroup = { key: string; labels: Record<Lang, string>; eyebrow?: Record<Lang, string>; children: NavLeaf[] };
 type NavItem = NavLeaf | NavGroup;
 const isGroup = (item: NavItem): item is NavGroup => "children" in item;
@@ -60,6 +60,16 @@ const NAV: NavItem[] = [
       { to: "/chrismed/internacional", labels: { pt: "Português · Brasil", en: "Portuguese · Brazil", es: "Portugués · Brasil" }, desc: { pt: "Suporte médico internacional em português.", en: "International medical support in Portuguese.", es: "Soporte médico internacional en portugués." }, setLang: "pt" },
       { to: "/chrismed/internacional", labels: { pt: "English", en: "English", es: "English" }, desc: { pt: "Medical support in English.", en: "Medical support in English.", es: "Medical support in English." }, setLang: "en" },
       { to: "/chrismed/internacional", labels: { pt: "Español", en: "Español", es: "Español" }, desc: { pt: "Atención médica en español.", en: "Atención médica en español.", es: "Atención médica en español." }, setLang: "es" },
+    ],
+  },
+  {
+    key: "acessos",
+    labels: { pt: "Acessos", en: "Access", es: "Accesos" },
+    eyebrow: { pt: "Áreas reservadas", en: "Secure areas", es: "Áreas reservadas" },
+    children: [
+      { to: "/auth?persona=patient&next=%2Fchrismed%2Fminha-conta", native: true, labels: { pt: "Área do Paciente", en: "Patient Area", es: "Área del Paciente" }, desc: { pt: "Acesse sua conta, documentos e serviços do paciente.", en: "Access your account, documents and patient services.", es: "Acceda a su cuenta, documentos y servicios del paciente." } },
+      { to: "/auth?persona=professional&next=%2Fchrismed%2Fagenda%2Fprofissional", native: true, labels: { pt: "Área do Profissional da Saúde", en: "Healthcare Professional Area", es: "Área del Profesional de la Salud" }, desc: { pt: "Acesso reservado para profissionais da saúde.", en: "Secure access for healthcare professionals.", es: "Acceso reservado para profesionales de la salud." } },
+      { to: "/chrismed/ocupacional", labels: { pt: "Área das Empresas", en: "Companies Area", es: "Área de Empresas" }, desc: { pt: "Soluções, serviços e atendimento corporativo CHRISMED.", en: "CHRISMED corporate solutions, services and support.", es: "Soluciones, servicios y atención corporativa CHRISMED." } },
     ],
   },
   { to: "/chrismed/contato", labels: { pt: "Contato", en: "Contact", es: "Contacto" } },
@@ -107,6 +117,14 @@ function LangSwitcher({ lang }: { lang: Lang }) {
 function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lang; pathname: string }) {
   const [open, setOpen] = useState(false);
   const active = group.children.some((child) => pathname === child.to || pathname.startsWith(`${child.to}/`));
+  const linkClass = "group bg-white px-6 py-5 transition-colors hover:bg-[#f7f4ec]";
+  const linkContent = (leaf: NavLeaf) => (
+    <>
+      <strong className="block text-[13px] font-semibold text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]">{leaf.labels[lang]}</strong>
+      {leaf.desc && <span className="mt-2 block text-[12px] leading-[1.55] text-[var(--chrismed-graphite)]">{leaf.desc[lang]}</span>}
+      <span className="mt-3 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--chrismed-forest)] opacity-0 transition-opacity group-hover:opacity-100">Acessar →</span>
+    </>
+  );
   return (
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className={cn("group inline-flex h-[5.4rem] items-center gap-1.5 border-b-2 border-transparent px-3 text-[12px] font-medium tracking-[0.02em] text-white/88 transition-all hover:text-white 2xl:px-4 2xl:text-[13px]", active && "border-[var(--chrismed-amber)] text-white")}>
@@ -121,12 +139,10 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
               <span className="chrismed-serif mt-1 block text-[1.35rem] text-[var(--chrismed-forest-deep)]">{group.labels[lang]}</span>
             </div>
             <div className="grid gap-px bg-[#e4dfd3] sm:grid-cols-2">
-              {group.children.map((leaf) => (
-                <Link key={`${group.key}-${leaf.to}-${leaf.labels.pt}`} to={leaf.to} search={leaf.setLang ? ((prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never) : undefined} role="menuitem" onClick={() => setOpen(false)} className="group bg-white px-6 py-5 transition-colors hover:bg-[#f7f4ec]">
-                  <strong className="block text-[13px] font-semibold text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]">{leaf.labels[lang]}</strong>
-                  {leaf.desc && <span className="mt-2 block text-[12px] leading-[1.55] text-[var(--chrismed-graphite)]">{leaf.desc[lang]}</span>}
-                  <span className="mt-3 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--chrismed-forest)] opacity-0 transition-opacity group-hover:opacity-100">Acessar →</span>
-                </Link>
+              {group.children.map((leaf) => leaf.native ? (
+                <a key={`${group.key}-${leaf.to}-${leaf.labels.pt}`} href={leaf.to} role="menuitem" onClick={() => setOpen(false)} className={linkClass}>{linkContent(leaf)}</a>
+              ) : (
+                <Link key={`${group.key}-${leaf.to}-${leaf.labels.pt}`} to={leaf.to} search={leaf.setLang ? ((prev: Record<string, unknown>) => ({ ...prev, lang: leaf.setLang }) as never) : undefined} role="menuitem" onClick={() => setOpen(false)} className={linkClass}>{linkContent(leaf)}</Link>
               ))}
             </div>
           </div>
@@ -170,10 +186,6 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
         </nav>
 
         <div className="ml-auto hidden shrink-0 items-center gap-3 border-l border-white/10 pl-5 2xl:flex">
-          <div className="flex items-center gap-1.5">
-            <a href="/auth?persona=patient&next=%2Fchrismed%2Fminha-conta" className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 px-3.5 text-[11px] font-semibold text-white/88 transition-all hover:border-white/30 hover:bg-white/7 hover:text-white 2xl:px-4 2xl:text-xs"><CircleUserRound className="h-4 w-4 text-[var(--chrismed-amber)]" aria-hidden /> Área do Paciente</a>
-            <a href="/auth?persona=professional&next=%2Fchrismed%2Fagenda%2Fprofissional" className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 px-3.5 text-[11px] font-semibold text-white/88 transition-all hover:border-white/30 hover:bg-white/7 hover:text-white 2xl:px-4 2xl:text-xs"><Stethoscope className="h-4 w-4 text-[var(--chrismed-amber)]" aria-hidden /> Área Profissional</a>
-          </div>
           <Link to="/chrismed/agendar" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--chrismed-amber)] px-5 text-[12px] font-extrabold text-[var(--chrismed-forest-deep)] shadow-[0_7px_22px_rgba(214,168,64,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(214,168,64,0.30)]"><CalendarCheck className="h-4 w-4" aria-hidden /> Agendar</Link>
           <LangSwitcher lang={lang} />
         </div>
@@ -208,7 +220,7 @@ function MobileDrawer({ lang, pathname, onClose }: { lang: Lang; pathname: strin
       <button type="button" aria-label="Fechar menu" onClick={onClose} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <aside className="absolute inset-y-0 right-0 flex h-dvh w-[min(100vw,25rem)] flex-col bg-[var(--chrismed-forest-deep)] text-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div className="rounded-lg bg-white px-3 py-2"><ChrismedWordmark variant="sm" /></div><button type="button" onClick={onClose} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 hover:bg-white/10" aria-label="Fechar menu"><X className="h-5 w-5" /></button></div>
-        <nav className="flex-1 overflow-y-auto px-5 py-3" aria-label="Menu principal">{NAV.map((item) => isGroup(item) ? <MobileSection key={item.key} group={item} lang={lang} pathname={pathname} onClose={onClose} /> : <Link key={item.to} to={item.to} onClick={onClose} className={cn("block border-b border-white/10 py-4 text-[14px] font-medium text-white/88", pathname === item.to && "text-[var(--chrismed-amber-soft)]")}>{item.labels[lang]}</Link>)}</nav>
+        <nav className="flex-1 overflow-y-auto px-5 py-3" aria-label="Menu principal">{NAV.map((item) => isGroup(item) ? (item.key === "acessos" ? null : <MobileSection key={item.key} group={item} lang={lang} pathname={pathname} onClose={onClose} />) : <Link key={item.to} to={item.to} onClick={onClose} className={cn("block border-b border-white/10 py-4 text-[14px] font-medium text-white/88", pathname === item.to && "text-[var(--chrismed-amber-soft)]")}>{item.labels[lang]}</Link>)}</nav>
         <div className="border-t border-white/10 bg-black/10 p-4">
           <div className="mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--chrismed-amber-soft)]">Áreas de acesso</div>
           <nav aria-label="Áreas de acesso CHRISMED" className="space-y-2">
