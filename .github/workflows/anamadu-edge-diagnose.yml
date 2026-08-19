@@ -13,10 +13,14 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
+    environment: production
     env:
       EXPECTED_IP: ${{ secrets.VPS_HOST }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
     steps:
-      - name: Diagnose Ana Madu public edge
+      - name: Diagnose public edge
         run: |
           set -euo pipefail
           h='anamadu.impulsionando.com.br'
@@ -28,16 +32,50 @@ jobs:
           if [ -n "${EXPECTED_IP:-}" ]; then
             origin_code="$(curl -sk --connect-timeout 5 --max-time 15 --resolve "$h:443:$EXPECTED_IP" -o /dev/null -w '%{http_code}' "https://$h" || true)"
           fi
-          direct='no'
-          if [ -n "${EXPECTED_IP:-}" ] && printf '%s\n' "$dns_raw" | grep -Fxq "$EXPECTED_IP"; then direct='yes'; fi
           echo "ANAMADU_DNS_A=${dns_raw:-NONE}"
           echo "ANAMADU_CNAME=${cname_raw:-NONE}"
           echo "ANAMADU_PUBLIC_HTTP=${public_code:-000}"
           echo "ANAMADU_PUBLIC_SERVER=${public_server:-UNKNOWN}"
           echo "ANAMADU_ORIGIN_HTTP=${origin_code:-000}"
-          echo "ANAMADU_DIRECT_TO_VPS=$direct"
-          if [ "${origin_code:-000}" = '200' ] && [ "${public_code:-000}" != '200' ]; then
-            echo '::error::PUBLIC_EDGE_MISMATCH origin=200 public!=200'
-            exit 42
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+
+      - name: Inspect VPS runtime without changes
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set +e
+          h='anamadu.impulsionando.com.br'
+          echo '=== SYSTEMD ==='
+          sudo systemctl is-active impulsionando-core || true
+          sudo systemctl status impulsionando-core --no-pager -l | tail -n 40 || true
+          echo '=== SYSTEMD DIRECT HTTP ==='
+          curl -sS -H "Host: $h" -o /tmp/anamadu-systemd-body -w 'HTTP=%{http_code}\n' --max-time 10 http://127.0.0.1:3000/ || true
+          echo '=== DOCKER PS ==='
+          sudo docker ps -a --filter name=impulsionando-core --format 'name={{.Names}} status={{.Status}} image={{.Image}} ports={{.Ports}}' || true
+          echo '=== DOCKER INSPECT NETWORKS ==='
+          sudo docker inspect impulsionando-core --format '{{json .NetworkSettings.Networks}}' || true
+          echo '=== DOCKER LABELS ==='
+          sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' || true
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
+          echo "CONTAINER_IP=$ip"
+          if [ -n "$ip" ]; then
+            echo '=== CONTAINER DIRECT HTTP ==='
+            curl -sS -H "Host: $h" -o /tmp/anamadu-container-body -w 'HTTP=%{http_code}\n' --max-time 10 "http://$ip:3000/" || true
+            curl -sS -H "Host: $h" -o /tmp/anamadu-container-health -w 'HEALTH_HTTP=%{http_code}\n' --max-time 10 "http://$ip:3000/api/anamadu/health" || true
           fi
-          [ "${public_code:-000}" = '200' ]
+          echo '=== DOCKER LOGS ==='
+          sudo docker logs --tail 120 impulsionando-core 2>&1 || true
+          echo '=== TRAEFIK NETWORKS ==='
+          sudo docker ps --format '{{.Names}}' | grep -i traefik | while read -r c; do echo "TRAEFIK_CONTAINER=$c"; sudo docker inspect "$c" --format '{{json .NetworkSettings.Networks}}'; done || true
+          echo '=== TRAEFIK LOG TAIL ==='
+          sudo docker ps --format '{{.Names}}' | grep -i traefik | head -n1 | xargs -r sudo docker logs --tail 120 2>&1 || true
+          REMOTE
