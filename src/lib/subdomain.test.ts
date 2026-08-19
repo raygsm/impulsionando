@@ -64,26 +64,28 @@ describe("canonicalTenantHostRedirect", () => {
     }
   });
 
-  it("redirects only former Colors aliases to the canonical Colors Saúde subdomain", () => {
+  it("keeps the apex /colors fallback on impulsionando.com.br", () => {
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "impulsionando.com.br", pathname: "/colors" }))
+      .toBeNull();
+    expect(canonicalTenantHostRedirect({ ...base, hostname: "impulsionando.com.br", pathname: "/colors/agenda" }))
+      .toBeNull();
+  });
+
+  it("does not re-enable former Colors aliases as redirects", () => {
     for (const hostname of [
       "colors.impulsionando.com.br",
       "colors-saude.impulsionando.com.br",
       "colors.impulsionando.lovable.app",
       "colorsaude.lovable.app",
+      "grupocolors.com.br",
     ]) {
-      expect(canonicalTenantHostRedirect({ ...base, hostname }))
-        .toBe(`https://${COLORS}/`);
+      expect(canonicalTenantHostRedirect({ ...base, hostname })).toBeNull();
     }
-  });
-
-  it("redirects /colors from the Impulsionando apex to the canonical Colors Saúde subdomain", () => {
-    expect(canonicalTenantHostRedirect({ ...base, hostname: "impulsionando.com.br", pathname: "/colors/agenda" }))
-      .toBe(`https://${COLORS}/agenda`);
   });
 });
 
 describe("Colors clean public path routing", () => {
-  it("maps the Colors root on the sole canonical host to its internal namespace", () => {
+  it("maps the Colors root on the canonical host to its internal namespace", () => {
     expect(toColorsInternalPathname(COLORS, "/")).toBe("/colors");
   });
 
@@ -107,28 +109,18 @@ describe("Colors clean public path routing", () => {
     expect(toColorsInternalPathname(COLORS, "/assets/app.js")).toBe("/assets/app.js");
     expect(toColorsInternalPathname(COLORS, "/robots.txt")).toBe("/robots.txt");
   });
-
-  it("does not treat former Colors aliases as active canonical hosts", () => {
-    expect(toColorsInternalPathname("colors.impulsionando.com.br", "/agenda")).toBe("/agenda");
-    expect(toColorsInternalPathname("colors-saude.impulsionando.com.br", "/agenda")).toBe("/agenda");
-  });
 });
 
 describe("deprecatedSubdomainRedirect", () => {
-  it("redirects former Colors hosts to the canonical Colors Saúde subdomain", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors.impulsionando.com.br" }))
-      .toBe(`https://${COLORS}/`);
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors-saude.impulsionando.com.br" }))
-      .toBe(`https://${COLORS}/`);
-  });
-
-  it("removes the internal /colors namespace from former hosts", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: "colors.impulsionando.com.br", pathname: "/colors/super-green-black" }))
-      .toBe(`https://${COLORS}/super-green-black`);
-  });
-
-  it("returns null for the canonical Colors Saúde subdomain", () => {
-    expect(deprecatedSubdomainRedirect({ ...base, hostname: COLORS })).toBeNull();
+  it("is fully disabled", () => {
+    for (const hostname of [
+      "colors.impulsionando.com.br",
+      "colors-saude.impulsionando.com.br",
+      COLORS,
+      "grupocolors.com.br",
+    ]) {
+      expect(deprecatedSubdomainRedirect({ ...base, hostname })).toBeNull();
+    }
   });
 });
 
@@ -158,10 +150,6 @@ describe("WMP clean public path routing", () => {
     expect(wmpHostLockTarget(WMP, "/dashboard")).toBeNull();
     expect(wmpHostLockTarget(WMP, "/wmp/djs")).toBeNull();
   });
-
-  it("does not rewrite Colors Saúde", () => {
-    expect(toWmpInternalPathname(COLORS, "/djs")).toBe("/djs");
-  });
 });
 
 describe("tenant landing resolution", () => {
@@ -169,12 +157,16 @@ describe("tenant landing resolution", () => {
     expect(tenantLandingTargetForHost("chrismed.impulsionando.com.br")).toBe("/chrismed");
   });
 
-  it("routes Colors Saúde only from its canonical subdomain", () => {
+  it("routes Colors Saúde from its canonical subdomain", () => {
     expect(tenantLandingTargetForHost(COLORS)).toBe("/colors");
   });
 
   it("routes WMP to its dedicated landing", () => {
     expect(tenantLandingTargetForHost(WMP)).toBe("/wmp");
+  });
+
+  it("routes CSI to its dedicated landing", () => {
+    expect(tenantLandingTargetForHost("csi.impulsionando.com.br")).toBe("/csi");
   });
 
   it("uses the storefront for a tenant without a dedicated landing", () => {
