@@ -1,0 +1,121 @@
+name: Go-live infrastructure proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/go-live-infra-proof.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            test -n "${!v}" || { echo "missing $v"; exit 1; }
+          done
+          ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ip" = '187.77.232.52'
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Collect VPS and n8n proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' >/tmp/vps-proof.txt
+          set -euo pipefail
+          echo "ssh=ok"
+          echo "host_ip=$(hostname -I | awk '{print $1}')"
+          if sudo docker inspect n8n-umlg-n8n-1 >/dev/null 2>&1; then
+            echo "n8n_container=present"
+            echo "n8n_state=$(sudo docker inspect n8n-umlg-n8n-1 --format '{{.State.Status}}')"
+            if sudo docker exec n8n-umlg-n8n-1 node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then echo "n8n_health=ok"; else echo "n8n_health=fail"; fi
+          else
+            echo "n8n_container=missing"
+          fi
+          if sudo test -f /etc/impulsionando-core.env; then echo "core_env=present"; else echo "core_env=missing"; fi
+          if sudo test -f /etc/impulsionando-security.env; then echo "security_env=present"; else echo "security_env=missing"; fi
+          if sudo docker inspect impulsionando-core-multitenant >/dev/null 2>&1; then
+            echo "multitenant_container=present"
+            echo "multitenant_state=$(sudo docker inspect impulsionando-core-multitenant --format '{{.State.Status}}')"
+          else
+            echo "multitenant_container=missing"
+          fi
+          REMOTE
+          cat /tmp/vps-proof.txt
+
+      - name: Collect Core registry proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/n8n_workflow_registry?select=status,n8n_workflow_id" -o /tmp/n8n.json
+          jq '{total:length,active_bound:map(select(.status=="ACTIVE" and .n8n_workflow_id!=null))|length,ready_unbound:map(select(.status=="READY" and .n8n_workflow_id==null))|length}' /tmp/n8n.json >/tmp/n8n-summary.json
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=not.is.null&subdomain=neq.impulsionando&select=subdomain,root_domain,dns_status,ssl_status" -o /tmp/domains.json
+          jq '{total:length,active_issued:map(select(.dns_status=="active" and .ssl_status=="issued"))|length,pending:map(select(.dns_status!="active" or .ssl_status!="issued"))|length}' /tmp/domains.json >/tmp/domain-summary.json
+
+      - name: Validate Cloudflare access and current records
+        shell: bash
+        run: |
+          set -euo pipefail
+          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$zone" -o /tmp/zone.json
+          jq -e '.success==true' /tmp/zone.json >/dev/null
+          jq -r '.[] | select(.subdomain!=null) | (.subdomain+"."+(.root_domain//"impulsionando.com.br"))' /tmp/domains.json >/tmp/domain-list.txt
+          ok=0; missing=0
+          while read -r d; do
+            [ -n "$d" ] || continue
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$d&per_page=100" -o /tmp/one.json
+            if jq -e '.result | any(.type=="A" and .content=="187.77.232.52")' /tmp/one.json >/dev/null; then ok=$((ok+1)); else missing=$((missing+1)); fi
+          done </tmp/domain-list.txt
+          jq -n --argjson ok "$ok" --argjson missing "$missing" '{records_to_187:$ok,records_missing_or_wrong:$missing}' >/tmp/cloudflare-summary.json
+
+      - name: Write proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          jq -n \
+            --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --rawfile vps /tmp/vps-proof.txt \
+            --slurpfile n8n /tmp/n8n-summary.json \
+            --slurpfile domains /tmp/domain-summary.json \
+            --slurpfile cf /tmp/cloudflare-summary.json \
+            '{generated_at_utc:$generated_at_utc,vps_text:$vps,n8n:$n8n[0],domains:$domains[0],cloudflare:$cf[0]}' > docs/ops/go-live-infra-proof.json
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/go-live-infra-proof.json
+          git commit -m 'chore(go-live): record infrastructure proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
