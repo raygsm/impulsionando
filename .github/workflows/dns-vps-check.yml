@@ -1,13 +1,5 @@
 name: DNS/HTTPS publication check
 
-# Confirma a cada 6h (e em cada push em main) a disponibilidade publica dos
-# principais dominios do ecossistema. Hosts protegidos por Cloudflare/CDN nao
-# devem falhar apenas porque a origem bloqueia acesso direto por IP/SNI.
-#
-# A origem VPS e testada como diagnostico adicional quando VPS_HOST existe.
-# Se o DNS publico aponta diretamente para a origem, a falha de origem e fatal.
-# Se o host esta proxied, a origem direta e apenas informativa.
-
 on:
   schedule:
     - cron: "0 */6 * * *"
@@ -33,6 +25,7 @@ jobs:
             "colorssaude.impulsionando.com.br"
             "marocas.impulsionando.com.br"
             "riomed.impulsionando.com.br"
+            "it.impulsionando.com.br"
           )
 
           fail=0
