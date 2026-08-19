@@ -8,9 +8,9 @@ import { Card } from "@/components/ui/card";
 export const Route = createFileRoute("/seguranca")({
   head: () => ({
     meta: [
-      { title: "Segurança — Dados Seguros e CP | Impulsionando Tecnologia" },
+      { title: "Segurança e Privacidade — Dados Seguros e CP | Impulsionando Tecnologia" },
       { name: "description", content: "Conheça os serviços de segurança e privacidade da Impulsionando: Dados Seguros para credenciais e CP — Chat Privado para conversas e redes controladas." },
-      { property: "og:title", content: "Segurança Impulsionando — seus dados e suas conversas sob controle" },
+      { property: "og:title", content: "Segurança e Privacidade Impulsionando — seus dados e suas conversas sob controle" },
       { property: "og:description", content: "Dados Seguros e CP — Chat Privado: produtos independentes para proteger credenciais, informações sensíveis e comunicações." },
       { property: "og:url", content: "https://impulsionando.com.br/seguranca" },
     ],
@@ -34,13 +34,13 @@ function SecurityPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,hsl(var(--primary)/.15),transparent_34%),radial-gradient(circle_at_82%_18%,hsl(var(--primary)/.08),transparent_30%)]" />
           <div className="relative mx-auto max-w-6xl px-6 py-20 md:py-28">
             <div className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Segurança Impulsionando
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Segurança e Privacidade Impulsionando
             </div>
             <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-6xl">
-              Seus dados. Suas conversas. <span className="text-primary">Sob o seu controle.</span>
+              Segurança e Privacidade. <span className="text-primary">Seus dados e suas conversas sob o seu controle.</span>
             </h1>
             <p className="mt-6 max-w-4xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-              A área Segurança reúne produtos independentes do Ecossistema Impulsionando criados para proteger informações sensíveis e comunicações privadas sem transformar segurança em complicação.
+              A área Segurança e Privacidade reúne produtos independentes do Ecossistema Impulsionando criados para proteger informações sensíveis e comunicações privadas sem transformar segurança em complicação.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
               Você pode contratar cada serviço separadamente. Quando usados juntos, eles formam uma camada adicional de proteção para credenciais, acessos, informações privadas e relações autorizadas.
@@ -95,7 +95,7 @@ function SecurityPage() {
         <section className="border-y bg-muted/25">
           <div className="mx-auto max-w-6xl px-6 py-16">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[.2em] text-primary">Uma visão única de segurança</p>
+              <p className="text-xs font-bold uppercase tracking-[.2em] text-primary">Uma visão única de segurança e privacidade</p>
               <h2 className="mt-3 text-3xl font-semibold">Proteja o que você guarda e também o que você conversa.</h2>
               <p className="mt-4 leading-relaxed text-muted-foreground">Dados Seguros e CP atacam problemas diferentes. O primeiro protege segredos e credenciais. O segundo protege a forma como pessoas autorizadas se comunicam. Nenhum deles exige a contratação dos sistemas de gestão da Impulsionando.</p>
             </div>
@@ -107,7 +107,7 @@ function SecurityPage() {
 
         <section className="mx-auto max-w-5xl px-6 py-16 text-center">
           <UsersRound className="mx-auto h-9 w-9 text-primary" />
-          <h2 className="mt-4 text-3xl font-semibold">Segurança não precisa ser um produto complicado.</h2>
+          <h2 className="mt-4 text-3xl font-semibold">Segurança e privacidade não precisam ser complicadas.</h2>
           <p className="mx-auto mt-4 max-w-3xl text-muted-foreground">Escolha a proteção que faz sentido hoje. Você pode começar pelo cofre de dados, pelo chat privado ou usar os dois de forma complementar.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg"><Link to="/dados-seguros">Dados Seguros</Link></Button>
