@@ -1,3 +1,4 @@
+# Forced reconciliation trigger: 2026-08-19T20:51:00-03:00
 name: n8n universal READY provisioner v3
 
 on:
@@ -83,8 +84,6 @@ jobs:
               ],connections:{"Core Event Webhook":{main:[[{node:"Verify signature in Core",type:"main",index:0}]]},"Verify signature in Core":{main:[[{node:"Normalize verification result",type:"main",index:0}]]},"Normalize verification result":{main:[[{node:"Respond Security Result",type:"main",index:0}]]}},settings:{executionOrder:"v1"}}' >"$file"
             sudo docker cp "$file" "$C:$file"
             sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
-            # n8n 2.29 publish:workflow spikes memory and was killed with rc=137.
-            # update:workflow activates the current imported version; one restart below applies all changes.
             sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
             printf '%s\t%s\t%s\t%s\t%s\n' "$slug" "$version" "$tenant" "$id" "$path" >>/tmp/v3-map.tsv
           done < <(jq -r '.[]|[.workflow_slug,(.version|tostring),(.config.tenant_slug//"impulsionando"),(.description//.workflow_slug)]|@tsv' /tmp/ready-v3.json)
