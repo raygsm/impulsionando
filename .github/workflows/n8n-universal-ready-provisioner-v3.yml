@@ -1,0 +1,145 @@
+name: n8n universal READY provisioner v3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/n8n-universal-ready-provisioner-v3.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: n8n-universal-provisioner-v3
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure definitive VPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ip" = '187.77.232.52'
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Import and activate every READY workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          CORE_VERIFY='https://impulsionando.com.br/api/public/hooks/n8n-verify'
+          CORE_ENV=/etc/impulsionando-core.env
+          SECURITY_ENV=/etc/impulsionando-security.env
+          SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
+          SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
+          SIGNING_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+          test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY" && test -n "$SIGNING_SECRET"
+          sudo docker inspect "$C" --format '{{.State.Status}}' | grep -q running
+
+          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=workflow_slug,version,description,config&order=workflow_slug.asc" \
+            -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" >/tmp/ready-v3.json
+          total="$(jq 'length' /tmp/ready-v3.json)"
+          echo "READY_TO_PROVISION=$total"
+          [ "$total" -gt 0 ] || exit 0
+
+          slugify(){ printf '%s' "$1" | tr '[:upper:]._' '[:lower:]---' | tr -cd 'a-z0-9-'; }
+          make_id(){ printf 'iu%s' "$(printf '%s' "$1" | sha256sum | cut -c1-20)"; }
+          sign_payload(){ printf '%s' "$1" | openssl dgst -sha256 -hmac "$SIGNING_SECRET" -hex | awk '{print $2}'; }
+          : >/tmp/v3-map.tsv
+
+          while IFS=$'\t' read -r slug version tenant title; do
+            [ -n "$slug" ] || continue
+            [ -n "$tenant" ] || tenant=impulsionando
+            id="$(make_id "${slug}:v${version}")"
+            path="core-$(slugify "$slug")-v${version}"
+            file="/tmp/${id}-v3.json"
+            jq -n --arg id "$id" --arg name "Impulsionando | ${title:-$slug}" --arg path "$path" --arg hook "${id}-hook" --arg verify "$CORE_VERIFY" --arg slug "$slug" --arg tenant "$tenant" \
+              '{id:$id,name:$name,active:false,nodes:[
+                {parameters:{httpMethod:"POST",path:$path,responseMode:"responseNode",options:{}},id:($id+"-webhook"),name:"Core Event Webhook",type:"n8n-nodes-base.webhook",typeVersion:2,position:[0,0],webhookId:$hook},
+                {parameters:{method:"POST",url:$verify,sendHeaders:true,headerParameters:{parameters:[{name:"x-impulsionando-signature",value:"={{ $json.headers?.[\"x-impulsionando-signature\"] || \"\" }}"},{name:"Content-Type",value:"application/json"}]},sendBody:true,contentType:"raw",rawContentType:"application/json",body:"={{ JSON.stringify($json.body) }}",options:{response:{response:{fullResponse:true,neverError:true,responseFormat:"json"}},timeout:15000}},id:($id+"-verify"),name:"Verify signature in Core",type:"n8n-nodes-base.httpRequest",typeVersion:4.2,position:[260,0]},
+                {parameters:{jsCode:("const r=$input.first().json;const b=r.body||{};const ok=Number(r.statusCode)===200&&b.authorized===true&&b.ok===true&&b.tenant_slug===\""+$tenant+"\";return [{json:{authorized:ok,statusCode:Number(r.statusCode)||0,error:ok?null:(b.error||\"verification_failed\"),payload:ok?(b.payload||null):null}}];")},id:($id+"-normalize"),name:"Normalize verification result",type:"n8n-nodes-base.code",typeVersion:2,position:[520,0]},
+                {parameters:{respondWith:"json",responseBody:("={{ { ok: $json.authorized === true, workflow: \""+$slug+"\", error: $json.authorized === true ? null : $json.error, event_code: $json.payload?.event_code || null, correlation_id: $json.payload?.correlation_id || null } }}"),options:{responseCode:"={{ $json.authorized === true ? 200 : 401 }}"}},id:($id+"-respond"),name:"Respond Security Result",type:"n8n-nodes-base.respondToWebhook",typeVersion:1.4,position:[780,0]}
+              ],connections:{"Core Event Webhook":{main:[[{node:"Verify signature in Core",type:"main",index:0}]]},"Verify signature in Core":{main:[[{node:"Normalize verification result",type:"main",index:0}]]},"Normalize verification result":{main:[[{node:"Respond Security Result",type:"main",index:0}]]}},settings:{executionOrder:"v1"}}' >"$file"
+            sudo docker cp "$file" "$C:$file"
+            sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
+            # n8n 2.29 publish:workflow spikes memory and was killed with rc=137.
+            # update:workflow activates the current imported version; one restart below applies all changes.
+            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
+            printf '%s\t%s\t%s\t%s\t%s\n' "$slug" "$version" "$tenant" "$id" "$path" >>/tmp/v3-map.tsv
+          done < <(jq -r '.[]|[.workflow_slug,(.version|tostring),(.config.tenant_slug//"impulsionando"),(.description//.workflow_slug)]|@tsv' /tmp/ready-v3.json)
+
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 60); do
+            sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
+            [ "$i" -lt 60 ] || exit 50
+            sleep 2
+          done
+
+          failures=0
+          while IFS=$'\t' read -r slug version tenant id path; do
+            payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"unsigned-$id\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            unsigned="$(curl -sS -o /tmp/${id}-u -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -d "$payload" || true)"
+            if [ "$unsigned" != 401 ]; then echo "FAIL_UNSIGNED $slug $unsigned"; failures=$((failures+1)); continue; fi
+            payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"signed-$id-$(date +%s%N)\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            sig="$(sign_payload "$payload")"
+            signed="$(curl -sS -o /tmp/${id}-s -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
+            if [ "$signed" != 200 ] || ! grep -q '"ok":true' /tmp/${id}-s; then echo "FAIL_SIGNED $slug $signed"; failures=$((failures+1)); continue; fi
+            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
+            if ! sudo docker exec -e WF_ID="$id" "$C" node - <<'NODE'
+          const fs=require('fs');const id=process.env.WF_ID;const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));const w=Array.isArray(raw)?raw[0]:raw;if(!w.active||!w.activeVersionId)process.exit(1);
+          NODE
+            then echo "FAIL_EXPORT $slug"; failures=$((failures+1)); continue; fi
+
+            curl -fsS -X PATCH "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.$slug&version=eq.$version" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -d "{\"n8n_workflow_id\":\"$id\",\"status\":\"ACTIVE\"}" >/dev/null
+
+            tenant_id="$(curl -fsS "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.$tenant&active=eq.true&deleted_at=is.null&select=id&limit=1" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq -r '.[0].id // empty')"
+            if [ -n "$tenant_id" ]; then
+              cfg="$(jq -c --arg slug "$slug" --arg runtime "$id" '.[]|select(.workflow_slug==$slug)|.config + {execution_model:"n8n_verified_ingress",verified_runtime_id:$runtime}' /tmp/ready-v3.json)"
+              body="$(jq -nc --arg tenant_id "$tenant_id" --arg key "$slug" --argjson version "$version" --arg runtime "$id" --argjson cfg "$cfg" '{tenant_id:$tenant_id,automation_key:$key,version:$version,n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
+              curl -fsS -X POST "$SUPABASE_URL/rest/v1/communication_automations?on_conflict=tenant_id,automation_key,version" \
+                -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$body" >/dev/null || true
+            fi
+            echo "VERIFIED $slug $id"
+          done </tmp/v3-map.tsv
+
+          remaining="$(curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq 'length')"
+          echo "RESULT remaining=$remaining failures=$failures"
+          [ "$remaining" -eq 0 ] && [ "$failures" -eq 0 ]
+          REMOTE
+
+      - name: Record n8n proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/n8n_workflow_registry?select=status,n8n_workflow_id" -o /tmp/final.json
+          mkdir -p docs/ops
+          jq --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{generated_at_utc:$generated_at_utc,total:length,active_bound:(map(select(.status=="ACTIVE" and .n8n_workflow_id!=null))|length),ready_unbound:(map(select(.status=="READY" and .n8n_workflow_id==null))|length),ok:((map(select(.status=="READY" and .n8n_workflow_id==null))|length)==0)}' /tmp/final.json >docs/ops/n8n-go-live-proof.json
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/n8n-go-live-proof.json
+          git commit -m 'chore(go-live): record n8n v3 proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
