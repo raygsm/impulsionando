@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import { PUBLIC_NICHES } from "@/data/public-niche-catalog";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -15,8 +16,14 @@ const NAV = [
   { to: "/planos", label: "Planos" },
 ] as const;
 
+const PUBLIC_NICHE_COUNT = PUBLIC_NICHES.length;
+
 function isActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`);
+}
+
+function navAriaLabel(item: (typeof NAV)[number]) {
+  return item.to === "/nichos" ? `${item.label} — ${PUBLIC_NICHE_COUNT} setores disponíveis` : item.label;
 }
 
 function openImpulsionito() {
@@ -40,6 +47,7 @@ export function PublicHeader() {
             <Link
               key={item.to}
               to={item.to}
+              aria-label={navAriaLabel(item)}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive(pathname, item.to)
@@ -77,6 +85,7 @@ export function PublicHeader() {
                   <Link
                     key={item.to}
                     to={item.to}
+                    aria-label={navAriaLabel(item)}
                     onClick={() => setOpen(false)}
                     className={cn(
                       "rounded-lg px-3 py-3 text-sm font-semibold transition-colors",
