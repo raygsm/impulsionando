@@ -42,14 +42,14 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 const CSP_DIRECTIVES = [
   "default-src 'self' https: data: blob:",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://*.lovable.app https://*.lovable.dev https://sdk.mercadopago.com https://http2.mlstatic.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://sdk.mercadopago.com https://http2.mlstatic.com",
   "style-src 'self' 'unsafe-inline' https: data:",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https:",
   "connect-src 'self' https: wss: data: blob:",
   "media-src 'self' https: data: blob:",
   "frame-src 'self' https://meet.jit.si https:",
-  "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev",
+  "frame-ancestors 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self' https:",
@@ -138,9 +138,6 @@ export default {
         return applySecurityHeaders(wmpDomainLockResponse(request));
       }
 
-      // Absolute WMP rule: never canonicalize, bootstrap, meta-refresh, or issue
-      // any HTTP redirect. Clean WMP URLs are mapped only through an internal
-      // request rewrite, so the browser location remains untouched.
       if (!isWmpHost) {
         const canonicalTenantUrl = canonicalTenantHostRedirect({
           hostname: originalUrl.hostname,
