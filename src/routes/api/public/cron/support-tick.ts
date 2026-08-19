@@ -45,7 +45,7 @@ export const Route = createFileRoute('/api/public/cron/support-tick')({
         }
 
         // 3) IA — categorização de até 20 tickets sem ai_topic
-        const key = process.env.LOVABLE_API_KEY
+        const key = process.env.OPENAI_API_KEY
         let aiProcessed = 0
         if (key) {
           const { data: pending } = await supabaseAdmin
@@ -58,9 +58,12 @@ export const Route = createFileRoute('/api/public/cron/support-tick')({
 
           if (pending?.length) {
             const { generateText } = await import('ai')
-            const { createLovableAiGatewayProvider } = await import('@/lib/ai-gateway.server')
-            const gateway = createLovableAiGatewayProvider(key)
-            const model = gateway('google/gemini-2.5-flash')
+            const { resolveProvider } = await import('@/lib/impulsionito/providers.server')
+            const { model } = resolveProvider({
+              llm: { provider: 'openai', model: 'gpt-4o-mini' },
+              allowFallback: false,
+              openaiApiKey: key,
+            })
 
             for (const t of pending) {
               try {
