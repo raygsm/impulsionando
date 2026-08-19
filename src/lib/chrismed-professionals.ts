@@ -14,7 +14,8 @@ export type HealthSpecialty = {
 };
 
 export const CHRISMED_COMPANY_ID = "642096b5-a9ff-4521-a82a-c004f6d2e2d2";
-export const CHRISMED_ONBOARDING_PATH = "/chrismed/profissional/onboarding";
+export const CHRISMED_ONBOARDING_PATH = "/chrismed/profissional/cadastro";
+export const CHRISMED_APPROVED_ONBOARDING_PATH = "/chrismed/profissional/onboarding";
 
 /**
  * Fallback de disponibilidade. A fonte de verdade é health_professions no
