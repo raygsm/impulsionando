@@ -23,10 +23,7 @@ import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcie
 import { MedicitoConcierge } from "@/components/riomed/MedicitoConcierge";
 import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
-import {
-  canonicalTenantHostRedirect,
-  deprecatedSubdomainRedirect,
-} from "@/lib/subdomain";
+import { canonicalTenantHostRedirect } from "@/lib/subdomain";
 import { EnvHealthBanner } from "@/components/app/EnvHealthBanner";
 import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
@@ -35,12 +32,12 @@ import { openImpulsionito } from "@/lib/impulsionito-tracking";
 import { SkipLink } from "@/components/impulsionando/SkipLink";
 
 const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
+const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 const CLIENT_AGENT_HOSTS = new Set([
   "anamadu.impulsionando.com.br",
   "chrismed.impulsionando.com.br",
-  "colors.impulsionando.com.br",
-  "colorssaude.com.br",
-  "wmp.impulsionando.com.br",
+  COLORS_CANONICAL_HOST,
+  WMP_CANONICAL_HOST,
   "riomed.impulsionando.com.br",
   "marocas.impulsionando.com.br",
 ]);
@@ -48,19 +45,10 @@ const CLIENT_AGENT_HOSTS = new Set([
 function TenantSubdomainRedirect() {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hostname.toLowerCase() === WMP_CANONICAL_HOST) return;
+    const host = window.location.hostname.toLowerCase();
+    if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return;
     const canonical = canonicalTenantHostRedirect(window.location);
-    if (canonical) { window.location.replace(canonical); return; }
-    const legacy = deprecatedSubdomainRedirect(window.location);
-    if (legacy) {
-      const from_host = window.location.hostname;
-      let to_host = from_host;
-      try { to_host = new URL(legacy).hostname; } catch { /* noop */ }
-      import("@/lib/painel-audit").then(({ logLegacySubdomainHit }) => {
-        logLegacySubdomainHit({ from_host, to_host, path: window.location.pathname, search: window.location.search, hash: window.location.hash });
-      }).catch(() => { /* noop */ });
-      window.location.replace(legacy);
-    }
+    if (canonical) window.location.replace(canonical);
   }, []);
   return null;
 }
