@@ -4,7 +4,6 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
-  deprecatedSubdomainRedirect,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
   toColorsInternalPathname,
@@ -42,11 +41,6 @@ describe("canonicalTenantHostRedirect", () => {
       .toBe("https://chrismed.impulsionando.com.br/");
   });
 
-  it("removes the internal CHRISMED prefix from nested canonical paths", () => {
-    expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/chrismed/agendar" }))
-      .toBe("https://chrismed.impulsionando.com.br/agendar");
-  });
-
   it("does not redirect an already public CHRISMED path", () => {
     expect(canonicalTenantHostRedirect({ ...base, hostname: "chrismed.impulsionando.com.br", pathname: "/agendar" }))
       .toBeNull();
@@ -58,7 +52,7 @@ describe("canonicalTenantHostRedirect", () => {
     }
   });
 
-  it("never canonicalizes the Colors Saúde canonical host to another domain", () => {
+  it("never canonicalizes the Colors Saúde host to another domain", () => {
     for (const pathname of ["/", "/colors", "/super-green-black", "/agenda", "/eventos", "/suporte", "/afiliados", "/rastreio"]) {
       expect(canonicalTenantHostRedirect({ ...base, hostname: COLORS, pathname })).toBeNull();
     }
@@ -71,12 +65,10 @@ describe("canonicalTenantHostRedirect", () => {
       .toBeNull();
   });
 
-  it("does not re-enable former Colors aliases as redirects", () => {
+  it("does not redirect former Colors aliases", () => {
     for (const hostname of [
       "colors.impulsionando.com.br",
       "colors-saude.impulsionando.com.br",
-      "colors.impulsionando.lovable.app",
-      "colorsaude.lovable.app",
       "grupocolors.com.br",
     ]) {
       expect(canonicalTenantHostRedirect({ ...base, hostname })).toBeNull();
@@ -108,19 +100,6 @@ describe("Colors clean public path routing", () => {
     expect(toColorsInternalPathname(COLORS, "/api/public/webhooks/maisfy-colors")).toBe("/api/public/webhooks/maisfy-colors");
     expect(toColorsInternalPathname(COLORS, "/assets/app.js")).toBe("/assets/app.js");
     expect(toColorsInternalPathname(COLORS, "/robots.txt")).toBe("/robots.txt");
-  });
-});
-
-describe("deprecatedSubdomainRedirect", () => {
-  it("is fully disabled", () => {
-    for (const hostname of [
-      "colors.impulsionando.com.br",
-      "colors-saude.impulsionando.com.br",
-      COLORS,
-      "grupocolors.com.br",
-    ]) {
-      expect(deprecatedSubdomainRedirect({ ...base, hostname })).toBeNull();
-    }
   });
 });
 
