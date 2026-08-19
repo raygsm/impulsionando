@@ -1,14 +1,13 @@
 /**
  * Camada de Provedores LLM — server-only.
  *
- * Cada cliente pode exigir provedor e credencial estritos sem alterar o
- * comportamento dos demais clientes. Quando allowFallback=false, somente o
- * provedor explicitamente solicitado é considerado.
+ * O ecossistema Impulsionando usa OpenAI como provedor canônico de produção.
+ * Configurações históricas de outros provedores permanecem tipadas apenas para
+ * compatibilidade de dados legados, mas não são resolvidas em runtime.
  */
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
 import type { LlmConfig, LlmProviderId } from "./types";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const DEFAULT_MODEL_BY_PROVIDER: Record<LlmProviderId, string> = {
   openai: "gpt-4o-mini",
@@ -32,28 +31,21 @@ function tryProvider(
   requestedModel: string | undefined,
   credentials: ProviderCredentialOverrides = {},
 ): ResolvedProvider | null {
-  const modelId = requestedModel && requestedModel.trim() ? requestedModel.trim() : DEFAULT_MODEL_BY_PROVIDER[id];
+  if (id !== "openai") return null;
 
-  if (id === "openai") {
-    const key = credentials.openaiApiKey?.trim() || process.env.OPENAI_API_KEY?.trim();
-    if (!key) return null;
-    const provider = createOpenAICompatible({
-      name: "openai",
-      baseURL: "https://api.openai.com/v1",
-      headers: { Authorization: `Bearer ${key}` },
-    });
-    return { provider: "openai", model: provider(modelId), modelId };
-  }
+  const modelId = requestedModel && requestedModel.trim()
+    ? requestedModel.trim()
+    : DEFAULT_MODEL_BY_PROVIDER.openai;
+  const key = credentials.openaiApiKey?.trim() || process.env.OPENAI_API_KEY?.trim();
+  if (!key) return null;
 
-  if (id === "gemini") {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return null;
-    const provider = createLovableAiGatewayProvider(key);
-    const finalId = modelId.startsWith("google/") ? modelId : DEFAULT_MODEL_BY_PROVIDER.gemini;
-    return { provider: "gemini", model: provider(finalId), modelId: finalId };
-  }
+  const provider = createOpenAICompatible({
+    name: "openai",
+    baseURL: "https://api.openai.com/v1",
+    headers: { Authorization: `Bearer ${key}` },
+  });
 
-  return null;
+  return { provider: "openai", model: provider(modelId), modelId };
 }
 
 export interface ResolveOptions {
@@ -75,19 +67,11 @@ export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
     throw new Error(`llm_provider_unavailable:${requested}`);
   }
 
-  const fallback: LlmProviderId[] = opts.llm?.fallback ?? ["gemini"];
-  const chain: LlmProviderId[] = [];
-  const seen = new Set<LlmProviderId>();
-  for (const id of [requested, ...fallback, "openai", "gemini"] as LlmProviderId[]) {
-    if (seen.has(id)) continue;
-    seen.add(id);
-    chain.push(id);
-  }
+  const requestedResolved = tryProvider(requested, model, credentials);
+  if (requestedResolved) return requestedResolved;
 
-  for (const id of chain) {
-    const resolved = tryProvider(id, id === requested ? model : undefined, credentials);
-    if (resolved) return resolved;
-  }
+  const openaiResolved = tryProvider("openai", requested === "openai" ? model : undefined, credentials);
+  if (openaiResolved) return openaiResolved;
 
   throw new Error("no_llm_provider_available");
 }
@@ -95,7 +79,7 @@ export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
 export function detectAvailableProviders(): Record<LlmProviderId, boolean> {
   return {
     openai: !!process.env.OPENAI_API_KEY,
-    gemini: !!process.env.LOVABLE_API_KEY,
+    gemini: false,
     claude: false,
     ollama: false,
   };
