@@ -24,7 +24,6 @@ export interface Area {
   label: string;
   description: string;
   icon: LucideIcon;
-  /** Cor semântica (token). Ex.: 'primary', 'accent'. */
   accent: "primary" | "accent" | "secondary";
   links: AreaLink[];
 }
@@ -45,7 +44,6 @@ export const NAVIGATION_AREAS: Area[] = [
       { label: "Atividades Recentes", to: "/notifications" },
       { label: "Alertas", to: "/admin/action-center" },
     ],
-
   },
   {
     key: "clientes",
@@ -109,6 +107,7 @@ export const NAVIGATION_AREAS: Area[] = [
       { label: "WhatsApp", to: "/admin/comunicacao" },
       { label: "Impulsionito", to: "/admin/comunicacao" },
       { label: "Central de Comunicação", to: "/admin/comunicacao" },
+      { label: "Contatos em Massa / E-mail", to: "/admin/comunicacoes/email-massa" },
     ],
   },
   {
