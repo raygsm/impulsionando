@@ -3,8 +3,9 @@ name: Ana Madu Full Catalog Import
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
-      - "scripts/anamadu_catalog_import_v2.py"
+      - "scripts/anamadu_catalog_import.py"
       - ".github/workflows/anamadu-full-catalog-import.yml"
 
 concurrency:
@@ -14,7 +15,8 @@ concurrency:
 jobs:
   import-catalog:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    environment: production
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +34,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          set -euo pipefail
           test -n "$SUPABASE_URL"
           test -n "$SUPABASE_SERVICE_ROLE_KEY"
 
@@ -40,7 +43,31 @@ jobs:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANAMADU_STORAGE_BUCKET: anamadu-products
-        run: python scripts/anamadu_catalog_import_v2.py
+        run: python scripts/anamadu_catalog_import.py
+
+      - name: Verify complete migration
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, requests
+          base=os.environ['SUPABASE_URL'].rstrip('/')
+          key=os.environ['SUPABASE_SERVICE_ROLE_KEY']
+          h={'apikey':key,'Authorization':f'Bearer {key}'}
+          tenants=requests.get(base+'/rest/v1/communication_tenants',headers=h,params={'slug':'eq.anamadu','active':'eq.true','select':'company_id','limit':'1'},timeout=30)
+          tenants.raise_for_status(); rows=tenants.json(); assert rows, 'Ana Madu tenant missing'
+          cid=rows[0]['company_id']
+          products=requests.get(base+'/rest/v1/core_products',headers={**h,'Prefer':'count=exact'},params={'company_id':f'eq.{cid}','brand':'eq.Ana Madú','active':'eq.true','select':'id,name,description,image_url,metadata'},timeout=60)
+          products.raise_for_status(); data=products.json()
+          full=[p for p in data if str((p.get('metadata') or {}).get('migration_mode','')).startswith('full_crawl')]
+          media=[p for p in full if '/storage/v1/object/public/anamadu-products/' in str(p.get('image_url') or '')]
+          described=[p for p in full if str(p.get('description') or '').strip()]
+          print({'total':len(data),'full_crawl':len(full),'internal_media':len(media),'described':len(described)})
+          assert len(full) >= 20, 'full crawl did not persist enough products'
+          assert len(media) >= 1, 'no product media was internalized'
+          PY
 
       - name: Record import trigger
-        run: echo "ANA_MADU_FULL_IMPORT_V2_TRIGGERED=${GITHUB_SHA}"
+        run: echo "ANA_MADU_FULL_IMPORT_COMPLETED=${GITHUB_SHA}"
