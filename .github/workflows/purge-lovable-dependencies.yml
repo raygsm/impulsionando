@@ -1,4 +1,4 @@
-# Forced definitive purge trigger: 2026-08-19T17:38:00-03:00
+# Forced definitive purge trigger: 2026-08-19T20:36:00-03:00
 name: Purge Lovable dependencies
 
 on:
@@ -46,11 +46,11 @@ jobs:
         run: |
           set -euo pipefail
           if grep -Rni --include='package.json' --include='package-lock.json' '@lovable.dev' .; then
-            echo '::error::Lovable package reference remains in npm manifests'
+            echo '::error::Legacy package reference remains in npm manifests'
             exit 1
           fi
           if grep -Rni --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' '@lovable.dev' src vite.config.ts server.ts 2>/dev/null; then
-            echo '::error::Lovable runtime import remains in source'
+            echo '::error::Legacy runtime import remains in source'
             exit 1
           fi
 
@@ -78,6 +78,6 @@ jobs:
             echo 'No dependency changes required.'
             exit 0
           fi
-          git commit -m 'chore(core): remove all Lovable package dependencies and retire bun lock'
+          git commit -m 'chore(core): remove all legacy builder package dependencies and retire bun lock'
           git pull --rebase origin main
           git push origin HEAD:main
