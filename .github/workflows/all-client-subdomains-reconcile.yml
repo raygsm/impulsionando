@@ -46,7 +46,7 @@ jobs:
       - name: Validate tenant subdomains at Traefik origin
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
           ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$domains' bash -s" <<'REMOTE'
           set -euo pipefail
           for domain in $DOMAINS; do
@@ -69,7 +69,7 @@ jobs:
       - name: Reconcile Cloudflare DNS to validated VPS
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
           for domain in $domains; do
             curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
               "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
@@ -91,7 +91,7 @@ jobs:
       - name: Validate public HTTPS without cross-host redirects
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br'
+          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
           failed=0
           for domain in $domains; do
             code=000
