@@ -1,6 +1,8 @@
 /**
  * Detecção de subdomínio de tenant (client-side/server-side helpers).
- * Colors Saúde possui UM ÚNICO host válido: colorssaude.impulsionando.com.br.
+ * Colors Saúde possui UM ÚNICO host oficial: colorssaude.impulsionando.com.br.
+ * Enquanto DNS/SSL estiverem em reconciliação, o front também pode ser acompanhado
+ * pelo caminho interno estável no domínio principal.
  */
 
 const ROOT_DOMAINS = ["impulsionando.com.br", "impulsionando.lovable.app"];
@@ -13,6 +15,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   chrismed: "/chrismed",
   riomed: "/riomed",
   wmp: "/wmp",
+  csi: "/csi",
   anamadu: "/anamadu",
   garrido: "/garrido",
   colorssaude: "/colors",
@@ -46,12 +49,8 @@ export function canonicalTenantHostRedirect(loc: {
 
   if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return null;
 
-  const isColorsInternalPath = path === "/colors" || path.startsWith("/colors/");
-  const isImpulsionandoApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
-  if (isImpulsionandoApex && isColorsInternalPath) {
-    const publicPath = path.slice("/colors".length) || "/";
-    return `${proto}//${COLORS_CANONICAL_HOST}${publicPath}${loc.search}${loc.hash}`;
-  }
+  // Não redirecionar /colors no apex. Ele é o fallback operacional de preview
+  // quando colorssaude.impulsionando.com.br ainda estiver em reconciliação.
 
   const isChrismedPath = path === "/chrismed" || path.startsWith("/chrismed/");
   const isApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
