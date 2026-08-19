@@ -5,7 +5,8 @@ export type OmnichannelAgentKey =
   | 'colors-iris'
   | 'chrismed-oliver'
   | 'wmp-millito'
-  | 'marocas-maruquito';
+  | 'marocas-maruquito'
+  | 'anamadu-anita';
 export type OmnichannelChannel = 'web_chat' | 'whatsapp' | 'instagram' | 'facebook' | string;
 
 export type InboundMessageInput = {
