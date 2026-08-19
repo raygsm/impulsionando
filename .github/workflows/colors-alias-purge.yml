@@ -1,0 +1,94 @@
+name: Colors Alias Purge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/colors-alias-purge.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: colors-alias-purge
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CANONICAL: colorssaude.impulsionando.com.br
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Validate scope
+        run: |
+          set -euo pipefail
+          test -n "$CF_API_TOKEN"
+          test -n "$CF_ZONE_ID"
+          [ "$CANONICAL" = 'colorssaude.impulsionando.com.br' ]
+
+      - name: Remove every non-canonical Colors DNS alias
+        run: |
+          set -euo pipefail
+          aliases='colors.impulsionando.com.br colors-saude.impulsionando.com.br colorsaude.impulsionando.com.br'
+          for domain in $aliases; do
+            [ "$domain" != "$CANONICAL" ] || exit 20
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
+            jq -e '.success == true' /tmp/dns.json >/dev/null
+            jq -r '.result[].id' /tmp/dns.json | while read -r id; do
+              [ -n "$id" ] || continue
+              curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" -o /tmp/delete.json
+              jq -e '.success == true' /tmp/delete.json >/dev/null
+              echo "DELETED_DNS $domain $id"
+            done
+          done
+
+      - name: Remove Page Rules mentioning non-canonical Colors hosts
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/pagerules?status=active&per_page=100" -o /tmp/pagerules.json
+          jq -e '.success == true' /tmp/pagerules.json >/dev/null
+          jq -r '.result[] | select(((.targets|tostring)+(.actions|tostring)) | test("colors\\.impulsionando\\.com\\.br|colors-saude\\.impulsionando\\.com\\.br|colorsaude\\.impulsionando\\.com\\.br")) | .id' /tmp/pagerules.json | while read -r id; do
+            [ -n "$id" ] || continue
+            curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/pagerules/$id" -o /tmp/pr-delete.json
+            jq -e '.success == true' /tmp/pr-delete.json >/dev/null
+            echo "DELETED_PAGE_RULE $id"
+          done
+
+      - name: Remove redirect rules mentioning non-canonical Colors hosts
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets" -o /tmp/rulesets.json
+          jq -e '.success == true' /tmp/rulesets.json >/dev/null
+          jq -r '.result[].id' /tmp/rulesets.json | while read -r rsid; do
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets/$rsid" -o "/tmp/rs-$rsid.json"
+            jq -r '.result as $rs | ($rs.rules // [])[] | select(.action=="redirect") | select(((.expression // "") + ((.action_parameters // {})|tostring)) | test("colors\\.impulsionando\\.com\\.br|colors-saude\\.impulsionando\\.com\\.br|colorsaude\\.impulsionando\\.com\\.br")) | .id' "/tmp/rs-$rsid.json" | while read -r rid; do
+              [ -n "$rid" ] || continue
+              curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/rulesets/$rsid/rules/$rid" -o /tmp/rs-delete.json
+              jq -e '.success == true' /tmp/rs-delete.json >/dev/null
+              echo "DELETED_REDIRECT_RULE $rsid $rid"
+            done
+          done
+
+      - name: Assert canonical DNS remains and aliases are gone
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$CANONICAL&per_page=100" -o /tmp/canonical.json
+          jq -e '.success == true and (.result|length) > 0' /tmp/canonical.json >/dev/null
+          for domain in colors.impulsionando.com.br colors-saude.impulsionando.com.br colorsaude.impulsionando.com.br; do
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/check.json
+            jq -e '.success == true and (.result|length) == 0' /tmp/check.json >/dev/null
+          done
+          echo 'COLORS_ALIAS_PURGE=PASS'
