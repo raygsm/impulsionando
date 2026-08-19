@@ -1,15 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveProvider } from "@/lib/impulsionito/providers.server";
 import { generateText } from "ai";
 
 /**
  * Executive Briefing — narrativa diária gerada por IA para a operação
  * Impulsionando. Lê os KPIs das últimas 24h e 7d e devolve um resumo
  * estruturado em PT-BR (destaques, riscos, ações sugeridas).
- *
- * Nenhum SaaS BR oferece executive summary diário gerado por IA nativo.
  */
 export const getExecutiveBriefing = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -47,7 +45,7 @@ export const getExecutiveBriefing = createServerFn({ method: "GET" })
 
     const snapshot = {
       mrr_brl: mrr,
-      tenants_ativos: activeTenants,
+      clientes_ativos: activeTenants,
       leads_24h: leads24.count ?? 0,
       leads_7d: leads7v,
       leads_delta_pct_vs_7d_anteriores: leadsDelta,
@@ -60,27 +58,19 @@ export const getExecutiveBriefing = createServerFn({ method: "GET" })
       automacoes_falharam_7d: runsFailed,
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return { snapshot, briefing: null, error: "LOVABLE_API_KEY ausente" };
+    const key = process.env.OPENAI_API_KEY?.trim();
+    if (!key) return { snapshot, briefing: null, error: "OPENAI_API_KEY ausente" };
 
     try {
-      const gateway = createLovableAiGatewayProvider(key);
+      const { model } = resolveProvider({
+        llm: { provider: "openai", model: "gpt-4o-mini" },
+        allowFallback: false,
+        openaiApiKey: key,
+      });
       const { text } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model,
         system: "Você é o analista-chefe de operações da plataforma SaaS Impulsionando. Escreva em PT-BR, tom executivo, direto, sem clichês. Sempre cite números do snapshot.",
-        prompt: `Analise o snapshot operacional abaixo e produza um briefing executivo em 3 blocos curtos (markdown):
-
-## 🔥 Destaques
-2-3 bullets com o que está indo bem.
-
-## ⚠️ Riscos
-2-3 bullets com o que merece atenção imediata.
-
-## 🎯 Ações sugeridas
-3 bullets, cada um começando com verbo no infinitivo, priorizando o que tem maior impacto em MRR.
-
-Snapshot JSON:
-${JSON.stringify(snapshot, null, 2)}`,
+        prompt: `Analise o snapshot operacional abaixo e produza um briefing executivo em 3 blocos curtos (markdown):\n\n## 🔥 Destaques\n2-3 bullets com o que está indo bem.\n\n## ⚠️ Riscos\n2-3 bullets com o que merece atenção imediata.\n\n## 🎯 Ações sugeridas\n3 bullets, cada um começando com verbo no infinitivo, priorizando o que tem maior impacto em MRR.\n\nSnapshot JSON:\n${JSON.stringify(snapshot, null, 2)}`,
       });
       return { snapshot, briefing: text, error: null };
     } catch (e: any) {
