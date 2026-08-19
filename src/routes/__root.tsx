@@ -13,7 +13,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
@@ -165,7 +164,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const { kind, title, guidance } = classifyError(error);
   const errorId = `ERR-${Date.now().toString(36).toUpperCase()}`;
   const errorDetail = `${errorId}\n${error?.name ?? "Error"}: ${error?.message ?? ""}${error?.stack ? `\n${error.stack.split("\n").slice(0, 4).join("\n")}` : ""}`;
-  useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component", kind, errorId }); }, [error, kind, errorId]);
   async function copyDetail() { try { await navigator.clipboard.writeText(errorDetail); } catch { /* noop */ } }
   const supportCtx = `Código do erro: ${errorId}\nTipo: ${kind}\nMensagem: ${error?.message ?? ""}`;
   return <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-10"><div className="w-full max-w-lg">{!isWmpBrowser() && <div className="mb-6 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>}<div className="rounded-xl border border-border bg-card p-6 shadow-sm"><div className="flex items-start gap-3"><div aria-hidden="true" className={"mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full " + (kind === "offline" ? "bg-amber-500" : kind === "chunk_stale" ? "bg-sky-500" : kind === "server" ? "bg-red-500" : "bg-muted-foreground")} /><div className="min-w-0"><h1 className="text-xl font-semibold tracking-tight text-foreground">{title}</h1><p className="mt-2 text-sm text-muted-foreground leading-relaxed">{guidance}</p></div></div><div className="mt-5 flex flex-wrap gap-2">{kind === "chunk_stale" ? <button onClick={() => window.location.reload()} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Recarregar página</button> : <button onClick={() => { router.invalidate(); reset(); }} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Tentar novamente</button>}<button onClick={copyDetail} className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground">Copiar detalhes</button>{!isWmpBrowser() && <button onClick={() => openImpulsionito({ message: `Preciso de ajuda com um erro no portal.\n${supportCtx}`, source: "error_boundary" })} className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground">Falar com suporte</button>}</div><p className="mt-4 text-xs text-muted-foreground">Código: <span className="font-mono">{errorId}</span></p></div></div></div>;
