@@ -6,8 +6,8 @@ on:
       - .github/workflows/minimum-wage-sync.yml
   workflow_dispatch:
   schedule:
-    # 06:17 America/Sao_Paulo (09:17 UTC) diariamente.
-    - cron: "17 9 * * *"
+    # Verificacao recorrente a cada 3 horas. O Core reprecifica imediatamente quando o indice muda.
+    - cron: "17 */3 * * *"
 
 permissions:
   contents: read
@@ -19,7 +19,6 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    environment: production
     env:
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -36,7 +35,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location -A 'ImpulsionandoPricingVerifier/2.1' "$OFFICIAL_URL" -o /tmp/minimum-wage.html
+          curl --fail --silent --show-error --location -A 'ImpulsionandoPricingVerifier/3.0' "$OFFICIAL_URL" -o /tmp/minimum-wage.html
           python3 - <<'PY' >/tmp/value.env
           import html as html_lib
           import re
@@ -92,13 +91,13 @@ jobs:
           year="$(TZ=America/Sao_Paulo date +%Y)"
           effective_from="$year-01-01"
           checked="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          payload="$(jq -nc --argjson value "$MINIMUM_WAGE" --arg effective "$effective_from" --arg url "$OFFICIAL_URL" --arg checked "$checked" '{current_value:$value,effective_from:$effective,source_url:$url,source_reference:"Fonte oficial gov.br — salario-minimo nacional vigente",metadata:{country:"BR",currency:"BRL",official_source:"gov.br",auto_refresh_required:true,last_verified_at:$checked,verification:"github_actions_official_source_v2"},updated_at:$checked}')"
+          payload="$(jq -nc --argjson value "$MINIMUM_WAGE" --arg effective "$effective_from" --arg url "$OFFICIAL_URL" --arg checked "$checked" '{current_value:$value,effective_from:$effective,source_url:$url,source_reference:"Fonte oficial gov.br — salario-minimo nacional vigente",metadata:{country:"BR",currency:"BRL",official_source:"gov.br",auto_refresh_required:true,last_verified_at:$checked,verification:"github_actions_official_source_v3"},updated_at:$checked}')"
           curl --fail --silent --show-error -X PATCH \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
             --data "$payload" "$SUPABASE_URL/rest/v1/core_pricing_index?index_key=eq.br_minimum_wage" -o /tmp/updated.json
           jq -e 'length == 1' /tmp/updated.json >/dev/null
 
-      - name: Reprice all salary-indexed plans
+      - name: Reprice all salary-indexed offers
         shell: bash
         run: |
           set -euo pipefail
@@ -107,17 +106,28 @@ jobs:
             -d '{}' "$SUPABASE_URL/rest/v1/rpc/core_reprice_minimum_wage_plans" -o /tmp/repriced.json
           jq . /tmp/repriced.json
 
-      - name: Assert commercial source of truth
+      - name: Assert universal Impulsionando pricing source of truth
         shell: bash
         run: |
           set -euo pipefail
           curl --fail --silent --show-error \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            "$SUPABASE_URL/rest/v1/billing_plans?is_active=eq.true&show_on_site=eq.true&select=code,name,recurring_amount,setup_fee,metadata&order=sort_order.asc" -o /tmp/business-plans.json
-          jq -e 'all(.[]; .metadata.pricing_index_key == "br_minimum_wage" and (.metadata.minimum_wage_multiplier != null))' /tmp/business-plans.json >/dev/null
+            "$SUPABASE_URL/rest/v1/billing_plans?is_active=eq.true&select=code,name,recurring_amount,setup_fee,metadata&order=sort_order.asc" -o /tmp/business-plans.json
+          jq -e 'all(.[]; ((.recurring_amount|tonumber)==0 and (.setup_fee|tonumber)==0) or (.metadata.pricing_index_key == "br_minimum_wage" and (.metadata.minimum_wage_multiplier != null)))' /tmp/business-plans.json >/dev/null
 
           curl --fail --silent --show-error \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             "$SUPABASE_URL/rest/v1/clube_plans?is_active=eq.true&select=code,name,monthly_price_cents,pricing_index_key,minimum_wage_multiplier" -o /tmp/club-plans.json
-          jq -e 'all(.[]; (.code == "free" and .monthly_price_cents == 0) or (.pricing_index_key == "br_minimum_wage" and (.minimum_wage_multiplier != null)))' /tmp/club-plans.json >/dev/null
-          echo "MINIMUM_WAGE_SYNC=PASS official=$MINIMUM_WAGE business_and_club=true"
+          jq -e 'all(.[]; (.monthly_price_cents == 0) or (.pricing_index_key == "br_minimum_wage" and (.minimum_wage_multiplier != null)))' /tmp/club-plans.json >/dev/null
+
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/cp_commercial_tiers?status_comercial=eq.disponivel_contratacao&select=code,monthly_amount,metadata" -o /tmp/cp-tiers.json
+          jq -e 'all(.[]; ((.monthly_amount // 0)|tonumber)==0 or (.metadata.pricing_index_key == "br_minimum_wage" and (.metadata.minimum_wage_multiplier != null)))' /tmp/cp-tiers.json >/dev/null
+
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/modules?select=slug,monthly_price,setup_fee,pricing_index_key,minimum_wage_multiplier" -o /tmp/modules.json
+          jq -e 'all(.[]; (((.monthly_price // 0)|tonumber)==0 and ((.setup_fee // 0)|tonumber)==0) or (.pricing_index_key == "br_minimum_wage" and (.minimum_wage_multiplier != null)))' /tmp/modules.json >/dev/null
+
+          echo "MINIMUM_WAGE_SYNC=PASS official=$MINIMUM_WAGE universal_impulsionando_pricing=true"
