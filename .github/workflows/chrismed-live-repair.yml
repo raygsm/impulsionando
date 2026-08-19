@@ -8,16 +8,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: chrismed-live-repair
   cancel-in-progress: true
 
 jobs:
-  repair:
+  reconnect:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 20
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -27,75 +27,12 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
-      - name: Repair CHRISMED navigation and deploy gate
+      - name: Validate existing OpenAI credential
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          sidebar = Path('src/components/app/SidebarNav.tsx')
-          s = sidebar.read_text()
-          if '@/integrations/supabase/client' not in s:
-              s = s.replace('import { useServerFn } from "@tanstack/react-start";\n', 'import { useServerFn } from "@tanstack/react-start";\nimport { supabase } from "@/integrations/supabase/client";\n')
-          marker = '  const { companyId } = useActiveCompany();\n'
-          tenant_query = '''  const { companyId } = useActiveCompany();\n  const { data: activeTenantSlug } = useQuery({\n    queryKey: ["active-company-tenant-slug", companyId],\n    enabled: !!companyId,\n    staleTime: 60_000,\n    queryFn: async () => {\n      const { data } = await supabase\n        .from("communication_tenants")\n        .select("slug")\n        .eq("company_id", companyId)\n        .eq("active", true)\n        .is("deleted_at", null)\n        .maybeSingle();\n      return data?.slug ?? null;\n    },\n  });\n'''
-          if 'active-company-tenant-slug' not in s:
-              if marker not in s: raise SystemExit('Sidebar company marker not found')
-              s = s.replace(marker, tenant_query)
-          old = '    items: area.links.map((link) => ({ to: link.to, label: link.label, icon: area.icon, audiences: ["empresa", "white-label"] })),\n'
-          new = '''    items: (area.key === "comunicacao" && activeTenantSlug === "chrismed"\n      ? [{ label: "WhatsApp", to: "/chrismed/whatsapp" }, ...area.links]\n      : area.links\n    ).map((link) => ({ to: link.to, label: link.label, icon: area.icon, audiences: ["empresa", "white-label"] })),\n'''
-          if 'activeTenantSlug === "chrismed"' not in s:
-              if old not in s: raise SystemExit('Sidebar canonical links marker not found')
-              s = s.replace(old, new)
-          sidebar.write_text(s)
-
-          # Unblock the canonical build gate while keeping the single-source invariant real.
-          header = Path('src/components/marketing/PublicHeader.tsx')
-          h = header.read_text()
-          if 'PUBLIC_NICHE_GROUPS' not in h:
-              h = h.replace('import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";\n', 'import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";\nimport { PUBLIC_NICHE_GROUPS } from "@/data/public-niche-catalog";\n')
-              h = h.replace('const NAV = [\n', 'const PUBLIC_SECTOR_GROUP_COUNT = PUBLIC_NICHE_GROUPS.length;\n\nconst NAV = [\n')
-              h = h.replace('              to={item.to}\n              className={cn(', '              to={item.to}\n              title={item.to === "/nichos" ? `${PUBLIC_SECTOR_GROUP_COUNT} grupos de setores disponíveis` : undefined}\n              className={cn(')
-          header.write_text(h)
-
-          deploy = Path('.github/workflows/deploy-core-frontend.yml')
-          d = deploy.read_text()
-          d = d.replace('    environment: production\n', '')
-          deploy.write_text(d)
-          PY
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Build current main with CHRISMED repairs
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm ci --no-audit --no-fund
-          npm run build
-
-      - name: Commit source repairs
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'Impulsionito Core Automation'
-          git config user.email 'automation@impulsionando.com.br'
-          git add src/components/app/SidebarNav.tsx src/components/marketing/PublicHeader.tsx .github/workflows/deploy-core-frontend.yml
-          git commit -m 'fix(chrismed): expose WhatsApp under Communication and unblock authorized deploys' || true
-          git pull --rebase origin main
-          git push origin HEAD:main
-
-      - name: Validate OpenAI credential without exposing it
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$OPENAI_API_KEY"
+          test -n "${OPENAI_API_KEY:-}"
           code="$(curl -sS -o /tmp/openai.json -w '%{http_code}' --max-time 20 https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY")"
           test "$code" = '200'
           echo 'OPENAI_CREDENTIAL=VALID'
@@ -107,10 +44,11 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
 
-      - name: Reconnect Oliver and Evolution API in canonical Core runtime
+      - name: Reconnect Oliver and prepare CHRISMED QR
         shell: bash
         run: |
           set -euo pipefail
@@ -119,16 +57,18 @@ jobs:
           chmod 600 "$keyfile"
           scp "$keyfile" "$VPS_USER@$VPS_HOST:/tmp/chrismed-openai.key"
           rm -f "$keyfile"
+
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
           ENV_FILE=/etc/impulsionando-core.env
           CORE=impulsionando-core
           EVO=impulsionando-evolution-api
           COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+
           sudo test -f "$ENV_FILE"
+          sudo test -f "$COMPOSE"
           sudo docker inspect "$CORE" >/dev/null
           sudo docker inspect "$EVO" >/dev/null
-          sudo test -f "$COMPOSE"
 
           OPENAI_KEY="$(cat /tmp/chrismed-openai.key)"
           rm -f /tmp/chrismed-openai.key
@@ -142,7 +82,7 @@ jobs:
             sudo docker network connect "$core_network" "$EVO"
           fi
 
-          set_env(){
+          set_env() {
             local key="$1" value="$2" tmp
             tmp="$(mktemp)"
             sudo awk -F= -v k="$key" '$1!=k{print}' "$ENV_FILE" > "$tmp"
@@ -150,13 +90,15 @@ jobs:
             sudo install -o root -g root -m 0600 "$tmp" "$ENV_FILE"
             rm -f "$tmp"
           }
+
           set_env OPENAI_API_KEY "$OPENAI_KEY"
           set_env CHRISMED_EVOLUTION_BASE_URL 'http://impulsionando-evolution-api:8080'
           set_env CHRISMED_EVOLUTION_API_KEY "$EVO_KEY"
           unset OPENAI_KEY EVO_KEY
 
           cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate "$CORE"
+
           for i in $(seq 1 40); do
             state="$(sudo docker inspect "$CORE" --format '{{.State.Status}}' 2>/dev/null || true)"
             [ "$state" = running ] && break
@@ -164,51 +106,41 @@ jobs:
             sleep 2
           done
 
-          sudo docker exec "$CORE" node - <<'NODE'
-          const must=['OPENAI_API_KEY','CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY'];
-          for(const k of must){ if(!process.env[k]) { console.error(`missing:${k}`); process.exit(1); } }
-          const openai=await fetch('https://api.openai.com/v1/models',{headers:{authorization:`Bearer ${process.env.OPENAI_API_KEY}`}});
-          if(!openai.ok){ console.error(`openai_http=${openai.status}`); process.exit(2); }
-          const base=process.env.CHRISMED_EVOLUTION_BASE_URL.replace(/\/$/,'');
-          const headers={apikey:process.env.CHRISMED_EVOLUTION_API_KEY,'content-type':'application/json'};
-          let r=await fetch(`${base}/instance/connectionState/chrismed-oliver`,{headers});
-          if(r.status===404){
-            const c=await fetch(`${base}/instance/create`,{method:'POST',headers,body:JSON.stringify({instanceName:'chrismed-oliver',qrcode:true,integration:'WHATSAPP-BAILEYS'})});
-            if(!c.ok && c.status!==409){ console.error(`evolution_create_http=${c.status}`); process.exit(3); }
+          sudo docker exec -i "$CORE" node - <<'NODE'
+          const required=['OPENAI_API_KEY','CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY'];
+          for (const key of required) {
+            if (!process.env[key]) { console.error(`missing:${key}`); process.exit(1); }
           }
-          r=await fetch(`${base}/instance/connect/chrismed-oliver`,{headers});
-          if(!r.ok){ console.error(`evolution_connect_http=${r.status}`); process.exit(4); }
-          const data=await r.json();
-          const qr=Boolean(data?.base64||data?.qrcode?.base64||data?.data?.Qrcode||data?.data?.qrcode);
-          const pairing=Boolean(data?.pairingCode||data?.qrcode?.pairingCode);
-          const stateResp=await fetch(`${base}/instance/connectionState/chrismed-oliver`,{headers});
-          let state=null; try{const j=await stateResp.json();state=j?.instance?.state||j?.state||j?.data?.state||null}catch{}
-          const connected=['open','connected','CONNECTED'].includes(String(state));
-          if(!connected && !qr && !pairing){ console.error('evolution_pairing_not_ready'); process.exit(5); }
-          console.log(JSON.stringify({openai:true,evolution:true,instance:'chrismed-oliver',connected,qr_ready:qr||pairing}));
+          const openai = await fetch('https://api.openai.com/v1/models', { headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY}` } });
+          if (!openai.ok) { console.error(`openai_http=${openai.status}`); process.exit(2); }
+
+          const base = process.env.CHRISMED_EVOLUTION_BASE_URL.replace(/\/$/, '');
+          const headers = { apikey: process.env.CHRISMED_EVOLUTION_API_KEY, 'content-type': 'application/json' };
+          const instance = 'chrismed-oliver';
+          let stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+          if (stateResp.status === 404) {
+            const created = await fetch(`${base}/instance/create`, { method:'POST', headers, body:JSON.stringify({instanceName:instance,qrcode:true,integration:'WHATSAPP-BAILEYS'}) });
+            if (!created.ok && created.status !== 409) { console.error(`evolution_create_http=${created.status}`); process.exit(3); }
+          }
+          const connect = await fetch(`${base}/instance/connect/${instance}`, { headers });
+          if (!connect.ok) { console.error(`evolution_connect_http=${connect.status}`); process.exit(4); }
+          const data = await connect.json();
+          const qrReady = Boolean(data?.base64 || data?.qrcode?.base64 || data?.data?.Qrcode || data?.data?.qrcode || data?.pairingCode || data?.qrcode?.pairingCode);
+          stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+          let state = null;
+          try { const body = await stateResp.json(); state = body?.instance?.state || body?.state || body?.data?.state || null; } catch {}
+          const connected = ['open','connected','CONNECTED'].includes(String(state));
+          if (!connected && !qrReady) { console.error('evolution_pairing_not_ready'); process.exit(5); }
+          console.log(JSON.stringify({openai:true,evolution:true,instance,connected,qr_ready:qrReady}));
           NODE
           REMOTE
 
-      - name: Mark CHRISMED WhatsApp endpoint ready for pairing
+      - name: Synchronize CHRISMED channel metadata
         shell: bash
         run: |
           set -euo pipefail
           tenant="$(curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.chrismed&active=eq.true&select=id" | jq -r '.[0].id // empty')"
           test -n "$tenant"
-          payload='{"provider":"evolution_api","status":"PENDING_CONNECTION","secret_reference":"CHRISMED_EVOLUTION_API_KEY","webhook_path":"/api/communication/whatsapp/chrismed","config":{"instance":"chrismed-oliver","qr_pairing":true,"requires_credentials":false,"provider":"evolution_api","pairing_ui":"/chrismed/whatsapp"},"last_error":null}'
+          payload='{"provider":"evolution_api","status":"PENDING_CONNECTION","secret_reference":"CHRISMED_EVOLUTION_API_KEY","webhook_path":"/api/communication/whatsapp/chrismed","last_error":null}'
           curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$payload" "$SUPABASE_URL/rest/v1/communication_channel_endpoints?tenant_id=eq.$tenant&channel=eq.whatsapp&is_primary=eq.true" >/dev/null
-
-      - name: Record non-secret production proof
-        shell: bash
-        run: |
-          set -euo pipefail
-          code="$(curl -sS -L -o /tmp/chrismed-home -w '%{http_code}' --max-time 30 https://chrismed.impulsionando.com.br/)"
-          test "$code" = 200
-          mkdir -p docs/ops
-          jq -n --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg sha "$(git rev-parse HEAD)" '{generated_at_utc:$at,sha:$sha,chrismed_front_http:200,openai_credential_valid:true,oliver_runtime_env:true,evolution_runtime_reachable:true,whatsapp_instance:"chrismed-oliver",whatsapp_pairing_ready:true,communication_menu_whatsapp:true,vps:"187.77.232.52"}' > docs/ops/chrismed-oliver-whatsapp-live-proof.json
-          git config user.name 'Impulsionito Core Automation'
-          git config user.email 'automation@impulsionando.com.br'
-          git add docs/ops/chrismed-oliver-whatsapp-live-proof.json
-          git commit -m 'chore(chrismed): record Oliver and WhatsApp live proof' || true
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo 'CHRISMED_WHATSAPP=PAIRING_READY'
