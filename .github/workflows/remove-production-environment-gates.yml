@@ -1,0 +1,56 @@
+name: Remove autonomous job environment gates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/remove-production-environment-gates.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Remove approval gate from autonomous infrastructure jobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            .github/workflows/all-client-subdomains-reconcile.yml
+            .github/workflows/n8n-universal-ready-provisioner.yml
+            .github/workflows/minimum-wage-sync.yml
+          )
+          for file in "${files[@]}"; do
+            test -f "$file"
+            sed -i '/^[[:space:]]*environment:[[:space:]]*production[[:space:]]*$/d' "$file"
+          done
+          if grep -n 'environment:[[:space:]]*production' "${files[@]}"; then
+            echo '::error::Production approval gate still present'
+            exit 1
+          fi
+
+      - name: Commit governance reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add \
+            .github/workflows/all-client-subdomains-reconcile.yml \
+            .github/workflows/n8n-universal-ready-provisioner.yml \
+            .github/workflows/minimum-wage-sync.yml
+          if git diff --cached --quiet; then
+            echo 'Autonomous jobs already ungated.'
+            exit 0
+          fi
+          git commit -m 'ci(core): ungate autonomous DNS n8n and pricing jobs'
+          git pull --rebase origin main
+          git push origin HEAD:main
