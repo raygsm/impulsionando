@@ -11,8 +11,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: all-client-subdomains-reconcile
-  cancel-in-progress: false
+  group: tenant-dns-fast-reconcile-v2
+  cancel-in-progress: true
 
 jobs:
   reconcile:
@@ -76,36 +76,26 @@ jobs:
             [ -n "$domain" ] || continue
             code=000; final='-'
             for attempt in $(seq 1 24); do
-              read -r code final < <(curl -sS -L -A 'ImpulsionandoGoLive/5.0' -o /tmp/body -w '%{http_code} %{url_effective}' --max-time 20 "https://$domain/" || echo '000 -')
+              read -r code final < <(curl -sS -L -A 'ImpulsionandoGoLive/5.1' -o /tmp/body -w '%{http_code} %{url_effective}' --max-time 20 "https://$domain/" || echo '000 -')
               host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then break; fi
               sleep 3
             done
             host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
-            if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then
-              echo "$domain" >>/tmp/proven.txt
-            else
-              echo "$domain|$code|$final" >>/tmp/failures.txt
-            fi
+            if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then echo "$domain" >>/tmp/proven.txt; else echo "$domain|$code|$final" >>/tmp/failures.txt; fi
           done </tmp/domains.txt
           cat /tmp/failures.txt || true
-
           now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           while read -r domain; do
             [ -n "$domain" ] || continue
             sub="${domain%.impulsionando.com.br}"
             payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
-            curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' --data "$payload" \
-              "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$sub" >/dev/null
+            curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' --data "$payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$sub" >/dev/null
           done </tmp/proven.txt
-
-          total="$(wc -l </tmp/domains.txt | tr -d ' ')"
-          proven="$(wc -l </tmp/proven.txt | tr -d ' ')"
-          failed="$(wc -l </tmp/failures.txt | tr -d ' ')"
+          total="$(wc -l </tmp/domains.txt | tr -d ' ')"; proven="$(wc -l </tmp/proven.txt | tr -d ' ')"; failed="$(wc -l </tmp/failures.txt | tr -d ' ')"
           mkdir -p docs/ops
-          jq -n --arg generated_at_utc "$now" --argjson total "$total" --argjson active_issued "$proven" --argjson pending "$failed" \
-            --rawfile failures /tmp/failures.txt '{generated_at_utc:$generated_at_utc,total:$total,active_issued:$active_issued,pending:$pending,failures:$failures,origin_ip:"187.77.232.52",runtime:"impulsionando-core wildcard Traefik"}' \
-            >docs/ops/domain-go-live-proof.json
+          jq -n --arg generated_at_utc "$now" --argjson total "$total" --argjson active_issued "$proven" --argjson pending "$failed" --rawfile failures /tmp/failures.txt \
+            '{generated_at_utc:$generated_at_utc,total:$total,active_issued:$active_issued,pending:$pending,failures:$failures,origin_ip:"187.77.232.52",runtime:"impulsionando-core wildcard Traefik"}' >docs/ops/domain-go-live-proof.json
           [ "$failed" -eq 0 ]
 
       - name: Commit proof
