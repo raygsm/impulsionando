@@ -1,3 +1,4 @@
+# Forced reconciliation trigger: 2026-08-19T07:48:00-03:00
 name: All client subdomains reconcile
 
 on:
