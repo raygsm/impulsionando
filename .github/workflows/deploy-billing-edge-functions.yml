@@ -1,0 +1,62 @@
+name: Deploy Billing Edge Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - supabase/functions/billing-create-payment/**
+      - supabase/functions/mpago-webhook/**
+      - .github/workflows/deploy-billing-edge-functions.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-billing-edge-functions-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: arygtqrdpcdkwnuwsgmm
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_URL"
+
+      - name: Deploy secure billing checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.45.4 functions deploy billing-create-payment --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Deploy Mercado Pago webhook
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.45.4 functions deploy mpago-webhook --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Smoke endpoints without side effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          billing_code=$(curl -sS -o /tmp/billing.out -w '%{http_code}' -X POST "$SUPABASE_URL/functions/v1/billing-create-payment" -H 'content-type: application/json' -d '{}')
+          echo "billing-create-payment unauthenticated => $billing_code $(head -c 160 /tmp/billing.out)"
+          test "$billing_code" = "401"
+
+          webhook_code=$(curl -sS -o /tmp/webhook.out -w '%{http_code}' -X POST "$SUPABASE_URL/functions/v1/mpago-webhook" -H 'content-type: application/json' -d '{}')
+          echo "mpago-webhook missing company => $webhook_code $(head -c 160 /tmp/webhook.out)"
+          test "$webhook_code" = "400"
+
+          echo "BILLING_EDGE_FUNCTIONS_SMOKE=PASS"
