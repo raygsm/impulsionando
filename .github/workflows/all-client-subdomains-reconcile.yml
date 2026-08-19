@@ -1,6 +1,5 @@
 name: All client subdomains reconcile
 
-# Forced production reconciliation: 2026-08-19T07:41:00-03:00
 on:
   push:
     paths:
@@ -20,6 +19,7 @@ jobs:
   reconcile:
     runs-on: ubuntu-latest
     environment: production
+    timeout-minutes: 45
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -29,6 +29,13 @@ jobs:
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
       - name: Validate production credentials and origin
         run: |
           set -euo pipefail
@@ -55,15 +62,94 @@ jobs:
           echo "TENANT_COUNT=$(wc -w <<<"$domains" | tr -d ' ')" >> "$GITHUB_ENV"
           echo "Discovered domains: $domains"
 
+      - name: Build multi-tenant Core
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+
       - name: Configure SSH
         run: |
           set -euo pipefail
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
 
-      - name: Validate tenant subdomains at Traefik origin
+      - name: Upload multi-tenant release
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/multitenant-release.tgz .output scripts package.json package-lock.json
+          scp /tmp/multitenant-release.tgz "$VPS_USER@$VPS_HOST:/tmp/multitenant-release.tgz"
+
+      - name: Deploy generic multi-tenant runtime and low-priority router
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+          release="/var/www/impulsionando-core/releases/multitenant-$RELEASE_SHA"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.multitenant.yml
+          envfile=/etc/impulsionando-core.env
+          test -f "$base"
+          sudo test -f "$envfile"
+          mkdir -p "$release"
+          tar -xzf /tmp/multitenant-release.tgz -C "$release"
+          rm -f /tmp/multitenant-release.tgz
+          printf 'node_modules\n' > "$release/.dockerignore"
+          cat > /tmp/Dockerfile.multitenant <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          sudo docker build -f /tmp/Dockerfile.multitenant -t impulsionando-core:multitenant "$release"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core-multitenant:
+              image: impulsionando-core:multitenant
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.impulsionando-multitenant.entrypoints: websecure
+                traefik.http.routers.impulsionando-multitenant.rule: HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`)
+                traefik.http.routers.impulsionando-multitenant.service: impulsionando-core-multitenant
+                traefik.http.routers.impulsionando-multitenant.tls: "true"
+                traefik.http.routers.impulsionando-multitenant.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-multitenant.priority: "50"
+                traefik.http.services.impulsionando-core-multitenant.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-multitenant
+          for i in $(seq 1 60); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-multitenant 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then
+              code="$(curl -sS -H 'Host: ontap.impulsionando.com.br' -o /tmp/multitenant-origin -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"
+            fi
+            [ "$code" = '200' ] && break
+            [ "$i" -lt 60 ] || { sudo docker logs --tail 200 impulsionando-core-multitenant || true; exit 60; }
+            sleep 2
+          done
+          echo "MULTITENANT_RUNTIME=PASS HTTP=$code"
+          REMOTE
+
+      - name: Validate tenant routes at Traefik origin
         run: |
           set -euo pipefail
           ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$DOMAINS' bash -s" <<'REMOTE'
@@ -71,9 +157,9 @@ jobs:
           for domain in $DOMAINS; do
             code=000
             location=''
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 20); do
               headers="$(mktemp)"
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/3.1' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/4.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
               location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
               rm -f "$headers"
               echo "ORIGIN $domain attempt=$attempt HTTP=$code LOCATION=${location:-none}"
@@ -114,8 +200,8 @@ jobs:
           for domain in $DOMAINS; do
             code=000
             final_url=''
-            for attempt in $(seq 1 18); do
-              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/3.1' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+            for attempt in $(seq 1 24); do
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/4.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
               final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               echo "PUBLIC $domain attempt=$attempt HTTP=$code FINAL=$final_url"
               if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
