@@ -6,6 +6,7 @@ on:
       - .github/workflows/minimum-wage-sync.yml
   workflow_dispatch:
   schedule:
+    # 06:17 America/Sao_Paulo (09:17 UTC) diariamente.
     - cron: "17 9 * * *"
 
 permissions:
@@ -22,7 +23,8 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      OFFICIAL_URL: https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12797.htm
+      # URL oficial estavel do Governo Federal que informa o salario-minimo vigente.
+      OFFICIAL_URL: https://www.gov.br/trabalho-e-emprego/pt-br/servicos/trabalhador/abono-salarial
     steps:
       - name: Validate production credentials
         shell: bash
@@ -31,43 +33,46 @@ jobs:
           test -n "$SUPABASE_URL"
           test -n "$SUPABASE_SERVICE_ROLE_KEY"
 
-      - name: Read official minimum wage source
-        id: official
+      - name: Read official current minimum wage
         shell: bash
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --location \
-            -A 'ImpulsionandoPricingVerifier/1.0' \
+            -A 'ImpulsionandoPricingVerifier/2.0' \
             "$OFFICIAL_URL" -o /tmp/minimum-wage.html
 
           python3 - <<'PY' >/tmp/value.env
+          import html as html_lib
           import re
           from pathlib import Path
-          html = Path('/tmp/minimum-wage.html').read_text(errors='ignore')
-          text = re.sub(r'<[^>]+>', ' ', html)
+
+          raw = Path('/tmp/minimum-wage.html').read_text(errors='ignore')
+          text = html_lib.unescape(re.sub(r'<[^>]+>', ' ', raw))
           text = re.sub(r'\s+', ' ', text)
+
           patterns = [
-              r'sal[aá]rio m[ií]nimo[^R]{0,180}R\$\s*([0-9\.]+,[0-9]{2})',
-              r'R\$\s*(1\.621,00)',
+              r'sal[aá]rio[- ]m[ií]nimo(?:\s+nacional)?[^R]{0,260}R\$\s*([0-9\.]+,[0-9]{2})',
+              r'sal[aá]rio[- ]m[ií]nimo[^0-9]{0,260}([0-9]{1,2}\.[0-9]{3},[0-9]{2})',
           ]
           value = None
           for pattern in patterns:
-              m = re.search(pattern, text, flags=re.I)
-              if m:
-                  raw = m.group(1)
-                  value = float(raw.replace('.', '').replace(',', '.'))
+              match = re.search(pattern, text, flags=re.I)
+              if match:
+                  value = float(match.group(1).replace('.', '').replace(',', '.'))
                   break
+
           if value is None:
-              raise SystemExit('minimum wage value not found in official source')
+              raise SystemExit('minimum wage value not found in official gov.br source')
           if not 1000 <= value <= 10000:
               raise SystemExit(f'official value outside safety range: {value}')
+
           print(f'MINIMUM_WAGE={value:.2f}')
           PY
 
           cat /tmp/value.env >> "$GITHUB_ENV"
           cat /tmp/value.env
 
-      - name: Compare with Core index
+      - name: Compare with Core index and validate delta
         id: compare
         shell: bash
         run: |
@@ -77,8 +82,20 @@ jobs:
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             "$SUPABASE_URL/rest/v1/core_pricing_index?index_key=eq.br_minimum_wage&select=current_value,effective_from,source_reference" \
             -o /tmp/current.json
+
           current="$(jq -r '.[0].current_value // empty' /tmp/current.json)"
+          test -n "$current"
           echo "CURRENT=$current OFFICIAL=$MINIMUM_WAGE"
+
+          python3 - "$current" "$MINIMUM_WAGE" <<'PY'
+          import sys
+          current = float(sys.argv[1])
+          official = float(sys.argv[2])
+          delta = abs(official-current)/current
+          if delta > 0.20:
+              raise SystemExit(f'blocked: minimum wage delta {delta:.2%} exceeds 20% safety guard')
+          PY
+
           if [ "$current" = "$MINIMUM_WAGE" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -90,14 +107,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          year="$(date -u +%Y)"
+          year="$(TZ=America/Sao_Paulo date +%Y)"
           effective_from="$year-01-01"
+          checked="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           payload="$(jq -nc \
             --argjson value "$MINIMUM_WAGE" \
             --arg effective "$effective_from" \
             --arg url "$OFFICIAL_URL" \
-            --arg checked "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{current_value:$value,effective_from:$effective,source_url:$url,source_reference:"Fonte oficial Planalto — salário mínimo nacional vigente",metadata:{country:"BR",currency:"BRL",official_source:"Planalto",auto_refresh_required:true,last_verified_at:$checked,verification:"github_actions_official_source"},updated_at:$checked}')"
+            --arg checked "$checked" \
+            '{current_value:$value,effective_from:$effective,source_url:$url,source_reference:"Fonte oficial gov.br — salario-minimo nacional vigente",metadata:{country:"BR",currency:"BRL",official_source:"gov.br",auto_refresh_required:true,last_verified_at:$checked,verification:"github_actions_official_source_v2"},updated_at:$checked}')"
 
           curl --fail --silent --show-error -X PATCH \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
