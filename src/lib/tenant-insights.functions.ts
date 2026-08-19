@@ -1,16 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveProvider } from "@/lib/impulsionito/providers.server";
 import { generateText } from "ai";
 import { z } from "zod";
 
 const Input = z.object({ companyId: z.string().uuid() });
 
 /**
- * Tenant Insights (IA) — análise individual de um tenant.
+ * Tenant Insights (IA) — análise individual de um cliente.
  * Cruza contrato, módulos, tickets, atividade e idade da conta, e usa
- * Lovable AI para gerar 3 blocos: o que está funcionando, o que está em
+ * OpenAI para gerar 3 blocos: o que está funcionando, o que está em
  * risco e as 3 próximas ações priorizadas para Customer Success.
  */
 export const getTenantInsights = createServerFn({ method: "POST" })
@@ -32,7 +32,7 @@ export const getTenantInsights = createServerFn({ method: "POST" })
       supabaseAdmin.from("runtime_events").select("event_type, created_at").eq("company_id", companyId).order("created_at", { ascending: false }).limit(100),
     ]);
 
-    if (!company.data) throw new Error("Tenant não encontrado.");
+    if (!company.data) throw new Error("Cliente não encontrado.");
 
     const activeMrr = (contracts.data ?? []).filter((c: any) => c.status === "active").reduce((s: number, c: any) => s + Number(c.recurring_amount ?? 0), 0);
     const enabledModules = (modules.data ?? []).filter((m: any) => m.is_enabled !== false).map((m: any) => m.module_id);
@@ -55,27 +55,19 @@ export const getTenantInsights = createServerFn({ method: "POST" })
       eventos_runtime_30d: runtimeLast30,
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return { snapshot, insights: null, error: "LOVABLE_API_KEY ausente" };
+    const key = process.env.OPENAI_API_KEY?.trim();
+    if (!key) return { snapshot, insights: null, error: "OPENAI_API_KEY ausente" };
 
     try {
-      const gateway = createLovableAiGatewayProvider(key);
+      const { model } = resolveProvider({
+        llm: { provider: "openai", model: "gpt-4o-mini" },
+        allowFallback: false,
+        openaiApiKey: key,
+      });
       const { text } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model,
         system: "Você é o Customer Success Manager da plataforma SaaS Impulsionando. Escreva em PT-BR, tom executivo e prático. Sempre cite números do snapshot.",
-        prompt: `Analise este tenant e responda em markdown com 3 blocos curtos:
-
-## ✅ O que está funcionando
-2-3 bullets.
-
-## ⚠️ Riscos / sinais de churn
-2-3 bullets. Use idade, tickets, atividade.
-
-## 🎯 Próximas 3 ações
-Cada bullet começa com verbo no infinitivo. Priorize impacto em retenção e expansão.
-
-Snapshot:
-${JSON.stringify(snapshot, null, 2)}`,
+        prompt: `Analise este cliente e responda em markdown com 3 blocos curtos:\n\n## ✅ O que está funcionando\n2-3 bullets.\n\n## ⚠️ Riscos / sinais de churn\n2-3 bullets. Use idade, tickets, atividade.\n\n## 🎯 Próximas 3 ações\nCada bullet começa com verbo no infinitivo. Priorize impacto em retenção e expansão.\n\nSnapshot:\n${JSON.stringify(snapshot, null, 2)}`,
       });
       return { snapshot, insights: text, error: null };
     } catch (e: any) {
