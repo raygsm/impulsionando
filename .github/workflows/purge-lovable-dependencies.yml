@@ -1,0 +1,82 @@
+name: Purge Lovable dependencies
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/purge-lovable-dependencies.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: purge-lovable-dependencies
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Remove Lovable packages from manifests and lockfiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm uninstall \
+            @lovable.dev/cloud-auth-js \
+            @lovable.dev/email-js \
+            @lovable.dev/mcp-js \
+            @lovable.dev/webhooks-js \
+            @lovable.dev/vite-tanstack-config \
+            --save
+          bun install --lockfile-only
+
+      - name: Assert zero Lovable package dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -Rni --include='package.json' --include='package-lock.json' --include='bun.lock' '@lovable.dev' .; then
+            echo '::error::Lovable package reference remains in dependency manifests'
+            exit 1
+          fi
+
+      - name: Install and build definitive Core
+        shell: bash
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+
+      - name: Commit validated dependency cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add package.json package-lock.json bun.lock src/routeTree.gen.ts || true
+          if git diff --cached --quiet; then
+            echo 'No dependency changes required.'
+            exit 0
+          fi
+          git commit -m 'chore(core): remove all Lovable package dependencies'
+          git pull --rebase origin main
+          git push origin HEAD:main
