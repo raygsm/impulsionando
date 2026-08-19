@@ -15,6 +15,8 @@ import { countPendingPixCharges } from "@/lib/pix-charges.functions";
 import { fetchUserPlanContext } from "@/lib/plan-context.functions";
 import { useServerFn } from "@tanstack/react-start";
 
+const CHRISMED_COMPANY_ID = "642096b5-a9ff-4521-a82a-c004f6d2e2d2";
+
 function classifyPlanTier(code: string | null | undefined, name: string | null | undefined):
   "essencial" | "profissional" | "completo" | null {
   const blob = `${code ?? ""} ${name ?? ""}`.toLowerCase();
@@ -211,12 +213,18 @@ export function SidebarNav({ currentUser, onNavigate }: { currentUser: CurrentUs
     return perms.has(i.perm);
   };
 
-  const canonicalBusinessGroups: NavGroup[] = NAVIGATION_AREAS.map((area, index) => ({
-    label: area.label,
-    audiences: ["empresa", "white-label"],
-    defaultOpen: index === 0,
-    items: area.links.map((link) => ({ to: link.to, label: link.label, icon: area.icon, audiences: ["empresa", "white-label"] })),
-  }));
+  const canonicalBusinessGroups: NavGroup[] = NAVIGATION_AREAS.map((area, index) => {
+    const links = area.links.map((link) => ({ to: link.to, label: link.label, icon: area.icon, audiences: ["empresa", "white-label"] as NavAudience[] }));
+    if (companyId === CHRISMED_COMPANY_ID && area.key === "comunicacao") {
+      links.splice(1, 0, { to: "/chrismed/whatsapp", label: "WhatsApp", icon: area.icon, audiences: ["empresa", "white-label"] as NavAudience[] });
+    }
+    return {
+      label: area.label,
+      audiences: ["empresa", "white-label"],
+      defaultOpen: index === 0,
+      items: links,
+    };
+  });
 
   const sourceGroups = audience === "empresa" || audience === "white-label" ? canonicalBusinessGroups : NAV_GROUPS;
   const visibleGroups = sourceGroups.filter((g) => matchesAudience(g.audiences));
