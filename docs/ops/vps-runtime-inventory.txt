@@ -1,0 +1,55 @@
+generated_at_utc=2026-08-19T20:43:58Z
+--- docker ps ---
+NAMES                              IMAGE                                STATUS                  PORTS
+impulsionando-core                 impulsionando-core:latest            Up 28 minutes           3000/tcp
+impulsionando-evolution-api        evoapicloud/evolution-api:v2.3.7     Up 42 hours             8080/tcp
+impulsionando-evolution-postgres   postgres:16-alpine                   Up 42 hours (healthy)   5432/tcp
+impulsionando-evolution-redis      redis:7-alpine                       Up 42 hours (healthy)   6379/tcp
+chrismed-oliver-check              impulsionando-core:chrismed-oliver   Up 2 days               3000/tcp
+n8n-umlg-n8n-1                     docker.n8n.io/n8nio/n8n              Up 6 seconds            0.0.0.0:32875->5678/tcp, [::]:32875->5678/tcp
+traefik-traefik-1                  traefik:latest                       Up 7 weeks              0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+--- images ---
+REPOSITORY                          TAG                  IMAGE ID       CREATED
+impulsionando-core                  latest               2256da088ff2   2 days ago
+impulsionando-core                  chrismed-oliver      c0fac6ed4287   2 days ago
+postgres                            16-alpine            cf78e76683b9   6 days ago
+redis                               7-alpine             e7723ff73d96   3 weeks ago
+ghcr.io/raygsm/impulsionando-core   hostinger-verified   c15342cb4ed7   4 weeks ago
+docker.n8n.io/n8nio/n8n             latest               9cb60554716a   5 weeks ago
+traefik                             latest               e4d98158c01a   8 weeks ago
+evoapicloud/evolution-api           v2.3.7               1bd8afc4a6cf   8 months ago
+--- compose files ---
+/opt/impulsionando/deploy/hostinger/docker-compose.anamadu.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.chrismed.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.client-subdomains.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.colors-p0.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.colors.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.tour-it.yml
+/opt/impulsionando/deploy/hostinger/docker-compose.yml
+/opt/impulsionando/evolution/docker-compose.yml
+--- main compose services ---
+impulsionando-core
+--- traefik labels in compose ---
+6:    image: impulsionando-core:latest
+23:      - traefik.enable=true
+24:      - traefik.docker.network=n8n-umlg_default
+25:      - traefik.http.services.impulsionando-core.loadbalancer.server.port=3000
+26:      - traefik.http.routers.colorssaude.rule=Host(`colorssaude.impulsionando.com.br`)
+27:      - traefik.http.routers.colorssaude.entrypoints=${TRAEFIK_HTTPS_ENTRYPOINT:-websecure}
+28:      - traefik.http.routers.colorssaude.tls=true
+29:      - traefik.http.routers.colorssaude.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+30:      - traefik.http.routers.colorssaude.service=impulsionando-core
+31:      - traefik.http.routers.colorssaude.priority=200
+32:      - traefik.http.middlewares.impulsionando-core-https.redirectscheme.scheme=https
+33:      - traefik.http.routers.impulsionando-core-web.entrypoints=${TRAEFIK_HTTP_ENTRYPOINT:-web}
+34:      - traefik.http.routers.impulsionando-core-web.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || Host(`chrismed.impulsionando.com.br`) || Host(`wmp.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
+35:      - traefik.http.routers.impulsionando-core-web.middlewares=impulsionando-core-https
+36:      - traefik.http.routers.impulsionando-core.entrypoints=${TRAEFIK_HTTPS_ENTRYPOINT:-websecure}
+37:      - traefik.http.routers.impulsionando-core.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || Host(`chrismed.impulsionando.com.br`) || Host(`wmp.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
+38:      - traefik.http.routers.impulsionando-core.tls=true
+39:      - traefik.http.routers.impulsionando-core.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+40:      - traefik.http.routers.chrismed.rule=Host(`chrismed.impulsionando.com.br`)
+41:      - traefik.http.routers.chrismed.entrypoints=${TRAEFIK_HTTPS_ENTRYPOINT:-websecure}
+42:      - traefik.http.routers.chrismed.tls=true
+43:      - traefik.http.routers.chrismed.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+44:      - traefik.http.routers.chrismed.service=impulsionando-core
