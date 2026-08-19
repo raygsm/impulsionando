@@ -10,6 +10,8 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -85,126 +87,108 @@ function isHtmlDocumentRequest(request: Request): boolean {
   return accept.includes("text/html") || accept.includes("application/xhtml+xml");
 }
 
-const WMP_GLOBAL_PATHS = new Set([
-  "/auth",
-  "/dashboard",
-  "/seguranca/senha",
-  "/reset-password",
-  "/reset-password-sent",
-]);
-
-const WMP_BYPASS_PREFIXES = [
-  "/api/",
-  "/assets/",
-  "/.well-known/",
-  "/favicon",
-  "/robots",
-  "/sitemap",
-  "/manifest",
-];
-
-function shouldBootstrapWmpDocument(url: URL, request: Request): boolean {
-  if (!isHtmlDocumentRequest(request)) return false;
-  if (url.hostname.toLowerCase() !== "wmp.impulsionando.com.br") return false;
-  const path = url.pathname || "/";
-
-  // Root is intentionally NOT bootstrapped. The server internally renders /wmp
-  // while the browser remains on the clean WMP root. The client root route is
-  // host-locked to render WMP, so SSR and hydration stay on the same brand/front.
-  if (path === "/") return false;
-
-  if (path === "/wmp" || path.startsWith("/wmp/")) return false;
-  if (WMP_GLOBAL_PATHS.has(path)) return false;
-  if (WMP_BYPASS_PREFIXES.some((prefix) => path.startsWith(prefix))) return false;
-  return true;
-}
-
-function wmpBootstrapResponse(request: Request, url: URL): Response {
-  const cleanPath = url.pathname || "/";
-  const targetPath = cleanPath === "/" ? "/wmp/" : `/wmp${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
-  const target = `${targetPath}${url.search}${url.hash}`;
-  const escapedTarget = JSON.stringify(target);
-  const escapedHref = target.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const headers = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
-  if (request.method === "HEAD") return new Response(null, { status: 200, headers });
-  return new Response(
-    `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WMP — Wagner Miller Produções</title><meta http-equiv="refresh" content="0;url=${escapedHref}"><script>location.replace(${escapedTarget})</script></head><body><main><p>WMP — Wagner Miller Produções</p><p><a href="${escapedHref}">Continuar para WMP</a></p></main></body></html>`,
-    { status: 200, headers },
-  );
-}
-
 function wmpDomainLockResponse(request: Request): Response {
   const headers = {
     "content-type": "text/plain; charset=utf-8",
     "cache-control": "no-store, max-age=0",
+    "x-wmp-redirect-policy": "deny-all",
   };
   if (request.method === "HEAD") return new Response(null, { status: 200, headers });
   return new Response(
-    "WMP_DOMAIN_LOCK_RELEASE=2026-08-18-v2\nWMP_CANONICAL_HOST=wmp.impulsionando.com.br\nWMP_DOMAIN_ISOLATION=ENFORCED\nWMP_ROOT_HYDRATION=HOST_LOCKED\n",
+    "WMP_DOMAIN_LOCK_RELEASE=2026-08-19-v3\nWMP_CANONICAL_HOST=wmp.impulsionando.com.br\nWMP_DOMAIN_ISOLATION=ENFORCED\nWMP_ROOT_HYDRATION=HOST_LOCKED\nWMP_REDIRECT_POLICY=DENY_ALL\n",
     { status: 200, headers },
   );
+}
+
+function enforceWmpNoRedirect(hostname: string, response: Response): Response {
+  if (hostname.toLowerCase() !== WMP_CANONICAL_HOST) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("x-wmp-redirect-policy", "deny-all");
+
+  if (response.status >= 300 && response.status < 400) {
+    headers.delete("location");
+    headers.set("content-type", "text/plain; charset=utf-8");
+    headers.set("cache-control", "no-store");
+    return new Response("WMP navigation blocked by redirect policy.", {
+      status: 409,
+      headers,
+    });
+  }
+
+  headers.delete("location");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const url = new URL(request.url);
+      const originalUrl = new URL(request.url);
+      const isWmpHost = originalUrl.hostname.toLowerCase() === WMP_CANONICAL_HOST;
 
       if (
-        url.hostname.toLowerCase() === "wmp.impulsionando.com.br" &&
-        url.pathname === "/wmp-domain-lock.txt" &&
+        isWmpHost &&
+        originalUrl.pathname === "/wmp-domain-lock.txt" &&
         (request.method === "GET" || request.method === "HEAD")
       ) {
         return applySecurityHeaders(wmpDomainLockResponse(request));
       }
 
-      if (shouldBootstrapWmpDocument(url, request)) {
-        return applySecurityHeaders(wmpBootstrapResponse(request, url));
+      // Absolute WMP rule: never canonicalize, bootstrap, meta-refresh, or issue
+      // any HTTP redirect. Clean WMP URLs are mapped only through an internal
+      // request rewrite, so the browser location remains untouched.
+      if (!isWmpHost) {
+        const canonicalTenantUrl = canonicalTenantHostRedirect({
+          hostname: originalUrl.hostname,
+          pathname: originalUrl.pathname,
+          search: originalUrl.search,
+          hash: originalUrl.hash,
+          protocol: originalUrl.protocol,
+        });
+        if (canonicalTenantUrl) {
+          return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
+        }
       }
 
-      const canonicalTenantUrl = canonicalTenantHostRedirect({
-        hostname: url.hostname,
-        pathname: url.pathname,
-        search: url.search,
-        hash: url.hash,
-        protocol: url.protocol,
-      });
-      if (canonicalTenantUrl) {
-        return applySecurityHeaders(Response.redirect(canonicalTenantUrl, 308));
-      }
-
-      if (url.pathname === "/api/public/hooks/n8n-verify") {
-        return applySecurityHeaders(await handleN8nHmacVerifier(request));
+      if (originalUrl.pathname === "/api/public/hooks/n8n-verify") {
+        const hookResponse = await handleN8nHmacVerifier(request);
+        return applySecurityHeaders(enforceWmpNoRedirect(originalUrl.hostname, hookResponse));
       }
 
       const handler = await getServerEntry();
+      const routedUrl = new URL(originalUrl);
       let routedRequest = request;
-      const tenantTarget = tenantLandingTargetForHost(url.host);
-      const internalChrismedPathname = toChrismedInternalPathname(url.hostname, url.pathname);
+      const tenantTarget = tenantLandingTargetForHost(routedUrl.host);
+      const internalChrismedPathname = toChrismedInternalPathname(routedUrl.hostname, routedUrl.pathname);
       const internalColorsPathname = isHtmlDocumentRequest(request)
-        ? toColorsInternalPathname(url.hostname, url.pathname)
-        : url.pathname;
+        ? toColorsInternalPathname(routedUrl.hostname, routedUrl.pathname)
+        : routedUrl.pathname;
       const internalWmpPathname = isHtmlDocumentRequest(request)
-        ? toWmpInternalPathname(url.hostname, url.pathname)
-        : url.pathname;
+        ? toWmpInternalPathname(routedUrl.hostname, routedUrl.pathname)
+        : routedUrl.pathname;
 
-      if (internalChrismedPathname !== url.pathname) {
-        url.pathname = internalChrismedPathname;
-        routedRequest = new Request(url, request);
-      } else if (internalColorsPathname !== url.pathname) {
-        url.pathname = internalColorsPathname;
-        routedRequest = new Request(url, request);
-      } else if (internalWmpPathname !== url.pathname) {
-        url.pathname = internalWmpPathname;
-        routedRequest = new Request(url, request);
-      } else if ((url.pathname === "/" || url.pathname === "") && tenantTarget) {
-        url.pathname = tenantTarget;
-        routedRequest = new Request(url, request);
+      if (internalChrismedPathname !== routedUrl.pathname) {
+        routedUrl.pathname = internalChrismedPathname;
+        routedRequest = new Request(routedUrl, request);
+      } else if (internalColorsPathname !== routedUrl.pathname) {
+        routedUrl.pathname = internalColorsPathname;
+        routedRequest = new Request(routedUrl, request);
+      } else if (internalWmpPathname !== routedUrl.pathname) {
+        routedUrl.pathname = internalWmpPathname;
+        routedRequest = new Request(routedUrl, request);
+      } else if ((routedUrl.pathname === "/" || routedUrl.pathname === "") && tenantTarget) {
+        routedUrl.pathname = tenantTarget;
+        routedRequest = new Request(routedUrl, request);
       }
 
       const response = await handler.fetch(routedRequest, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
-      return applySecurityHeaders(normalized);
+      const wmpLocked = enforceWmpNoRedirect(originalUrl.hostname, normalized);
+      return applySecurityHeaders(wmpLocked);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(
