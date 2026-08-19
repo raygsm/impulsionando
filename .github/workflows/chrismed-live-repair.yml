@@ -22,20 +22,10 @@ jobs:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Validate existing OpenAI credential
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "${OPENAI_API_KEY:-}"
-          code="$(curl -sS -o /tmp/openai.json -w '%{http_code}' --max-time 20 https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY")"
-          test "$code" = '200'
-          echo 'OPENAI_CREDENTIAL=VALID'
 
       - name: Configure SSH
         shell: bash
@@ -48,16 +38,10 @@ jobs:
           ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
 
-      - name: Reconnect Oliver and prepare CHRISMED QR
+      - name: Reuse live OpenAI credential and prepare CHRISMED QR
         shell: bash
         run: |
           set -euo pipefail
-          keyfile="$(mktemp)"
-          printf '%s' "$OPENAI_API_KEY" > "$keyfile"
-          chmod 600 "$keyfile"
-          scp "$keyfile" "$VPS_USER@$VPS_HOST:/tmp/chrismed-openai.key"
-          rm -f "$keyfile"
-
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
           ENV_FILE=/etc/impulsionando-core.env
@@ -70,9 +54,17 @@ jobs:
           sudo docker inspect "$CORE" >/dev/null
           sudo docker inspect "$EVO" >/dev/null
 
-          OPENAI_KEY="$(cat /tmp/chrismed-openai.key)"
-          rm -f /tmp/chrismed-openai.key
+          OPENAI_KEY="$(sudo sed -n 's/^OPENAI_API_KEY=//p' "$ENV_FILE" | head -n1)"
+          if [ -z "$OPENAI_KEY" ] && sudo docker inspect "$CORE" >/dev/null 2>&1; then
+            OPENAI_KEY="$(sudo docker inspect "$CORE" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^OPENAI_API_KEY=//p' | head -n1)"
+          fi
           test -n "$OPENAI_KEY"
+
+          openai_code="$(curl -sS -o /tmp/chrismed-openai-check.json -w '%{http_code}' --max-time 20 https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_KEY")"
+          rm -f /tmp/chrismed-openai-check.json
+          test "$openai_code" = 200
+          echo 'OLIVER_OPENAI=VALID_EXISTING_CREDENTIAL'
+
           EVO_KEY="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
           test -n "$EVO_KEY"
 
