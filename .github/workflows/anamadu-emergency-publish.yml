@@ -6,6 +6,12 @@ on:
     branches: [main]
     paths:
       - .github/workflows/anamadu-emergency-publish.yml
+      - src/components/anamadu/**
+      - src/lib/anamadu/**
+      - src/routes/api/anamadu/**
+      - src/routes/anamadu.tsx
+      - src/routes/index.tsx
+      - src/routes/__root.tsx
 
 concurrency:
   group: anamadu-emergency-publish
@@ -97,6 +103,8 @@ jobs:
           sudo tee "$override" >/dev/null <<'YAML'
           services:
             impulsionando-core:
+              env_file:
+                - /etc/impulsionando-core.env
               labels:
                 traefik.http.routers.anamadu.entrypoints: websecure
                 traefik.http.routers.anamadu.rule: Host(`anamadu.impulsionando.com.br`)
