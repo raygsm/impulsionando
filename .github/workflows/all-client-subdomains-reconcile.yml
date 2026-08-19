@@ -1,5 +1,6 @@
 name: All client subdomains reconcile
 
+# Forced production reconciliation: 2026-08-19T07:41:00-03:00
 on:
   push:
     paths:
