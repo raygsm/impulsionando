@@ -1,0 +1,177 @@
+name: Definitive legacy builder purge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/legacy-builder-purge.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: definitive-legacy-builder-purge
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Remove legacy builder packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm uninstall \
+            @lovable.dev/cloud-auth-js \
+            @lovable.dev/email-js \
+            @lovable.dev/mcp-js \
+            @lovable.dev/webhooks-js \
+            @lovable.dev/vite-tanstack-config
+          rm -f bun.lock
+
+      - name: Replace legacy AI gateway with OpenAI
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > src/lib/ai-gateway.server.ts <<'EOF'
+          import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+
+          /** Server-only OpenAI provider. Credentials are read only on the server. */
+          export function createOpenAiGatewayProvider(apiKey: string) {
+            return createOpenAICompatible({
+              name: "openai",
+              baseURL: "https://api.openai.com/v1",
+              headers: { Authorization: `Bearer ${apiKey}` },
+            });
+          }
+          EOF
+
+          cat > src/lib/impulsionito/providers.server.ts <<'EOF'
+          /**
+           * Camada de provedores LLM — server-only.
+           * O Core usa OpenAI como provedor canônico. Provedores não configurados falham fechados.
+           */
+          import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+          import type { LanguageModel } from "ai";
+          import type { LlmConfig, LlmProviderId } from "./types";
+
+          const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+
+          export interface ResolvedProvider {
+            provider: LlmProviderId;
+            model: LanguageModel;
+            modelId: string;
+          }
+
+          export interface ResolveOptions {
+            llm?: Partial<LlmConfig>;
+            allowFallback?: boolean;
+            openaiApiKey?: string;
+          }
+
+          function resolveOpenAi(requestedModel?: string, explicitKey?: string): ResolvedProvider | null {
+            const key = explicitKey?.trim() || process.env.OPENAI_API_KEY?.trim();
+            if (!key) return null;
+            const modelId = requestedModel?.trim() || DEFAULT_OPENAI_MODEL;
+            const provider = createOpenAICompatible({
+              name: "openai",
+              baseURL: "https://api.openai.com/v1",
+              headers: { Authorization: `Bearer ${key}` },
+            });
+            return { provider: "openai", model: provider(modelId), modelId };
+          }
+
+          export function resolveProvider(opts: ResolveOptions = {}): ResolvedProvider {
+            const requested = opts.llm?.provider ?? "openai";
+            if (requested === "openai") {
+              const resolved = resolveOpenAi(opts.llm?.model, opts.openaiApiKey);
+              if (resolved) return resolved;
+              throw new Error("llm_provider_unavailable:openai");
+            }
+            if (opts.allowFallback === false) throw new Error(`llm_provider_unavailable:${requested}`);
+            const fallback = resolveOpenAi(undefined, opts.openaiApiKey);
+            if (fallback) return fallback;
+            throw new Error("no_llm_provider_available");
+          }
+
+          export function detectAvailableProviders(): Record<LlmProviderId, boolean> {
+            return {
+              openai: !!process.env.OPENAI_API_KEY,
+              gemini: false,
+              claude: false,
+              ollama: false,
+            };
+          }
+          EOF
+
+          files=$(git grep -Il 'createLovableAiGatewayProvider\|LOVABLE_API_KEY\|google/gemini-3-flash-preview\|google/gemini-2.5-flash' -- 'src/**' '.github/**' 2>/dev/null || true)
+          if [ -n "$files" ]; then
+            while IFS= read -r file; do
+              [ -n "$file" ] || continue
+              sed -i \
+                -e 's/createLovableAiGatewayProvider/createOpenAiGatewayProvider/g' \
+                -e 's/LOVABLE_API_KEY/OPENAI_API_KEY/g' \
+                -e 's#google/gemini-3-flash-preview#gpt-4o-mini#g' \
+                -e 's#google/gemini-2.5-flash#gpt-4o-mini#g' \
+                "$file"
+            done <<< "$files"
+          fi
+
+          # Remove historical textual references from tracked text files while keeping this neutral purge workflow intact.
+          refs=$(git grep -Il -i 'lovable' -- ':!package.json' ':!package-lock.json' ':!.github/workflows/legacy-builder-purge.yml' 2>/dev/null || true)
+          if [ -n "$refs" ]; then
+            while IFS= read -r file; do
+              [ -n "$file" ] || continue
+              perl -0pi -e 's/lovable/legacy-builder/gi' "$file"
+            done <<< "$refs"
+          fi
+
+          git rm -f .github/workflows/purge-lovable-debug.yml 2>/dev/null || true
+          git rm -f .github/workflows/purge-lovable-dependencies.yml 2>/dev/null || true
+
+      - name: Assert legacy builder is absent from runtime and manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Rni --include='package.json' --include='package-lock.json' '@lovable.dev' .
+          ! git grep -ni -I 'lovable' -- ':!.github/workflows/legacy-builder-purge.yml'
+          ! test -f bun.lock
+
+      - name: Install and build Core
+        shell: bash
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+
+      - name: Commit validated purge
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No cleanup changes required.'
+            exit 0
+          fi
+          git commit -m 'chore(core): permanently remove legacy builder and standardize OpenAI runtime'
+          git pull --rebase origin main
+          git push origin HEAD:main
