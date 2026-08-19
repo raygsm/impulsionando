@@ -1,4 +1,4 @@
-# Forced reconciliation trigger: 2026-08-19T07:48:00-03:00
+# Forced reconciliation trigger: 2026-08-19T16:56:00-03:00
 name: All client subdomains reconcile
 
 on:
@@ -46,6 +46,7 @@ jobs:
           CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
           ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           test -n "$ORIGIN_IP"
+          test "$ORIGIN_IP" = "187.77.232.52" || { echo "::error::Unexpected origin IP $ORIGIN_IP; expected 187.77.232.52"; exit 1; }
           printf 'CF_ZONE_ID=%s\nORIGIN_IP=%s\n' "$CF_ZONE_ID" "$ORIGIN_IP" >> "$GITHUB_ENV"
 
       - name: Discover active tenant domains from Core
@@ -160,7 +161,7 @@ jobs:
             location=''
             for attempt in $(seq 1 20); do
               headers="$(mktemp)"
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/4.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/4.1' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
               location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
               rm -f "$headers"
               echo "ORIGIN $domain attempt=$attempt HTTP=$code LOCATION=${location:-none}"
@@ -202,7 +203,7 @@ jobs:
             code=000
             final_url=''
             for attempt in $(seq 1 24); do
-              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/4.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/4.1' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
               final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               echo "PUBLIC $domain attempt=$attempt HTTP=$code FINAL=$final_url"
               if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
