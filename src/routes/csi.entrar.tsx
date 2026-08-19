@@ -2,48 +2,5 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, LogIn, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-export const Route = createFileRoute("/csi/entrar")({
-  head: () => ({ meta: [
-    { title: "Entrar — CSI Invest" },
-    { name: "description", content: "Acesso seguro à área privada do investidor CSI." },
-    { name: "robots", content: "noindex,nofollow" },
-  ] }),
-  component: CsiLogin,
-});
-
-function CsiLogin() {
-  const navigate = useNavigate();
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  const [show,setShow]=useState(false);
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState<string|null>(null);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault(); setError(null); setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (error) throw error;
-      navigate({ to: "/csi/portal" });
-    } catch (err: any) {
-      const m=String(err?.message||"").toLowerCase();
-      setError(m.includes("invalid login credentials") ? "E-mail ou senha incorretos." : m.includes("email not confirmed") ? "Confirme seu e-mail antes de entrar." : "Não foi possível entrar. Tente novamente.");
-    } finally { setLoading(false); }
-  }
-
-  return <main className="min-h-screen bg-[#07111b] text-white grid place-items-center px-5 py-12">
-    <div className="w-full max-w-md rounded-[30px] border border-white/10 bg-white/[.045] p-7 md:p-9 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center gap-3 text-amber-300"><ShieldCheck className="h-6 w-6"/><span className="text-xs font-semibold uppercase tracking-[.18em]">CSI Private Access</span></div>
-      <h1 className="mt-5 text-3xl font-semibold tracking-tight">Acesse sua área do investidor</h1>
-      <p className="mt-2 text-sm leading-relaxed text-slate-400">Ambiente privado para inteligência, documentos, suitability, alertas e acompanhamento.</p>
-      <form onSubmit={submit} className="mt-7 space-y-4">
-        <label className="block"><span className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-white/50">E-mail</span><input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full rounded-xl border border-white/15 bg-white/[.04] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/20" placeholder="voce@email.com"/></label>
-        <label className="block"><span className="mb-1.5 flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-white/50">Senha <Link to="/auth" className="normal-case tracking-normal text-amber-300">Recuperar acesso</Link></span><div className="relative"><input required type={show?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full rounded-xl border border-white/15 bg-white/[.04] px-4 py-3 pr-11 text-sm text-white placeholder:text-white/30 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/20" placeholder="••••••••"/><button type="button" onClick={()=>setShow(v=>!v)} className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-white/50 hover:bg-white/5" aria-label={show?"Ocultar senha":"Mostrar senha"}>{show?<EyeOff className="h-4 w-4"/>:<Eye className="h-4 w-4"/>}</button></div></label>
-        {error && <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
-        <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60">{loading?<Loader2 className="h-4 w-4 animate-spin"/>:<LogIn className="h-4 w-4"/>}{loading?"Entrando...":"Entrar com segurança"}</button>
-      </form>
-      <p className="mt-5 text-center text-xs text-slate-600">Acesso sujeito às políticas de segurança, privacidade e suitability da CSI.</p>
-    </div>
-  </main>;
-}
+export const Route=createFileRoute("/csi/entrar")({head:()=>({meta:[{title:"Entrar — CSI Invest"},{name:"description",content:"Acesso seguro à área privada do investidor CSI."},{name:"robots",content:"noindex,nofollow"}]}),component:CsiLogin});
+function CsiLogin(){const navigate=useNavigate();const[email,setEmail]=useState("");const[password,setPassword]=useState("");const[show,setShow]=useState(false);const[loading,setLoading]=useState(false);const[error,setError]=useState<string|null>(null);async function submit(e:React.FormEvent){e.preventDefault();setError(null);setLoading(true);try{const{error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error)throw error;navigate({to:"/csi/portal"});}catch(err:any){const m=String(err?.message||"").toLowerCase();setError(m.includes("invalid login credentials")?"E-mail ou senha incorretos.":m.includes("email not confirmed")?"Confirme seu e-mail antes de entrar.":"Não foi possível entrar. Tente novamente.");}finally{setLoading(false)}}return<main className="min-h-screen bg-[#07111b] text-white grid place-items-center px-5 py-12"><div className="w-full max-w-md rounded-[30px] border border-white/10 bg-white/[.045] p-7 md:p-9 shadow-2xl backdrop-blur-xl"><div className="flex items-center gap-3 text-amber-300"><ShieldCheck className="h-6 w-6"/><span className="text-xs font-semibold uppercase tracking-[.18em]">CSI Private Access</span></div><h1 className="mt-5 text-3xl font-semibold tracking-tight">Acesse sua área do investidor</h1><p className="mt-2 text-sm leading-relaxed text-slate-400">Ambiente privado para inteligência, documentos, suitability, alertas e acompanhamento.</p><form onSubmit={submit} className="mt-7 space-y-4"><label className="block"><span className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-white/50">E-mail</span><input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full rounded-xl border border-white/15 bg-white/[.04] px-4 py-3 text-sm focus:border-amber-300 focus:outline-none"/></label><label className="block"><span className="mb-1.5 flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-white/50">Senha <Link to="/csi/recuperar" className="normal-case tracking-normal text-amber-300">Recuperar acesso</Link></span><div className="relative"><input required type={show?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full rounded-xl border border-white/15 bg-white/[.04] px-4 py-3 pr-11 text-sm focus:border-amber-300 focus:outline-none"/><button type="button" onClick={()=>setShow(v=>!v)} className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-white/50" aria-label={show?"Ocultar senha":"Mostrar senha"}>{show?<EyeOff className="h-4 w-4"/>:<Eye className="h-4 w-4"/>}</button></div></label>{error&&<p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}<button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60">{loading?<Loader2 className="h-4 w-4 animate-spin"/>:<LogIn className="h-4 w-4"/>}{loading?"Entrando...":"Entrar com segurança"}</button></form><p className="mt-5 text-center text-xs text-slate-500">Primeiro acesso? <Link to="/csi/criar-conta" className="text-amber-300">Criar acesso CSI</Link></p></div></main>}
