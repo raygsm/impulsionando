@@ -23,17 +23,34 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - name: Validate production credentials and origin
         run: |
           set -euo pipefail
-          for value in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
+          for value in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
             test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }
           done
           CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
           ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           test -n "$ORIGIN_IP"
           printf 'CF_ZONE_ID=%s\nORIGIN_IP=%s\n' "$CF_ZONE_ID" "$ORIGIN_IP" >> "$GITHUB_ENV"
+
+      - name: Discover active tenant domains from Core
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&subdomain=neq.impulsionando&order=subdomain.asc" \
+            -o /tmp/tenants.json
+          jq -e 'type == "array"' /tmp/tenants.json >/dev/null
+          domains="$(jq -r '.[] | select(.subdomain != null and .root_domain != null) | (.subdomain + "." + .root_domain)' /tmp/tenants.json | sort -u | tr '\n' ' ' | xargs)"
+          test -n "$domains" || { echo '::error::No tenant domains discovered'; exit 2; }
+          echo "DOMAINS=$domains" >> "$GITHUB_ENV"
+          echo "TENANT_COUNT=$(wc -w <<<"$domains" | tr -d ' ')" >> "$GITHUB_ENV"
+          echo "Discovered domains: $domains"
 
       - name: Configure SSH
         run: |
@@ -46,15 +63,14 @@ jobs:
       - name: Validate tenant subdomains at Traefik origin
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
-          ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$domains' bash -s" <<'REMOTE'
+          ssh -o ConnectTimeout=20 "$VPS_USER@$VPS_HOST" "DOMAINS='$DOMAINS' bash -s" <<'REMOTE'
           set -euo pipefail
           for domain in $DOMAINS; do
             code=000
             location=''
             for attempt in $(seq 1 30); do
               headers="$(mktemp)"
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/2.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoTenantReconcile/3.0' -H 'Accept: text/html,application/xhtml+xml' -D "$headers" -o /tmp/tenant-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
               location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
               rm -f "$headers"
               echo "ORIGIN $domain attempt=$attempt HTTP=$code LOCATION=${location:-none}"
@@ -69,8 +85,7 @@ jobs:
       - name: Reconcile Cloudflare DNS to validated VPS
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
-          for domain in $domains; do
+          for domain in $DOMAINS; do
             curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
               "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
             jq -e '.success == true' /tmp/dns.json >/dev/null
@@ -91,13 +106,12 @@ jobs:
       - name: Validate public HTTPS without cross-host redirects
         run: |
           set -euo pipefail
-          domains='colorssaude.impulsionando.com.br chrismed.impulsionando.com.br anamadu.impulsionando.com.br marocas.impulsionando.com.br riomed.impulsionando.com.br wmp.impulsionando.com.br csi.impulsionando.com.br'
           failed=0
-          for domain in $domains; do
+          for domain in $DOMAINS; do
             code=000
             final_url=''
             for attempt in $(seq 1 18); do
-              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/2.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoTenantReconcile/3.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
               final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               echo "PUBLIC $domain attempt=$attempt HTTP=$code FINAL=$final_url"
               if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
@@ -110,4 +124,4 @@ jobs:
             fi
           done
           [ "$failed" = '0' ] || exit 40
-          echo 'ALL_CLIENT_SUBDOMAINS=PASS'
+          echo "ALL_CLIENT_SUBDOMAINS=PASS count=$TENANT_COUNT"
