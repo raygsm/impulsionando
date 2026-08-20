@@ -1,0 +1,79 @@
+name: CHRISMED WhatsApp and Oliver diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-whatsapp-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Collect sanitized readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/wa-proof.json 2>/tmp/wa-proof.err <<'REMOTE'
+          set -euo pipefail
+          CORE=impulsionando-core
+          EVO=impulsionando-evolution-api
+          core_state="$(sudo docker inspect "$CORE" --format '{{.State.Status}}' 2>/dev/null || echo missing)"
+          evo_state="$(sudo docker inspect "$EVO" --format '{{.State.Status}}' 2>/dev/null || echo missing)"
+          env_dump="$(sudo docker inspect "$CORE" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null || true)"
+          has_openai=false; has_evo_url=false; has_evo_key=false
+          grep -q '^OPENAI_API_KEY=.' <<<"$env_dump" && has_openai=true
+          grep -q '^CHRISMED_EVOLUTION_BASE_URL=.' <<<"$env_dump" && has_evo_url=true
+          grep -q '^CHRISMED_EVOLUTION_API_KEY=.' <<<"$env_dump" && has_evo_key=true
+          openai_http=0
+          if $has_openai; then
+            openai_key="$(sed -n 's/^OPENAI_API_KEY=//p' <<<"$env_dump" | head -n1)"
+            openai_http="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://api.openai.com/v1/models -H "Authorization: Bearer $openai_key" || echo 0)"
+            unset openai_key
+          fi
+          instance_state='unknown'; pairing_ready=false
+          if [ "$evo_state" = running ]; then
+            evo_key="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
+            if [ -n "$evo_key" ]; then
+              response="$(curl -sS --max-time 15 http://127.0.0.1:8080/instance/connectionState/chrismed-oliver -H "apikey: $evo_key" || true)"
+              instance_state="$(jq -r '.instance.state // .state // .data.state // "unknown"' <<<"${response:-{}}" 2>/dev/null || echo unknown)"
+              connect="$(curl -sS --max-time 15 http://127.0.0.1:8080/instance/connect/chrismed-oliver -H "apikey: $evo_key" || true)"
+              if jq -e '.base64 // .qrcode.base64 // .data.Qrcode // .data.qrcode // .pairingCode // .qrcode.pairingCode' >/dev/null 2>&1 <<<"${connect:-{}}"; then pairing_ready=true; fi
+              unset evo_key response connect
+            fi
+          fi
+          jq -n --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg core_state "$core_state" --arg evo_state "$evo_state" --arg instance_state "$instance_state" --argjson has_openai "$has_openai" --argjson has_evo_url "$has_evo_url" --argjson has_evo_key "$has_evo_key" --argjson pairing_ready "$pairing_ready" --argjson openai_http "${openai_http:-0}" '{generated_at_utc:$generated_at_utc,core_container:$core_state,evolution_container:$evo_state,core_has_openai:$has_openai,core_has_evolution_url:$has_evo_url,core_has_evolution_key:$has_evo_key,openai_http:$openai_http,instance:"chrismed-oliver",instance_state:$instance_state,pairing_ready:$pairing_ready}'
+          REMOTE
+          test -s /tmp/wa-proof.json
+          jq . /tmp/wa-proof.json
+          mkdir -p docs/ops
+          cp /tmp/wa-proof.json docs/ops/chrismed-whatsapp-oliver-live.json
+      - name: Commit sanitized proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-whatsapp-oliver-live.json
+          git commit -m 'chore(chrismed): record WhatsApp and Oliver live proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
