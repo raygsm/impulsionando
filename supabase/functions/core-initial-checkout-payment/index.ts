@@ -6,6 +6,9 @@ const cors = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+const IMPULSIONANDO_COMPANY_ID = 'bda711e0-cbfa-4899-a068-0c75f96d4e59';
+const EXPECTED_ACCESS_SECRET = `mpago:${IMPULSIONANDO_COMPANY_ID}:production:access_token`;
+const EXPECTED_WEBHOOK_SECRET = `mpago:${IMPULSIONANDO_COMPANY_ID}:production:webhook_secret`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
@@ -16,6 +19,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY')!;
     const auth = req.headers.get('authorization') ?? '';
     if (!auth.toLowerCase().startsWith('bearer ')) return json({ error: 'authentication_required' }, 401);
+
     const authClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: auth } } });
     const { data: userData, error: userError } = await authClient.auth.getUser();
     const user = userData.user;
@@ -49,17 +53,29 @@ Deno.serve(async (req) => {
     if (!Number.isInteger(amountCents) || amountCents <= 0) return json({ error: 'invalid_checkout_amount' }, 409);
 
     const { data: masterCompanyId, error: masterError } = await service.rpc('master_company_id');
-    if (masterError || !masterCompanyId) return json({ error: 'merchant_company_unavailable' }, 503);
+    if (masterError || String(masterCompanyId) !== IMPULSIONANDO_COMPANY_ID) {
+      console.error('[core-initial-checkout-payment] merchant identity mismatch', { masterCompanyId });
+      return json({ error: 'impulsionando_merchant_identity_mismatch' }, 503);
+    }
     const { data: credential, error: credentialError } = await service.from('mpago_credentials')
-      .select('access_token_secret_name,webhook_secret_name,environment').eq('company_id', masterCompanyId).eq('active', true)
-      .order('environment', { ascending: false }).limit(1).maybeSingle();
-    if (credentialError || !credential) return json({ error: 'merchant_not_configured' }, 503);
-    const { data: token } = await service.rpc('reveal_secret_value', { p_name: credential.access_token_secret_name });
-    if (!token) return json({ error: 'merchant_secret_unavailable' }, 503);
+      .select('access_token_secret_name,webhook_secret_name,environment,company_id').eq('company_id', IMPULSIONANDO_COMPANY_ID).eq('active', true)
+      .eq('environment', 'production').limit(1).maybeSingle();
+    if (credentialError || !credential) return json({ error: 'impulsionando_merchant_not_configured' }, 503);
+    if (credential.company_id !== IMPULSIONANDO_COMPANY_ID || credential.access_token_secret_name !== EXPECTED_ACCESS_SECRET || credential.webhook_secret_name !== EXPECTED_WEBHOOK_SECRET) {
+      console.error('[core-initial-checkout-payment] merchant credential isolation violation');
+      return json({ error: 'impulsionando_merchant_credential_isolation_violation' }, 503);
+    }
+    if (String(credential.access_token_secret_name).startsWith('chrismed_') || String(credential.webhook_secret_name).startsWith('chrismed_')) {
+      console.error('[core-initial-checkout-payment] CHRISMED credential rejected');
+      return json({ error: 'cross_merchant_credential_rejected' }, 503);
+    }
+    const { data: token } = await service.rpc('reveal_secret_value', { p_name: EXPECTED_ACCESS_SECRET });
+    if (!token) return json({ error: 'impulsionando_merchant_secret_unavailable' }, 503);
 
-    const notificationUrl = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/core-initial-checkout-webhook?company_id=${encodeURIComponent(String(masterCompanyId))}`;
+    const notificationUrl = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/core-initial-checkout-webhook?company_id=${encodeURIComponent(IMPULSIONANDO_COMPANY_ID)}`;
     const externalReference = `billing_initial_checkout:${session.id}`;
     const metadata = {
+      merchant_company_id: IMPULSIONANDO_COMPANY_ID,
       context_type: 'billing_initial_checkout',
       checkout_session_id: session.id,
       billed_customer_company_id: session.customer_company_id,
@@ -85,7 +101,7 @@ Deno.serve(async (req) => {
     if (!mpResponse.ok) return json({ error: 'mercado_pago_error', details: mpData }, mpResponse.status);
 
     const { data: payment, error: persistError } = await service.from('mpago_payments').insert({
-      company_id: masterCompanyId,
+      company_id: IMPULSIONANDO_COMPANY_ID,
       external_reference: externalReference,
       mp_payment_id: String(mpData.id),
       payment_method: 'pix',
@@ -103,7 +119,7 @@ Deno.serve(async (req) => {
     }).select('id,mp_payment_id,status,amount_cents,pix_qr_code,pix_qr_code_base64,pix_expires_at').single();
     if (persistError || !payment) return json({ error: 'payment_persistence_failed', details: persistError?.message }, 500);
 
-    const { error: linkError } = await service.from('billing_checkout_sessions').update({ mpago_payment_id: payment.id, status: 'payment_pending', updated_at: new Date().toISOString(), metadata: { payment_provider: 'mercado_pago', quote } }).eq('id', session.id);
+    const { error: linkError } = await service.from('billing_checkout_sessions').update({ mpago_payment_id: payment.id, status: 'payment_pending', updated_at: new Date().toISOString(), metadata: { payment_provider: 'mercado_pago', merchant_company_id: IMPULSIONANDO_COMPANY_ID, quote } }).eq('id', session.id);
     if (linkError) return json({ error: 'checkout_payment_link_failed' }, 500);
 
     if (payment.status === 'approved') {
