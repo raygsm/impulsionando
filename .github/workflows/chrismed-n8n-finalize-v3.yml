@@ -1,0 +1,165 @@
+name: CHRISMED n8n finalize v3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-n8n-finalize-v3.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chrismed-n8n-finalize-v3
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Provision CHRISMED workflows using isolated n8n CLI containers
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/chrismed-n8n-v3.txt 2>&1 <<'REMOTE'
+          set -Eeuo pipefail
+          trap 'rc=$?; echo "FAILED rc=$rc line=$LINENO"; rm -f /tmp/n8n-cli.env /tmp/chrismed-all-v3.json /tmp/chrismed-map-v3.tsv; exit $rc' ERR
+
+          N8N=n8n-umlg-n8n-1
+          CORE=impulsionando-core
+          CORE_ENV=/etc/impulsionando-core.env
+          SECURITY_ENV=/etc/impulsionando-security.env
+          SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
+          SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
+          SIGNING_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+          test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY" && test -n "$SIGNING_SECRET"
+          sudo docker inspect "$N8N" --format '{{.State.Status}}' | grep -q running
+          sudo docker inspect "$CORE" --format '{{.State.Status}}' | grep -q running
+
+          IMAGE="$(sudo docker inspect "$N8N" --format '{{.Config.Image}}')"
+          NETWORK="$(sudo docker inspect "$N8N" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | head -n1)"
+          test -n "$IMAGE" && test -n "$NETWORK"
+
+          sudo docker inspect "$N8N" --format '{{range .Config.Env}}{{println .}}{{end}}' > /tmp/n8n-cli.env
+          chmod 600 /tmp/n8n-cli.env
+          grep -q '^N8N_' /tmp/n8n-cli.env || true
+
+          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&config-%3E%3Etenant_slug=eq.chrismed&select=id,workflow_slug,version,description,config&order=workflow_slug.asc" \
+            -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" > /tmp/chrismed-ready-v3.json
+
+          total="$(jq 'length' /tmp/chrismed-ready-v3.json)"
+          echo "READY_CHRISMED=$total"
+          if [ "$total" -eq 0 ]; then
+            echo 'RESULT remaining_chrismed=0 failures=0'
+            rm -f /tmp/n8n-cli.env
+            exit 0
+          fi
+
+          slugify(){ printf '%s' "$1" | tr '[:upper:]._' '[:lower:]---' | tr -cd 'a-z0-9-'; }
+          make_id(){ printf 'ch%s' "$(printf '%s' "$1" | sha256sum | cut -c1-20)"; }
+          sign(){ printf '%s' "$1" | openssl dgst -sha256 -hmac "$SIGNING_SECRET" -hex | awk '{print $2}'; }
+
+          echo '[]' > /tmp/chrismed-all-v3.json
+          : > /tmp/chrismed-map-v3.tsv
+
+          while IFS=$'\t' read -r registry_id slug version title; do
+            [ -n "$slug" ] || continue
+            id="$(make_id "${slug}:v${version}")"
+            path="chrismed-$(slugify "$slug")-v${version}"
+            tmp="$(mktemp)"
+            jq -n --arg id "$id" --arg name "CHRISMED | ${title:-$slug}" --arg path "$path" --arg slug "$slug" '{id:$id,name:$name,active:false,nodes:[{parameters:{httpMethod:"POST",path:$path,responseMode:"responseNode",options:{}},id:($id+"-webhook"),name:"CHRISMED Event",type:"n8n-nodes-base.webhook",typeVersion:2,position:[0,0],webhookId:($id+"-hook")},{parameters:{method:"POST",url:"http://impulsionando-core:3000/api/public/hooks/n8n-verify",sendHeaders:true,headerParameters:{parameters:[{name:"x-impulsionando-signature",value:"={{ $json.headers?.[\"x-impulsionando-signature\"] || \"\" }}"},{name:"Content-Type",value:"application/json"}]},sendBody:true,contentType:"raw",rawContentType:"application/json",body:"={{ JSON.stringify($json.body) }}",options:{response:{response:{fullResponse:true,neverError:true,responseFormat:"json"}},timeout:15000}},id:($id+"-verify"),name:"Verify in Core",type:"n8n-nodes-base.httpRequest",typeVersion:4.2,position:[260,0]},{parameters:{jsCode:"const r=$input.first().json;const b=r.body||{};return [{json:{ok:Number(r.statusCode)===200&&b.authorized===true&&b.ok===true,statusCode:Number(r.statusCode)||0,error:b.error||null,payload:b.payload||null}}];"},id:($id+"-normalize"),name:"Normalize",type:"n8n-nodes-base.code",typeVersion:2,position:[520,0]},{parameters:{respondWith:"json",responseBody:("={{ { ok: $json.ok === true, workflow: \""+$slug+"\", error: $json.ok === true ? null : $json.error, event_code: $json.payload?.event_code || null, correlation_id: $json.payload?.correlation_id || null } }}"),options:{responseCode:"={{ $json.ok === true ? 200 : 401 }}"}},id:($id+"-respond"),name:"Respond",type:"n8n-nodes-base.respondToWebhook",typeVersion:1.4,position:[780,0]}],connections:{"CHRISMED Event":{main:[[{node:"Verify in Core",type:"main",index:0}]]},"Verify in Core":{main:[[{node:"Normalize",type:"main",index:0}]]},"Normalize":{main:[[{node:"Respond",type:"main",index:0}]]}},settings:{executionOrder:"v1",timezone:"America/Sao_Paulo"}}' > "$tmp"
+            jq --slurpfile w "$tmp" '. + $w' /tmp/chrismed-all-v3.json > /tmp/chrismed-all-v3.next
+            mv /tmp/chrismed-all-v3.next /tmp/chrismed-all-v3.json
+            rm -f "$tmp"
+            printf '%s\t%s\t%s\t%s\t%s\n' "$registry_id" "$slug" "$version" "$id" "$path" >> /tmp/chrismed-map-v3.tsv
+          done < <(jq -r '.[]|[.id,.workflow_slug,(.version|tostring),(.description//.workflow_slug)]|@tsv' /tmp/chrismed-ready-v3.json)
+
+          echo "COMBINED_IMPORT_COUNT=$(jq 'length' /tmp/chrismed-all-v3.json)"
+          sudo docker run --rm --network "$NETWORK" --env-file /tmp/n8n-cli.env -v /tmp/chrismed-all-v3.json:/tmp/chrismed-all-v3.json:ro "$IMAGE" import:workflow --input=/tmp/chrismed-all-v3.json
+
+          publish_failures=0
+          while IFS=$'\t' read -r registry_id slug version id path; do
+            echo "PUBLISH $slug id=$id"
+            if ! sudo docker run --rm --network "$NETWORK" --env-file /tmp/n8n-cli.env "$IMAGE" publish:workflow --id="$id"; then
+              echo "PUBLISH_FAILED $slug"
+              publish_failures=$((publish_failures+1))
+            fi
+          done < /tmp/chrismed-map-v3.tsv
+          test "$publish_failures" -eq 0
+
+          sudo docker restart "$N8N" >/dev/null
+          for i in $(seq 1 60); do
+            sudo docker exec "$N8N" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
+            [ "$i" -lt 60 ] || exit 50
+            sleep 2
+          done
+
+          CORE_NETWORK="$(sudo docker inspect "$CORE" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | head -n1)"
+          if ! sudo docker inspect "$N8N" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | grep -Fxq "$CORE_NETWORK"; then sudo docker network connect "$CORE_NETWORK" "$N8N"; fi
+          N8N_IP="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$N8N" | awk '{print $1}')"
+
+          failures=0
+          while IFS=$'\t' read -r registry_id slug version id path; do
+            payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"chrismed\",\"correlation_id\":\"final-$id-$(date +%s%N)\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
+            sig="$(sign "$payload")"
+            code="$(curl -sS -o /tmp/${id}.out -w '%{http_code}' --max-time 20 -X POST "http://$N8N_IP:5678/webhook/$path" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
+            if [ "$code" != 200 ] || ! grep -q '"ok":true' /tmp/${id}.out; then
+              echo "VERIFY_FAILED $slug http=$code body=$(head -c 180 /tmp/${id}.out)"
+              failures=$((failures+1))
+              continue
+            fi
+
+            public_hook="https://n8n.impulsionando.com.br/webhook/$path"
+            cfg="$(jq -c --arg rid "$registry_id" --arg hook "$public_hook" --arg runtime "$id" '.[]|select(.id==$rid)|.config + {webhook_url:$hook,execution_model:"n8n_verified_ingress",verified_runtime_id:$runtime,verified_at:(now|todateiso8601)}' /tmp/chrismed-ready-v3.json)"
+            patch="$(jq -nc --arg runtime "$id" --argjson cfg "$cfg" '{n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
+            curl -fsS -X PATCH "$SUPABASE_URL/rest/v1/n8n_workflow_registry?id=eq.$registry_id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -d "$patch" >/dev/null
+
+            tenant_id="$(curl -fsS "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.chrismed&active=eq.true&select=id&limit=1" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq -r '.[0].id // empty')"
+            state_cfg="$(jq -nc --arg hook "$public_hook" --arg runtime "$id" --arg slug "$slug" '{webhook_url:$hook,n8n_workflow_id:$runtime,workflow_slug:$slug,verified:true}')"
+            state_body="$(jq -nc --arg tenant_id "$tenant_id" --arg registry_id "$registry_id" --argjson cfg "$state_cfg" '{tenant_id:$tenant_id,registry_id:$registry_id,status:"ACTIVE",config:$cfg,last_error:null}')"
+            curl -fsS -X POST "$SUPABASE_URL/rest/v1/tenant_workflow_state?on_conflict=tenant_id,registry_id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$state_body" >/dev/null
+
+            auto_body="$(jq -nc --arg tenant_id "$tenant_id" --arg key "$slug" --argjson version "$version" --arg runtime "$id" --argjson cfg "$cfg" '{tenant_id:$tenant_id,automation_key:$key,version:$version,n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
+            curl -fsS -X POST "$SUPABASE_URL/rest/v1/communication_automations?on_conflict=tenant_id,automation_key,version" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$auto_body" >/dev/null || true
+            echo "VERIFIED $slug $id"
+          done < /tmp/chrismed-map-v3.tsv
+
+          remaining="$(curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&config-%3E%3Etenant_slug=eq.chrismed&select=id" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq 'length')"
+          echo "RESULT remaining_chrismed=$remaining failures=$failures"
+          rm -f /tmp/n8n-cli.env /tmp/chrismed-all-v3.json /tmp/chrismed-map-v3.tsv /tmp/chrismed-ready-v3.json
+          [ "$remaining" -eq 0 ] && [ "$failures" -eq 0 ]
+          REMOTE
+
+      - name: Persist proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/chrismed-n8n-v3.txt docs/ops/chrismed-n8n-finalize-v3.txt || true
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-n8n-finalize-v3.txt
+          git commit -m 'chore(chrismed): record n8n finalization v3 proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
