@@ -10,8 +10,14 @@ CURRENT_LINK="/var/www/impulsionando-core/current"
 COMPOSE="/opt/impulsionando/deploy/hostinger/docker-compose.yml"
 LOCK_FILE="$STATE_DIR/publish.lock"
 
-mkdir -p "$STATE_DIR" "$RELEASE_ROOT"
-chmod 0755 "$STATE_DIR"
+mkdir -p "$STATE_DIR" "$RELEASE_ROOT" "$STATE_DIR/npm-home" "$STATE_DIR/npm-cache"
+chmod 0755 "$STATE_DIR" "$STATE_DIR/npm-home" "$STATE_DIR/npm-cache"
+export HOME="$STATE_DIR/npm-home"
+export npm_config_cache="$STATE_DIR/npm-cache"
+export npm_config_update_notifier=false
+export npm_config_fund=false
+export npm_config_audit=false
+
 exec 9>"$LOCK_FILE"
 if ! flock -n 9; then
   printf '{"state":"busy","stage":"Já existe uma publicação em andamento.","updated_at":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$STATUS_FILE"
@@ -44,7 +50,7 @@ rollback() {
     systemctl restart impulsionando-core
   fi
   if [ "$EDGE_ROLLBACK_READY" = 1 ] && docker image inspect impulsionando-core:deploy-rollback >/dev/null 2>&1; then
-    docker tag impulsionando-core:deploy-rollback impulsionando-core:latest
+    docker tag "$old_image" impulsionando-core:latest 2>/dev/null || docker tag impulsionando-core:deploy-rollback impulsionando-core:latest
     cd /opt/impulsionando/deploy/hostinger
     docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core >/dev/null 2>&1 || true
   fi
@@ -53,14 +59,8 @@ rollback() {
 trap rollback ERR
 
 write_status "running" "Sincronizando o código mais recente do GitHub." ""
-if [ ! -d "$WORKTREE/.git" ]; then
-  rm -rf "$WORKTREE"
-  git clone --depth=1 --branch main "$REPO_URL" "$WORKTREE"
-else
-  git -C "$WORKTREE" fetch --depth=1 origin main
-  git -C "$WORKTREE" reset --hard origin/main
-  git -C "$WORKTREE" clean -fdx
-fi
+rm -rf "$WORKTREE"
+git clone --depth=1 --branch main "$REPO_URL" "$WORKTREE"
 SHA="$(git -C "$WORKTREE" rev-parse HEAD)"
 
 CURRENT_RELEASE="$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)"
