@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Sparkles } from "lucide-react";
+import { Brain, MessageCircle, Sparkles } from "lucide-react";
 import { GenericSectionCrud } from "@/components/impulsionito-ic/GenericSectionCrud";
 import { PromptMasterEditor } from "@/components/impulsionito-ic/PromptMasterEditor";
 import { LearningsReview } from "@/components/impulsionito-ic/LearningsReview";
@@ -82,9 +82,17 @@ function CentroInteligenciaPage() {
             cada interação.
           </p>
         </div>
-        <Badge variant="outline" className="gap-1">
-          <Sparkles className="h-3 w-3" /> Estrutura visual pronta — integração posterior
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="gap-1">
+            <Sparkles className="h-3 w-3" /> Core conectado ao chat omnichannel
+          </Badge>
+          <Link
+            to="/admin/comunicacoes/whatsapp"
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            <MessageCircle className="h-4 w-4" /> Conectar WhatsApp
+          </Link>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
