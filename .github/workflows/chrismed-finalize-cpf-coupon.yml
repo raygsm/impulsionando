@@ -1,4 +1,4 @@
-name: CHRISMED persistent journey assistant
+name: CHRISMED Portuguese-only access guidance
 on:
   push:
     paths: ['.github/workflows/chrismed-finalize-cpf-coupon.yml']
@@ -13,32 +13,24 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Keep assistant available during authentication
+      - name: Remove raw provider errors from access journeys
         run: |
           python - <<'PY'
           from pathlib import Path
 
           p=Path('src/routes/auth.tsx')
           s=p.read_text()
-          anchor='import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";'
-          if 'ChrismedOliverProvider' not in s:
-            s=s.replace(anchor, anchor+'\nimport { ChrismedOliverProvider } from "@/components/chrismed/ChrismedOliverProvider";')
-          old='return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} />;'
-          new='return <ChrismedOliverProvider><ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} /></ChrismedOliverProvider>;'
-          if old not in s: raise SystemExit('CHRISMED auth entry marker not found')
-          s=s.replace(old,new,1)
+          raw='return msg ? `Não foi possível concluir a solicitação: ${msg}` : "Não foi possível concluir o acesso. Tente novamente.";'
+          safe='return "Não foi possível concluir o acesso. Confira os dados informados e tente novamente. Se continuar, peça ajuda ao Impulsionito nesta tela.";'
+          if raw not in s: raise SystemExit('raw auth fallback not found')
+          s=s.replace(raw,safe,1)
           p.write_text(s)
 
-          p=Path('src/components/chrismed/ChrismedProfessionalAuth.tsx')
+          p=Path('src/routes/reset-password.tsx')
           s=p.read_text()
-          old='''          <a\n            href={`mailto:${technicalSupportEmail}`}\n            className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"\n          >\n            <HelpCircle className="h-4 w-4" />\n            Precisa de ajuda?\n          </a>'''
-          new='''          <button\n            type="button"\n            onClick={() => window.dispatchEvent(new CustomEvent("chrismed:oliver:open"))}\n            className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"\n          >\n            <HelpCircle className="h-4 w-4" />\n            Impulsionito a postos · pedir ajuda\n          </button>'''
-          if old not in s: raise SystemExit('auth help control not found')
-          s=s.replace(old,new,1)
-          marker='''          <p className="mt-2 text-[#52605c]">\n            {mode === "login"\n              ? "Use seu e-mail para continuar."\n              : "Você é um profissional da saúde? Crie sua conta para acessar sua área exclusiva e configurar sua agenda de atendimento."}\n          </p>'''
-          replacement=marker+'''\n          <p className="mt-3 rounded-xl border border-[#d9d3cb] bg-[#f7f5f1] px-4 py-3 text-xs leading-relaxed text-[#52605c]"><strong>Orientação em todas as etapas:</strong> se algum dado estiver incorreto ou o acesso não for permitido, o sistema explicará em português o que aconteceu e como corrigir. O Impulsionito, por meio do Oliver, permanece disponível nesta tela.</p>'''
-          if marker not in s: raise SystemExit('auth guidance marker not found')
-          s=s.replace(marker,replacement,1)
+          raw='if (error) return toast.error(error.message);'
+          safe='if (error) return toast.error("Não foi possível salvar a nova senha. Confira os requisitos, solicite um novo link se este tiver expirado e tente novamente.");'
+          if raw in s: s=s.replace(raw,safe,1)
           p.write_text(s)
           PY
       - name: Validate and commit
@@ -46,7 +38,7 @@ jobs:
           git diff --check
           git config user.name impulsionando-bot
           git config user.email actions@users.noreply.github.com
-          git add src/routes/auth.tsx src/components/chrismed/ChrismedProfessionalAuth.tsx
-          git commit -m "feat(chrismed): keep Impulsionito available through auth journey"
+          git add src/routes/auth.tsx src/routes/reset-password.tsx
+          git commit -m "fix(chrismed): keep access errors actionable and Portuguese-only"
           git pull --rebase origin main
           git push origin main
