@@ -1,0 +1,93 @@
+name: CHRISMED runtime env guard
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-runtime-env-guard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrismed-runtime-env-guard
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Restore protected CHRISMED runtime configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          ENV_FILE=/etc/impulsionando-core.env
+          SECURITY_ENV=/etc/impulsionando-security.env
+          CORE=impulsionando-core
+          EVO=impulsionando-evolution-api
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          sudo test -f "$ENV_FILE"
+          sudo docker inspect "$EVO" >/dev/null
+          EVO_KEY="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
+          test -n "$EVO_KEY"
+          WEBHOOK_SECRET="$(sudo sed -n 's/^CHRISMED_EVOLUTION_WEBHOOK_SECRET=//p' "$ENV_FILE" | head -n1)"
+          if [ -z "$WEBHOOK_SECRET" ]; then
+            WEBHOOK_SECRET="$(sudo sed -n 's/^CHRISMED_EVOLUTION_WEBHOOK_SECRET=//p' "$SECURITY_ENV" 2>/dev/null | head -n1)"
+          fi
+          if [ -z "$WEBHOOK_SECRET" ]; then
+            WEBHOOK_SECRET="$(openssl rand -hex 32)"
+            tmpsec="$(mktemp)"
+            sudo awk -F= '$1!="CHRISMED_EVOLUTION_WEBHOOK_SECRET"{print}' "$SECURITY_ENV" 2>/dev/null > "$tmpsec" || true
+            printf 'CHRISMED_EVOLUTION_WEBHOOK_SECRET=%s\n' "$WEBHOOK_SECRET" >> "$tmpsec"
+            sudo install -o root -g root -m 0600 "$tmpsec" "$SECURITY_ENV"
+            rm -f "$tmpsec"
+          fi
+          set_env(){
+            key="$1"; value="$2"; tmp="$(mktemp)"
+            sudo awk -F= -v k="$key" '$1!=k{print}' "$ENV_FILE" > "$tmp"
+            printf '%s=%s\n' "$key" "$value" >> "$tmp"
+            sudo install -o root -g root -m 0600 "$tmp" "$ENV_FILE"
+            rm -f "$tmp"
+          }
+          set_env CHRISMED_EVOLUTION_BASE_URL 'http://impulsionando-evolution-api:8080'
+          set_env CHRISMED_EVOLUTION_API_KEY "$EVO_KEY"
+          set_env CHRISMED_EVOLUTION_WEBHOOK_SECRET "$WEBHOOK_SECRET"
+          unset EVO_KEY WEBHOOK_SECRET
+          core_network="$(sudo docker inspect "$CORE" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | head -n1)"
+          if [ -n "$core_network" ] && ! sudo docker inspect "$EVO" --format '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' | grep -Fxq "$core_network"; then
+            sudo docker network connect "$core_network" "$EVO"
+          fi
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate "$CORE"
+          for i in $(seq 1 40); do
+            sudo docker exec "$CORE" node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
+            [ "$i" -lt 40 ] || exit 51
+            sleep 2
+          done
+          sudo docker exec "$CORE" node - <<'NODE'
+          for (const key of ['CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY','CHRISMED_EVOLUTION_WEBHOOK_SECRET']) {
+            if (!process.env[key]) process.exit(2);
+          }
+          console.log('CHRISMED_RUNTIME_ENV=PASS');
+          NODE
+          REMOTE
