@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -163,6 +163,10 @@ function CoreDashboardPage() {
     queryFn: fetchOverview,
     refetchInterval: 30000,
   });
+
+  if (me?.isMasterObserver && !me.isImpulsionandoStaff && !me.isSuperAdmin) {
+    return <Navigate to="/master-observer" replace />;
+  }
 
   const greeting = me?.memberships[0]?.display_name ?? me?.user.email ?? "";
 
