@@ -1,0 +1,3 @@
+Universal production front release trigger.
+Purpose: generate a real main push for the Universal Fast Front workflow after the 2026-08-20 P0 auth, plans, journeys and niche corrections.
+No runtime behavior is changed by this marker.
