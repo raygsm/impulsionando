@@ -1,0 +1,88 @@
+name: CHRISMED communication worker live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-communication-worker-live.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chrismed-communication-worker-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: arygtqrdpcdkwnuwsgmm
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Patch canonical event mappings without duplicating worker logic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('supabase/functions/chrismed-communication-worker/index.ts')
+          s=p.read_text()
+          anchor='  professional_registration_management:"professional.registration.management",\n'
+          if anchor not in s:
+              raise SystemExit('worker mapping anchor not found')
+          additions='''  "professional.registration.approved":"professional.registration.approved",\n  "professional.registration.rejected":"professional.registration.rejected",\n  "professional.invitation":"professional.invitation",\n  "professional.suspended":"professional.suspended",\n  "professional.reactivated":"professional.reactivated",\n  "company.invitation":"company.invitation",\n  "patient.invitation":"patient.invitation",\n  "account.suspended":"account.suspended",\n  "account.reactivated":"account.reactivated",\n  "payment.failed":"payment.failed",\n  "occupational.document.expiring":"occupational.document.expiring",\n  "support.ticket.created":"support.ticket.created",\n  "support.ticket.resolved":"support.ticket.resolved",\n'''
+          for line in additions.splitlines(True):
+              if line.strip() and line.strip() not in s:
+                  s=s.replace(anchor,anchor+line,1)
+                  anchor=anchor+line
+          p.write_text(s)
+          PY
+          grep -q '"professional.registration.approved":"professional.registration.approved"' supabase/functions/chrismed-communication-worker/index.ts
+          grep -q '"company.invitation":"company.invitation"' supabase/functions/chrismed-communication-worker/index.ts
+          grep -q '"account.reactivated":"account.reactivated"' supabase/functions/chrismed-communication-worker/index.ts
+
+      - name: Version worker source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito CHRISMED Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add supabase/functions/chrismed-communication-worker/index.ts
+          if git diff --cached --quiet; then
+            echo 'WORKER_SOURCE_ALREADY_CANONICAL=true'
+          else
+            git commit -m 'fix(chrismed): map professional, invite and lifecycle email events'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Validate Supabase deployment credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${SUPABASE_ACCESS_TOKEN:-}"
+          test -n "${SUPABASE_URL:-}"
+
+      - name: Deploy CHRISMED communication worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.45.4 functions deploy chrismed-communication-worker --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Side-effect free smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/chrismed-worker-smoke -w '%{http_code}' --max-time 20 "$SUPABASE_URL/functions/v1/chrismed-communication-worker")"
+          echo "chrismed-communication-worker GET => $code"
+          test "$code" = '405'
+          echo 'CHRISMED_COMMUNICATION_WORKER_DEPLOY=PASS'
