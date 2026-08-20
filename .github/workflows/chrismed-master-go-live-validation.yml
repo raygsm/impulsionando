@@ -1,0 +1,100 @@
+name: CHRISMED master go-live validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-master-go-live-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chrismed-master-go-live-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Resolve latest application source commit
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$(git log -1 --format=%H -- src public scripts package.json package-lock.json Dockerfile vite.config.ts)"
+          test -n "$target"
+          echo "sha=$target" >> "$GITHUB_OUTPUT"
+          echo "TARGET_APP_SHA=$target"
+
+      - name: Clean production build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -d .output
+          echo 'CHRISMED_SOURCE_BUILD=PASS'
+
+      - name: Wait until application source is visible in production
+        id: production
+        shell: bash
+        env:
+          TARGET_APP_SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          endpoint='https://chrismed.impulsionando.com.br/api/public/version'
+          deployed=''
+          for i in $(seq 1 80); do
+            if curl -fsS --max-time 15 "$endpoint" -o /tmp/version.json; then
+              deployed="$(jq -r '.commit // empty' /tmp/version.json)"
+              if [ -n "$deployed" ] && git cat-file -e "$deployed^{commit}" 2>/dev/null && git merge-base --is-ancestor "$TARGET_APP_SHA" "$deployed"; then
+                echo "DEPLOYED_APP_SHA=$deployed"
+                echo "sha=$deployed" >> "$GITHUB_OUTPUT"
+                break
+              fi
+            fi
+            [ "$i" -lt 80 ] || { echo "Production did not reach target source $TARGET_APP_SHA; deployed=$deployed"; exit 41; }
+            sleep 15
+            git fetch origin main --quiet || true
+          done
+
+          home_code="$(curl -sS -o /tmp/home.html -w '%{http_code}' --max-time 20 https://chrismed.impulsionando.com.br/)"
+          version_code="$(curl -sS -o /tmp/version-final.json -w '%{http_code}' --max-time 20 "$endpoint")"
+          test "$home_code" = '200'
+          test "$version_code" = '200'
+          echo "PUBLIC_HOME_HTTP=$home_code"
+          echo "PUBLIC_VERSION_HTTP=$version_code"
+
+      - name: Record validation proof
+        shell: bash
+        env:
+          TARGET_APP_SHA: ${{ steps.target.outputs.sha }}
+          DEPLOYED_APP_SHA: ${{ steps.production.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          jq -n \
+            --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg target_app_sha "$TARGET_APP_SHA" \
+            --arg deployed_app_sha "$DEPLOYED_APP_SHA" \
+            '{generated_at_utc:$generated_at_utc,target_app_sha:$target_app_sha,deployed_app_sha:$deployed_app_sha,source_build:true,public_home_http:200,public_version_http:200,front_reached_target:true}' \
+            > docs/ops/chrismed-master-go-live-validation.json
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-master-go-live-validation.json
+          git commit -m 'chore(chrismed): record master front validation proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
