@@ -1,0 +1,96 @@
+name: CHRISMED EHR schema repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-ehr-schema-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Align EHR source with live CHRISMED patient schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('src/routes/_authenticated/ehr.index.tsx')
+          s=p.read_text()
+          s=s.replace('type Customer = { id: string; name: string };', 'type Patient = { user_id: string; full_name: string };')
+          s=s.replace('  customer_id: string;\n', '  patient_user_id: string;\n')
+          s=s.replace('  customers?: { name: string } | null;\n', '  patient?: { full_name: string } | null;\n')
+          s=s.replace('.select("id, customer_id, record_number, status, updated_at, customers(name)")', '.select("id, patient_user_id, record_number, status, updated_at, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(full_name)")')
+          s=s.replace('r.customers?.name?.toLowerCase().includes(t)', 'r.patient?.full_name?.toLowerCase().includes(t)')
+          s=s.replace('const { data: customers, isLoading: loadingCustomers }', 'const { data: patients, isLoading: loadingPatients }')
+          s=s.replace('["customers-opt", companyId]', '["chrismed-patients-opt", companyId]')
+          s=s.replace('.from("customers")\n        .select("id, name")\n        .eq("company_id", companyId!)\n        .eq("is_active", true)\n        .order("name")', '.from("chrismed_patient_profiles")\n        .select("user_id, full_name")\n        .eq("company_id", companyId!)\n        .in("status", ["APPROVED", "ACTIVE"])\n        .order("full_name")')
+          s=s.replace('return (data ?? []) as Customer[];', 'return (data ?? []) as Patient[];')
+          s=s.replace('const payload: { company_id: string; customer_id: string; record_number?: string } = {\n        company_id: companyId,\n        customer_id: selectedCustomer,\n      };', 'const payload: { company_id: string; patient_user_id: string; record_number?: string } = {\n        company_id: companyId,\n        patient_user_id: selectedCustomer,\n      };')
+          s=s.replace('after: { customer_id: selectedCustomer, record_number: recordNumber || null }', 'after: { patient_user_id: selectedCustomer, record_number: recordNumber || null }')
+          s=s.replace('const noCustomersInDialog = openCreate && !loadingCustomers && (customers?.length ?? 0) === 0;', 'const noPatientsInDialog = openCreate && !loadingPatients && (patients?.length ?? 0) === 0;')
+          s=s.replace('noCustomersInDialog', 'noPatientsInDialog')
+          s=s.replace('Nenhum paciente cadastrado', 'Nenhum paciente CHRISMED aprovado')
+          s=s.replace('Cadastre um paciente em <strong>Clientes</strong> antes de abrir um prontuário.', 'Cadastre e aprove o paciente na Gestão de Pacientes CHRISMED antes de abrir um prontuário.')
+          s=s.replace('<Link to="/customers" onClick={() => setOpenCreate(false)}>', '<Link to="/chrismed/pacientes-gestao" onClick={() => setOpenCreate(false)}>')
+          s=s.replace('Ir para Clientes', 'Ir para Gestão de Pacientes')
+          s=s.replace('placeholder={loadingCustomers ? "Carregando…" : "Selecione um paciente"}', 'placeholder={loadingPatients ? "Carregando…" : "Selecione um paciente"}')
+          s=s.replace('{customers?.map((c) => (\n                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>\n                          ))}', '{patients?.map((c) => (\n                            <SelectItem key={c.user_id} value={c.user_id}>{c.full_name}</SelectItem>\n                          ))}')
+          s=s.replace('r.customers?.name ?? "Paciente"', 'r.patient?.full_name ?? "Paciente"')
+          p.write_text(s)
+
+          p=Path('src/routes/_authenticated/ehr.$id.tsx')
+          s=p.read_text()
+          s=s.replace('import { useServerFn } from "@tanstack/react-start";\n', '')
+          s=s.replace('import { invitePatient } from "@/lib/ehr-patient.functions";\n', '')
+          s=s.replace('.select("*, customers(id, name, document, phone, email, birthdate, patient_user_id, patient_invited_at)")', '.select("*, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(user_id, full_name, cpf, whatsapp, email, status)")')
+          s=s.replace('title={record?.customers?.name ?? "Prontuário"}', 'title={record?.patient?.full_name ?? "Prontuário"}')
+          s=s.replace('record?.customers\n              ? [\n                  record.customers.document,\n                  record.customers.phone,\n                  record.customers.email,\n                ].filter(Boolean).join(" • ")', 'record?.patient\n              ? [\n                  record.patient.cpf,\n                  record.patient.whatsapp,\n                  record.patient.email,\n                ].filter(Boolean).join(" • ")')
+          s=s.replace('customer={record?.customers}', 'patient={record?.patient}')
+          start=s.find('/* ---------- Patient Access Button ---------- */')
+          if start < 0: raise SystemExit('PatientAccessButton marker not found')
+          replacement='''/* ---------- Patient Access Status ---------- */\nfunction PatientAccessButton({\n  patient,\n}: {\n  recordId: string;\n  patient: { user_id: string; full_name: string | null; email: string | null; status: string | null } | null | undefined;\n  onChange: () => void;\n}) {\n  if (!patient) return null;\n  return (\n    <Button variant="outline" size="sm" disabled>\n      <UserPlus className="w-4 h-4" />\n      Paciente vinculado · {patient.status || "CADASTRADO"}\n    </Button>\n  );\n}\n'''
+          s=s[:start]+replacement
+          p.write_text(s)
+
+          # Retire the legacy helper from active code by adapting it to the canonical schema.
+          p=Path('src/lib/ehr-patient.functions.ts')
+          s=p.read_text()
+          s=s.replace('.select("id, company_id, customer_id, customers(id, name, email, patient_user_id)")', '.select("id, company_id, patient_user_id, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(user_id, full_name, email, status)")')
+          # The old invite flow is no longer used by the EHR UI; fail closed if invoked by stale clients.
+          marker='    const customer = (rec as any).customers as {'
+          idx=s.find(marker)
+          if idx >= 0:
+              end=s.find('    return { ok: true, alreadyLinked: false, userId: targetUserId, invitedBy: userId };', idx)
+              if end < 0: raise SystemExit('legacy helper end not found')
+              end=s.find('\n', end)+1
+              block='''    const patient = (rec as any).patient as { user_id: string; full_name: string | null; email: string | null; status: string | null } | null;\n    if (!patient?.user_id) throw new Error("Paciente CHRISMED não vinculado ao prontuário");\n    if (patient.email && patient.email.toLowerCase() !== data.email.toLowerCase()) {\n      throw new Error("O e-mail informado não corresponde ao cadastro do paciente CHRISMED");\n    }\n    return { ok: true, alreadyLinked: true, userId: patient.user_id, invitedBy: userId };\n'''
+              s=s[:idx]+block+s[end:]
+          p.write_text(s)
+          PY
+          git diff --check
+          grep -q 'patient_user_id' src/routes/_authenticated/ehr.index.tsx
+          grep -q 'chrismed_patient_profiles' src/routes/_authenticated/ehr.index.tsx
+          grep -q 'patient:chrismed_patient_profiles' 'src/routes/_authenticated/ehr.$id.tsx'
+      - name: Commit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/routes/_authenticated/ehr.index.tsx 'src/routes/_authenticated/ehr.$id.tsx' src/lib/ehr-patient.functions.ts
+          git commit -m 'fix(chrismed): align EHR with patient profiles' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
