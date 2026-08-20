@@ -1,0 +1,48 @@
+name: CHRISMED scheduling build blocker fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-agendar-build-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Repair malformed JSX in scheduling modality grid
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/chrismed.agendar.tsx')
+          s=p.read_text(encoding='utf-8')
+          bad='})}}</div>'
+          good='})}</div>'
+          if bad in s:
+              s=s.replace(bad,good,1)
+              p.write_text(s,encoding='utf-8')
+          elif good not in s:
+              raise SystemExit('Expected scheduling JSX anchor not found')
+          PY
+          ! grep -F '})}}</div>' src/routes/chrismed.agendar.tsx
+          git diff --check
+      - name: Commit build repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/routes/chrismed.agendar.tsx
+          git commit -m 'fix(chrismed): repair scheduling modality JSX' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
