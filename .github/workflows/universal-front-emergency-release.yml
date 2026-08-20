@@ -6,9 +6,12 @@ on:
     paths:
       - .github/workflows/universal-front-emergency-release.yml
   workflow_dispatch:
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: universal-front-emergency-release
@@ -16,6 +19,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name != 'issues' || github.event.issue.title == '[ops] universal front emergency release'
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 45
