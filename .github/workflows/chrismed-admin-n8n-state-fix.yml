@@ -1,0 +1,46 @@
+name: CHRISMED admin n8n state fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-admin-n8n-state-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch management semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/_authenticated/chrismed.admin.tsx')
+          s=p.read_text()
+          s=s.replace("metric(cc?.companies?.requests_pending) + metric(cc?.communication?.failed) + metric(n8n?.ready) +\n    metric(cc?.operations?.critical_tasks)", "metric(cc?.companies?.requests_pending) + metric(cc?.communication?.failed) +\n    metric(cc?.operations?.critical_tasks)")
+          old='''          <AlertItem active={metric(n8n?.ready)>0} title={`${metric(n8n?.ready)} jornada(s) n8n ainda não ativa(s)`} detail={`${metric(n8n?.active)} de ${metric(n8n?.total)} fluxos CHRISMED ativos.`} href="/chrismed/alertas"/>'''
+          new='''          {metric(n8n?.total)>0 ? <div className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950"><Workflow className="mt-0.5 h-4 w-4 shrink-0"/><div><strong>Automação CHRISMED operacional</strong><p className="mt-0.5 text-xs opacity-80">Worker transacional homologado ativo; {metric(n8n?.ready)} fluxos permanecem como catálogo preparado e só são publicados individualmente quando houver evento e efeito de negócio homologados.</p></div></div> : null}'''
+          if old not in s: raise SystemExit('n8n alert pattern not found')
+          s=s.replace(old,new)
+          p.write_text(s)
+          PY
+          git diff --check
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/routes/_authenticated/chrismed.admin.tsx
+          git commit -m 'fix(chrismed): align n8n dashboard with homologated architecture' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
