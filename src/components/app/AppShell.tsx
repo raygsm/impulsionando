@@ -9,6 +9,7 @@ import { CommandPalette } from "./CommandPalette";
 import { QuickActions } from "./QuickActions";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { PublishNowButton } from "./PublishNowButton";
+import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -67,9 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         path.startsWith("/area-clube") ||
         path.startsWith("/auth") ||
         path === "/";
-      if (!allowedConsumer) {
-        navigate({ to: "/checkout/$slug", params: { slug: "clube_premium" } });
-      }
+      if (!allowedConsumer) navigate({ to: "/checkout/$slug", params: { slug: "clube_premium" } });
       return;
     }
     const allowed =
@@ -87,9 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!subActive) return;
     const required = requiredModuleFor(location.pathname);
     if (!required) return;
-    if (!hasModule(required)) {
-      navigate({ to: "/planos", search: { locked: required } as never });
-    }
+    if (!hasModule(required)) navigate({ to: "/planos", search: { locked: required } as never });
   }, [isPlatformMaster, bypass, modulesLoading, isSuspended, subActive, location.pathname, hasModule, navigate]);
 
   useEffect(() => {
@@ -101,12 +98,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-dvh flex items-center justify-center bg-background p-6">
         <div className="max-w-sm text-center space-y-4">
           <h2 className="text-lg font-semibold">Não foi possível carregar seu perfil</h2>
-          <p className="text-sm text-muted-foreground">
-            Sua sessão pode ter expirado. Faça login novamente para continuar.
-          </p>
-          <Button onClick={() => signOutSafely({ queryClient, navigate })}>
-            Voltar para o login
-          </Button>
+          <p className="text-sm text-muted-foreground">Sua sessão pode ter expirado. Faça login novamente para continuar.</p>
+          <Button onClick={() => signOutSafely({ queryClient, navigate })}>Voltar para o login</Button>
         </div>
       </div>
     );
@@ -127,10 +120,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh flex bg-background">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:shadow-lg"
-      >
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:shadow-lg">
         Pular para o conteúdo
       </a>
       <Sidebar currentUser={data} />
@@ -148,6 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileBottomNav />
       <CommandPalette />
       <QuickActions />
+      <ImpulsionitoDock />
     </div>
   );
 }
