@@ -1,0 +1,49 @@
+name: CHRISMED definitive access-menu fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-menu-definitive-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Fix desktop access dropdown overflow once and for all
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/components/chrismed/ChrismedShell.tsx')
+          s = p.read_text(encoding='utf-8')
+          old = '<div role="menu" className="absolute left-1/2 top-full z-[100] w-[31rem] -translate-x-1/2 pt-3">'
+          new = '<div role="menu" className={cn("absolute top-full z-[100] w-[min(31rem,calc(100vw-2rem))] pt-3", group.key === "acessos" ? "right-0" : "left-1/2 -translate-x-1/2")}>'
+          if new not in s:
+              if old not in s:
+                  raise SystemExit('Desktop dropdown anchor not found')
+              s = s.replace(old, new, 1)
+          s = s.replace('className="block text-[13px] font-semibold text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]"', 'className="block whitespace-normal break-words text-[13px] font-semibold leading-snug text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]"', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          grep -F 'group.key === "acessos" ? "right-0"' src/components/chrismed/ChrismedShell.tsx
+          git diff --check
+      - name: Commit corrected menu
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/components/chrismed/ChrismedShell.tsx
+          git commit -m 'fix(chrismed): prevent Access menu overlap and truncation' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
