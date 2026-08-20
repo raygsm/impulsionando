@@ -15,19 +15,21 @@ import { ChrismedOliverProvider } from "@/components/chrismed/ChrismedOliverProv
 import { isChrismedHost } from "@/lib/chrismed-professionals";
 import type { User } from "@supabase/supabase-js";
 
+const CANONICAL_RECOVERY_URL = "https://impulsionando.com.br/reset-password";
+
 function traduzirErroAuth(msg: string | undefined | null): string {
   const m = (msg ?? "").toLowerCase();
   if (m.includes("invalid login credentials") || m.includes("invalid credentials")) return "E-mail ou senha incorretos.";
   if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
   if (m.includes("user already registered") || m.includes("already registered")) return "Já existe uma conta com este e-mail.";
   if (m.includes("password should be at least")) return "A senha precisa ter pelo menos 6 caracteres.";
-  if (m.includes("rate limit") || m.includes("too many")) return "Muitas tentativas. Aguarde alguns minutos e tente de novo.";
+  if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) return "Muitas solicitações em pouco tempo. Aguarde alguns minutos e tente novamente.";
   if (m.includes("unable to validate email") || m.includes("invalid email")) return "E-mail inválido.";
   if (m.includes("network") || m.includes("failed to fetch")) return "Sem conexão. Verifique sua internet e tente novamente.";
   if (m.includes("user not found")) return "Usuário não encontrado.";
   if (m.includes("token has expired") || m.includes("jwt expired")) return "Sua sessão expirou. Faça login novamente.";
   if (m.includes("unsupported provider")) return "Provedor de login não configurado. Fale com o suporte.";
-  return "Não foi possível concluir o acesso. Confira os dados informados e tente novamente. Se continuar, use a ajuda disponível na tela.";
+  return msg ? `Não foi possível concluir a solicitação: ${msg}` : "Não foi possível concluir o acesso. Tente novamente.";
 }
 
 type AuthPersona = "core" | "empresa" | "white-label" | "admin" | "clube";
@@ -91,7 +93,7 @@ function AuthPage() {
   const wmp = isWmpHost();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState(wmp ? "sac@wagnermiller.com.br" : "");
+  const [email, setEmail] = useState(search.email ?? (wmp ? "sac@wagnermiller.com.br" : ""));
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
@@ -141,17 +143,21 @@ function AuthPage() {
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
-    const target = (resetEmail || email).trim();
+    const target = (resetEmail || email).trim().toLowerCase();
     if (!target) return toast.error("Informe o e-mail para recuperação.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target)) return toast.error("Informe um endereço de e-mail válido.");
     setResetLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(target, { redirectTo: `${window.location.origin}/reset-password` });
-      if (error) return toast.error("Não foi possível processar a solicitação. Verifique o e-mail e tente novamente.");
+      const { error } = await supabase.auth.resetPasswordForEmail(target, { redirectTo: CANONICAL_RECOVERY_URL });
+      if (error) {
+        console.error("[Auth] password recovery failed", { message: error.message, status: error.status, code: error.code });
+        return toast.error(traduzirErroAuth(error.message));
+      }
       setResetOpen(false);
       navigate({ to: "/reset-password-sent" });
-    } catch {
-      toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+    } catch (error) {
+      console.error("[Auth] password recovery exception", error);
+      toast.error("Erro de conexão ao solicitar a recuperação. Tente novamente.");
     } finally {
       setResetLoading(false);
     }
