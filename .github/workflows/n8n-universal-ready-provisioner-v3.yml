@@ -1,4 +1,4 @@
-# Forced reconciliation trigger: 2026-08-19T22:59:00-03:00
+# Forced reconciliation trigger: 2026-08-20T08:56:00-03:00
 name: n8n universal READY provisioner v3
 
 on:
@@ -58,7 +58,7 @@ jobs:
           test -n "$SUPABASE_URL" && test -n "$SERVICE_KEY" && test -n "$SIGNING_SECRET"
           sudo docker inspect "$C" --format '{{.State.Status}}' | grep -q running
 
-          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=workflow_slug,version,description,config&order=workflow_slug.asc" \
+          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=id,workflow_slug,version,description,config&order=workflow_slug.asc" \
             -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" >/tmp/ready-v3.json
           total="$(jq 'length' /tmp/ready-v3.json)"
           echo "READY_TO_PROVISION=$total"
@@ -69,7 +69,7 @@ jobs:
           sign_payload(){ printf '%s' "$1" | openssl dgst -sha256 -hmac "$SIGNING_SECRET" -hex | awk '{print $2}'; }
           : >/tmp/v3-map.tsv
 
-          while IFS=$'\t' read -r slug version tenant title; do
+          while IFS=$'\t' read -r registry_id slug version tenant title; do
             [ -n "$slug" ] || continue
             [ -n "$tenant" ] || tenant=impulsionando
             id="$(make_id "${slug}:v${version}")"
@@ -85,8 +85,8 @@ jobs:
             sudo docker cp "$file" "$C:$file"
             sudo docker exec "$C" n8n import:workflow --input="$file" >/dev/null
             sudo docker exec "$C" n8n update:workflow --id="$id" --active=true >/dev/null
-            printf '%s\t%s\t%s\t%s\t%s\n' "$slug" "$version" "$tenant" "$id" "$path" >>/tmp/v3-map.tsv
-          done < <(jq -r '.[]|[.workflow_slug,(.version|tostring),(.config.tenant_slug//"impulsionando"),(.description//.workflow_slug)]|@tsv' /tmp/ready-v3.json)
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$registry_id" "$slug" "$version" "$tenant" "$id" "$path" >>/tmp/v3-map.tsv
+          done < <(jq -r '.[]|[.id,.workflow_slug,(.version|tostring),(.config.tenant_slug//"impulsionando"),(.description//.workflow_slug)]|@tsv' /tmp/ready-v3.json)
 
           sudo docker restart "$C" >/dev/null
           for i in $(seq 1 60); do
@@ -94,31 +94,43 @@ jobs:
             [ "$i" -lt 60 ] || exit 50
             sleep 2
           done
+          N8N_IP="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$C")"
+          test -n "$N8N_IP"
 
           failures=0
-          while IFS=$'\t' read -r slug version tenant id path; do
+          while IFS=$'\t' read -r registry_id slug version tenant id path; do
             payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"unsigned-$id\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
-            unsigned="$(curl -sS -o /tmp/${id}-u -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -d "$payload" || true)"
+            unsigned="$(curl -sS -o /tmp/${id}-u -w '%{http_code}' --max-time 20 -X POST "http://$N8N_IP:5678/webhook/$path" -H 'content-type: application/json' -d "$payload" || true)"
             if [ "$unsigned" != 401 ]; then echo "FAIL_UNSIGNED $slug $unsigned"; failures=$((failures+1)); continue; fi
+
             payload="{\"workflow_name\":\"$slug\",\"event_code\":\"$slug\",\"tenant_slug\":\"$tenant\",\"correlation_id\":\"signed-$id-$(date +%s%N)\",\"dispatched_at\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\",\"data\":{\"probe\":true}}"
             sig="$(sign_payload "$payload")"
-            signed="$(curl -sS -o /tmp/${id}-s -w '%{http_code}' --max-time 20 -X POST "https://n8n.impulsionando.com.br/webhook/$path" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
+            signed="$(curl -sS -o /tmp/${id}-s -w '%{http_code}' --max-time 20 -X POST "http://$N8N_IP:5678/webhook/$path" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
             if [ "$signed" != 200 ] || ! grep -q '"ok":true' /tmp/${id}-s; then echo "FAIL_SIGNED $slug $signed"; failures=$((failures+1)); continue; fi
+
             sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/${id}-verified.json" >/dev/null
             if ! sudo docker exec -e WF_ID="$id" "$C" node - <<'NODE'
-          const fs=require('fs');const id=process.env.WF_ID;const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));const w=Array.isArray(raw)?raw[0]:raw;if(!w.active||!w.activeVersionId)process.exit(1);
-          NODE
+const fs=require('fs');const id=process.env.WF_ID;const raw=JSON.parse(fs.readFileSync(`/tmp/${id}-verified.json`,'utf8'));const w=Array.isArray(raw)?raw[0]:raw;if(!w.active||!w.activeVersionId)process.exit(1);
+NODE
             then echo "FAIL_EXPORT $slug"; failures=$((failures+1)); continue; fi
 
-            curl -fsS -X PATCH "$SUPABASE_URL/rest/v1/n8n_workflow_registry?workflow_slug=eq.$slug&version=eq.$version" \
-              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -d "{\"n8n_workflow_id\":\"$id\",\"status\":\"ACTIVE\"}" >/dev/null
+            public_hook="https://n8n.impulsionando.com.br/webhook/$path"
+            registry_cfg="$(jq -c --arg rid "$registry_id" '.[]|select(.id==$rid)|.config' /tmp/ready-v3.json)"
+            new_registry_cfg="$(jq -c --arg hook "$public_hook" --arg runtime "$id" '. + {webhook_url:$hook,execution_model:"n8n_verified_ingress",verified_runtime_id:$runtime,verified_at:(now|todateiso8601)}' <<<"$registry_cfg")"
+            patch="$(jq -nc --arg runtime "$id" --argjson cfg "$new_registry_cfg" '{n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
+            curl -fsS -X PATCH "$SUPABASE_URL/rest/v1/n8n_workflow_registry?id=eq.$registry_id" \
+              -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -d "$patch" >/dev/null
 
             tenant_id="$(curl -fsS "$SUPABASE_URL/rest/v1/communication_tenants?slug=eq.$tenant&active=eq.true&deleted_at=is.null&select=id&limit=1" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" | jq -r '.[0].id // empty')"
             if [ -n "$tenant_id" ]; then
-              cfg="$(jq -c --arg slug "$slug" --arg runtime "$id" '.[]|select(.workflow_slug==$slug)|.config + {execution_model:"n8n_verified_ingress",verified_runtime_id:$runtime}' /tmp/ready-v3.json)"
-              body="$(jq -nc --arg tenant_id "$tenant_id" --arg key "$slug" --argjson version "$version" --arg runtime "$id" --argjson cfg "$cfg" '{tenant_id:$tenant_id,automation_key:$key,version:$version,n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
+              auto_body="$(jq -nc --arg tenant_id "$tenant_id" --arg key "$slug" --argjson version "$version" --arg runtime "$id" --argjson cfg "$new_registry_cfg" '{tenant_id:$tenant_id,automation_key:$key,version:$version,n8n_workflow_id:$runtime,status:"ACTIVE",config:$cfg}')"
               curl -fsS -X POST "$SUPABASE_URL/rest/v1/communication_automations?on_conflict=tenant_id,automation_key,version" \
-                -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$body" >/dev/null || true
+                -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$auto_body" >/dev/null || true
+
+              state_cfg="$(jq -nc --arg hook "$public_hook" --arg runtime "$id" --arg slug "$slug" '{webhook_url:$hook,n8n_workflow_id:$runtime,workflow_slug:$slug,verified:true}')"
+              state_body="$(jq -nc --arg tenant_id "$tenant_id" --arg registry_id "$registry_id" --argjson cfg "$state_cfg" '{tenant_id:$tenant_id,registry_id:$registry_id,status:"ACTIVE",config:$cfg,last_error:null}')"
+              curl -fsS -X POST "$SUPABASE_URL/rest/v1/tenant_workflow_state?on_conflict=tenant_id,registry_id" \
+                -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' -d "$state_body" >/dev/null
             fi
             echo "VERIFIED $slug $id"
           done </tmp/v3-map.tsv
