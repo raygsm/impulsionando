@@ -1,0 +1,79 @@
+name: CHRISMED front publish direct
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-front-publish-direct.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chrismed-front-publish-direct
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Upload canonical publisher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s scripts/publish-core-now.sh
+          scp scripts/publish-core-now.sh "$VPS_USER@$VPS_HOST:/tmp/chrismed-publish-core-now.sh"
+      - name: Publish and validate CHRISMED
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/chrismed-front-publish-direct.txt 2>&1 <<'REMOTE'
+          set -Eeuo pipefail
+          trap 'rc=$?; echo "FAILED rc=$rc line=$LINENO"; exit $rc' ERR
+          chmod +x /tmp/chrismed-publish-core-now.sh
+          sudo /tmp/chrismed-publish-core-now.sh
+          echo '--- systemd ---'
+          sudo systemctl is-active impulsionando-core.service
+          echo '--- docker ---'
+          sudo docker inspect impulsionando-core --format 'status={{.State.Status}} image={{.Image}} started={{.State.StartedAt}}'
+          echo '--- version ---'
+          curl -fsS --max-time 20 https://chrismed.impulsionando.com.br/api/public/version
+          echo
+          for path in / /chrismed/admin /chrismed/convites /chrismed/pacientes /chrismed/whatsapp /chrismed/ocupacional-gestao; do
+            code="$(curl -sS -o /tmp/chrismed-probe -w '%{http_code}' --max-time 20 "https://chrismed.impulsionando.com.br$path")"
+            echo "PROBE $path HTTP=$code"
+            test "$code" = 200
+          done
+          echo 'CHRISMED_FRONT_DIRECT_PUBLISH=PASS'
+          REMOTE
+      - name: Persist proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/chrismed-front-publish-direct.txt docs/ops/chrismed-front-publish-direct.txt || true
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-front-publish-direct.txt
+          git commit -m 'chore(chrismed): record direct front publication proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
