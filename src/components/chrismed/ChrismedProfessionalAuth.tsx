@@ -46,7 +46,7 @@ function authError(message?: string) {
   return "Não foi possível concluir o acesso. Confira os dados informados e tente novamente. Se continuar, fale com o atendimento CHRISMED.";
 }
 
-export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMode?: AuthMode }) {
+export function ChrismedProfessionalAuth({ initialMode = "login", initialEmail = "", nextPath = null }: { initialMode?: AuthMode; initialEmail?: string; nextPath?: string | null }) {
   const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [step, setStep] = useState(0);
@@ -63,7 +63,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
   const [otherSpecialty, setOtherSpecialty] = useState("");
   const [otherSpecialtyDetails, setOtherSpecialtyDetails] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail.trim());
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [technicalSupportEmail, setTechnicalSupportEmail] = useState("ti@chrismed.com.br");
@@ -196,7 +196,7 @@ export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMod
       metadata.is_impulsionando_staff === true ||
       metadata.platform_role === "super_admin";
     if (isMaster) {
-      window.location.assign("/chrismed/admin");
+      window.location.assign(nextPath || "/chrismed/admin");
       return;
     }
     navigate({ to: "/dashboard" });

@@ -36,6 +36,7 @@ interface AuthSearch {
   persona?: AuthPersona;
   mode?: AuthMode;
   next?: string;
+  email?: string;
 }
 
 function safeNext(next: string | undefined): string | null {
@@ -62,6 +63,7 @@ export const Route = createFileRoute("/auth")({
     persona: (s.persona as AuthPersona) || undefined,
     mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
     next: typeof s.next === "string" ? s.next : undefined,
+    email: typeof s.email === "string" ? s.email : undefined,
   }),
   head: () => ({ meta: [
     { title: "Acessar sua conta" },
@@ -74,7 +76,7 @@ export const Route = createFileRoute("/auth")({
 function AuthEntryPage() {
   const search = Route.useSearch();
   if (typeof window !== "undefined" && isChrismedHost(window.location.hostname)) {
-    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} />;
+    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} />;
   }
   return <AuthPage />;
 }
