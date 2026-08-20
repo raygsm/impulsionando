@@ -50,20 +50,20 @@ function money(value: number | string) {
 const VALUE_BY_PLAN: Record<string, string[]> = {
   ESSENCIAL: [
     "Core Impulsionando + Impulsionito",
-    "Até 3 módulos prioritários",
+    "Até 3 módulos prioritários homologados",
     "Implantação e configuração assistidas",
     "CRM, operação e relacionamento conforme módulos escolhidos",
     "Evolução de plano sem reconstruir o ambiente",
   ],
   PRO: [
     "Tudo do Essencial com mais integração",
-    "Até 6 módulos conectados",
+    "Capacidade de evolução para até 6 módulos, conforme homologação e escopo",
     "Jornadas e automações entre áreas",
     "Mais inteligência de CRM, LTV, recorrência e pesquisas",
     "Ideal para substituir sistemas e planilhas desconectados",
   ],
   ENTERPRISE: [
-    "Ecossistema completo com módulos homologados",
+    "Ecossistema completo com todos os módulos homologados aplicáveis",
     "Operação multiárea e visão executiva",
     "BI, integrações e automação avançada",
     "Acompanhamento prioritário de implantação e evolução",
@@ -104,7 +104,7 @@ function PlanosPage() {
           <div className="mb-8 grid gap-3 md:grid-cols-4">
             {[
               [CreditCard, "Dia 5", "Vencimento mensal padronizado"],
-              [ShieldCheck, "90 dias", "Ciclo inicial de implantação e adoção"],
+              [ShieldCheck, "90 dias", "Ciclo médio inicial de implantação, treinamento e adoção"],
               [HeartHandshake, "Mãos dadas", "Onboarding e evolução acompanhados"],
               [Bot, "Impulsionito", "Concierge permanente do ecossistema"],
             ].map(([Icon, title, text]: any) => <Card key={title} className="p-5"><Icon className="h-5 w-5 text-primary"/><div className="mt-3 font-semibold">{title}</div><div className="mt-1 text-sm text-muted-foreground">{text}</div></Card>)}
@@ -122,7 +122,8 @@ function PlanosPage() {
                   <div className="mt-5 space-y-2">
                     {(VALUE_BY_PLAN[plan.code] ?? []).map((item) => <div key={item} className="flex gap-2 text-sm"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary"/><span>{item}</span></div>)}
                   </div>
-                  <Button asChild size="lg" className="mt-6 w-full"><Link to="/contratar" search={{ plano: plan.code }}>{plan.cta || `Contratar ${plan.name}`} <ArrowRight className="ml-2 h-4 w-4"/></Link></Button>
+                  <Button asChild size="lg" className="mt-6 w-full"><Link to="/auth" search={{ persona: "empresa", mode: "signup", next: `/onboarding/empresa?plano=${plan.code}` }}>{`Contratar ${plan.name}`} <ArrowRight className="ml-2 h-4 w-4"/></Link></Button>
+                  <p className="mt-3 text-center text-xs text-muted-foreground">Cadastro autônomo: conta → empresa → subdomínio → termos → pagamento → onboarding.</p>
                 </Card>
               ))}
             </div>
