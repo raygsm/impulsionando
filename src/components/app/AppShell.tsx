@@ -8,6 +8,7 @@ import { ImpersonationBanner } from "./ImpersonationBanner";
 import { CommandPalette } from "./CommandPalette";
 import { QuickActions } from "./QuickActions";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { PublishNowButton } from "./PublishNowButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -23,7 +24,6 @@ import { CheckoutShell, isCheckoutPath } from "./CheckoutShell";
 import { useAudience } from "@/hooks/use-audience";
 import { useConsumerHasActiveMembership } from "@/hooks/use-consumer-membership";
 import { MobileBottomNav } from "./MobileBottomNav";
-// ImpulsionitoDock removido a pedido — não renderizar mais no shell.
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -41,7 +41,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!isLoading && !data && !error) navigate({ to: "/auth" });
   }, [data, isLoading, error, navigate]);
 
-  // Histórico recente (B19)
   useEffect(() => {
     const path = location.pathname;
     if (path === "/" || path === "/auth" || path.startsWith("/auth/")) return;
@@ -55,13 +54,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pushRecent(path, label);
   }, [location.pathname]);
 
-  // Gate de inadimplência (trial OU assinatura suspensa)
   const isSuspended = trialSuspended || subSuspended;
   useEffect(() => {
     if (!isSuspended) return;
     const path = location.pathname;
-    // Consumidor final: pagamento é do Clube, redireciona para o checkout do Clube,
-    // NÃO para a área financeira B2B (/minha-assinatura).
     if (audience === "consumidor") {
       const allowedConsumer =
         path.startsWith("/checkout") ||
@@ -84,19 +80,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!allowed) navigate({ to: "/minha-assinatura" });
   }, [isSuspended, location.pathname, navigate, audience]);
 
-  // Gate por módulo: aplicado APENAS para assinantes pagantes ativos.
-  // Durante trial ativo (sem assinatura), todos os módulos ficam acessíveis.
-  // Sem trial nem assinatura, o usuário cai no fluxo de /planos.
   useEffect(() => {
     if (bypass || modulesLoading || isSuspended) return;
-    if (!subActive) return; // não bloqueia trial ou sem-assinatura aqui
+    if (!subActive) return;
     const required = requiredModuleFor(location.pathname);
     if (!required) return;
     if (!hasModule(required)) {
       navigate({ to: "/planos", search: { locked: required } as never });
     }
   }, [bypass, modulesLoading, isSuspended, subActive, location.pathname, hasModule, navigate]);
-
 
   useEffect(() => {
     if (error) console.error("[AppShell] failed to load current user", error);
@@ -110,9 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <p className="text-sm text-muted-foreground">
             Sua sessão pode ter expirado. Faça login novamente para continuar.
           </p>
-          <Button
-            onClick={() => signOutSafely({ queryClient, navigate })}
-          >
+          <Button onClick={() => signOutSafely({ queryClient, navigate })}>
             Voltar para o login
           </Button>
         </div>
@@ -128,10 +118,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Jornada de contratação/assinatura: shell limpo, sem sidebar administrativa.
-  // Consumidor Final SEM assinatura ativa também recebe o shell enxuto em
-  // qualquer rota — antes de assinar, o menu é só: Meu Plano · Benefícios ·
-  // Checkout · Ajuda.
   const isPreSubConsumer = audience === "consumidor" && !hasActiveMembership;
   if (isCheckoutPath(location.pathname) || isPreSubConsumer) {
     return <CheckoutShell>{children}</CheckoutShell>;
@@ -148,6 +134,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar currentUser={data} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar currentUser={data} />
+        {data.isSuperAdmin ? <PublishNowButton /> : null}
         <ImpersonationBanner />
         <TrialBanner />
         <PastDueBanner />
@@ -159,8 +146,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileBottomNav />
       <CommandPalette />
       <QuickActions />
-      
     </div>
   );
 }
-
