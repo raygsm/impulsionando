@@ -25,6 +25,7 @@ export interface CurrentUser {
   memberships: MyMembership[];
   isSuperAdmin: boolean;
   isImpulsionandoStaff: boolean;
+  isMasterObserver: boolean;
 }
 
 type AppRole = "admin" | "gestor" | "profissional" | "paciente" | "empresa";
@@ -56,6 +57,13 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
     metadata.is_super_admin === true || metadata.platform_role === "super_admin";
   const metadataStaff = metadataSuperAdmin || metadata.is_impulsionando_staff === true;
 
+  // O papel Master Observer é resolvido no servidor por entitlement associado ao e-mail
+  // autenticado. Ele nunca é promovido a staff/super-admin e, portanto, não herda escrita.
+  const { data: observerData } = await (supabase as any).rpc("is_impulsionando_master_observer", {
+    _user: userData.user.id,
+  });
+  const isMasterObserver = observerData === true;
+
   // O Core atual usa user_roles. user_profiles pertence ao modelo legado e não existe
   // no banco de produção. A consulta abaixo preserva o formato MyMembership consumido
   // pelo front, sem reintroduzir dependência da estrutura antiga.
@@ -64,7 +72,7 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
     .select("id, company_id, role, companies:company_id(id, name, is_master)")
     .eq("user_id", userData.user.id);
 
-  if (rolesError && !metadataStaff) throw rolesError;
+  if (rolesError && !metadataStaff && !isMasterObserver) throw rolesError;
 
   const displayName =
     (userData.user.user_metadata?.full_name as string | undefined) ??
@@ -95,5 +103,5 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   const isImpulsionandoStaff =
     metadataStaff || list.some((membership) => membership.profiles?.is_master_profile === true);
 
-  return { user: userData.user, memberships: list, isSuperAdmin, isImpulsionandoStaff };
+  return { user: userData.user, memberships: list, isSuperAdmin, isImpulsionandoStaff, isMasterObserver };
 }
