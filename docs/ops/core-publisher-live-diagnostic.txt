@@ -1,0 +1,193 @@
+generated_at_utc=2026-08-20T15:00:31Z
+--- service ---
+● impulsionando-publish-worker.service - Impulsionando one-click publisher worker
+     Loaded: loaded (/etc/systemd/system/impulsionando-publish-worker.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-08-20 15:00:26 UTC; 5s ago
+   Main PID: 1925001 (bash)
+      Tasks: 2 (limit: 4652)
+     Memory: 10.9M (peak: 14.9M)
+        CPU: 128ms
+     CGroup: /system.slice/impulsionando-publish-worker.service
+             ├─1925001 bash /usr/local/lib/impulsionando/publisher/core-publish-worker.sh
+             └─1925023 sleep 3
+
+Aug 20 15:00:21 srv1777313 systemd[1]: impulsionando-publish-worker.service: Failed with result 'oom-kill'.
+Aug 20 15:00:21 srv1777313 systemd[1]: impulsionando-publish-worker.service: Consumed 3min 58.427s CPU time, 13.0M memory peak, 0B memory swap peak.
+Aug 20 15:00:26 srv1777313 systemd[1]: impulsionando-publish-worker.service: Scheduled restart job, restart counter is at 3.
+Aug 20 15:00:26 srv1777313 systemd[1]: Started impulsionando-publish-worker.service - Impulsionando one-click publisher worker.
+--- publisher status ---
+{"state": "running", "stage": "Compilando o front e o backend do Core.", "sha": "4d5f6183f7ca3407517d0027f9592e6cd52dc781", "updated_at": "2026-08-20T14:30:51.655910Z"}
+--- lock/processes ---
+-rw-r--r-- 1 root root 0 Aug 20 14:30 /var/lib/impulsionando-publisher/publish.lock
+1925001       1       5  0.3  0.0 bash /usr/local/lib/impulsionando/publisher/core-publish-worker.sh
+--- current release ---
+/var/www/impulsionando-core/releases/d37cd7de182beb954d5ce7f88b9de76cbe18fc67
+--- current main sha in publisher worktree ---
+4d5f6183f7ca3407517d0027f9592e6cd52dc781
+--- runtime ---
+active
+status=running image=sha256:2256da088ff219e9251564c1f96a8d00572f4ea9e6bad6a4c439954357c9ec3b started=2026-08-20T14:29:39.848251999Z
+--- public version ---
+curl: (28) Connection timed out after 20002 milliseconds
+
+--- recent publisher journal ---
+Aug 20 02:18:00 srv1777313 core-publish-worker.sh[1541427]: Cloning into '/var/lib/impulsionando-publisher/repo'...
+Aug 20 02:18:03 srv1777313 core-publish-worker.sh[1541427]: [303B blob data]
+Aug 20 02:18:22 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:23 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:25 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:25 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:35 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:38 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:58 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 02:19:33 srv1777313 core-publish-worker.sh[1541449]: added 709 packages in 1m
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > prebuild
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542796]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542803]: [build-info] commit=7e7d1ab branch=main builtAt=2026-08-20T02:19:34.429Z
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > build
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: vite v7.3.5 building client environment for production...
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: transforming...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: ✓ 3353 modules transformed.
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: ✗ Build failed in 5m 37s
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: error during build:
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: [vite:esbuild] Transform failed with 1 error:
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: /var/lib/impulsionando-publisher/repo/src/routes/chrismed.agendar.tsx?tsr-split=component:443:13: ERROR: The character "}" is not valid inside a JSX element
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: file: /var/lib/impulsionando-publisher/repo/src/routes/chrismed.agendar.tsx?tsr-split=component:443:13
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: The character "}" is not valid inside a JSX element
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 441 |                setStep('specialty');
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 442 |              }} className={`${m === 'telemedicina' ? 'order-1' : m === 'presencial' ? 'order-2' : 'order-3'} text-left...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 443 |            })}}</div>
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     |               ^
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 444 |        <div className="mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5"><div ...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 445 |              window.dispatchEvent(new CustomEvent('chrismed:reception:notify', {
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at failureErrorWithLog (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1748:15)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1017:50
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at responseCallbacks.<computed> (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:884:9)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at handleIncomingPacket (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:939:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.readFromStdout (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:862:7)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.emit (node:events:519:28)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at addChunk (node:internal/streams/readable:561:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Readable.push (node:internal/streams/readable:392:5)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+Aug 20 02:27:56 srv1777313 core-publish-worker.sh[1547889]: Cloning into '/var/lib/impulsionando-publisher/repo'...
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:17 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:22 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:22 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:28:33 srv1777313 core-publish-worker.sh[1547906]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 02:28:53 srv1777313 core-publish-worker.sh[1547906]: added 709 packages in 54s
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548394]: > prebuild
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548394]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548406]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548413]: [build-info] commit=6a07bd2 branch=main builtAt=2026-08-20T02:28:54.257Z
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548394]: > build
+Aug 20 02:28:54 srv1777313 core-publish-worker.sh[1548394]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 02:29:13 srv1777313 core-publish-worker.sh[1548425]: vite v7.3.5 building client environment for production...
+Aug 20 02:29:13 srv1777313 core-publish-worker.sh[1548425]: transforming...
+Aug 20 03:51:45 srv1777313 systemd[1]: impulsionando-publish-worker.service: A process of this unit has been killed by the OOM killer.
+Aug 20 03:51:48 srv1777313 systemd[1]: impulsionando-publish-worker.service: Failed with result 'oom-kill'.
+Aug 20 03:51:48 srv1777313 systemd[1]: impulsionando-publish-worker.service: Consumed 9min 50.536s CPU time, 1.6G memory peak, 0B memory swap peak.
+Aug 20 03:51:53 srv1777313 systemd[1]: impulsionando-publish-worker.service: Scheduled restart job, restart counter is at 1.
+Aug 20 03:51:53 srv1777313 systemd[1]: Started impulsionando-publish-worker.service - Impulsionando one-click publisher worker.
+Aug 20 14:11:23 srv1777313 core-publish-worker.sh[1918288]: Cloning into '/var/lib/impulsionando-publisher/repo'...
+Aug 20 14:11:44 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:45 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:49 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:11:50 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:12:02 srv1777313 core-publish-worker.sh[1918404]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 14:12:22 srv1777313 core-publish-worker.sh[1918404]: added 709 packages in 56s
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919020]: > prebuild
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919020]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919032]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919039]: [build-info] commit=f7b4a51 branch=main builtAt=2026-08-20T14:12:23.502Z
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919020]: > build
+Aug 20 14:12:23 srv1777313 core-publish-worker.sh[1919020]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 14:12:44 srv1777313 core-publish-worker.sh[1919051]: vite v7.3.5 building client environment for production...
+Aug 20 14:12:44 srv1777313 core-publish-worker.sh[1919051]: transforming...
+Aug 20 14:26:32 srv1777313 systemd[1]: impulsionando-publish-worker.service: Scheduled restart job, restart counter is at 2.
+Aug 20 14:26:32 srv1777313 systemd[1]: Started impulsionando-publish-worker.service - Impulsionando one-click publisher worker.
+Aug 20 14:30:20 srv1777313 core-publish-worker.sh[1924032]: Cloning into '/var/lib/impulsionando-publisher/repo'...
+Aug 20 14:30:31 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:32 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:34 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:34 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 14:30:40 srv1777313 core-publish-worker.sh[1924049]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924049]: added 709 packages in 28s
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924255]: > prebuild
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924255]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924267]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924274]: [build-info] commit=4d5f618 branch=main builtAt=2026-08-20T14:30:51.943Z
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924255]: > build
+Aug 20 14:30:51 srv1777313 core-publish-worker.sh[1924255]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 14:31:02 srv1777313 core-publish-worker.sh[1924286]: vite v7.3.5 building client environment for production...
+Aug 20 14:31:02 srv1777313 core-publish-worker.sh[1924286]: transforming...
+Aug 20 15:00:20 srv1777313 systemd[1]: impulsionando-publish-worker.service: A process of this unit has been killed by the OOM killer.
+Aug 20 15:00:21 srv1777313 systemd[1]: impulsionando-publish-worker.service: Failed with result 'oom-kill'.
+Aug 20 15:00:21 srv1777313 systemd[1]: impulsionando-publish-worker.service: Consumed 3min 58.427s CPU time, 13.0M memory peak, 0B memory swap peak.
+Aug 20 15:00:26 srv1777313 systemd[1]: impulsionando-publish-worker.service: Scheduled restart job, restart counter is at 3.
+Aug 20 15:00:26 srv1777313 systemd[1]: Started impulsionando-publish-worker.service - Impulsionando one-click publisher worker.
