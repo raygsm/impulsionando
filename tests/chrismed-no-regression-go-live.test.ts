@@ -8,6 +8,9 @@ const read = (p: string) => fs.readFileSync(path.join(root, p), 'utf8');
 const booking = read('src/routes/chrismed.agendar.tsx');
 const payment = read('src/components/chrismed/ChrismedPaymentMethod.tsx');
 const validators = read('src/lib/validators.ts');
+const auth = read('src/routes/auth.tsx');
+const professionalAuth = read('src/components/chrismed/ChrismedProfessionalAuth.tsx');
+const shell = read('src/components/chrismed/ChrismedShell.tsx');
 
 describe('CHRISMED — regras congeladas de go-live', () => {
   it('mantém o hold de checkout em 5 minutos', () => {
@@ -28,6 +31,30 @@ describe('CHRISMED — regras congeladas de go-live', () => {
     expect(validators).toContain('export function isValidCPF');
     expect(validators).toContain('export function isValidCNPJ');
     expect(validators).toContain('calculateCNPJDigit');
+  });
+
+  it('bloqueia avanço com CPF inválido e explica como corrigir', () => {
+    expect(booking).toContain('CPF inválido — não é possível avançar');
+    expect(booking).toContain('Validar dados e continuar');
+    expect(booking).toContain("if (!isValidCPF(patient.doc))");
+    expect(booking).toContain("document.getElementById('doc')?.focus()");
+  });
+
+  it('mantém orientação do Impulsionito durante a jornada CHRISMED', () => {
+    expect(booking).toContain('O Impulsionito e o Oliver estão disponíveis para orientar você');
+    expect(shell).toContain('Impulsionito a postos');
+    expect(professionalAuth).toContain('Impulsionito a postos');
+  });
+
+  it('não devolve erro bruto do provedor na autenticação CHRISMED', () => {
+    expect(auth).not.toContain('Não foi possível concluir a solicitação: ${msg}');
+    expect(professionalAuth).not.toContain('return message ||');
+  });
+
+  it('mantém acesso administrativo direto com e-mail pré-preenchível e destino seguro', () => {
+    expect(auth).toContain('email?: string');
+    expect(auth).toContain('initialEmail={search.email}');
+    expect(auth).toContain('nextPath={safeNext(search.next)}');
   });
 
   it('não permite os erros técnicos históricos em inglês na agenda pública', () => {
