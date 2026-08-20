@@ -29,7 +29,7 @@ function traduzirErroAuth(msg: string | undefined | null): string {
   if (m.includes("user not found")) return "Usuário não encontrado.";
   if (m.includes("token has expired") || m.includes("jwt expired")) return "Sua sessão expirou. Faça login novamente.";
   if (m.includes("unsupported provider")) return "Provedor de login não configurado. Fale com o suporte.";
-  return msg ? `Não foi possível concluir a solicitação: ${msg}` : "Não foi possível concluir o acesso. Tente novamente.";
+  return "Não foi possível concluir o acesso. Confira os dados informados e tente novamente. Se continuar, peça ajuda ao Impulsionito nesta tela.";
 }
 
 type AuthPersona = "core" | "empresa" | "white-label" | "admin" | "clube";

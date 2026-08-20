@@ -44,7 +44,7 @@ function ResetPasswordPage() {
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error("Não foi possível salvar a nova senha. Confira os requisitos, solicite um novo link se este tiver expirado e tente novamente.");
     toast.success("Senha redefinida com sucesso.");
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
