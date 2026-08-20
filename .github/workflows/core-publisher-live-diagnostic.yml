@@ -1,0 +1,78 @@
+name: Core Publisher Live Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/core-publisher-live-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: core-publisher-live-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Collect publisher state without changing production
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/core-publisher-live-diagnostic.txt 2>&1 <<'REMOTE'
+          set -euo pipefail
+          echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo '--- service ---'
+          sudo systemctl status impulsionando-publish-worker.service --no-pager -n 40 || true
+          echo '--- publisher status ---'
+          sudo cat /var/lib/impulsionando-publisher/status.json 2>/dev/null || true
+          echo
+          echo '--- lock/processes ---'
+          sudo ls -l /var/lib/impulsionando-publisher/publish.lock 2>/dev/null || true
+          ps -eo pid,ppid,etimes,%cpu,%mem,cmd | grep -E 'publish-core-now|core-publish-worker|vite|esbuild|npm ci|docker build' | grep -v grep || true
+          echo '--- current release ---'
+          readlink -f /var/www/impulsionando-core/current 2>/dev/null || true
+          echo '--- current main sha in publisher worktree ---'
+          sudo git -C /var/lib/impulsionando-publisher/repo rev-parse HEAD 2>/dev/null || true
+          echo '--- runtime ---'
+          sudo systemctl is-active impulsionando-core.service || true
+          sudo docker inspect impulsionando-core --format 'status={{.State.Status}} image={{.Image}} started={{.State.StartedAt}}' 2>/dev/null || true
+          echo '--- public version ---'
+          curl -fsS --max-time 20 https://impulsionando.com.br/api/public/version || true
+          echo
+          echo '--- recent publisher journal ---'
+          sudo journalctl --no-pager -u impulsionando-publish-worker.service -n 160 || true
+          REMOTE
+      - name: Persist diagnostic proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/core-publisher-live-diagnostic.txt docs/ops/core-publisher-live-diagnostic.txt || true
+          git config user.name 'Impulsionito Core Diagnostic'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/core-publisher-live-diagnostic.txt
+          git commit -m 'chore(core): record live publisher diagnostic' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
