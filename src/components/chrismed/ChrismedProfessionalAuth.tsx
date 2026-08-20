@@ -43,7 +43,7 @@ function authError(message?: string) {
   if (normalized.includes("already registered")) return "Já existe uma conta com este e-mail.";
   if (normalized.includes("password should be"))
     return "A senha precisa ter pelo menos 12 caracteres.";
-  return message || "Não foi possível concluir. Tente novamente.";
+  return "Não foi possível concluir o acesso. Confira os dados informados e tente novamente. Se continuar, fale com o atendimento CHRISMED.";
 }
 
 export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMode?: AuthMode }) {

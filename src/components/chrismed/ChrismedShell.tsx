@@ -278,6 +278,7 @@ export function ChrismedShell({ children, headerVariant = "full" }: { children: 
           <ChrismedHeader variant={headerVariant} />
           <main className="pt-[5.4rem]">{children}</main>
           <ChrismedFooter />
+          <button type="button" onClick={() => openChrismedOliver({ source: "journey_assist", intent: "help" })} className="fixed bottom-5 right-5 z-[70] rounded-full border border-white/20 bg-[var(--chrismed-forest-deep)] px-4 py-3 text-left text-xs font-semibold text-white shadow-2xl" aria-label="Pedir ajuda ao assistente CHRISMED"><span className="block text-[10px] uppercase tracking-[0.16em] text-[var(--chrismed-amber-soft)]">Impulsionito a postos</span><span className="block">Precisa de orientação? Fale com Oliver.</span></button>
         </div>
       </ChrismedOliverProvider>
     </ChrismedShellContext.Provider>
