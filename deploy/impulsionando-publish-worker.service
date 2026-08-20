@@ -1,0 +1,20 @@
+[Unit]
+Description=Impulsionando one-click publisher worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/impulsionando-core.env
+Environment=CORE_PUBLISH_POLL_SECONDS=3
+ExecStart=/usr/local/lib/impulsionando/publisher/core-publish-worker.sh
+Restart=always
+RestartSec=5
+User=root
+Group=root
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
