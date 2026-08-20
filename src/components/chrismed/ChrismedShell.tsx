@@ -120,7 +120,7 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
   const linkClass = "group bg-white px-6 py-5 transition-colors hover:bg-[#f7f4ec]";
   const linkContent = (leaf: NavLeaf) => (
     <>
-      <strong className="block text-[13px] font-semibold text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]">{leaf.labels[lang]}</strong>
+      <strong className="block whitespace-normal break-words text-[13px] font-semibold leading-snug text-[var(--chrismed-forest-deep)] transition-colors group-hover:text-[var(--chrismed-forest)]">{leaf.labels[lang]}</strong>
       {leaf.desc && <span className="mt-2 block text-[12px] leading-[1.55] text-[var(--chrismed-graphite)]">{leaf.desc[lang]}</span>}
       <span className="mt-3 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--chrismed-forest)] opacity-0 transition-opacity group-hover:opacity-100">Acessar →</span>
     </>
@@ -132,7 +132,7 @@ function DesktopDropdown({ group, lang, pathname }: { group: NavGroup; lang: Lan
         <ChevronDown className={cn("h-3.5 w-3.5 opacity-60 transition-transform", open && "rotate-180")} aria-hidden />
       </button>
       {open && (
-        <div role="menu" className="absolute left-1/2 top-full z-[100] w-[31rem] -translate-x-1/2 pt-3">
+        <div role="menu" className={cn("absolute top-full z-[100] w-[min(31rem,calc(100vw-2rem))] pt-3", group.key === "acessos" ? "right-0" : "left-1/2 -translate-x-1/2")}>
           <div className="overflow-hidden rounded-[1.35rem] border border-[#d9d3c4] bg-[#fbfaf6] shadow-[0_24px_70px_rgba(4,22,18,0.22)]">
             <div className="border-b border-[#e4dfd3] bg-[#f5f1e7] px-6 py-4">
               <span className="block text-[9px] font-semibold uppercase tracking-[0.28em] text-[var(--chrismed-forest)]">{group.eyebrow?.[lang]}</span>
