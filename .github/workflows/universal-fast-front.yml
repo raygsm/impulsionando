@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: universal-fast-front
@@ -141,8 +141,12 @@ jobs:
           echo "UNIVERSAL_FAST_FRONT_ORIGIN=PASS sha=$RELEASE_SHA"
           REMOTE
       - name: Validate every existing tenant domain
+        id: validate
+        shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          : > /tmp/universal-fast-front-proof.txt
+          printf 'generated_at_utc=%s\nsha=%s\ntenant_count=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$GITHUB_SHA" "$TENANT_COUNT" >> /tmp/universal-fast-front-proof.txt
           failed=0
           while read -r domain; do
             [ -n "$domain" ] || continue
@@ -156,11 +160,25 @@ jobs:
             done
             final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
             if [ "$code" != 200 ] || [ "$final_host" != "$domain" ]; then
-              echo "::error::PUBLIC_FAIL $domain HTTP=$code FINAL=$final"
+              echo "PUBLIC_FAIL $domain HTTP=$code FINAL=$final" | tee -a /tmp/universal-fast-front-proof.txt
               failed=1
             else
-              echo "PUBLIC_PASS $domain"
+              echo "PUBLIC_PASS $domain HTTP=200" | tee -a /tmp/universal-fast-front-proof.txt
             fi
           done < /tmp/domains
-          [ "$failed" = 0 ]
-          echo "UNIVERSAL_FAST_FRONT=PASS count=$TENANT_COUNT"
+          echo "failed=$failed" >> /tmp/universal-fast-front-proof.txt
+          if [ "$failed" = 0 ]; then echo "UNIVERSAL_FAST_FRONT=PASS count=$TENANT_COUNT" | tee -a /tmp/universal-fast-front-proof.txt; else echo "UNIVERSAL_FAST_FRONT=PARTIAL count=$TENANT_COUNT" | tee -a /tmp/universal-fast-front-proof.txt; fi
+          exit "$failed"
+      - name: Persist universal publication proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/universal-fast-front-proof.txt docs/ops/universal-fast-front-proof.txt || printf 'proof_unavailable\n' > docs/ops/universal-fast-front-proof.txt
+          git config user.name 'Impulsionito Universal Front QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/universal-fast-front-proof.txt
+          git commit -m 'chore(front): record universal fast front proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
