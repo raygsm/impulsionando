@@ -1,0 +1,65 @@
+name: CHRISMED runtime repair after Core deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-runtime-env-after-core-deploy.yml
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Restore CHRISMED Evolution settings and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          ENV_FILE=/etc/impulsionando-core.env
+          CORE=impulsionando-core
+          EVO=impulsionando-evolution-api
+          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          sudo test -f "$ENV_FILE"
+          sudo test -f "$COMPOSE"
+          sudo docker inspect "$EVO" >/dev/null
+          EVO_KEY="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
+          test -n "$EVO_KEY"
+          set_env(){ local key="$1" value="$2" tmp; tmp="$(mktemp)"; sudo awk -F= -v k="$key" '$1!=k{print}' "$ENV_FILE" > "$tmp"; printf '%s=%s\n' "$key" "$value" >> "$tmp"; sudo install -o root -g root -m 0600 "$tmp" "$ENV_FILE"; rm -f "$tmp"; }
+          set_env CHRISMED_EVOLUTION_BASE_URL 'http://impulsionando-evolution-api:8080'
+          set_env CHRISMED_EVOLUTION_API_KEY "$EVO_KEY"
+          unset EVO_KEY
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core >/dev/null
+          for i in $(seq 1 45); do
+            state="$(sudo docker inspect "$CORE" --format '{{.State.Status}}' 2>/dev/null || true)"
+            if [ "$state" = running ]; then
+              ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$CORE" 2>/dev/null || true)"
+              if [ -n "$ip" ] && curl -fsS -H 'Host: chrismed.impulsionando.com.br' "http://$ip:3000/" >/dev/null 2>&1; then break; fi
+            fi
+            [ "$i" -lt 45 ] || exit 51
+            sleep 2
+          done
+          sudo docker exec "$CORE" sh -lc 'test -n "$CHRISMED_EVOLUTION_BASE_URL" && test -n "$CHRISMED_EVOLUTION_API_KEY"'
+          echo 'CHRISMED_RUNTIME_REPAIR=PASS'
+          REMOTE
