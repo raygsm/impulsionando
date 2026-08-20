@@ -1,0 +1,106 @@
+name: CHRISMED n8n runtime diagnose v5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-n8n-runtime-diagnose-v5.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Inspect live n8n database and webhook publication
+        shell: bash
+        run: |
+          set +e
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/chrismed-n8n-v5-diagnostic.txt 2>&1 <<'REMOTE'
+          set -u
+          C=n8n-umlg-n8n-1
+          SAMPLE=chdf108f4e5414059ecba9
+          echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "state=$(sudo docker inspect "$C" --format '{{.State.Status}}' 2>/dev/null || echo missing)"
+          if [ "$(sudo docker inspect "$C" --format '{{.State.Status}}' 2>/dev/null || echo missing)" != running ]; then
+            sudo docker start "$C" >/dev/null 2>&1 || true
+            sleep 5
+          fi
+          echo "final_state=$(sudo docker inspect "$C" --format '{{.State.Status}}' 2>/dev/null || echo missing)"
+          echo '--- n8n version ---'
+          sudo docker exec "$C" n8n --version 2>&1 || true
+          echo '--- health ---'
+          sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(async r=>{console.log(r.status,await r.text())}).catch(e=>{console.error(e.message);process.exit(1)})" 2>&1 || true
+          echo '--- export sample ---'
+          sudo docker exec "$C" n8n export:workflow --id="$SAMPLE" --output=/tmp/sample-v5.json >/dev/null 2>&1 || true
+          sudo docker exec "$C" node -e 'const fs=require("fs");try{const r=JSON.parse(fs.readFileSync("/tmp/sample-v5.json","utf8"));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).map(n=>({type:n.type,webhookId:n.webhookId||null,path:n.parameters?.path||null}))},null,2))}catch(e){console.log("sample_export_error",e.message)}' 2>&1 || true
+          echo '--- export outbox ---'
+          sudo docker exec "$C" n8n export:workflow --id=chrismedOutboxWorker01 --output=/tmp/outbox-v5.json >/dev/null 2>&1 || true
+          sudo docker exec "$C" node -e 'const fs=require("fs");try{const r=JSON.parse(fs.readFileSync("/tmp/outbox-v5.json","utf8"));const w=Array.isArray(r)?r[0]:r;console.log(JSON.stringify({id:w.id,name:w.name,active:w.active,versionId:w.versionId,activeVersionId:w.activeVersionId,nodes:(w.nodes||[]).map(n=>({type:n.type,webhookId:n.webhookId||null,path:n.parameters?.path||null}))},null,2))}catch(e){console.log("outbox_export_error",e.message)}' 2>&1 || true
+          DB=$(sudo docker inspect "$C" --format '{{range .Mounts}}{{if eq .Destination "/home/node/.n8n"}}{{.Source}}{{end}}{{end}}')
+          echo "db_dir=$DB"
+          if [ -n "$DB" ] && [ -f "$DB/database.sqlite" ]; then
+            echo '--- sqlite metadata ---'
+            sudo python3 - "$DB/database.sqlite" "$SAMPLE" <<'PY'
+          import sqlite3,sys,json
+          path,wid=sys.argv[1],sys.argv[2]
+          db=sqlite3.connect(path)
+          db.row_factory=sqlite3.Row
+          for table in ['workflow_entity','webhook_entity','workflow_history','workflow_published_version']:
+              print('TABLE',table)
+              try:
+                  cols=[r['name'] for r in db.execute(f'pragma table_info("{table}")')]
+                  print('COLS',cols)
+                  if table=='workflow_entity':
+                      rows=db.execute('select * from workflow_entity where id in (?,?)',(wid,'chrismedOutboxWorker01')).fetchall()
+                  elif table=='webhook_entity':
+                      rows=db.execute('select * from webhook_entity where workflowId in (?,?)',(wid,'chrismedOutboxWorker01')).fetchall()
+                  elif 'workflowId' in cols:
+                      rows=db.execute(f'select * from "{table}" where workflowId in (?,?) order by rowid desc limit 20',(wid,'chrismedOutboxWorker01')).fetchall()
+                  else:
+                      rows=[]
+                  for row in rows:
+                      d=dict(row)
+                      for k,v in list(d.items()):
+                          if isinstance(v,str) and len(v)>500: d[k]=v[:500]+'...'
+                      print(json.dumps(d,ensure_ascii=False,default=str))
+              except Exception as e:
+                  print('ERR',type(e).__name__,str(e))
+          PY
+          fi
+          echo '--- logs tail ---'
+          sudo docker logs --tail 120 "$C" 2>&1 || true
+          REMOTE
+          exit 0
+      - name: Persist proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/chrismed-n8n-v5-diagnostic.txt docs/ops/chrismed-n8n-v5-diagnostic.txt || echo 'diagnostic missing' > docs/ops/chrismed-n8n-v5-diagnostic.txt
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-n8n-v5-diagnostic.txt
+          git commit -m 'chore(chrismed): record n8n v5 diagnostic' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
