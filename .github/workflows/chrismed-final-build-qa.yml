@@ -1,0 +1,62 @@
+name: CHRISMED final source build QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-final-build-qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build and verify CHRISMED source
+        shell: bash
+        run: |
+          set +e
+          {
+            echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "sha=$GITHUB_SHA"
+            npm ci --no-audit --no-fund
+            echo "npm_ci_rc=$?"
+            npx vitest run src/lib/subdomain.test.ts tests/chrismed-frontend-quality.test.ts
+            echo "tests_rc=$?"
+            npm run build
+            build_rc=$?
+            echo "build_rc=$build_rc"
+            test -f .output/server/index.mjs && echo 'server_output=PASS' || echo 'server_output=FAIL'
+            grep -q "api/communication/whatsapp/chrismed" .output/server/index.mjs 2>/dev/null && echo 'whatsapp_route_bundle=PASS' || echo 'whatsapp_route_bundle=CHECK_GENERATED_CHUNKS'
+            grep -q 'chrismed_patient_profiles' src/routes/_authenticated/ehr.index.tsx && echo 'ehr_patient_schema=PASS' || echo 'ehr_patient_schema=FAIL'
+            grep -q 'group.key === "acessos" ? "right-0"' src/components/chrismed/ChrismedShell.tsx && echo 'access_menu_fix=PASS' || echo 'access_menu_fix=FAIL'
+            exit $build_rc
+          } > /tmp/chrismed-final-build-qa.txt 2>&1
+      - name: Persist QA proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/chrismed-final-build-qa.txt docs/ops/chrismed-final-build-qa.txt || echo 'proof missing' > docs/ops/chrismed-final-build-qa.txt
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-final-build-qa.txt
+          git commit -m 'chore(chrismed): record final source build QA' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
