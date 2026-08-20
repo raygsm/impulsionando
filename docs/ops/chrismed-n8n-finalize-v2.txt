@@ -1,0 +1,13 @@
+READY_CHRISMED=34
+IMPORT chrismed.appointment.cancelled id=chdf108f4e5414059ecba9
+Importing 1 workflows...
+Successfully imported 1 workflow.
+⚠️  WARNING: The "update:workflow" command is deprecated.
+
+Publishing workflow chdf108f4e5414059ecba9 with current version
+Please use: publish:workflow --id=chdf108f4e5414059ecba9
+
+Note: Changes will not take effect if n8n is running.
+Please restart n8n for changes to take effect if n8n is currently running.
+IMPORT chrismed.appointment.checkin id=chbb99beebe92379a3b5d3
+FAILED rc=137 line=31
