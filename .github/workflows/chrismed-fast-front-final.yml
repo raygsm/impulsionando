@@ -44,9 +44,8 @@ jobs:
           grep -Fq 'initialEmail={search.email}' src/routes/auth.tsx
           grep -Fq 'nextPath={safeNext(search.next)}' src/routes/auth.tsx
           if grep -Fq 'Não foi possível concluir a solicitação: ${msg}' src/routes/auth.tsx; then exit 31; fi
-          npm test -- --run tests/chrismed-no-regression-go-live.test.ts
 
-      - name: Build current main
+      - name: Install, test and build current main
         env:
           VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -55,6 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --no-audit --no-fund
+          npm test -- --run tests/chrismed-no-regression-go-live.test.ts
           npm run build
           test -f .output/server/index.mjs
           printf '%s' "$GITHUB_SHA" > .output/public/impulsionando-front-sha.txt
@@ -114,7 +114,6 @@ jobs:
           fi
           sudo docker rm -f "$canary" >/dev/null
 
-          old_live_image="$(sudo docker inspect -f '{{.Config.Image}}' "$live" 2>/dev/null || true)"
           sudo docker rm -f "$live" >/dev/null 2>&1 || true
           sudo docker run -d --name "$live" --network "$network" --env-file "$envfile" --restart unless-stopped \
             -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
@@ -141,7 +140,7 @@ jobs:
             sudo docker rm -f "$live" >/dev/null 2>&1 || true
             exit 72
           fi
-          echo "CHRISMED_PROMOTION_PASS sha=$RELEASE_SHA prior_image=${old_live_image:-none}"
+          echo "CHRISMED_PROMOTION_PASS sha=$RELEASE_SHA"
           REMOTE
           rc=${PIPESTATUS[0]}
           test "$rc" -eq 0
@@ -150,7 +149,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          marker=''
+          marker=''; h=''; a=''; b=''
           for i in $(seq 1 35); do
             marker="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 12 "https://chrismed.impulsionando.com.br/impulsionando-front-sha.txt?t=$GITHUB_SHA" 2>/dev/null || true)"
             h="$(curl -sS -L -o /tmp/h -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://chrismed.impulsionando.com.br/?t=$GITHUB_SHA" || true)"
@@ -162,7 +161,7 @@ jobs:
             fi
             sleep 2
           done
-          printf 'sha=%s\nhome=%s\nauth=%s\nbooking=%s\nstatus=FAIL\n' "$marker" "${h:-}" "${a:-}" "${b:-}" > /tmp/chrismed-final-front-proof.txt
+          printf 'sha=%s\nhome=%s\nauth=%s\nbooking=%s\nstatus=FAIL\n' "$marker" "$h" "$a" "$b" > /tmp/chrismed-final-front-proof.txt
           exit 81
 
       - name: Persist proof
