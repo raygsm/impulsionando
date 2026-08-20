@@ -1,4 +1,4 @@
-# Forced diagnostic trigger: 2026-08-19T23:05:00-03:00
+# Forced diagnostic trigger: 2026-08-19T23:12:00-03:00
 name: n8n READY debug
 
 on:
@@ -32,43 +32,45 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-      - name: Capture n8n diagnostics
+      - name: Capture HMAC diagnostics
         shell: bash
         run: |
           set +e
           mkdir -p docs/ops
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' >docs/ops/n8n-ready-debug.txt 2>&1
           set +e
-          C=n8n-umlg-n8n-1
           CORE_ENV=/etc/impulsionando-core.env
           SECURITY_ENV=/etc/impulsionando-security.env
+          C=n8n-umlg-n8n-1
           echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           echo "container_state=$(sudo docker inspect "$C" --format '{{.State.Status}}' 2>&1)"
-          echo '--- n8n version ---'
-          sudo docker exec "$C" n8n --version 2>&1; echo "rc=$?"
-          echo '--- import help ---'
-          sudo docker exec "$C" n8n import:workflow --help 2>&1 | tail -80; echo "rc=$?"
-          echo '--- publish help ---'
-          sudo docker exec "$C" n8n publish:workflow --help 2>&1 | tail -80; echo "rc=$?"
-          echo '--- update help ---'
-          sudo docker exec "$C" n8n update:workflow --help 2>&1 | tail -80; echo "rc=$?"
+          SEC_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
+          CORE_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$CORE_ENV" | head -n1)"
+          echo "security_secret_present=$([ -n "$SEC_SECRET" ] && echo yes || echo no)"
+          echo "core_secret_present=$([ -n "$CORE_SECRET" ] && echo yes || echo no)"
+          if [ -n "$SEC_SECRET" ] && [ -n "$CORE_SECRET" ]; then
+            [ "$SEC_SECRET" = "$CORE_SECRET" ] && echo 'secret_match=yes' || echo 'secret_match=no'
+          else
+            echo 'secret_match=unknown'
+          fi
+          payload='{"workflow_name":"chrismed.appointment.cancelled","event_code":"appointment.cancelled","tenant_slug":"chrismed","correlation_id":"hmac-diagnostic-20260819","dispatched_at":"2026-08-20T02:12:00.000Z","data":{"probe":true}}'
+          code_unsigned="$(curl -sS -o /tmp/u.out -w '%{http_code}' --max-time 20 -X POST 'https://impulsionando.com.br/api/public/hooks/n8n-verify' -H 'content-type: application/json' -d "$payload" || true)"
+          echo "unsigned_http=$code_unsigned body=$(cat /tmp/u.out 2>/dev/null | head -c 240)"
+          if [ -n "$SEC_SECRET" ]; then
+            sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$SEC_SECRET" -hex | awk '{print $2}')"
+            code_sec="$(curl -sS -o /tmp/s.out -w '%{http_code}' --max-time 20 -X POST 'https://impulsionando.com.br/api/public/hooks/n8n-verify' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload" || true)"
+            echo "security_secret_http=$code_sec body=$(cat /tmp/s.out 2>/dev/null | head -c 300)"
+          fi
+          if [ -n "$CORE_SECRET" ]; then
+            sig2="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$CORE_SECRET" -hex | awk '{print $2}')"
+            code_core="$(curl -sS -o /tmp/c.out -w '%{http_code}' --max-time 20 -X POST 'https://impulsionando.com.br/api/public/hooks/n8n-verify' -H 'content-type: application/json' -H "x-impulsionando-signature: $sig2" -d "$payload" || true)"
+            echo "core_secret_http=$code_core body=$(cat /tmp/c.out 2>/dev/null | head -c 300)"
+          fi
+          echo '--- first READY ---'
           SUPABASE_URL="$(sudo sed -n 's/^SUPABASE_URL=//p' "$CORE_ENV" | head -n1)"
           SERVICE_KEY="$(sudo sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=//p' "$CORE_ENV" | head -n1)"
-          SIGNING_SECRET="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SECURITY_ENV" | head -n1)"
-          echo "core_env_values=$([ -n "$SUPABASE_URL" ] && [ -n "$SERVICE_KEY" ] && echo ok || echo missing)"
-          echo "signing_secret=$([ -n "$SIGNING_SECRET" ] && echo present || echo missing)"
-          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=workflow_slug,version,description,config&order=workflow_slug.asc&limit=1" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" >/tmp/one.json
-          echo '--- first READY ---'; cat /tmp/one.json; echo
-          slug="$(jq -r '.[0].workflow_slug // empty' /tmp/one.json)"; version="$(jq -r '.[0].version // 1' /tmp/one.json)"; tenant="$(jq -r '.[0].config.tenant_slug // "impulsionando"' /tmp/one.json)"
-          id="iu$(printf '%s' "${slug}:v${version}" | sha256sum | cut -c1-20)"; path="debug-$(printf '%s' "$slug"|tr '[:upper:]._' '[:lower:]---'|tr -cd 'a-z0-9-')-v${version}"
-          echo "slug=$slug id=$id path=$path tenant=$tenant"
-          jq -n --arg id "$id" --arg name "DEBUG | $slug" --arg path "$path" --arg hook "${id}-hook" '{id:$id,name:$name,active:false,nodes:[{parameters:{httpMethod:"POST",path:$path,responseMode:"onReceived",options:{}},id:($id+"-webhook"),name:"Webhook",type:"n8n-nodes-base.webhook",typeVersion:2,position:[0,0],webhookId:$hook}],connections:{},settings:{executionOrder:"v1"}}' >/tmp/debug-wf.json
-          sudo docker cp /tmp/debug-wf.json "$C:/tmp/debug-wf.json" 2>&1; echo "docker_cp_rc=$?"
-          sudo docker exec "$C" n8n import:workflow --input=/tmp/debug-wf.json 2>&1; echo "import_rc=$?"
-          sudo docker exec "$C" n8n publish:workflow --id="$id" 2>&1; echo "publish_rc=$?"
-          sudo docker exec "$C" n8n update:workflow --id="$id" --active=true 2>&1; echo "activate_rc=$?"
-          sudo docker exec "$C" n8n export:workflow --id="$id" --output=/tmp/debug-export.json 2>&1; echo "export_rc=$?"
-          sudo docker exec "$C" cat /tmp/debug-export.json 2>&1 | head -c 3000; echo
+          curl -fsS "$SUPABASE_URL/rest/v1/n8n_workflow_registry?status=eq.READY&n8n_workflow_id=is.null&select=workflow_slug,version,config&order=workflow_slug.asc&limit=3" -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" || true
+          echo
           REMOTE
           exit 0
       - name: Commit diagnostic
