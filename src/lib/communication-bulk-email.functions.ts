@@ -255,6 +255,7 @@ export const createBulkEmailCampaign = createServerFn({ method: 'POST' })
     audienceMode: z.enum(['all', 'selected']).default('all'),
     recipientIds: z.array(z.string().uuid()).max(5000).optional(),
     scheduledFor: z.string().datetime().optional().nullable(),
+    audienceCategory: z.enum(['professional','company','occupational','patient','event','laboratory','partner']).optional(),
   }).parse(value))
   .handler(async ({ data, context }) => {
     const supabase = context.supabase as any;
@@ -265,6 +266,9 @@ export const createBulkEmailCampaign = createServerFn({ method: 'POST' })
       .select('id,email,display_name,external_id')
       .eq('tenant_id', tenantId)
       .is('deleted_at', null);
+    if (data.audienceMode === 'all' && data.audienceCategory) {
+      recipientsQuery = recipientsQuery.contains('attributes', { category: data.audienceCategory });
+    }
     if (data.audienceMode === 'selected') {
       const ids = data.recipientIds ?? [];
       if (!ids.length) throw new Error('Selecione ao menos um contato.');
@@ -316,7 +320,7 @@ export const createBulkEmailCampaign = createServerFn({ method: 'POST' })
         name: data.name,
         category: 'marketing',
         audience_mode: data.audienceMode,
-        audience_filter: data.audienceMode === 'selected' ? { recipient_ids: eligible.map((r: any) => r.id) } : { all_active_email_contacts: true },
+        audience_filter: data.audienceMode === 'selected' ? { recipient_ids: eligible.map((r: any) => r.id) } : { all_active_email_contacts: true, category: data.audienceCategory ?? null },
         status: 'draft',
         scheduled_for: data.scheduledFor || null,
         created_by: context.userId,
@@ -329,6 +333,7 @@ export const createBulkEmailCampaign = createServerFn({ method: 'POST' })
           html_body: data.htmlBody || null,
           created_from: 'bulk_email_workspace',
           filtered_out: recipients.length - eligible.length,
+          audience_category: data.audienceCategory ?? null,
         },
       })
       .select('id,name,status,scheduled_for')
