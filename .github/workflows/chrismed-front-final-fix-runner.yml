@@ -1,0 +1,38 @@
+name: CHRISMED repair final front runner order
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-front-final-fix-runner.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Move tests after dependency install
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/chrismed-fast-front-final.yml')
+          s=p.read_text()
+          line='          npm test -- --run tests/chrismed-no-regression-go-live.test.ts\n'
+          if line not in s: raise SystemExit('test line missing')
+          s=s.replace(line,'',1)
+          anchor='          npm ci --no-audit --no-fund\n'
+          if anchor not in s: raise SystemExit('npm ci anchor missing')
+          s=s.replace(anchor,anchor+line,1)
+          p.write_text(s)
+          PY
+          git diff --check
+          git config user.name 'Impulsionito CHRISMED Front QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add .github/workflows/chrismed-fast-front-final.yml
+          git commit -m 'fix(chrismed): run final regression tests after npm ci'
+          git pull --rebase origin main
+          git push origin main
