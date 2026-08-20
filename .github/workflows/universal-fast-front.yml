@@ -1,0 +1,166 @@
+name: Universal Fast Front
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - public/**
+      - vite.config.*
+      - package.json
+      - package-lock.json
+      - .github/workflows/universal-fast-front.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-fast-front
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Discover active Core tenants
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" \
+            -o /tmp/tenant-identities.json
+          jq -e 'type=="array"' /tmp/tenant-identities.json >/dev/null
+          jq -r '.[] | select(.subdomain != null and .root_domain != null) | (.subdomain + "." + .root_domain)' /tmp/tenant-identities.json | sort -u > /tmp/domains
+          test -s /tmp/domains
+          echo "TENANT_COUNT=$(wc -l </tmp/domains | tr -d ' ')" >> "$GITHUB_ENV"
+      - name: Build latest universal Core front
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+          test -d .output/public
+          printf '%s' "$GITHUB_SHA" > .output/public/impulsionando-front-sha.txt
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Upload latest output once
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/universal-fast-front.tgz .output scripts
+          scp /tmp/universal-fast-front.tgz "$VPS_USER@$VPS_HOST:/tmp/universal-fast-front.tgz"
+          scp /tmp/domains "$VPS_USER@$VPS_HOST:/tmp/universal-fast-front-domains"
+      - name: Deploy parallel universal frontend router
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          release="/var/www/impulsionando-core/releases/universal-fast-front-$RELEASE_SHA"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.universal-fast-front.yml
+          envfile=/etc/impulsionando-core.env
+          sudo test -f "$base"
+          sudo test -f "$envfile"
+          sudo docker inspect impulsionando-core >/dev/null
+          sudo rm -rf "$release"
+          sudo mkdir -p "$release"
+          sudo tar -xzf /tmp/universal-fast-front.tgz -C "$release"
+          rm -f /tmp/universal-fast-front.tgz
+          cat > /tmp/Dockerfile.universal-fast-front <<'DOCKERFILE'
+          FROM impulsionando-core:latest
+          WORKDIR /app
+          COPY .output ./.output
+          COPY scripts ./scripts
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          printf 'node_modules\n' | sudo tee "$release/.dockerignore" >/dev/null
+          sudo docker build -f /tmp/Dockerfile.universal-fast-front -t "impulsionando-core:universal-fast-$RELEASE_SHA" "$release"
+          sudo docker tag "impulsionando-core:universal-fast-$RELEASE_SHA" impulsionando-core:universal-fast-current
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core-universal-fastfront:
+              image: impulsionando-core:universal-fast-current
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.impulsionando-fast-apex.entrypoints: websecure
+                traefik.http.routers.impulsionando-fast-apex.rule: (Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`)) && !PathPrefix(`/api`)
+                traefik.http.routers.impulsionando-fast-apex.service: impulsionando-core-universal-fastfront
+                traefik.http.routers.impulsionando-fast-apex.tls: "true"
+                traefik.http.routers.impulsionando-fast-apex.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-fast-apex.priority: "2000"
+                traefik.http.routers.impulsionando-fast-tenants.entrypoints: websecure
+                traefik.http.routers.impulsionando-fast-tenants.rule: HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`) && !PathPrefix(`/api`)
+                traefik.http.routers.impulsionando-fast-tenants.service: impulsionando-core-universal-fastfront
+                traefik.http.routers.impulsionando-fast-tenants.tls: "true"
+                traefik.http.routers.impulsionando-fast-tenants.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-fast-tenants.priority: "1900"
+                traefik.http.services.impulsionando-core-universal-fastfront.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-universal-fastfront
+          for i in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-universal-fastfront 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then code="$(curl -sS -H 'Host: impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/uff-origin -w '%{http_code}' --max-time 8 "http://$ip:3000/" || true)"; fi
+            [ "$code" = 200 ] && break
+            [ "$i" -lt 45 ] || { sudo docker logs --tail 160 impulsionando-core-universal-fastfront || true; exit 61; }
+            sleep 2
+          done
+          echo "UNIVERSAL_FAST_FRONT_ORIGIN=PASS sha=$RELEASE_SHA"
+          REMOTE
+      - name: Validate every existing tenant domain
+        run: |
+          set -euo pipefail
+          failed=0
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            code=000
+            final=''
+            for i in $(seq 1 18); do
+              read -r code final < <(curl -sS -L -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/domain-home -w '%{http_code} %{url_effective}' --max-time 20 "https://$domain/?front_sha=$GITHUB_SHA" || echo '000 -')
+              final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+              if [ "$code" = 200 ] && [ "$final_host" = "$domain" ]; then break; fi
+              sleep 3
+            done
+            final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            if [ "$code" != 200 ] || [ "$final_host" != "$domain" ]; then
+              echo "::error::PUBLIC_FAIL $domain HTTP=$code FINAL=$final"
+              failed=1
+            else
+              echo "PUBLIC_PASS $domain"
+            fi
+          done < /tmp/domains
+          [ "$failed" = 0 ]
+          echo "UNIVERSAL_FAST_FRONT=PASS count=$TENANT_COUNT"
