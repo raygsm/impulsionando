@@ -1,29 +1,41 @@
-generated_at_utc=2026-08-20T02:17:01Z
+generated_at_utc=2026-08-20T02:23:38Z
 --- worker service ---
 ● impulsionando-publish-worker.service - Impulsionando one-click publisher worker
      Loaded: loaded (/etc/systemd/system/impulsionando-publish-worker.service; enabled; preset: enabled)
-     Active: active (running) since Thu 2026-08-20 02:14:01 UTC; 2min 59s ago
+     Active: active (running) since Thu 2026-08-20 02:14:01 UTC; 9min ago
    Main PID: 1537047 (bash)
-      Tasks: 2 (limit: 4652)
-     Memory: 79.1M (peak: 642.3M)
-        CPU: 23.734s
+      Tasks: 32 (limit: 4652)
+     Memory: 1.4G (peak: 1.4G)
+        CPU: 2min 52.014s
      CGroup: /system.slice/impulsionando-publish-worker.service
              ├─1537047 bash /usr/local/lib/impulsionando/publisher/core-publish-worker.sh
-             └─1539989 sleep 3
+             ├─1541419 bash /usr/local/lib/impulsionando/publisher/publish-core-now.sh
+             ├─1542784 "npm run build"
+             ├─1542814 sh -c "node --max-old-space-size=12288 node_modules/vite/bin/vite.js build"
+             ├─1542815 node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+             └─1542851 /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.27.7 --ping
 
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent ENOENT: no such file or directory, mkdir '/root/.npm'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent This is related to npm not being able to find a file.
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice New major version of npm available! 10.9.8 -> 12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice To update run: npm install -g npm@12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error Log files were not written due to an error writing to the directory: /root/.npm/_logs
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+Aug 20 02:18:58 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 02:19:33 srv1777313 core-publish-worker.sh[1541449]: added 709 packages in 1m
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > prebuild
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542796]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542803]: [build-info] commit=7e7d1ab branch=main builtAt=2026-08-20T02:19:34.429Z
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > build
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: vite v7.3.5 building client environment for production...
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: transforming...
 --- publisher state ---
-{"state": "error", "stage": "Falha na publicação. Produção anterior preservada/restaurada.", "sha": "16d410d5ed46d45c7347dc84ea14d575e92a67fa", "updated_at": "2026-08-20T02:16:05.479608Z"}
+{"state": "running", "stage": "Compilando o front e o backend do Core.", "sha": "7e7d1abebf14e3c714940cd9734436c0d62f0c54", "updated_at": "2026-08-20T02:19:33.797494Z"}
 --- journal ---
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/consola',
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/consola/dist'] {
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
+Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
 Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/consola/dist'
 Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
 Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
@@ -244,20 +256,77 @@ Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice To update
 Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice
 Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error Log files were not written due to an error writing to the directory: /root/.npm/_logs
 Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+Aug 20 02:18:00 srv1777313 core-publish-worker.sh[1541427]: Cloning into '/var/lib/impulsionando-publisher/repo'...
+Aug 20 02:18:03 srv1777313 core-publish-worker.sh[1541427]: [303B blob data]
+Aug 20 02:18:22 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:23 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/row@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/section@0.0.17: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/text@0.1.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/link@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/img@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/html@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/heading@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/head@0.0.13: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/container@0.0.16: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/font@0.0.10: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/hr@0.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/column@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/preview@0.0.14: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/code-inline@0.0.6: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:24 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/body@0.3.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:25 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/markdown@0.0.18: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:25 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/button@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:35 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/tailwind@2.0.7: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:38 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/code-block@0.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Aug 20 02:18:58 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+Aug 20 02:19:33 srv1777313 core-publish-worker.sh[1541449]: added 709 packages in 1m
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > prebuild
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542796]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542803]: [build-info] commit=7e7d1ab branch=main builtAt=2026-08-20T02:19:34.429Z
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > build
+Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: vite v7.3.5 building client environment for production...
+Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: transforming...
+--- active publisher processes ---
+ 682342  682318  2-14:04:19  0.0  0.3 node scripts/start-core-runtime.mjs
+ 682389  682342  2-14:04:18  0.5  1.6 /usr/local/bin/node scripts/pulsonitor-worker.mjs
+ 682390  682342  2-14:04:18  0.0  1.0 /usr/local/bin/node scripts/colors-automation-worker.mjs
+ 682391  682342  2-14:04:18  0.0  2.1 /usr/local/bin/node .output/server/index.mjs
+ 704516       1  2-05:16:55  0.0  0.2 /usr/bin/node scripts/start-core-runtime.mjs
+ 704526  704516  2-05:16:55  0.5  1.7 /usr/bin/node scripts/pulsonitor-worker.mjs
+ 704527  704516  2-05:16:55  0.0  1.0 /usr/bin/node scripts/colors-automation-worker.mjs
+ 704528  704516  2-05:16:55  0.0  2.1 /usr/bin/node .output/server/index.mjs
+ 709663  709638  1-23:48:45  0.0  0.4 npm run start:prod
+ 710276  709663  1-23:48:29  0.0  2.3 node dist/main
+1541419 1537047       05:39  0.0  0.0 bash /usr/local/lib/impulsionando/publisher/publish-core-now.sh
+1542514 1542486       04:15  0.0  0.3 node scripts/start-core-runtime.mjs
+1542563 1542514       04:14  1.1  1.2 /usr/local/bin/node scripts/pulsonitor-worker.mjs
+1542565 1542514       04:14  0.0  0.5 /usr/local/bin/node scripts/colors-automation-worker.mjs
+1542566 1542514       04:14  1.2  1.9 /usr/local/bin/node .output/server/index.mjs
+1542784 1541419       04:04  0.0  0.4 npm run build
+1542814 1542784       04:04  0.0  0.0 sh -c node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+1542815 1542814       04:04 43.4 35.3 node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
+1542851 1542815       04:03  0.6  1.3 /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.27.7 --ping
+1544521 1544477       00:54 27.9 17.7 node /usr/local/bin/n8n
+1544820 1544521       00:38  6.9  1.5 node --disallow-code-generation-from-strings --disable-proto=delete /usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_bd25ea1f047b3163759a25985b9c52da/node_modules/@n8n/task-runner/dist/start.js
+1544938 1544453       00:24 19.1  5.7 node /usr/local/bin/n8n import:workflow --input=/tmp/iu2378ee8eb78d3bdfce75.json
 --- disk ---
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/sda1        48G   24G   25G  50% /
-/dev/sda1        48G   24G   25G  50% /
-/dev/sda1        48G   24G   25G  50% /
+/dev/sda1        48G   25G   24G  51% /
+/dev/sda1        48G   25G   24G  51% /
+/dev/sda1        48G   25G   24G  51% /
 --- node/npm ---
 v22.23.1
 10.9.8
 --- publisher files ---
 total 20
-drwxr-xr-x 2 root root 4096 Aug 20 02:13 .
+drwxr-xr-x 2 root root 4096 Aug 20 02:17 .
 drwxr-xr-x 3 root root 4096 Aug 20 02:13 ..
--rwxr-xr-x 1 root root 1989 Aug 20 02:13 core-publish-worker.sh
--rwxr-xr-x 1 root root 5047 Aug 20 02:13 publish-core-now.sh
+-rwxr-xr-x 1 root root 1989 Aug 20 02:17 core-publish-worker.sh
+-rwxr-xr-x 1 root root 5209 Aug 20 02:17 publish-core-now.sh
 --- repo state ---
 ## main...origin/main
-16d410d5ed46d45c7347dc84ea14d575e92a67fa
+ M src/generated/build-info.ts
+ M src/routeTree.gen.ts
+7e7d1abebf14e3c714940cd9734436c0d62f0c54
