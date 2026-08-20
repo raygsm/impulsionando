@@ -1,0 +1,95 @@
+name: Impulsionando Front Final Recovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/impulsionando-front-final-recovery.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: impulsionando-front-final-recovery
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Publish latest main after safe lock release
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/impulsionando-front-final-recovery.txt 2>&1 <<'REMOTE'
+          set -Eeuo pipefail
+          PUBLISHER=/usr/local/lib/impulsionando/publisher/publish-core-now.sh
+          STATUS=/var/lib/impulsionando-publisher/status.json
+          test -x "$PUBLISHER"
+
+          for attempt in $(seq 1 30); do
+            if sudo flock -n /var/lib/impulsionando-publisher/publish.lock -c 'true'; then
+              echo "PUBLISH_LOCK=FREE attempt=$attempt"
+              break
+            fi
+            echo "PUBLISH_LOCK=BUSY attempt=$attempt"
+            if [ "$attempt" -eq 30 ]; then
+              echo 'PUBLISH_LOCK_TIMEOUT'
+              exit 61
+            fi
+            sleep 20
+          done
+
+          sudo "$PUBLISHER"
+          state="$(sudo jq -r '.state // empty' "$STATUS" 2>/dev/null || true)"
+          sha="$(sudo jq -r '.sha // empty' "$STATUS" 2>/dev/null || true)"
+          stage="$(sudo jq -r '.stage // empty' "$STATUS" 2>/dev/null || true)"
+          echo "PUBLISH_STATE=$state"
+          echo "PUBLISH_SHA=$sha"
+          echo "PUBLISH_STAGE=$stage"
+          test "$state" = 'success'
+          test -n "$sha"
+
+          public_version="$(curl -fsS --max-time 30 https://impulsionando.com.br/api/public/version)"
+          echo "PUBLIC_VERSION=$public_version"
+          printf '%s' "$public_version" | grep -F "$sha"
+
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' https://impulsionando.com.br/ > /tmp/impulsionando-home.html
+          grep -Fq 'Um ecossistema para vender, operar e crescer' /tmp/impulsionando-home.html
+          grep -Fq 'R$ 810,50' /tmp/impulsionando-home.html
+          grep -Fq 'R$ 1.621,00' /tmp/impulsionando-home.html
+          grep -Fq 'R$ 3.242,00' /tmp/impulsionando-home.html
+          grep -Fq 'Impulsionito' /tmp/impulsionando-home.html
+          echo 'IMPULSIONANDO_FRONT_FINAL=PASS'
+          REMOTE
+      - name: Persist final proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/impulsionando-front-final-recovery.txt docs/ops/impulsionando-front-final-recovery.txt || true
+          git config user.name 'Impulsionito Release QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/impulsionando-front-final-recovery.txt
+          git commit -m 'chore(front): record final Impulsionando publication proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
