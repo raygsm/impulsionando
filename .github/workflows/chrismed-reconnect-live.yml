@@ -1,3 +1,4 @@
+# Revalidation trigger: 2026-08-20T09:19:00-03:00
 name: CHRISMED reconnect Oliver and WhatsApp
 
 on:
@@ -108,46 +109,31 @@ jobs:
           done
 
           sudo docker exec -i "$CORE" node - <<'NODE'
-          const required=['OPENAI_API_KEY','CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY'];
-          for (const key of required) {
-            if (!process.env[key]) { console.error(`missing:${key}`); process.exit(1); }
-          }
-
-          const openai = await fetch('https://api.openai.com/v1/models', {
-            headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-          });
-          if (!openai.ok) { console.error(`openai_http=${openai.status}`); process.exit(2); }
-
-          const base = process.env.CHRISMED_EVOLUTION_BASE_URL.replace(/\/$/, '');
-          const headers = { apikey: process.env.CHRISMED_EVOLUTION_API_KEY, 'content-type': 'application/json' };
-          const instance = 'chrismed-oliver';
-
-          let stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
-          if (stateResp.status === 404) {
-            const created = await fetch(`${base}/instance/create`, {
-              method: 'POST', headers,
-              body: JSON.stringify({ instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' }),
-            });
-            if (!created.ok && created.status !== 409) {
-              console.error(`evolution_create_http=${created.status}`); process.exit(3);
-            }
-          }
-
-          const connect = await fetch(`${base}/instance/connect/${instance}`, { headers });
-          if (!connect.ok) { console.error(`evolution_connect_http=${connect.status}`); process.exit(4); }
-          const data = await connect.json();
-          const qrReady = Boolean(data?.base64 || data?.qrcode?.base64 || data?.data?.Qrcode || data?.data?.qrcode || data?.pairingCode || data?.qrcode?.pairingCode);
-
-          stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
-          let state = null;
-          try {
-            const body = await stateResp.json();
-            state = body?.instance?.state || body?.state || body?.data?.state || null;
-          } catch {}
-          const connected = ['open','connected','CONNECTED'].includes(String(state));
-          if (!connected && !qrReady) { console.error('evolution_pairing_not_ready'); process.exit(5); }
-          console.log(JSON.stringify({ openai:true, evolution:true, instance, connected, qr_ready:qrReady }));
-          NODE
+const required=['OPENAI_API_KEY','CHRISMED_EVOLUTION_BASE_URL','CHRISMED_EVOLUTION_API_KEY'];
+for (const key of required) {
+  if (!process.env[key]) { console.error(`missing:${key}`); process.exit(1); }
+}
+const openai = await fetch('https://api.openai.com/v1/models', { headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY}` } });
+if (!openai.ok) { console.error(`openai_http=${openai.status}`); process.exit(2); }
+const base = process.env.CHRISMED_EVOLUTION_BASE_URL.replace(/\/$/, '');
+const headers = { apikey: process.env.CHRISMED_EVOLUTION_API_KEY, 'content-type': 'application/json' };
+const instance = 'chrismed-oliver';
+let stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+if (stateResp.status === 404) {
+  const created = await fetch(`${base}/instance/create`, { method: 'POST', headers, body: JSON.stringify({ instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' }) });
+  if (!created.ok && created.status !== 409) { console.error(`evolution_create_http=${created.status}`); process.exit(3); }
+}
+const connect = await fetch(`${base}/instance/connect/${instance}`, { headers });
+if (!connect.ok) { console.error(`evolution_connect_http=${connect.status}`); process.exit(4); }
+const data = await connect.json();
+const qrReady = Boolean(data?.base64 || data?.qrcode?.base64 || data?.data?.Qrcode || data?.data?.qrcode || data?.pairingCode || data?.qrcode?.pairingCode);
+stateResp = await fetch(`${base}/instance/connectionState/${instance}`, { headers });
+let state = null;
+try { const body = await stateResp.json(); state = body?.instance?.state || body?.state || body?.data?.state || null; } catch {}
+const connected = ['open','connected','CONNECTED'].includes(String(state));
+if (!connected && !qrReady) { console.error('evolution_pairing_not_ready'); process.exit(5); }
+console.log(JSON.stringify({ openai:true, evolution:true, instance, connected, qr_ready:qrReady }));
+NODE
           REMOTE
 
       - name: Synchronize CHRISMED channel metadata
