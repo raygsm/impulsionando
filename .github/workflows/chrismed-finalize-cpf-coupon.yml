@@ -1,4 +1,4 @@
-name: CHRISMED direct guided dashboard access
+name: CHRISMED persistent journey assistant
 on:
   push:
     paths: ['.github/workflows/chrismed-finalize-cpf-coupon.yml']
@@ -13,23 +13,32 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Enable safe prefilled email and direct destination
+      - name: Keep assistant available during authentication
         run: |
           python - <<'PY'
           from pathlib import Path
 
           p=Path('src/routes/auth.tsx')
           s=p.read_text()
-          s=s.replace('''interface AuthSearch {\n  persona?: AuthPersona;\n  mode?: AuthMode;\n  next?: string;\n}''','''interface AuthSearch {\n  persona?: AuthPersona;\n  mode?: AuthMode;\n  next?: string;\n  email?: string;\n}''')
-          s=s.replace('''    next: typeof s.next === "string" ? s.next : undefined,\n  }),''','''    next: typeof s.next === "string" ? s.next : undefined,\n    email: typeof s.email === "string" ? s.email : undefined,\n  }),''')
-          s=s.replace('''    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} />;''','''    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} />;''')
+          anchor='import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";'
+          if 'ChrismedOliverProvider' not in s:
+            s=s.replace(anchor, anchor+'\nimport { ChrismedOliverProvider } from "@/components/chrismed/ChrismedOliverProvider";')
+          old='return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} />;'
+          new='return <ChrismedOliverProvider><ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} /></ChrismedOliverProvider>;'
+          if old not in s: raise SystemExit('CHRISMED auth entry marker not found')
+          s=s.replace(old,new,1)
           p.write_text(s)
 
           p=Path('src/components/chrismed/ChrismedProfessionalAuth.tsx')
           s=p.read_text()
-          s=s.replace('''export function ChrismedProfessionalAuth({ initialMode = "login" }: { initialMode?: AuthMode }) {''','''export function ChrismedProfessionalAuth({ initialMode = "login", initialEmail = "", nextPath = null }: { initialMode?: AuthMode; initialEmail?: string; nextPath?: string | null }) {''')
-          s=s.replace('''  const [email, setEmail] = useState("");''','''  const [email, setEmail] = useState(initialEmail.trim());''',1)
-          s=s.replace('''    if (isMaster) {\n      window.location.assign("/chrismed/admin");\n      return;\n    }''','''    if (isMaster) {\n      window.location.assign(nextPath || "/chrismed/admin");\n      return;\n    }''')
+          old='''          <a\n            href={`mailto:${technicalSupportEmail}`}\n            className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"\n          >\n            <HelpCircle className="h-4 w-4" />\n            Precisa de ajuda?\n          </a>'''
+          new='''          <button\n            type="button"\n            onClick={() => window.dispatchEvent(new CustomEvent("chrismed:oliver:open"))}\n            className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"\n          >\n            <HelpCircle className="h-4 w-4" />\n            Impulsionito a postos · pedir ajuda\n          </button>'''
+          if old not in s: raise SystemExit('auth help control not found')
+          s=s.replace(old,new,1)
+          marker='''          <p className="mt-2 text-[#52605c]">\n            {mode === "login"\n              ? "Use seu e-mail para continuar."\n              : "Você é um profissional da saúde? Crie sua conta para acessar sua área exclusiva e configurar sua agenda de atendimento."}\n          </p>'''
+          replacement=marker+'''\n          <p className="mt-3 rounded-xl border border-[#d9d3cb] bg-[#f7f5f1] px-4 py-3 text-xs leading-relaxed text-[#52605c]"><strong>Orientação em todas as etapas:</strong> se algum dado estiver incorreto ou o acesso não for permitido, o sistema explicará em português o que aconteceu e como corrigir. O Impulsionito, por meio do Oliver, permanece disponível nesta tela.</p>'''
+          if marker not in s: raise SystemExit('auth guidance marker not found')
+          s=s.replace(marker,replacement,1)
           p.write_text(s)
           PY
       - name: Validate and commit
@@ -38,6 +47,6 @@ jobs:
           git config user.name impulsionando-bot
           git config user.email actions@users.noreply.github.com
           git add src/routes/auth.tsx src/components/chrismed/ChrismedProfessionalAuth.tsx
-          git commit -m "fix(chrismed): prefill admin email and honor direct destination"
+          git commit -m "feat(chrismed): keep Impulsionito available through auth journey"
           git pull --rebase origin main
           git push origin main
