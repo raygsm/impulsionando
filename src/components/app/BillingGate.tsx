@@ -2,65 +2,53 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyBillingStatus } from "@/lib/billing.functions";
-import { useActiveCompany } from "@/hooks/use-active-company";
+import { getMyCoreAccessPolicy } from "@/lib/access-policy.functions";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 function isFinancialPath(pathname: string) {
   return (
     pathname.startsWith("/finance") ||
     pathname.startsWith("/minha-assinatura") ||
+    pathname.startsWith("/assinatura/checkout") ||
     pathname.startsWith("/checkout") ||
     pathname.startsWith("/auth")
   );
 }
 
 function isPlanActivationPath(pathname: string) {
-  return isFinancialPath(pathname) || pathname.startsWith("/planos");
+  return isFinancialPath(pathname) || pathname.startsWith("/planos") || pathname.startsWith("/onboarding/empresa");
 }
 
 /**
  * Gate financeiro universal do Core.
- *
- * Regras:
- * - Staff Impulsionando não é bloqueado.
- * - Empresa sem contrato válido fica em onboarding financeiro até contratar.
- * - Empresa suspensa por inadimplência mantém somente acesso financeiro.
- * - O dashboard continua visível, porém bloqueado por uma camada de marca-d'água.
- * - O status é reconsultado automaticamente para liberar a conta assim que o
- *   pagamento for identificado e o contrato voltar a active.
+ * A empresa e o estado de acesso são resolvidos no servidor; o browser não escolhe company_id.
  */
 export function BillingGate() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { companyId } = useActiveCompany();
   const { data: me } = useCurrentUser();
-  const fn = useServerFn(getMyBillingStatus);
+  const fn = useServerFn(getMyCoreAccessPolicy);
 
-  const enabled = !!companyId && !me?.isSuperAdmin && !me?.isImpulsionandoStaff;
+  const enabled = !!me?.user && !me?.isSuperAdmin && !me?.isImpulsionandoStaff;
   const { data } = useQuery({
-    queryKey: ["billing-gate", companyId],
+    queryKey: ["core-access-policy", me?.user?.id],
     enabled,
-    queryFn: () => fn({ data: { companyId } }),
+    queryFn: () => fn(),
     staleTime: 15_000,
     refetchInterval: enabled ? 15_000 : false,
     refetchOnWindowFocus: true,
   });
 
-  const hasContract = !!data && "hasContract" in data && data.hasContract;
-  const planRequired = !!data && "hasContract" in data && !data.hasContract;
-  const suspended = hasContract && data.contract.status === "suspended";
-  const restricted = planRequired || suspended;
+  const policy = data?.hasCompany ? data.policy : null;
+  const accessMode = policy?.access_mode ?? null;
+  const suspended = accessMode === "financial_only" || policy?.service_state === "suspended_nonpayment";
+  const planRequired = accessMode === "financial_onboarding_only";
+  const restricted = suspended || planRequired;
 
   useEffect(() => {
     if (!enabled || !data || !restricted) return;
 
-    const allowed = suspended
-      ? isFinancialPath(pathname)
-      : isPlanActivationPath(pathname);
-
-    // O dashboard pode ser visto como referência, mas fica totalmente bloqueado
-    // pela marca-d'água abaixo. Demais áreas são redirecionadas ao financeiro.
+    const allowed = suspended ? isFinancialPath(pathname) : isPlanActivationPath(pathname);
     if (pathname === "/dashboard" || allowed) return;
 
     navigate({
@@ -95,11 +83,7 @@ export function BillingGate() {
         <button
           type="button"
           className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          onClick={() =>
-            navigate({
-              to: suspended ? "/minha-assinatura" : "/planos",
-            })
-          }
+          onClick={() => navigate({ to: suspended ? "/minha-assinatura" : "/planos" })}
         >
           {actionLabel}
         </button>
