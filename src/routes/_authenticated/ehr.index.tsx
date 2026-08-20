@@ -26,14 +26,14 @@ export const Route = createFileRoute("/_authenticated/ehr/")({
   component: EhrList,
 });
 
-type Customer = { id: string; name: string };
+type Patient = { user_id: string; full_name: string };
 type EhrRecord = {
   id: string;
-  customer_id: string;
+  patient_user_id: string;
   record_number: string | null;
   status: string;
   updated_at: string;
-  customers?: { name: string } | null;
+  patient?: { full_name: string } | null;
 };
 
 function EhrList() {
@@ -52,7 +52,7 @@ function EhrList() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ehr_records")
-        .select("id, customer_id, record_number, status, updated_at, customers(name)")
+        .select("id, patient_user_id, record_number, status, updated_at, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(full_name)")
         .eq("company_id", companyId!)
         .order("updated_at", { ascending: false })
         .limit(200);
@@ -62,25 +62,25 @@ function EhrList() {
       const t = q.toLowerCase();
       return list.filter(
         (r) =>
-          r.customers?.name?.toLowerCase().includes(t) ||
+          r.patient?.full_name?.toLowerCase().includes(t) ||
           r.record_number?.toLowerCase().includes(t),
       );
     },
   });
 
-  const { data: customers, isLoading: loadingCustomers } = useQuery({
-    queryKey: ["customers-opt", companyId],
+  const { data: patients, isLoading: loadingPatients } = useQuery({
+    queryKey: ["chrismed-patients-opt", companyId],
     enabled: !!companyId && openCreate,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("customers")
-        .select("id, name")
+        .from("chrismed_patient_profiles")
+        .select("user_id, full_name")
         .eq("company_id", companyId!)
-        .eq("is_active", true)
-        .order("name")
+        .in("status", ["APPROVED", "ACTIVE"])
+        .order("full_name")
         .limit(500);
       if (error) throw error;
-      return (data ?? []) as Customer[];
+      return (data ?? []) as Patient[];
     },
   });
 
@@ -88,9 +88,9 @@ function EhrList() {
     mutationFn: async () => {
       if (!companyId) throw new Error("Selecione uma empresa ativa.");
       if (!selectedCustomer) throw new Error("Selecione um paciente.");
-      const payload: { company_id: string; customer_id: string; record_number?: string } = {
+      const payload: { company_id: string; patient_user_id: string; record_number?: string } = {
         company_id: companyId,
-        customer_id: selectedCustomer,
+        patient_user_id: selectedCustomer,
       };
       if (recordNumber.trim()) payload.record_number = recordNumber.trim();
       const { data: ins, error } = await supabase
@@ -101,7 +101,7 @@ function EhrList() {
       if (error) throw error;
       auditClinical({
         company_id: companyId, action: "patient.create", entity: "ehr_records",
-        entity_id: ins?.id, after: { customer_id: selectedCustomer, record_number: recordNumber || null },
+        entity_id: ins?.id, after: { patient_user_id: selectedCustomer, record_number: recordNumber || null },
       });
     },
     onSuccess: () => {
@@ -156,7 +156,7 @@ function EhrList() {
   });
 
   const noCompany = !companyId;
-  const noCustomersInDialog = openCreate && !loadingCustomers && (customers?.length ?? 0) === 0;
+  const noPatientsInDialog = openCreate && !loadingPatients && (patients?.length ?? 0) === 0;
 
   return (
     <div>
@@ -185,17 +185,17 @@ function EhrList() {
                     Vincule um prontuário a um paciente já cadastrado.
                   </DialogDescription>
                 </DialogHeader>
-                {noCustomersInDialog ? (
+                {noPatientsInDialog ? (
                   <div className="space-y-3 py-2">
                     <Card className="p-4 text-sm bg-muted/30">
-                      <p className="font-medium mb-1">Nenhum paciente cadastrado</p>
+                      <p className="font-medium mb-1">Nenhum paciente CHRISMED aprovado</p>
                       <p className="text-muted-foreground text-xs">
-                        Cadastre um paciente em <strong>Clientes</strong> antes de abrir um prontuário.
+                        Cadastre e aprove o paciente na Gestão de Pacientes CHRISMED antes de abrir um prontuário.
                       </p>
                     </Card>
                     <Button asChild className="w-full">
-                      <Link to="/customers" onClick={() => setOpenCreate(false)}>
-                        <UserPlus className="w-4 h-4" /> Ir para Clientes
+                      <Link to="/chrismed/pacientes-gestao" onClick={() => setOpenCreate(false)}>
+                        <UserPlus className="w-4 h-4" /> Ir para Gestão de Pacientes
                       </Link>
                     </Button>
                   </div>
@@ -205,11 +205,11 @@ function EhrList() {
                       <label className="text-sm font-medium">Paciente *</label>
                       <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
                         <SelectTrigger>
-                          <SelectValue placeholder={loadingCustomers ? "Carregando…" : "Selecione um paciente"} />
+                          <SelectValue placeholder={loadingPatients ? "Carregando…" : "Selecione um paciente"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {customers?.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          {patients?.map((c) => (
+                            <SelectItem key={c.user_id} value={c.user_id}>{c.full_name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -224,7 +224,7 @@ function EhrList() {
                     </div>
                   </div>
                 )}
-                {!noCustomersInDialog && (
+                {!noPatientsInDialog && (
                   <DialogFooter>
                     <Button
                       onClick={() => create.mutate()}
@@ -266,7 +266,7 @@ function EhrList() {
                 params={{ id: r.id }}
                 className="min-w-0 flex-1"
               >
-                <div className="font-medium truncate">{r.customers?.name ?? "Paciente"}</div>
+                <div className="font-medium truncate">{r.patient?.full_name ?? "Paciente"}</div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {r.record_number ? `Nº ${r.record_number}` : `ID ${r.id.slice(0, 8)}`}
                 </div>

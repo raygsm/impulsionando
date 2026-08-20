@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
@@ -22,7 +21,6 @@ import { useActiveCompany } from "@/hooks/use-active-company";
 import {
   ArrowLeft, Upload, FileText, FileImage, Activity, Stethoscope, Download, ShieldCheck, UserPlus,
 } from "lucide-react";
-import { invitePatient } from "@/lib/ehr-patient.functions";
 import { auditClinical } from "@/lib/clinical-audit-log";
 
 export const Route = createFileRoute("/_authenticated/ehr/$id")({
@@ -60,7 +58,7 @@ function EhrDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ehr_records")
-        .select("*, customers(id, name, document, phone, email, birthdate, patient_user_id, patient_invited_at)")
+        .select("*, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(user_id, full_name, cpf, whatsapp, email, status)")
         .eq("id", id)
         .single();
       if (error) throw error;
@@ -116,20 +114,20 @@ function EhrDetail() {
       </div>
       <div className="flex items-start justify-between gap-3 mb-2">
         <PageHeader
-          title={record?.customers?.name ?? "Prontuário"}
+          title={record?.patient?.full_name ?? "Prontuário"}
           description={
-            record?.customers
+            record?.patient
               ? [
-                  record.customers.document,
-                  record.customers.phone,
-                  record.customers.email,
+                  record.patient.cpf,
+                  record.patient.whatsapp,
+                  record.patient.email,
                 ].filter(Boolean).join(" • ")
               : "Carregando…"
           }
         />
         <PatientAccessButton
           recordId={id}
-          customer={record?.customers}
+          patient={record?.patient}
           onChange={() => qc.invalidateQueries({ queryKey: ["ehr-record", id] })}
         />
       </div>
@@ -644,87 +642,19 @@ function Toggle({ l, v, onChange }: { l: string; v: boolean; onChange: (b: boole
 function catLabel(v: string) { return CATEGORIES.find((c) => c.v === v)?.l ?? v; }
 function srcLabel(v: string) { return SOURCES.find((s) => s.v === v)?.l ?? v; }
 
-/* ---------- Patient Access Button ---------- */
+/* ---------- Patient Access Status ---------- */
 function PatientAccessButton({
-  recordId, customer, onChange,
+  patient,
 }: {
   recordId: string;
-  customer: { id: string; name: string | null; email: string | null; patient_user_id: string | null; patient_invited_at: string | null } | null | undefined;
+  patient: { user_id: string; full_name: string | null; email: string | null; status: string | null } | null | undefined;
   onChange: () => void;
 }) {
-  const invite = useServerFn(invitePatient);
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState(customer?.email ?? "");
-  const [name, setName] = useState(customer?.name ?? "");
-  const [loading, setLoading] = useState(false);
-
-  if (!customer) return null;
-
-  const isLinked = !!customer.patient_user_id;
-
-  async function submit() {
-    if (!email.trim()) return toast.error("Informe um e-mail");
-    setLoading(true);
-    try {
-      const r: any = await invite({ data: { recordId, email: email.trim(), name: name.trim() || undefined } });
-      if (r?.alreadyLinked) toast.success("Paciente já tinha acesso vinculado");
-      else toast.success("Convite enviado ao paciente");
-      setOpen(false);
-      onChange();
-    } catch (e: any) {
-      toast.error(e?.message || "Falha ao convidar paciente");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  if (!patient) return null;
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={isLinked ? "outline" : "default"} size="sm">
-          <UserPlus className="w-4 h-4" />
-          {isLinked ? "Acesso liberado" : "Liberar acesso ao paciente"}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {isLinked ? "Acesso do paciente" : "Convidar paciente"}
-          </DialogTitle>
-        </DialogHeader>
-        {isLinked ? (
-          <div className="text-sm space-y-2">
-            <p>Este paciente já possui acesso à área exclusiva.</p>
-            {customer.patient_invited_at && (
-              <p className="text-xs text-muted-foreground">
-                Convidado em {new Date(customer.patient_invited_at).toLocaleString("pt-BR")}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Ele(a) verá apenas documentos, evoluções e pareceres que você marcar como liberados.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm">Nome</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm">E-mail</label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Enviaremos um e-mail com link de acesso. O paciente verá apenas conteúdos liberados.
-            </p>
-            <DialogFooter>
-              <Button onClick={submit} disabled={loading}>
-                {loading ? "Enviando…" : "Enviar convite"}
-              </Button>
-            </DialogFooter>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+    <Button variant="outline" size="sm" disabled>
+      <UserPlus className="w-4 h-4" />
+      Paciente vinculado · {patient.status || "CADASTRADO"}
+    </Button>
   );
 }

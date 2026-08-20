@@ -22,72 +22,16 @@ export const invitePatient = createServerFn({ method: "POST" })
     // Load the record + customer (RLS ensures staff has access)
     const { data: rec, error: recErr } = await supabase
       .from("ehr_records")
-      .select("id, company_id, customer_id, customers(id, name, email, patient_user_id)")
+      .select("id, company_id, patient_user_id, patient:chrismed_patient_profiles!ehr_records_patient_user_id_fkey(user_id, full_name, email, status)")
       .eq("id", data.recordId)
       .maybeSingle();
     if (recErr) throw new Error(recErr.message);
     if (!rec) throw new Error("Prontuário não encontrado ou sem acesso");
 
-    const customer = (rec as any).customers as {
-      id: string;
-      name: string | null;
-      email: string | null;
-      patient_user_id: string | null;
-    };
-
-    if (customer.patient_user_id) {
-      return { ok: true, alreadyLinked: true, userId: customer.patient_user_id };
+    const patient = (rec as any).patient as { user_id: string; full_name: string | null; email: string | null; status: string | null } | null;
+    if (!patient?.user_id) throw new Error("Paciente CHRISMED não vinculado ao prontuário");
+    if (patient.email && patient.email.toLowerCase() !== data.email.toLowerCase()) {
+      throw new Error("O e-mail informado não corresponde ao cadastro do paciente CHRISMED");
     }
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const siteOrigin =
-      process.env.SITE_URL ||
-      process.env.PUBLIC_SITE_URL ||
-      "https://impulsionando.com.br";
-
-    // Try to find an existing user with this email
-    let targetUserId: string | null = null;
-    const list = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
-    const existing = list.data?.users?.find(
-      (u) => (u.email || "").toLowerCase() === data.email.toLowerCase(),
-    );
-    if (existing) {
-      targetUserId = existing.id;
-    } else {
-      const inv = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-        redirectTo: `${siteOrigin}/paciente`,
-        data: {
-          display_name: data.name || customer.name || data.email.split("@")[0],
-          is_patient: true,
-        },
-      });
-      if (inv.error || !inv.data?.user) {
-        throw new Error(inv.error?.message || "Falha ao convidar paciente");
-      }
-      targetUserId = inv.data.user.id;
-    }
-
-    // Link patient to customer
-    const { error: updErr } = await supabaseAdmin
-      .from("customers")
-      .update({
-        patient_user_id: targetUserId,
-        patient_invited_at: new Date().toISOString(),
-        email: customer.email || data.email,
-      })
-      .eq("id", customer.id);
-    if (updErr) throw new Error(updErr.message);
-
-    // Audit: patient access granted (link to portal)
-    await context.supabase.from("audit_logs").insert({
-      company_id: (rec as any).company_id,
-      user_id: userId,
-      action: "permission.grant",
-      entity: "customers",
-      entity_id: customer.id,
-      after: { patient_user_id: targetUserId, email: data.email },
-      metadata: { domain: "clinical", source: "invitePatient" },
-    } as any);
-
-    return { ok: true, alreadyLinked: false, userId: targetUserId, invitedBy: userId };
+    return { ok: true, alreadyLinked: true, userId: patient.user_id, invitedBy: userId };
   });
