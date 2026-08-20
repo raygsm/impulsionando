@@ -32,8 +32,9 @@ jobs:
       - name: Collect read-only runtime proof
         shell: bash
         run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/n8n-diagnostic.txt 2>&1 <<'REMOTE'
+          set -u
+          : > /tmp/n8n-diagnostic.txt
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' >> /tmp/n8n-diagnostic.txt 2>&1 <<'REMOTE' || echo "SSH_DIAGNOSTIC_EXIT=$?" >> /tmp/n8n-diagnostic.txt
           set -u
           C=n8n-umlg-n8n-1
           echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -51,21 +52,24 @@ try {
  const raw=JSON.parse(fs.readFileSync('/tmp/all-workflows.json','utf8'));
  const arr=Array.isArray(raw)?raw:[raw];
  const chr=arr.filter(w=>String(w.id||'').startsWith('iu') || String(w.name||'').toLowerCase().includes('chrismed'));
- console.log(JSON.stringify({total:arr.length,active:arr.filter(w=>w.active).length,chrismed_like:chr.length,chrismed_active:chr.filter(w=>w.active).length,sample:chr.slice(0,12).map(w=>({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null}))},null,2));
+ console.log(JSON.stringify({total:arr.length,active:arr.filter(w=>w.active).length,chrismed_like:chr.length,chrismed_active:chr.filter(w=>w.active).length,sample:chr.slice(0,20).map(w=>({id:w.id,name:w.name,active:w.active,activeVersionId:w.activeVersionId||null}))},null,2));
 } catch(e){ console.log('export_parse_error='+e.message); }
 NODE
           echo '--- recent n8n logs ---'
-          sudo docker logs --tail 120 "$C" 2>&1 || true
+          sudo docker logs --tail 160 "$C" 2>&1 || true
           REMOTE
           mkdir -p docs/ops
           cp /tmp/n8n-diagnostic.txt docs/ops/n8n-chrismed-live-diagnostic.txt
       - name: Commit diagnostic proof
+        if: always()
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
+          mkdir -p docs/ops
+          test -f docs/ops/n8n-chrismed-live-diagnostic.txt || printf 'diagnostic_not_generated\n' > docs/ops/n8n-chrismed-live-diagnostic.txt
           git config user.name 'Impulsionito CHRISMED QA'
           git config user.email 'automation@impulsionando.com.br'
           git add docs/ops/n8n-chrismed-live-diagnostic.txt
           git commit -m 'chore(chrismed): record live n8n diagnostic' || exit 0
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git pull --rebase origin main || exit 0
+          git push origin HEAD:main || exit 0
