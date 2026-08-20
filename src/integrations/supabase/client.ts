@@ -2,6 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+const CANONICAL_RECOVERY_URL = 'https://impulsionando.com.br/reset-password';
+
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to process.env for SSR (server-side rendering)
@@ -24,7 +26,7 @@ function createSupabaseClient() {
     throw new Error(message);
   }
 
-  return createClient<Database>(
+  const client = createClient<Database>(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY,
     {
@@ -38,6 +40,18 @@ function createSupabaseClient() {
       },
     }
   );
+
+  // Password recovery is a Core capability, not a tenant-specific feature.
+  // All subdomains use one canonical callback so Auth URL allow-listing stays
+  // deterministic and a client domain can never break recovery by itself.
+  const originalResetPasswordForEmail = client.auth.resetPasswordForEmail.bind(client.auth);
+  client.auth.resetPasswordForEmail = (email, options) =>
+    originalResetPasswordForEmail(email, {
+      ...options,
+      redirectTo: CANONICAL_RECOVERY_URL,
+    });
+
+  return client;
 }
 
 let _supabase:
