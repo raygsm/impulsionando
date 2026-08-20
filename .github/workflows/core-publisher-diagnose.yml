@@ -1,3 +1,4 @@
+# Forced live diagnostic: 2026-08-19T23:22:00-03:00
 name: Core publisher diagnose
 
 on:
@@ -45,7 +46,9 @@ jobs:
           sudo cat /var/lib/impulsionando-publisher/status.json 2>/dev/null || true
           echo
           echo '--- journal ---'
-          sudo journalctl --no-pager -u impulsionando-publish-worker.service -n 220
+          sudo journalctl --no-pager -u impulsionando-publish-worker.service -n 260
+          echo '--- active publisher processes ---'
+          ps -eo pid,ppid,etime,pcpu,pmem,cmd | grep -E 'publish-core-now|npm|vite|node|docker build' | grep -v grep || true
           echo '--- disk ---'
           df -h / /var /tmp
           echo '--- node/npm ---'
@@ -64,6 +67,6 @@ jobs:
           git config user.name 'Impulsionito Core Automation'
           git config user.email 'automation@impulsionando.com.br'
           git add docs/ops/core-publisher-diagnostic.txt
-          git commit -m 'chore(core): record publisher failure diagnostic' || exit 0
+          git commit -m 'chore(core): record publisher live diagnostic' || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
