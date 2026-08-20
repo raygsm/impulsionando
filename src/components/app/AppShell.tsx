@@ -54,7 +54,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pushRecent(path, label);
   }, [location.pathname]);
 
-  const isSuspended = trialSuspended || subSuspended;
+  const isPlatformMaster = data?.isSuperAdmin === true || data?.isImpulsionandoStaff === true;
+  const isSuspended = !isPlatformMaster && (trialSuspended || subSuspended);
+
   useEffect(() => {
     if (!isSuspended) return;
     const path = location.pathname;
@@ -81,14 +83,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [isSuspended, location.pathname, navigate, audience]);
 
   useEffect(() => {
-    if (bypass || modulesLoading || isSuspended) return;
+    if (isPlatformMaster || bypass || modulesLoading || isSuspended) return;
     if (!subActive) return;
     const required = requiredModuleFor(location.pathname);
     if (!required) return;
     if (!hasModule(required)) {
       navigate({ to: "/planos", search: { locked: required } as never });
     }
-  }, [bypass, modulesLoading, isSuspended, subActive, location.pathname, hasModule, navigate]);
+  }, [isPlatformMaster, bypass, modulesLoading, isSuspended, subActive, location.pathname, hasModule, navigate]);
 
   useEffect(() => {
     if (error) console.error("[AppShell] failed to load current user", error);
@@ -118,8 +120,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const isPreSubConsumer = audience === "consumidor" && !hasActiveMembership;
-  if (isCheckoutPath(location.pathname) || isPreSubConsumer) {
+  const isPreSubConsumer = !isPlatformMaster && audience === "consumidor" && !hasActiveMembership;
+  if (!isPlatformMaster && (isCheckoutPath(location.pathname) || isPreSubConsumer)) {
     return <CheckoutShell>{children}</CheckoutShell>;
   }
 
@@ -136,8 +138,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Topbar currentUser={data} />
         {data.isSuperAdmin ? <PublishNowButton /> : null}
         <ImpersonationBanner />
-        <TrialBanner />
-        <PastDueBanner />
+        {!isPlatformMaster ? <TrialBanner /> : null}
+        {!isPlatformMaster ? <PastDueBanner /> : null}
         <Breadcrumbs />
         <main id="main-content" className="flex-1 p-4 sm:p-6 md:p-6 lg:p-8 overflow-x-hidden pb-20 lg:pb-8">
           {children}
