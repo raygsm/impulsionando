@@ -1,0 +1,44 @@
+name: CHRISMED admin navigation polish
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-admin-navigation-polish.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch dashboard shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/routes/_authenticated/chrismed.admin.tsx')
+          s=p.read_text()
+          needle='<QuickAction href="/chrismed/convites" icon={UserPlus} title="Novo convite" description="Profissional, empresa ou paciente."/>'
+          insert=needle+'\n        <QuickAction href="/chrismed/pacientes-gestao" icon={UserRound} title="Pacientes" description="Cadastro, aprovação e acesso à jornada clínica."/>'
+          if needle not in s: raise SystemExit('quick action anchor not found')
+          if '/chrismed/pacientes-gestao" icon={UserRound}' not in s:
+              s=s.replace(needle,insert)
+          s=s.replace('<div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">n8n ativo</p><strong>{metric(n8n?.active)}/{metric(n8n?.total)}</strong></div>', '<div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Automação</p><strong>{metric(n8n?.active)>0 ? "Worker ativo" : "Atenção"}</strong></div>')
+          p.write_text(s)
+          PY
+          git diff --check
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/routes/_authenticated/chrismed.admin.tsx
+          git commit -m 'fix(chrismed): expose patient management in command center' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
