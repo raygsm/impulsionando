@@ -199,6 +199,7 @@ function ChrismedAdmin() {
 
       <section><div className="mb-3 flex items-end justify-between"><div><h2 className="text-lg font-bold">Criar e operar</h2><p className="text-xs text-muted-foreground">Ações mais usadas pela Gestão CHRISMED.</p></div></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         <QuickAction href="/chrismed/convites" icon={UserPlus} title="Novo convite" description="Profissional, empresa ou paciente."/>
+        <QuickAction href="/chrismed/pacientes-gestao" icon={UserRound} title="Pacientes" description="Cadastro, aprovação e acesso à jornada clínica."/>
         <QuickAction href="/chrismed/time" icon={Stethoscope} title="Profissionais" description="Comitê, aprovação, suspensão e ativação."/>
         <QuickAction href="/agenda/appointments" icon={CalendarDays} title="Agenda" description="Consultas, horários e operação diária."/>
         <QuickAction href="/chrismed/ocupacional-gestao" icon={HeartPulse} title="Medicina ocupacional" description="Empresas, trabalhadores, ASO, PCMSO e eSocial."/>
@@ -214,7 +215,7 @@ function ChrismedAdmin() {
 
       <section className="grid gap-5 xl:grid-cols-2">
         <Card><CardHeader><CardTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5"/>Comunicação e jornadas</CardTitle></CardHeader><CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Fila</p><strong>{metric(cc?.communication?.queued)}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Falhas</p><strong>{metric(cc?.communication?.failed)}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">n8n ativo</p><strong>{metric(n8n?.active)}/{metric(n8n?.total)}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">WhatsApp</p><strong className="text-xs">{wa?.status || '—'}</strong></div></div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Fila</p><strong>{metric(cc?.communication?.queued)}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Falhas</p><strong>{metric(cc?.communication?.failed)}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Automação</p><strong>{metric(n8n?.active)>0 ? "Worker ativo" : "Atenção"}</strong></div><div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">WhatsApp</p><strong className="text-xs">{wa?.status || '—'}</strong></div></div>
           <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><a href="/chrismed/convites"><Send className="mr-2 h-4 w-4"/>Convites</a></Button><Button asChild variant="outline"><a href="/admin/comunicacoes/email-massa"><Mail className="mr-2 h-4 w-4"/>E-mail em massa</a></Button><Button asChild variant="outline"><a href="/chrismed/whatsapp"><MessageCircle className="mr-2 h-4 w-4"/>WhatsApp</a></Button></div>
         </CardContent></Card>
 
