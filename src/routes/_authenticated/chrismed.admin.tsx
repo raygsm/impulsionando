@@ -151,7 +151,7 @@ function ChrismedAdmin() {
   const mpReady = Boolean(mpStatus?.configured && mpStatus.has_access_token && mpStatus.has_webhook_secret);
   const attentionCount =
     metric(cc?.professionals?.pending_review) + metric(cc?.professionals?.approved_waiting_agenda) +
-    metric(cc?.companies?.requests_pending) + metric(cc?.communication?.failed) + metric(n8n?.ready) +
+    metric(cc?.companies?.requests_pending) + metric(cc?.communication?.failed) +
     metric(cc?.operations?.critical_tasks) + metric(payoutSummary?.invoice_pending) +
     (String(wa?.status || '').toUpperCase() === 'CONNECTED' ? 0 : 1);
 
@@ -182,7 +182,7 @@ function ChrismedAdmin() {
           <AlertItem active={metric(cc?.professionals?.approved_waiting_agenda)>0} title={`${metric(cc?.professionals?.approved_waiting_agenda)} aprovado(s) sem ativação pública`} detail="Aguardando consultório, serviços e horários para abrir agenda." href="/chrismed/time"/>
           <AlertItem active={metric(cc?.companies?.requests_pending)>0} title={`${metric(cc?.companies?.requests_pending)} empresa(s) aguardando análise`} detail="Solicitações de acesso à medicina ocupacional." href="/chrismed/ocupacional-gestao"/>
           <AlertItem active={metric(cc?.communication?.failed)>0} title={`${metric(cc?.communication?.failed)} comunicação(ões) com falha`} detail="Revisar fila e corrigir entrega antes de novos disparos." href="/chrismed/alertas"/>
-          <AlertItem active={metric(n8n?.ready)>0} title={`${metric(n8n?.ready)} jornada(s) n8n ainda não ativa(s)`} detail={`${metric(n8n?.active)} de ${metric(n8n?.total)} fluxos CHRISMED ativos.`} href="/chrismed/alertas"/>
+          {metric(n8n?.total)>0 ? <div className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-950"><Workflow className="mt-0.5 h-4 w-4 shrink-0"/><div><strong>Automação CHRISMED operacional</strong><p className="mt-0.5 text-xs opacity-80">Worker transacional homologado ativo; {metric(n8n?.ready)} fluxos permanecem como catálogo preparado e só são publicados individualmente quando houver evento e efeito de negócio homologados.</p></div></div> : null}
           <AlertItem active={String(wa?.status || '').toUpperCase() !== 'CONNECTED'} title="WhatsApp oficial ainda não conectado" detail={`Estado: ${wa?.status || 'não informado'} · ${wa?.address || '+55 21 97253-7868'}`} href="/chrismed/whatsapp"/>
           <AlertItem active={metric(cc?.operations?.critical_tasks)>0} title={`${metric(cc?.operations?.critical_tasks)} tarefa(s) operacional(is) crítica(s)`} detail="Prioridade alta na operação CHRISMED." href="/chrismed/alertas"/>
           <AlertItem active={metric(payoutSummary?.invoice_pending)>0} title={`${metric(payoutSummary?.invoice_pending)} profissional(is) com NF pendente`} detail="NF é condição para preparação de repasse." href="/finance"/>
