@@ -1,0 +1,60 @@
+name: Communication bulk category upgrade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/communication-bulk-category-upgrade.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: Patch category-aware bulk email backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/lib/communication-bulk-email.functions.ts')
+          s=p.read_text()
+          enum="z.enum(['professional','company','occupational','patient','event','laboratory','partner'])"
+          needle="    scheduledFor: z.string().datetime().optional().nullable(),\n"
+          add="    audienceCategory: "+enum+".optional(),\n"
+          if add not in s:
+              if needle not in s: raise SystemExit('schema anchor missing')
+              s=s.replace(needle,needle+add,1)
+          needle2="    if (data.audienceMode === 'selected') {\n"
+          add2="    if (data.audienceMode === 'all' && data.audienceCategory) {\n      recipientsQuery = recipientsQuery.contains('attributes', { category: data.audienceCategory });\n    }\n"
+          if add2 not in s:
+              if needle2 not in s: raise SystemExit('query anchor missing')
+              s=s.replace(needle2,add2+needle2,1)
+          old="audience_filter: data.audienceMode === 'selected' ? { recipient_ids: eligible.map((r: any) => r.id) } : { all_active_email_contacts: true },"
+          new="audience_filter: data.audienceMode === 'selected' ? { recipient_ids: eligible.map((r: any) => r.id) } : { all_active_email_contacts: true, category: data.audienceCategory ?? null },"
+          if old in s: s=s.replace(old,new,1)
+          elif new not in s: raise SystemExit('audience filter anchor missing')
+          oldm="          filtered_out: recipients.length - eligible.length,\n"
+          newm="          filtered_out: recipients.length - eligible.length,\n          audience_category: data.audienceCategory ?? null,\n"
+          if newm not in s:
+              if oldm not in s: raise SystemExit('metadata anchor missing')
+              s=s.replace(oldm,newm,1)
+          p.write_text(s)
+          PY
+          grep -q 'audienceCategory' src/lib/communication-bulk-email.functions.ts
+          git diff --check
+      - name: Commit safe Core extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add src/lib/communication-bulk-email.functions.ts
+          git commit -m 'feat(communication): segment bulk email by audience category' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
