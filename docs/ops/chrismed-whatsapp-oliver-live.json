@@ -1,0 +1,12 @@
+{
+  "generated_at_utc": "2026-08-20T12:38:14Z",
+  "core_container": "running",
+  "evolution_container": "running",
+  "core_has_openai": true,
+  "core_has_evolution_url": false,
+  "core_has_evolution_key": false,
+  "openai_http": 200,
+  "instance": "chrismed-oliver",
+  "instance_state": "unknown",
+  "pairing_ready": false
+}
