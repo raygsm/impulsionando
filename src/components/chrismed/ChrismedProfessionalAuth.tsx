@@ -374,13 +374,14 @@ if (error) {
             alt="CHRISMED"
             className="h-12 w-auto object-contain lg:hidden"
           />
-          <a
-            href={`mailto:${technicalSupportEmail}`}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("chrismed:oliver:open"))}
             className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#d9d3cb] bg-white/80 px-4 py-2 text-sm font-medium text-[#0b2a24] shadow-sm transition hover:border-[#e4b54a] hover:bg-[#f6e8be]/45"
           >
             <HelpCircle className="h-4 w-4" />
-            Precisa de ajuda?
-          </a>
+            Impulsionito a postos · pedir ajuda
+          </button>
         </div>
 
         <div className="relative z-10 mx-auto my-auto w-full max-w-xl rounded-3xl border border-[#d9d3cb]/80 bg-white/85 p-6 shadow-[0_24px_70px_rgba(7,28,24,0.10)] backdrop-blur sm:p-9">
@@ -395,6 +396,7 @@ if (error) {
               ? "Use seu e-mail para continuar."
               : "Você é um profissional da saúde? Crie sua conta para acessar sua área exclusiva e configurar sua agenda de atendimento."}
           </p>
+          <p className="mt-3 rounded-xl border border-[#d9d3cb] bg-[#f7f5f1] px-4 py-3 text-xs leading-relaxed text-[#52605c]"><strong>Orientação em todas as etapas:</strong> se algum dado estiver incorreto ou o acesso não for permitido, o sistema explicará em português o que aconteceu e como corrigir. O Impulsionito, por meio do Oliver, permanece disponível nesta tela.</p>
 
           <Tabs
             value={mode}

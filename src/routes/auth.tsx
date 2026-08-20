@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { ShieldCheck, Layers, Zap, LockKeyhole, Headphones, CalendarDays } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { ChrismedProfessionalAuth } from "@/components/chrismed/ChrismedProfessionalAuth";
+import { ChrismedOliverProvider } from "@/components/chrismed/ChrismedOliverProvider";
 import { isChrismedHost } from "@/lib/chrismed-professionals";
 import type { User } from "@supabase/supabase-js";
 
@@ -76,7 +77,7 @@ export const Route = createFileRoute("/auth")({
 function AuthEntryPage() {
   const search = Route.useSearch();
   if (typeof window !== "undefined" && isChrismedHost(window.location.hostname)) {
-    return <ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} />;
+    return <ChrismedOliverProvider><ChrismedProfessionalAuth initialMode={search.mode === "signup" ? "signup" : "login"} initialEmail={search.email} nextPath={safeNext(search.next)} /></ChrismedOliverProvider>;
   }
   return <AuthPage />;
 }
