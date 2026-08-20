@@ -1,0 +1,75 @@
+name: CHRISMED publisher live diagnostic v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-publisher-live-diagnostic-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Collect publisher state
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/chrismed-publisher-diagnostic-v2.txt 2>&1 <<'REMOTE'
+          set +e
+          echo "generated_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo '--- publisher service ---'
+          sudo systemctl is-active impulsionando-publish-worker.service || true
+          sudo systemctl --no-pager --full status impulsionando-publish-worker.service | head -40 || true
+          echo '--- publisher processes ---'
+          ps -eo pid,ppid,etime,stat,cmd | grep -E 'publish-core-now|core-publish-worker|npm (ci|run build)|vite|node' | grep -v grep | head -80 || true
+          echo '--- publisher lock/status ---'
+          sudo ls -la /var/lock/impulsionando* /run/lock/impulsionando* 2>/dev/null || true
+          sudo cat /var/www/impulsionando-core/publisher-status.json 2>/dev/null || true
+          sudo cat /var/www/impulsionando-core/current/docs/ops/core-publisher-status.json 2>/dev/null || true
+          echo '--- systemd core ---'
+          sudo systemctl is-active impulsionando-core.service || true
+          readlink -f /var/www/impulsionando-core/current || true
+          echo '--- docker core ---'
+          sudo docker inspect impulsionando-core --format 'status={{.State.Status}} image={{.Image}} started={{.State.StartedAt}}' || true
+          echo '--- disk and memory ---'
+          df -h / /var/www/impulsionando-core 2>/dev/null || true
+          free -m || true
+          echo '--- recent publisher journal ---'
+          sudo journalctl --no-pager -u impulsionando-publish-worker.service -n 120 || true
+          echo '--- public version from VPS ---'
+          curl -fsS --max-time 20 https://chrismed.impulsionando.com.br/api/public/version || true
+          echo
+          REMOTE
+      - name: Persist proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/chrismed-publisher-diagnostic-v2.txt docs/ops/chrismed-publisher-diagnostic-v2.txt
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-publisher-diagnostic-v2.txt
+          git commit -m 'chore(chrismed): record publisher diagnostic v2' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
