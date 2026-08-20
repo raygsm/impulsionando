@@ -1,87 +1,15 @@
-generated_at_utc=2026-08-19T20:55:52Z
+generated_at_utc=2026-08-20T02:03:43Z
 container_state=running
---- n8n version ---
-2.29.10
-rc=0
---- import help ---
-USAGE
-  $ n8n import:workflow
-
-FLAGS
-  -h, --help           Show CLI help
-  -i, --input <value>  Input file name or directory if --separate is used
-  --separate           Imports *.json files from directory provided by --input [default: false]
-  --userId <value>     The ID of the user to assign the imported workflows to
-  --projectId <value>  The ID of the project to assign the imported workflows to
-  --activeState        Whether to respect the JSON active field. "false" (default) deactivates all imported workflows. "fromJson" activates/deactivates each workflow based on its JSON active field. [default: false]
-
-DESCRIPTION
-  Import workflows
-
-EXAMPLES
-  $ n8n import:workflow --input=file.json
-  $ n8n import:workflow --separate --input=backups/latest/
-  $ n8n import:workflow --input=file.json --userId=1d64c3d2-85fe-4a83-a649-e446b07b3aae
-  $ n8n import:workflow --input=file.json --projectId=Ox8O54VQrmBrb4qL
-  $ n8n import:workflow --separate --input=backups/latest/ --userId=1d64c3d2-85fe-4a83-a649-e446b07b3aae
-  $ n8n import:workflow --input=file.json --activeState=fromJson
-
-rc=0
---- publish help ---
-USAGE
-  $ n8n publish:workflow
-
-FLAGS
-  -h, --help           Show CLI help
-  --id <value>         The ID of the workflow to publish
-  --versionId <value>  The version ID to publish. If not provided, publishes the current version
-  --all                (Deprecated) This flag is no longer supported
-
-DESCRIPTION
-  Publish a specific version of a workflow. If no version is specified, publishes the current version.
-
-EXAMPLES
-  $ n8n publish:workflow --id=5 --versionId=abc123
-  $ n8n publish:workflow --id=5
-
-rc=0
---- update help ---
-USAGE
-  $ n8n update:workflow
-
-FLAGS
-  -h, --help        Show CLI help
-  --active <value>  Active state the workflow/s should be set to
-  --all             Operate on all workflows
-  --id <value>      The ID of the workflow to operate on
-
-DESCRIPTION
-  [DEPRECATED] Update workflows - use publish:workflow or unpublish:workflow instead
-
-EXAMPLES
-  $ n8n update:workflow --all --active=false
-  $ n8n update:workflow --id=5 --active=true
-
-rc=0
-core_env_values=ok
-signing_secret=present
+security_secret_present=yes
+core_secret_present=yes
+secret_match=yes
+curl: (28) Connection timed out after 20002 milliseconds
+unsigned_http=000 body=
+curl: (28) Connection timed out after 20002 milliseconds
+security_secret_http=000 body=
+curl: (28) Cocore_secret_http=000 body=
 --- first READY ---
-[{"workflow_slug":"chrismed.appointment.cancelled","version":1,"description":"Workflow transacional CHRISMED: appointment-cancelled","config":{"source": "communication_automations", "executor": "n8n", "tenant_slug": "chrismed", "idempotency_required": true, "correlation_id_required": true}}]
-slug=chrismed.appointment.cancelled id=iudf108f4e5414059ecba9 path=debug-chrismed-appointment-cancelled-v1 tenant=chrismed
-docker_cp_rc=0
-Importing 1 workflows...
-Deactivating workflow "DEBUG | chrismed.appointment.cancelled".
-Successfully imported 1 workflow.
-import_rc=0
-publish_rc=137
-⚠️  WARNING: The "update:workflow" command is deprecated.
-
-Publishing workflow iudf108f4e5414059ecba9 with current version
-Please use: publish:workflow --id=iudf108f4e5414059ecba9
-
-Note: Changes will not take effect if n8n is running.
-Please restart n8n for changes to take effect if n8n is currently running.
-activate_rc=0
-Successfully exported 1 workflow.
-export_rc=0
-[{"updatedAt":"2026-08-19T20:56:59.000Z","createdAt":"2026-08-19T20:06:24.133Z","id":"iudf108f4e5414059ecba9","name":"DEBUG | chrismed.appointment.cancelled","description":null,"active":true,"isArchived":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"debug-chrismed-appointment-cancelled-v1","responseMode":"onReceived","options":{}},"id":"iudf108f4e5414059ecba9-webhook","name":"Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"iudf108f4e5414059ecba9-hook"}],"connections":{},"settings":{"executionOrder":"v1"},"staticData":null,"meta":null,"nodeGroups":[],"pinData":null,"versionId":"4a76cc86-abf8-4302-81de-401df51af440","activeVersionId":"4a76cc86-abf8-4302-81de-401df51af440","versionCounter":3,"triggerCount":1,"sourceWorkflowId":null,"tags":[],"shared":[{"updatedAt":"2026-08-19T20:06:24.141Z","createdAt":"2026-08-19T20:06:24.141Z","role":"workflow:owner","workflowId":"iudf108f4e5414059ecba9","projectId":"Ht4x0dVIVLNUi8m6","project":{"updatedAt":"2026-06-23T05:17:10.029Z","createdAt":"2026-06-23T05:14:38.372Z","id":"Ht4x0dVIVLNUi8m6","name":"Raygs Monnerat <raygs@hotmail.com>","type":"personal","icon":null,"description":null,"customTelemetryTags":[],"creatorId":"4c0a9fe6-9bfa-40bb-83b9-8459a067c97c"}}],"versionMetadata":{"name":null,"description":null}}]
+nnection timed out after 20002 milliseconds
+[{"workflow_slug":"chrismed.appointment.cancelled","version":1,"config":{"source": "communication_automations", "executor": "n8n", "tenant_slug": "chrismed", "idempotency_required": true, "correlation_id_required": true}}, 
+ {"workflow_slug":"chrismed.appointment.checkin","version":1,"config":{"source": "chrismed_presence_core", "executor": "n8n", "event_code": "chrismed.appointment.checkin.welcome", "tenant_slug": "chrismed", "idempotency_required": true, "correlation_id_required": true}}, 
+ {"workflow_slug":"chrismed.appointment.created","version":1,"config":{"source": "communication_automations", "executor": "n8n", "tenant_slug": "chrismed", "idempotency_required": true, "correlation_id_required": true}}]
