@@ -1,261 +1,29 @@
-generated_at_utc=2026-08-20T02:23:38Z
+generated_at_utc=2026-08-20T02:26:21Z
 --- worker service ---
 ● impulsionando-publish-worker.service - Impulsionando one-click publisher worker
      Loaded: loaded (/etc/systemd/system/impulsionando-publish-worker.service; enabled; preset: enabled)
-     Active: active (running) since Thu 2026-08-20 02:14:01 UTC; 9min ago
+     Active: active (running) since Thu 2026-08-20 02:14:01 UTC; 12min ago
    Main PID: 1537047 (bash)
-      Tasks: 32 (limit: 4652)
-     Memory: 1.4G (peak: 1.4G)
-        CPU: 2min 52.014s
+      Tasks: 2 (limit: 4652)
+     Memory: 81.0M (peak: 1.6G)
+        CPU: 3min 11.902s
      CGroup: /system.slice/impulsionando-publish-worker.service
              ├─1537047 bash /usr/local/lib/impulsionando/publisher/core-publish-worker.sh
-             ├─1541419 bash /usr/local/lib/impulsionando/publisher/publish-core-now.sh
-             ├─1542784 "npm run build"
-             ├─1542814 sh -c "node --max-old-space-size=12288 node_modules/vite/bin/vite.js build"
-             ├─1542815 node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
-             └─1542851 /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.27.7 --ping
+             └─1546067 sleep 3
 
-Aug 20 02:18:58 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
-Aug 20 02:19:33 srv1777313 core-publish-worker.sh[1541449]: added 709 packages in 1m
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > prebuild
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node scripts/verify-niche-destinations.mjs && node scripts/generate-build-info.mjs
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542796]: ✓ Catálogo público de nichos consistente: fonte única, segmentos críticos e rotas validados.
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542803]: [build-info] commit=7e7d1ab branch=main builtAt=2026-08-20T02:19:34.429Z
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > build
-Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
-Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: vite v7.3.5 building client environment for production...
-Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: transforming...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at failureErrorWithLog (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1748:15)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1017:50
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at responseCallbacks.<computed> (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:884:9)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at handleIncomingPacket (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:939:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.readFromStdout (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:862:7)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.emit (node:events:519:28)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at addChunk (node:internal/streams/readable:561:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Readable.push (node:internal/streams/readable:392:5)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
 --- publisher state ---
-{"state": "running", "stage": "Compilando o front e o backend do Core.", "sha": "7e7d1abebf14e3c714940cd9734436c0d62f0c54", "updated_at": "2026-08-20T02:19:33.797494Z"}
---- journal ---
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/consola',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/consola/dist'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/consola/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/d3-array',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/d3-array/src'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/d3-array/src'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/crossws',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/crossws/dist'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/crossws/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/dom-serializer',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/dom-serializer/lib'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/dom-serializer/lib'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/domutils',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/domutils/lib'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/domutils/lib'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/enhanced-resolve',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/enhanced-resolve/lib'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/enhanced-resolve/lib'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   [
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     '/var/lib/impulsionando-publisher/repo/node_modules/htmlparser2',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/var/lib/impulsionando-publisher/repo/node_modules/htmlparser2/lib'] {
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       errno: -39,
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       code: 'ENOTEMPTY',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       syscall: 'rmdir',
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup       path: '/var/lib/impulsionando-publisher/repo/node_modules/htmlparser2/lib'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup     }
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ],
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup   ... 103 more items
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn cleanup ]
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/zod/v4'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/html2canvas/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/brotli/readme.md'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/scope-manager/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-router/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/feedback/build'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/functions-js/src'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/react/build'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/browser/build'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/tailwindcss/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/recharts/es6'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/restructure/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/mdn-data/css'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-day-picker/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/d3-interpolate/src'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/css-line-break/rollup.config.ts'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/type-utils/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@vitest/utils/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/scope-manager/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@testing-library/react/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-server-core/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-client-core/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/virtual-file-routes/src'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-router/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/realtime-js/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-start-rsc/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/browser/build'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/@eslint/config-array/README.md'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@eslint/eslintrc/conf'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/generator/lib'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-email/node_modules/@react-email/render/dist'
-Aug 20 02:16:03 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/glob/node_modules/minimatch/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/prompts/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/recharts/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-day-picker/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/fast-png/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/db0/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/axe-core/locales'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/ajv/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-server-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-client-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-start-rsc/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/realtime-js/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@oozcitak/dom/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/h3-v2/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/helpers/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/core/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/generator/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/happy-dom/node_modules/entities/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/nitro/node_modules/lru-cache/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/glob/node_modules/minimatch/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/zod/v4'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/vitest/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/terser/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-transition-group/config'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/prompts/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/js-yaml/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/html2canvas/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/h3-v2/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/fast-png/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/db0/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/css-line-break/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@vitest/mocker/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/feedback/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/react/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@jridgewell/sourcemap-codec/types'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@oozcitak/dom/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@jridgewell/remapping/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/types/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/helpers/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/core/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/nitro/node_modules/lru-cache/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/happy-dom/node_modules/entities/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/zod/v4'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/html2canvas/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/scope-manager/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-router/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/feedback/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/functions-js/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/react/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/browser/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/tailwindcss/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/recharts/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/restructure/README.md'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/mdn-data/css'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-day-picker/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/d3-interpolate/src'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/type-utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@vitest/utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/scope-manager/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/@testing-library/react/README.md'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-server-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-client-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/virtual-file-routes/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-router/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/realtime-js/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-start-rsc/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/browser/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@eslint/config-array/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@eslint/eslintrc/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/generator/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-email/node_modules/@react-email/render/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/glob/node_modules/minimatch/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/prompts/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/recharts/es6'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-day-picker/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/fast-png/lib-esm'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/db0/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/axe-core/locales'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/ajv/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-server-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/start-client-core/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@tanstack/react-start-rsc/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/@supabase/realtime-js/package.json'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@oozcitak/dom/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/h3-v2/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/helpers/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/core/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/generator/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/happy-dom/node_modules/entities/escape.js'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/nitro/node_modules/lru-cache/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/glob/node_modules/minimatch/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/zod/v4'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/vitest/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/terser/tools'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/react-transition-group/CSSTransition'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/prompts/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/js-yaml/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/html2canvas/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/h3-v2/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/fast-png/package.json'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/db0/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@vitest/mocker/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@typescript-eslint/utils/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/feedback/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@sentry/react/build'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@jridgewell/sourcemap-codec/types'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@oozcitak/dom/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@jridgewell/remapping/types'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/types/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/helpers/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/@babel/core/lib'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/var/lib/impulsionando-publisher/repo/node_modules/nitro/node_modules/lru-cache/dist'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open '/var/lib/impulsionando-publisher/repo/node_modules/happy-dom/node_modules/entities/decode.js'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error code ENOENT
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error syscall mkdir
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error path /root/.npm
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error errno -2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent ENOENT: no such file or directory, mkdir '/root/.npm'
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent This is related to npm not being able to find a file.
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error enoent
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice New major version of npm available! 10.9.8 -> 12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice To update run: npm install -g npm@12.0.2
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm notice
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error Log files were not written due to an error writing to the directory: /root/.npm/_logs
-Aug 20 02:16:04 srv1777313 core-publish-worker.sh[1538236]: npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal
+{"state": "error", "stage": "Falha na publicação. Produção anterior preservada/restaurada.", "sha": "7e7d1abebf14e3c714940cd9734436c0d62f0c54", "updated_at": "2026-08-20T02:25:35.382253Z"}
+--- recent journal ---
 Aug 20 02:18:00 srv1777313 core-publish-worker.sh[1541427]: Cloning into '/var/lib/impulsionando-publisher/repo'...
 Aug 20 02:18:03 srv1777313 core-publish-worker.sh[1541427]: [303B blob data]
 Aug 20 02:18:22 srv1777313 core-publish-worker.sh[1541449]: npm warn deprecated @react-email/components@1.0.12: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
@@ -288,45 +56,54 @@ Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > build
 Aug 20 02:19:34 srv1777313 core-publish-worker.sh[1542784]: > node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
 Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: vite v7.3.5 building client environment for production...
 Aug 20 02:19:57 srv1777313 core-publish-worker.sh[1542815]: transforming...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: ✓ 3353 modules transformed.
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: ✗ Build failed in 5m 37s
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: error during build:
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: [vite:esbuild] Transform failed with 1 error:
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: /var/lib/impulsionando-publisher/repo/src/routes/chrismed.agendar.tsx?tsr-split=component:443:13: ERROR: The character "}" is not valid inside a JSX element
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: file: /var/lib/impulsionando-publisher/repo/src/routes/chrismed.agendar.tsx?tsr-split=component:443:13
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: The character "}" is not valid inside a JSX element
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 441 |                setStep('specialty');
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 442 |              }} className={`${m === 'telemedicina' ? 'order-1' : m === 'presencial' ? 'order-2' : 'order-3'} text-left...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 443 |            })}}</div>
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     |               ^
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 444 |        <div className="mt-10 rounded-xl border border-[var(--chrismed-champagne)] bg-[var(--chrismed-bone)] p-5"><div ...
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]: 445 |              window.dispatchEvent(new CustomEvent('chrismed:reception:notify', {
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at failureErrorWithLog (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1748:15)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1017:50
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at responseCallbacks.<computed> (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:884:9)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at handleIncomingPacket (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:939:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.readFromStdout (/var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/esbuild/lib/main.js:862:7)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Socket.emit (node:events:519:28)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at addChunk (node:internal/streams/readable:561:12)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Readable.push (node:internal/streams/readable:392:5)
+Aug 20 02:25:34 srv1777313 core-publish-worker.sh[1542815]:     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
 --- active publisher processes ---
- 682342  682318  2-14:04:19  0.0  0.3 node scripts/start-core-runtime.mjs
- 682389  682342  2-14:04:18  0.5  1.6 /usr/local/bin/node scripts/pulsonitor-worker.mjs
- 682390  682342  2-14:04:18  0.0  1.0 /usr/local/bin/node scripts/colors-automation-worker.mjs
- 682391  682342  2-14:04:18  0.0  2.1 /usr/local/bin/node .output/server/index.mjs
- 704516       1  2-05:16:55  0.0  0.2 /usr/bin/node scripts/start-core-runtime.mjs
- 704526  704516  2-05:16:55  0.5  1.7 /usr/bin/node scripts/pulsonitor-worker.mjs
- 704527  704516  2-05:16:55  0.0  1.0 /usr/bin/node scripts/colors-automation-worker.mjs
- 704528  704516  2-05:16:55  0.0  2.1 /usr/bin/node .output/server/index.mjs
- 709663  709638  1-23:48:45  0.0  0.4 npm run start:prod
- 710276  709663  1-23:48:29  0.0  2.3 node dist/main
-1541419 1537047       05:39  0.0  0.0 bash /usr/local/lib/impulsionando/publisher/publish-core-now.sh
-1542514 1542486       04:15  0.0  0.3 node scripts/start-core-runtime.mjs
-1542563 1542514       04:14  1.1  1.2 /usr/local/bin/node scripts/pulsonitor-worker.mjs
-1542565 1542514       04:14  0.0  0.5 /usr/local/bin/node scripts/colors-automation-worker.mjs
-1542566 1542514       04:14  1.2  1.9 /usr/local/bin/node .output/server/index.mjs
-1542784 1541419       04:04  0.0  0.4 npm run build
-1542814 1542784       04:04  0.0  0.0 sh -c node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
-1542815 1542814       04:04 43.4 35.3 node --max-old-space-size=12288 node_modules/vite/bin/vite.js build
-1542851 1542815       04:03  0.6  1.3 /var/lib/impulsionando-publisher/repo/node_modules/vite/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.27.7 --ping
-1544521 1544477       00:54 27.9 17.7 node /usr/local/bin/n8n
-1544820 1544521       00:38  6.9  1.5 node --disallow-code-generation-from-strings --disable-proto=delete /usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_bd25ea1f047b3163759a25985b9c52da/node_modules/@n8n/task-runner/dist/start.js
-1544938 1544453       00:24 19.1  5.7 node /usr/local/bin/n8n import:workflow --input=/tmp/iu2378ee8eb78d3bdfce75.json
---- disk ---
+ 682342  682318  2-14:07:01  0.0  0.1 node scripts/start-core-runtime.mjs
+ 682389  682342  2-14:07:01  0.5  2.1 /usr/local/bin/node scripts/pulsonitor-worker.mjs
+ 682390  682342  2-14:07:01  0.0  1.1 /usr/local/bin/node scripts/colors-automation-worker.mjs
+ 682391  682342  2-14:07:01  0.0  2.3 /usr/local/bin/node .output/server/index.mjs
+ 704516       1  2-05:19:38  0.0  0.2 /usr/bin/node scripts/start-core-runtime.mjs
+ 704526  704516  2-05:19:38  0.5  2.1 /usr/bin/node scripts/pulsonitor-worker.mjs
+ 704527  704516  2-05:19:38  0.0  1.1 /usr/bin/node scripts/colors-automation-worker.mjs
+ 704528  704516  2-05:19:38  0.0  2.4 /usr/bin/node .output/server/index.mjs
+ 709663  709638  1-23:51:27  0.0  0.5 npm run start:prod
+ 710276  709663  1-23:51:12  0.0  2.4 node dist/main
+1542514 1542486       06:58  0.0  0.1 node scripts/start-core-runtime.mjs
+1542563 1542514       06:57  1.7  1.8 /usr/local/bin/node scripts/pulsonitor-worker.mjs
+1542565 1542514       06:57  0.1  0.6 /usr/local/bin/node scripts/colors-automation-worker.mjs
+1542566 1542514       06:57  1.4  2.6 /usr/local/bin/node .output/server/index.mjs
+1545520 1545476       00:39 36.1 19.4 node /usr/local/bin/n8n
+1545723 1545520       00:30  6.7  2.9 node --disallow-code-generation-from-strings --disable-proto=delete /usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_bd25ea1f047b3163759a25985b9c52da/node_modules/@n8n/task-runner/dist/start.js
+1546042 1545451       00:04 78.8  7.7 node /usr/local/bin/n8n update:workflow --id=iud3177a53bfd683fa7453 --active=true
+--- disk/memory ---
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/sda1        48G   25G   24G  51% /
 /dev/sda1        48G   25G   24G  51% /
 /dev/sda1        48G   25G   24G  51% /
---- node/npm ---
-v22.23.1
-10.9.8
---- publisher files ---
-total 20
-drwxr-xr-x 2 root root 4096 Aug 20 02:17 .
-drwxr-xr-x 3 root root 4096 Aug 20 02:13 ..
--rwxr-xr-x 1 root root 1989 Aug 20 02:17 core-publish-worker.sh
--rwxr-xr-x 1 root root 5209 Aug 20 02:17 publish-core-now.sh
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       2.3Gi       962Mi        19Mi       891Mi       1.5Gi
+Swap:             0B          0B          0B
 --- repo state ---
-## main...origin/main
- M src/generated/build-info.ts
- M src/routeTree.gen.ts
 7e7d1abebf14e3c714940cd9734436c0d62f0c54
