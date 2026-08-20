@@ -1,0 +1,295 @@
+IMAGE=docker.n8n.io/n8nio/n8n NETWORK=n8n-umlg_default
+--- mounts ---
+volume /var/lib/docker/volumes/n8n-umlg_n8n_data/_data -> /home/node/.n8n
+
+--- database mode keys ---
+--- backup export ---
+BACKUP_WORKFLOWS=102
+READY_CHRISMED=34
+COMBINED_IMPORT_COUNT=34
+N8N_STOPPED_FOR_MAINTENANCE=true
+Importing 34 workflows...
+Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: appointment-cancelled".
+Successfully imported 34 workflows.
+ACTIVATE chrismed.appointment.cancelled id=chdf108f4e5414059ecba9
+ACTIVATE chrismed.appointment.checkin id=chbb99beebe92379a3b5d3
+ACTIVATE chrismed.appointment.created id=ch7221e3e0861d8a764e58
+ACTIVATE chrismed.appointment.post.survey id=ch70df5f44461e37ff50a1
+ACTIVATE chrismed.appointment.reminders id=ch702a3aa3820d9bcdf97f
+ACTIVATE chrismed.appointment.rescheduled id=ch12ba903d1fde1bfc9e39
+ACTIVATE chrismed.booking.abandoned id=ch50113e5ebf3d6f21aeb6
+ACTIVATE chrismed.critical.alerts id=ch96efe07f307907c4d118
+ACTIVATE chrismed.daily.operational.digest id=chf0a67ea4c907b1e897cc
+ACTIVATE chrismed.ehr.document.released id=ch99ff00c9ffd3bde4975c
+ACTIVATE chrismed.ehr.evolution.signed id=ch12469961b3cc0aa6146f
+ACTIVATE chrismed.ehr.record.created id=ch12af960d05b1d2d570d5
+ACTIVATE chrismed.event.checkin id=ch07641201f7d7c482e9f3
+ACTIVATE chrismed.event.confirmation id=chbbcb66ece78cdf96efa2
+ACTIVATE chrismed.event.invitation id=chff588c693e8ff4676d05
+ACTIVATE chrismed.event.organization.dashboard id=ch1e45e148ff683924cbd2
+ACTIVATE chrismed.event.post.survey id=che2ea24717a2eba5fd4ea
+ACTIVATE chrismed.event.reminder id=ch0ad007980d34f9e59330
+ACTIVATE chrismed.experience.engagement id=ch740bc0da2b923fc17116
+ACTIVATE chrismed.failed.delivery.recovery id=ch6037a3e80310ab3a1106
+ACTIVATE chrismed.new.lead id=ch72e19fc0ba3f5bb060e2
+ACTIVATE chrismed.occupational.aso.issued id=ch380755abbda1d3c9fc21
+ACTIVATE chrismed.occupational.aso.requested id=ch3b7f07e967fe5c1f8bd6
+ACTIVATE chrismed.occupational.document.expiring id=chd94614c438d7156b23f9
+ACTIVATE chrismed.occupational.employee.created id=ch42dc01e0f270044ae63e
+ACTIVATE chrismed.occupational.esocial.ready id=ch0de6c49d65af309f1ff0
+ACTIVATE chrismed.occupational.exam.due id=ch3d9e5b3c7a80d50de1d8
+ACTIVATE chrismed.occupational.satisfaction.followup id=ch84fec80f00b3f9569a02
+ACTIVATE chrismed.payment.approved id=ch2997f927e6a957bd40e1
+ACTIVATE chrismed.pega.agenda.expiration id=ch75c7a851bfaff522f5a3
+ACTIVATE chrismed.pega.agenda.offer id=ch42b46b1e7d170d869f55
+ACTIVATE chrismed.pega.agenda.open.slot id=ch0495ce66c84125be47ab
+ACTIVATE chrismed.reactivation id=ch5217b81158aeebc91ff9
+ACTIVATE chrismed.registration.abandoned id=ch70b017e7a01e5a3572cc
+VERIFY_FAILED chrismed.appointment.cancelled http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-cancelled-v1</pre>
+</body
+VERIFY_FAILED chrismed.appointment.checkin http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-checkin-v1</pre>
+</body>
+VERIFY_FAILED chrismed.appointment.created http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-created-v1</pre>
+</body>
+VERIFY_FAILED chrismed.appointment.post.survey http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-post-survey-v1</pre>
+</bo
+VERIFY_FAILED chrismed.appointment.reminders http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-reminders-v1</pre>
+</body
+VERIFY_FAILED chrismed.appointment.rescheduled http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-appointment-rescheduled-v1</pre>
+</bo
+VERIFY_FAILED chrismed.booking.abandoned http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-booking-abandoned-v1</pre>
+</body>
+</
+VERIFY_FAILED chrismed.critical.alerts http=503 body={"code":503,"message":"Database is not ready!"}
+VERIFY_FAILED chrismed.daily.operational.digest http=503 body={"code":503,"message":"Database is not ready!"}
+VERIFY_FAILED chrismed.ehr.document.released http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-ehr-document-released-v1</pre>
+</body
+VERIFY_FAILED chrismed.ehr.evolution.signed http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-ehr-evolution-signed-v1</pre>
+</body>
+VERIFY_FAILED chrismed.ehr.record.created http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-ehr-record-created-v1</pre>
+</body>
+<
+VERIFY_FAILED chrismed.event.checkin http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-checkin-v1</pre>
+</body>
+</html
+VERIFY_FAILED chrismed.event.confirmation http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-confirmation-v1</pre>
+</body>
+<
+VERIFY_FAILED chrismed.event.invitation http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-invitation-v1</pre>
+</body>
+</h
+VERIFY_FAILED chrismed.event.organization.dashboard http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-organization-dashboard-v1</pre>
+VERIFY_FAILED chrismed.event.post.survey http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-post-survey-v1</pre>
+</body>
+</
+VERIFY_FAILED chrismed.event.reminder http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-reminder-v1</pre>
+</body>
+</htm
+VERIFY_FAILED chrismed.experience.engagement http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-experience-engagement-v1</pre>
+</body
+VERIFY_FAILED chrismed.failed.delivery.recovery http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-failed-delivery-recovery-v1</pre>
+</b
+VERIFY_FAILED chrismed.new.lead http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-new-lead-v1</pre>
+</body>
+</html>
+VERIFY_FAILED chrismed.occupational.aso.issued http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-aso-issued-v1</pre>
+</bo
+VERIFY_FAILED chrismed.occupational.aso.requested http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-aso-requested-v1</pre>
+<
+VERIFY_FAILED chrismed.occupational.document.expiring http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-document-expiring-v1</pr
+VERIFY_FAILED chrismed.occupational.employee.created http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-employee-created-v1</pre
+VERIFY_FAILED chrismed.occupational.esocial.ready http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-esocial-ready-v1</pre>
+<
+VERIFY_FAILED chrismed.occupational.exam.due http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-exam-due-v1</pre>
+</body
+VERIFY_FAILED chrismed.occupational.satisfaction.followup http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-satisfaction-followup-v1
+VERIFY_FAILED chrismed.payment.approved http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-payment-approved-v1\" is not registered.","hint":"The workflow must be active for a production URL to run succ
+VERIFY_FAILED chrismed.pega.agenda.expiration http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-pega-agenda-expiration-v1\" is not registered.","hint":"The workflow must be active for a production URL to ru
+VERIFY_FAILED chrismed.pega.agenda.offer http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-pega-agenda-offer-v1\" is not registered.","hint":"The workflow must be active for a production URL to run suc
+VERIFY_FAILED chrismed.pega.agenda.open.slot http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-pega-agenda-open-slot-v1\" is not registered.","hint":"The workflow must be active for a production URL to run
+VERIFY_FAILED chrismed.reactivation http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-reactivation-v1\" is not registered.","hint":"The workflow must be active for a production URL to run successf
+VERIFY_FAILED chrismed.registration.abandoned http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-registration-abandoned-v1\" is not registered.","hint":"The workflow must be active for a production URL to ru
+RESULT remaining_chrismed=34 failures=34
+FAILED rc=1 line=11
