@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Banknote, BriefcaseBusiness, Clock3, Landmark, PiggyBank, TrendingUp, UsersRound, ReceiptText } from "lucide-react";
+import { AlertTriangle, Banknote, BriefcaseBusiness, Clock3, Landmark, PiggyBank, TrendingUp, UsersRound, ReceiptText, Scale } from "lucide-react";
 
 type FinancialAccount = { code: string; name: string; institution: string; purpose: string; allocation_pct: number | null; configured: boolean };
 type FinancialAlert = { severity: string; code: string; message: string; clients_remaining?: number; mrr_remaining?: number };
 type RecurringCost = { supplier: string; service: string; plan: string; monthly_brl: number; confidence: string; payment_status?: string };
+type FounderCompensation = { partner_name: string; code: string; work_hours: number; period_days: number; hourly_rate_brl: number; original_amount: number; paid_amount: number; outstanding_amount: number; status: string; settlement_priority: number; valuation_includable: boolean; settlement_condition: string; description: string };
 type DashboardPayload = {
   phase: string;
   paying_clients: number;
@@ -32,6 +33,8 @@ type DashboardPayload = {
   profit_retention_pct: number;
   recurring_costs_monthly_brl: number;
   recurring_costs: RecurringCost[];
+  founder_deferred_compensation_outstanding_brl: number;
+  founder_deferred_compensation: FounderCompensation[];
   accounts: FinancialAccount[];
   alerts: FinancialAlert[];
 };
@@ -60,7 +63,7 @@ export function ImpulsionandoFinancialGovernance() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ERP da própria Impulsionando</p>
           <h2 className="mt-1 text-xl font-semibold">Governança financeira e capacidade operacional</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Receita, custos, fundos, pró-labores, aporte e contratações calculados pelas regras internas.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Receita, custos, fundos, pró-labores, aporte, remuneração diferida e contratações calculados pelas regras internas.</p>
         </div>
         <Badge variant="secondary">{phaseLabel(data.phase)}</Badge>
       </div>
@@ -93,6 +96,11 @@ export function ImpulsionandoFinancialGovernance() {
           </div>
         </Card>
       </div>
+
+      <Card className="border-primary/30 p-5">
+        <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-semibold"><Scale className="h-4 w-4 text-primary" />Remuneração diferida de fundador</div><strong>{brl(data.founder_deferred_compensation_outstanding_brl)}</strong></div>
+        <div className="mt-4 space-y-3">{(data.founder_deferred_compensation ?? []).map((item) => <div key={item.code} className="rounded-xl border p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><div className="font-medium">{item.partner_name}</div><div className="text-xs text-muted-foreground">{item.work_hours} horas em {item.period_days} dias · {brl(item.hourly_rate_brl)}/hora</div></div><Badge variant="outline">Prioridade {item.settlement_priority}</Badge></div><p className="mt-3 text-sm text-muted-foreground">{item.description}</p><p className="mt-2 text-xs text-muted-foreground">Incluível em valuation: {item.valuation_includable ? "sim" : "não"}. Quitação sujeita à formalização societária, contábil e jurídica aplicável.</p></div>)}</div>
+      </Card>
 
       <Card className="p-5">
         <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-semibold"><ReceiptText className="h-4 w-4 text-primary" />Custos recorrentes mapeados</div><strong>{brl(data.recurring_costs_monthly_brl)}/mês</strong></div>
