@@ -1,6 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+const IMPULSIONANDO_COMPANY_ID = 'bda711e0-cbfa-4899-a068-0c75f96d4e59';
+const EXPECTED_ACCESS_SECRET = `mpago:${IMPULSIONANDO_COMPANY_ID}:production:access_token`;
+const EXPECTED_WEBHOOK_SECRET = `mpago:${IMPULSIONANDO_COMPANY_ID}:production:webhook_secret`;
 
 async function verifySignature(secret: string, dataId: string, requestId: string, signature: string) {
   const ts = signature.match(/(?:^|,)ts=([^,]+)/)?.[1] ?? '';
@@ -22,7 +25,8 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const merchantCompanyId = url.searchParams.get('company_id');
-    if (!merchantCompanyId) return json({ error: 'company_id_required' }, 400);
+    if (merchantCompanyId !== IMPULSIONANDO_COMPANY_ID) return json({ error: 'invalid_merchant' }, 403);
+
     const payload = JSON.parse(await req.text() || '{}');
     const eventType = String(payload.type ?? payload.topic ?? 'unknown');
     const resourceId = String(payload.data?.id ?? payload.resource ?? payload.id ?? '');
@@ -30,21 +34,36 @@ Deno.serve(async (req) => {
     const signature = req.headers.get('x-signature') ?? '';
     if (eventType !== 'payment' || !resourceId || !requestId || !signature) return json({ error: 'invalid_webhook' }, 401);
 
-    const { data: masterId } = await service.rpc('master_company_id');
-    if (!masterId || String(masterId) !== merchantCompanyId) return json({ error: 'invalid_merchant' }, 403);
-    const { data: cred } = await service.from('mpago_credentials').select('access_token_secret_name,webhook_secret_name').eq('company_id', merchantCompanyId).eq('active', true).limit(1).maybeSingle();
-    if (!cred?.webhook_secret_name || !cred?.access_token_secret_name) return json({ error: 'credentials_unavailable' }, 503);
+    const { data: masterId, error: masterError } = await service.rpc('master_company_id');
+    if (masterError || String(masterId) !== IMPULSIONANDO_COMPANY_ID) return json({ error: 'impulsionando_merchant_identity_mismatch' }, 503);
+
+    const { data: cred, error: credError } = await service.from('mpago_credentials')
+      .select('company_id,environment,access_token_secret_name,webhook_secret_name')
+      .eq('company_id', IMPULSIONANDO_COMPANY_ID)
+      .eq('environment', 'production')
+      .eq('active', true)
+      .limit(1)
+      .maybeSingle();
+    if (credError || !cred) return json({ error: 'impulsionando_merchant_not_configured' }, 503);
+    if (cred.company_id !== IMPULSIONANDO_COMPANY_ID || cred.access_token_secret_name !== EXPECTED_ACCESS_SECRET || cred.webhook_secret_name !== EXPECTED_WEBHOOK_SECRET) {
+      return json({ error: 'impulsionando_merchant_credential_isolation_violation' }, 503);
+    }
+    if (String(cred.access_token_secret_name).startsWith('chrismed_') || String(cred.webhook_secret_name).startsWith('chrismed_')) {
+      return json({ error: 'cross_merchant_credential_rejected' }, 503);
+    }
+
     const [{ data: webhookSecret }, { data: accessToken }] = await Promise.all([
-      service.rpc('reveal_secret_value', { p_name: cred.webhook_secret_name }),
-      service.rpc('reveal_secret_value', { p_name: cred.access_token_secret_name }),
+      service.rpc('reveal_secret_value', { p_name: EXPECTED_WEBHOOK_SECRET }),
+      service.rpc('reveal_secret_value', { p_name: EXPECTED_ACCESS_SECRET }),
     ]);
-    if (!webhookSecret || !accessToken) return json({ error: 'secrets_unavailable' }, 503);
+    if (!webhookSecret || !accessToken) return json({ error: 'impulsionando_merchant_secrets_unavailable' }, 503);
     if (!(await verifySignature(String(webhookSecret), resourceId, requestId, signature))) return json({ error: 'invalid_signature' }, 401);
 
     const { data: previous } = await service.from('mpago_webhook_events').select('id,processed').eq('mp_event_id', requestId).eq('event_type', 'initial_checkout_payment').maybeSingle();
     if (previous?.processed) return json({ ok: true, duplicate: true });
+
     const { data: event, error: eventError } = await service.from('mpago_webhook_events').upsert({
-      company_id: merchantCompanyId,
+      company_id: IMPULSIONANDO_COMPANY_ID,
       event_type: 'initial_checkout_payment',
       mp_event_id: requestId,
       mp_resource_id: resourceId,
@@ -58,6 +77,9 @@ Deno.serve(async (req) => {
     const mpResp = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(resourceId)}`, { headers: { Authorization: `Bearer ${String(accessToken)}` } });
     if (!mpResp.ok) return json({ error: 'payment_lookup_failed' }, 502);
     const mpData = await mpResp.json();
+    const metadataMerchant = String(mpData?.metadata?.merchant_company_id ?? '');
+    if (metadataMerchant && metadataMerchant !== IMPULSIONANDO_COMPANY_ID) return json({ error: 'payment_merchant_metadata_mismatch' }, 403);
+
     const status = String(mpData.status ?? 'pending');
     const patch: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
     if (status === 'approved') patch.approved_at = new Date().toISOString();
@@ -65,10 +87,13 @@ Deno.serve(async (req) => {
     if (status === 'refunded') patch.refunded_at = new Date().toISOString();
 
     const { data: payment, error: paymentError } = await service.from('mpago_payments').update(patch)
-      .eq('company_id', merchantCompanyId).eq('mp_payment_id', resourceId)
-      .eq('context_type', 'billing_initial_checkout').select('id,context_id,status').maybeSingle();
+      .eq('company_id', IMPULSIONANDO_COMPANY_ID)
+      .eq('mp_payment_id', resourceId)
+      .eq('context_type', 'billing_initial_checkout')
+      .select('id,context_id,status,metadata').maybeSingle();
     if (paymentError) throw paymentError;
     if (!payment?.context_id) return json({ error: 'initial_checkout_payment_not_found' }, 404);
+    if (String(payment.metadata?.merchant_company_id ?? '') !== IMPULSIONANDO_COMPANY_ID) return json({ error: 'stored_payment_merchant_mismatch' }, 403);
 
     if (status === 'approved') {
       const { error: finalError } = await service.rpc('billing_finalize_initial_checkout', { p_checkout_session_id: payment.context_id });
