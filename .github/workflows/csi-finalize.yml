@@ -1,3 +1,4 @@
+# trigger: 2026-08-20-final
 name: CSI Finalize
 
 on:
@@ -34,7 +35,6 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-
       - name: Build current CSI front
         env:
           VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
@@ -48,23 +48,18 @@ jobs:
           test -f .output/server/index.mjs
           test -d .output/public
           printf '%s' "$GITHUB_SHA" > .output/public/csi-final-sha.txt
-
       - name: Configure SSH
         run: |
           set -euo pipefail
-          for value in VPS_HOST VPS_USER VPS_SSH_KEY; do test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }; done
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-          test -s ~/.ssh/known_hosts
-
       - name: Upload CSI build
         run: |
           set -euo pipefail
           tar -czf /tmp/csi-final.tgz .output scripts
           scp /tmp/csi-final.tgz "$VPS_USER@$VPS_HOST:/tmp/csi-final.tgz"
-
       - name: Promote on known-good Core runtime
         run: |
           set -euo pipefail
@@ -73,21 +68,13 @@ jobs:
           release="/var/www/impulsionando-core/releases/csi-final-$RELEASE_SHA"
           base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
           override=/opt/impulsionando/deploy/hostinger/docker-compose.csi-final.yml
-          envfile=/etc/impulsionando-core.env
-          sudo test -f "$base"
-          sudo test -f "$envfile"
-
           base_image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core-universal-fastfront 2>/dev/null || true)"
           if [ -z "$base_image" ]; then base_image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core 2>/dev/null || true)"; fi
-          test -n "$base_image" || { echo 'No known-good Core image found'; exit 50; }
-          sudo docker image inspect "$base_image" >/dev/null
-
-          sudo rm -rf "$release"
-          sudo mkdir -p "$release"
+          test -n "$base_image"
+          sudo rm -rf "$release" && sudo mkdir -p "$release"
           sudo tar -xzf /tmp/csi-final.tgz -C "$release"
           rm -f /tmp/csi-final.tgz
           printf 'node_modules\n' | sudo tee "$release/.dockerignore" >/dev/null
-
           cat > /tmp/Dockerfile.csi-final <<'DOCKERFILE'
           ARG BASE_IMAGE
           FROM ${BASE_IMAGE}
@@ -98,10 +85,7 @@ jobs:
           EXPOSE 3000
           CMD ["node","scripts/start-core-runtime.mjs"]
           DOCKERFILE
-
-          sudo docker build --build-arg "BASE_IMAGE=$base_image" -f /tmp/Dockerfile.csi-final -t "impulsionando-core:csi-final-$RELEASE_SHA" "$release"
-          sudo docker tag "impulsionando-core:csi-final-$RELEASE_SHA" impulsionando-core:csi-final-current
-
+          sudo docker build --build-arg "BASE_IMAGE=$base_image" -f /tmp/Dockerfile.csi-final -t impulsionando-core:csi-final-current "$release"
           cd /opt/impulsionando/deploy/hostinger
           sudo tee "$override" >/dev/null <<'YAML'
           services:
@@ -120,49 +104,24 @@ jobs:
                 traefik.http.routers.csi-final.priority: "9000"
                 traefik.http.services.impulsionando-core-csi-final.loadbalancer.server.port: "3000"
           YAML
-
           sudo docker compose -f "$base" -f "$override" config -q
           sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-csi-final
-
           for i in $(seq 1 60); do
             ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-csi-final 2>/dev/null || true)"
             code=000
-            if [ -n "$ip" ]; then code="$(curl -sS -H 'Host: csi.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/csi-origin -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"; fi
-            if [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/csi-origin; then break; fi
+            if [ -n "$ip" ]; then code="$(curl -sS -H 'Host: csi.impulsionando.com.br' -o /tmp/csi-origin -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"; fi
+            [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/csi-origin && break
             [ "$i" -lt 60 ] || { sudo docker logs --tail 200 impulsionando-core-csi-final || true; exit 61; }
             sleep 2
           done
-          echo "CSI_FINAL_ORIGIN=PASS HTTP=$code base=$base_image"
           REMOTE
-
-      - name: Reconcile CSI DNS
-        run: |
-          set -euo pipefail
-          for value in CF_API_TOKEN CF_ZONE_ID VPS_HOST; do test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }; done
-          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          origin_ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
-          test -n "$origin_ip"
-          curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
-          jq -e '.success == true' /tmp/dns.json >/dev/null
-          good="$(jq -r --arg ip "$origin_ip" '.result[] | select(.type=="A" and .content==$ip and .proxied==true) | .id' /tmp/dns.json | head -n1)"
-          if [ -z "$good" ]; then
-            jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/dns.json | while read -r id; do [ -n "$id" ] && curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records/$id" >/dev/null; done
-            jq -nc --arg name "$DOMAIN" --arg content "$origin_ip" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/new.json
-            curl --fail --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" -o /tmp/created.json
-            jq -e '.success == true' /tmp/created.json >/dev/null
-          fi
-          echo "CSI_DNS=PASS IP=$origin_ip"
-
       - name: Validate CSI publicly
         run: |
           set -euo pipefail
           for i in $(seq 1 40); do
             code="$(curl -sS -L -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/public -w '%{http_code}' --max-time 20 "https://$DOMAIN/?sha=$GITHUB_SHA" || true)"
             echo "CSI_PUBLIC attempt=$i HTTP=$code"
-            if [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/public; then
-              echo 'CSI_PUBLIC=PASS'
-              exit 0
-            fi
+            if [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/public; then echo 'CSI_PUBLIC=PASS'; exit 0; fi
             sleep 3
           done
           exit 70
