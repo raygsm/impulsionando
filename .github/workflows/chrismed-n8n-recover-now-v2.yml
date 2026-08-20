@@ -1,0 +1,72 @@
+name: CHRISMED n8n recover now v2
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-n8n-recover-now-v2.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: SSH setup
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+      - name: Recover n8n
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/n8n-recover-v2.txt 2>&1 <<'REMOTE'
+          set -euo pipefail
+          C=n8n-umlg-n8n-1
+          echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "before=$(sudo docker inspect "$C" --format '{{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restart={{.RestartCount}}' 2>/dev/null || echo missing)"
+          sudo docker start "$C" >/dev/null 2>&1 || true
+          for i in $(seq 1 25); do
+            state="$(sudo docker inspect "$C" --format '{{.State.Status}}' 2>/dev/null || true)"
+            if [ "$state" = running ] && sudo docker exec "$C" wget -qO- http://127.0.0.1:5678/healthz >/tmp/n8n-health 2>/dev/null; then
+              echo "health=$(cat /tmp/n8n-health)"
+              echo "after=$(sudo docker inspect "$C" --format '{{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restart={{.RestartCount}}')"
+              echo 'N8N_RUNTIME=PASS'
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'first recovery failed; controlled restart'
+          sudo docker restart "$C" >/dev/null
+          for i in $(seq 1 30); do
+            if sudo docker exec "$C" wget -qO- http://127.0.0.1:5678/healthz >/tmp/n8n-health 2>/dev/null; then
+              echo "health=$(cat /tmp/n8n-health)"
+              echo "after=$(sudo docker inspect "$C" --format '{{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restart={{.RestartCount}}')"
+              echo 'N8N_RUNTIME=PASS_AFTER_RESTART'
+              exit 0
+            fi
+            sleep 2
+          done
+          sudo docker logs --tail 100 "$C" 2>&1 || true
+          exit 81
+          REMOTE
+      - name: Persist proof
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/n8n-recover-v2.txt docs/ops/chrismed-n8n-recover-v2.txt || echo 'proof missing' > docs/ops/chrismed-n8n-recover-v2.txt
+          git config user.name 'Impulsionito CHRISMED QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/chrismed-n8n-recover-v2.txt
+          git commit -m 'chore(chrismed): record n8n runtime recovery v2' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
