@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HomePage } from "@/components/marketing/HomePage";
+import { HomePageLive } from "@/components/marketing/HomePageLive";
 import { ChrismedHomePage } from "./chrismed.index";
 import { Route as ColorsIndexRoute } from "./colors.index";
 import { Route as WmpIndexRoute } from "./wmp.index";
@@ -57,7 +57,7 @@ function HomeWithSubdomainGuard() {
     if (host === "chrismed.impulsionando.com.br") return <><ChrismedRootMetadata /><ChrismedHomePage /></>;
     if (host === "anamadu.impulsionando.com.br") return <><AnaMaduRootMetadata /><AnaMaduStorefront /><AnitaDock /></>;
   }
-  return <><HomePage /><CpDiscoveryPopup /></>;
+  return <><HomePageLive /><CpDiscoveryPopup /></>;
 }
 
 function CsiRootPage() {
