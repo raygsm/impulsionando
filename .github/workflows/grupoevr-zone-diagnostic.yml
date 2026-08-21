@@ -1,0 +1,47 @@
+name: Grupo EVR Cloudflare zone diagnostic
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/grupoevr-zone-diagnostic.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'ops/grupoevr-cloudflare-zone-diagnostic'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Inspect zone and record
+        id: diag
+        shell: bash
+        run: |
+          set -euo pipefail
+          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$zone" -o /tmp/zone.json
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=grupoevr.impulsionando.com.br&per_page=100" -o /tmp/record.json
+          zname="$(jq -r '.result.name // empty' /tmp/zone.json)"
+          zstatus="$(jq -r '.result.status // empty' /tmp/zone.json)"
+          zns="$(jq -r '.result.name_servers // [] | join(",")' /tmp/zone.json)"
+          rid="$(jq -r '.result[0].id // empty' /tmp/record.json)"
+          rname="$(jq -r '.result[0].name // empty' /tmp/record.json)"
+          rcontent="$(jq -r '.result[0].content // empty' /tmp/record.json)"
+          rproxied="$(jq -r '.result[0].proxied // empty' /tmp/record.json)"
+          detail="zone=$zname status=$zstatus ns=$zns record_id=$rid record=$rname content=$rcontent proxied=$rproxied"
+          echo "detail=$detail" >> "$GITHUB_OUTPUT"
+
+      - name: Report
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            -f body="GRUPOEVR_CF_ZONE: ${{ steps.diag.outputs.detail }}"
