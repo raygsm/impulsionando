@@ -48,6 +48,8 @@ jobs:
             host: raoni.impulsionando.com.br
           - slug: spartacus
             host: spartacus.impulsionando.com.br
+          - slug: haunted
+            host: haunted.impulsionando.com.br
     steps:
       - name: Validate HTTPS and prevent cross-domain front redirects
         shell: bash
