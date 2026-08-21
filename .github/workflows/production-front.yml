@@ -1,6 +1,7 @@
 name: Production Front
 
 # Single frontend publication authority for Impulsionando and every tenant.
+# Canonical release trigger after legacy publisher retirement: 2026-08-21.
 on:
   workflow_dispatch:
   push:
