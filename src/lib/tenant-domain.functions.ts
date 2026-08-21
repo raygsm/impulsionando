@@ -1,4 +1,4 @@
-// Server fns para gestão do domínio próprio do tenant (W27).
+// Server fns para gestão do domínio próprio do cliente conectado ao Core (W27).
 // Lê/atualiza core_tenant_identity respeitando RLS (member lê; admin/staff escreve).
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -22,13 +22,14 @@ export const getMyTenantDomain = createServerFn({ method: "POST" })
     const { data: identity, error } = await supabase
       .from("core_tenant_identity")
       .select(
-        "id, company_id, subdomain, root_domain, full_domain, custom_domain, dns_status, dns_error, dns_last_checked_at, ssl_status, ssl_issued_at, ssl_expires_at, provisioned_at, published_at, updated_at",
+        "id, company_id, subdomain, root_domain, full_domain, custom_domain, dns_status, dns_error, dns_last_checked_at, ssl_status, ssl_issued_at, ssl_expires_at, provisioned_at, updated_at",
       )
       .eq("company_id", data.companyId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     return { identity, impulsionando: IMPULSIONANDO_DNS };
   });
+
 export const requestCustomDomain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { companyId: string; customDomain: string | null }) =>
