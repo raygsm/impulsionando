@@ -7,6 +7,10 @@ on:
       - ".github/workflows/schema-replay-pr.yml"
   workflow_dispatch:
 
+concurrency:
+  group: schema-replay-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   full-migration-replay:
     name: Replay integral de migrations em banco limpo
@@ -32,7 +36,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client
 
-      - name: Preparar objetos gerenciados pelo Supabase
+      - name: Preparar objetos gerenciados e compatibilidade histórica
         env:
           PGPASSWORD: test
         run: |
@@ -90,6 +94,20 @@ jobs:
           DROP FUNCTION IF EXISTS storage.foldername(text);
           CREATE FUNCTION storage.foldername(text) RETURNS text[]
           LANGUAGE sql IMMUTABLE AS 'SELECT (string_to_array($1, ''/''))[1:greatest(array_length(string_to_array($1, ''/''), 1)-1, 0)]';
+
+          -- Historical compatibility prelude only for disposable full replay.
+          -- An early 2026 migration installs UPDATE triggers before the helper
+          -- itself was versioned in a later migration. Production already has
+          -- the helper; recreating it here preserves immutable migration history.
+          CREATE OR REPLACE FUNCTION public.touch_updated_at()
+          RETURNS trigger
+          LANGUAGE plpgsql
+          AS $function$
+          BEGIN
+            NEW.updated_at := now();
+            RETURN NEW;
+          END;
+          $function$;
           SQL
 
       - name: Aplicar todas as migrations em ordem
@@ -99,9 +117,13 @@ jobs:
           set -euo pipefail
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print0 | sort -z | while IFS= read -r -d '' f; do
             base="$(basename "$f")"
+
+            # Historical fixtures reproduce external prerequisites that existed
+            # when old migrations were authored. They are replay-only and do not
+            # provision or change any live customer environment.
             if [ "$base" = "20260616232528_4bc16d9f-c66f-4835-af12-f15ad3222b32.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-                -c "INSERT INTO public.companies (id, name, subdomain, is_active) VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Imobiliária Garrido', 'garrido', true) ON CONFLICT (id) DO NOTHING;"
+                -c "INSERT INTO public.companies (id, name, subdomain, is_active) VALUES ('8e90a584-a5f6-40b3-8975-dad968db39ba', 'Historical fixture A', 'fixture-a', true) ON CONFLICT (id) DO NOTHING;"
             fi
             if [ "$base" = "20260617202257_8827c23a-1491-4c90-818e-d03f6c99c308.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
@@ -109,16 +131,17 @@ jobs:
             fi
             if [ "$base" = "20260619135156_ba09f970-b4af-43fd-b76a-81a299cb202b.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-                -c "INSERT INTO public.companies (id, name, email, subdomain, is_active, status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'CHRISMED', 'sac@chrismed.com.br', 'chrismed', true, 'active') ON CONFLICT (id) DO NOTHING;"
+                -c "INSERT INTO public.companies (id, name, email, subdomain, is_active, status) VALUES ('642096b5-a9ff-4521-a82a-c004f6d2e2d2', 'Historical fixture B', 'fixture-b@example.invalid', 'fixture-b', true, 'active') ON CONFLICT (id) DO NOTHING;"
             fi
             if [ "$base" = "20260621141709_1922ea87-bfb7-4ec2-ac05-6ff2d9cf202a.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('3f2e2101-190d-44f2-8102-57dddfd34c91', 'raygs@hotmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING; INSERT INTO public.companies (id, name, subdomain, is_master, is_active, status) VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Impulsionando fixture', 'app-fixture', false, true, 'active') ON CONFLICT (id) DO NOTHING; DELETE FROM public.user_profiles WHERE profile_id IN (SELECT id FROM public.profiles WHERE slug='super-admin-impulsionando'); DELETE FROM public.profiles WHERE slug='super-admin-impulsionando'; INSERT INTO public.profiles (id, slug, name, is_master_profile, is_system) VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true, true);"
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('3f2e2101-190d-44f2-8102-57dddfd34c91', 'fixture-master@example.invalid', '{}'::jsonb) ON CONFLICT (id) DO NOTHING; INSERT INTO public.companies (id, name, subdomain, is_master, is_active, status) VALUES ('eb102fc8-5575-4c71-91dc-3ed48be9b353', 'Historical fixture master', 'fixture-master', false, true, 'active') ON CONFLICT (id) DO NOTHING; DELETE FROM public.user_profiles WHERE profile_id IN (SELECT id FROM public.profiles WHERE slug='super-admin-impulsionando'); DELETE FROM public.profiles WHERE slug='super-admin-impulsionando'; INSERT INTO public.profiles (id, slug, name, is_master_profile, is_system) VALUES ('6fbbb7e6-01ae-447f-bd66-85aeba9f54c4', 'super-admin-impulsionando', 'Super Admin Impulsionando', true, true);"
             fi
             if [ "$base" = "20260621142541_6cc27d3e-c6c5-4a2a-96fd-b912794e8589.sql" ]; then
               psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'raygsmonnerat@gmail.com', '{}'::jsonb) ON CONFLICT (id) DO NOTHING;"
+                -c "INSERT INTO auth.users (id, email, raw_app_meta_data) VALUES ('907cdfca-9edb-4d4b-a537-6a9b47fa69a6', 'fixture-secondary@example.invalid', '{}'::jsonb) ON CONFLICT (id) DO NOTHING;"
             fi
+
             echo "Aplicando $base"
             if ! psql -h localhost -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -f "$f" >/tmp/migration.log 2>&1; then
               echo "::error::Falha ao aplicar $base"
