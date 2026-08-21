@@ -1,9 +1,8 @@
 /**
- * Core E2E — validação do pipeline compartilhado de e-mail contratual.
+ * Core E2E — validação da etapa compartilhada contrato -> message_outbox.
  *
- * O teste não depende de uma tabela legada de documentos. Ele exercita o
- * serviço compartilhado de comunicação, idempotência e `email_send_log` com
- * um identificador sintético de contrato.
+ * A entrega externa é validada separadamente no go-live `communication_send`.
+ * Este teste prova persistência, idempotência e payload transacional da fila Core.
  */
 import { afterAll, describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
@@ -11,32 +10,26 @@ import { admin } from "../helpers";
 import { sendContractEmail } from "@/lib/contracts-notify.server";
 
 const RUN = Date.now();
-const RECIPIENT = process.env.E2E_EMAIL_TO || `e2e-core-contract-${RUN}@mailinator.com`;
+const RECIPIENT = `e2e-core-contract-${RUN}@example.com`;
 const docId = randomUUID();
-const trackedMsgIds: string[] = [];
+const trackedIds: string[] = [];
 
-afterAll(async () => {
-  if (trackedMsgIds.length) {
-    await admin.from("email_send_log").delete().in("message_id", trackedMsgIds);
-  }
-});
-
-async function waitForLog(messageId: string, ms = 8000): Promise<any | null> {
-  const deadline = Date.now() + ms;
-  while (Date.now() < deadline) {
-    const { data } = await admin
-      .from("email_send_log")
-      .select("id,status,message_id,error_message,template_name,recipient_email,metadata,created_at")
-      .eq("message_id", messageId)
-      .maybeSingle();
-    if (data) return data;
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  return null;
+async function readOutbox(id: string) {
+  const { data, error } = await admin
+    .from("message_outbox")
+    .select("id,event_code,channel,recipient_email,subject,body,payload,status,idempotency_key,reference_type,reference_id")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data;
 }
 
-describe("Core contract email delivery", () => {
-  it("queues contract-generated and records email_send_log", async () => {
+afterAll(async () => {
+  if (trackedIds.length) await admin.from("message_outbox").delete().in("id", trackedIds);
+});
+
+describe("Core contract email queue", () => {
+  it("queues contract-generated in canonical message_outbox", async () => {
     const key = `contract-generated:${docId}:e2e:${RUN}`;
     const r = await sendContractEmail({
       templateName: "contract-generated",
@@ -51,18 +44,21 @@ describe("Core contract email delivery", () => {
         signUrl: `https://www.impulsionando.com.br/contrato/${docId}`,
       },
     });
-    expect(["queued", "suppressed"]).toContain(r.status);
+    expect(r.status).toBe("queued");
     expect(r.messageId).toBeTruthy();
-    trackedMsgIds.push(r.messageId!);
+    trackedIds.push(r.messageId!);
 
-    const row = await waitForLog(r.messageId!);
-    expect(row).toBeTruthy();
-    expect(row!.template_name).toBe("contract-generated");
-    expect(row!.recipient_email.toLowerCase()).toBe(RECIPIENT.toLowerCase());
-    expect(["pending", "sent", "suppressed", "failed", "dlq"]).toContain(row!.status);
+    const row = await readOutbox(r.messageId!);
+    expect(row.event_code).toBe("contracts.contract-generated");
+    expect(row.channel).toBe("email");
+    expect(row.recipient_email).toBe(RECIPIENT);
+    expect(row.status).toBe("queued");
+    expect(row.idempotency_key).toBe(key);
+    expect(row.payload?.purpose).toBe("transactional");
+    expect(row.payload?.template_name).toBe("contract-generated");
   });
 
-  it("queues contract-signed and records email_send_log", async () => {
+  it("queues contract-signed in canonical message_outbox", async () => {
     const key = `contract-signed:${docId}:e2e:${RUN}`;
     const r = await sendContractEmail({
       templateName: "contract-signed",
@@ -77,51 +73,42 @@ describe("Core contract email delivery", () => {
         downloadUrl: `https://www.impulsionando.com.br/contrato/${docId}`,
       },
     });
-    expect(["queued", "suppressed"]).toContain(r.status);
+    expect(r.status).toBe("queued");
     expect(r.messageId).toBeTruthy();
-    trackedMsgIds.push(r.messageId!);
+    trackedIds.push(r.messageId!);
 
-    const row = await waitForLog(r.messageId!);
-    expect(row).toBeTruthy();
-    expect(row!.template_name).toBe("contract-signed");
+    const row = await readOutbox(r.messageId!);
+    expect(row.event_code).toBe("contracts.contract-signed");
+    expect(row.payload?.template_name).toBe("contract-signed");
   });
 
-  it("resend uses a distinct idempotency key", async () => {
-    const resendKey = `contract-generated:${docId}:resend:${Date.now()}`;
-    const r = await sendContractEmail({
-      templateName: "contract-generated",
+  it("repeated idempotency key returns the same outbox row", async () => {
+    const key = `contract-generated:${docId}:idempotent:${RUN}`;
+    const args = {
+      templateName: "contract-generated" as const,
       to: RECIPIENT,
-      idempotencyKey: resendKey,
+      idempotencyKey: key,
       templateData: {
-        signerName: "E2E Core Resend",
+        signerName: "E2E Core",
         companyName: `E2E Core ${RUN}`,
         contractNumber: `E2E-${RUN}`,
         planName: "Integrado",
         monthly: "R$ 0,00",
         signUrl: `https://www.impulsionando.com.br/contrato/${docId}`,
       },
-    });
-    expect(["queued", "suppressed"]).toContain(r.status);
-    expect(r.messageId).toBeTruthy();
-    trackedMsgIds.push(r.messageId!);
+    };
+    const first = await sendContractEmail(args);
+    const second = await sendContractEmail(args);
+    expect(first.status).toBe("queued");
+    expect(second.status).toBe("queued");
+    expect(second.messageId).toBe(first.messageId);
+    trackedIds.push(first.messageId!);
 
-    const row = await waitForLog(r.messageId!);
-    expect(row).toBeTruthy();
-    expect(row!.metadata?.idempotency_key).toBe(resendKey);
-  });
-
-  it("records at least three attempts for the synthetic contract", async () => {
-    const { data, error } = await admin
-      .from("email_send_log")
-      .select("id,status,template_name,metadata")
-      .eq("recipient_email", RECIPIENT.toLowerCase())
-      .in("template_name", ["contract-generated", "contract-signed"])
-      .order("created_at", { ascending: false })
-      .limit(20);
+    const { count, error } = await admin
+      .from("message_outbox")
+      .select("id", { count: "exact", head: true })
+      .eq("idempotency_key", key);
     expect(error).toBeNull();
-    const mine = (data ?? []).filter((r: any) =>
-      String(r.metadata?.idempotency_key ?? "").includes(`:${docId}:`),
-    );
-    expect(mine.length).toBeGreaterThanOrEqual(3);
+    expect(count).toBe(1);
   });
 });
