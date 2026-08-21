@@ -9,7 +9,12 @@ declare global {
 }
 
 export function getPaddleEnvironment(): "sandbox" | "live" {
-  return clientToken?.startsWith("test_") ? "sandbox" : "live";
+  if (clientToken?.startsWith("test_")) return "sandbox";
+  if (clientToken?.startsWith("live_")) return "live";
+  // Fail safe in non-production/local builds when no token is injected.
+  // Production payment flows remain fail-closed because initializePaddle()
+  // refuses to start without an explicit client token.
+  return import.meta.env.PROD ? "live" : "sandbox";
 }
 
 let paddleInitialized = false;
