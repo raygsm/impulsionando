@@ -64,9 +64,11 @@ jobs:
                 -f "/backup/$backup_name"
           fi
           test -s "backup/$backup_name"
-          echo "backup_name=$backup_name" >> "$GITHUB_OUTPUT"
-          echo "sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
-          echo "size=$(stat -c%s "backup/$backup_name")" >> "$GITHUB_OUTPUT"
+          {
+            echo "backup_name=$backup_name"
+            echo "sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')"
+            echo "size=$(stat -c%s "backup/$backup_name")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Bootstrap managed Supabase dependencies in disposable target
         run: |
