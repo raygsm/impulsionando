@@ -1,157 +1,26 @@
-name: CSI Go Live
+name: CSI Front Verification (canonical)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/csi-go-live.yml
-      - src/routes/csi*.tsx
-      - src/lib/csi-**
-      - src/hooks/useCsiPrivateSession.ts
-      - src/routes/index.tsx
-
-concurrency:
-  group: csi-go-live
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 45
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Build current main
-        env:
-          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Verify CSI canonical front
         run: |
           set -euo pipefail
-          npm ci --no-audit --no-fund
-          npx vitest run src/lib/subdomain.test.ts
-          npm run build
-          test -f .output/server/index.mjs
-
-      - name: Configure SSH
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts
-
-      - name: Package and upload release
-        env:
-          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
-          DEPLOY_USER: ${{ secrets.VPS_USER }}
-        run: |
-          set -euo pipefail
-          tar -czf /tmp/csi-current.tgz .output scripts package.json package-lock.json
-          scp /tmp/csi-current.tgz "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/csi-current.tgz"
-
-      - name: Publish CSI route on Core
-        env:
-          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
-          DEPLOY_USER: ${{ secrets.VPS_USER }}
-        run: |
-          set -euo pipefail
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_SHA='${GITHUB_SHA}' bash -s" <<'REMOTE'
-          set -euo pipefail
-          release="/var/www/impulsionando-core/releases/$RELEASE_SHA"
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.csi.yml
-          envfile=/etc/impulsionando-core.env
-          test -f "$base"
-          sudo test -f "$envfile"
-          mkdir -p "$release"
-          tar -xzf /tmp/csi-current.tgz -C "$release"
-          rm -f /tmp/csi-current.tgz
-          cd "$release"
-          npm ci --omit=dev --no-audit --no-fund
-          printf 'node_modules\n' > .dockerignore
-          cat > /tmp/Dockerfile.csi-current <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-          sudo docker build -f /tmp/Dockerfile.csi-current -t impulsionando-core:csi-current "$release"
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core-csi:
-              image: impulsionando-core:csi-current
-              env_file:
-                - /etc/impulsionando-core.env
-              restart: unless-stopped
-              labels:
-                traefik.enable: "true"
-                traefik.http.routers.csi.entrypoints: websecure
-                traefik.http.routers.csi.rule: Host(`csi.impulsionando.com.br`)
-                traefik.http.routers.csi.service: impulsionando-core-csi
-                traefik.http.routers.csi.tls: "true"
-                traefik.http.routers.csi.tls.certresolver: letsencrypt
-                traefik.http.routers.csi.priority: "250"
-                traefik.http.services.impulsionando-core-csi.loadbalancer.server.port: "3000"
-          YAML
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$base" -f "$override" config -q
-          sudo docker compose -f "$base" -f "$override" up -d --no-build impulsionando-core-csi
-          for attempt in $(seq 1 45); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-csi 2>/dev/null || true)"
-            code=000
-            if [ -n "$ip" ]; then code="$(curl -sS -H 'Host: csi.impulsionando.com.br' -o /tmp/csi-origin -w '%{http_code}' "http://$ip:3000/" || true)"; fi
-            [ "$code" = '200' ] && break
-            [ "$attempt" -lt 45 ] || { sudo docker logs --tail 160 impulsionando-core-csi || true; exit 70; }
-            sleep 2
-          done
-          grep -q 'CSI' /tmp/csi-origin || true
-          echo "CSI_ORIGIN_PASS HTTP=$code"
-          REMOTE
-
-      - name: Reconcile Cloudflare DNS
-        env:
-          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-        run: |
-          set -euo pipefail
-          origin_ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           domain='csi.impulsionando.com.br'
-          curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
-          jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/dns.json | while read -r id; do [ -n "$id" ] && curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null; done
-          jq -nc --arg name "$domain" --arg content "$origin_ip" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/new.json
-          curl --fail --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/created.json
-          jq -e '.success == true' /tmp/created.json >/dev/null
-
-      - name: Validate public CSI
+          code="$(curl -sS -L -o /tmp/home -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 20 "https://$domain/")"
+          marker="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$domain/impulsionando-front-sha.txt")"
+          test "$code" = 200
+          printf '%s' "$marker" | grep -Eq '^[0-9a-f]{40}$'
+          echo "CSI_CANONICAL_FRONT=PASS sha=$marker"
+      - name: Architecture invariant
         run: |
-          set -euo pipefail
-          for attempt in $(seq 1 30); do
-            code="$(curl -sSL --max-time 20 -o /tmp/csi-public -w '%{http_code}' 'https://csi.impulsionando.com.br/' || true)"
-            echo "CSI_PUBLIC attempt=$attempt HTTP=$code"
-            if [ "$code" = '200' ]; then
-              grep -Eq 'CSI Invest|CSI Intelligence' /tmp/csi-public
-              exit 0
-            fi
-            sleep 4
-          done
-          exit 72
+          echo 'CSI frontend publication belongs exclusively to Production Front.'
+          echo 'This workflow is verification-only and cannot mutate DNS, Traefik, images or containers.'
