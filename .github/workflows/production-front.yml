@@ -1,7 +1,7 @@
 name: Production Front
 
 # Single frontend publication authority for Impulsionando and every tenant.
-# Canonical release trigger after legacy publisher retirement: 2026-08-21.
+# Canonical release trigger after final legacy publisher retirement: 2026-08-21T16:43-03:00.
 on:
   workflow_dispatch:
   push:
@@ -111,7 +111,7 @@ jobs:
           for name in $(sudo docker ps -a --format '{{.Names}}'); do
             [ "$name" = impulsionando-core ] && continue
             case "$name" in
-              *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|chrismed-front-final-live|chrismed-front-final-canary)
+              *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary)
                 sudo docker rm -f "$name" >/dev/null 2>&1 || true
                 echo "REMOVED_COMPETING_FRONT=$name"
                 ;;
