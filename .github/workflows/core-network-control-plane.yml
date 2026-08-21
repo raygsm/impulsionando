@@ -41,20 +41,11 @@ jobs:
           ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           test -n "$ORIGIN_IP"
           printf 'CF_ZONE_ID=%s\nORIGIN_IP=%s\n' "$CF_ZONE_ID" "$ORIGIN_IP" >> "$GITHUB_ENV"
-          # Use canonical persisted tables instead of depending on a PostgREST-exposed helper view.
-          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            "$SUPABASE_URL/rest/v1/companies?select=id,name,is_active,is_demo,status&is_active=eq.true&is_demo=eq.false&status=eq.active" -o /tmp/companies.json
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/companies?select=id,name,is_active,is_demo,status&is_active=eq.true&is_demo=eq.false&status=eq.active" -o /tmp/companies.json
           jq -e 'type=="array" and length>0' /tmp/companies.json >/dev/null
-          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=company_id,subdomain,root_domain,metadata&subdomain=neq.impulsionando&order=subdomain.asc" -o /tmp/identities.json
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=company_id,subdomain,root_domain,metadata&subdomain=neq.impulsionando&order=subdomain.asc" -o /tmp/identities.json
           jq -e 'type=="array" and length>0' /tmp/identities.json >/dev/null
-          jq -n -r --slurpfile c /tmp/companies.json --slurpfile t /tmp/identities.json '
-            ($c[0] | map(.id) | INDEX(.)) as $active |
-            $t[0][] |
-            select($active[.company_id] != null) |
-            select(.root_domain == "impulsionando.com.br") |
-            select((.metadata.test_fixture // false) != true) |
-            (.subdomain + "." + .root_domain)' | sort -u > /tmp/domains.txt
+          jq -n -r --slurpfile c /tmp/companies.json --slurpfile t /tmp/identities.json '($c[0] | map(.id) | INDEX(.)) as $active | $t[0][] | select($active[.company_id] != null) | select(.root_domain == "impulsionando.com.br") | select((.metadata.test_fixture // false) != true) | (.subdomain + "." + .root_domain)' | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
           echo "PRODUCTION_TENANTS=$(wc -l </tmp/domains.txt | tr -d ' ')"
 
@@ -181,7 +172,7 @@ jobs:
           while read -r domain; do
             code=000; final=''
             for i in $(seq 1 18); do
-              read -r code final < <(curl -sS -L -A 'ImpulsionandoControlPlane/1.1' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
+              read -r code final < <(curl -sS -L -A 'ImpulsionandoControlPlane/1.2' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
               host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               [ "$code" = 200 ] && [ "$host" = "$domain" ] && break
               sleep 4
@@ -199,11 +190,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # checkout/build steps can legitimately modify ignored/untracked workspace files.
+          # Never rebase a dirty Actions workspace; reset it to origin/main before writing proof.
+          git reset --hard HEAD
+          git clean -fd
+          git fetch origin main
+          git reset --hard origin/main
           mkdir -p docs/ops
           jq -nc --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg sha "$GITHUB_SHA" '{generated_at_utc:$generated_at_utc,commit:$sha,architecture:"wildcard-dns + single-traefik-router + single-core + canonical-tenant-resolver",status:"control-plane-executed"}' >docs/ops/core-network-control-plane.json
           git config user.name 'Impulsionito Core Control Plane'
           git config user.email 'automation@impulsionando.com.br'
           git add docs/ops/core-network-control-plane.json
-          git commit -m 'chore(core): record network control-plane execution' || exit 0
-          git pull --rebase origin main
+          if git diff --cached --quiet; then echo 'PROOF_UNCHANGED=PASS'; exit 0; fi
+          git commit -m 'chore(core): record network control-plane execution'
           git push origin HEAD:main
