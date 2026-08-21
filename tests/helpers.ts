@@ -1,8 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL!;
-// The application-facing publishable key is the source of truth for public/RLS tests.
-// Keep SUPABASE_PUBLISHABLE_KEY as a compatibility fallback only.
 const ANON = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY!;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -20,8 +18,6 @@ export function anonClient(): SupabaseClient {
   });
 }
 
-// Legacy profile ids are kept only for older test modules that have not yet
-// migrated to the current user_roles model. New Core tests must use user_roles.
 export const PROFILES = {
   superAdmin: "6fbbb7e6-01ae-447f-bd66-85aeba9f54c4",
   suporte: "91c932fc-a199-4dba-abfd-4a60a4514052",
@@ -83,7 +79,29 @@ export async function createCompany(name: string) {
   return data.id as string;
 }
 
+async function deleteRows(table: string, companyId: string) {
+  const { error } = await admin.from(table).delete().eq("company_id", companyId);
+  if (error) throw new Error(`cleanup_${table}_failed:${error.message}`);
+}
+
 export async function deleteCompany(id: string) {
-  await admin.from("user_roles").delete().eq("company_id", id);
-  await admin.from("companies").delete().eq("id", id);
+  // Company provisioning creates these rows automatically. Some of them use
+  // ON DELETE RESTRICT/SET NULL, so remove them explicitly before the company.
+  // This keeps E2E runs from polluting the live Core with orphan test tenants.
+  await deleteRows("user_roles", id);
+  await deleteRows("core_service_access_events", id);
+  await deleteRows("core_service_access_state", id);
+  await deleteRows("communication_tenants", id);
+  // core_tenant_identity is ON DELETE CASCADE and is intentionally left to the FK.
+
+  const { error } = await admin.from("companies").delete().eq("id", id);
+  if (error) throw new Error(`cleanup_companies_failed:${error.message}`);
+
+  const { data: stillThere, error: verifyError } = await admin
+    .from("companies")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (verifyError) throw new Error(`cleanup_company_verify_failed:${verifyError.message}`);
+  if (stillThere) throw new Error(`cleanup_company_verify_failed:${id}`);
 }
