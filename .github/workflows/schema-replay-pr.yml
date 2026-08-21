@@ -108,6 +108,49 @@ jobs:
             RETURN NEW;
           END;
           $function$;
+
+          -- These consumer tables were external/manual prerequisites of a legacy
+          -- module. They are referenced by historical migrations but are absent
+          -- from both the migration history and the current production schema.
+          -- Recreate the minimum historical contract only in this disposable DB;
+          -- never resurrect this retired module in production.
+          CREATE TABLE IF NOT EXISTS public.consumer_profiles (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id uuid,
+            full_name text,
+            email text,
+            phone text,
+            cep text,
+            city text,
+            marketing_optin boolean NOT NULL DEFAULT false,
+            current_level text,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now()
+          );
+          CREATE TABLE IF NOT EXISTS public.consumer_memberships (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id uuid,
+            company_id uuid,
+            consumer_id uuid,
+            plan text,
+            status text,
+            amount_cents integer NOT NULL DEFAULT 0,
+            cycle text,
+            started_at timestamptz,
+            current_period_start timestamptz,
+            current_period_end timestamptz,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now()
+          );
+          CREATE TABLE IF NOT EXISTS public.consumer_membership_invoices (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            membership_id uuid,
+            status text,
+            amount numeric NOT NULL DEFAULT 0,
+            paid_at timestamptz,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now()
+          );
           SQL
 
       - name: Aplicar todas as migrations em ordem
