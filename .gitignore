@@ -17,6 +17,7 @@ dist-ssr
 *.local
 
 # Environment files
+# Never commit real environment files. Keep only sanitized *.example templates.
 .env
 .env.*
 !.env.example
