@@ -92,6 +92,7 @@ export async function deleteCompany(id: string) {
   await deleteRows("core_service_access_events", id);
   await deleteRows("core_service_access_state", id);
   await deleteRows("communication_tenants", id);
+  await deleteRows("core_client_enrollment", id);
   // core_tenant_identity is ON DELETE CASCADE and is intentionally left to the FK.
 
   const { error } = await admin.from("companies").delete().eq("id", id);
