@@ -11,6 +11,10 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: p0-recover-all-fronts
+  cancel-in-progress: true
+
 jobs:
   recover:
     if: github.head_ref == 'ops/p0-recover-fronts-20260821'
@@ -100,6 +104,7 @@ jobs:
             [ "$code" = 200 ] || failed=1
           done
           [ "$failed" -eq 0 ]
+          sudo ln -sfn "$release" /var/www/impulsionando-core/current
           sudo ln -sfn "$release" /var/www/impulsionando-core/current-front
           REMOTE
 
