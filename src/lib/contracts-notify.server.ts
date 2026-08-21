@@ -1,70 +1,78 @@
 /**
  * Contracts — server-only notification helper.
- * Sends "contract-generated" and "contract-signed" emails via the queue.
- * SERVER-ONLY: never import from client modules (filename has .server suffix).
+ * Canonical flow: contract event -> public.message_outbox -> Core worker/provider.
+ *
+ * This module intentionally does not call legacy email_send_log / suppressed_emails
+ * or the removed enqueue_email RPC. External delivery is handled by the shared
+ * communication worker, while this helper guarantees durable/idempotent queuing.
  */
-import * as React from 'react'
-import { render as renderAsync } from '@react-email/components'
-import { supabaseAdmin } from '@/integrations/supabase/client.server'
-import { TEMPLATES } from '@/lib/email-templates/registry'
-
-const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
-const FROM_DOMAIN = 'www.impulsionando.com.br'
-const SITE_NAME = 'Impulsionando'
+import * as React from "react";
+import { render as renderAsync } from "@react-email/components";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { TEMPLATES } from "@/lib/email-templates/registry";
 
 export async function sendContractEmail(args: {
-  templateName: 'contract-generated' | 'contract-signed'
-  to: string
-  templateData: Record<string, unknown>
-  idempotencyKey: string
-}): Promise<{ status: 'queued' | 'suppressed' | 'error' | 'no_template'; messageId?: string; error?: string }> {
-  const tpl = TEMPLATES[args.templateName]
-  if (!tpl) return { status: 'no_template' }
-  const recipient = (args.to || '').trim()
-  if (!recipient) return { status: 'error', error: 'recipient_missing' }
-  const meta = { idempotency_key: args.idempotencyKey, channel: 'contracts' }
+  templateName: "contract-generated" | "contract-signed";
+  to: string;
+  templateData: Record<string, unknown>;
+  idempotencyKey: string;
+}): Promise<{ status: "queued" | "error" | "no_template"; messageId?: string; error?: string }> {
+  const tpl = TEMPLATES[args.templateName];
+  if (!tpl) return { status: "no_template" };
+
+  const recipient = (args.to || "").trim().toLowerCase();
+  if (!recipient) return { status: "error", error: "recipient_missing" };
 
   try {
-    const element = React.createElement(tpl.component as any, args.templateData)
+    const element = React.createElement(tpl.component as any, args.templateData);
     const [html, text] = await Promise.all([
       renderAsync(element),
       renderAsync(element, { plainText: true }),
-    ])
-    const subject = typeof tpl.subject === 'function' ? tpl.subject(args.templateData) : tpl.subject
+    ]);
+    const subject = typeof tpl.subject === "function" ? tpl.subject(args.templateData) : tpl.subject;
 
-    const { data: suppressed } = await supabaseAdmin
-      .from('suppressed_emails').select('id').eq('email', recipient.toLowerCase()).maybeSingle()
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from("message_outbox")
+      .select("id,status")
+      .eq("idempotency_key", args.idempotencyKey)
+      .maybeSingle();
+    if (existingError) throw new Error(`outbox_idempotency_read:${existingError.message}`);
+    if (existing?.id) return { status: "queued", messageId: existing.id };
 
-    const messageId = crypto.randomUUID()
-    if (suppressed) {
-      await supabaseAdmin.from('email_send_log').insert({
-        message_id: messageId, template_name: args.templateName, recipient_email: recipient,
-        status: 'suppressed', metadata: meta,
+    const { data: queued, error: queueError } = await supabaseAdmin
+      .from("message_outbox")
+      .insert({
+        event_code: `contracts.${args.templateName}`,
+        channel: "email",
+        recipient_email: recipient,
+        subject,
+        body: text,
+        payload: {
+          purpose: "transactional",
+          template_name: args.templateName,
+          html,
+          template_data: args.templateData,
+          source: "contracts-notify.server",
+        },
+        status: "queued",
+        attempts: 0,
+        scheduled_at: new Date().toISOString(),
+        available_at: new Date().toISOString(),
+        reference_type: "contract_notification",
+        reference_id: String(args.templateData.contractNumber ?? ""),
+        idempotency_key: args.idempotencyKey,
       })
-      return { status: 'suppressed', messageId }
+      .select("id")
+      .single();
+
+    if (queueError || !queued?.id) {
+      throw new Error(`outbox_insert:${queueError?.message ?? "missing_id"}`);
     }
 
-    await supabaseAdmin.from('email_send_log').insert({
-      message_id: messageId, template_name: args.templateName, recipient_email: recipient,
-      status: 'pending', metadata: meta,
-    })
-    await supabaseAdmin.rpc('enqueue_email', {
-      queue_name: 'transactional_emails',
-      payload: {
-        message_id: messageId,
-        to: recipient,
-        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-        sender_domain: SENDER_DOMAIN,
-        subject, html, text,
-        purpose: 'transactional',
-        label: args.templateName,
-        idempotency_key: args.idempotencyKey,
-        queued_at: new Date().toISOString(),
-      },
-    })
-    return { status: 'queued', messageId }
-  } catch (err: any) {
-    console.error('sendContractEmail failed', { template: args.templateName, err })
-    return { status: 'error', error: err?.message ?? 'unknown' }
+    return { status: "queued", messageId: queued.id };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown";
+    console.error("sendContractEmail failed", { template: args.templateName, error: message });
+    return { status: "error", error: message };
   }
 }
