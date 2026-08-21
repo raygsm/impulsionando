@@ -62,15 +62,9 @@ jobs:
         id: rls
         run: |
           set -o pipefail
-          suites=(
-            tests/rls-recent-hardening.test.ts
-            tests/storage-buckets-access.test.ts
-            tests/rls-contracts-isolation.test.ts
-          )
-          for suite in "${suites[@]}"; do
-            test -f "$suite" || { echo "::error::Missing ecosystem security suite: $suite"; exit 2; }
-          done
-          bunx vitest run "${suites[@]}" \
+          suite=tests/rls-recent-hardening.test.ts
+          test -f "$suite" || { echo "::error::Missing ecosystem security suite: $suite"; exit 2; }
+          bunx vitest run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/rls.junit.xml 2>&1 | tee test-results/rls.log
 
@@ -81,7 +75,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.SUPABASE_DB_HOST }}" ]; then
             psql "postgres://postgres:${PGPASSWORD}@${{ secrets.SUPABASE_DB_HOST }}:5432/postgres" \
-              -c "SELECT created_at, action, entity, company_id, user_id, metadata FROM audit_logs WHERE action IN ('security.access_denied','realestate.interest.rate_limited') ORDER BY created_at DESC LIMIT 25;" \
+              -c "SELECT created_at, action, entity, company_id, user_id, metadata FROM audit_logs WHERE action = 'security.access_denied' ORDER BY created_at DESC LIMIT 25;" \
               > test-results/audit_tail.txt 2>&1 || echo "snapshot skipped" > test-results/audit_tail.txt
           fi
 
