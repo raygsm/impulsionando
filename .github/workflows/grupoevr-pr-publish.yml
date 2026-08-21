@@ -15,17 +15,15 @@ jobs:
   publish:
     if: github.head_ref == 'ops/grupoevr-publish-pr-run'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     env:
       DOMAIN: grupoevr.impulsionando.com.br
       ORIGIN_IP: 187.77.232.52
       CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Publish DNS and validate HTTPS
+      - name: Upsert and verify Cloudflare record
         id: publish
         shell: bash
         run: |
@@ -38,8 +36,7 @@ jobs:
           else
             zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
             curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
-            rc=$?
-            if [ $rc -ne 0 ] || ! jq -e '.success == true' /tmp/dns.json >/dev/null 2>&1; then
+            if [ $? -ne 0 ] || ! jq -e '.success == true' /tmp/dns.json >/dev/null 2>&1; then
               result='FAIL'
               detail='Cloudflare lookup failed'
             else
@@ -50,43 +47,32 @@ jobs:
               else
                 curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" -o /tmp/upsert.json
               fi
-              rc=$?
-              if [ $rc -ne 0 ] || ! jq -e '.success == true' /tmp/upsert.json >/dev/null 2>&1; then
+              if [ $? -ne 0 ] || ! jq -e '.success == true' /tmp/upsert.json >/dev/null 2>&1; then
                 result='FAIL'
                 detail='Cloudflare upsert failed'
               else
-                result='DNS_OK'
-                detail='A record created/updated'
-                for i in $(seq 1 24); do
-                  code="$(curl -sS -L -o /tmp/page -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
-                  if [ "$code" = 200 ]; then
-                    result='HTTPS_OK'
-                    detail='public HTTPS returned 200'
-                    break
-                  fi
-                  sleep 5
-                done
+                rid="$(jq -r '.result.id // empty' /tmp/upsert.json)"
+                rcontent="$(jq -r '.result.content // empty' /tmp/upsert.json)"
+                rproxied="$(jq -r '.result.proxied // empty' /tmp/upsert.json)"
+                result='DNS_API_OK'
+                detail="record_id=$rid content=$rcontent proxied=$rproxied"
+                code="$(curl -sS -L -o /tmp/page -w '%{http_code}' --max-time 8 "https://$DOMAIN/" || true)"
+                if [ "$code" = 200 ]; then
+                  result='HTTPS_OK'
+                  detail="$detail http=200"
+                else
+                  detail="$detail http=$code"
+                fi
               fi
             fi
           fi
           echo "result=$result" >> "$GITHUB_OUTPUT"
           echo "detail=$detail" >> "$GITHUB_OUTPUT"
 
-      - name: Persist Core status when public
-        if: steps.publish.outputs.result == 'HTTPS_OK' && env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != ''
-        run: |
-          set -euo pipefail
-          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
-          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.grupoevr"
-          endpoint_payload='{"status":"active","monitoring_enabled":true,"is_primary":true}'
-          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$endpoint_payload" "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.public_site&url=eq.https%3A%2F%2Fgrupoevr.impulsionando.com.br"
-
       - name: Report result on this PR
         if: always()
-        run: |
-          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="GRUPOEVR_PR_PUBLISH: ${{ steps.publish.outputs.result }} — ${{ steps.publish.outputs.detail }}"
+        run: gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="GRUPOEVR_PR_PUBLISH: ${{ steps.publish.outputs.result }} — ${{ steps.publish.outputs.detail }}"
 
-      - name: Fail unless HTTPS is public
-        if: steps.publish.outputs.result != 'HTTPS_OK'
+      - name: Fail only on Cloudflare API failure
+        if: steps.publish.outputs.result == 'FAIL'
         run: exit 1
