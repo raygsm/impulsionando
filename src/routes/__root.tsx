@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase as supabaseAuth } from "@/integrations/supabase/client";
 import {
@@ -175,11 +175,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({ head: () => (
 
 function RootComponent() {
   const state = useRouterState();
-  const queryClientFromContext = useQueryClient();
   useEffect(() => {
-    const { data } = supabaseAuth.auth.onAuthStateChange(() => { queryClientFromContext.invalidateQueries(); });
+    const { data } = supabaseAuth.auth.onAuthStateChange(() => { queryClient.invalidateQueries(); });
     return () => data.subscription.unsubscribe();
-  }, [queryClientFromContext]);
+  }, []);
 
   const pathname = state.location.pathname;
   const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
