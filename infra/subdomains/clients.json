@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "zone": "impulsionando.com.br",
   "clients": [
     {"slug":"csi","domain":"csi.impulsionando.com.br","route":"/csi","enabled":true},
@@ -7,6 +7,12 @@
     {"slug":"chrismed","domain":"chrismed.impulsionando.com.br","route":"/chrismed","enabled":true},
     {"slug":"anamadu","domain":"anamadu.impulsionando.com.br","route":"/anamadu","enabled":true},
     {"slug":"marocas","domain":"marocas.impulsionando.com.br","route":"/marocas","enabled":true},
-    {"slug":"riomed","domain":"riomed.impulsionando.com.br","route":"/riomed","enabled":true}
+    {"slug":"riomed","domain":"riomed.impulsionando.com.br","route":"/riomed","enabled":true},
+    {"slug":"colorssaude","domain":"colorssaude.impulsionando.com.br","route":"/colors","enabled":true},
+    {"slug":"peroladavila","domain":"peroladavila.impulsionando.com.br","route":"/peroladavila","enabled":true},
+    {"slug":"riobeer","domain":"riobeer.impulsionando.com.br","route":"/riobeer","enabled":true},
+    {"slug":"ontap","domain":"ontap.impulsionando.com.br","route":"/ontap","enabled":true},
+    {"slug":"raoni","domain":"raoni.impulsionando.com.br","route":"/raoni","enabled":true},
+    {"slug":"spartacus","domain":"spartacus.impulsionando.com.br","route":"/spartacus","enabled":true}
   ]
 }
