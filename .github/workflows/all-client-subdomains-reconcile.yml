@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: core-client-subdomains-reconcile
@@ -27,6 +28,7 @@ jobs:
       CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CORE_IMAGE: ghcr.io/raygsm/impulsionando-core:hostinger-stable
 
     steps:
       - uses: actions/checkout@v4
@@ -47,30 +49,15 @@ jobs:
         id: discover
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            "$SUPABASE_URL/rest/v1/core_company_access_policy?select=company_id,company_name,subdomain,root_domain&subdomain=not.is.null" \
-            -o /tmp/tenants.json
+          curl --fail --silent --show-error -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_company_access_policy?select=company_id,company_name,subdomain,root_domain&subdomain=not.is.null" -o /tmp/tenants.json
           jq -e 'type == "array"' /tmp/tenants.json >/dev/null
-
-          jq -r '.[]
-            | select(.root_domain == "impulsionando.com.br")
-            | select((.company_name // "" | test("^(E2E|RLS)"; "i")) | not)
-            | select((.subdomain // "" | test("^(e2e|rls)-"; "i")) | not)
-            | (.subdomain + "." + .root_domain)' /tmp/tenants.json \
-            | sort -u > /tmp/domains
-
+          jq -r '.[] | select(.root_domain == "impulsionando.com.br") | select((.company_name // "" | test("^(E2E|RLS)"; "i")) | not) | select((.subdomain // "" | test("^(e2e|rls)-"; "i")) | not) | (.subdomain + "." + .root_domain)' /tmp/tenants.json | sort -u > /tmp/domains
           count="$(grep -c . /tmp/domains || true)"
           echo "count=$count" >> "$GITHUB_OUTPUT"
-          if [ "$count" -eq 0 ]; then
-            echo "No eligible commercial client domains to reconcile."
-            exit 0
-          fi
+          if [ "$count" -eq 0 ]; then echo "No eligible commercial client domains to reconcile."; exit 0; fi
           DOMAINS="$(tr '\n' ' ' < /tmp/domains | xargs)"
           echo "DOMAINS=$DOMAINS" >> "$GITHUB_ENV"
           echo "TENANT_COUNT=$count" >> "$GITHUB_ENV"
-          echo "Eligible Core domains: $count"
 
       - name: Configure SSH
         if: steps.discover.outputs.count != '0'
@@ -83,30 +70,29 @@ jobs:
           ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
 
-      - name: Ensure generic multi-client router uses current Core image
+      - name: Ensure generic multi-client router uses canonical Core image
         if: steps.discover.outputs.count != '0'
         run: |
           set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          ssh "$VPS_USER@$VPS_HOST" "CORE_IMAGE='$CORE_IMAGE' bash -s" <<'REMOTE'
           set -euo pipefail
           base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
           override=/opt/impulsionando/deploy/hostinger/docker-compose.multitenant.yml
           envfile=/etc/impulsionando-core.env
           test -f "$base"
           sudo test -f "$envfile"
-          sudo docker image inspect impulsionando-core:latest >/dev/null
-
-          sudo tee "$override" >/dev/null <<'YAML'
+          sudo docker pull "$CORE_IMAGE"
+          sudo tee "$override" >/dev/null <<YAML
           services:
             impulsionando-core-multitenant:
-              image: impulsionando-core:latest
+              image: $CORE_IMAGE
               env_file:
                 - /etc/impulsionando-core.env
               restart: unless-stopped
               labels:
                 traefik.enable: "true"
                 traefik.http.routers.impulsionando-multitenant.entrypoints: websecure
-                traefik.http.routers.impulsionando-multitenant.rule: HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`)
+                traefik.http.routers.impulsionando-multitenant.rule: HostRegexp(\`{subdomain:[a-z0-9-]+}.impulsionando.com.br\`)
                 traefik.http.routers.impulsionando-multitenant.service: impulsionando-core-multitenant
                 traefik.http.routers.impulsionando-multitenant.tls: "true"
                 traefik.http.routers.impulsionando-multitenant.tls.certresolver: letsencrypt
@@ -115,15 +101,11 @@ jobs:
           YAML
           cd /opt/impulsionando/deploy/hostinger
           sudo docker compose -f "$base" -f "$override" config -q
-
-          desired="$(sudo docker image inspect -f '{{.Id}}' impulsionando-core:latest)"
+          desired="$(sudo docker image inspect -f '{{.Id}}' "$CORE_IMAGE")"
           current="$(sudo docker inspect -f '{{.Image}}' impulsionando-core-multitenant 2>/dev/null || true)"
           running="$(sudo docker inspect -f '{{.State.Running}}' impulsionando-core-multitenant 2>/dev/null || true)"
           if [ "$desired" != "$current" ] || [ "$running" != "true" ]; then
             sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-multitenant
-            echo "MULTITENANT_ROUTER=UPDATED"
-          else
-            echo "MULTITENANT_ROUTER=CURRENT"
           fi
           REMOTE
 
@@ -136,12 +118,11 @@ jobs:
           for domain in $DOMAINS; do
             code=000
             for attempt in $(seq 1 12); do
-              echo "Origin check $domain attempt=$attempt"
-              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoCoreReconcile/5.0' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-origin -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
+              code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoCoreReconcile/6.0' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-origin -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
               [ "$code" = '200' ] && break
               sleep 2
             done
-            [ "$code" = '200' ] || { echo "::error::Generic Core route unavailable for $domain"; exit 31; }
+            [ "$code" = '200' ] || exit 31
           done
           REMOTE
 
@@ -150,26 +131,14 @@ jobs:
         run: |
           set -euo pipefail
           for domain in $DOMAINS; do
-            curl --fail --silent --show-error \
-              -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
+            curl --fail --silent --show-error -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
             jq -e '.success == true' /tmp/dns.json >/dev/null
             current_id="$(jq -r --arg ip "$ORIGIN_IP" '.result[] | select(.type=="A" and .content==$ip and .proxied==true) | .id' /tmp/dns.json | head -n1)"
             if [ -z "$current_id" ]; then
-              jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/dns.json | while read -r id; do
-                [ -n "$id" ] && curl --fail --silent --show-error -X DELETE \
-                  -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-                  "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
-              done
+              jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/dns.json | while read -r id; do [ -n "$id" ] && curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null; done
               jq -nc --arg name "$domain" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/new.json
-              curl --fail --silent --show-error -X POST \
-                -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-                --data @/tmp/new.json \
-                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/created.json
+              curl --fail --silent --show-error -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/created.json
               jq -e '.success == true' /tmp/created.json >/dev/null
-              echo "DNS_RECONCILED $domain"
-            else
-              echo "DNS_OK $domain"
             fi
           done
 
@@ -177,42 +146,24 @@ jobs:
         if: steps.discover.outputs.count != '0'
         run: |
           set -euo pipefail
-          failed=0
-          : > /tmp/verified-domains
+          failed=0; : > /tmp/verified-domains
           for domain in $DOMAINS; do
-            code=000
-            final_url=''
+            code=000; final_url=''
             for attempt in $(seq 1 18); do
-              echo "Public HTTPS check $domain attempt=$attempt"
-              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoCoreReconcile/5.0' \
-                -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
-                -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
+              read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoCoreReconcile/6.0' -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
               final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               if [ "$code" = '200' ] && [ "$final_host" = "$domain" ]; then break; fi
               sleep 4
             done
             final_host="$(printf '%s' "$final_url" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
-            if [ "$code" != '200' ] || [ "$final_host" != "$domain" ]; then
-              failed=1
-              echo "::error::Client domain invalid: $domain HTTP=$code FINAL=$final_url"
-            else
-              echo "$domain" >> /tmp/verified-domains
-            fi
+            if [ "$code" != '200' ] || [ "$final_host" != "$domain" ]; then failed=1; else echo "$domain" >> /tmp/verified-domains; fi
           done
-
           now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           while read -r domain; do
             [ -n "$domain" ] || continue
             subdomain="${domain%.impulsionando.com.br}"
             payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,ssl_issued_at:$now,provisioned_at:$now,dns_error:null}')"
-            curl --fail --silent --show-error -X PATCH \
-              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-              -H 'Content-Type: application/json' -H 'Prefer: return=minimal' \
-              --data "$payload" \
-              "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$subdomain"
-            echo "CORE_DOMAIN_VERIFIED $domain"
+            curl --fail --silent --show-error -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$subdomain"
           done < /tmp/verified-domains
-
           [ "$failed" = '0' ] || exit 40
           echo "CORE_CLIENT_SUBDOMAINS=PASS count=$TENANT_COUNT"
