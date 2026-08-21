@@ -70,9 +70,12 @@ export async function assignProfile(opts: {
 }
 
 export async function createCompany(name: string) {
+  // Synthetic E2E companies must never enter commercial provisioning, DNS,
+  // billing or showcase automation. Marking them demo keeps tenant isolation
+  // tests realistic while preventing production side effects.
   const { data, error } = await admin
     .from("companies")
-    .insert({ name, is_active: true, status: "active" })
+    .insert({ name, is_active: true, is_demo: true, status: "active" })
     .select("id")
     .single();
   if (error) throw error;
@@ -85,9 +88,9 @@ async function deleteRows(table: string, companyId: string) {
 }
 
 export async function deleteCompany(id: string) {
-  // Company provisioning creates these rows automatically. Some of them use
-  // ON DELETE RESTRICT/SET NULL, so remove them explicitly before the company.
-  // This keeps E2E runs from polluting the live Core with orphan test tenants.
+  // Company provisioning creates these rows automatically for commercial
+  // companies. Keep defensive cleanup for historical suites created before
+  // synthetic companies were marked as demo.
   await deleteRows("user_roles", id);
   await deleteRows("core_service_access_events", id);
   await deleteRows("core_service_access_state", id);
