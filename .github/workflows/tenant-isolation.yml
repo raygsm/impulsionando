@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   vitest-isolation:
-    name: Tenant isolation + email delivery (vitest)
+    name: Core tenant isolation + contract email delivery
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -42,43 +42,23 @@ jobs:
       - name: Prepare results dir
         run: mkdir -p test-results
 
-      - name: Run tenant isolation E2E
+      - name: Run Core tenant isolation E2E
         id: isolation
         run: |
           set -o pipefail
-          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
-          if [ "$schema_code" = "200" ]; then suite=tests/e2e/tenant-isolation.test.ts; else suite=tests/e2e/chrismed-current-isolation.test.ts; fi
+          suite=tests/e2e/tenant-isolation.test.ts
+          test -f "$suite" || { echo "::error::Missing ecosystem isolation suite: $suite"; exit 2; }
           bunx vitest --config vitest.e2e.config.ts run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
 
-      - name: Run CHRISMED isolation E2E
-        id: chrismed
-        if: always()
-        run: |
-          set -o pipefail
-          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
-          if [ "$schema_code" = "200" ]; then suite=tests/e2e/chrismed-isolation.test.ts; else suite=tests/e2e/chrismed-current-isolation.test.ts; fi
-          bunx vitest --config vitest.e2e.config.ts run "$suite" \
-            --reporter=verbose --reporter=junit \
-            --outputFile=test-results/chrismed.junit.xml 2>&1 | tee test-results/chrismed.log
-
-      - name: Run contract email delivery E2E
+      - name: Run Core contract email delivery E2E
         id: email
         if: always()
         run: |
           set -o pipefail
-          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
-          if [ "$schema_code" = "200" ]; then suite=tests/e2e/contract-email-delivery.test.ts; else suite=tests/chrismed-booking-security.test.ts; fi
+          suite=tests/e2e/contract-email-delivery.test.ts
+          test -f "$suite" || { echo "::error::Missing ecosystem email suite: $suite"; exit 2; }
           bunx vitest --config vitest.e2e.config.ts run "$suite" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
@@ -100,23 +80,11 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Tenant isolation + email delivery"
+            echo "## Core tenant isolation + contract email delivery"
             echo "| Suite | Outcome |"
             echo "|---|---|"
             echo "| tenant-isolation | ${{ steps.isolation.outcome }} |"
-            echo "| chrismed-isolation | ${{ steps.chrismed.outcome }} |"
             echo "| contract-email-delivery | ${{ steps.email.outcome }} |"
-            echo ""
-            for f in isolation chrismed email; do
-              echo "### $f log (tail)"
-              echo '```'
-              tail -n 80 "test-results/$f.log" 2>/dev/null || echo "no log"
-              echo '```'
-            done
-            echo "### email_send_log (latest 50)"
-            echo '```'
-            cat test-results/email_send_log_tail.txt 2>/dev/null || echo "no snapshot"
-            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload all artifacts
@@ -128,23 +96,11 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-      - name: Upload email artifacts (failure only)
-        if: failure() && steps.email.outcome != 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: email-delivery-failure
-          path: |
-            test-results/email.log
-            test-results/email.junit.xml
-            test-results/email_send_log_tail.txt
-          retention-days: 60
-          if-no-files-found: warn
-
       - name: Fail job if any suite failed
         if: always()
         run: |
           fail=0
-          for o in "${{ steps.isolation.outcome }}" "${{ steps.chrismed.outcome }}" "${{ steps.email.outcome }}"; do
+          for o in "${{ steps.isolation.outcome }}" "${{ steps.email.outcome }}"; do
             [ "$o" = "success" ] || fail=1
           done
-          test "$fail" = "0" || { echo "::error::One or more E2E suites failed"; exit 1; }
+          test "$fail" = "0" || { echo "::error::One or more Core isolation suites failed"; exit 1; }
