@@ -79,6 +79,9 @@ jobs:
       - name: Restore into disposable PostgreSQL 17
         run: |
           set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 \
+              -c "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS private CASCADE;"
           docker run --rm --network host \
             -e PGPASSWORD=restore-test \
             -v "$PWD/backup:/backup:ro" postgres:17 \
