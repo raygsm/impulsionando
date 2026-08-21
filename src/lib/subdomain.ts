@@ -1,8 +1,5 @@
 /**
  * Detecção de subdomínio de tenant (client-side/server-side helpers).
- * Colors Saúde possui UM ÚNICO host oficial: colorssaude.impulsionando.com.br.
- * Enquanto DNS/SSL estiverem em reconciliação, o front também pode ser acompanhado
- * pelo caminho interno estável no domínio principal.
  */
 
 const ROOT_DOMAINS = ["impulsionando.com.br"];
@@ -17,8 +14,15 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   wmp: "/wmp",
   csi: "/csi",
   anamadu: "/anamadu",
+  grupoevr: "/grupo-evr",
   garrido: "/garrido",
   colorssaude: "/colors",
+  peroladavila: "/peroladavila",
+  riobeer: "/riobeer",
+  ontap: "/ontap",
+  raoni: "/raoni",
+  spartacus: "/spartacus",
+  haunted: "/haunted",
   it: "/tour",
   ip: "/tour",
   tour: "/tour",
@@ -48,9 +52,6 @@ export function canonicalTenantHostRedirect(loc: {
   const proto = loc.protocol === "http:" ? "http:" : "https:";
 
   if (host === WMP_CANONICAL_HOST || host === COLORS_CANONICAL_HOST) return null;
-
-  // Não redirecionar /colors no apex. Ele é o fallback operacional de preview
-  // quando colorssaude.impulsionando.com.br ainda estiver em reconciliação.
 
   const isChrismedPath = path === "/chrismed" || path.startsWith("/chrismed/");
   const isApex = host === "impulsionando.com.br" || host === "www.impulsionando.com.br";
