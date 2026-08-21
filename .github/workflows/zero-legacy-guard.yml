@@ -1,0 +1,43 @@
+name: Zero Legacy Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Block forbidden legacy references
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          scan() {
+            pattern="$1"
+            label="$2"
+            if git grep -n -I -E "$pattern" -- ':!docs/archive/**' ':!*.lock' >/tmp/legacy_hits 2>/dev/null; then
+              echo "::error::$label detected"
+              cat /tmp/legacy_hits
+              fail=1
+            fi
+          }
+          scan 'grupocolors\.com\.br|checkout\.grupocolors\.com\.br' 'Forbidden Colors legacy domain'
+          scan 'colors\.impulsionando\.com\.br|colors-saude\.impulsionando\.com\.br' 'Deprecated Colors hostname'
+          scan 'raygsm/impulsionito|github\.com/raygsm/impulsionito' 'Wrong repository reference'
+          scan 'impulsionando\.lovable\.app|lovable\.app|lovable\.dev' 'Lovable runtime/domain reference'
+          [ "$fail" -eq 0 ]
+      - name: Assert canonical Colors host exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          git grep -n -I 'colorssaude\.impulsionando\.com\.br' -- src supabase .github >/dev/null
+          echo 'CANONICAL_COLORS_HOST=PASS'
