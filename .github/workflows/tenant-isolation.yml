@@ -18,6 +18,7 @@ jobs:
     env:
       CI: "true"
       CORE_E2E_PRIVILEGED_CLEANUP: "1"
+      CORE_E2E_RUN_ID: ${{ github.run_id }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -35,8 +36,8 @@ jobs:
       - name: Verify required secrets
         run: |
           missing=0
-          for v in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY PGHOST_SOURCE PGPASSWORD_SOURCE PROJECT_REF; do
-            if [ -z "${!v}" ]; then echo "::error::Missing secret: $v"; missing=1; fi
+          for v in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY PGHOST_SOURCE PGPASSWORD_SOURCE PROJECT_REF CORE_E2E_RUN_ID; do
+            if [ -z "${!v}" ]; then echo "::error::Missing secret/env: $v"; missing=1; fi
           done
           test "$missing" = "0"
 
@@ -67,14 +68,19 @@ jobs:
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
 
-      - name: Privileged cleanup of exact Core E2E companies
+      - name: Privileged cleanup of this run's exact Core E2E companies
         if: always()
         run: |
           set -euo pipefail
           cat > /tmp/cleanup-core-e2e.sql <<'SQL'
+          \set run_id `echo "$CORE_E2E_RUN_ID"`
           begin;
           create temporary table _e2e_companies on commit drop as
-            select id from public.companies where name like 'E2E Core Iso %';
+            select id from public.companies
+            where name in (
+              'E2E Core Iso A ' || :'run_id',
+              'E2E Core Iso B ' || :'run_id'
+            );
 
           delete from public.core_service_access_events where company_id in (select id from _e2e_companies);
           delete from public.core_service_access_state where company_id in (select id from _e2e_companies);
@@ -87,13 +93,13 @@ jobs:
 
           source_user="postgres.${PROJECT_REF}"
           if ! docker run --rm --network host \
-            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -e PGPASSWORD="$PGPASSWORD_SOURCE" -e CORE_E2E_RUN_ID="$CORE_E2E_RUN_ID" \
             -v /tmp/cleanup-core-e2e.sql:/cleanup.sql:ro postgres:17 \
-            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 -f /cleanup.sql; then
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 -v run_id="$CORE_E2E_RUN_ID" -f /cleanup.sql; then
             docker run --rm --network host \
-              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -e PGPASSWORD="$PGPASSWORD_SOURCE" -e CORE_E2E_RUN_ID="$CORE_E2E_RUN_ID" \
               -v /tmp/cleanup-core-e2e.sql:/cleanup.sql:ro postgres:17 \
-              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 -f /cleanup.sql
+              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 -v run_id="$CORE_E2E_RUN_ID" -f /cleanup.sql
           fi
 
       - name: Snapshot canonical contract outbox metadata
