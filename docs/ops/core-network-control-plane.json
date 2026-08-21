@@ -1,1 +1,1 @@
-{"generated_at_utc":"2026-08-21T12:08:59Z","commit":"b9d9bf1e507553a0565e4279a230d8c11fee2df3","architecture":"wildcard-dns + single-traefik-router + single-core + canonical-tenant-resolver","status":"control-plane-executed"}
+{"generated_at_utc":"2026-08-21T12:47:25Z","commit":"a4e0d3b67145050cb64e6415916e8f7bacf8a1fa","architecture":"wildcard-dns + single-traefik-router + single-core + canonical-tenant-resolver","status":"control-plane-executed"}
