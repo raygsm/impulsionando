@@ -1,8 +1,10 @@
 name: Grupo EVR DNS publish
 
 on:
-  issue_comment:
-    types: [created]
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/grupoevr-dns-publish.yml
   workflow_dispatch:
 
 permissions:
@@ -12,7 +14,6 @@ permissions:
 
 jobs:
   publish-dns:
-    if: github.event_name == 'workflow_dispatch' || (github.event.issue.number == 87 && github.event.comment.body == '/publish-grupoevr-now')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
