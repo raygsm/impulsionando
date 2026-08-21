@@ -1,119 +1,15 @@
-name: Ana Madu Traefik Router Persistence
+name: Ana Madu Legacy Router Guard
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/anamadu-traefik-router-persist.yml
-  workflow_run:
-    workflows: ["Deploy Core Frontend"]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: anamadu-traefik-router-persist
-  cancel-in-progress: false
-
 jobs:
-  persist:
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+  guard:
     runs-on: ubuntu-latest
-    environment: production
-    env:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
     steps:
-      - name: Configure SSH
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          : > ~/.ssh/known_hosts
-          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          test -s ~/.ssh/known_hosts
-
-      - name: Restore Ana Madu router and rebuild unhealthy edge
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.anamadu.yml
-          domain='anamadu.impulsionando.com.br'
-          release="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
-          test -f "$base"
-          test -n "$release"
-          test -f "$release/.output/server/index.mjs"
-          test -f "$release/scripts/start-core-runtime.mjs"
-          cd /opt/impulsionando/deploy/hostinger
-
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core:
-              labels:
-                traefik.http.routers.anamadu.entrypoints: websecure
-                traefik.http.routers.anamadu.rule: Host(`anamadu.impulsionando.com.br`)
-                traefik.http.routers.anamadu.service: impulsionando-core
-                traefik.http.routers.anamadu.tls: "true"
-                traefik.http.routers.anamadu.tls.certresolver: letsencrypt
-                traefik.http.routers.anamadu.priority: "200"
-          YAML
-          sudo docker compose -f "$base" -f "$override" config -q
-
-          current_ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-          direct_code='000'
-          if [ -n "$current_ip" ]; then
-            direct_code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/anamadu-direct -w '%{http_code}' --max-time 10 "http://$current_ip:3000/" || true)"
-          fi
-          echo "ANAMADU_EDGE_BEFORE direct=$direct_code release=$release"
-
-          case "$direct_code" in
-            2*|3*) : ;;
-            *)
-              printf 'node_modules\n' > "$release/.dockerignore"
-              cat > /tmp/Dockerfile.anamadu-recovery <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-              sudo docker build -f /tmp/Dockerfile.anamadu-recovery -t impulsionando-core:latest "$release"
-              ;;
-          esac
-
-          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
-
-          for attempt in $(seq 1 60); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-            if [ -n "$ip" ]; then
-              home_code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/anamadu-container -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"
-              case "$home_code" in 2*|3*) break ;; esac
-            fi
-            [ "$attempt" -lt 60 ] || { sudo docker logs --tail 200 impulsionando-core || true; exit 60; }
-            sleep 2
-          done
-
-          echo "ANAMADU_CONTAINER home=$home_code ip=$ip"
-          for attempt in $(seq 1 60); do
-            public_code="$(curl -sS --resolve "$domain:443:127.0.0.1" -H 'Accept: text/html,application/xhtml+xml' -H 'User-Agent: Mozilla/5.0 AnaMaduRecovery/3.0' -o /tmp/anamadu-persist -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
-            [ "$public_code" = '200' ] && break
-            [ "$attempt" -lt 60 ] || {
-              echo "::error::Ana Madu local TLS probe failed with HTTP=$public_code"
-              sudo docker inspect impulsionando-core --format '{{json .Config.Labels}}' || true
-              sudo docker logs --tail 200 impulsionando-core || true
-              exit 61
-            }
-            sleep 2
-          done
-          echo 'ANAMADU_TRAEFIK_TLS_ROUTER=PASS'
-          REMOTE
+      - run: |
+          echo 'Legacy Ana Madu router persistence is retired.'
+          echo 'Production Front is the only frontend publication authority.'
