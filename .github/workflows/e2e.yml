@@ -65,7 +65,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build checked-out commit for local E2E preview
-        if: vars.E2E_BASE_URL == ''
+        if: github.event_name == 'pull_request' || vars.E2E_BASE_URL == ''
         env:
           E2E_BASE_URL: ""
         run: bun run build
@@ -89,6 +89,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           E2E_BASE_URL: ""
+          E2E_USE_PREVIEW: "1"
         run: >-
           bun run test:e2e --
           e2e/admin-master-hub-automacao-filters.spec.ts
@@ -100,6 +101,8 @@ jobs:
 
       - name: Run full ecosystem suite on main/manual
         if: github.event_name != 'pull_request'
+        env:
+          E2E_USE_PREVIEW: ${{ vars.E2E_BASE_URL == '' && '1' || '0' }}
         run: bun run test:e2e -- --shard=${{ matrix.shard }}
 
       - name: Upload Playwright report
