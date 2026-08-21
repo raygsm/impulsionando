@@ -1,3 +1,4 @@
 Universal production front release trigger.
-Purpose: generate a real main push for the Universal Fast Front workflow after the 2026-08-20 P0 auth, plans, journeys and niche corrections.
-No runtime behavior is changed by this marker.
+Purpose: force a fresh Production Front deployment after VPS disk expansion and cleanup on 2026-08-21.
+Requirements: rebuild current main once, publish the canonical Core runtime, evict competing frontend routers, and verify Impulsionando plus every active tenant serves the exact release SHA.
+No application runtime behavior is changed by this marker.
