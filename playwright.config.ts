@@ -2,15 +2,15 @@ import { defineConfig, devices } from "@playwright/test";
 
 const externalBaseUrl = process.env.E2E_BASE_URL?.trim();
 const localBaseUrl = "http://127.0.0.1:4173";
-const localServerCommand = process.env.CI
+const usePreview = process.env.E2E_USE_PREVIEW === "1";
+const localServerCommand = usePreview
   ? "bun run preview -- --host 127.0.0.1 --port 4173 --strictPort"
   : "bun run dev -- --host 127.0.0.1 --port 4173 --strictPort";
 
 /**
  * Playwright config para a suíte de jornada nicho-primeiro.
- * Localmente roda contra o dev server. No CI roda contra o bundle previamente
- * compilado e servido por `vite preview`, evitando que o timeout do webServer
- * inclua a compilação da aplicação. E2E_BASE_URL continua permitindo validar
+ * Usa dev server por padrão e somente usa o bundle previamente compilado quando
+ * o workflow define E2E_USE_PREVIEW=1. E2E_BASE_URL continua permitindo validar
  * uma implantação externa quando uma URL não vazia for informada.
  */
 export default defineConfig({
