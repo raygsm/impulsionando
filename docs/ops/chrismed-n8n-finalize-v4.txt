@@ -4,45 +4,12 @@ volume /var/lib/docker/volumes/n8n-umlg_n8n_data/_data -> /home/node/.n8n
 
 --- database mode keys ---
 --- backup export ---
-BACKUP_WORKFLOWS=135
+BACKUP_WORKFLOWS=102
 READY_CHRISMED=34
 COMBINED_IMPORT_COUNT=34
 N8N_STOPPED_FOR_MAINTENANCE=true
 Importing 34 workflows...
 Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: appointment-cancelled".
-Deactivating workflow "CHRISMED | Check-in de consulta por QR ou confirmação manual; dispara boas-vindas imediatas e agenda pesquisa de experiência.".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: appointment-created".
-Deactivating workflow "CHRISMED | Pesquisa de experiência 24 horas após check-in da consulta, com NPS, CSAT e perguntas operacionais.".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: appointment-reminders".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: appointment-rescheduled".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: booking-abandoned".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: critical-alerts".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: daily-operational-digest".
-Deactivating workflow "CHRISMED | CHRISMED · documento liberado ao paciente: notificação segura".
-Deactivating workflow "CHRISMED | CHRISMED · evolução assinada: registro, liberação e continuidade assistencial".
-Deactivating workflow "CHRISMED | CHRISMED · novo prontuário: auditoria, relacionamento e próximos passos".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: event-checkin".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: event-confirmation".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: event-invitation".
-Deactivating workflow "CHRISMED | Atualiza e distribui indicadores de convidados, confirmações, check-ins e satisfação para organizações vinculadas ao evento.".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: event-post-survey".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: event-reminder".
-Deactivating workflow "CHRISMED | Jornada segmentada de engajamento após pesquisa, conforme público, participação, NPS e histórico.".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: failed-delivery-recovery".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: new-lead".
-Deactivating workflow "CHRISMED | CHRISMED · ASO emitido: entrega, vencimento e jornada de acompanhamento".
-Deactivating workflow "CHRISMED | CHRISMED · ASO solicitado: agenda, exames e comunicação multicanal".
-Deactivating workflow "CHRISMED | CHRISMED · documento SST a vencer: alerta, tarefa e renovação".
-Deactivating workflow "CHRISMED | CHRISMED · trabalhador cadastrado: avaliação de riscos e protocolo ocupacional".
-Deactivating workflow "CHRISMED | CHRISMED · evento eSocial SST pronto: validação operacional e fila de envio".
-Deactivating workflow "CHRISMED | CHRISMED · exame ocupacional a vencer: convocação e escalonamento".
-Deactivating workflow "CHRISMED | CHRISMED · pós-atendimento ocupacional: pesquisa 24h e relacionamento".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: payment-approved".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: pega-agenda-expiration".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: pega-agenda-offer".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: pega-agenda-open-slot".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: reactivation".
-Deactivating workflow "CHRISMED | Workflow transacional CHRISMED: registration-abandoned".
 Successfully imported 34 workflows.
 ACTIVATE chrismed.appointment.cancelled id=chdf108f4e5414059ecba9
 ACTIVATE chrismed.appointment.checkin id=chbb99beebe92379a3b5d3
@@ -142,25 +109,8 @@ VERIFY_FAILED chrismed.booking.abandoned http=404 body=<!DOCTYPE html>
 <pre>Cannot POST /webhook/chrismed-chrismed-booking-abandoned-v1</pre>
 </body>
 </
-VERIFY_FAILED chrismed.critical.alerts http=404 body=<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Error</title>
-</head>
-<body>
-<pre>Cannot POST /webhook/chrismed-chrismed-critical-alerts-v1</pre>
-</body>
-</ht
-VERIFY_FAILED chrismed.daily.operational.digest http=404 body=<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Error</title>
-</head>
-<body>
-<pre>Cannot POST /webhook/chrismed-chrismed-daily-operational-digest-v1</pre>
-</b
+VERIFY_FAILED chrismed.critical.alerts http=503 body={"code":503,"message":"Database is not ready!"}
+VERIFY_FAILED chrismed.daily.operational.digest http=503 body={"code":503,"message":"Database is not ready!"}
 VERIFY_FAILED chrismed.ehr.document.released http=404 body=<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,20 +159,132 @@ VERIFY_FAILED chrismed.event.confirmation http=404 body=<!DOCTYPE html>
 <pre>Cannot POST /webhook/chrismed-chrismed-event-confirmation-v1</pre>
 </body>
 <
-VERIFY_FAILED chrismed.event.invitation http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-event-invitation-v1\" is not registered.","hint":"The workflow must be active for a production URL to run succ
-VERIFY_FAILED chrismed.event.organization.dashboard http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-event-organization-dashboard-v1\" is not registered.","hint":"The workflow must be active for a production URL
-VERIFY_FAILED chrismed.event.post.survey http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-event-post-survey-v1\" is not registered.","hint":"The workflow must be active for a production URL to run suc
-VERIFY_FAILED chrismed.event.reminder http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-event-reminder-v1\" is not registered.","hint":"The workflow must be active for a production URL to run succes
-VERIFY_FAILED chrismed.experience.engagement http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-experience-engagement-v1\" is not registered.","hint":"The workflow must be active for a production URL to run
-VERIFY_FAILED chrismed.failed.delivery.recovery http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-failed-delivery-recovery-v1\" is not registered.","hint":"The workflow must be active for a production URL to 
-VERIFY_FAILED chrismed.new.lead http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-new-lead-v1\" is not registered.","hint":"The workflow must be active for a production URL to run successfully
-VERIFY_FAILED chrismed.occupational.aso.issued http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-aso-issued-v1\" is not registered.","hint":"The workflow must be active for a production URL to r
-VERIFY_FAILED chrismed.occupational.aso.requested http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-aso-requested-v1\" is not registered.","hint":"The workflow must be active for a production URL t
-VERIFY_FAILED chrismed.occupational.document.expiring http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-document-expiring-v1\" is not registered.","hint":"The workflow must be active for a production U
-VERIFY_FAILED chrismed.occupational.employee.created http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-employee-created-v1\" is not registered.","hint":"The workflow must be active for a production UR
-VERIFY_FAILED chrismed.occupational.esocial.ready http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-esocial-ready-v1\" is not registered.","hint":"The workflow must be active for a production URL t
-VERIFY_FAILED chrismed.occupational.exam.due http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-exam-due-v1\" is not registered.","hint":"The workflow must be active for a production URL to run
-VERIFY_FAILED chrismed.occupational.satisfaction.followup http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-occupational-satisfaction-followup-v1\" is not registered.","hint":"The workflow must be active for a producti
+VERIFY_FAILED chrismed.event.invitation http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-invitation-v1</pre>
+</body>
+</h
+VERIFY_FAILED chrismed.event.organization.dashboard http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-organization-dashboard-v1</pre>
+VERIFY_FAILED chrismed.event.post.survey http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-post-survey-v1</pre>
+</body>
+</
+VERIFY_FAILED chrismed.event.reminder http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-event-reminder-v1</pre>
+</body>
+</htm
+VERIFY_FAILED chrismed.experience.engagement http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-experience-engagement-v1</pre>
+</body
+VERIFY_FAILED chrismed.failed.delivery.recovery http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-failed-delivery-recovery-v1</pre>
+</b
+VERIFY_FAILED chrismed.new.lead http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-new-lead-v1</pre>
+</body>
+</html>
+VERIFY_FAILED chrismed.occupational.aso.issued http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-aso-issued-v1</pre>
+</bo
+VERIFY_FAILED chrismed.occupational.aso.requested http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-aso-requested-v1</pre>
+<
+VERIFY_FAILED chrismed.occupational.document.expiring http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-document-expiring-v1</pr
+VERIFY_FAILED chrismed.occupational.employee.created http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-employee-created-v1</pre
+VERIFY_FAILED chrismed.occupational.esocial.ready http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-esocial-ready-v1</pre>
+<
+VERIFY_FAILED chrismed.occupational.exam.due http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-exam-due-v1</pre>
+</body
+VERIFY_FAILED chrismed.occupational.satisfaction.followup http=404 body=<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /webhook/chrismed-chrismed-occupational-satisfaction-followup-v1
 VERIFY_FAILED chrismed.payment.approved http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-payment-approved-v1\" is not registered.","hint":"The workflow must be active for a production URL to run succ
 VERIFY_FAILED chrismed.pega.agenda.expiration http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-pega-agenda-expiration-v1\" is not registered.","hint":"The workflow must be active for a production URL to ru
 VERIFY_FAILED chrismed.pega.agenda.offer http=404 body={"code":404,"message":"The requested webhook \"POST chrismed-chrismed-pega-agenda-offer-v1\" is not registered.","hint":"The workflow must be active for a production URL to run suc

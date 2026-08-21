@@ -15,7 +15,11 @@ grant all on public.chrismed_event_service_requests to service_role;
 drop policy if exists chrismed_event_service_requests_staff_read on public.chrismed_event_service_requests;
 create policy chrismed_event_service_requests_staff_read on public.chrismed_event_service_requests for select to authenticated using (public.is_impulsionando_staff((select auth.uid())));
 
-create or replace function public.submit_chrismed_event_service_request(p_request jsonb) returns uuid language plpgsql security definer set search_path=public as $$
+create or replace function public.submit_chrismed_event_service_request(p_request jsonb) returns uuid
+language plpgsql
+security definer
+set search_path='pg_catalog','public'
+as $$
 declare v_id uuid; v_request_id uuid; v_email text; v_kind text; v_attendees integer; v_payload jsonb;
 begin
   v_request_id:=nullif(p_request->>'requestId','')::uuid; v_email:=lower(trim(p_request->>'email')); v_kind:=lower(trim(p_request->>'eventKind'));

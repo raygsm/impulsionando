@@ -1,35 +1,39 @@
 -- Grupo EVR — authorization helpers used by EVR RLS policies.
 -- Keeps Core company membership valid while allowing explicit group-level access.
+-- Hardened: fixed search_path and caller identity enforced for authenticated RPC use.
 
 create or replace function public.evr_user_can_view_company(p_user_id uuid, p_company_id uuid)
 returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = 'pg_catalog','public'
 as $$
   select
-    public.user_belongs_to_company(p_user_id, p_company_id)
-    or exists (
-      select 1
-      from public.evr_group_user_access ga
-      join public.evr_group_user_company_access ca on ca.group_user_access_id = ga.id
-      join public.evr_group_companies gc on gc.group_id = ga.group_id and gc.company_id = ca.company_id
-      where ga.user_id = p_user_id
-        and ga.active = true
-        and ca.company_id = p_company_id
-        and ca.can_view = true
-        and gc.active = true
-    )
-    or exists (
-      select 1
-      from public.evr_group_user_access ga
-      join public.evr_group_companies gc on gc.group_id = ga.group_id
-      where ga.user_id = p_user_id
-        and ga.active = true
-        and ga.access_level = 'super_master'
-        and gc.company_id = p_company_id
-        and gc.active = true
+    p_user_id = auth.uid()
+    and (
+      public.user_belongs_to_company(p_user_id, p_company_id)
+      or exists (
+        select 1
+        from public.evr_group_user_access ga
+        join public.evr_group_user_company_access ca on ca.group_user_access_id = ga.id
+        join public.evr_group_companies gc on gc.group_id = ga.group_id and gc.company_id = ca.company_id
+        where ga.user_id = p_user_id
+          and ga.active = true
+          and ca.company_id = p_company_id
+          and ca.can_view = true
+          and gc.active = true
+      )
+      or exists (
+        select 1
+        from public.evr_group_user_access ga
+        join public.evr_group_companies gc on gc.group_id = ga.group_id
+        where ga.user_id = p_user_id
+          and ga.active = true
+          and ga.access_level = 'super_master'
+          and gc.company_id = p_company_id
+          and gc.active = true
+      )
     );
 $$;
 
@@ -38,35 +42,39 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = 'pg_catalog','public'
 as $$
   select
-    public.user_belongs_to_company(p_user_id, p_company_id)
-    or exists (
-      select 1
-      from public.evr_group_user_access ga
-      join public.evr_group_user_company_access ca on ca.group_user_access_id = ga.id
-      where ga.user_id = p_user_id
-        and ga.active = true
-        and ca.company_id = p_company_id
-        and ca.can_operate = true
-    )
-    or exists (
-      select 1
-      from public.evr_group_user_access ga
-      join public.evr_group_companies gc on gc.group_id = ga.group_id
-      where ga.user_id = p_user_id
-        and ga.active = true
-        and ga.access_level = 'super_master'
-        and gc.company_id = p_company_id
-        and gc.active = true
+    p_user_id = auth.uid()
+    and (
+      public.user_belongs_to_company(p_user_id, p_company_id)
+      or exists (
+        select 1
+        from public.evr_group_user_access ga
+        join public.evr_group_user_company_access ca on ca.group_user_access_id = ga.id
+        where ga.user_id = p_user_id
+          and ga.active = true
+          and ca.company_id = p_company_id
+          and ca.can_operate = true
+      )
+      or exists (
+        select 1
+        from public.evr_group_user_access ga
+        join public.evr_group_companies gc on gc.group_id = ga.group_id
+        where ga.user_id = p_user_id
+          and ga.active = true
+          and ga.access_level = 'super_master'
+          and gc.company_id = p_company_id
+          and gc.active = true
+      )
     );
 $$;
 
+revoke all on function public.evr_user_can_view_company(uuid, uuid) from public, anon;
+revoke all on function public.evr_user_can_operate_company(uuid, uuid) from public, anon;
 grant execute on function public.evr_user_can_view_company(uuid, uuid) to authenticated;
 grant execute on function public.evr_user_can_operate_company(uuid, uuid) to authenticated;
 
--- Replace broad EVR table policies with group-aware authorization.
 drop policy if exists evr_business_units_member on public.evr_business_units;
 create policy evr_business_units_select on public.evr_business_units for select to authenticated using (public.evr_user_can_view_company(auth.uid(), company_id));
 create policy evr_business_units_write on public.evr_business_units for all to authenticated using (public.evr_user_can_operate_company(auth.uid(), company_id)) with check (public.evr_user_can_operate_company(auth.uid(), company_id));

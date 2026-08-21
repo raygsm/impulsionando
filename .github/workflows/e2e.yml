@@ -6,7 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Avoid piling up runs on the same ref.
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
@@ -15,8 +14,6 @@ jobs:
   playwright:
     name: Playwright shard ${{ matrix.artifact }}
     runs-on: ubuntu-latest
-    # Six browser/device projects exercise the complete suite. Keep enough
-    # headroom for browser setup, report generation and artifact upload.
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -35,23 +32,15 @@ jobs:
       pull-requests: write
     env:
       CI: "true"
-      # --- Build-time (Vite client bundle) ---
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
-      # --- Runtime (server functions) ---
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      # --- E2E credentials (test account on the staging backend) ---
       E2E_EMAIL: ${{ secrets.E2E_EMAIL || secrets.E2E_SUPER_ADMIN_EMAIL }}
       E2E_PASSWORD: ${{ secrets.E2E_PASSWORD || secrets.E2E_SUPER_ADMIN_PASSWORD }}
-      # Optional override: point at an external preview deploy instead of
-      # building locally. When set, Playwright skips its own webServer.
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
-      # Enable visual-regression snapshots when the repo variable is set.
-      # The reducedMotion / RTL snapshot scenarios skip themselves on CI unless
-      # this is "1" so the first run can produce baselines without failing.
       E2E_VISUAL: ${{ vars.E2E_VISUAL }}
 
     steps:
@@ -75,12 +64,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Build checked-out commit for local E2E preview
+        if: github.event_name == 'pull_request' || vars.E2E_BASE_URL == ''
+        env:
+          E2E_BASE_URL: ""
+        run: bun run build
+
       - name: Cache Playwright browsers
         id: pw-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          # Bump key whenever we add/remove engines (chromium+firefox+webkit).
           key: pw-cfw-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
 
       - name: Install Playwright browsers (Chromium + Firefox + WebKit)
@@ -91,24 +85,24 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: bunx playwright install-deps chromium firefox webkit
 
-      # Roda a matriz inteira definida em playwright.config.ts:
-      # desktop-{chromium,firefox,webkit} + mobile-{chromium,webkit,firefox}.
-      # Inclui specs de funil (e2e/nichos-funnel.spec.ts), visual regression
-      # (e2e/hero-cta-visual.spec.ts, e2e/escolher-nicho-visual.spec.ts) e
-      # auditoria axe (e2e/nichos-a11y.spec.ts — falha em violação critical).
-      - name: Run CHRISMED PR suite (all engines · desktop+mobile)
+      - name: Run Core PR suite (all engines · desktop+mobile)
         if: github.event_name == 'pull_request'
         env:
-          # Validate the checked-out PR commit instead of the old production bundle.
           E2E_BASE_URL: ""
+          E2E_USE_PREVIEW: "1"
         run: >-
           bun run test:e2e --
-          e2e/chrismed-header-fixed.spec.ts
-          e2e/chrismed-oliver-only.spec.ts
+          e2e/admin-master-hub-automacao-filters.spec.ts
+          e2e/admin-master-hub-automacao-links.spec.ts
+          e2e/admin-vitrine-diagnostico.spec.ts
+          e2e/checkout-navegacao-fallback-a11y.spec.ts
+          e2e/checkout-planos.spec.ts
           --shard=${{ matrix.shard }}
 
       - name: Run full ecosystem suite on main/manual
         if: github.event_name != 'pull_request'
+        env:
+          E2E_USE_PREVIEW: ${{ vars.E2E_BASE_URL == '' && '1' || '0' }}
         run: bun run test:e2e -- --shard=${{ matrix.shard }}
 
       - name: Upload Playwright report
@@ -122,10 +116,6 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-      # When a visual-regression test fails, Playwright writes
-      # `*-expected.png`, `*-actual.png`, and `*-diff.png` into
-      # `test-results/<test>/`. Upload them as a dedicated artifact so
-      # diffs are one click away from the failed run.
       - name: Upload visual-diff PNGs (on failure)
         if: failure()
         id: upload-visual-diffs
@@ -144,12 +134,6 @@ jobs:
         id: upload-traces
         uses: actions/upload-artifact@v4
         with:
-          # Inclui:
-          #  - trace.zip          → trace viewer com DOM snapshots por ação
-          #  - video.webm         → vídeo da execução
-          #  - test-failed-*.png  → screenshot do estado final
-          #  - error-context.md   → contexto de DOM ao redor do locator falho
-          #  - *.html             → dumps de DOM eventualmente anexados
           name: playwright-traces-${{ matrix.artifact }}
           path: |
             test-results/**/trace.zip
@@ -160,18 +144,11 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-
-      # Gera relatório agrupando diffs por componente × viewport × estado
-      # (verticalOffer educacao, PublicFooter, Hero CTAs, etc.) e
-      # publica no Job Summary + expõe como output para o comentário.
       - name: Generate visual regression report
         if: always()
         id: visual-report
         run: node scripts/playwright-visual-report.mjs test-results
 
-      # Comment on the PR with direct links to the uploaded artifacts so
-      # reviewers can fetch expected/actual/diff PNGs and traces in one click.
-      # Only runs on pull_request events and only when something failed.
       - name: Comment PR with visual diff + trace links
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -190,15 +167,9 @@ jobs:
               "",
               `- 📄 [Run completo](${REPORT_URL})`,
             ];
-            if (DIFF_URL) {
-              lines.push(`- 🖼️ [Visual diffs (expected / actual / diff PNGs)](${DIFF_URL})`);
-            }
-            if (TRACE_URL) {
-              lines.push(`- 🎞️ [Traces & vídeos](${TRACE_URL}) — abra com \`bunx playwright show-trace trace.zip\``);
-            }
-            if (VISUAL_ENABLED === "1" && !DIFF_URL) {
-              lines.push("- ℹ️ Nenhum PNG de diff foi gerado — provável falha não-visual.");
-            }
+            if (DIFF_URL) lines.push(`- 🖼️ [Visual diffs (expected / actual / diff PNGs)](${DIFF_URL})`);
+            if (TRACE_URL) lines.push(`- 🎞️ [Traces & vídeos](${TRACE_URL}) — abra com \`bunx playwright show-trace trace.zip\``);
+            if (VISUAL_ENABLED === "1" && !DIFF_URL) lines.push("- ℹ️ Nenhum PNG de diff foi gerado — provável falha não-visual.");
             if (VISUAL_ENABLED !== "1") {
               lines.push("");
               lines.push("> 💡 Os cenários de visual regression só rodam com `E2E_VISUAL=1` (Settings → Variables).");
@@ -210,12 +181,6 @@ jobs:
               lines.push(VISUAL_REPORT);
               lines.push("</details>");
             }
-            lines.push("");
-            lines.push("Como interpretar os PNGs em `playwright-visual-diffs`:");
-            lines.push("");
-            lines.push("- `*-expected.png` — baseline commitado no repo.");
-            lines.push("- `*-actual.png` — o que o teste capturou nesta run.");
-            lines.push("- `*-diff.png` — pixels divergentes em vermelho. Se a mudança for intencional, regenere os baselines (ver `tests/e2e/README.md`).");
             const body = lines.join("\n");
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -230,7 +195,7 @@ jobs:
     needs: playwright
     runs-on: ubuntu-latest
     steps:
-      - name: Consolidate full-suite result
+      - name: Consolidate Core suite result
         env:
           SHARDS_RESULT: ${{ needs.playwright.result }}
         run: |
@@ -239,4 +204,3 @@ jobs:
             exit 1
           fi
           echo "All Playwright shards passed."
-

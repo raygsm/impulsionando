@@ -1,0 +1,189 @@
+name: Core Backup & Restore
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/core-backup-restore.yml"
+      - "scripts/core-restore-*.sql"
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+concurrency:
+  group: core-backup-restore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backup-restore:
+    name: Production Core backup -> disposable restore
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      restore_db:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: restore-test
+          POSTGRES_DB: restore
+        ports:
+          - 55433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d restore"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST_SOURCE: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPASSWORD_SOURCE: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate source connection secrets
+        run: |
+          set -euo pipefail
+          for v in PGHOST_SOURCE PGPASSWORD_SOURCE PROJECT_REF; do
+            [ -n "${!v}" ] || { echo "::error::Missing required secret: $v"; exit 1; }
+          done
+
+      - name: Create read-only Core backup artifact
+        id: dump
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          backup_name="core-$(date -u +%Y%m%dT%H%M%SZ).dump"
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v "$PWD/backup:/backup" postgres:17 \
+            pg_dump -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres \
+              --format=custom --no-owner --no-privileges --schema=public --schema=private \
+              -f "/backup/$backup_name"; then
+            docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -v "$PWD/backup:/backup" postgres:17 \
+              pg_dump -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
+                --format=custom --no-owner --no-privileges --schema=public --schema=private \
+                -f "/backup/$backup_name"
+          fi
+          test -s "backup/$backup_name"
+          {
+            echo "backup_name=$backup_name"
+            echo "sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')"
+            echo "size=$(stat -c%s "backup/$backup_name")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Export only auth UUIDs required for FK restore
+        run: |
+          set -euo pipefail
+          source_user="postgres.${PROJECT_REF}"
+          query="copy (select id from auth.users order by id) to stdout with (format csv)"
+          if ! docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" postgres:17 \
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres \
+              -v ON_ERROR_STOP=1 -c "$query" > backup/auth-user-ids.csv; then
+            docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" postgres:17 \
+              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
+                -v ON_ERROR_STOP=1 -c "$query" > backup/auth-user-ids.csv
+          fi
+          test -f backup/auth-user-ids.csv
+          if grep -Evq '^[0-9a-fA-F-]{36}$|^$' backup/auth-user-ids.csv; then
+            echo "::error::Auth restore bridge contains unexpected non-UUID data"
+            exit 1
+          fi
+          echo "Auth FK bridge rows: $(grep -c . backup/auth-user-ids.csv || true)"
+
+      - name: Bootstrap managed Supabase dependencies in disposable target
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/scripts/core-restore-bootstrap.sql:/bootstrap.sql:ro" postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 -f /bootstrap.sql
+          docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc \
+              "select case when to_regnamespace('auth') is not null and to_regprocedure('auth.uid()') is not null then 'READY' else 'MISSING' end" \
+            | grep -qx READY
+
+      - name: Seed disposable auth FK identities
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/backup/auth-user-ids.csv:/auth-user-ids.csv:ro" postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 \
+              -c "\\copy auth.users(id) from '/auth-user-ids.csv' with (format csv)"
+          source_count="$(grep -c . backup/auth-user-ids.csv || true)"
+          target_count="$(docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc 'select count(*) from auth.users')"
+          [ "$source_count" = "$target_count" ] || { echo "::error::Auth UUID bridge row-count mismatch"; exit 1; }
+
+      - name: Restore into disposable PostgreSQL 17
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 \
+              -c "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS private CASCADE;"
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/backup:/backup:ro" postgres:17 \
+            pg_restore -h 127.0.0.1 -p 55433 -U postgres -d restore \
+              --no-owner --no-privileges --exit-on-error \
+              "/backup/${{ steps.dump.outputs.backup_name }}"
+
+      - name: Validate restored Core invariants
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/scripts/core-restore-verify.sql:/verify.sql:ro" postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 -f /verify.sql
+          companies=$(docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc "select count(*) from public.companies")
+          [ "$companies" -gt 0 ] || { echo "::error::Restored companies table is unexpectedly empty"; exit 1; }
+          echo "Restored Core company rows: $companies"
+
+      - name: Remove ephemeral auth FK bridge
+        if: always()
+        run: rm -f backup/auth-user-ids.csv
+
+      - name: Register verified backup evidence in production Core
+        env:
+          BACKUP_NAME: ${{ steps.dump.outputs.backup_name }}
+          BACKUP_SHA: ${{ steps.dump.outputs.sha }}
+          BACKUP_SIZE: ${{ steps.dump.outputs.size }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/register-evidence.sql <<'SQL'
+          insert into public.core_backup_evidence(status,source,backup_name,raw_size,raw_sha,details)
+          values ('success','github_core_backup_restore', :'backup_name', :'backup_size'::bigint, :'backup_sha',
+                  jsonb_build_object('restore_verified',true,'workflow_run', :'run_id','postgres_version','17','auth_bridge','uuid_only'));
+          update public.core_go_live_checks
+          set status='passed',
+              evidence_ref='core_backup_evidence:' || (
+                select id::text from public.core_backup_evidence where raw_sha=:'backup_sha' order by created_at desc limit 1
+              ),
+              notes='Backup Core criado e restaurado em banco descartável; FKs de auth validadas com ponte efêmera somente de UUIDs.',
+              last_checked_at=now()
+          where check_key='backup.restore';
+          SQL
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 \
+              -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
+              -f /register-evidence.sql; then
+            docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
+              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+                -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
+                -f /register-evidence.sql
+          fi
+
+      - name: Write verification metadata only
+        if: always()
+        run: |
+          printf 'backup_name=%s\nsha256=%s\nsize=%s\n' \
+            '${{ steps.dump.outputs.backup_name }}' '${{ steps.dump.outputs.sha }}' '${{ steps.dump.outputs.size }}' \
+            > backup-metadata.txt
+
+      - name: Upload verification metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-backup-restore-metadata
+          path: backup-metadata.txt
+          retention-days: 30
+          if-no-files-found: error

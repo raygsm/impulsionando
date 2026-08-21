@@ -1,0 +1,348 @@
+name: Universal Fast Front
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - public/**
+      - vite.config.*
+      - package.json
+      - package-lock.json
+      - .github/workflows/universal-fast-front.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: universal-fast-front
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Discover current client domains
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" \
+            -o /tmp/tenant-identities.json
+          jq -e 'type=="array"' /tmp/tenant-identities.json >/dev/null
+          jq -r '.[] | select(.subdomain != null and .root_domain != null and .subdomain != "impulsionando") | (.subdomain + "." + .root_domain)' /tmp/tenant-identities.json | sort -u > /tmp/domains
+          test -s /tmp/domains
+          echo "TENANT_COUNT=$(wc -l </tmp/domains | tr -d ' ')" >> "$GITHUB_ENV"
+
+      - name: Universal P0 quality gates
+        run: |
+          set -euo pipefail
+          grep -Fq "Área do Cliente" src/lib/niche-plans.ts
+          grep -Fq "Portal do Cliente" src/lib/niche-plans.ts
+          grep -Fq "Dashboard" src/lib/niche-plans.ts
+          grep -Fq "EyeOff" src/components/ui/input.tsx
+          grep -Fq "CANONICAL_RECOVERY_URL" src/routes/auth.tsx
+          grep -Fq "resetPasswordForEmail" src/routes/auth.tsx
+          grep -Fq "is_super_admin" src/routes/auth.tsx
+
+      - name: Build once on GitHub runner
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+          test -d .output/public
+          printf '%s' "$GITHUB_SHA" > .output/public/impulsionando-front-sha.txt
+          tar -czf /tmp/universal-fast-front.tgz .output scripts
+
+      - name: Configure production access
+        run: |
+          set -euo pipefail
+          for value in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
+            test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }
+          done
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ORIGIN_IP" = "187.77.232.52" || { echo "::error::Unexpected production origin $ORIGIN_IP"; exit 2; }
+          echo "ORIGIN_IP=$ORIGIN_IP" >> "$GITHUB_ENV"
+          echo "CF_ZONE_ID=$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      - name: Ensure wildcard DNS for every future client
+        run: |
+          set -euo pipefail
+          wildcard='*.impulsionando.com.br'
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$wildcard&per_page=100" \
+            -o /tmp/wildcard.json
+          jq -e '.success == true' /tmp/wildcard.json >/dev/null
+          good="$(jq -r --arg ip "$ORIGIN_IP" '.result[] | select(.type=="A" and .content==$ip and .proxied==true) | .id' /tmp/wildcard.json | head -n1)"
+          if [ -z "$good" ]; then
+            jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/wildcard.json | while read -r id; do
+              [ -n "$id" ] && curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
+            done
+            jq -nc --arg name "$wildcard" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/wildcard-new.json
+            curl --fail --silent --show-error -X POST \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data @/tmp/wildcard-new.json \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+              -o /tmp/wildcard-created.json
+            jq -e '.success == true' /tmp/wildcard-created.json >/dev/null
+            echo 'WILDCARD_DNS_RECONCILED'
+          else
+            echo 'WILDCARD_DNS_OK'
+          fi
+
+      - name: Reconcile current client DNS
+        run: |
+          set -euo pipefail
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            curl --fail --silent --show-error \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" \
+              -o /tmp/dns.json
+            jq -e '.success == true' /tmp/dns.json >/dev/null
+            good="$(jq -r --arg ip "$ORIGIN_IP" '.result[] | select(.type=="A" and .content==$ip and .proxied==true) | .id' /tmp/dns.json | head -n1)"
+            if [ -z "$good" ]; then
+              jq -r '.result[] | select(.type=="A" or .type=="AAAA" or .type=="CNAME") | .id' /tmp/dns.json | while read -r id; do
+                [ -n "$id" ] && curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
+              done
+              jq -nc --arg name "$domain" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/new.json
+              curl --fail --silent --show-error -X POST \
+                -H "Authorization: Bearer $CF_API_TOKEN" \
+                -H 'Content-Type: application/json' \
+                --data @/tmp/new.json \
+                "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+                -o /tmp/created.json
+              jq -e '.success == true' /tmp/created.json >/dev/null
+              echo "DNS_RECONCILED $domain"
+            else
+              echo "DNS_OK $domain"
+            fi
+          done < /tmp/domains
+
+      - name: Upload ready artifact only
+        run: |
+          set -euo pipefail
+          scp /tmp/universal-fast-front.tgz "$VPS_USER@$VPS_HOST:/tmp/universal-fast-front-$GITHUB_SHA.tgz"
+
+      - name: Zero-build canary and atomic promotion
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          release="/var/www/impulsionando-core/releases/universal-fast-front-$RELEASE_SHA"
+          archive="/tmp/universal-fast-front-$RELEASE_SHA.tgz"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.universal-fast-front.yml
+          envfile=/etc/impulsionando-core.env
+          canary=impulsionando-core-fastfront-canary
+
+          sudo test -f "$base"
+          sudo test -f "$envfile"
+          sudo docker inspect impulsionando-core >/dev/null
+
+          base_image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core)"
+          network="$(sudo docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' impulsionando-core | awk '{print $1}')"
+          test -n "$base_image"
+          test -n "$network"
+          sudo docker image inspect "$base_image" >/dev/null
+
+          sudo rm -rf "$release"
+          sudo mkdir -p "$release"
+          sudo tar -xzf "$archive" -C "$release"
+          rm -f "$archive"
+          sudo test -f "$release/.output/server/index.mjs"
+          sudo test -f "$release/.output/public/impulsionando-front-sha.txt"
+          test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$RELEASE_SHA"
+
+          sudo docker rm -f "$canary" >/dev/null 2>&1 || true
+          sudo docker run -d \
+            --name "$canary" \
+            --network "$network" \
+            --env-file "$envfile" \
+            -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            -v "$release/.output:/app/.output:ro" \
+            -v "$release/scripts:/app/scripts:ro" \
+            "$base_image" node scripts/start-core-runtime.mjs >/dev/null
+
+          passed=0
+          for i in $(seq 1 30); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$canary" 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then
+              code="$(curl -sS -H 'Host: impulsionando.com.br' -o /tmp/fastfront-canary -w '%{http_code}' --max-time 8 "http://$ip:3000/" || true)"
+            fi
+            if [ "$code" = 200 ]; then passed=1; break; fi
+            sleep 2
+          done
+          if [ "$passed" != 1 ]; then
+            sudo docker logs --tail 160 "$canary" || true
+            sudo docker rm -f "$canary" >/dev/null 2>&1 || true
+            exit 61
+          fi
+          sudo docker rm -f "$canary" >/dev/null
+
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<YAML
+          services:
+            impulsionando-core-universal-fastfront:
+              image: $base_image
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              volumes:
+                - $release/.output:/app/.output:ro
+                - $release/scripts:/app/scripts:ro
+              command: ["node", "scripts/start-core-runtime.mjs"]
+              environment:
+                NODE_ENV: production
+                HOST: 0.0.0.0
+                PORT: 3000
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.impulsionando-fast-apex.entrypoints: websecure
+                traefik.http.routers.impulsionando-fast-apex.rule: (Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`)) && !PathPrefix(`/api`)
+                traefik.http.routers.impulsionando-fast-apex.service: impulsionando-core-universal-fastfront
+                traefik.http.routers.impulsionando-fast-apex.tls: "true"
+                traefik.http.routers.impulsionando-fast-apex.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-fast-apex.priority: "5000"
+                traefik.http.routers.impulsionando-fast-tenants.entrypoints: websecure
+                traefik.http.routers.impulsionando-fast-tenants.rule: HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`) && !PathPrefix(`/api`)
+                traefik.http.routers.impulsionando-fast-tenants.service: impulsionando-core-universal-fastfront
+                traefik.http.routers.impulsionando-fast-tenants.tls: "true"
+                traefik.http.routers.impulsionando-fast-tenants.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-fast-tenants.priority: "4900"
+                traefik.http.services.impulsionando-core-universal-fastfront.loadbalancer.server.port: "3000"
+          YAML
+
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-universal-fastfront
+
+          promoted=0
+          for i in $(seq 1 30); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-universal-fastfront 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then
+              code="$(curl -sS -H 'Host: impulsionando.com.br' -o /tmp/fastfront-promoted -w '%{http_code}' --max-time 8 "http://$ip:3000/" || true)"
+            fi
+            if [ "$code" = 200 ]; then promoted=1; break; fi
+            sleep 2
+          done
+          if [ "$promoted" != 1 ]; then
+            sudo docker logs --tail 160 impulsionando-core-universal-fastfront || true
+            sudo docker compose -f "$base" -f "$override" rm -sf impulsionando-core-universal-fastfront || true
+            sudo rm -f "$override"
+            exit 62
+          fi
+
+          echo "ZERO_BUILD_PROMOTION=PASS sha=$RELEASE_SHA base=$base_image network=$network"
+          REMOTE
+
+      - name: Validate exact SHA on apex and every current client
+        id: validate
+        shell: bash
+        run: |
+          set -uo pipefail
+          : > /tmp/universal-fast-front-proof.txt
+          printf 'generated_at_utc=%s\nsha=%s\ntenant_count=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$GITHUB_SHA" "$TENANT_COUNT" >> /tmp/universal-fast-front-proof.txt
+          failed=0
+
+          check_domain() {
+            domain="$1"
+            for i in $(seq 1 20); do
+              code="$(curl -sS -L -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/domain-home -w '%{http_code}' --max-time 20 "https://$domain/?front_sha=$GITHUB_SHA" || echo 000)"
+              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 10 "https://$domain/impulsionando-front-sha.txt?x=$GITHUB_SHA" 2>/dev/null || true)"
+              if [ "$code" = 200 ] && [ "$sha" = "$GITHUB_SHA" ]; then return 0; fi
+              sleep 3
+            done
+            return 1
+          }
+
+          if check_domain impulsionando.com.br; then
+            echo "PUBLIC_PASS impulsionando.com.br SHA=$GITHUB_SHA" | tee -a /tmp/universal-fast-front-proof.txt
+          else
+            echo "PUBLIC_FAIL impulsionando.com.br" | tee -a /tmp/universal-fast-front-proof.txt
+            failed=1
+          fi
+
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            if check_domain "$domain"; then
+              echo "PUBLIC_PASS $domain SHA=$GITHUB_SHA" | tee -a /tmp/universal-fast-front-proof.txt
+            else
+              echo "PUBLIC_FAIL $domain" | tee -a /tmp/universal-fast-front-proof.txt
+              failed=1
+            fi
+          done < /tmp/domains
+
+          echo "failed=$failed" >> /tmp/universal-fast-front-proof.txt
+          if [ "$failed" = 0 ]; then
+            echo "UNIVERSAL_FAST_FRONT=PASS count=$TENANT_COUNT" | tee -a /tmp/universal-fast-front-proof.txt
+          else
+            echo "UNIVERSAL_FAST_FRONT=PARTIAL count=$TENANT_COUNT" | tee -a /tmp/universal-fast-front-proof.txt
+          fi
+          exit "$failed"
+
+      - name: Roll back fast-front router if public validation fails
+        if: failure()
+        run: |
+          set +e
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.universal-fast-front.yml
+          if sudo test -f "$override"; then
+            cd /opt/impulsionando/deploy/hostinger
+            sudo docker compose -f "$base" -f "$override" rm -sf impulsionando-core-universal-fastfront || true
+            sudo rm -f "$override"
+          fi
+          REMOTE
+
+      - name: Persist universal publication proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/ops
+          cp /tmp/universal-fast-front-proof.txt docs/ops/universal-fast-front-proof.txt || printf 'proof_unavailable\n' > docs/ops/universal-fast-front-proof.txt
+          git config user.name 'Impulsionito Universal Front QA'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/universal-fast-front-proof.txt
+          git commit -m 'chore(front): record universal fast front proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main

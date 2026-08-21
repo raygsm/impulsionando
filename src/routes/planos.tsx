@@ -122,8 +122,12 @@ function PlanosPage() {
                   <div className="mt-5 space-y-2">
                     {(VALUE_BY_PLAN[plan.code] ?? []).map((item) => <div key={item} className="flex gap-2 text-sm"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary"/><span>{item}</span></div>)}
                   </div>
-                  <Button asChild size="lg" className="mt-6 w-full"><Link to="/auth" search={{ persona: "empresa", mode: "signup", next: `/onboarding/empresa?plano=${plan.code}` }}>{`Contratar ${plan.name}`} <ArrowRight className="ml-2 h-4 w-4"/></Link></Button>
-                  <p className="mt-3 text-center text-xs text-muted-foreground">Cadastro autônomo: conta → empresa → subdomínio → termos → pagamento → onboarding.</p>
+                  {plan.allow_direct_checkout ? (
+                    <Button asChild size="lg" className="mt-6 w-full"><Link to="/auth" search={{ persona: "empresa", mode: "signup", next: `/onboarding/empresa?plano=${plan.code}` }}>{`Contratar ${plan.name}`} <ArrowRight className="ml-2 h-4 w-4"/></Link></Button>
+                  ) : (
+                    <Button asChild size="lg" className="mt-6 w-full"><Link to="/contratar" search={{ plano: plan.code }}>Solicitar proposta <ArrowRight className="ml-2 h-4 w-4"/></Link></Button>
+                  )}
+                  <p className="mt-3 text-center text-xs text-muted-foreground">{plan.allow_direct_checkout ? "Cadastro autônomo: conta → empresa → subdomínio → termos → pagamento → onboarding." : "Checkout direto permanece bloqueado até homologação financeira completa; sua solicitação segue para o atendimento comercial sem cobrança."}</p>
                 </Card>
               ))}
             </div>

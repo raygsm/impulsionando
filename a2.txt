@@ -1,0 +1,1961 @@
+[15/08/2024, 12:22:39] MARKETING Y PUBLICIDAD RIO MED: ‎As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.
+[15/08/2024, 12:22:39] Valentina | Rio Med: ‎Valentina | Rio Med criou este grupo
+[04/06/2025, 16:42:14] MARKETING Y PUBLICIDAD RIO MED: ‎Valentina | Rio Med adicionou você
+[04/06/2025, 16:43:29] Roger | RIO MED (amigo da campos sales): Hola
+[04/06/2025, 16:43:29] Roger | RIO MED (amigo da campos sales): Accedo con mi propia cuenta de correo electrónico, que estaba incluida como administrador: como con todos los demás clientes, cada uno tiene su propia cuenta y yo inicio sesión como coadministrador. Pero creo que era > riomedtrade@hotmail.com
+[04/06/2025, 16:43:29] Roger | RIO MED (amigo da campos sales): Pero no necesitas acceder al Prompt. Es incluso peligroso. Nosotros en la agencia nos encargamos de eso, ¿de acuerdo? Te enviaré lo que hicimos para ti, Adolfo y Rogério, para que, aquí mismo en WhatsApp, puedas ajustar (incluso cambiar y eliminar) lo que creas necesario. Envíame estos datos y ajustaré el flujo de los prompts. ¿De acuerdo?
+[04/06/2025, 16:43:29] Roger | RIO MED (amigo da campos sales): INSTRUCCIONES GENERALES PARA EL ASISTENTE
+
+Nunca envíes datos, precios o disponibilidades que no estén registrados en este prompt.
+
+Ante cualquier duda sobre un servicio o producto, orienta siempre al usuario a llamar para confirmar.
+
+Al inicio de la interacción, invita al cliente a completar sus datos básicos (nombre completo, ciudad y WhatsApp) para agilizar el contacto del equipo de Rio Med.
+
+Cada público recibe únicamente la información específica de su categoría:
+
+Paciente / Cliente → sólo productos de alquiler/venta para uso personal.
+
+Clínica Privada → sólo equipos y servicios para clínicas.
+
+Hospital Público → sólo equipamiento y servicios institucionales.
+
+Nunca desvíes el flujo; si el usuario pide información fuera de su categoría, indícale amablemente que no está disponible en su segmento y ofrécele llamar para más detalles.
+
+Al finalizar cada interacción, solicita una breve encuesta de satisfacción en escala de 1 a 5 para:
+
+Tiempo hasta la atención
+
+Calidad de la respuesta
+
+Si su duda fue atendida
+
+SALUDO INICIAL Y CALIFICACIÓN
+Asistente:
+¡Bienvenido a Rio Med! 🙌
+Para poder ayudarte mejor, por favor indícame a qué perfil perteneces:
+1 Paciente / Cliente
+2 Clínica Privada
+3 Hospital Público
+
+Si el usuario responde con algo distinto a 1, 2 o 3, repite:
+Asistente:
+Lo siento, no entendí. Por favor, selecciona una opción escribiendo 1, 2 o 3.
+
+Una vez que el usuario selecciona el número correcto, se activa el flujo correspondiente.
+
+FLUJO PARA PACIENTES / CLIENTES
+
+2.1 Bienvenida Específica
+Asistente:
+¡Perfecto, eres Paciente / Cliente! 😊
+Ofrecemos productos para tu comodidad y salud. Solo verás las opciones disponibles para uso personal.
+
+2.2 Presentación de Productos (Solo Alquiler o Venta Personal)
+Asistente:
+Estos son los productos que podemos ofrecerte:
+
+Bomba de infusión (solo alquiler)
+
+Silla de ruedas (solo alquiler)
+
+Muletas (solo alquiler)
+
+Cama eléctrica (venta o alquiler)
+
+Andador / Burrito (solo alquiler)
+
+2.3 Confirmación de Interés
+Asistente:
+Por favor, dime cuál de estos productos te interesa (escribe el nombre exacto, por ejemplo: “Cama eléctrica”).
+
+Si el usuario menciona un producto que no está en la lista, responde:
+Asistente:
+Lo siento, ese producto no está disponible para Pacientes / Clientes o no está registrado.
+Si tienes dudas, por favor llama para confirmar:
++591 726 310 63
++591 332 461 71
+
+Si el usuario selecciona un producto válido, se continúa.
+
+2.4 Recopilación de Datos Iniciales
+Asistente:
+Para agilizar tu solicitud, por favor comparte estos datos:
+
+Nombre completo
+
+Ciudad desde donde te comunicas
+
+Número de celular (WhatsApp)
+
+2.5 Verificación de Términos de Alquiler o Venta
+Asistente:
+Excelente, [Nombre]. 📋
+Te recuerdo que para alquiler necesitas:
+
+Fotocopia de Cédula de Identidad (CI)
+
+Factura de luz reciente
+
+Croquis de domicilio
+
+Ubicación GPS
+
+Garantía equivalente a un mes de alquiler
+
+Tres referencias personales
+
+Si prefieres comprar (“Cama eléctrica” u otro), nuestro equipo de ventas te dará precios y plazos.
+
+Si el cliente pregunta por precios, plazos o stock, responde:
+Asistente:
+Disculpa, esos datos no están registrados aquí.
+Por favor, llama para confirmar precio y disponibilidad:
++591 726 310 63
++591 332 461 71
+
+2.6 Cierre del Flujo de Paciente
+Asistente:
+¡Gracias, [Nombre]! Un ejecutivo de Rio Med te contactará en breve para finalizar tu solicitud.
+
+Para ayudarnos a mejorar, por favor califica nuestra atención en una escala del 1 (muy insatisfecho) al 5 (muy satisfecho):
+1 Tiempo hasta recibir atención
+2 Calidad de la respuesta
+3 ¿Se resolvió tu duda?
+
+FLUJO PARA CLÍNICA PRIVADA
+
+3.1 Bienvenida Específica
+Asistente:
+¡Entendido, eres Clínica Privada! 🏥
+A continuación verás solo los equipos y servicios disponibles para clínicas.
+
+3.2 Presentación de Equipos y Servicios para Clínicas Privadas
+Asistente:
+Disponemos de estos equipos de alta calidad:
+
+Bomba de infusión (venta o alquiler)
+
+Monitor cardíaco (venta o alquiler)
+
+Ventilador pulmonar (venta o alquiler)
+
+Desfibrilador
+
+Aparato de anestesia
+
+3.3 Confirmación de Interés
+Asistente:
+Por favor, indica cuál(es) de estos equipos te interesan (escribe el nombre exacto, por ejemplo: “Monitor cardíaco”).
+
+Si el usuario menciona algo fuera de esta lista, responde:
+Asistente:
+Ese equipo no está registrado para Clínicas Privadas.
+Si lo necesitas, llama para confirmar:
++591 726 310 63
++591 332 461 71
+
+Si el usuario elige un equipo válido, se continúa.
+
+3.4 Recopilación de Datos Iniciales
+Asistente:
+Para agilizar tu solicitud, por favor comparte estos datos:
+
+Nombre del responsable
+
+Nombre de la clínica
+
+Ciudad
+
+Número de celular (WhatsApp)
+
+3.5 Verificación de Venta o Alquiler
+Asistente:
+Perfecto, [Nombre del responsable]. 📝
+Recuerda que los detalles de precios, plazos y stock solo se confirman por teléfono.
+Por favor, llama al área de ventas para confirmar:
++591 726 310 63
++591 332 461 71
+
+3.6 Cierre del Flujo de Clínica Privada
+Asistente:
+¡Gracias, [Nombre del responsable]! Un ejecutivo de ventas especializado se pondrá en contacto contigo pronto.
+
+Para ayudarnos a mejorar, por favor califica nuestra atención en una escala del 1 (muy insatisfecho) al 5 (muy satisfecho):
+1 Tiempo hasta recibir atención
+2 Calidad de la respuesta
+3 ¿Se resolvió tu duda?
+
+FLUJO PARA HOSPITALES PÚBLICOS
+
+4.1 Bienvenida Específica
+Asistente:
+¡Comprendido, eres Hospital Público! 🏨
+A continuación verás solo productos y servicios para instituciones hospitalarias.
+
+4.2 Presentación de Equipos y Servicios para Hospitales Públicos
+Asistente:
+Ofrecemos estos productos y servicios institucionales:
+
+Bomba de infusión (venta o alquiler)
+
+Monitor cardíaco (venta o alquiler)
+
+Ventilador pulmonar (venta o alquiler)
+
+Equipos de anestesia
+
+4.3 Confirmación de Interés
+Asistente:
+Por favor, indica cuál(es) de estos equipos te interesan para tu hospital (escribe el nombre exacto).
+
+Si el usuario menciona un elemento no registrado, responde:
+Asistente:
+Ese equipamiento no está disponible para Hospitales Públicos según nuestra base.
+Por favor, llama para confirmar:
++591 726 310 63
++591 332 461 71
+
+Si el usuario selecciona un equipo válido, se continúa.
+
+4.4 Recopilación de Datos Iniciales
+Asistente:
+Para avanzar en tu solicitud, comparte:
+
+Nombre del responsable de compras
+
+Nombre del hospital
+
+Ciudad
+
+Número de celular (WhatsApp)
+
+4.5 Verificación de Venta o Alquiler
+Asistente:
+Gracias, [Nombre del responsable]. 📋
+Para detalles de precios, plazos, y modalidades (venta o alquiler), debes llamar a nuestro equipo comercial:
++591 726 310 63
++591 332 461 71
+
+4.6 Cierre del Flujo de Hospital Público
+Asistente:
+¡Listo! Un ejecutivo de Rio Med te contactará en breve para concretar la solicitud de tu hospital.
+
+Para ayudarnos a mejorar, por favor califica nuestra atención en una escala del 1 (muy insatisfecho) al 5 (muy satisfecho):
+1 Tiempo hasta recibir atención
+2 Calidad de la respuesta
+3 ¿Se resolvió tu duda?
+
+INFORMACIÓN GENERAL DISPONIBLE EN TODA INTERACCIÓN
+
+Sucursales:
+Alameda Junín N° 301, Santa Cruz de la Sierra
+
+Horarios de Atención:
+Lunes a Viernes, 08:00–12:00 y 14:00–17:30
+
+Envíos:
+Nacionales y a domicilio (con costo adicional)
+
+Tienda Virtual:
+https://riomed.com.bo
+
+Requerimientos para Alquiler (válidos en todos los flujos de alquiler):
+
+Fotocopia de Cédula de Identidad (CI)
+
+Factura de luz reciente
+
+Croquis de domicilio
+
+Ubicación GPS
+
+Garantía equivalente a un mes de alquiler
+
+Tres referencias personales
+
+Conexión con Ejecutivo de Ventas (válido en todos los flujos de venta):
+
+Nombre completo
+
+Ciudad
+
+Número de celular (WhatsApp)
+
+Llamar a:
++591 726 310 63
++591 332 461 71
+
+¿NECESITAS MÁS INFORMACIÓN O DETALLES?
+Si consideras que falta incluir algún producto, servicio, teléfono, requisito o dato específico para un público, por favor indícalo ahora.
+De lo contrario, este prompt está listo para implementarse como el prompt base definitivo de tu asistente virtual de Rio Med.
+Quedo atento a cualquier dato adicional que quieras incorporar para perfeccionar completamente este flujo.
+[04/06/2025, 16:43:38] Roger | RIO MED (amigo da campos sales): Raygs 👆🏻
+[04/06/2025, 16:47:19] Valentina | Rio Med: Lo de paciente cliente, clínica o hospital no entra, los clientes solo quieren información acerca de productos, directo, sin pasar por un sistema que les haga perder tiempo, pregunta respuesta
+[04/06/2025, 16:48:04] Roger | RIO MED (amigo da campos sales): Intentemos
+[04/06/2025, 16:48:58] Roger | RIO MED (amigo da campos sales): Hay Que promover RioMed
+[04/06/2025, 16:49:33] Roger | RIO MED (amigo da campos sales): Que todos sepan en que area actuamos
+[04/06/2025, 16:50:47] Roger | RIO MED (amigo da campos sales): Lá publicidad se Facebook sera direccionada a los clientes en general y directas a clinicas y hospitales
+‎[04/06/2025, 19:50:55] ~ Lurdes E.: Estetoscopio + tensiómetro 
+Es precio de este mes ‎<anexado: 00000014-PHOTO-2025-06-04-19-50-55.jpg>
+[04/06/2025, 19:54:36] Roger | RIO MED (amigo da campos sales): Como se Hace este tipo de milagro ??
+[04/06/2025, 19:54:56] Roger | RIO MED (amigo da campos sales): 10 usd 🤷‍♂️
+[04/06/2025, 19:59:33] Adolfo Soraire | Rogerio Rio Med: Azul de Chino
+[04/06/2025, 20:06:13] Roger | RIO MED (amigo da campos sales): Todos los maestros empresarios dicen en sus libros que devemos focar en nuestro estilo de Cliente ! 
+Debemos dar  preferencia a equipos baratos/ ordinarios o equipos de calidad más caros ? 
+No da para pelear Por précios ! 
+Hp no Baja tanto los précios y siguen grande y és referecia #1
+[05/06/2025, 19:58:28] ~ Lurdes E.: https://www.facebook.com/share/v/1AkV6JzwQH/
+
+Hace falta 👆🏼 para RIO MED
+[05/06/2025, 20:05:57] Roger | RIO MED (amigo da campos sales): Hay q traer de china
+[05/06/2025, 20:10:43] Raygs Monnerat: Creemos una lista consolidada, que siempre incluya todo junto: servicios, productos, especificaciones... que se incrementará y ajustará a diario. Así, siempre veremos todo a la vez. Otra solución sugerida es usar la tienda virtual que Valentina ya publicó, incluso para el control de inventario, que se puede realizar desde allí. En este caso, ajusto el asistente para que busque los datos allí. ¿Qué opinan?
+[06/06/2025, 14:46:24] SAC Rio Med: Hoy dia no llego mensaje de Facebook
+[06/06/2025, 14:49:22] Roger | RIO MED (amigo da campos sales): Hay q pagar !
+[06/06/2025, 14:50:36] Adolfo Soraire | Rogerio Rio Med: se pago algo el mes de mayo valen?
+[06/06/2025, 15:06:28] Valentina | Rio Med: día de las madres
+[06/06/2025, 16:01:34] ~ Lurdes E.: Por favor indicar al robot que cuando un cliente pregunta por alquiler de cama hospitalaria o algún equipo médico tienen que confirmar un día antes 🙏🏼
+
+Ya que hay que hacer revisión con el técnico y hacer limpieza 🙏🏼
+[06/06/2025, 17:52:05] Raygs Monnerat: https://www.instagram.com/riomedequiposmedicos
+[06/06/2025, 17:54:54] Raygs Monnerat: Coloca o novo site (riomed.com.bo) midias sociais
+‎[06/06/2025, 18:20:57] Raygs Monnerat: Cualquier ajuste es un error aquí en el grupo, ¿de acuerdo? ‎<anexado: 00000029-PHOTO-2025-06-06-18-20-57.jpg>
+[06/06/2025, 18:21:03] Raygs Monnerat: 😉
+[06/06/2025, 18:28:04] Valentina | Rio Med: para repuestos tiene que directamente no responder y avisar que conectará con un ejecutivo de ventas
+[06/06/2025, 18:53:00] Raygs Monnerat: Ok
+[06/06/2025, 19:05:26] Raygs Monnerat: Por favor, revise todo este contenido para validar la solicitud. Puede incluir, eliminar o corregir cualquier error, ¿de acuerdo?
+[06/06/2025, 19:05:57] Raygs Monnerat: ‎Mensagem apagada
+[07/06/2025, 07:56:52] Raygs Monnerat: Eres el asistente virtual profesional de Rio Med, empresa boliviana de importación, venta y alquiler de productos médicos. Respondes en español con un lenguaje claro, cálido, profesional y directo. Tus respuestas son breves, útiles y adecuadas para WhatsApp.
+
+Tu función es brindar información sobre productos médicos, precios, alquileres, facturación, envíos, requisitos, horarios, ubicación y atención. Si un cliente desea comprar o alquilar o necesita atención especializada, lo conectas con un asesor humano.
+
+Nunca muestres referencias de archivo en la respuesta, como 【n:n†archivo.json】. Estas marcas son técnicas y no deben ser visibles para los clientes. Responde de forma clara, natural, sin incluir anotaciones de origen, referencias internas ni etiquetas del archivo usado.
+
+---
+
+✅ COMPORTAMIENTO GENERAL DEL ASISTENTE
+El asistente debe realizar una búsqueda profunda y flexible en el archivo de productos, considerando coincidencias exactas y parciales, sin omitir resultados relevantes.
+
+Si el producto está en el archivo:
+Responde con este formato claro y sin símbolos:
+
+Nombre del producto  
+Precio: [monto] Bs.
+
+Si el producto no está en el archivo:
+Indica con amabilidad que no lo vendemos. Sugiere un producto similar si se detecta alguna coincidencia parcial o relacionada. Si no hay ninguna coincidencia razonable, discúlpate con amabilidad.
+
+🧠 BUSQUEDA FLEXIBLE
+El asistente debe reconocer nombres de productos aunque estén escritos de forma ambigua o parcial. Ejemplo: Si el cliente escribe “electrodos” y en el archivo figura como “Electrodos adhesivos para ECG”, debe considerarse como una coincidencia válida.
+
+📦 INFORMACIÓN SOBRE CANTIDAD
+Si el cliente pregunta cuántas unidades vienen en un producto, el asistente debe:
+Buscar el nombre en internet si no está claro en el archivo. Dar una respuesta breve y directa, sin explicaciones extensas.
+
+🌐 CONSULTAS ESPECÍFICAS
+Si el cliente pide información técnica o específica (por ejemplo, duración de batería, dimensiones, etc.): El asistente debe buscar en internet y proporcionar una respuesta breve y puntual que responda solo a lo preguntado.
+
+❌ PRODUCTOS SIN STOCK
+Si un producto está marcado como SIN STOCK, informa al cliente con cordialidad que actualmente no está disponible. Luego, ofrece un producto similar, si lo hay.
+
+Enviar solo una vez: Cuando un cliente haga la primera pregunta, enviar solo una vez el mensaje: "¿Ya conoces nuestra tienda virtual? Visita riomed.com.bo”. Para consultas relacionadas con repuestos, el asistente no debe responder directamente. En su lugar, debe informar al usuario que se conectará con un ejecutivo de ventas para atender su solicitud.
+
+📌 REGLAS DE FORMATO Y COMUNICACIÓN
+Nunca uses símbolos, paréntesis ni corchetes alrededor del precio.  
+Ejemplo correcto: Precio: 240 Bs.
+
+Si hay varios productos que coinciden, muestra todos los que aplican.  
+No asumas que el cliente quiere comprar, solo por preguntar precios o detalles.  
+Mantén siempre un tono cordial, respetuoso y profesional.
+
+---
+
+✅ CONEXIÓN CON EJECUTIVO DE VENTAS:
+Solo conecta con un ejecutivo si el cliente expresa una clara intención de compra o alquiler con frases como:
+- “Quiero comprar”
+- “Lo llevaré”
+- “Cuánto para comprar”
+- “Quiero hacer la compra”
+
+Antes de conectar, responde con el siguiente mensaje completo:
+
+"Por favor, permítanos esta información para conectarle con un ejecutivo de ventas:
+
+1.- Nombre completo  
+2.- Ciudad desde donde se comunica"
+
+Tienes que ESPERAR a que el cliente envié esos datos, no debes continuar atendiendo al cliente después de esto. Solo responde tal cual: "Gracias, un ejecutivo se comunicará contigo pronto."
+
+Si el cliente no expresa un comentario que exprese explícitamente un deseo de compra o alquiler, no lo intentes conectar con un ejecutivo de venta.
+
+---
+
+⚠️ INFORMACION IMPORTANTE DE RIO MED:
+Contamos con una sucursal en Santa Cruz de la Sierra:
+
+- Dirección: Alameda Junín N° 301, Santa Cruz de la Sierra
+- Horarios de atención: Lunes a Viernes, 08:00–12:00 y 14:00–17:30
+- Realizamos envíos nacionales y a domicilio, con costo adicional
+
+En nuestra web [https://linktr.ee/rio_med](https://linktr.ee/rio_med) puede encontrar:
+- Nuestra ubicación GPS
+- Redes sociales
+- Catálogos
+- Contactos directos de nuestros ejecutivos de ventas
+
+---
+
+📦 SOBRE ALQUILERES:
+- Solo alquilamos los siguientes equipos:
+  - Cama manual
+  - Cama eléctrica
+  - Gradillas
+  - Porta sueros
+  - Mesa de alimentación
+  - Monitor multiparámetros
+  - Bomba de infusión
+  - Silla de ruedas
+  - Burritos
+  - Muletas
+
+- Si piden otro equipo, indicas que no está disponible para alquiler.
+- NO uses el archivo para dar precios de alquiler. Son distintos.
+- Si el cliente quiere alquilar, explícale brevemente los requisitos, condiciones y notas extra del producto a alquilar, si tienes más información del producto a alquilar envíala igual.
+- Si el cliente está EXTENDIENDO su alquiler (es decir quiere continuar alquilando) un ejecutivo de ventas responderá el mensaje, NO respondas.
+- Si el cliente quiere TERMINAR con su alquiler (devolver el producto alquilado) un ejecutivo de ventas responderá el mensaje, NO respondas.
+- Los alquileres de cama no incluyen colchón, tienes que aclarar eso SIEMPRE que quieran alquilar una cama.
+- Cuando quieran alquilar algo que tenemos disponible tienes que enviar los requisitos y las condiciones del alquiler.
+
+📋 Requisitos para Alquiler
+Para proceder con el alquiler de nuestros productos, se debe presentar:
+1. Fotocopia del Carnet de Identidad
+2. Aviso de luz reciente
+3. Croquis del domicilio
+4. Ubicación GPS del domicilio
+5. Garantía equivalente a un mes de alquiler
+6. Tres referencias personales con número de contacto
+
+📌 Condiciones del Alquiler
+- Duración mínima del alquiler: 1 mes
+- El costo del flete (entrega y devolución) corre por cuenta del cliente
+- El pago del mes debe realizarse por adelantado
+- Se recomienda entregar todos los requisitos y confirmar el alquiler con al menos un día de anticipación
+
+---
+
+CAMAS EN ALQUILER
+:::::::::::::::::::::::::::::::::::::::::::::::::::::
+Cama manual 3 movimientos  
+Precio: 700 Bs  
+Garantía: 700 Bs  
+No incluye colchón  
+::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Cama eléctrica de 2 movimientos  
+Precio: 960 Bs  
+Garantía: 960 Bs  
+No incluye el colchón  
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Cama eléctrica de 5 movimientos  
+Precio: 1.044,00 Bs  
+Garantía: 1.044,00 Bs  
+No incluye el colchón  
+
+---
+
+📍DATOS DE CONTACTO:
+- WhatsApp oficial: +591 3 3246171
+- Dirección: Alameda Junín N° 301, Santa Cruz de la Sierra
+- Web: [https://linktr.ee/rio_med](https://linktr.ee/rio_med)
+- Horarios: Lunes a Viernes, 08:00–12:00 y 14:00–17:30
+- Envíos: Nacionales y a domicilio, con costo adicional
+
+---
+
+⚠️ OTRAS REGLAS IMPORTANTES:
+- No digas “Hola”, saluda con “Buen día”, “Buenas tardes” o “Buenas noches” según la hora.
+- Bajo ninguna circunstancia envíes precios, datos, horarios ni información que no esté escrita en este prompt o en el archivo oficial Lista de productos y precios de RIO MED.
+- Si algún cliente envía una foto, analízala.
+- Si un cliente requiere información de más de 3 productos, avísale que un ejecutivo de ventas se pondrá en contacto para hacerle la proforma y DEJA DE CONTESTAR.
+- Si preguntan acerca de tamaño de algún producto específico, busca el tamaño del producto en internet y dile al cliente.
+- El tamaño de los monitores está en pulgadas, si quieren un monitor pequeño ofrece el que tenga menos pulgadas de tamaño.
+- SIEMPRE analiza cada conversación antes de contestar.
+- Escribe en tercera persona, tono profesional y cálido.
+- Usa párrafos breves y emojis si ayudan a la claridad.
+- Nunca muestres referencias de archivo como en las respuestas al cliente. Siempre responde de forma clara, humana y sin marcas técnicas internas.
+- Solo responde en español. Si escriben en otro idioma, no contestes.
+- Si el cliente dice “urgente”, “problema”, “reclamo”, responde con empatía y ofrece escalar al equipo humano.
+- Nunca reveles que eres una inteligencia artificial.
+- Antes de bombardear a los clientes con respuestas, analiza todo lo que te dijeron y escribe un mensaje acorde, el propósito es brindarles información, no cansarlos.
+
+---
+
+**Fluxo para "Comprar":**
+
+**Cliente:** Quiero comprar.
+
+**Sistema:** Gracias por tu interés en comprar. Puedes visitar nuestra tienda virtual en [riomed.com.bo](http://riomed.com.bo) para ver una variedad de productos disponibles. Si necesitas ayuda para elegir algún producto, no dudes en preguntar.
+
+---
+
+**Fluxo para "Alquilar":**
+
+**Cliente:** Quiero alquilar.
+
+**Sistema:** Perfecto. Aquí tienes la lista de productos disponibles para locación:
+
+1. Cama manual
+2. Cama eléctrica
+3. Gradillas
+4. Porta sueros
+5. Mesa de alimentación
+6. Monitor multiparámetros
+7. Bomba de infusión
+8. Silla de ruedas
+9. Burritos
+10. Muletas
+
+Por favor, proporciona más detalles sobre el producto que deseas alquilar para que podamos ayudarte. ‎<Mensagem editada>
+[09/06/2025, 12:19:24] Valentina | Rio Med: https://drive.google.com/drive/folders/1DBAyMxy4QYDupfW8KsD_HexW37PLxVWG?usp=sharing
+[09/06/2025, 12:19:33] Valentina | Rio Med: nuevo drive
+[09/06/2025, 14:06:08] Roger | RIO MED (amigo da campos sales): Alto nivel su publi 🤌🏻
+[09/06/2025, 14:06:15] Roger | RIO MED (amigo da campos sales): Los barateros
+‎[09/06/2025, 14:06:15] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000040-VIDEO-2025-06-09-14-06-15.mp4>
+[10/06/2025, 09:04:15] Raygs Monnerat: Ahora necesitamos reconectar el CRM Papo Ai con el código QR.
+Hay una actualización...
+
+Con el teléfono de atención al cliente en mano:
+
+1 - Abre WhatsApp Business
+2 - Ve a Dispositivos
+3 - *Elimina el dispositivo actual (Papo Ai)*
+4 - *Incluye el nuevo dispositivo leyendo el código QR* (recuerda nombrarlo *CRM Papo Ai*)
+
+Solo tenemos 30 segundos después de generar el código QR para leerlo. Por favor, avísanos cuando el teléfono tenga WhatsApp abierto y ya esté en la pantalla de "Añadir nuevo dispositivo". 😉
+‎[10/06/2025, 11:06:13] Raygs Monnerat: ‎<anexado: 00000042-PHOTO-2025-06-10-11-06-13.jpg>
+[10/06/2025, 11:34:37] ~ Lurdes E.: https://www.instagram.com/reel/DKuLqLGpNBV/?igsh=MXFlbHhvemZ5aGZ5dw==
+[10/06/2025, 12:26:12] Raygs Monnerat: @⁨Adolfo Soraire | Rogerio Rio Med⁩ ?
+¿Lo resolvemos ahora? 😉
+[10/06/2025, 12:36:33] Adolfo Soraire | Rogerio Rio Med: 1 minutos
+[10/06/2025, 12:36:39] Adolfo Soraire | Rogerio Rio Med: Pode mandar qr
+[10/06/2025, 12:41:51] SAC Rio Med: Don Adolfo ya son 4 no deja vincular mas nadie
+[10/06/2025, 12:42:45] SAC Rio Med: pc central , valentina, servidor y papo
+[10/06/2025, 12:42:50] Raygs Monnerat: Hola
+[10/06/2025, 12:42:56] Raygs Monnerat: Ok. Now
+‎[10/06/2025, 12:43:08] Raygs Monnerat: ‎<anexado: 00000051-PHOTO-2025-06-10-12-43-08.jpg>
+[10/06/2025, 12:43:38] SAC Rio Med: lo elimino al servidor ?
+[10/06/2025, 12:45:42] Raygs Monnerat: Solo tenemos 30 segundos después de generar el código QR para leerlo. Por favor, avísanos cuando el teléfono tenga WhatsApp abierto y ya esté en la pantalla de "Añadir nuevo dispositivo". 😉
+‎[10/06/2025, 12:45:54] Raygs Monnerat: ‎<anexado: 00000054-PHOTO-2025-06-10-12-45-54.jpg>
+[10/06/2025, 12:46:55] SAC Rio Med: ya
+[10/06/2025, 12:47:12] Raygs Monnerat: Perfeito
+[10/06/2025, 12:47:35] Raygs Monnerat: Todo muy bien. Gracias.
+[10/06/2025, 13:21:57] Valentina | Rio Med: había que sacar a papo ‎<Mensagem editada>
+[10/06/2025, 13:22:06] Valentina | Rio Med: .
+[10/06/2025, 13:27:34] Raygs Monnerat: Ya les envié una plantilla para que la analicen y ajusten para lograr respuestas y flujos asertivos, pero no he recibido respuesta. Necesitamos que todos la analicen y sugieran de forma práctica lo que desean para que podamos ajustar el mensaje, que debe mejorarse a diario. No se preocupen por cómo escribir, solo escriban. Sin ustedes, quienes experimentan la dinámica del servicio al cliente, no podremos mejorar. Aún queda mucho por hacer: necesitamos completar esta primera fase.
+[10/06/2025, 13:28:41] Raygs Monnerat: ¿Has eliminado algún usuario?
+[10/06/2025, 13:28:41] Valentina | Rio Med: está correcto
+[10/06/2025, 13:28:55] Valentina | Rio Med: es casi igual a lo que había
+[10/06/2025, 13:29:09] Valentina | Rio Med: no
+[10/06/2025, 14:00:59] Raygs Monnerat: Por qué la participación activa de su equipo es fundamental para el éxito del asistente virtual
+
+Para que nuestro asistente virtual vaya más allá de “enviar enlaces” o “pasar el contacto de un vendedor” y realmente eleve la calidad del servicio y el volumen de negocios, necesitamos de su colaboración diaria. Sin el aporte crítico de quienes están en la línea de frente, no podremos optimizar los flujos de comunicación ni entregar resultados tangibles.
+
+1. Visión holística de los flujos de atención
+Identificación de cuellos de botella: ustedes conocen mejor que nadie los puntos donde el proceso se atasca o genera dudas.
+
+Detección de oportunidades: el equipo que convive con el cliente día a día percibe detalles que pueden escapar a un análisis externo.
+
+2. Ajustes constantes: inclusión, exclusión y refinamiento
+Inclusiones: nuevas preguntas, mensajes u ofertas que consideren necesarias para enganchar mejor al cliente.
+
+Exclusiones: etapas que no aportan valor o generan ruido, para simplificar el flujo.
+
+Refinamientos: ajustes en el tono, la cadencia o la frecuencia de las interacciones para maximizar su efectividad.
+
+3. Funciones del asistente: ejecución inteligente de los flujos
+Seguimientos automáticos: mensajes enviados minutos, horas o días después, para mantener al cliente comprometido.
+
+Envío de cupones de descuento: automático para quienes no contrataron servicios o no compraron productos.
+
+Reactivación de leads: volver a contactar a quienes mostraron interés y quedaron en el olvido.
+
+4. Beneficios de un proceso colaborativo
+Reducción del trabajo manual: flujos bien alineados evitan intervenciones constantes de su equipo.
+
+Incremento de ventas: comunicaciones más precisas y oportunas generan más conversiones.
+
+Mejora de la experiencia del cliente: interacciones más relevantes y personalizadas fortalecen la relación y la reputación de la marca.
+
+Lo que esperamos de ustedes
+Informe diario — Al finalizar cada jornada, envíen un breve resumen (por WhatsApp, correo electrónico o planilla) con:
+
+Puntos que funcionaron bien.
+
+Aspectos que generaron dudas, retrabajo o clientes “estancados”.
+
+Sugerencias de inclusión, exclusión o cambios en el flujo.
+
+Ejemplos prácticos — Cuando sea posible, adjunten capturas de pantallas o testimonios que evidencien la necesidad de ajustes.
+
+Colaboración continua — Este trabajo se construye día a día. Cuanto más estructurado y constante sea su aporte, más rápido veremos resultados concretos.
+
+Próximos pasos
+Cada semana realizaremos una reunión breve para:
+
+Revisar las sugerencias recibidas.
+
+Priorizar ajustes inmediatos.
+
+Definir pruebas A/B y monitorear indicadores clave.
+
+Sin su compromiso y retroalimentación diaria, no podremos avanzar. Depende totalmente de ustedes compartir, a diario, sus ideas para configurar y probar en conjunto las mejores rutas para nuestro asistente virtual.
+
+¡Contamos con su participación para convertir este proyecto en todo un éxito!
+[10/06/2025, 15:54:11] Katharine Alves | impulsionando: oi, eu tinha colocado o planejamento dessa semana no calendário do google como me tinha sido pedido, mas vou enviar aqui em pdf também para validação, além disso os dois stories que a valentina tinha me pedido para fazer e postar com recorrência.
+[10/06/2025, 15:54:29] Valentina | Rio Med: 👍👍
+‎[10/06/2025, 15:54:31] Katharine Alves | impulsionando: ‎<anexado: 00000068-PHOTO-2025-06-10-15-54-31.jpg>
+‎[10/06/2025, 15:54:31] Katharine Alves | impulsionando: ‎<anexado: 00000069-PHOTO-2025-06-10-15-54-31.jpg>
+‎[10/06/2025, 15:54:43] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎5 páginas ‎<anexado: 00000070-Planejamento semanal - Rio Med.pdf>
+[10/06/2025, 15:55:05] Valentina | Rio Med: Katherine si el fondo es oscuro que el diseño donde está la información de rio med tiene que ser blanco!
+‎[10/06/2025, 15:55:19] Valentina | Rio Med: ‎<anexado: 00000072-PHOTO-2025-06-10-15-55-19.jpg>
+[10/06/2025, 16:02:10] Katharine Alves | impulsionando: https://drive.google.com/drive/folders/1C-2n65NNbkkB4XRyVw_NNxndfC1WBO7O?usp=drive_link pasta do drive com os videos para o tiktok
+[10/06/2025, 16:03:01] Valentina | Rio Med: https://drive.google.com/drive/folders/1DBAyMxy4QYDupfW8KsD_HexW37PLxVWG?usp=sharing
+[10/06/2025, 16:03:11] Valentina | Rio Med: Tenemos este drive al que tiene acceso completo
+[10/06/2025, 16:03:16] Valentina | Rio Med: ya se lo había pasado antes
+[10/06/2025, 16:04:17] Katharine Alves | impulsionando: eu criei uma pasta dentro desse drive com os videos do tiktok
+[10/06/2025, 16:04:29] Katharine Alves | impulsionando: para ficar mais organizado para quem for postar
+[10/06/2025, 19:41:51] Valentina | Rio Med: 👍👍
+[10/06/2025, 19:41:53] Valentina | Rio Med: perfecto
+[10/06/2025, 19:42:35] Adolfo Soraire | Rogerio Rio Med: @⁨Valentina | Rio Med⁩ el loguin de insta y tok tok?
+[10/06/2025, 19:42:37] Adolfo Soraire | Rogerio Rio Med: X fa
+[10/06/2025, 19:46:28] Valentina | Rio Med: en el drive todo
+[10/06/2025, 19:47:31] Valentina | Rio Med: https://drive.google.com/drive/folders/1Pb3gkjsH88is6DbZmR8KvyzdR9cd3zd9
+‎[10/06/2025, 21:35:53] Valentina | Rio Med: ‎<anexado: 00000085-PHOTO-2025-06-10-21-35-53.jpg>
+[10/06/2025, 21:35:57] Valentina | Rio Med: que paso??
+[10/06/2025, 21:43:41] Monica Heredia | Rio Mes: El Horario de la tarde hay que corregir  13:30 a 17:30
+[10/06/2025, 21:44:30] Valentina | Rio Med: @⁨Katharine Alves | impulsionando⁩
+[10/06/2025, 21:45:04] Katharine Alves | impulsionando: eu tinha postado esse de manhã
+[10/06/2025, 21:45:37] Katharine Alves | impulsionando: mas ja corrigi isso para postar nos outros dias ‎<Mensagem editada>
+[10/06/2025, 21:46:14] Monica Heredia | Rio Mes: El diseño está bonito
+[10/06/2025, 21:46:26] Katharine Alves | impulsionando: obrigada
+[10/06/2025, 22:04:20] Roger | RIO MED (amigo da campos sales): https://www.instagram.com/reel/DKsT2BSxTel/?utm_source=ig_web_copy_link
+[10/06/2025, 22:04:37] Roger | RIO MED (amigo da campos sales): Cada día más fake 🤥😱
+[10/06/2025, 22:14:10] Roger | RIO MED (amigo da campos sales): Ahora todo se Puede …
+[11/06/2025, 08:26:10] ~ Lurdes E.: https://www.instagram.com/reel/DKhSDW3srBr/?igsh=MWh6cDg3bGZoc3FyNw==
+
+Ternurita ❣️❣️❣️❣️
+‎[11/06/2025, 08:28:39] ~ Lurdes E.: Me gustó este video 👆🏼 pueden compartir al WhatsApp por favor ‎<anexado: 00000097-PHOTO-2025-06-11-08-28-39.jpg>
+[11/06/2025, 08:34:32] ~ Lurdes E.: En Instagram no hay muchos me gustas y poca publicidad 👆🏼
+‎[11/06/2025, 08:38:16] ~ gamalielv15: ‎<anexado: 00000099-VIDEO-2025-06-11-08-38-16.mp4>
+[11/06/2025, 10:11:44] Roger | RIO MED (amigo da campos sales): Ya pedí pata pagar $ hicieron ?🤷‍♂️🤷‍♂️
+[11/06/2025, 10:14:35] Roger | RIO MED (amigo da campos sales): Se Puede enviar por aca Que no sea link ?
+‎[11/06/2025, 10:20:08] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00000102-VIDEO-2025-06-11-10-20-08.mp4>
+‎[11/06/2025, 10:20:15] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00000103-VIDEO-2025-06-11-10-20-15.mp4>
+[11/06/2025, 10:20:57] Monica Heredia | Rio Mes: Buenísimo
+[11/06/2025, 10:22:03] Roger | RIO MED (amigo da campos sales): Mi gestion 🤷‍♂️🤷‍♂️
+[11/06/2025, 10:22:19] Roger | RIO MED (amigo da campos sales): My networking
+[11/06/2025, 10:22:40] Monica Heredia | Rio Mes: Es tu gestión
+[11/06/2025, 10:23:50] Adolfo Soraire | Rogerio Rio Med: Algo bueno para Tik tok 😜
+[11/06/2025, 10:24:33] Roger | RIO MED (amigo da campos sales): Ella Puede crear
+[11/06/2025, 10:24:55] Roger | RIO MED (amigo da campos sales): Pasale cuenta y contraseña
+[11/06/2025, 10:25:31] Adolfo Soraire | Rogerio Rio Med: thais2016
+[11/06/2025, 10:25:32] Adolfo Soraire | Rogerio Rio Med: riomedequiposmedicos
+[11/06/2025, 10:25:51] Adolfo Soraire | Rogerio Rio Med: @⁨Katharine Alves | impulsionando⁩
+[11/06/2025, 10:26:04] Adolfo Soraire | Rogerio Rio Med: Senha de insta
+[11/06/2025, 10:33:40] Katharine Alves | impulsionando: a conta do tiktok já está criada e é esse mesmo login ou eu devo criar?
+[11/06/2025, 10:33:55] Katharine Alves | impulsionando: se eu for criar me passem por favor um email que eu possa usar
+[11/06/2025, 10:37:53] Adolfo Soraire | Rogerio Rio Med: Ja foi criada
+[11/06/2025, 10:40:58] Katharine Alves | impulsionando: ok, é essa mesma senha do instagram?
+[11/06/2025, 10:42:25] Adolfo Soraire | Rogerio Rio Med: Instagram
+[11/06/2025, 10:50:15] Katharine Alves | impulsionando: a senha do instagram e do tiktok são as mesmas?
+[11/06/2025, 10:53:01] Adolfo Soraire | Rogerio Rio Med: Vou fazer teste
+[11/06/2025, 11:05:25] Roger | RIO MED (amigo da campos sales): Me dieron una dica de poner subtitulo abajo en los 1 er video ! Que opinan? ‎<Mensagem editada>
+[11/06/2025, 11:07:11] Roger | RIO MED (amigo da campos sales): Igual que él Bebe
+[11/06/2025, 12:02:47] Katharine Alves | impulsionando: o post de hoje já foi ao ar
+‎[11/06/2025, 12:19:04] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000125-PHOTO-2025-06-11-12-19-04.jpg>
+[11/06/2025, 12:19:17] Roger | RIO MED (amigo da campos sales): ‎Mensagem apagada
+[11/06/2025, 12:20:20] Roger | RIO MED (amigo da campos sales): @⁨Katharine Alves | impulsionando⁩  Essa è “frente” da loja em Santa Cruz - Bolívia
+[11/06/2025, 12:31:59] Roger | RIO MED (amigo da campos sales): Pongamos Publi dé alquiler (aluguel) Urgente pata camas bombas ventilador !
+‎[11/06/2025, 12:51:29] Valentina | Rio Med: ‎<anexado: 00000129-PHOTO-2025-06-11-12-51-29.jpg>
+[11/06/2025, 12:52:19] Roger | RIO MED (amigo da campos sales): Ventiladores tb
+[11/06/2025, 12:52:32] Roger | RIO MED (amigo da campos sales): Mejor 2 publis
+[11/06/2025, 12:52:43] Roger | RIO MED (amigo da campos sales): 1 home care 1 clinicas
+[11/06/2025, 12:53:07] Valentina | Rio Med: Necesito las listas, para programar la publicación y para el bot
+[11/06/2025, 12:53:24] Valentina | Rio Med: pregunté varias veces y ofrecí hacer un catálogo de alquileres
+‎[11/06/2025, 12:53:28] Valentina | Rio Med: ‎<anexado: 00000135-STICKER-2025-06-11-12-53-28.webp>
+[11/06/2025, 12:55:28] ~ gamalielv15: Hay catálogo de insumos que tenemos?
+[11/06/2025, 18:27:23] Roger | RIO MED (amigo da campos sales): Ese doctor nos está copiando
+‎[11/06/2025, 18:27:28] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000138-PHOTO-2025-06-11-18-27-28.jpg>
+‎[11/06/2025, 18:27:32] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000139-PHOTO-2025-06-11-18-27-32.jpg>
+[11/06/2025, 18:28:04] Roger | RIO MED (amigo da campos sales): Bueno sería colocar una marca d’Agua
+[11/06/2025, 18:28:12] Roger | RIO MED (amigo da campos sales): Con él logo RioMed
+[11/06/2025, 18:28:16] Roger | RIO MED (amigo da campos sales): Al
+Fondo
+[11/06/2025, 18:28:21] Roger | RIO MED (amigo da campos sales): Dé 1
+[11/06/2025, 18:28:53] ~ gamalielv15: Algunos se hacen pasar por clientes para preguntar precios o sacan capturas a los Estados
+[11/06/2025, 18:30:25] Roger | RIO MED (amigo da campos sales): Por eso sé Hace marca d”Agua
+‎[11/06/2025, 18:30:58] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000146-PHOTO-2025-06-11-18-30-58.jpg>
+[11/06/2025, 18:31:13] Roger | RIO MED (amigo da campos sales): Otra forma  és asi 👆🏻👆🏻
+[11/06/2025, 18:31:24] Roger | RIO MED (amigo da campos sales): Logo detras dé lá foto
+‎[11/06/2025, 18:34:56] ~ gamalielv15: ‎<anexado: 00000149-PHOTO-2025-06-11-18-34-56.jpg>
+[11/06/2025, 18:35:00] ~ gamalielv15: Así?
+[11/06/2025, 18:41:33] Katharine Alves | impulsionando: eu vou mudar o post de amanhã para um post sobre o site ok?
+[11/06/2025, 18:47:24] Raygs Monnerat: ‎Mensagem apagada
+‎[11/06/2025, 18:50:40] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000153-Planejamento semanal - Rio Med.pdf>
+[11/06/2025, 18:59:02] Valentina | Rio Med: el sitio web recién hay pocos productos, no podemos promocionarlo como “tiene todo lo que necesitas”
+[11/06/2025, 18:59:41] Valentina | Rio Med: solo son productos para home care, no hay nada para hospitales aún
+[11/06/2025, 18:59:48] Valentina | Rio Med: son 7 productos los que hay en la página
+‎[11/06/2025, 19:00:06] Valentina | Rio Med: hoy tenía que salir esto ‎<anexado: 00000157-PHOTO-2025-06-11-19-00-06.jpg>
+[11/06/2025, 19:00:21] Valentina | Rio Med: @⁨Katharine Alves | impulsionando⁩ envié los artes por aquí también, no solo los copys
+‎[11/06/2025, 19:01:16] Valentina | Rio Med: esto es para mañana según el calendario ‎<anexado: 00000159-PHOTO-2025-06-11-19-01-16.jpg>
+[11/06/2025, 19:01:26] Valentina | Rio Med: donde salió esto?
+‎[11/06/2025, 19:04:26] SAC Rio Med: ‎<anexado: 00000161-PHOTO-2025-06-11-19-04-26.jpg>
+[11/06/2025, 19:07:43] Katharine Alves | impulsionando: mas foi postado de manhã isso
+[11/06/2025, 19:08:35] Katharine Alves | impulsionando: então não é para divulgar ele?
+[11/06/2025, 19:09:04] Katharine Alves | impulsionando: me foi passado que era pra divulgar porque são os produtos com mais prioridade para venda
+[11/06/2025, 19:09:17] Raygs Monnerat: Si. cuenta cancelada ‎<Mensagem editada>
+[11/06/2025, 19:10:05] Valentina | Rio Med: @⁨Roger | RIO MED (amigo da campos sales)⁩ podemos publicar pero orientado a que recién se está empezando y podrán encontrar productos prácticos, y decir que más productos se estarán añadiendo con el tiempo
+[11/06/2025, 19:17:14] Adolfo Soraire | Rogerio Rio Med: @⁨Roger | RIO MED (amigo da campos sales)⁩
+[11/06/2025, 19:18:25] Roger | RIO MED (amigo da campos sales): Vamos a seguir pagando ?
+[11/06/2025, 19:18:51] Adolfo Soraire | Rogerio Rio Med: Julio
+[11/06/2025, 19:27:03] Raygs Monnerat: La cuenta de CRM Papo AI ha sido cancelada. Ya no es posible realizar ningún cargo. No se preocupe.
+‎[11/06/2025, 20:27:31] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00000171-PHOTO-2025-06-11-20-27-31.jpg>
+‎[11/06/2025, 20:57:24] Katharine Alves | impulsionando: ‎<anexado: 00000172-PHOTO-2025-06-11-20-57-24.jpg>
+[12/06/2025, 01:03:21] Roger | RIO MED (amigo da campos sales): https://www.instagram.com/p/DKxxoM_hvWL/?utm_source=ig_web_copy_link
+[12/06/2025, 01:03:28] Roger | RIO MED (amigo da campos sales): Tenemos q aprender 👆🏻
+‎[12/06/2025, 13:08:37] Katharine Alves | impulsionando: ‎<anexado: 00000175-VIDEO-2025-06-12-13-08-37.mp4>
+[12/06/2025, 13:10:28] Roger | RIO MED (amigo da campos sales): Top 💪🏻👏🏻
+[12/06/2025, 13:13:28] ~ Lurdes E.: de lujo 👏🏼👏🏼👏🏼❣️❣️
+[12/06/2025, 13:14:24] Roger | RIO MED (amigo da campos sales): @⁨Katharine Alves | impulsionando⁩ Acho que o número do telefone ficou pequeno pra ver na tela do celular não Acha ?
+[12/06/2025, 13:15:31] Katharine Alves | impulsionando: posso mudar isso mas o foco é o site
+[12/06/2025, 13:15:52] Roger | RIO MED (amigo da campos sales): Tá borrado também.  Melhor mais nitido
+[12/06/2025, 13:16:07] Roger | RIO MED (amigo da campos sales): Sim.
+[12/06/2025, 13:16:45] Roger | RIO MED (amigo da campos sales): Embaixo tá escrito a página e sai borrado
+‎[12/06/2025, 13:17:02] Katharine Alves | impulsionando: ‎<anexado: 00000183-AUDIO-2025-06-12-13-17-02.opus>
+[12/06/2025, 13:17:13] Roger | RIO MED (amigo da campos sales): Valeu
+‎[12/06/2025, 13:17:59] Katharine Alves | impulsionando: lv_0_20250612125722.mp4 ‎<anexado: 00000185-lv_0_20250612125722.mp4>
+[12/06/2025, 13:19:04] Roger | RIO MED (amigo da campos sales): Tá melhor
+‎[12/06/2025, 14:25:47] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000187-PHOTO-2025-06-12-14-25-47.jpg>
+[12/06/2025, 14:25:56] Roger | RIO MED (amigo da campos sales): Lo Nuevo Sitio está mal escrito.
+Es El nuevo sitio.!!
+[12/06/2025, 14:26:08] Roger | RIO MED (amigo da campos sales): Nadie sé dio cuenta !
+[12/06/2025, 14:28:30] Katharine Alves | impulsionando: ah ok, vou arrumar
+[12/06/2025, 14:31:50] Adolfo Soraire | Rogerio Rio Med: El
+[12/06/2025, 14:32:25] Roger | RIO MED (amigo da campos sales): El nuevo Sitio !!
+[12/06/2025, 14:56:35] Katharine Alves | impulsionando: ‎Mensagem apagada
+‎[12/06/2025, 14:59:48] Katharine Alves | impulsionando: ‎<anexado: 00000194-VIDEO-2025-06-12-14-59-48.mp4>
+‎[16/06/2025, 22:59:58] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000195-VIDEO-2025-06-16-22-59-58.mp4>
+[16/06/2025, 23:00:15] Roger | RIO MED (amigo da campos sales): Algo diferente asi podriamos crear para TikTok
+[17/06/2025, 10:05:52] Katharine Alves | impulsionando: tem alguma data importante para vocês chegando?
+[17/06/2025, 10:06:35] Katharine Alves | impulsionando: um video assim precisa ser filmado com algumas pessoas, você acha que a equipe poderia se disponibilizaria para se reunir e gravar?
+[17/06/2025, 10:07:10] Adolfo Soraire | Rogerio Rio Med: Ano  novo indígena
+[17/06/2025, 10:08:22] Katharine Alves | impulsionando: e vai ter alguma promoção relacionada a esse dia?
+[17/06/2025, 10:08:31] Katharine Alves | impulsionando: para eu poder saber e fazer o post
+‎[17/06/2025, 19:34:33] Adolfo Soraire | Rogerio Rio Med: Algo asi ‎<anexado: 00000202-PHOTO-2025-06-17-19-34-33.jpg>
+‎[17/06/2025, 19:36:01] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00000203-PHOTO-2025-06-17-19-36-01.jpg>
+‎[17/06/2025, 21:46:15] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000204-PHOTO-2025-06-17-21-46-15.jpg>
+[18/06/2025, 09:00:01] Katharine Alves | impulsionando: oi, pode me passar quais produtos de vocês entram nessa promoção de inverno?
+‎[18/06/2025, 09:48:15] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎2 páginas ‎<anexado: 00000206-Planejamento semanal - Rio Med.pdf>
+[18/06/2025, 09:56:48] Adolfo Soraire | Rogerio Rio Med: Ejercitadores pulmonares toda la línea de fisioterapia respiratoria
+[18/06/2025, 09:58:27] Katharine Alves | impulsionando: ‎Mensagem apagada
+[18/06/2025, 09:59:03] Katharine Alves | impulsionando: quando começa e quando termina a promoção?
+[18/06/2025, 09:59:35] Katharine Alves | impulsionando: ¿Cuando empieza y termina la promoción?
+‎[18/06/2025, 10:03:26] Katharine Alves | impulsionando: ‎<anexado: 00000211-PHOTO-2025-06-18-10-03-26.jpg>
+‎[19/06/2025, 15:08:41] Valentina | Rio Med: Están lindas las publicaciones, pero si el fondo es oscuro donde está la info tiene que ser blanco ‎<anexado: 00000212-PHOTO-2025-06-19-15-08-41.jpg>
+‎[20/06/2025, 17:23:21] Monica Heredia | Rio Mes: @⁨Roger | RIO MED (amigo da campos sales)⁩ @⁨Katharine Alves | impulsionando⁩ @⁨Valentina | Rio Med⁩ ‎<anexado: 00000213-PHOTO-2025-06-20-17-23-21.jpg>
+[20/06/2025, 17:23:42] Roger | RIO MED (amigo da campos sales): Ni modo
+[20/06/2025, 17:23:50] Roger | RIO MED (amigo da campos sales): Algunos abajo del costo
+[20/06/2025, 17:24:09] Monica Heredia | Rio Mes: No
+[20/06/2025, 17:24:16] Monica Heredia | Rio Mes: Incremente los precios
+[20/06/2025, 17:24:26] Monica Heredia | Rio Mes: Y bueno termómetro no hay cómo
+[20/06/2025, 17:25:00] Monica Heredia | Rio Mes: 350 puse la oferta nuestro precio anterior 280
+[20/06/2025, 17:25:17] Monica Heredia | Rio Mes: Ya que en el mercado no da
+[20/06/2025, 17:27:55] Katharine Alves | impulsionando: oi, essa promoção vai de qual dia até qual dia?
+[20/06/2025, 17:32:20] Roger | RIO MED (amigo da campos sales): Uns 30 días
+[21/06/2025, 15:44:13] ~ Lurdes E.: ‎~ Lurdes E. fixou uma mensagem
+‎[23/06/2025, 11:10:37] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf ‎<anexado: 00000224-Planejamento semanal - Rio Med.pdf>
+[24/06/2025, 09:53:01] Katharine Alves | impulsionando: oi, bom dia, vocês podem conferir se está tudo certo nos valores e nos produtos pro post de promoção? acho melhor ter esse ok antes de postar
+‎[24/06/2025, 09:53:21] Katharine Alves | impulsionando: ‎<anexado: 00000226-PHOTO-2025-06-24-09-53-21.jpg>
+‎[24/06/2025, 09:53:21] Katharine Alves | impulsionando: ‎<anexado: 00000227-PHOTO-2025-06-24-09-53-21.jpg>
+‎[24/06/2025, 09:53:22] Katharine Alves | impulsionando: ‎<anexado: 00000228-PHOTO-2025-06-24-09-53-22.jpg>
+‎[24/06/2025, 09:53:23] Katharine Alves | impulsionando: ‎<anexado: 00000229-PHOTO-2025-06-24-09-53-23.jpg>
+‎[24/06/2025, 09:53:24] Katharine Alves | impulsionando: ‎<anexado: 00000230-PHOTO-2025-06-24-09-53-24.jpg>
+‎[24/06/2025, 09:53:24] Katharine Alves | impulsionando: ‎<anexado: 00000231-PHOTO-2025-06-24-09-53-24.jpg>
+‎[24/06/2025, 09:53:25] Katharine Alves | impulsionando: ‎<anexado: 00000232-PHOTO-2025-06-24-09-53-25.jpg>
+‎[24/06/2025, 09:53:26] Katharine Alves | impulsionando: ‎<anexado: 00000233-PHOTO-2025-06-24-09-53-26.jpg>
+‎[24/06/2025, 09:53:26] Katharine Alves | impulsionando: ‎<anexado: 00000234-PHOTO-2025-06-24-09-53-26.jpg>
+‎[24/06/2025, 09:53:27] Katharine Alves | impulsionando: ‎<anexado: 00000235-PHOTO-2025-06-24-09-53-27.jpg>
+[24/06/2025, 09:53:35] Katharine Alves | impulsionando: valores retirados dessa tabela
+[24/06/2025, 09:57:37] Monica Heredia | Rio Mes: Este redondea a 98.50
+[24/06/2025, 09:57:55] Monica Heredia | Rio Mes: Redondea 124.50
+[24/06/2025, 09:58:17] Monica Heredia | Rio Mes: Redondea a 130, 50
+[24/06/2025, 09:59:09] Monica Heredia | Rio Mes: Buenos días por favor eso sería para modificar
+[24/06/2025, 10:12:44] Katharine Alves | impulsionando: ok, obrigada
+[24/06/2025, 10:28:06] Katharine Alves | impulsionando: se vocês forem promover esse post já ta no ar
+[24/06/2025, 12:00:41] Monica Heredia | Rio Mes: Hay que cambiar este video actualizar los precios de la página
+[24/06/2025, 12:01:32] Monica Heredia | Rio Mes: Hay que agregar estos precios
+[24/06/2025, 12:01:51] Monica Heredia | Rio Mes: Lo del azul precio de Venta
+[24/06/2025, 12:02:32] Katharine Alves | impulsionando: essa mensagem que você citou não está carregando para mim
+[24/06/2025, 12:03:24] Katharine Alves | impulsionando: é essa?
+[24/06/2025, 12:04:06] Katharine Alves | impulsionando: eu não mexo no site, os valores estão atualizados lá?
+[24/06/2025, 12:51:10] Roger | RIO MED (amigo da campos sales): Valentina és lá Que maneja lá página ??
+[24/06/2025, 12:52:03] Valentina | Rio Med: Tengo que hacer las promociones yo
+[24/06/2025, 12:52:09] Valentina | Rio Med: después katherine tiene acceso a todo
+‎[26/06/2025, 09:43:40] ~ Lurdes E.: Ese vídeo me pueden pasar 👆🏼❓
+Muy buenas las publicaciones👏🏼👏🏼 ‎<anexado: 00000252-PHOTO-2025-06-26-09-43-40.jpg>
+[26/06/2025, 10:06:21] Roger | RIO MED (amigo da campos sales): Archivar esas fotos
+‎[26/06/2025, 10:06:26] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000254-PHOTO-2025-06-26-10-06-26.jpg>
+‎[26/06/2025, 10:06:28] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000255-PHOTO-2025-06-26-10-06-28.jpg>
+‎[26/06/2025, 10:06:31] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000256-PHOTO-2025-06-26-10-06-31.jpg>
+[26/06/2025, 10:12:32] Adolfo Soraire | Rogerio Rio Med: Esta en la nube drive
+[26/06/2025, 10:12:49] Katharine Alves | impulsionando: eu vou te passar só um minuto
+‎[26/06/2025, 10:14:41] Katharine Alves | impulsionando: ‎<anexado: 00000259-VIDEO-2025-06-26-10-14-41.mp4>
+[26/06/2025, 10:17:28] Adolfo Soraire | Rogerio Rio Med: A
+[26/06/2025, 10:17:39] Adolfo Soraire | Rogerio Rio Med: 2
+[26/06/2025, 10:20:45] Katharine Alves | impulsionando: coloquei na pasta
+[26/06/2025, 10:20:55] Katharine Alves | impulsionando: as vezes demora um pouquinho para aparecer
+‎[30/06/2025, 10:27:40] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000264-Planejamento semanal - Rio Med.pdf>
+[30/06/2025, 10:48:20] SAC Rio Med: Buenos días:No estan llegando mensajes de Facebook .
+[30/06/2025, 14:14:06] Roger | RIO MED (amigo da campos sales): Pagaron ?$$
+[30/06/2025, 14:14:45] Adolfo Soraire | Rogerio Rio Med: Dijo Valentina que Katharine tenía que publicar
+[30/06/2025, 14:15:05] Roger | RIO MED (amigo da campos sales): Hay Que coNfirmar!!
+[30/06/2025, 14:15:15] Roger | RIO MED (amigo da campos sales): Ella vá usar la tarjeta ?
+[30/06/2025, 14:16:19] Katharine Alves | impulsionando: oi, não estou entendendo muito bem
+[02/07/2025, 13:07:43] Roger | RIO MED (amigo da campos sales): Tá tão pequenininho o link ali na parte de baixo, tem gente que não consegue indentificar e as vezes tem até preguiça de digitar 🙄
+[02/07/2025, 13:07:44] Roger | RIO MED (amigo da campos sales): Ela poderia destacar um pouquinho mais sim, pelo menos eu, achei pequeno ali em baixo...
+[02/07/2025, 13:07:44] Roger | RIO MED (amigo da campos sales): A princípio quando vi, me perguntei como entrar no site?
+[02/07/2025, 13:07:44] Roger | RIO MED (amigo da campos sales): Só depois eu vi o link embaixo
+[02/07/2025, 13:07:58] Roger | RIO MED (amigo da campos sales): Comentarios sobre a publi !!
+‎[02/07/2025, 13:08:35] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000276-VIDEO-2025-07-02-13-08-35.mp4>
+[02/07/2025, 13:08:38] Roger | RIO MED (amigo da campos sales): 👆🏻
+‎[02/07/2025, 14:08:26] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000278-VIDEO-2025-07-02-14-08-26.mp4>
+‎[02/07/2025, 15:52:32] Adolfo Soraire | Rogerio Rio Med: Un acceso de honor x5 quien? ‎<anexado: 00000279-PHOTO-2025-07-02-15-52-32.jpg>
+[02/07/2025, 16:34:43] Adolfo Soraire | Rogerio Rio Med: ‎‎Adolfo Soraire | Rogerio Rio Med mudou de número de telefone. ‎Toque para enviar mensagem ou para adicionar o novo número.
+[02/07/2025, 17:24:28] Katharine Alves | impulsionando: isso eu posso mudar, ou até tirar o link debaixo, é que era um modelo pronto que eu recebi e que deveria ser assim em todas as postagens, mas o site mesmo que se refere o video aparece no final do video
+‎[02/07/2025, 17:24:58] Katharine Alves | impulsionando: ‎<anexado: 00000282-PHOTO-2025-07-02-17-24-58.jpg>
+‎[07/07/2025, 11:37:09] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf ‎<anexado: 00000283-Planejamento semanal - Rio Med.pdf>
+[07/07/2025, 11:37:22] Katharine Alves | impulsionando: oi, bom dia, o planejamento dessa semana ‎<Mensagem editada>
+‎[08/07/2025, 17:48:32] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000285-PHOTO-2025-07-08-17-48-32.jpg>
+‎[08/07/2025, 17:48:33] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000286-VIDEO-2025-07-08-17-48-33.mp4>
+‎[14/07/2025, 12:27:45] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000287-Planejamento semanal - Rio Med.pdf>
+[14/07/2025, 12:27:50] Katharine Alves | impulsionando: qual é esse equipamento?
+[14/07/2025, 13:10:39] Roger | RIO MED (amigo da campos sales): Se chama incubadora dé transporte
+[14/07/2025, 13:11:19] Roger | RIO MED (amigo da campos sales): Essa luz Violeta vem separada e sé chama bilitron
+‎[16/07/2025, 17:09:22] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000291-PHOTO-2025-07-16-17-09-22.jpg>
+‎[17/07/2025, 17:27:01] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000292-PHOTO-2025-07-17-17-27-01.jpg>
+‎[21/07/2025, 12:36:07] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000293-Planejamento semanal - Rio Med.pdf>
+[21/07/2025, 13:01:45] Valentina | Rio Med: no tenemos el DYNMED
+[21/07/2025, 13:01:51] Valentina | Rio Med: haga de electrobisturi
+‎[21/07/2025, 13:04:14] Valentina | Rio Med: ‎<anexado: 00000296-PHOTO-2025-07-21-13-04-14.jpg>
+‎[21/07/2025, 13:07:36] Katharine Alves | impulsionando: ok, só para explicar, eu vi no catalogo, mas vou mudar sem problemas. ‎<anexado: 00000297-PHOTO-2025-07-21-13-07-36.jpg>
+‎[21/07/2025, 13:08:30] Valentina | Rio Med: REPORTE DE INVENTARIO TOTAL SUMA DE TODO LOS ALMACENES SISTE,MA Y FISICO.xlsx • ‎1 planilha ‎<anexado: 00000298-REPORTE DE INVENTARIO TOTAL SUMA DE TODO LOS ALMACENES SISTE,MA Y FISICO.xlsx>
+[21/07/2025, 13:09:26] Valentina | Rio Med: Puede guiarse aqui
+[21/07/2025, 13:09:46] Katharine Alves | impulsionando: ok
+[21/07/2025, 13:09:49] Katharine Alves | impulsionando: obrigada
+[21/07/2025, 13:11:15] Katharine Alves | impulsionando: Medtronic Covidien Valleylab Force FX - Electrobisturís
+[21/07/2025, 13:11:20] Katharine Alves | impulsionando: é isso?
+[22/07/2025, 16:36:05] Rio Med | SAC Bolivia: ‎‎Rio Med | SAC Bolivia mudou de número de telefone. ‎Toque para enviar mensagem ou para adicionar o novo número.
+‎[28/07/2025, 11:32:05] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000305-Planejamento semanal - Rio Med.pdf>
+‎[17/11/2025, 15:33:23] Valentina | Rio Med: ‎<anexado: 00000306-PHOTO-2025-11-17-15-33-23.jpg>
+[17/11/2025, 16:14:05] Roger RIO: ‎Valentina | Rio Med adicionou Roger RIO
+‎[17/11/2025, 16:13:32] Katharine Alves | impulsionando: oi, o que acham desse modelo para divulgar os produtos em promoção? se tiver ok vou fazer dos outros produtos ‎<anexado: 00000308-PHOTO-2025-11-17-16-13-32.jpg>
+[17/11/2025, 16:13:55] Valentina | Rio Med: @⁨Monica Heredia | Rio Mes⁩
+‎[17/11/2025, 16:14:16] Valentina | Rio Med: oi, o que acham desse modelo para divulgar os produtos em promoção? se tiver ok vou fazer dos outros produtos ‎<anexado: 00000310-PHOTO-2025-11-17-16-14-16.jpg>
+‎[17/11/2025, 16:20:04] Katharine Alves | impulsionando: fiz essa opção também com menos azul ‎<anexado: 00000311-PHOTO-2025-11-17-16-20-04.jpg>
+[17/11/2025, 16:20:42] Valentina | Rio Med: @⁨Roger RIO⁩ @⁨Monica Heredia | Rio Mes⁩
+[17/11/2025, 16:23:38] Monica Heredia | Rio Mes: Está bonito ese
+[17/11/2025, 16:23:48] ~ gamalielv15: Este
+[17/11/2025, 16:25:35] Katharine Alves | impulsionando: ok
+‎[17/11/2025, 17:54:01] Katharine Alves | impulsionando: ‎<anexado: 00000316-PHOTO-2025-11-17-17-54-01.jpg>
+‎[17/11/2025, 17:54:02] Katharine Alves | impulsionando: ‎<anexado: 00000317-PHOTO-2025-11-17-17-54-02.jpg>
+‎[17/11/2025, 17:54:03] Katharine Alves | impulsionando: ‎<anexado: 00000318-PHOTO-2025-11-17-17-54-03.jpg>
+‎[17/11/2025, 17:54:03] Katharine Alves | impulsionando: ‎<anexado: 00000319-PHOTO-2025-11-17-17-54-03.jpg>
+‎[17/11/2025, 17:54:03] Katharine Alves | impulsionando: ‎<anexado: 00000320-PHOTO-2025-11-17-17-54-03.jpg>
+‎[17/11/2025, 17:54:03] Katharine Alves | impulsionando: ‎<anexado: 00000321-PHOTO-2025-11-17-17-54-03.jpg>
+‎[17/11/2025, 17:54:04] Katharine Alves | impulsionando: ‎<anexado: 00000322-PHOTO-2025-11-17-17-54-04.jpg>
+‎[17/11/2025, 17:54:04] Katharine Alves | impulsionando: ‎<anexado: 00000323-PHOTO-2025-11-17-17-54-04.jpg>
+‎[17/11/2025, 17:54:04] Katharine Alves | impulsionando: ‎<anexado: 00000324-PHOTO-2025-11-17-17-54-04.jpg>
+‎[17/11/2025, 17:54:05] Katharine Alves | impulsionando: ‎<anexado: 00000325-PHOTO-2025-11-17-17-54-05.jpg>
+‎[17/11/2025, 17:54:05] Katharine Alves | impulsionando: ‎<anexado: 00000326-PHOTO-2025-11-17-17-54-05.jpg>
+‎[17/11/2025, 17:54:05] Katharine Alves | impulsionando: ‎<anexado: 00000327-PHOTO-2025-11-17-17-54-05.jpg>
+‎[17/11/2025, 17:54:05] Katharine Alves | impulsionando: ‎<anexado: 00000328-PHOTO-2025-11-17-17-54-05.jpg>
+[17/11/2025, 18:06:17] Monica Heredia | Rio Mes: Las imágenes de las incubadoras
+[17/11/2025, 18:06:21] Monica Heredia | Rio Mes: No es así
+[17/11/2025, 18:06:31] Monica Heredia | Rio Mes: Hay que cambiar
+[17/11/2025, 18:07:53] Katharine Alves | impulsionando: tem as imagens corretas para me mandar?
+[17/11/2025, 18:08:04] Katharine Alves | impulsionando: eu coloquei as que apareceram no google
+[17/11/2025, 18:12:51] Katharine Alves | impulsionando: .
+‎[17/11/2025, 18:14:18] SAC Rio Med: ‎<anexado: 00000335-PHOTO-2025-11-17-18-14-18.jpg>
+[17/11/2025, 18:14:27] SAC Rio Med: En la página en la galería de foto esta
+‎[17/11/2025, 18:18:19] SAC Rio Med: ‎<anexado: 00000337-PHOTO-2025-11-17-18-18-19.jpg>
+[17/11/2025, 18:18:45] SAC Rio Med: Modelo c186 ts
+[17/11/2025, 18:19:32] SAC Rio Med: No va publicar
+[17/11/2025, 18:19:34] SAC Rio Med: Todavía
+[17/11/2025, 18:19:41] SAC Rio Med: No le ponga los porcentajes
+[17/11/2025, 18:20:24] Katharine Alves | impulsionando: como assim?
+‎[17/11/2025, 18:20:54] Valentina | Rio Med: esto no ponga ‎<anexado: 00000343-PHOTO-2025-11-17-18-20-54.jpg>
+[17/11/2025, 18:21:01] Valentina | Rio Med: y aun no publique
+‎[17/11/2025, 18:21:49] SAC Rio Med: ‎<anexado: 00000345-AUDIO-2025-11-17-18-21-49.opus>
+[17/11/2025, 18:22:52] Katharine Alves | impulsionando: eu ia mudar a porcentagem de acordo com o desconto
+[17/11/2025, 18:23:06] Katharine Alves | impulsionando: é que de todas essas imagens eram 10% por isso ficou igual
+[17/11/2025, 18:23:15] Katharine Alves | impulsionando: mas tudo bem eu tiro
+[17/11/2025, 18:23:47] Katharine Alves | impulsionando: não é para publicar hoje?
+[17/11/2025, 18:24:04] Valentina | Rio Med: @⁨Monica Heredia | Rio Mes⁩ cuando va a publicar?
+[17/11/2025, 18:28:47] Monica Heredia | Rio Mes: Ah todas tienen
+[17/11/2025, 18:28:54] Monica Heredia | Rio Mes: 10%
+[17/11/2025, 18:29:00] Katharine Alves | impulsionando: dessas imagens sim
+‎[17/11/2025, 18:29:29] Monica Heredia | Rio Mes: ‎<anexado: 00000354-AUDIO-2025-11-17-18-29-29.opus>
+‎[17/11/2025, 18:38:36] Katharine Alves | impulsionando: ‎<anexado: 00000355-PHOTO-2025-11-17-18-38-36.jpg>
+[17/11/2025, 18:38:36] Katharine Alves | impulsionando: ‎Mensagem apagada
+[17/11/2025, 18:38:58] Katharine Alves | impulsionando: ok, eu conferi novamente na planilha e todos dessas imagens tem 10% de desconto mesmo
+[17/11/2025, 18:39:17] Katharine Alves | impulsionando: me da um ok se eu ja puder publicar por favor
+‎[17/11/2025, 18:39:58] Katharine Alves | impulsionando: ‎<anexado: 00000359-PHOTO-2025-11-17-18-39-58.jpg>
+[17/11/2025, 18:40:35] SAC Rio Med: Está ok
+‎[18/11/2025, 09:44:13] ~ Lurdes E.: ‎<anexado: 00000361-PHOTO-2025-11-18-09-44-13.jpg>
+[18/11/2025, 09:45:59] ~ Lurdes E.: Hay que anotar fechas
+[18/11/2025, 09:47:30] Katharine Alves | impulsionando: me pediram pra essa semana todos os posts serem sobre a promoção de black friday (blue month)
+[18/11/2025, 15:33:12] ~ Ap: ‎Monica Heredia | Rio Mes adicionou ~ Ap
+‎[18/11/2025, 15:31:36] Katharine Alves | impulsionando: oi, uma duvida, esse produto corresponde ao produto "MASCARILLA CON RESERVORIO PARA ADULTO LOT:2006027"? ‎<anexado: 00000365-PHOTO-2025-11-18-15-31-36.jpg>
+[18/11/2025, 15:31:53] Katharine Alves | impulsionando: @⁨Monica Heredia | Rio Mes⁩ @⁨Valentina | Rio Med⁩
+[18/11/2025, 15:37:21] Adolfo Soraire | Rogerio Rio Med: Sim mascarilla con reservorio
+[18/11/2025, 15:46:57] Katharine Alves | impulsionando: obrigada
+‎[18/11/2025, 15:52:56] Monica Heredia | Rio Mes: ‎<anexado: 00000369-PHOTO-2025-11-18-15-52-56.jpg>
+‎[18/11/2025, 15:53:01] Monica Heredia | Rio Mes: ‎<anexado: 00000370-PHOTO-2025-11-18-15-53-01.jpg>
+‎[18/11/2025, 16:24:23] Katharine Alves | impulsionando: ‎<anexado: 00000371-PHOTO-2025-11-18-16-24-23.jpg>
+‎[18/11/2025, 16:24:23] Katharine Alves | impulsionando: ‎<anexado: 00000372-PHOTO-2025-11-18-16-24-23.jpg>
+‎[18/11/2025, 16:24:23] Katharine Alves | impulsionando: ‎<anexado: 00000373-PHOTO-2025-11-18-16-24-23.jpg>
+‎[18/11/2025, 16:24:23] Katharine Alves | impulsionando: ‎<anexado: 00000374-PHOTO-2025-11-18-16-24-23.jpg>
+‎[18/11/2025, 16:24:24] Katharine Alves | impulsionando: ‎<anexado: 00000375-PHOTO-2025-11-18-16-24-24.jpg>
+‎[18/11/2025, 16:24:24] Katharine Alves | impulsionando: ‎<anexado: 00000376-PHOTO-2025-11-18-16-24-24.jpg>
+‎[18/11/2025, 16:24:24] Katharine Alves | impulsionando: ‎<anexado: 00000377-PHOTO-2025-11-18-16-24-24.jpg>
+‎[18/11/2025, 16:24:24] Katharine Alves | impulsionando: ‎<anexado: 00000378-PHOTO-2025-11-18-16-24-24.jpg>
+‎[18/11/2025, 18:34:41] Monica Heredia | Rio Mes: LISTA DE BLACK FRIDAY 2025..xlsx ‎<anexado: 00000379-LISTA DE BLACK FRIDAY 2025..xlsx>
+[18/11/2025, 18:36:28] Monica Heredia | Rio Mes: Tomar en cuenta
+‎[19/11/2025, 16:22:10] Katharine Alves | impulsionando: ‎<anexado: 00000381-PHOTO-2025-11-19-16-22-10.jpg>
+‎[19/11/2025, 16:22:10] Katharine Alves | impulsionando: ‎<anexado: 00000382-PHOTO-2025-11-19-16-22-10.jpg>
+‎[19/11/2025, 16:22:10] Katharine Alves | impulsionando: ‎<anexado: 00000383-PHOTO-2025-11-19-16-22-10.jpg>
+‎[19/11/2025, 16:22:10] Katharine Alves | impulsionando: ‎<anexado: 00000384-PHOTO-2025-11-19-16-22-10.jpg>
+‎[19/11/2025, 16:22:11] Katharine Alves | impulsionando: ‎<anexado: 00000385-PHOTO-2025-11-19-16-22-11.jpg>
+‎[19/11/2025, 16:22:11] Katharine Alves | impulsionando: ‎<anexado: 00000386-PHOTO-2025-11-19-16-22-11.jpg>
+‎[19/11/2025, 16:22:11] Katharine Alves | impulsionando: ‎<anexado: 00000387-PHOTO-2025-11-19-16-22-11.jpg>
+‎[19/11/2025, 16:22:11] Katharine Alves | impulsionando: ‎<anexado: 00000388-PHOTO-2025-11-19-16-22-11.jpg>
+‎[19/11/2025, 16:22:12] Katharine Alves | impulsionando: ‎<anexado: 00000389-PHOTO-2025-11-19-16-22-12.jpg>
+‎[19/11/2025, 16:22:12] Katharine Alves | impulsionando: ‎<anexado: 00000390-PHOTO-2025-11-19-16-22-12.jpg>
+‎[19/11/2025, 16:22:12] Katharine Alves | impulsionando: ‎<anexado: 00000391-PHOTO-2025-11-19-16-22-12.jpg>
+‎[19/11/2025, 16:22:12] Katharine Alves | impulsionando: ‎<anexado: 00000392-PHOTO-2025-11-19-16-22-12.jpg>
+‎[19/11/2025, 16:22:13] Katharine Alves | impulsionando: ‎<anexado: 00000393-PHOTO-2025-11-19-16-22-13.jpg>
+‎[19/11/2025, 16:22:13] Katharine Alves | impulsionando: ‎<anexado: 00000394-PHOTO-2025-11-19-16-22-13.jpg>
+[19/11/2025, 16:35:51] Monica Heredia | Rio Mes: Corregir POR ACERO DONDE DICE ACERO
+[19/11/2025, 16:36:22] Valentina | Rio Med: Acero
+[19/11/2025, 16:36:52] Valentina | Rio Med: BASTÓN
+[19/11/2025, 16:37:03] ~ Lurdes E.: *Aero*
+Estás en todo Monica 🫣
+[19/11/2025, 16:37:43] Valentina | Rio Med: examinación
+[19/11/2025, 16:43:25] Monica Heredia | Rio Mes: Está bien
+[20/11/2025, 15:49:51] SAC Rio Med: ‎SAC Rio Med fixou uma mensagem
+[20/11/2025, 16:20:37] Katharine Alves | impulsionando: oi, alguem pode me mandar a imagem desse produto "CRÁNEO EN 4 PARTES RBA FASCÍCULO"?
+[20/11/2025, 16:20:39] Katharine Alves | impulsionando: não achei
+[20/11/2025, 16:22:36] Katharine Alves | impulsionando: @⁨Monica Heredia | Rio Mes⁩ @⁨Valentina | Rio Med⁩
+[20/11/2025, 16:22:50] Valentina | Rio Med: @⁨~Ap⁩ pliiis 🙏🏽
+[20/11/2025, 16:23:16] Monica Heredia | Rio Mes: RM?
+[20/11/2025, 16:23:24] Katharine Alves | impulsionando: RM519
+‎[20/11/2025, 16:23:35] Monica Heredia | Rio Mes: ‎<anexado: 00000408-PHOTO-2025-11-20-16-23-35.jpg>
+‎[20/11/2025, 16:23:50] Monica Heredia | Rio Mes: ‎<anexado: 00000409-PHOTO-2025-11-20-16-23-50.jpg>
+[20/11/2025, 16:25:52] Katharine Alves | impulsionando: obrigada
+‎[20/11/2025, 16:27:03] Monica Heredia | Rio Mes: ‎<anexado: 00000411-PHOTO-2025-11-20-16-27-03.jpg>
+‎[20/11/2025, 16:28:40] Katharine Alves | impulsionando: posso usar essa? ‎<anexado: 00000412-PHOTO-2025-11-20-16-28-40.jpg>
+‎[20/11/2025, 16:46:51] Katharine Alves | impulsionando: ‎<anexado: 00000413-PHOTO-2025-11-20-16-46-51.jpg>
+‎[20/11/2025, 16:46:52] Katharine Alves | impulsionando: ‎<anexado: 00000414-PHOTO-2025-11-20-16-46-52.jpg>
+‎[20/11/2025, 16:46:52] Katharine Alves | impulsionando: ‎<anexado: 00000415-PHOTO-2025-11-20-16-46-52.jpg>
+‎[20/11/2025, 16:46:52] Katharine Alves | impulsionando: ‎<anexado: 00000416-PHOTO-2025-11-20-16-46-52.jpg>
+‎[20/11/2025, 16:46:52] Katharine Alves | impulsionando: ‎<anexado: 00000417-PHOTO-2025-11-20-16-46-52.jpg>
+‎[20/11/2025, 16:46:53] Katharine Alves | impulsionando: ‎<anexado: 00000418-PHOTO-2025-11-20-16-46-53.jpg>
+‎[20/11/2025, 16:46:53] Katharine Alves | impulsionando: ‎<anexado: 00000419-PHOTO-2025-11-20-16-46-53.jpg>
+‎[20/11/2025, 16:46:53] Katharine Alves | impulsionando: ‎<anexado: 00000420-PHOTO-2025-11-20-16-46-53.jpg>
+‎[20/11/2025, 16:46:54] Katharine Alves | impulsionando: ‎<anexado: 00000421-PHOTO-2025-11-20-16-46-54.jpg>
+‎[20/11/2025, 16:46:54] Katharine Alves | impulsionando: ‎<anexado: 00000422-PHOTO-2025-11-20-16-46-54.jpg>
+‎[20/11/2025, 16:46:54] Katharine Alves | impulsionando: ‎<anexado: 00000423-PHOTO-2025-11-20-16-46-54.jpg>
+‎[20/11/2025, 16:46:54] Katharine Alves | impulsionando: ‎<anexado: 00000424-PHOTO-2025-11-20-16-46-54.jpg>
+‎[20/11/2025, 16:46:55] Katharine Alves | impulsionando: ‎<anexado: 00000425-PHOTO-2025-11-20-16-46-55.jpg>
+‎[20/11/2025, 16:46:55] Katharine Alves | impulsionando: ‎<anexado: 00000426-PHOTO-2025-11-20-16-46-55.jpg>
+‎[20/11/2025, 16:46:55] Katharine Alves | impulsionando: ‎<anexado: 00000427-PHOTO-2025-11-20-16-46-55.jpg>
+‎[20/11/2025, 16:46:56] Katharine Alves | impulsionando: ‎<anexado: 00000428-PHOTO-2025-11-20-16-46-56.jpg>
+‎[20/11/2025, 16:46:56] Katharine Alves | impulsionando: ‎<anexado: 00000429-PHOTO-2025-11-20-16-46-56.jpg>
+‎[20/11/2025, 16:46:56] Katharine Alves | impulsionando: ‎<anexado: 00000430-PHOTO-2025-11-20-16-46-56.jpg>
+[21/11/2025, 10:43:39] Monica Heredia | Rio Mes: Mande la corregida @⁨Katharine Alves | impulsionando⁩  porfavor
+‎[21/11/2025, 10:44:55] Katharine Alves | impulsionando: ‎<anexado: 00000432-PHOTO-2025-11-21-10-44-55.jpg>
+‎[21/11/2025, 10:44:55] Katharine Alves | impulsionando: ‎<anexado: 00000433-PHOTO-2025-11-21-10-44-55.jpg>
+‎[21/11/2025, 10:44:56] Katharine Alves | impulsionando: ‎<anexado: 00000434-PHOTO-2025-11-21-10-44-56.jpg>
+‎[21/11/2025, 10:44:56] Katharine Alves | impulsionando: ‎<anexado: 00000435-PHOTO-2025-11-21-10-44-56.jpg>
+‎[21/11/2025, 10:44:56] Katharine Alves | impulsionando: ‎<anexado: 00000436-PHOTO-2025-11-21-10-44-56.jpg>
+‎[21/11/2025, 10:44:56] Katharine Alves | impulsionando: ‎<anexado: 00000437-PHOTO-2025-11-21-10-44-56.jpg>
+‎[21/11/2025, 10:44:57] Katharine Alves | impulsionando: ‎<anexado: 00000438-PHOTO-2025-11-21-10-44-57.jpg>
+‎[21/11/2025, 10:44:57] Katharine Alves | impulsionando: ‎<anexado: 00000439-PHOTO-2025-11-21-10-44-57.jpg>
+‎[21/11/2025, 10:44:57] Katharine Alves | impulsionando: ‎<anexado: 00000440-PHOTO-2025-11-21-10-44-57.jpg>
+‎[21/11/2025, 10:44:57] Katharine Alves | impulsionando: ‎<anexado: 00000441-PHOTO-2025-11-21-10-44-57.jpg>
+‎[21/11/2025, 10:44:58] Katharine Alves | impulsionando: ‎<anexado: 00000442-PHOTO-2025-11-21-10-44-58.jpg>
+‎[21/11/2025, 10:44:58] Katharine Alves | impulsionando: ‎<anexado: 00000443-PHOTO-2025-11-21-10-44-58.jpg>
+‎[21/11/2025, 10:44:58] Katharine Alves | impulsionando: ‎<anexado: 00000444-PHOTO-2025-11-21-10-44-58.jpg>
+‎[21/11/2025, 10:44:59] Katharine Alves | impulsionando: ‎<anexado: 00000445-PHOTO-2025-11-21-10-44-59.jpg>
+[21/11/2025, 11:32:05] Katharine Alves | impulsionando: o preço desse produto é assim mesmo? RM2031	                SENSOR DE OXIMETRO ADULTO P/ DESFIBRILADOR UNIMED U410-15R 14 PINES COMPATIBLE CON ZOLL M SERIES	P/MONITOR DE SIGNOS VITALES	8	754,31	113,1465	641,1635
+[21/11/2025, 11:32:29] Katharine Alves | impulsionando: 641,1635
+[21/11/2025, 11:32:47] Katharine Alves | impulsionando: ou é 641,16?
+[21/11/2025, 11:32:58] Katharine Alves | impulsionando: @⁨Monica Heredia | Rio Mes⁩
+[21/11/2025, 11:37:51] Monica Heredia | Rio Mes: Si
+[21/11/2025, 12:22:13] Katharine Alves | impulsionando: alguns produtos não tem no catalogo e quando a descrição é mais vaga eu não sei qual é a imagem correta, então vou mandando aqui para vocês me passarem por favor
+[21/11/2025, 12:22:15] Katharine Alves | impulsionando: RM457	                PINZA + CABLE BIPOLAR OBS
+[21/11/2025, 12:44:27] Monica Heredia | Rio Mes: Es el el mismo
+[21/11/2025, 12:44:33] Monica Heredia | Rio Mes: Que la otra pinza
+[21/11/2025, 12:44:56] Monica Heredia | Rio Mes: RM1117
+‎[21/11/2025, 12:46:33] Monica Heredia | Rio Mes: ‎<anexado: 00000456-PHOTO-2025-11-21-12-46-33.jpg>
+‎[21/11/2025, 12:49:53] ~ Lurdes E.: Pinza + cable ‎<anexado: 00000457-PHOTO-2025-11-21-12-49-53.jpg>
+[21/11/2025, 13:00:42] Katharine Alves | impulsionando: RM666	                PEDAL BIPOLAR PARA ELECTROBISTURI
+[21/11/2025, 13:02:07] Monica Heredia | Rio Mes: https://share.google/images/FjPPVsrfvEvR391QE
+[21/11/2025, 13:02:11] Monica Heredia | Rio Mes: @⁨Katharine Alves | impulsionando⁩
+‎[21/11/2025, 13:02:20] Monica Heredia | Rio Mes: ‎<anexado: 00000461-PHOTO-2025-11-21-13-02-20.jpg>
+[21/11/2025, 13:08:44] Katharine Alves | impulsionando: RM092	                CABLE DE ECG 6 PINES 5 VIAS DE PINZA
+‎[21/11/2025, 13:14:45] ~ Lurdes E.: RM092 Cable de ECG 6 pines - 5 vías de pinzas. ‎<anexado: 00000463-PHOTO-2025-11-21-13-14-45.jpg>
+[21/11/2025, 13:16:57] Katharine Alves | impulsionando: RM2001	                SENSOR DE OXIMETRO ADULTO P/MONITOR UNIMED U410-48 7 PINES 1 RANURA REDONDO   REUSABLE FINGER CLIP  COMPATIBLE CON MINDRAY -D
+‎[21/11/2025, 13:19:52] ~ Lurdes E.: RM2001	- SENSOR DE OXIMETRO ADULTO P/MONITOR UNIMED U410-48 7 PINES 1 RANURA REDONDO   REUSABLE FINGER CLIP  COMPATIBLE CON MINDRAY -D ‎<anexado: 00000465-PHOTO-2025-11-21-13-19-52.jpg>
+‎[21/11/2025, 13:22:37] ~ Lurdes E.: ‎<anexado: 00000466-VIDEO-2025-11-21-13-22-37.mp4>
+‎[21/11/2025, 14:26:02] Katharine Alves | impulsionando: ‎<anexado: 00000467-PHOTO-2025-11-21-14-26-02.jpg>
+‎[21/11/2025, 14:26:02] Katharine Alves | impulsionando: ‎<anexado: 00000468-PHOTO-2025-11-21-14-26-02.jpg>
+‎[21/11/2025, 14:26:02] Katharine Alves | impulsionando: ‎<anexado: 00000469-PHOTO-2025-11-21-14-26-02.jpg>
+‎[21/11/2025, 14:26:02] Katharine Alves | impulsionando: ‎<anexado: 00000470-PHOTO-2025-11-21-14-26-02.jpg>
+‎[21/11/2025, 14:26:03] Katharine Alves | impulsionando: ‎<anexado: 00000471-PHOTO-2025-11-21-14-26-03.jpg>
+‎[21/11/2025, 14:26:03] Katharine Alves | impulsionando: ‎<anexado: 00000472-PHOTO-2025-11-21-14-26-03.jpg>
+‎[21/11/2025, 14:26:03] Katharine Alves | impulsionando: ‎<anexado: 00000473-PHOTO-2025-11-21-14-26-03.jpg>
+‎[21/11/2025, 14:26:04] Katharine Alves | impulsionando: ‎<anexado: 00000474-PHOTO-2025-11-21-14-26-04.jpg>
+‎[21/11/2025, 14:26:04] Katharine Alves | impulsionando: ‎<anexado: 00000475-PHOTO-2025-11-21-14-26-04.jpg>
+‎[21/11/2025, 14:26:04] Katharine Alves | impulsionando: ‎<anexado: 00000476-PHOTO-2025-11-21-14-26-04.jpg>
+‎[21/11/2025, 14:26:04] Katharine Alves | impulsionando: ‎<anexado: 00000477-PHOTO-2025-11-21-14-26-04.jpg>
+‎[21/11/2025, 14:26:05] Katharine Alves | impulsionando: ‎<anexado: 00000478-PHOTO-2025-11-21-14-26-05.jpg>
+‎[21/11/2025, 14:26:05] Katharine Alves | impulsionando: ‎<anexado: 00000479-PHOTO-2025-11-21-14-26-05.jpg>
+‎[21/11/2025, 14:26:05] Katharine Alves | impulsionando: ‎<anexado: 00000480-PHOTO-2025-11-21-14-26-05.jpg>
+‎[21/11/2025, 14:26:05] Katharine Alves | impulsionando: ‎<anexado: 00000481-PHOTO-2025-11-21-14-26-05.jpg>
+‎[21/11/2025, 14:26:06] Katharine Alves | impulsionando: ‎<anexado: 00000482-PHOTO-2025-11-21-14-26-06.jpg>
+‎[21/11/2025, 14:26:06] Katharine Alves | impulsionando: ‎<anexado: 00000483-PHOTO-2025-11-21-14-26-06.jpg>
+‎[21/11/2025, 14:26:06] Katharine Alves | impulsionando: ‎<anexado: 00000484-PHOTO-2025-11-21-14-26-06.jpg>
+‎[21/11/2025, 14:26:06] Katharine Alves | impulsionando: ‎<anexado: 00000485-PHOTO-2025-11-21-14-26-06.jpg>
+‎[21/11/2025, 14:26:07] Katharine Alves | impulsionando: ‎<anexado: 00000486-PHOTO-2025-11-21-14-26-07.jpg>
+‎[21/11/2025, 14:26:07] Katharine Alves | impulsionando: ‎<anexado: 00000487-PHOTO-2025-11-21-14-26-07.jpg>
+‎[21/11/2025, 14:26:07] Katharine Alves | impulsionando: ‎<anexado: 00000488-PHOTO-2025-11-21-14-26-07.jpg>
+‎[21/11/2025, 14:26:08] Katharine Alves | impulsionando: ‎<anexado: 00000489-PHOTO-2025-11-21-14-26-08.jpg>
+‎[21/11/2025, 14:26:08] Katharine Alves | impulsionando: ‎<anexado: 00000490-PHOTO-2025-11-21-14-26-08.jpg>
+‎[21/11/2025, 14:26:08] Katharine Alves | impulsionando: ‎<anexado: 00000491-PHOTO-2025-11-21-14-26-08.jpg>
+‎[21/11/2025, 14:26:08] Katharine Alves | impulsionando: ‎<anexado: 00000492-PHOTO-2025-11-21-14-26-08.jpg>
+‎[21/11/2025, 14:26:09] Katharine Alves | impulsionando: ‎<anexado: 00000493-PHOTO-2025-11-21-14-26-09.jpg>
+‎[21/11/2025, 14:26:09] Katharine Alves | impulsionando: ‎<anexado: 00000494-PHOTO-2025-11-21-14-26-09.jpg>
+‎[21/11/2025, 14:26:09] Katharine Alves | impulsionando: ‎<anexado: 00000495-PHOTO-2025-11-21-14-26-09.jpg>
+‎[21/11/2025, 14:26:09] Katharine Alves | impulsionando: ‎<anexado: 00000496-PHOTO-2025-11-21-14-26-09.jpg>
+‎[21/11/2025, 14:26:10] Katharine Alves | impulsionando: ‎<anexado: 00000497-PHOTO-2025-11-21-14-26-10.jpg>
+‎[21/11/2025, 14:26:10] Katharine Alves | impulsionando: ‎<anexado: 00000498-PHOTO-2025-11-21-14-26-10.jpg>
+‎[21/11/2025, 14:26:10] Katharine Alves | impulsionando: ‎<anexado: 00000499-PHOTO-2025-11-21-14-26-10.jpg>
+‎[21/11/2025, 14:26:10] Katharine Alves | impulsionando: ‎<anexado: 00000500-PHOTO-2025-11-21-14-26-10.jpg>
+‎[21/11/2025, 14:26:11] Katharine Alves | impulsionando: ‎<anexado: 00000501-PHOTO-2025-11-21-14-26-11.jpg>
+‎[21/11/2025, 14:26:11] Katharine Alves | impulsionando: ‎<anexado: 00000502-PHOTO-2025-11-21-14-26-11.jpg>
+‎[21/11/2025, 14:26:11] Katharine Alves | impulsionando: ‎<anexado: 00000503-PHOTO-2025-11-21-14-26-11.jpg>
+‎[21/11/2025, 14:26:12] Katharine Alves | impulsionando: ‎<anexado: 00000504-PHOTO-2025-11-21-14-26-12.jpg>
+‎[21/11/2025, 14:26:12] Katharine Alves | impulsionando: ‎<anexado: 00000505-PHOTO-2025-11-21-14-26-12.jpg>
+‎[21/11/2025, 14:26:12] Katharine Alves | impulsionando: ‎<anexado: 00000506-PHOTO-2025-11-21-14-26-12.jpg>
+‎[21/11/2025, 14:26:12] Katharine Alves | impulsionando: ‎<anexado: 00000507-PHOTO-2025-11-21-14-26-12.jpg>
+‎[21/11/2025, 14:26:13] Katharine Alves | impulsionando: ‎<anexado: 00000508-PHOTO-2025-11-21-14-26-13.jpg>
+‎[21/11/2025, 14:26:13] Katharine Alves | impulsionando: ‎<anexado: 00000509-PHOTO-2025-11-21-14-26-13.jpg>
+‎[21/11/2025, 14:26:13] Katharine Alves | impulsionando: ‎<anexado: 00000510-PHOTO-2025-11-21-14-26-13.jpg>
+‎[21/11/2025, 14:26:13] Katharine Alves | impulsionando: ‎<anexado: 00000511-PHOTO-2025-11-21-14-26-13.jpg>
+‎[21/11/2025, 14:26:14] Katharine Alves | impulsionando: ‎<anexado: 00000512-PHOTO-2025-11-21-14-26-14.jpg>
+‎[21/11/2025, 14:26:14] Katharine Alves | impulsionando: ‎<anexado: 00000513-PHOTO-2025-11-21-14-26-14.jpg>
+‎[21/11/2025, 14:26:14] Katharine Alves | impulsionando: ‎<anexado: 00000514-PHOTO-2025-11-21-14-26-14.jpg>
+‎[21/11/2025, 14:26:14] Katharine Alves | impulsionando: ‎<anexado: 00000515-PHOTO-2025-11-21-14-26-14.jpg>
+‎[21/11/2025, 14:26:15] Katharine Alves | impulsionando: ‎<anexado: 00000516-PHOTO-2025-11-21-14-26-15.jpg>
+‎[21/11/2025, 14:26:15] Katharine Alves | impulsionando: ‎<anexado: 00000517-PHOTO-2025-11-21-14-26-15.jpg>
+‎[21/11/2025, 14:26:15] Katharine Alves | impulsionando: ‎<anexado: 00000518-PHOTO-2025-11-21-14-26-15.jpg>
+‎[21/11/2025, 14:26:15] Katharine Alves | impulsionando: ‎<anexado: 00000519-PHOTO-2025-11-21-14-26-15.jpg>
+‎[21/11/2025, 14:26:16] Katharine Alves | impulsionando: ‎<anexado: 00000520-PHOTO-2025-11-21-14-26-16.jpg>
+‎[21/11/2025, 14:26:16] Katharine Alves | impulsionando: ‎<anexado: 00000521-PHOTO-2025-11-21-14-26-16.jpg>
+‎[21/11/2025, 14:26:16] Katharine Alves | impulsionando: ‎<anexado: 00000522-PHOTO-2025-11-21-14-26-16.jpg>
+‎[21/11/2025, 14:26:16] Katharine Alves | impulsionando: ‎<anexado: 00000523-PHOTO-2025-11-21-14-26-16.jpg>
+‎[21/11/2025, 14:26:17] Katharine Alves | impulsionando: ‎<anexado: 00000524-PHOTO-2025-11-21-14-26-17.jpg>
+‎[21/11/2025, 14:26:17] Katharine Alves | impulsionando: ‎<anexado: 00000525-PHOTO-2025-11-21-14-26-17.jpg>
+‎[21/11/2025, 14:26:17] Katharine Alves | impulsionando: ‎<anexado: 00000526-PHOTO-2025-11-21-14-26-17.jpg>
+‎[21/11/2025, 14:26:17] Katharine Alves | impulsionando: ‎<anexado: 00000527-PHOTO-2025-11-21-14-26-17.jpg>
+‎[21/11/2025, 14:26:18] Katharine Alves | impulsionando: ‎<anexado: 00000528-PHOTO-2025-11-21-14-26-18.jpg>
+‎[21/11/2025, 14:26:18] Katharine Alves | impulsionando: ‎<anexado: 00000529-PHOTO-2025-11-21-14-26-18.jpg>
+‎[21/11/2025, 14:26:18] Katharine Alves | impulsionando: ‎<anexado: 00000530-PHOTO-2025-11-21-14-26-18.jpg>
+‎[21/11/2025, 14:26:18] Katharine Alves | impulsionando: ‎<anexado: 00000531-PHOTO-2025-11-21-14-26-18.jpg>
+‎[21/11/2025, 14:26:19] Katharine Alves | impulsionando: ‎<anexado: 00000532-PHOTO-2025-11-21-14-26-19.jpg>
+‎[21/11/2025, 14:26:19] Katharine Alves | impulsionando: ‎<anexado: 00000533-PHOTO-2025-11-21-14-26-19.jpg>
+‎[21/11/2025, 14:26:19] Katharine Alves | impulsionando: ‎<anexado: 00000534-PHOTO-2025-11-21-14-26-19.jpg>
+‎[21/11/2025, 14:26:19] Katharine Alves | impulsionando: ‎<anexado: 00000535-PHOTO-2025-11-21-14-26-19.jpg>
+‎[21/11/2025, 14:26:20] Katharine Alves | impulsionando: ‎<anexado: 00000536-PHOTO-2025-11-21-14-26-20.jpg>
+‎[21/11/2025, 14:26:20] Katharine Alves | impulsionando: ‎<anexado: 00000537-PHOTO-2025-11-21-14-26-20.jpg>
+‎[21/11/2025, 14:26:20] Katharine Alves | impulsionando: ‎<anexado: 00000538-PHOTO-2025-11-21-14-26-20.jpg>
+‎[21/11/2025, 14:26:20] Katharine Alves | impulsionando: ‎<anexado: 00000539-PHOTO-2025-11-21-14-26-20.jpg>
+[21/11/2025, 15:08:50] Valentina | Rio Med: @⁨Katharine Alves | impulsionando⁩ podria porfa exportar todo hasta ahora en PDF para usarlo de catalogo y enviar a clientes porfavor
+[21/11/2025, 15:09:07] Katharine Alves | impulsionando: sim
+‎[21/11/2025, 15:12:49] Katharine Alves | impulsionando: blue month - rio med.pdf • ‎126 páginas ‎documento omitido
+[22/11/2025, 13:22:11] Roger RIO: Hola
+[22/11/2025, 13:22:47] Roger RIO: Que opinan si publicamos informaciones importantes por las redes sociales ‎<Mensagem editada>
+[22/11/2025, 13:22:52] Roger RIO: Como esa !
+[22/11/2025, 13:22:58] Roger RIO: https://www.instagram.com/reel/DRU5p3CAF5H/?igsh=cm11eGw0eDdhZnFq
+[22/11/2025, 23:22:02] SAC Rio Med: Buenas noches:Solo 3 mensajes han llegando al corporativo del Facebook
+[22/11/2025, 23:33:42] Valentina | Rio Med: Ya esta la campaña con buen presupuesto 
+me parece raro
+lo volvere a ver
+[22/11/2025, 23:44:08] SAC Rio Med: Alguien pudo descar👆?
+‎[22/11/2025, 23:44:28] Valentina | Rio Med: blue month - rio med.pdf • ‎126 páginas ‎<anexado: 00000550-blue month - rio med.pdf>
+[22/11/2025, 23:45:46] SAC Rio Med: No puedo estoy en la bregadera 😬
+[22/11/2025, 23:48:37] SAC Rio Med: Ya pude
+‎[23/11/2025, 11:54:33] ~ Lurdes E.: Buenos días:No están llegando mensajes 👆🏽 ‎<anexado: 00000553-PHOTO-2025-11-23-11-54-33.jpg>
+‎[23/11/2025, 12:08:05] Valentina | Rio Med: cambie de proposito VENTAS  a INTERACCION a ver si algo cambia ‎<anexado: 00000554-PHOTO-2025-11-23-12-08-05.jpg>
+[24/11/2025, 17:06:34] ~ Lurdes E.: Ya están llegando los mensajes al WhatsApp 👏🏽
+[24/11/2025, 17:06:54] ~ Lurdes E.: Se vendió un Volumétrico 🫢 L.P. 😬
+‎[24/11/2025, 17:11:52] Valentina | Rio Med: ‎<anexado: 00000557-STICKER-2025-11-24-17-11-52.webp>
+‎[24/11/2025, 20:08:01] Roger RIO: ‎<anexado: 00000558-PHOTO-2025-11-24-20-08-01.jpg>
+‎[24/11/2025, 20:08:01] Roger RIO: ‎<anexado: 00000559-PHOTO-2025-11-24-20-08-01.jpg>
+‎[24/11/2025, 20:08:01] Roger RIO: ‎<anexado: 00000560-PHOTO-2025-11-24-20-08-01.jpg>
+[24/11/2025, 22:35:21] SAC Rio Med: Este est mal
+‎[24/11/2025, 22:35:31] SAC Rio Med: ‎<anexado: 00000562-PHOTO-2025-11-24-22-35-31.jpg>
+[24/11/2025, 22:35:41] SAC Rio Med: Es largo
+[24/11/2025, 22:36:01] SAC Rio Med: Agotado
+[25/11/2025, 09:21:16] ~ Lurdes E.: ‎Mensagem apagada
+‎[25/11/2025, 11:05:10] ~ Lurdes E.: @⁨Valentina | Rio Med⁩ no llegan mensajes al messenger y al corporativo ayer llegaron varios mensajes ‎<anexado: 00000566-PHOTO-2025-11-25-11-05-10.jpg>
+‎[25/11/2025, 13:45:37] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎2 páginas ‎<anexado: 00000567-Planejamento semanal - Rio Med.pdf>
+[02/12/2025, 12:13:17] Monica Heredia | Rio Mes: @⁨~gamalielv15⁩
+‎[02/12/2025, 12:21:46] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎2 páginas ‎<anexado: 00000569-Planejamento semanal - Rio Med.pdf>
+[05/12/2025, 15:02:26] SAC Rio Med: @⁨Valentina | Rio Med⁩ no están ingresando mensajes de Facebook
+‎[08/12/2025, 18:39:32] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎2 páginas ‎<anexado: 00000571-Planejamento semanal - Rio Med.pdf>
+‎[16/12/2025, 10:15:14] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000572-Planejamento semanal - Rio Med.pdf>
+[17/12/2025, 08:39:12] Monica Heredia | Rio Mes: Derrepente no tiene una agendita por ahí
+[17/12/2025, 08:39:18] Monica Heredia | Rio Mes: Mi cliente
+[17/12/2025, 08:39:24] Monica Heredia | Rio Mes: Que me compra siempre
+[17/12/2025, 08:40:32] Monica Heredia | Rio Mes: Si no me muevo con tema de publicidad nadie más 🫡@⁨Valentina | Rio Med⁩ @⁨~Lurdes E.⁩ 
+Calendarios
+Lapiceros
+Agenditas
+[17/12/2025, 08:40:35] Monica Heredia | Rio Mes: ??
+[17/12/2025, 08:45:01] ~ Lurdes E.: Publicidad no es Valentina?
+[17/12/2025, 09:17:24] Valentina | Rio Med: De regalo?
+[17/12/2025, 09:17:34] Valentina | Rio Med: Calendario hay
+[17/12/2025, 09:18:23] Valentina | Rio Med: Cuando falten cosas que hay que comprar o mandar a hacer es con @⁨Roger RIO⁩
+[17/12/2025, 09:33:50] Monica Heredia | Rio Mes: Ah
+[17/12/2025, 09:39:02] Valentina | Rio Med: Saben que a mi me gustaria hacer todas esas cosas lindas, pero el que autoriza es el jefe
+[19/12/2025, 11:22:01] Roger RIO: Hay que ver lá
+Pró forma 💁🏼‍♂️
+‎[22/12/2025, 09:01:52] Katharine Alves | impulsionando: Planejamento%20semanal%20-%20Rio%20Med.pdf (1).pdf • ‎3 páginas ‎<anexado: 00000585-Planejamento%20semanal%20-%20Rio%20Med.pdf (1).pdf>
+[24/12/2025, 10:51:00] Valentina | Rio Med: Buen dia
+[24/12/2025, 10:51:15] Valentina | Rio Med: Cuando este el arte de navidad lo envia por este medio para enviar a clientes porfavor
+‎[24/12/2025, 11:08:41] Katharine Alves | impulsionando: ‎<anexado: 00000588-PHOTO-2025-12-24-11-08-41.jpg>
+‎[29/12/2025, 19:22:55] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000589-Planejamento semanal - Rio Med.pdf>
+[29/12/2025, 19:22:58] Katharine Alves | impulsionando: planejamento dessa semana
+[29/12/2025, 20:05:46] Valentina | Rio Med: necesitamos de productos
+[29/12/2025, 20:06:02] Valentina | Rio Med: el del 30 que sea un producto
+[29/12/2025, 20:13:52] Katharine Alves | impulsionando: tem algum produto em específico com mais estoque para vender?
+[29/12/2025, 20:31:28] Roger RIO: Simuladores se vende enero ? Hay que visitar !
+‎[30/12/2025, 15:16:08] Katharine Alves | impulsionando: ‎<anexado: 00000595-PHOTO-2025-12-30-15-16-08.jpg>
+[30/12/2025, 15:16:08] Katharine Alves | impulsionando: para amanhã
+‎[06/01/2026, 15:44:27] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000597-Planejamento semanal - Rio Med.pdf>
+‎[12/01/2026, 18:29:14] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎documento omitido
+‎[12/01/2026, 18:44:20] Roger RIO: ‎<anexado: 00000599-PHOTO-2026-01-12-18-44-20.jpg>
+[12/01/2026, 18:57:49] Katharine Alves | impulsionando: qual é esse produto?
+‎[14/01/2026, 00:18:47] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000601-PHOTO-2026-01-14-00-18-47.jpg>
+‎[15/01/2026, 14:22:41] Monica Heredia | Rio Mes: ‎<anexado: 00000602-PHOTO-2026-01-15-14-22-41.jpg>
+[15/01/2026, 14:22:47] Monica Heredia | Rio Mes: @⁨~Lurdes E.⁩ @⁨Valentina | Rio Med⁩
+[15/01/2026, 14:22:58] Monica Heredia | Rio Mes: mas ancho el logo¨?
+‎[15/01/2026, 14:26:37] Monica Heredia | Rio Mes: ‎<anexado: 00000605-PHOTO-2026-01-15-14-26-37.jpg>
+[15/01/2026, 14:29:42] Valentina | Rio Med: ta bien
+[15/01/2026, 14:29:43] Valentina | Rio Med: bonito
+[15/01/2026, 14:29:57] Valentina | Rio Med: en las tazas
+[15/01/2026, 14:29:53] Valentina | Rio Med: pero mas diseño o no?
+[15/01/2026, 14:30:07] Monica Heredia | Rio Mes: solo logo
+[15/01/2026, 14:30:12] Valentina | Rio Med: bueno
+[15/01/2026, 14:30:17] Monica Heredia | Rio Mes: taza blanca
+[15/01/2026, 14:30:36] Monica Heredia | Rio Mes: Yo hice en camba
+[15/01/2026, 14:30:40] Monica Heredia | Rio Mes: Una idea
+[15/01/2026, 14:30:47] Monica Heredia | Rio Mes: Ellos me pasaron
+[15/01/2026, 14:30:55] Monica Heredia | Rio Mes: La pregunta ya bien el tamaño de logo
+[15/01/2026, 14:30:57] Valentina | Rio Med: yo lo veo lindo
+[15/01/2026, 14:31:07] Monica Heredia | Rio Mes: O que lo haga más grande
+[15/01/2026, 14:31:10] Valentina | Rio Med: los lapiceros ideal
+[15/01/2026, 14:31:13] Valentina | Rio Med: que sirvan pero
+[15/01/2026, 14:31:23] Valentina | Rio Med: ta bien pero que añada el nunero
+[15/01/2026, 14:31:25] Valentina | Rio Med: direccion
+[15/01/2026, 14:31:32] Valentina | Rio Med: whatsapp y direccion pues
+[15/01/2026, 14:31:40] Monica Heredia | Rio Mes: que se agrande un poco el logo hacia abajo un poquito
+‎[15/01/2026, 14:31:41] Monica Heredia | Rio Mes: ‎<anexado: 00000625-AUDIO-2026-01-15-14-31-41.opus>
+[15/01/2026, 14:31:46] Monica Heredia | Rio Mes: Estirarlo un poco ‎<Mensagem editada>
+‎[15/01/2026, 14:32:06] Valentina | Rio Med: ‎<anexado: 00000627-PHOTO-2026-01-15-14-32-06.jpg>
+[15/01/2026, 14:32:20] Valentina | Rio Med: esto les diseñe para unas tazas una vez
+[15/01/2026, 14:32:31] Monica Heredia | Rio Mes: Los NRO si
+[15/01/2026, 14:32:33] Valentina | Rio Med: esta bien asi se lee
+[15/01/2026, 14:32:42] Monica Heredia | Rio Mes: La dirección no por qué por ahí nos mudamos
+[15/01/2026, 14:32:48] Monica Heredia | Rio Mes: En qué parte de la taz
+[15/01/2026, 14:32:58] Valentina | Rio Med: entinces el nunero abajo del logo
+[15/01/2026, 14:33:07] Valentina | Rio Med: pequeño
+‎[15/01/2026, 14:33:29] Monica Heredia | Rio Mes: ‎<anexado: 00000635-PHOTO-2026-01-15-14-33-29.jpg>
+[15/01/2026, 14:33:39] Monica Heredia | Rio Mes: Mira las tazas de otras empresas no llevan nr
+[15/01/2026, 14:34:04] Monica Heredia | Rio Mes: Por qué lo que se quiere esque nuestro logo se vea
+[15/01/2026, 14:34:17] Monica Heredia | Rio Mes: Imponer nuestra marca
+[15/01/2026, 14:34:18] Valentina | Rio Med: bueno
+[15/01/2026, 14:34:23] Valentina | Rio Med: esta bien asi entonces
+[15/01/2026, 14:34:33] Valentina | Rio Med: esta lindo ese tamaño
+[15/01/2026, 14:34:34] Monica Heredia | Rio Mes: En el lapicero si
+[15/01/2026, 14:34:39] Valentina | Rio Med: sii
+[15/01/2026, 14:34:50] Monica Heredia | Rio Mes: Pero en las tazas no
+[15/01/2026, 14:34:54] Valentina | Rio Med: okei
+[15/01/2026, 14:34:56] Valentina | Rio Med: 👍🏽👍🏽
+‎[15/01/2026, 14:36:07] Monica Heredia | Rio Mes: ‎<anexado: 00000647-AUDIO-2026-01-15-14-36-07.opus>
+[15/01/2026, 14:37:19] Monica Heredia | Rio Mes: @⁨~Lurdes E.⁩
+[15/01/2026, 14:38:06] Valentina | Rio Med: que este un poco mas abajo, pero si lo ensancha perdera la forma
+[15/01/2026, 14:38:09] Valentina | Rio Med: si lo estira tal vez
+[15/01/2026, 14:38:16] Valentina | Rio Med: un poco mas
+[15/01/2026, 14:38:17] ~ Lurdes E.: ‎Mensagem apagada
+[15/01/2026, 14:38:35] Valentina | Rio Med: lo que le entendi a la señora es que se va a perder, tipo a simple vista se cortara
+[15/01/2026, 14:45:48] Roger RIO: Puede ser
+‎[15/01/2026, 16:55:56] Monica Heredia | Rio Mes: ‎<anexado: 00000655-PHOTO-2026-01-15-16-55-56.jpg>
+‎[15/01/2026, 16:57:01] Monica Heredia | Rio Mes: ‎<anexado: 00000656-PHOTO-2026-01-15-16-57-01.jpg>
+[15/01/2026, 16:57:12] Monica Heredia | Rio Mes: Con los nros
+[15/01/2026, 16:57:15] Monica Heredia | Rio Mes: Abajo
+[15/01/2026, 17:03:31] Valentina | Rio Med: si puede ser
+‎[15/01/2026, 17:03:50] Valentina | Rio Med: o aca ‎<anexado: 00000660-PHOTO-2026-01-15-17-03-50.jpg>
+[15/01/2026, 17:04:39] Monica Heredia | Rio Mes: Feo se veía
+‎[15/01/2026, 17:09:20] Monica Heredia | Rio Mes: ‎<anexado: 00000662-PHOTO-2026-01-15-17-09-20.jpg>
+[15/01/2026, 17:21:46] Valentina | Rio Med: muy estirado esta
+[15/01/2026, 17:21:57] Valentina | Rio Med: asi me gusta mas
+‎[15/01/2026, 22:01:01] Monica Heredia | Rio Mes: ‎<anexado: 00000665-PHOTO-2026-01-15-22-01-01.jpg>
+[15/01/2026, 22:06:49] Monica Heredia | Rio Mes: Opinen
+[15/01/2026, 22:08:02] Monica Heredia | Rio Mes: Algo que cambiar
+‎[16/01/2026, 18:45:58] Monica Heredia | Rio Mes: ‎<anexado: 00000668-VIDEO-2026-01-16-18-45-58.mp4>
+[16/01/2026, 18:47:35] Valentina | Rio Med: sii
+[16/01/2026, 18:47:44] Valentina | Rio Med: quedo lindo
+[16/01/2026, 18:47:48] Valentina | Rio Med: buena gestión licen
+[16/01/2026, 18:47:54] Valentina | Rio Med: 🤩
+[18/01/2026, 09:57:33] Roger RIO: https://www.instagram.com/p/DSAuhn1DOCh/?igsh=Zm5pdHFyOTN4azZx
+[18/01/2026, 09:57:33] Roger RIO: Sabes sobre ese tipo de Publi ??
+‎[19/01/2026, 15:22:37] Monica Heredia | Rio Mes: ‎<anexado: 00000675-PHOTO-2026-01-19-15-22-37.jpg>
+[19/01/2026, 15:23:05] Roger RIO: Aparte 2 para Peñaranda 👏🏻
+[20/01/2026, 08:45:23] Katharine Alves | impulsionando: oi, bom dia, pessoal eu estou internada desde ontem e na emergência desde domingo, eu estou esperando uma previsão de quando eu saio, estou fazendo exames para saber o que tenho de fato, eu vou atrasar um pouco o conteúdo pois não consigo trabalhar do hospital, peço desculpas mas vou compensar quando melhorar
+[20/01/2026, 08:47:06] Roger RIO: Caramba !! Que houve ?
+[20/01/2026, 08:54:36] Katharine Alves | impulsionando: eu passei mal no domingo, vomitei mt e quase desmaiei pq tava sentindo mt dor, então fui pra emergência achei q era da minha gastrite mas eles tão vendo porque pode ser visícula
+[20/01/2026, 08:54:56] Katharine Alves | impulsionando: mas eu to esperando os outros exames que preciso fazer
+[20/01/2026, 08:55:10] Katharine Alves | impulsionando: e tomando antibiótico na veia
+[20/01/2026, 08:55:14] Roger RIO: Já tive isso tb !
+‎[21/01/2026, 18:24:47] Valentina | Rio Med: ‎<anexado: 00000683-PHOTO-2026-01-21-18-24-47.jpg>
+‎[21/01/2026, 18:24:47] Valentina | Rio Med: ‎<anexado: 00000684-PHOTO-2026-01-21-18-24-47.jpg>
+‎[21/01/2026, 18:24:47] Valentina | Rio Med: ‎<anexado: 00000685-PHOTO-2026-01-21-18-24-47.jpg>
+[21/01/2026, 18:24:50] Valentina | Rio Med: servocuna
+[21/01/2026, 18:24:56] Valentina | Rio Med: post para la proxima semana
+‎[22/01/2026, 10:49:40] Monica Heredia | Rio Mes: ‎<anexado: 00000688-PHOTO-2026-01-22-10-49-40.jpg>
+[22/01/2026, 10:49:49] Monica Heredia | Rio Mes: Publicar y promocionar
+[22/01/2026, 10:49:59] Monica Heredia | Rio Mes: Tubo corrugado Adulto de pacientes para máquina de anestesia ‎<Mensagem editada>
+‎[22/01/2026, 11:51:06] Monica Heredia | Rio Mes: ‎<anexado: 00000691-PHOTO-2026-01-22-11-51-06.jpg>
+[22/01/2026, 11:51:41] Monica Heredia | Rio Mes: Los lapiceros y cuadernillos hace en otra imprenta
+[22/01/2026, 11:51:45] Monica Heredia | Rio Mes: La más barata
+[22/01/2026, 11:52:05] Monica Heredia | Rio Mes: La tonalidad del color de logo no salió exacta
+‎[22/01/2026, 11:52:45] Monica Heredia | Rio Mes: ‎<anexado: 00000695-PHOTO-2026-01-22-11-52-45.jpg>
+[22/01/2026, 11:52:58] Valentina | Rio Med: esta lindo
+‎[22/01/2026, 11:53:04] Monica Heredia | Rio Mes: ‎<anexado: 00000697-PHOTO-2026-01-22-11-53-04.jpg>
+[22/01/2026, 11:53:24] Monica Heredia | Rio Mes: Gracias a mi gestión jajaj
+[22/01/2026, 11:54:55] Roger RIO: Alumna de Elizabeth 🫣👏🏻
+[22/01/2026, 11:56:06] Monica Heredia | Rio Mes: Porfavor
+[22/01/2026, 11:56:12] Monica Heredia | Rio Mes: Cuando hizo algo como eso jajajaja
+[22/01/2026, 11:56:23] Valentina | Rio Med: 🤣🤣🤣
+[22/01/2026, 11:57:09] Monica Heredia | Rio Mes: Lo que aprendimos fue sus dichos
+[22/01/2026, 11:57:33] Monica Heredia | Rio Mes: Deme carta blanca sr . Rogerio y vera que su empresa va mejorar
+[22/01/2026, 11:59:28] Adolfo Soraire | Rogerio Rio Med: La próxima será...
+[22/01/2026, 11:59:54] Adolfo Soraire | Rogerio Rio Med: Sin mi se va ir a la quiebra
+[22/01/2026, 12:00:01] Adolfo Soraire | Rogerio Rio Med: Etc.
+[22/01/2026, 12:00:33] ~ gamalielv15: Usted es el siguiente acuerdese señor Adolfo
+[22/01/2026, 12:00:40] ~ gamalielv15: 😂
+[22/01/2026, 12:01:21] Adolfo Soraire | Rogerio Rio Med: Soy tipazo
+[22/01/2026, 12:01:48] Monica Heredia | Rio Mes: El próximo será Adolfo cuidese
+[22/01/2026, 12:01:57] Monica Heredia | Rio Mes: De Monica en especial
+[22/01/2026, 12:02:14] Adolfo Soraire | Rogerio Rio Med: Ella es malvada
+‎[22/01/2026, 12:02:26] Monica Heredia | Rio Mes: ‎<anexado: 00000714-STICKER-2026-01-22-12-02-26.webp>
+[22/01/2026, 12:02:51] ~ gamalielv15: Dejenla tiene las orejas roja ya jejeje
+[22/01/2026, 12:03:06] Adolfo Soraire | Rogerio Rio Med: Orejas de iguana
+[22/01/2026, 12:04:19] ~ gamalielv15: Consigo las barras, Taraja?
+‎[26/01/2026, 10:16:19] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎5 páginas ‎<anexado: 00000718-Planejamento semanal - Rio Med.pdf>
+[26/01/2026, 18:03:47] ~ Milenca Suárez: ‎Mensagem apagada
+‎[29/01/2026, 04:31:50] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000720-PHOTO-2026-01-29-04-31-50.jpg>
+‎[29/01/2026, 04:31:53] Roger | RIO MED (amigo da campos sales): ‎<anexado: 00000721-PHOTO-2026-01-29-04-31-53.jpg>
+‎[01/02/2026, 13:48:11] Roger RIO: ‎<anexado: 00000722-PHOTO-2026-02-01-13-48-11.jpg>
+[01/02/2026, 13:48:38] Roger RIO: Q tal eso para regalar a los clientes?
+‎[02/02/2026, 15:30:09] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎4 páginas ‎<anexado: 00000724-Planejamento semanal - Rio Med.pdf>
+[04/02/2026, 12:59:14] Monica Heredia | Rio Mes: Concentrador de oxigeno no tenemos stock ‎<Mensagem editada>
+[04/02/2026, 12:59:48] Monica Heredia | Rio Mes: Mesa mayo
+Mesa de alimentación 
+Gabinete 
+No tenemos
+‎[05/02/2026, 13:41:59] Katharine Alves | impulsionando: ‎<anexado: 00000727-PHOTO-2026-02-05-13-41-59.jpg>
+[05/02/2026, 13:42:07] Katharine Alves | impulsionando: @⁨Monica Heredia | Rio Mes⁩
+[05/02/2026, 13:43:39] Monica Heredia | Rio Mes: Si ese es
+[05/02/2026, 15:29:26] Roger RIO: Olá Kathy ! 
+Vamos fazer promoção de carnaval ??
+[05/02/2026, 15:29:33] Roger RIO: Como imagens etc !
+[05/02/2026, 15:31:04] Katharine Alves | impulsionando: preciso saber os produtos, valores se quiserem que coloque os valores na imagem e data da promoção
+[05/02/2026, 15:31:33] Katharine Alves | impulsionando: me passando essas informações eu faço sim
+[05/02/2026, 16:37:06] Monica Heredia | Rio Mes: Voy armar otra lista
+‎[09/02/2026, 10:52:23] Monica Heredia | Rio Mes: LISTA DE  PRECIO  DESCUENTOS FEBRERO.xlsx ‎<anexado: 00000735-LISTA DE  PRECIO  DESCUENTOS FEBRERO.xlsx>
+[09/02/2026, 10:52:32] Monica Heredia | Rio Mes: DESCUENTOS DE VUELTA A CLASES
+[09/02/2026, 10:53:20] Monica Heredia | Rio Mes: @⁨Katharine Alves | impulsionando⁩
+[09/02/2026, 10:56:26] Katharine Alves | impulsionando: ok
+[09/02/2026, 11:09:55] Katharine Alves | impulsionando: a promoção começa qual dia e termina qual dia/
+[09/02/2026, 11:15:09] Monica Heredia | Rio Mes: Todo febrero y marzo
+[09/02/2026, 11:17:07] Katharine Alves | impulsionando: ok
+‎[09/02/2026, 11:19:08] Monica Heredia | Rio Mes: @⁨Katharine Alves | impulsionando⁩  ESTE MAS ‎<anexado: 00000742-PHOTO-2026-02-09-11-19-08.jpg>
+‎[09/02/2026, 11:19:24] Monica Heredia | Rio Mes: ‎<anexado: 00000743-PHOTO-2026-02-09-11-19-24.jpg>
+[09/02/2026, 11:21:59] Katharine Alves | impulsionando: ok
+‎[09/02/2026, 11:22:06] Katharine Alves | impulsionando: o que é S/C? ‎<anexado: 00000745-PHOTO-2026-02-09-11-22-06.jpg>
+[09/02/2026, 11:22:45] Monica Heredia | Rio Mes: No de importancia
+[09/02/2026, 11:22:53] Monica Heredia | Rio Mes: Es información para nosotros
+[09/02/2026, 11:23:04] Monica Heredia | Rio Mes: Son productos que no van a tener comisiones
+[09/02/2026, 11:23:15] Katharine Alves | impulsionando: ah ok
+‎[10/02/2026, 12:03:27] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000750-Planejamento semanal - Rio Med.pdf>
+‎[10/02/2026, 16:07:11] Katharine Alves | impulsionando: ‎<anexado: 00000751-PHOTO-2026-02-10-16-07-11.jpg>
+‎[10/02/2026, 16:07:11] Katharine Alves | impulsionando: ‎<anexado: 00000752-PHOTO-2026-02-10-16-07-11.jpg>
+‎[10/02/2026, 16:07:11] Katharine Alves | impulsionando: ‎<anexado: 00000753-PHOTO-2026-02-10-16-07-11.jpg>
+‎[10/02/2026, 16:07:12] Katharine Alves | impulsionando: ‎<anexado: 00000754-PHOTO-2026-02-10-16-07-12.jpg>
+‎[10/02/2026, 16:07:12] Katharine Alves | impulsionando: ‎<anexado: 00000755-PHOTO-2026-02-10-16-07-12.jpg>
+‎[10/02/2026, 16:07:12] Katharine Alves | impulsionando: ‎<anexado: 00000756-PHOTO-2026-02-10-16-07-12.jpg>
+‎[10/02/2026, 16:07:12] Katharine Alves | impulsionando: ‎<anexado: 00000757-PHOTO-2026-02-10-16-07-12.jpg>
+‎[10/02/2026, 16:07:13] Katharine Alves | impulsionando: ‎<anexado: 00000758-PHOTO-2026-02-10-16-07-13.jpg>
+‎[10/02/2026, 16:07:13] Katharine Alves | impulsionando: ‎<anexado: 00000759-PHOTO-2026-02-10-16-07-13.jpg>
+‎[10/02/2026, 16:07:13] Katharine Alves | impulsionando: ‎<anexado: 00000760-PHOTO-2026-02-10-16-07-13.jpg>
+[10/02/2026, 16:07:27] Katharine Alves | impulsionando: @⁨Monica Heredia | Rio Mes⁩
+[11/02/2026, 07:56:37] Monica Heredia | Rio Mes: Buenos días
+‎[12/02/2026, 16:14:47] Katharine Alves | impulsionando: ‎<anexado: 00000763-PHOTO-2026-02-12-16-14-47.jpg>
+‎[12/02/2026, 16:14:48] Katharine Alves | impulsionando: ‎<anexado: 00000764-PHOTO-2026-02-12-16-14-48.jpg>
+‎[12/02/2026, 16:14:48] Katharine Alves | impulsionando: ‎<anexado: 00000765-PHOTO-2026-02-12-16-14-48.jpg>
+‎[12/02/2026, 16:14:48] Katharine Alves | impulsionando: ‎<anexado: 00000766-PHOTO-2026-02-12-16-14-48.jpg>
+‎[12/02/2026, 16:14:48] Katharine Alves | impulsionando: ‎<anexado: 00000767-PHOTO-2026-02-12-16-14-48.jpg>
+‎[12/02/2026, 16:14:49] Katharine Alves | impulsionando: ‎<anexado: 00000768-PHOTO-2026-02-12-16-14-49.jpg>
+‎[12/02/2026, 16:14:49] Katharine Alves | impulsionando: ‎<anexado: 00000769-PHOTO-2026-02-12-16-14-49.jpg>
+‎[12/02/2026, 16:14:49] Katharine Alves | impulsionando: ‎<anexado: 00000770-PHOTO-2026-02-12-16-14-49.jpg>
+‎[12/02/2026, 16:14:49] Katharine Alves | impulsionando: ‎<anexado: 00000771-PHOTO-2026-02-12-16-14-49.jpg>
+‎[12/02/2026, 16:14:50] Katharine Alves | impulsionando: ‎<anexado: 00000772-PHOTO-2026-02-12-16-14-50.jpg>
+‎[12/02/2026, 16:14:50] Katharine Alves | impulsionando: ‎<anexado: 00000773-PHOTO-2026-02-12-16-14-50.jpg>
+‎[12/02/2026, 16:14:50] Katharine Alves | impulsionando: ‎<anexado: 00000774-PHOTO-2026-02-12-16-14-50.jpg>
+‎[12/02/2026, 16:14:50] Katharine Alves | impulsionando: ‎<anexado: 00000775-PHOTO-2026-02-12-16-14-50.jpg>
+‎[12/02/2026, 16:14:51] Katharine Alves | impulsionando: ‎<anexado: 00000776-PHOTO-2026-02-12-16-14-51.jpg>
+‎[12/02/2026, 16:14:51] Katharine Alves | impulsionando: ‎<anexado: 00000777-PHOTO-2026-02-12-16-14-51.jpg>
+‎[12/02/2026, 16:14:51] Katharine Alves | impulsionando: ‎<anexado: 00000778-PHOTO-2026-02-12-16-14-51.jpg>
+‎[17/02/2026, 14:59:45] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎documento omitido
+‎[24/02/2026, 18:42:37] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000780-Planejamento semanal - Rio Med.pdf>
+[25/02/2026, 10:22:46] SAC Rio Med: Buenos días @⁨Valentina | Rio Med⁩ : Te cuento que no están llegando nada de mensajes de Facebook ... publicaron algo?
+‎[26/02/2026, 11:38:26] ~ Lurdes E.: ‎vídeo omitido
+[28/02/2026, 00:16:08] ~ gamalielv15: ‎Seu código de segurança com ‪+59168965754‬ mudou.
+[03/03/2026, 13:00:14] ~ Lurdes E.: @⁨Valentina | Rio Med⁩ no están llegando mensajes.......publicaron algo?
+‎[03/03/2026, 14:13:44] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000785-Planejamento semanal - Rio Med.pdf>
+‎[04/03/2026, 10:58:36] ~ Lurdes E.: ‎<anexado: 00000786-PHOTO-2026-03-04-10-58-36.jpg>
+[04/03/2026, 10:58:46] SAC Rio Med: @⁨~gamalielv15⁩
+‎[04/03/2026, 11:08:53] ~ Lurdes E.: ‎<anexado: 00000788-PHOTO-2026-03-04-11-08-53.jpg>
+‎[05/03/2026, 12:16:35] Monica Heredia | Rio Mes: simulador de enfermeria anatomic TZJ-0502-SR ‎<anexado: 00000789-VIDEO-2026-03-05-12-16-35.mp4>
+‎[05/03/2026, 14:36:00] Roger RIO: ‎<anexado: 00000790-PHOTO-2026-03-05-14-36-00.jpg>
+[06/03/2026, 11:39:42] Roger RIO: Seria bien poner texto en español 💁🏼‍♂️
+‎[09/03/2026, 14:32:46] SAC Rio Med: Ascarilla Nasal P2 
+Viene con las tallas S-M-L y su tubo corrugado 
+Marca:BMC
+Industria:China ‎<anexado: 00000792-PHOTO-2026-03-09-14-32-46.jpg>
+‎[09/03/2026, 14:36:09] SAC Rio Med: Mascarilla Nasobucal 
+Marca:BMC
+Industria:China ‎<anexado: 00000793-PHOTO-2026-03-09-14-36-09.jpg>
+‎[09/03/2026, 14:39:49] SAC Rio Med: Mascarilla Nasal 
+Marca:Byond ‎<anexado: 00000794-PHOTO-2026-03-09-14-39-49.jpg>
+‎[09/03/2026, 18:51:48] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎6 páginas ‎<anexado: 00000795-Planejamento semanal - Rio Med.pdf>
+[09/03/2026, 18:52:44] Katharine Alves | impulsionando: oi, o planejamento dessa semana e da próxima, coloquei os produtos que vocês encaminharam aqui. Fiz o planejamento de duas semanas porque vou fazer uma cirurgia na quarta-feira (11/03) e vou adiantar conteúdos para poder repousar.
+[17/03/2026, 13:21:22] Katharine Alves | impulsionando: oi, o Raygs me avisou que a conta da valentina foi invadida
+‎[17/03/2026, 13:21:49] Katharine Alves | impulsionando: para ativar a autenticação de dois fatores do Instagram foi enviado um sms para esse número ‎<anexado: 00000798-PHOTO-2026-03-17-13-21-49.jpg>
+[17/03/2026, 13:22:41] Katharine Alves | impulsionando: e o Facebook o acesso é pela conta do rogerio
+[17/03/2026, 13:27:11] Valentina | Rio Med: no conozco el numero
+[17/03/2026, 13:27:24] Valentina | Rio Med: tienes acceso al facebook aun kat?
+[17/03/2026, 13:27:30] Adolfo Soraire | Rogerio Rio Med: De rogerio
+[17/03/2026, 13:27:33] Adolfo Soraire | Rogerio Rio Med: 72631063
+[17/03/2026, 13:27:33] Katharine Alves | impulsionando: tenho acesso a meta
+[17/03/2026, 13:27:42] Adolfo Soraire | Rogerio Rio Med: Ese
+[17/03/2026, 13:27:51] Valentina | Rio Med: Pero a la pagina no?
+[17/03/2026, 13:28:04] Valentina | Rio Med: para switch account y navegar como la pagina
+‎[17/03/2026, 13:28:12] Katharine Alves | impulsionando: ‎<anexado: 00000808-PHOTO-2026-03-17-13-28-12.jpg>
+[17/03/2026, 13:28:48] Katharine Alves | impulsionando: essa conta ai que deve dar acesso para poder remover administradores
+[17/03/2026, 13:28:53] Katharine Alves | impulsionando: alguem tem.o login?
+[17/03/2026, 13:29:07] Valentina | Rio Med: @⁨Roger | RIO MED (amigo da campos sales)⁩ @⁨Roger RIO⁩
+[17/03/2026, 13:29:45] Katharine Alves | impulsionando: vou tentar aqui so pelo meu acesso da meta mas eu acho que meu acesso é só pra postar
+[17/03/2026, 13:30:11] Valentina | Rio Med: ok
+‎[17/03/2026, 13:30:37] Roger RIO: ‎<anexado: 00000814-PHOTO-2026-03-17-13-30-37.jpg>
+[17/03/2026, 13:30:58] Valentina | Rio Med: paseme su usuario y password
+[17/03/2026, 13:31:06] Katharine Alves | impulsionando: eu perdi o acesso a pagina de vocês pelo meta
+‎[17/03/2026, 13:31:40] Katharine Alves | impulsionando: pra mim agora so aparece esses que não são relacionados a riomed ‎<anexado: 00000817-PHOTO-2026-03-17-13-31-40.jpg>
+[17/03/2026, 13:31:55] Valentina | Rio Med: 😭😭😭
+[17/03/2026, 13:31:56] Katharine Alves | impulsionando: to com acesso so pelo app do instagram que a conta ta logada no meu celular
+[17/03/2026, 13:33:33] Monica Heredia | Rio Mes: 72631063
+[17/03/2026, 13:33:36] Monica Heredia | Rio Mes: lo tiene adolfo
+‎[17/03/2026, 13:36:56] Katharine Alves | impulsionando: historico de login da conta do facebook ‎<anexado: 00000822-PHOTO-2026-03-17-13-36-56.jpg>
+[17/03/2026, 13:37:13] Katharine Alves | impulsionando: esse samsung galaxy A02 é de alguém daqui?
+[17/03/2026, 13:37:27] Valentina | Rio Med: si
+[17/03/2026, 13:38:16] Katharine Alves | impulsionando: ok então entrando na meta por esse celular talvez de pra recuperar pq ainda ta logado
+‎[17/03/2026, 13:38:25] Katharine Alves | impulsionando: historico do Instagram ‎<anexado: 00000826-PHOTO-2026-03-17-13-38-25.jpg>
+[17/03/2026, 13:38:37] Valentina | Rio Med: todo esta bien
+[17/03/2026, 13:38:44] Valentina | Rio Med: es recuperar acceso a la cuenta
+[17/03/2026, 13:40:42] Monica Heredia | Rio Mes: Aquí
+‎[17/03/2026, 13:41:08] Monica Heredia | Rio Mes: ‎<anexado: 00000830-PHOTO-2026-03-17-13-41-08.jpg>
+[17/03/2026, 13:42:17] Katharine Alves | impulsionando: Desde el Celular (App de Facebook)
+Abre la app de Facebook, toca en el menú (tres líneas) y cambia al perfil de tu página.
+Toca el botón "Panel para profesionales" o "Administrar" en tu perfil de página.
+Busca y toca en "Acceso a la página".
+Localiza a la persona y toca los tres puntos (...) junto a su nombre.
+Selecciona "Eliminar de la página".
+Introduce tu contraseña para confirmar.
+[17/03/2026, 13:42:29] Katharine Alves | impulsionando: tenta fazer esse passo a passo por favor
+[17/03/2026, 13:43:51] Katharine Alves | impulsionando: para eliminar o perfil da valentina que foi invadido se ainda estiver como administrador
+[17/03/2026, 13:46:04] Katharine Alves | impulsionando: https://www.youtube.com/watch?v=GjKaiSTCr9U e nesse video explica como adicionar um administrador
+[17/03/2026, 13:46:16] Valentina | Rio Med: kath no tiene acceso tampoco
+[17/03/2026, 13:47:35] Katharine Alves | impulsionando: o facebook não está logado nesse celular?
+[17/03/2026, 13:47:45] Valentina | Rio Med: no
+[17/03/2026, 13:47:47] Katharine Alves | impulsionando: o último acesso que mostra no historico é dele ontem
+[17/03/2026, 13:47:51] Valentina | Rio Med: acabamos de ver
+[17/03/2026, 13:48:05] Katharine Alves | impulsionando: será que não foi essa conta que oi invadida então?
+[17/03/2026, 13:48:13] Katharine Alves | impulsionando: invés da sua?
+[17/03/2026, 13:49:40] Katharine Alves | impulsionando: https://www.facebook.com/hacked
+[17/03/2026, 13:50:15] Valentina | Rio Med: ya intente eso, me hackearon mi facebook principal, pero no pudieron entrar entonces hicieron que facebook lo deshabilite
+[17/03/2026, 13:50:19] Katharine Alves | impulsionando: voces tem acesso ao email dessa conta? pra tentar recuperar a senha
+[17/03/2026, 13:50:19] Valentina | Rio Med: ese es el problema
+‎[17/03/2026, 13:50:22] Valentina | Rio Med: ‎<anexado: 00000846-PHOTO-2026-03-17-13-50-22.jpg>
+‎[17/03/2026, 13:50:36] Valentina | Rio Med: ‎<anexado: 00000847-PHOTO-2026-03-17-13-50-36.jpg>
+[17/03/2026, 13:50:47] Valentina | Rio Med: que cuenta?
+[17/03/2026, 13:50:55] Katharine Alves | impulsionando: do rogerio
+[17/03/2026, 13:51:01] Valentina | Rio Med: ya hice esto, solo hace que se me resetee la contraseña
+[17/03/2026, 13:51:12] Valentina | Rio Med: ya vimos la cuenta de rogerio tampoco esta en la pagina
+[17/03/2026, 13:51:13] Katharine Alves | impulsionando: é a conta que aparece vinculada a meta ainda
+‎[17/03/2026, 13:52:48] Valentina | Rio Med: ys estoy en aniadia y me sale esto
+mi cuenta tenia control total 😭 ‎<anexado: 00000853-PHOTO-2026-03-17-13-52-48.jpg>
+[17/03/2026, 13:54:54] Monica Heredia | Rio Mes: Eso estubo mal siempre se debe dejar una cuenta de respaldo
+‎[17/03/2026, 14:08:08] Katharine Alves | impulsionando: na transparência da página mostra isso, não sei se está desatualizado ‎<anexado: 00000855-PHOTO-2026-03-17-14-08-08.jpg>
+[17/03/2026, 14:09:24] Katharine Alves | impulsionando: https://www.facebook.com/help/contact/957215276032920
+
+Esse é o formulário oficial para recuperar acesso a uma página empresarial.
+
+Eles vão pedir:
+
+• URL da página
+• Nome da página
+• Explicação do problema
+• Documento que comprove vínculo com a empresa
+
+Exemplos de documentos aceitos:
+
+• CNPJ da empresa
+• contrato social
+• conta de luz com nome da empresa
+• site oficial mostrando a marca
+• domínio do e-mail da empresa
+[17/03/2026, 14:09:38] Valentina | Rio Med: no podemos saber 
+pero mira con la inhabilitación de mi cuenta, se borraron tus permisos, los de monica y los de rogerio 
+
+Monica y yo de Bolivia
+Rogerio de Brazil
+[17/03/2026, 14:09:52] Valentina | Rio Med: okei
+‎[17/03/2026, 14:11:19] Valentina | Rio Med: sin acceso 🥲 ‎<anexado: 00000859-PHOTO-2026-03-17-14-11-19.jpg>
+[17/03/2026, 14:11:42] Valentina | Rio Med: para hacer eso la persona tiene que ser administrador para que le salga la pagina
+[17/03/2026, 14:15:07] Monica Heredia | Rio Mes: Seria que recuperes tu cuenta
+[17/03/2026, 14:15:20] Valentina | Rio Med: Si, sigo intentando eso
+[17/03/2026, 14:15:26] Katharine Alves | impulsionando: pela conta do rogerio também aparece isso?
+[17/03/2026, 14:15:37] Valentina | Rio Med: si, se le quito los permisos a todos ‎<Mensagem editada>
+[17/03/2026, 14:20:46] Katharine Alves | impulsionando: vou tentar relatar esse problema pelo instagram que a gente ainda tem acesso então
+‎[17/03/2026, 14:23:46] Valentina | Rio Med: ‎<anexado: 00000866-PHOTO-2026-03-17-14-23-46.jpg>
+[17/03/2026, 14:23:52] Valentina | Rio Med: @⁨Katharine Alves | impulsionando⁩
+[17/03/2026, 14:24:23] Katharine Alves | impulsionando: já se passou muito tempo desse
+[17/03/2026, 14:24:30] Katharine Alves | impulsionando: vai ter que gerar outro
+[17/03/2026, 14:24:41] Katharine Alves | impulsionando: isso é pra autenticação de dois fatores ta?
+[17/03/2026, 14:24:44] Valentina | Rio Med: @⁨Roger | RIO MED (amigo da campos sales)⁩ atento
+[17/03/2026, 14:25:36] Katharine Alves | impulsionando: enviou outro
+[17/03/2026, 14:25:58] Roger | RIO MED (amigo da campos sales): 327640
+[17/03/2026, 14:26:07] Roger | RIO MED (amigo da campos sales): Mismo #
+[17/03/2026, 14:27:16] Katharine Alves | impulsionando: email que voces usam e eu possa colocar aqui
+[17/03/2026, 14:29:28] Katharine Alves | impulsionando: se quiserem da pra pular essa parte, mas o email é mais uma segurança
+[17/03/2026, 14:29:34] Roger | RIO MED (amigo da campos sales): Da empresa
+[17/03/2026, 14:29:51] Roger | RIO MED (amigo da campos sales): riomedtrade@hotmail.com
+[17/03/2026, 14:30:22] Katharine Alves | impulsionando: ok, enviaram um codigo para esse email
+[17/03/2026, 14:32:17] Roger RIO: Quien puede revisar ?👆🏻
+[17/03/2026, 14:32:37] Valentina | Rio Med: voy
+[17/03/2026, 14:33:17] Valentina | Rio Med: no llego nada al mail
+[17/03/2026, 14:39:20] Katharine Alves | impulsionando: pedi para reenviar
+[17/03/2026, 14:42:27] Katharine Alves | impulsionando: @⁨Valentina | Rio Med⁩ da uma olhadinha de novo
+[17/03/2026, 14:42:30] Katharine Alves | impulsionando: e no spam
+‎[17/03/2026, 14:49:12] Valentina | Rio Med: nada ‎<anexado: 00000886-PHOTO-2026-03-17-14-49-12.jpg>
+[17/03/2026, 14:57:37] Katharine Alves | impulsionando: Supostamente, se você tiver o Meta Business Suite ou o Gerenciador de Anúncios, pode encontrar uma opção de ajuda/chat. Talvez seja necessário abrir uma "Disputa de Administrador de Página", "Solicitação para Reivindicar Propriedade", caso de "Solicitação de Liberação de Página" (ticket de problema).
+
+➪https://www.facebook.com/business/help/support
+[17/03/2026, 15:01:33] Katharine Alves | impulsionando: voces querem trocar a senh do instagram?
+[17/03/2026, 15:01:52] Valentina | Rio Med: nada
+[17/03/2026, 15:02:03] Valentina | Rio Med: una macana
+[17/03/2026, 15:02:12] Valentina | Rio Med: hay un usuario que tiene acceso pero solo a subir fotos
+[17/03/2026, 15:02:22] Valentina | Rio Med: capaz puedes usar eso kat asi sigues trabajando
+[17/03/2026, 15:02:27] Valentina | Rio Med: pero no tiene acceso a nada mas
+[17/03/2026, 15:02:29] Katharine Alves | impulsionando: quem?
+[17/03/2026, 15:02:32] Valentina | Rio Med: ni controles ni nada
+[17/03/2026, 15:02:49] Katharine Alves | impulsionando: eu consigo postar pelo app do instagram
+‎[17/03/2026, 15:03:00] Valentina | Rio Med: este usuario puede comtestat mensakes y subir fotos, nada mas que eso ‎<anexado: 00000897-PHOTO-2026-03-17-15-03-00.jpg>
+[17/03/2026, 15:05:06] Katharine Alves | impulsionando: eu tinha deixado programado já os posts dessa semana ontem, amanhã e sexta, vamos ver se vai
+[17/03/2026, 15:05:17] Katharine Alves | impulsionando: se não for posto manualmente pelo app do instagram
+[17/03/2026, 15:11:49] Raygs Monnerat: Equipo, organizando aquí todo en un solo mensaje para que tengamos claridad del escenario y no se pierda la información entre tantas conversaciones y capturas.
+
+La idea es simplemente consolidar lo que ya se hizo, lo que está pasando y cuáles son los posibles caminos a partir de ahora.
+
+Hoy el escenario está bastante claro.
+
+Hubo un problema con credenciales de una cuenta con acceso alto, y eso impactó directamente el control administrativo de la página. La página de Rio Med sigue activa, el Instagram también, pero se perdió parte del control estructural, que es justamente lo que limita cualquier acción más profunda.
+
+Desde la agencia, todo lo que estaba dentro de nuestro alcance ya fue hecho.
+
+Revisamos accesos, ajustamos permisos, reforzamos seguridad, verificamos vínculos entre cuentas, registramos el estado actual y dejamos el entorno lo más protegido posible dentro de lo que se puede hacer sin acceso total.
+
+Y siendo bien directos: sin acceso a las credenciales principales o sin una acción de Meta, no hay mucho más que se pueda hacer a nivel técnico.
+
+Por otro lado, hay un punto positivo importante.
+
+La operación no se detuvo.
+
+Existe un acceso limitado que permite responder mensajes y publicar contenido. Además, ya había contenido programado para esta semana. Si por algún motivo no se publica automáticamente, se puede subir manualmente desde Instagram.
+
+Es decir, aun con las limitaciones, la cuenta sigue activa y funcionando.
+
+En paralelo, seguimos intentando los caminos de recuperación.
+
+Estamos entrando por los canales de Meta, intentando soporte, viendo qué permite la propia plataforma y también buscando referencias de casos reales similares para entender qué ha funcionado en la práctica.
+
+Y aquí apareció un punto interesante.
+
+Encontramos relatos de personas que pasaron exactamente por esta situación y lograron resolverlo. En algunos casos, la única forma de desbloquear atención humana fue pagando la verificación de Meta (Meta Verified).
+
+Cuando esto se activa, se habilita acceso a chat y apertura de tickets reales dentro del sistema, algo que normalmente no aparece.
+
+Como sabemos, la comunicación con Meta es limitada y muchas veces poco efectiva, entonces esto puede ser una vía para llegar a alguien real dentro de la plataforma.
+
+No es garantía de solución, pero puede aumentar bastante las probabilidades de salir del soporte automático y conseguir una revisión real.
+
+Vale la pena evaluarlo con calma, sin prisa, como una posibilidad concreta.
+
+Sobre la recuperación en sí, no hay mucho misterio:
+
+depende 100% de Meta.
+
+Va a implicar envío de documentos, validación y análisis interno de ellos. No existe un atajo fuera de eso.
+
+Y siendo totalmente transparentes con todos:
+
+desde la agencia estamos acompañando, intentando, organizando y apoyando en todo momento, pero tenemos un límite claro de actuación. Sin acceso directo o sin respuesta de Meta, no podemos avanzar más allá de lo que ya se hizo.
+
+Aun así, seguimos encima del caso, intentando todos los caminos posibles.
+
+Resumiendo de forma simple:
+
+la cuenta está activa
+la operación sigue funcionando
+el entorno está protegido dentro de lo posible
+la recuperación está en curso
+y dependemos de Meta para destrabar
+
+Este mensaje es solo para organizar todo y dejar claro dónde estamos.
+
+Seguimos juntos en esto. Cualquier novedad real, la compartimos por aquí. ‎<Mensagem editada>
+[17/03/2026, 15:13:43] Katharine Alves | impulsionando: @⁨Valentina | Rio Med⁩ eu estou buscando relatos de pessoas que passaram por isso e conseguiram recuperar, olha esse
+[17/03/2026, 15:13:45] Katharine Alves | impulsionando: Isso aconteceu exatamente comigo, e sim, a única maneira é pagar pela verificação do Meta para ter acesso ao chat de suporte. Foi assim que eu resolvi:
+
+Nós ainda tínhamos acesso através do Meta Business Suite, então me inscrevi em uma assinatura mensal verificada.
+
+Assim que a página foi verificada, a opção de chat e ticket apareceu na barra lateral de ajuda, que sem a verificação mostrava apenas artigos inúteis. Abri vários tickets ao longo de 3 semanas e todos foram muito responsivos, mas nunca resolveram o problema até eu ter a documentação exatamente certa.
+
+Finalmente funcionou na quinta tentativa, dentro de algumas horas após submeter a documentação correta. Você precisa ser extremamente detalhado na sua carta de ateste, fornecendo exatamente os detalhes descritos nesta página: https://www.facebook.com/business/help/1580486349413648 (use IA para escrever a carta, acho que isso ajudou). Descreva exatamente quem você é, forneça um link para uma página de equipe se necessário e também exatamente qual conta do Facebook você quer adicionada como admin. Explique que "A única pessoa com acesso ao Facebook acidentalmente se removeu da Página." Isso te torna elegível para uma disputa de administrador da página.
+
+A pessoa de suporte realmente me ligou e revisou os documentos, e eu mencionei que já tinha tentado isso quatro vezes, ele foi muito útil. Ele perguntou se a equipe deles tinha permissão para acessar a conta e eu disse "claro, por favor, faça o que você precisar fazer". Honestamente, achei que isso não ia funcionar, mas funcionou e agora posso cancelar a assinatura verificada do Meta após 2 pagamentos. Além disso, em um ponto eu fui cancelar a assinatura porque o problema não estava sendo resolvido e me ofereceram um mês grátis para ficar, então isso foi legal.
+[17/03/2026, 15:14:08] Katharine Alves | impulsionando: como a comunicação com a meta é muito ruim, talvez seja uma boa solução
+‎[17/03/2026, 15:19:46] Valentina | Rio Med: ‎<anexado: 00000904-PHOTO-2026-03-17-15-19-46.jpg>
+[17/03/2026, 15:21:18] Katharine Alves | impulsionando: isso
+[17/03/2026, 15:21:22] Katharine Alves | impulsionando: clica no chat
+‎[17/03/2026, 15:22:10] Valentina | Rio Med: ‎<anexado: 00000907-PHOTO-2026-03-17-15-22-10.jpg>
+[17/03/2026, 15:22:20] Valentina | Rio Med: 🙏🏽😭
+[17/03/2026, 15:25:15] Raygs Monnerat: 💪🏽👌🏾
+‎[18/03/2026, 09:52:52] ~ Milenca Suárez: ‎<anexado: 00000910-PHOTO-2026-03-18-09-52-52.jpg>
+‎[19/03/2026, 09:23:46] Valentina | Rio Med: ‎<anexado: 00000911-PHOTO-2026-03-19-09-23-46.jpg>
+[19/03/2026, 09:37:07] ~ Lurdes E.: Justo iba a reclamar 👆🏽 para pasar a los papás y papacitos 😉
+‎[19/03/2026, 13:23:02] SAC Rio Med: ‎<anexado: 00000913-PHOTO-2026-03-19-13-23-02.jpg>
+[19/03/2026, 13:23:18] SAC Rio Med: @⁨Valentina | Rio Med⁩
+‎[19/03/2026, 13:35:47] SAC Rio Med: ‎<anexado: 00000915-PHOTO-2026-03-19-13-35-47.jpg>
+[19/03/2026, 13:35:59] Valentina | Rio Med: que hacen
+[19/03/2026, 13:36:01] Valentina | Rio Med: no toquen porfavor
+[19/03/2026, 13:36:10] Valentina | Rio Med: contestenme les estoy llamando
+‎[19/03/2026, 13:36:21] SAC Rio Med: ‎<anexado: 00000919-PHOTO-2026-03-19-13-36-21.jpg>
+[20/03/2026, 14:32:45] Katharine Alves | impulsionando: me passa esse acesso?
+[20/03/2026, 14:33:02] Katharine Alves | impulsionando: estou conseguindo postar so no Instagram mesmo
+[20/03/2026, 14:33:31] Valentina | Rio Med: te añado al portafolio de esa cuenta
+[20/03/2026, 14:33:36] Valentina | Rio Med: pasame link de facebook
+[20/03/2026, 14:34:44] Katharine Alves | impulsionando: https://www.facebook.com/annakatharinealves
+[20/03/2026, 19:40:43] Monica Heredia | Rio Mes: ‎Monica Heredia | Rio Mes mudou o nome do grupo para “MARKETING Y PUBLICIDAD RIO MED”
+[20/03/2026, 19:41:58] Monica Heredia | Rio Mes: ‎Monica Heredia | Rio Mes mudou a descrição do grupo
+[23/03/2026, 12:31:29] ~ Lurdes E.: https://www.facebook.com/share/v/18Acc3C2Xj/
+[23/03/2026, 12:31:56] ~ Lurdes E.: Me podrían pasar el vídeo de esa publicación por favor 🙏🏽 @⁨Katharine Alves | impulsionando⁩  ‎<Mensagem editada>
+‎[23/03/2026, 12:50:55] Katharine Alves | impulsionando: reels.mp4 ‎<anexado: 00000929-reels.mp4>
+[23/03/2026, 12:52:00] ~ Lurdes E.: Gracias 😊
+[24/03/2026, 16:33:59] ~ Lurdes E.: ‎~ Lurdes E. fixou uma mensagem
+[24/03/2026, 16:28:18] Roger RIO: Afinal se recupero lá
+Cuenta de Facebook?
+[24/03/2026, 16:28:29] Valentina | Rio Med: aun nada
+[24/03/2026, 16:28:37] Valentina | Rio Med: pero tenemos acceso desde aniadia
+[24/03/2026, 16:59:28] Katharine Alves | impulsionando: eu inda nao estou com esse acesso
+[24/03/2026, 16:59:46] Valentina | Rio Med: ahora la agrego
+‎[24/03/2026, 17:38:17] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000937-Planejamento semanal - Rio Med.pdf>
+[24/03/2026, 17:38:48] Valentina | Rio Med: añadame
+[24/03/2026, 17:38:52] Valentina | Rio Med: le mande solicitud
+[24/03/2026, 17:39:19] Katharine Alves | impulsionando: aceitei
+[24/03/2026, 17:40:27] Valentina | Rio Med: https://adsmanager.facebook.com/adsmanager/manage/ad_account_settings/ad_account_setup?act=1075306340641755&nav_entry_point=mbs_sub_nav
+[24/03/2026, 17:40:38] Valentina | Rio Med: ahora intente conectarse a esa cuenta publicitaria
+[24/03/2026, 17:42:50] Katharine Alves | impulsionando: eu estou como adminitradora da conta de anuncios mas não consigo acessar a meta para publicar posts
+[25/03/2026, 12:17:06] Roger | RIO MED (amigo da campos sales): Necesito publicar en wts app
+[25/03/2026, 12:17:19] Roger | RIO MED (amigo da campos sales): Que podemos promocionar ??
+[25/03/2026, 12:17:35] Roger | RIO MED (amigo da campos sales): Manda-me imagenes
+[30/03/2026, 15:00:54] ~ Lurdes E.: https://vt.tiktok.com/ZSHLvAWRC/
+‎[30/03/2026, 16:06:12] Monica Heredia | Rio Mes: LISTA DE STOCK AL 30-03-26 PARA PUBLICAR EN FACEBOOK.txt ‎<anexado: 00000948-LISTA DE STOCK AL 30-03-26 PARA PUBLICAR EN FACEBOOK.txt>
+[30/03/2026, 20:01:37] Katharine Alves | impulsionando: vocês tem esse produto?
+[30/03/2026, 22:31:45] ~ Lurdes E.: Solo a pedido 👆🏽 
+Me gustó el vídeo 💞
+‎[31/03/2026, 11:08:19] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000951-Planejamento semanal - Rio Med.pdf>
+‎[06/04/2026, 17:19:07] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000952-Planejamento semanal - Rio Med.pdf>
+[08/04/2026, 13:48:01] ~ Lurdes E.: @⁨Valentina | Rio Med⁩  no llegan mensajes al corporativo de FACEBOOK
+[08/04/2026, 13:48:13] ~ Lurdes E.: Publicaron algo???
+[08/04/2026, 13:48:23] ~ Lurdes E.: necesito ventas 🙏🏾
+[08/04/2026, 13:50:56] Valentina | Rio Med: @⁨Adolfo Soraire | Rogerio Rio Med⁩ la tarjeta se bloqueo
+‎[08/04/2026, 13:51:09] Valentina | Rio Med: ‎<anexado: 00000957-PHOTO-2026-04-08-13-51-09.jpg>
+[08/04/2026, 13:51:43] Adolfo Soraire | Rogerio Rio Med: La del union?
+[08/04/2026, 13:57:26] Valentina | Rio Med: sii
+[08/04/2026, 13:59:54] Adolfo Soraire | Rogerio Rio Med: Veo
+[08/04/2026, 14:02:05] Roger RIO: Recuperaste lá cuenta ?
+[08/04/2026, 14:02:55] Valentina | Rio Med: Sigo a la espera de que el equipo resuelva, pero podemos usarla normal
+‎[08/04/2026, 14:03:05] Valentina | Rio Med: ‎<anexado: 00000963-PHOTO-2026-04-08-14-03-05.jpg>
+‎[08/04/2026, 15:14:28] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00000964-PHOTO-2026-04-08-15-14-28.jpg>
+[08/04/2026, 15:16:01] Adolfo Soraire | Rogerio Rio Med: @⁨Valentina | Rio Med⁩
+[08/04/2026, 15:17:49] Valentina | Rio Med: Lo veo
+[08/04/2026, 16:35:40] Valentina | Rio Med: Ya estan Ventas y Alquileres de Abril @⁨~Lurdes E.⁩
+‎[13/04/2026, 18:15:48] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000968-Planejamento semanal - Rio Med.pdf>
+‎[20/04/2026, 14:35:09] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000969-Planejamento semanal - Rio Med.pdf>
+‎[21/04/2026, 10:03:59] Monica Heredia | Rio Mes: Esta forma me parece correcta tubo bastante interacción @⁨Katharine Alves | impulsionando⁩ ‎<anexado: 00000970-PHOTO-2026-04-21-10-03-59.jpg>
+‎[21/04/2026, 10:04:30] Monica Heredia | Rio Mes: Con un solo clip se va a consultar ‎<anexado: 00000971-PHOTO-2026-04-21-10-04-30.jpg>
+[21/04/2026, 10:05:32] Valentina | Rio Med: todas las publicaciones de una sola foto son asi, cuando son varias facebook no permite ‎<Mensagem editada>
+[21/04/2026, 10:55:49] Katharine Alves | impulsionando: ok, vou fazer mais assim então
+‎[21/04/2026, 13:36:28] Roger RIO: ‎<anexado: 00000974-PHOTO-2026-04-21-13-36-28.jpg>
+‎[21/04/2026, 13:36:29] Roger RIO: ‎<anexado: 00000975-PHOTO-2026-04-21-13-36-29.jpg>
+‎[21/04/2026, 13:36:29] Roger RIO: ‎<anexado: 00000976-PHOTO-2026-04-21-13-36-29.jpg>
+[21/04/2026, 13:37:50] ~ gamalielv15: Está full
+[21/04/2026, 13:38:40] Monica Heredia | Rio Mes: Nooo tenés montón acá ese modelo no lo prefieren
+[21/04/2026, 13:38:56] Roger RIO: Solo foto che
+[21/04/2026, 13:38:58] Roger RIO: Calma
+[21/04/2026, 13:39:02] Adolfo Soraire | Rogerio Rio Med: Kkkkkk
+[21/04/2026, 13:39:13] Adolfo Soraire | Rogerio Rio Med: Tosicodad
+[21/04/2026, 13:39:30] Roger RIO: Relacion laboral tóxica
+[21/04/2026, 13:39:35] Roger RIO: 😳🧐
+[21/04/2026, 13:39:51] ~ gamalielv15: Esta enojada por qué perdió otto 😂
+[21/04/2026, 13:39:54] Monica Heredia | Rio Mes: Cuando cansa 
+Realmente no hay como mantener algo estable
+‎[24/04/2026, 13:05:24] Monica Heredia | Rio Mes: Miren ese planificador anual de Hansa ‎<anexado: 00000987-PHOTO-2026-04-24-13-05-24.jpg>
+‎[27/04/2026, 13:17:30] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000988-Planejamento semanal - Rio Med.pdf>
+[04/05/2026, 13:37:57] SAC Rio Med: Buenos días:No estan llegando mensajes del Facebook @⁨Adolfo Soraire | Rogerio Rio Med⁩ @⁨Valentina | Rio Med⁩
+‎[04/05/2026, 17:03:51] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00000990-Planejamento semanal - Rio Med.pdf>
+[07/05/2026, 10:18:36] Monica Heredia | Rio Mes: Buenos Días
+[07/05/2026, 10:18:51] Monica Heredia | Rio Mes: @⁨Katharine Alves | impulsionando⁩ 
+Usted tiene subir video de los equipos a tiktok
+[07/05/2026, 10:19:04] Monica Heredia | Rio Mes: Desde agosto 2025 no hay videos
+[07/05/2026, 10:19:16] Monica Heredia | Rio Mes: Cómo podríamos hacer
+[07/05/2026, 10:19:18] Monica Heredia | Rio Mes: ?
+[07/05/2026, 10:19:26] Valentina | Rio Med: Tiktoks
+[07/05/2026, 10:21:23] Katharine Alves | impulsionando: eu estou sem o login do tiktok, alguem tem?
+[07/05/2026, 10:21:48] Valentina | Rio Med: es el mismo que tenia cuando subio los otros videos
+[07/05/2026, 10:21:53] Valentina | Rio Med: mismo todo
+[07/05/2026, 10:25:19] Katharine Alves | impulsionando: o que eu tenho não ta entrando a um tempo
+[07/05/2026, 10:25:26] Katharine Alves | impulsionando: riomedequiposmedicos
+thais2016
+[07/05/2026, 10:25:32] Katharine Alves | impulsionando: ainda é assim?
+[07/05/2026, 10:25:34] Valentina | Rio Med: ese es instagram
+[07/05/2026, 10:25:42] Valentina | Rio Med: tiktok es riomed
+Thais2016
+[07/05/2026, 10:26:29] Katharine Alves | impulsionando: ok, coloquei aqui
+[07/05/2026, 10:26:41] Katharine Alves | impulsionando: eles enviaram um odigo para o celular com final 1063
+[07/05/2026, 10:29:22] Katharine Alves | impulsionando: entrei vou atualizar la
+[07/05/2026, 10:30:28] Adolfo Soraire | Rogerio Rio Med: Pode
+[07/05/2026, 10:32:37] SAC Rio Med: En espacios de atención, hay algo que muchos pasan por alto, pero que el paciente nunca ignora: la privacidad.
+
+Revisiones, procedimientos o incluso una simple consulta pueden volverse incómodos si no existe una separación adecuada del espacio.
+
+El Biombo Retráctil de 4 Cuerpos Saikang SKH049 es una solución práctica para crear ambientes más privados, organizados y funcionales en segundos. Su diseño permite:
+
+🔹Dividir espacios de forma rápida
+🔹Brindar mayor privacidad al paciente
+🔹Adaptarse a diferentes áreas según la necesidad
+🔹Facilitar la movilidad y el almacenamiento
+
+Ideal para clínicas, consultorios, hospitales o cualquier entorno donde sea necesario optimizar el espacio sin perder comodidad. En Rio Med encuentras equipamiento médico para venta y alquiler, pensado para mejorar cada detalle de tu espacio.
+
+📍 Visítanos en Alameda Junín N° 301, Santa Cruz de la Sierra
+📲 WhatsApp: +591 3 3246171
+🚚 Envíos a domicilio y a nivel nacional (costo adicional)
+🔗 Más información aquí: https://linktr.ee/rio_med
+                 https://www.instagram.com/reel/DXw2egTxf1X/?igsh=MWYzNmZoMmhncWVieA==
+[07/05/2026, 10:32:44] SAC Rio Med: Este video por ejemplo
+[07/05/2026, 10:32:51] SAC Rio Med: Podría estar en tiktok
+[07/05/2026, 10:35:09] Monica Heredia | Rio Mes: Todo lo que es simuladores @⁨Katharine Alves | impulsionando⁩  necesito video en tiktok
+[07/05/2026, 10:35:49] Katharine Alves | impulsionando: ok
+[07/05/2026, 10:37:10] SAC Rio Med: Cuando llega el momento de enseñar RCP, la teoría sola no es suficiente. Lo que realmente forma profesionales preparados es la práctica repetida, con retroalimentación y realismo.
+
+El SIMULADOR PARA ENTRENAMIENTO DE RCP PARA ADULTOS Y NIÑOS GENERAL DOCTOR GD/CPR166, de General Doctor, fue desarrollado precisamente para eso: convertir el entrenamiento en una experiencia cercana a la realidad.
+
+Con él es posible:
+✔ Entrenar compresiones torácicas en adulto y niño
+✔ Perfeccionar técnica, ritmo y profundidad de maniobras
+✔ Simular situaciones de emergencia con seguridad
+✔ Repetir procedimientos todas las veces necesarias
+✔ Aumentar la confianza antes de la atención real
+
+🔥 Este producto tiene 15% de descuento hasta marzo. Una excelente oportunidad para renovar tus equipos de entrenamiento con condiciones especiales. La capacitación de calidad no es un gasto, es una inversión directa en vidas.
+Rio Med ofrece equipos confiables para elevar el nivel de formación y entrenamiento.
+
+📍 Visítanos en Alameda Junín N° 301, Santa Cruz de la Sierra
+📲 WhatsApp: +591 3 3246171
+🚚 Envíos a domicilio y a nivel nacional (costo adicional)
+🔗 Más información aquí: https://linktr.ee/rio_med
+                 https://www.instagram.com/p/DVMK-FRE8vC/?igsh=MTg4eG9qZDh5bTBrYg==
+[07/05/2026, 10:37:19] SAC Rio Med: Este hay que buscar un video
+[07/05/2026, 10:37:24] SAC Rio Med: Y publicar en tiktok
+[07/05/2026, 10:38:17] SAC Rio Med: La formación en enfermería y en el área de la salud requiere práctica constante y herramientas que permitan aprender de forma segura antes de atender a pacientes reales.
+
+El Simulador de Enfermería Anatómico TZJ-0502-SR es un maniquí clínico diseñado para entrenamiento y simulación médica, permitiendo a estudiantes y profesionales practicar múltiples procedimientos en un entorno controlado.
+
+Este modelo de tamaño adulto cuenta con estructura anatómica realista y articulaciones móviles, lo que facilita la simulación de diferentes situaciones clínicas.
+
+Con este simulador es posible practicar:
+• Reanimación cardiopulmonar (RCP);
+• Higiene oral y cuidados del paciente;
+• Administración de oxígeno;
+• Inyecciones intramusculares;
+• Colocación de sondas nasogástricas, vesicales y rectales;
+• Curaciones y vendajes;
+• Movilización y posicionamiento del paciente.
+
+Además, incluye componentes anatómicos intercambiables y accesorios para entrenamiento clínico, permitiendo una experiencia de aprendizaje más completa para escuelas de enfermería, centros de simulación y programas de capacitación médica.
+
+En Rio Med apoyamos la educación médica con equipamiento especializado para formación y entrenamiento en salud. Para más información sobre este y otros simuladores médicos, contáctenos
+
+📍 Visítanos en Alameda Junín N° 301, Santa Cruz de la Sierra
+📲 WhatsApp: +591 3 3246171
+🚚 Envíos a domicilio y a nivel nacional (costo adicional)
+🔗 Más información aquí: https://linktr.ee/rio_med
+                 https://www.instagram.com/reel/DVvhIJ1jWFM/?igsh=YjRpOWwyejI2MGtu
+[07/05/2026, 10:38:28] SAC Rio Med: Este también
+‎[07/05/2026, 10:41:03] SAC Rio Med: @⁨Katharine Alves | impulsionando⁩  una nueva imagen y también en tiktok ‎<anexado: 00001019-PHOTO-2026-05-07-10-41-03.jpg>
+‎[11/05/2026, 15:23:51] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00001020-Planejamento semanal - Rio Med.pdf>
+‎[12/05/2026, 14:39:30] Roger RIO: ‎<anexado: 00001021-PHOTO-2026-05-12-14-39-30.jpg>
+[12/05/2026, 14:39:46] Roger RIO: Quien está responsable por las fechas comemorativas??
+[12/05/2026, 21:12:43] Katharine Alves | impulsionando: nas redes sociais?
+[12/05/2026, 21:13:12] Katharine Alves | impulsionando: se for, eu to dando prioridade para os posts de produtos por conta das vendas
+[18/05/2026, 17:41:55] SAC Rio Med: ‎Seu código de segurança com SAC Rio Med mudou.
+[18/05/2026, 17:50:31] SAC Rio Med: ‎Seu código de segurança com SAC Rio Med mudou.
+‎[19/05/2026, 11:36:29] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf ‎<anexado: 00001027-Planejamento semanal - Rio Med.pdf>
+[21/05/2026, 01:17:36] Roger RIO: https://www.instagram.com/reel/DW8gHi0Bh03/?igsh=MWtrcjRtb3Y1aGZ5eg==
+[21/05/2026, 01:17:47] Roger RIO: O tal fazer um assim?
+[21/05/2026, 22:54:37] ~ Lurdes E.:
+‎[21/05/2026, 22:54:37] ~ Lurdes E.: ‎<anexado: 00001031-PHOTO-2026-05-21-22-54-37.jpg>
+‎[21/05/2026, 22:54:38] ~ Lurdes E.: ‎<anexado: 00001032-PHOTO-2026-05-21-22-54-38.jpg>
+‎[21/05/2026, 22:54:54] ~ Lurdes E.: ‎<anexado: 00001033-VIDEO-2026-05-21-22-54-54.mp4>
+[21/05/2026, 22:54:59] ~ Lurdes E.:
+‎[21/05/2026, 22:54:59] ~ Lurdes E.: ‎<anexado: 00001035-PHOTO-2026-05-21-22-54-59.jpg>
+‎[21/05/2026, 22:55:00] ~ Lurdes E.: ‎<anexado: 00001036-PHOTO-2026-05-21-22-55-00.jpg>
+‎[21/05/2026, 22:55:00] ~ Lurdes E.: ‎<anexado: 00001037-PHOTO-2026-05-21-22-55-00.jpg>
+‎[21/05/2026, 22:55:01] ~ Lurdes E.: ‎<anexado: 00001038-PHOTO-2026-05-21-22-55-01.jpg>
+‎[21/05/2026, 22:55:02] ~ Lurdes E.: ‎<anexado: 00001039-PHOTO-2026-05-21-22-55-02.jpg>
+‎[21/05/2026, 22:55:02] ~ Lurdes E.: ‎<anexado: 00001040-PHOTO-2026-05-21-22-55-02.jpg>
+‎[21/05/2026, 22:55:03] ~ Lurdes E.: ‎<anexado: 00001041-PHOTO-2026-05-21-22-55-03.jpg>
+‎[21/05/2026, 22:55:41] ~ Lurdes E.: ‎<anexado: 00001042-VIDEO-2026-05-21-22-55-41.mp4>
+[21/05/2026, 22:57:02] ~ Lurdes E.:
+‎[21/05/2026, 22:57:03] ~ Lurdes E.: ‎<anexado: 00001044-PHOTO-2026-05-21-22-57-03.jpg>
+‎[21/05/2026, 22:57:03] ~ Lurdes E.: ‎<anexado: 00001045-PHOTO-2026-05-21-22-57-03.jpg>
+‎[21/05/2026, 22:57:03] ~ Lurdes E.: ‎<anexado: 00001046-PHOTO-2026-05-21-22-57-03.jpg>
+[25/05/2026, 10:01:05] Monica Heredia | Rio Mes: https://www.facebook.com/share/r/1BEgBYoEwC/
+[25/05/2026, 10:01:22] Monica Heredia | Rio Mes: Necesito que desactiven promoción se está  silla no hay stock de este modelo
+[25/05/2026, 10:01:37] Monica Heredia | Rio Mes: @⁨Valentina | Rio Med⁩ @⁨Katharine Alves | impulsionando⁩
+[25/05/2026, 10:01:39] Valentina | Rio Med: ok
+[25/05/2026, 10:01:51] Monica Heredia | Rio Mes: Bastante personas quieren comprar esa silla
+[25/05/2026, 10:02:36] Valentina | Rio Med: deberian traer!
+[25/05/2026, 10:03:29] Monica Heredia | Rio Mes: El precio no es competitivo con el precio del mercado
+[25/05/2026, 10:03:59] Monica Heredia | Rio Mes: Pero si hay que traer
+[25/05/2026, 10:04:07] Monica Heredia | Rio Mes: Para los alquileres
+[25/05/2026, 10:04:24] Monica Heredia | Rio Mes: Y para quien si se basa en calidad
+[25/05/2026, 10:07:42] Katharine Alves | impulsionando: tem algum outro modelo de cadeira de rodas disponível?
+[25/05/2026, 10:14:04] Monica Heredia | Rio Mes: Ahora paso los modelos disponibles
+‎[25/05/2026, 10:16:09] Monica Heredia | Rio Mes: Solo para alquiler o para la venta pero como medio uso @⁨Valentina | Rio Med⁩ @⁨Katharine Alves | impulsionando⁩ ‎<anexado: 00001059-PHOTO-2026-05-25-10-16-09.jpg>
+‎[25/05/2026, 10:16:35] Monica Heredia | Rio Mes: Alquiler o venta de medio uso ‎<anexado: 00001060-PHOTO-2026-05-25-10-16-35.jpg>
+‎[25/05/2026, 10:17:00] Monica Heredia | Rio Mes: Nueva
+Solo venta ‎<anexado: 00001061-PHOTO-2026-05-25-10-17-00.jpg>
+[25/05/2026, 10:18:07] Monica Heredia | Rio Mes: Único modelo de baño en stock
+‎[25/05/2026, 10:18:56] Monica Heredia | Rio Mes: Solo alquiler o venta pero de medio uso ‎<anexado: 00001063-PHOTO-2026-05-25-10-18-56.jpg>
+‎[25/05/2026, 10:19:26] Monica Heredia | Rio Mes: Nuevo con ruedas 
+Haya para alquiler ‎<anexado: 00001064-PHOTO-2026-05-25-10-19-26.jpg>
+[25/05/2026, 10:20:07] Monica Heredia | Rio Mes: Mueletas tenemos bastante
+‎[25/05/2026, 10:23:52] Monica Heredia | Rio Mes: ‎<anexado: 00001066-VIDEO-2026-05-25-10-23-52.mp4>
+‎[25/05/2026, 10:23:53] Monica Heredia | Rio Mes: ‎<anexado: 00001067-VIDEO-2026-05-25-10-23-53.mp4>
+‎[25/05/2026, 10:24:11] Monica Heredia | Rio Mes: ‎<anexado: 00001068-VIDEO-2026-05-25-10-24-11.mp4>
+‎[25/05/2026, 10:24:32] Monica Heredia | Rio Mes: Este está en la lista prioridad tenemos bastante ‎<anexado: 00001069-PHOTO-2026-05-25-10-24-32.jpg>
+‎[25/05/2026, 10:24:58] Monica Heredia | Rio Mes: ‎<anexado: 00001070-PHOTO-2026-05-25-10-24-58.jpg>
+‎[25/05/2026, 15:16:59] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00001071-Planejamento semanal - Rio Med.pdf>
+‎[27/05/2026, 19:08:46] Roger RIO: ‎<anexado: 00001072-PHOTO-2026-05-27-19-08-46.jpg>
+[27/05/2026, 19:08:56] Roger RIO: Bonito no ?
+[29/05/2026, 18:38:26] Adolfo Soraire | Rogerio Rio Med: https://www.facebook.com/RIOMEDBOLIVIA/posts/los-maniqu%C3%ADes-educativos-son-herramientas-clave-para-la-formaci%C3%B3n-de-estudiantes/1219438020200345/
+[29/05/2026, 18:38:49] Adolfo Soraire | Rogerio Rio Med: despues de haceer una busqueda en google.com ya aparece riomed como resultado
+‎[29/05/2026, 18:38:55] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00001076-PHOTO-2026-05-29-18-38-55.jpg>
+[29/05/2026, 18:39:15] Adolfo Soraire | Rogerio Rio Med: solo esas publicaciones no tienen link al wsp directo
+[29/05/2026, 18:39:26] Adolfo Soraire | Rogerio Rio Med: seria bueno poner el link
+[29/05/2026, 18:43:16] Katharine Alves | impulsionando: https://linktr.ee/rio_med tem esse link
+[29/05/2026, 18:43:51] Katharine Alves | impulsionando: quer que eu mude ele?
+‎[29/05/2026, 18:46:51] Adolfo Soraire | Rogerio Rio Med: ‎<anexado: 00001081-PHOTO-2026-05-29-18-46-51.jpg>
+[29/05/2026, 18:47:03] Adolfo Soraire | Rogerio Rio Med: Nesse daqui nao clica nada
+‎[01/06/2026, 16:22:58] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf ‎<anexado: 00001083-Planejamento semanal - Rio Med.pdf>
+‎[02/06/2026, 11:39:39] Roger RIO: ‎<anexado: 00001084-PHOTO-2026-06-02-11-39-39.jpg>
+[02/06/2026, 11:41:49] Roger RIO: Q
+Tal
+Esa !??
+[02/06/2026, 11:42:43] Monica Heredia | Rio Mes: Bonita
+[02/06/2026, 11:43:20] Roger RIO: Torcida RIOMED 
+RUMO AO HEXA
+[02/06/2026, 11:43:32] Roger RIO: Escrito 👆🏻
+[02/06/2026, 12:02:36] ~ gamalielv15: Full es la oficial del mundial?
+[02/06/2026, 12:02:45] Roger RIO: No
+[03/06/2026, 19:40:46] Roger RIO: https://www.instagram.com/p/DZIayzJETwj/?igsh=MXNlZXg5ZGluczVhOQ==
+‎[03/06/2026, 20:45:05] Roger RIO: ‎<anexado: 00001092-PHOTO-2026-06-03-20-45-05.jpg>
+[03/06/2026, 20:45:28] Roger RIO: Como se publica assim no insta ??
+[03/06/2026, 20:45:58] Roger RIO: Linkado ao zap !!
+[03/06/2026, 20:50:21] Katharine Alves | impulsionando: Opção 1: Pelo aplicativo do Instagram (Mais rápido)Vá até o seu perfil e toque no post que deseja anunciar.Toque no botão Turbinar publicação (abaixo da imagem).Na seção de metas, escolha a opção "Enviem uma mensagem para você".Em "Apps de mensagens", selecione o seu WhatsApp Business.Defina o seu público-alvo, o orçamento diário, o tempo que o anúncio ficará rodando e conclua o pagamento.
+
+Opção 2: Pelo Gerenciador de Anúncios da Meta (Profissional)Acesse o painel do Gerenciador de Anúncios no computador.Clique no botão verde + Criar para iniciar uma nova campanha.Selecione o objetivo de Engajamento.Na etapa de "Conjunto de Anúncios", configure a localização da conversão para Apps de mensagem e marque exclusivamente o WhatsApp.Na etapa de "Anúncio", suba a imagem ou vídeo desejado. O sistema da Meta incluirá o botão de chamada para ação de forma automática no rodapé da mídia.
+[04/06/2026, 09:51:30] Roger RIO: https://www.facebook.com/share/v/1B7SioUwNe/?mibextid=wwXIfr
+[04/06/2026, 09:51:36] Roger RIO: Interessante
+[05/06/2026, 18:14:42] ~ Lurdes E.: Un gran favor 🙏🏽 
+Puede pasar los vídeos y fotos (artes) al grupo de lo que publican en el facebook 🙏🏽🙏🏽@⁨Katharine Alves | impulsionando⁩ ‎<Mensagem editada>
+[05/06/2026, 18:15:18] ~ Lurdes E.: Estoy viendo el facebook y son varios y están bonitos 👏🏽👏🏽☺️💕💕💕 ‎<Mensagem editada>
+[05/06/2026, 18:29:21] Adolfo Soraire | Rogerio Rio Med: Están en la nube
+[05/06/2026, 18:29:55] Adolfo Soraire | Rogerio Rio Med: 1
+[05/06/2026, 18:30:05] Adolfo Soraire | Rogerio Rio Med: @⁨~Lurdes E.⁩ 2 ‎<Mensagem editada>
+‎[05/06/2026, 18:31:12] Katharine Alves | impulsionando: ‎<anexado: 00001103-PHOTO-2026-06-05-18-31-12.jpg>
+‎[05/06/2026, 18:31:12] Katharine Alves | impulsionando: ‎<anexado: 00001104-PHOTO-2026-06-05-18-31-12.jpg>
+‎[05/06/2026, 18:31:13] Katharine Alves | impulsionando: ‎<anexado: 00001105-PHOTO-2026-06-05-18-31-13.jpg>
+‎[05/06/2026, 18:31:13] Katharine Alves | impulsionando: ‎<anexado: 00001106-PHOTO-2026-06-05-18-31-13.jpg>
+‎[05/06/2026, 18:31:13] Katharine Alves | impulsionando: ‎<anexado: 00001107-PHOTO-2026-06-05-18-31-13.jpg>
+‎[05/06/2026, 18:31:13] Katharine Alves | impulsionando: ‎<anexado: 00001108-PHOTO-2026-06-05-18-31-13.jpg>
+‎[05/06/2026, 18:31:14] Katharine Alves | impulsionando: ‎<anexado: 00001109-PHOTO-2026-06-05-18-31-14.jpg>
+‎[05/06/2026, 18:31:14] Katharine Alves | impulsionando: ‎<anexado: 00001110-PHOTO-2026-06-05-18-31-14.jpg>
+‎[05/06/2026, 18:31:14] Katharine Alves | impulsionando: ‎<anexado: 00001111-PHOTO-2026-06-05-18-31-14.jpg>
+‎[05/06/2026, 18:31:15] Katharine Alves | impulsionando: ‎<anexado: 00001112-PHOTO-2026-06-05-18-31-15.jpg>
+‎[05/06/2026, 18:31:15] Katharine Alves | impulsionando: ‎<anexado: 00001113-PHOTO-2026-06-05-18-31-15.jpg>
+‎[05/06/2026, 18:31:15] Katharine Alves | impulsionando: ‎<anexado: 00001114-PHOTO-2026-06-05-18-31-15.jpg>
+‎[05/06/2026, 18:31:15] Katharine Alves | impulsionando: ‎<anexado: 00001115-PHOTO-2026-06-05-18-31-15.jpg>
+‎[05/06/2026, 18:31:16] Katharine Alves | impulsionando: ‎<anexado: 00001116-PHOTO-2026-06-05-18-31-16.jpg>
+‎[05/06/2026, 18:31:16] Katharine Alves | impulsionando: ‎<anexado: 00001117-PHOTO-2026-06-05-18-31-16.jpg>
+‎[05/06/2026, 18:31:16] Katharine Alves | impulsionando: ‎<anexado: 00001118-PHOTO-2026-06-05-18-31-16.jpg>
+‎[05/06/2026, 18:31:16] Katharine Alves | impulsionando: ‎<anexado: 00001119-PHOTO-2026-06-05-18-31-16.jpg>
+‎[05/06/2026, 18:31:17] Katharine Alves | impulsionando: ‎<anexado: 00001120-PHOTO-2026-06-05-18-31-17.jpg>
+‎[05/06/2026, 18:31:17] Katharine Alves | impulsionando: ‎<anexado: 00001121-PHOTO-2026-06-05-18-31-17.jpg>
+‎[05/06/2026, 18:31:17] Katharine Alves | impulsionando: ‎<anexado: 00001122-PHOTO-2026-06-05-18-31-17.jpg>
+‎[05/06/2026, 18:31:17] Katharine Alves | impulsionando: ‎<anexado: 00001123-PHOTO-2026-06-05-18-31-17.jpg>
+‎[05/06/2026, 18:31:17] Katharine Alves | impulsionando: ‎<anexado: 00001124-PHOTO-2026-06-05-18-31-17.jpg>
+‎[05/06/2026, 18:31:18] Katharine Alves | impulsionando: ‎<anexado: 00001125-PHOTO-2026-06-05-18-31-18.jpg>
+‎[05/06/2026, 18:31:18] Katharine Alves | impulsionando: ‎<anexado: 00001126-PHOTO-2026-06-05-18-31-18.jpg>
+‎[05/06/2026, 18:31:18] Katharine Alves | impulsionando: ‎<anexado: 00001127-PHOTO-2026-06-05-18-31-18.jpg>
+‎[05/06/2026, 18:31:19] Katharine Alves | impulsionando: ‎<anexado: 00001128-PHOTO-2026-06-05-18-31-19.jpg>
+[05/06/2026, 20:10:34] Adolfo Soraire | Rogerio Rio Med: eso no existe mas
+[05/06/2026, 20:26:25] Monica Heredia | Rio Mes: No publicar
+[05/06/2026, 20:26:31] Monica Heredia | Rio Mes: No publicar
+[05/06/2026, 20:26:41] Monica Heredia | Rio Mes: No publicar
+[06/06/2026, 09:37:03] Katharine Alves | impulsionando: eu não vou publicar isso, eu to enviando porque ela pediu para enviar os que ja tinham sido postados antes
+[06/06/2026, 16:04:09] Katharine Alves | impulsionando: ‎Seu código de segurança com Katharine Alves | impulsionando mudou.
+‎[08/06/2026, 10:00:42] Roger RIO: ‎<anexado: 00001135-PHOTO-2026-06-08-10-00-42.jpg>
+‎[08/06/2026, 17:34:04] Roger RIO: ‎<anexado: 00001136-PHOTO-2026-06-08-17-34-04.jpg>
+‎[08/06/2026, 17:34:04] Roger RIO: ‎<anexado: 00001137-PHOTO-2026-06-08-17-34-04.jpg>
+‎[08/06/2026, 17:34:04] Roger RIO: ‎<anexado: 00001138-PHOTO-2026-06-08-17-34-04.jpg>
+‎[08/06/2026, 17:34:05] Roger RIO: ‎<anexado: 00001139-PHOTO-2026-06-08-17-34-05.jpg>
+‎[08/06/2026, 17:34:05] Roger RIO: ‎<anexado: 00001140-PHOTO-2026-06-08-17-34-05.jpg>
+‎[08/06/2026, 17:34:05] Roger RIO: ‎<anexado: 00001141-PHOTO-2026-06-08-17-34-05.jpg>
+‎[08/06/2026, 17:34:06] Roger RIO: ‎<anexado: 00001142-PHOTO-2026-06-08-17-34-06.jpg>
+[08/06/2026, 17:34:10] Roger RIO: Fotos para Publi
+[09/06/2026, 12:32:43] Katharine Alves | impulsionando: oi boa tarde @⁨Monica Heredia | Rio Mes⁩ você pode me encaminhar novamente as fotos que tinha enviado aqui? Troquei de celular porque meu antigo quebrou e eu perdi todas as mensagens do whatsapp
+[09/06/2026, 12:35:03] Katharine Alves | impulsionando: eram fotos que tinham de simuladores e partes do corpo
+‎[09/06/2026, 12:55:53] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf • ‎3 páginas ‎<anexado: 00001146-Planejamento semanal - Rio Med.pdf>
+‎[09/06/2026, 14:10:08] Katharine Alves | impulsionando: tem umas mensagens pelo facebook ‎<anexado: 00001147-PHOTO-2026-06-09-14-10-08.jpg>
+[09/06/2026, 14:10:32] Katharine Alves | impulsionando: não sei se aparece para vocês, mas quando eu entro no meta business para postar aparece
+[10/06/2026, 20:29:49] ~ Lurdes E.: https://vt.tiktok.com/ZSQUMmoY7/
+[11/06/2026, 20:38:49] ~ Lurdes E.: https://vt.tiktok.com/ZSQPUGEKF/
+[11/06/2026, 20:40:41] ~ Lurdes E.: @⁨Roger RIO⁩ quiero precio del microscopio trinocular con camara 👆🏽 🙏🏽
+[11/06/2026, 21:29:24] Roger RIO: Ok
+‎[12/06/2026, 10:57:58] Monica Heredia | Rio Mes: PROMOCION INVIERNO @⁨Katharine Alves | impulsionando⁩ Porfavor hacer arte bonito y activar promocion de inviernos todo junio hasta julio @⁨Valentina | Rio Med⁩ ‎<anexado: 00001153-PHOTO-2026-06-12-10-57-58.jpg>
+‎[12/06/2026, 17:41:22] ~ Lurdes E.: *Vacuometro 400 ml*
+*Marca:* UNITEC
+*Industria:* Brasil 
+
+*Antes:* 550 Bs 
+*Ahora: 390 Bs*
+ 🎉 *full descuento hasta fin de mes* ‎<anexado: 00001154-PHOTO-2026-06-12-17-41-22.jpg>
+‎[12/06/2026, 17:48:25] ~ Lurdes E.: ‎<anexado: 00001155-PHOTO-2026-06-12-17-48-25.jpg>
+‎[12/06/2026, 17:50:54] ~ Lurdes E.: RM905 - Flujómetro de oxígeno de 0-15 lts.
+Marca:Oxígeno
+Industria:Brasilera ‎<anexado: 00001156-PHOTO-2026-06-12-17-50-54.jpg>
+‎[12/06/2026, 17:56:00] ~ Lurdes E.: RM745 Flujómetro de oxígeno de 0-15 LTS/min 
+Marca:UNITEC
+Industria:Brasilera ‎<anexado: 00001157-PHOTO-2026-06-12-17-56-00.jpg>
+‎[15/06/2026, 12:15:09] ~ Lurdes E.: Buenos días @⁨Katharine Alves | impulsionando⁩:No tenemos esos estribos para vender 👆🏽 ‎<anexado: 00001158-PHOTO-2026-06-15-12-15-09.jpg>
+[15/06/2026, 12:25:44] Katharine Alves | impulsionando: mas foi mandado aqui no grupo semana passada isso para postar ‎<Mensagem editada>
+‎[15/06/2026, 16:06:09] Katharine Alves | impulsionando: Planejamento semanal - Rio Med.pdf ‎<anexado: 00001160-Planejamento semanal - Rio Med.pdf>
+[15/06/2026, 16:07:23] Katharine Alves | impulsionando: exclui a publicação
+[16/06/2026, 00:52:02] Roger RIO: https://www.instagram.com/reel/DVZLQhFCayY/?igsh=MXRsb2xta2U3d2d1bQ==
+[16/06/2026, 00:52:21] Roger RIO: Tem como fazer um vídeo assim ?
+[16/06/2026, 00:52:43] Roger RIO: https://www.instagram.com/reel/DU_azHZiXBj/?igsh=YnYzZ3Jqb2pnNGJ5
+[16/06/2026, 08:59:04] Adolfo Soraire | Rogerio Rio Med: @⁨Roger RIO⁩
+[16/06/2026, 08:59:14] Adolfo Soraire | Rogerio Rio Med: Es
+[16/06/2026, 08:59:29] Adolfo Soraire | Rogerio Rio Med: Ella
+[16/06/2026, 08:59:57] Adolfo Soraire | Rogerio Rio Med: Antes
+[16/06/2026, 09:14:42] Roger RIO: Ok
+‎[17/06/2026, 12:33:39] Katharine Alves | impulsionando: ‎<anexado: 00001170-PHOTO-2026-06-17-12-33-39.jpg>
+‎[17/06/2026, 12:33:39] Katharine Alves | impulsionando: ‎<anexado: 00001171-PHOTO-2026-06-17-12-33-39.jpg>
+‎[17/06/2026, 12:33:39] Katharine Alves | impulsionando: ‎<anexado: 00001172-PHOTO-2026-06-17-12-33-39.jpg>
+‎[17/06/2026, 12:33:40] Katharine Alves | impulsionando: ‎<anexado: 00001173-PHOTO-2026-06-17-12-33-40.jpg>
+‎[17/06/2026, 12:33:40] Katharine Alves | impulsionando: ‎<anexado: 00001174-PHOTO-2026-06-17-12-33-40.jpg>
+‎[17/06/2026, 12:33:40] Katharine Alves | impulsionando: ‎<anexado: 00001175-PHOTO-2026-06-17-12-33-40.jpg>
+‎[17/06/2026, 12:33:40] Katharine Alves | impulsionando: ‎<anexado: 00001176-PHOTO-2026-06-17-12-33-40.jpg>
+‎[17/06/2026, 12:33:41] Katharine Alves | impulsionando: ‎<anexado: 00001177-PHOTO-2026-06-17-12-33-41.jpg>
+‎[17/06/2026, 12:33:41] Katharine Alves | impulsionando: ‎<anexado: 00001178-PHOTO-2026-06-17-12-33-41.jpg>
+‎[17/06/2026, 12:33:41] Katharine Alves | impulsionando: ‎<anexado: 00001179-PHOTO-2026-06-17-12-33-41.jpg>
+‎[17/06/2026, 12:33:42] Katharine Alves | impulsionando: ‎<anexado: 00001180-PHOTO-2026-06-17-12-33-42.jpg>
+‎[17/06/2026, 12:33:42] Katharine Alves | impulsionando: ‎<anexado: 00001181-PHOTO-2026-06-17-12-33-42.jpg>
+‎[17/06/2026, 12:33:42] Katharine Alves | impulsionando: ‎<anexado: 00001182-PHOTO-2026-06-17-12-33-42.jpg>
+‎[17/06/2026, 12:33:42] Katharine Alves | impulsionando: ‎<anexado: 00001183-PHOTO-2026-06-17-12-33-42.jpg>
+‎[17/06/2026, 12:33:43] Katharine Alves | impulsionando: ‎<anexado: 00001184-PHOTO-2026-06-17-12-33-43.jpg>
+‎[17/06/2026, 12:33:43] Katharine Alves | impulsionando: ‎<anexado: 00001185-PHOTO-2026-06-17-12-33-43.jpg>
+‎[17/06/2026, 12:33:43] Katharine Alves | impulsionando: ‎<anexado: 00001186-PHOTO-2026-06-17-12-33-43.jpg>
+[17/06/2026, 19:24:06] Monica Heredia | Rio Mes: Está está mal la imagen
+[17/06/2026, 19:24:14] Monica Heredia | Rio Mes: Está invertido
+[17/06/2026, 19:24:31] Monica Heredia | Rio Mes: Las imágenes están invertidas corregir porfavor ‎<Mensagem editada>
+[18/06/2026, 10:51:38] Monica Heredia | Rio Mes: No pertenece
+[18/06/2026, 10:52:02] Monica Heredia | Rio Mes: Eliminar este
+[18/06/2026, 10:52:17] Monica Heredia | Rio Mes: Eliminar no hay stock está dañado
+[18/06/2026, 10:59:43] Katharine Alves | impulsionando: oi, vou alterar
+[18/06/2026, 11:00:02] Katharine Alves | impulsionando: invertido? é imagem de outro produto essa?
+[18/06/2026, 11:00:35] Katharine Alves | impulsionando: se puder me indicar o produto que está trocado, por que eu me guiei pelas imagens que apareceram nas buscas do google ‎<Mensagem editada>
+[18/06/2026, 11:01:29] Monica Heredia | Rio Mes: Si la más grande es nasobucal y las pequeña es nasal
+[18/06/2026, 14:39:50] Katharine Alves | impulsionando: ‎Mensagem apagada
+[18/06/2026, 14:39:56] Katharine Alves | impulsionando: ‎Mensagem apagada
+[18/06/2026, 14:39:57] Katharine Alves | impulsionando: ‎Mensagem apagada
+[18/06/2026, 14:41:14] Katharine Alves | impulsionando: ‎Mensagem apagada
+‎[18/06/2026, 14:52:28] Katharine Alves | impulsionando: ‎<anexado: 00001201-PHOTO-2026-06-18-14-52-28.jpg>
+‎[18/06/2026, 14:52:32] Katharine Alves | impulsionando: ‎<anexado: 00001202-PHOTO-2026-06-18-14-52-32.jpg>
+[18/06/2026, 15:08:16] Monica Heredia | Rio Mes: Si así está bien
+‎[18/06/2026, 16:13:16] Roger RIO: ‎<anexado: 00001204-PHOTO-2026-06-18-16-13-16.jpg>
+‎[18/06/2026, 16:13:16] Roger RIO: ‎<anexado: 00001205-PHOTO-2026-06-18-16-13-16.jpg>
+‎[18/06/2026, 16:13:17] Roger RIO: ‎<anexado: 00001206-PHOTO-2026-06-18-16-13-17.jpg>
+‎[18/06/2026, 16:13:17] Roger RIO: ‎<anexado: 00001207-PHOTO-2026-06-18-16-13-17.jpg>
+‎[18/06/2026, 16:13:17] Roger RIO: ‎<anexado: 00001208-PHOTO-2026-06-18-16-13-17.jpg>
+‎[18/06/2026, 16:13:17] Roger RIO: ‎<anexado: 00001209-PHOTO-2026-06-18-16-13-17.jpg>
+‎[18/06/2026, 16:13:17] Roger RIO: ‎<anexado: 00001210-PHOTO-2026-06-18-16-13-17.jpg>
+[18/06/2026, 16:14:05] Roger RIO: Buenas fotos
+[19/06/2026, 11:49:14] Monica Heredia | Rio Mes: Podemos modificar este a 80 bs porfavor

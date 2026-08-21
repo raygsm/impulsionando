@@ -1,5 +1,0 @@
-before=running
-backup=/var/backups/impulsionando/n8n/chrismed-n8n-20260821T040454Z.tgz bytes=4346440
-health=PASS
-cli_export=PASS workflows=135
-CHRISMED_N8N_VOLUME_RECOVERY=PASS

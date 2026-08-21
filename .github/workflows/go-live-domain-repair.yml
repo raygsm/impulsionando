@@ -1,0 +1,197 @@
+# Final go-live trigger: 2026-08-20T07:20:00-03:00
+name: Go-live domain repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/go-live-domain-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: all-client-subdomains-reconcile
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Validate definitive infrastructure
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do test -n "${!v}"; done
+          ip="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test "$ip" = '187.77.232.52'
+          echo "ORIGIN_IP=$ip" >> "$GITHUB_ENV"
+          echo "CF_ZONE_ID=$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=not.is.null&subdomain=neq.impulsionando&select=subdomain,root_domain&order=subdomain.asc" -o /tmp/domains.json
+          jq -r '.[] | (.subdomain+"."+(.root_domain//"impulsionando.com.br"))' /tmp/domains.json >/tmp/domains.txt
+          test -s /tmp/domains.txt
+
+      - name: Build definitive multitenant Core
+        shell: bash
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+          tar -czf /tmp/multitenant-release.tgz .output scripts package.json package-lock.json
+
+      - name: Configure SSH and upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          scp /tmp/multitenant-release.tgz "$VPS_USER@$VPS_HOST:/tmp/multitenant-release.tgz"
+
+      - name: Restore multitenant runtime on VPS 187
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+          release="/var/www/impulsionando-core/releases/multitenant-$RELEASE_SHA"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.multitenant.yml
+          mkdir -p "$release"
+          tar -xzf /tmp/multitenant-release.tgz -C "$release"
+          rm -f /tmp/multitenant-release.tgz
+          printf 'node_modules\n' > "$release/.dockerignore"
+          cat >/tmp/Dockerfile.multitenant <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          sudo docker build -f /tmp/Dockerfile.multitenant -t impulsionando-core:multitenant "$release"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<'YAML'
+          services:
+            impulsionando-core-multitenant:
+              image: impulsionando-core:multitenant
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.impulsionando-multitenant.entrypoints: websecure
+                traefik.http.routers.impulsionando-multitenant.rule: HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`)
+                traefik.http.routers.impulsionando-multitenant.service: impulsionando-core-multitenant
+                traefik.http.routers.impulsionando-multitenant.tls: "true"
+                traefik.http.routers.impulsionando-multitenant.tls.certresolver: letsencrypt
+                traefik.http.routers.impulsionando-multitenant.priority: "50"
+                traefik.http.services.impulsionando-core-multitenant.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-multitenant
+          for i in $(seq 1 60); do
+            state="$(sudo docker inspect impulsionando-core-multitenant --format '{{.State.Status}}' 2>/dev/null || true)"
+            [ "$state" = running ] && break
+            [ "$i" -lt 60 ] || exit 60
+            sleep 2
+          done
+          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-multitenant)"
+          code="$(curl -sS -H 'Host: ontap.impulsionando.com.br' -o /tmp/core -w '%{http_code}' --max-time 20 "http://$ip:3000/" || true)"
+          test "$code" = 200
+          echo "MULTITENANT_RUNTIME=PASS"
+          REMOTE
+
+      - name: Reconcile every Cloudflare record to VPS 187
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
+              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$domain&per_page=100" -o /tmp/records.json
+            jq -e '.success==true' /tmp/records.json >/dev/null
+            good="$(jq -r --arg ip "$ORIGIN_IP" '.result[]|select(.type=="A" and .content==$ip and .proxied==true)|.id' /tmp/records.json|head -n1)"
+            if [ -z "$good" ]; then
+              jq -r '.result[]|select(.type=="A" or .type=="AAAA" or .type=="CNAME")|.id' /tmp/records.json | while read -r id; do
+                [ -n "$id" ] && curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
+              done
+              jq -nc --arg name "$domain" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}' >/tmp/new.json
+              curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/create.json
+              jq -e '.success==true' /tmp/create.json >/dev/null
+            fi
+            echo "DNS_OK $domain"
+          done </tmp/domains.txt
+
+      - name: Verify HTTPS and persist only proven domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          : >/tmp/proven.txt
+          failed=0
+          while read -r domain; do
+            [ -n "$domain" ] || continue
+            code=000; final=''
+            for i in $(seq 1 24); do
+              read -r code final < <(curl -sS -L -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 30 "https://$domain/" || echo '000 -')
+              host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+              if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then break; fi
+              sleep 5
+            done
+            host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            if [ "$code" = 200 ] && [ "$host" = "$domain" ]; then echo "$domain" >>/tmp/proven.txt; else echo "FAIL $domain $code $final"; failed=$((failed+1)); fi
+          done </tmp/domains.txt
+
+          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          while read -r domain; do
+            sub="${domain%.impulsionando.com.br}"
+            payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
+            curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' --data "$payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.$sub" >/dev/null
+          done </tmp/proven.txt
+          total="$(wc -l </tmp/domains.txt | tr -d ' ')"; proven="$(wc -l </tmp/proven.txt | tr -d ' ')"
+          echo "total=$total proven=$proven failed=$failed"
+          [ "$failed" -eq 0 ] && [ "$proven" -eq "$total" ]
+
+      - name: Record domain proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=not.is.null&subdomain=neq.impulsionando&select=subdomain,dns_status,ssl_status" -o /tmp/final-domains.json
+          mkdir -p docs/ops
+          jq --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{generated_at_utc:$generated_at_utc,total:length,active_issued:(map(select(.dns_status=="active" and .ssl_status=="issued"))|length),pending:(map(select(.dns_status!="active" or .ssl_status!="issued"))|length)}' /tmp/final-domains.json >docs/ops/domain-go-live-proof.json
+          git config user.name 'Impulsionito Core Automation'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/domain-go-live-proof.json
+          git commit -m 'chore(go-live): record domain final proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main

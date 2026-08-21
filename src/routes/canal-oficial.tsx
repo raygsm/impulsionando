@@ -132,7 +132,7 @@ function CanalOficialPage() {
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                Domínios <code className="text-foreground">impulsionando.com.br</code> e <code className="text-foreground">impulsionando.lovable.app</code>
+                Domínio <code className="text-foreground">impulsionando.com.br</code> e seus subdomínios oficiais
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />

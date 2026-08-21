@@ -1,0 +1,93 @@
+name: Post-Core Client Publish Queue
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-core-client-publish-queue
+  cancel-in-progress: false
+
+jobs:
+  active-client-fronts:
+    name: Publish/verify all active client fronts
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - slug: colorssaude
+            host: colorssaude.impulsionando.com.br
+          - slug: wmp
+            host: wmp.impulsionando.com.br
+          - slug: chrismed
+            host: chrismed.impulsionando.com.br
+          - slug: csi
+            host: csi.impulsionando.com.br
+          - slug: anamadu
+            host: anamadu.impulsionando.com.br
+          - slug: marocas
+            host: marocas.impulsionando.com.br
+          - slug: riomed
+            host: riomed.impulsionando.com.br
+          - slug: peroladavila
+            host: peroladavila.impulsionando.com.br
+          - slug: riobeer
+            host: riobeer.impulsionando.com.br
+          - slug: ontap
+            host: ontap.impulsionando.com.br
+          - slug: raoni
+            host: raoni.impulsionando.com.br
+          - slug: spartacus
+            host: spartacus.impulsionando.com.br
+          - slug: haunted
+            host: haunted.impulsionando.com.br
+          - slug: grupoevr
+            host: grupoevr.impulsionando.com.br
+    steps:
+      - name: Validate HTTPS and prevent cross-domain front redirects
+        shell: bash
+        env:
+          CLIENT_SLUG: ${{ matrix.slug }}
+          CLIENT_HOST: ${{ matrix.host }}
+        run: |
+          set -euo pipefail
+          result="$(curl -sS -L --max-time 30 -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/client-front -w '%{http_code} %{url_effective}' "https://$CLIENT_HOST/")"
+          code="${result%% *}"
+          final="${result#* }"
+          final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+          echo "$CLIENT_SLUG HTTP=$code FINAL=$final"
+          [ "$code" = '200' ] || { echo "::error::$CLIENT_SLUG front is not publicly available"; exit 41; }
+          [ "$final_host" = "$CLIENT_HOST" ] || { echo "::error::$CLIENT_SLUG escaped to $final_host"; exit 42; }
+          grep -Eiq '<html|<!doctype html' /tmp/client-front || { echo "::error::$CLIENT_SLUG did not return a front-end document"; exit 43; }
+          echo "$CLIENT_SLUG FRONT=PASS"
+
+      - name: Validate tenant identity endpoint on same host
+        shell: bash
+        env:
+          CLIENT_SLUG: ${{ matrix.slug }}
+          CLIENT_HOST: ${{ matrix.host }}
+        run: |
+          set -euo pipefail
+          result="$(curl -sS -L --max-time 20 -o /tmp/client-health -w '%{http_code} %{url_effective}' "https://$CLIENT_HOST/api/health" || true)"
+          code="${result%% *}"
+          final="${result#* }"
+          final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+          echo "$CLIENT_SLUG HEALTH HTTP=$code FINAL=$final"
+          [ "$final_host" = "$CLIENT_HOST" ] || { echo "::error::$CLIENT_SLUG health escaped to $final_host"; exit 44; }
+          case "$code" in 200|204|401|404) ;; *) exit 45 ;; esac
+
+      - name: Client publication evidence
+        run: |
+          echo "### ${{ matrix.slug }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Host: https://${{ matrix.host }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Front: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Cross-domain redirect: NONE" >> "$GITHUB_STEP_SUMMARY"

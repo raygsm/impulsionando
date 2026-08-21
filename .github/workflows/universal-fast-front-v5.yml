@@ -1,0 +1,219 @@
+name: Universal Fast Front V5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/universal-fast-front-v5.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: universal-fast-front-v5
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Initialize proof
+        run: |
+          set -euo pipefail
+          printf 'workflow=Universal Fast Front V5\nsha=%s\nstarted_at_utc=%s\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /tmp/proof-v5.txt
+
+      - name: Verify CHRISMED release guards
+        run: |
+          set -euo pipefail
+          grep -Fq 'CPF inválido — não é possível avançar' src/routes/chrismed.agendar.tsx
+          grep -Fq 'Validar dados e continuar' src/routes/chrismed.agendar.tsx
+          grep -Fq 'Impulsionito a postos' src/components/chrismed/ChrismedShell.tsx
+          grep -Fq 'initialEmail={search.email}' src/routes/auth.tsx
+          grep -Fq 'nextPath={safeNext(search.next)}' src/routes/auth.tsx
+          echo 'PASS chrismed_release_guards' >> /tmp/proof-v5.txt
+
+      - name: Build current main on runner
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+          test -d .output/public
+          printf '%s' "$GITHUB_SHA" > .output/public/impulsionando-front-sha.txt
+          tar -czf /tmp/front-v5.tgz .output scripts
+          echo 'PASS build' >> /tmp/proof-v5.txt
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          scp /tmp/front-v5.tgz "$VPS_USER@$VPS_HOST:/tmp/uffv5-$GITHUB_SHA.tgz"
+          echo 'PASS artifact_uploaded' >> /tmp/proof-v5.txt
+
+      - name: Canary, diagnose and promote without duplicate workers
+        shell: bash
+        run: |
+          set -o pipefail
+          set +e
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE' 2>&1 | tee /tmp/v5-remote.log
+          set -Eeuo pipefail
+          release="/var/www/impulsionando-core/releases/uffv5-$RELEASE_SHA"
+          archive="/tmp/uffv5-$RELEASE_SHA.tgz"
+          envfile=/etc/impulsionando-core.env
+          canary=impulsionando-fastfront-v5-canary
+          live=impulsionando-fastfront-v5-live
+
+          sudo test -f "$envfile"
+          sudo docker inspect impulsionando-core >/dev/null
+          image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core)"
+          network="$(sudo docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s " $k}}{{end}}' impulsionando-core | awk '{print $1}')"
+          test -n "$image"
+          test -n "$network"
+
+          sudo rm -rf "$release"
+          sudo mkdir -p "$release"
+          sudo tar -xzf "$archive" -C "$release"
+          rm -f "$archive"
+          test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$RELEASE_SHA"
+
+          sudo docker rm -f "$canary" >/dev/null 2>&1 || true
+          sudo docker run -d \
+            --name "$canary" \
+            --network "$network" \
+            --env-file "$envfile" \
+            -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            -e PULSONITOR_ENABLED=false -e COLORS_AUTOMATION_ENABLED=false \
+            -v "$release/.output:/app/.output:ro" \
+            -v "$release/scripts:/app/scripts:ro" \
+            "$image" node scripts/start-core-runtime.mjs >/dev/null
+
+          ok=0
+          for i in $(seq 1 60); do
+            state="$(sudo docker inspect -f '{{.State.Status}}' "$canary" 2>/dev/null || true)"
+            if [ "$state" = running ]; then
+              if sudo docker exec "$canary" node -e "fetch('http://127.0.0.1:3000/',{headers:{host:'impulsionando.com.br'}}).then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(2))" >/dev/null 2>&1; then
+                ok=1
+                break
+              fi
+            fi
+            sleep 2
+          done
+
+          if [ "$ok" != 1 ]; then
+            echo 'CANARY_FAIL'
+            sudo docker inspect "$canary" --format 'state={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}}' || true
+            sudo docker exec "$canary" sh -lc 'ps -ef; echo ---ENV---; env | grep -E "^(HOST|PORT|NODE_ENV|PULSONITOR_ENABLED|COLORS_AUTOMATION_ENABLED)="; echo ---LISTEN---; (ss -lntp || netstat -lntp || true)' || true
+            sudo docker logs --tail 240 "$canary" || true
+            sudo docker rm -f "$canary" >/dev/null 2>&1 || true
+            exit 71
+          fi
+          echo 'CANARY_PASS'
+          sudo docker rm -f "$canary" >/dev/null
+
+          sudo docker rm -f "$live" >/dev/null 2>&1 || true
+          sudo docker run -d \
+            --name "$live" \
+            --network "$network" \
+            --env-file "$envfile" \
+            --restart unless-stopped \
+            -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3000 \
+            -e PULSONITOR_ENABLED=false -e COLORS_AUTOMATION_ENABLED=false \
+            -v "$release/.output:/app/.output:ro" \
+            -v "$release/scripts:/app/scripts:ro" \
+            --label 'traefik.enable=true' \
+            --label 'traefik.http.routers.uffv5-apex.entrypoints=websecure' \
+            --label 'traefik.http.routers.uffv5-apex.rule=(Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`)) && !PathPrefix(`/api`)' \
+            --label 'traefik.http.routers.uffv5-apex.tls=true' \
+            --label 'traefik.http.routers.uffv5-apex.tls.certresolver=letsencrypt' \
+            --label 'traefik.http.routers.uffv5-apex.priority=13000' \
+            --label 'traefik.http.routers.uffv5-apex.service=uffv5' \
+            --label 'traefik.http.routers.uffv5-tenants.entrypoints=websecure' \
+            --label 'traefik.http.routers.uffv5-tenants.rule=HostRegexp(`{subdomain:[a-z0-9-]+}.impulsionando.com.br`) && !PathPrefix(`/api`)' \
+            --label 'traefik.http.routers.uffv5-tenants.tls=true' \
+            --label 'traefik.http.routers.uffv5-tenants.tls.certresolver=letsencrypt' \
+            --label 'traefik.http.routers.uffv5-tenants.priority=12900' \
+            --label 'traefik.http.routers.uffv5-tenants.service=uffv5' \
+            --label 'traefik.http.services.uffv5.loadbalancer.server.port=3000' \
+            "$image" node scripts/start-core-runtime.mjs >/dev/null
+
+          live_ok=0
+          for i in $(seq 1 60); do
+            if sudo docker exec "$live" node -e "fetch('http://127.0.0.1:3000/',{headers:{host:'impulsionando.com.br'}}).then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(2))" >/dev/null 2>&1; then
+              live_ok=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$live_ok" != 1 ]; then
+            echo 'LIVE_FAIL'
+            sudo docker logs --tail 240 "$live" || true
+            sudo docker rm -f "$live" >/dev/null 2>&1 || true
+            exit 72
+          fi
+          echo "PROMOTION_PASS sha=$RELEASE_SHA image=$image network=$network"
+          REMOTE
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "FAIL promotion_rc=$rc" >> /tmp/proof-v5.txt
+            sed -n '1,260p' /tmp/v5-remote.log >> /tmp/proof-v5.txt
+            exit "$rc"
+          fi
+          echo 'PASS canary_and_promotion' >> /tmp/proof-v5.txt
+
+      - name: Validate CHRISMED public release marker and routes
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            marker="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 12 "https://chrismed.impulsionando.com.br/impulsionando-front-sha.txt?t=$GITHUB_SHA" 2>/dev/null || true)"
+            home_code="$(curl -sS -L -o /tmp/chrismed-home.html -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://chrismed.impulsionando.com.br/?t=$GITHUB_SHA" || true)"
+            auth_code="$(curl -sS -L -o /tmp/chrismed-auth.html -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://chrismed.impulsionando.com.br/auth?email=raygs%40hotmail.com&next=%2Fchrismed%2Fwhatsapp&t=$GITHUB_SHA" || true)"
+            book_code="$(curl -sS -L -o /tmp/chrismed-book.html -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://chrismed.impulsionando.com.br/chrismed/agendar?t=$GITHUB_SHA" || true)"
+            if [ "$marker" = "$GITHUB_SHA" ] && [ "$home_code" = 200 ] && [ "$auth_code" = 200 ] && [ "$book_code" = 200 ]; then
+              echo "PASS public_chrismed sha=$marker home=$home_code auth=$auth_code booking=$book_code" >> /tmp/proof-v5.txt
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "FAIL public_chrismed marker=$marker home=$home_code auth=$auth_code booking=$book_code" >> /tmp/proof-v5.txt
+          exit 81
+
+      - name: Persist proof
+        if: always()
+        run: |
+          set -euo pipefail
+          printf 'finished_at_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> /tmp/proof-v5.txt
+          mkdir -p docs/ops
+          cp /tmp/proof-v5.txt docs/ops/universal-fast-front-v5-proof.txt
+          git config user.name 'Impulsionito Front Publisher V5'
+          git config user.email 'automation@impulsionando.com.br'
+          git add docs/ops/universal-fast-front-v5-proof.txt
+          git commit -m 'chore(front): record universal fast front v5 proof' || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
