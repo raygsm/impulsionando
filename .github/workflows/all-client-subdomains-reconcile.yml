@@ -54,10 +54,6 @@ jobs:
             -o /tmp/tenants.json
           jq -e 'type == "array"' /tmp/tenants.json >/dev/null
 
-          # E2E/RLS fixtures must never be provisioned as public DNS. Real
-          # eligibility is already constrained by core_company_access_policy
-          # (active, non-master, non-demo); the prefix guard covers old fixtures
-          # created before synthetic companies were correctly marked demo.
           jq -r '.[]
             | select(.root_domain == "impulsionando.com.br")
             | select((.company_name // "" | test("^(E2E|RLS)"; "i")) | not)
@@ -140,6 +136,7 @@ jobs:
           for domain in $DOMAINS; do
             code=000
             for attempt in $(seq 1 12); do
+              echo "Origin check $domain attempt=$attempt"
               code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -A 'ImpulsionandoCoreReconcile/5.0' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/core-origin -w '%{http_code}' --max-time 15 "https://$domain/" || true)"
               [ "$code" = '200' ] && break
               sleep 2
@@ -186,6 +183,7 @@ jobs:
             code=000
             final_url=''
             for attempt in $(seq 1 18); do
+              echo "Public HTTPS check $domain attempt=$attempt"
               read -r code final_url < <(curl -sS -L -A 'Mozilla/5.0 ImpulsionandoCoreReconcile/5.0' \
                 -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' \
                 -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
