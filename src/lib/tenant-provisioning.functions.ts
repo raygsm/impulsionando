@@ -1,6 +1,5 @@
 // Provisionamento interno de clientes conectados ao Core Impulsionando.
-// Regra: criação da empresa não ativa contrato nem acesso financeiro; o plano
-// escolhido fica como preferência de onboarding até o fluxo canônico de cobrança.
+// Empresa, identidade/subdomínio e billing possuem fontes de verdade separadas.
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
@@ -8,7 +7,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 async function assertCoreAdmin(ctx: { supabase: any; userId: string }) {
   const { data: isAdmin, error } = await ctx.supabase.rpc('has_role', { _user_id: ctx.userId, _role: 'admin' })
   if (error) throw new Error(error.message)
-  if (!isAdmin) throw new Error('Forbidden: requer admin do core')
+  if (!isAdmin) throw new Error('Forbidden: requer admin do Core')
 }
 
 const SlugSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/)
@@ -60,32 +59,22 @@ export const provisionTenant = createServerFn({ method: 'POST' })
     return captureServerError(
       { scope: 'tenant-provisioning.provisionTenant', userId: context.userId, supabaseAdmin, context: { adminEmail: data.admin.email } },
       async () => {
-        // 1. Cria a empresa sem gravar slug diretamente. O trigger universal faz
-        // enrollment e o RPC canônico abaixo é a única fonte de verdade do slug.
+        // companies guarda somente identidade empresarial canônica. Dados de
+        // jornada/branding/nicho adicionais ficam no enrollment até seus módulos
+        // específicos consumi-los.
         const { data: company, error: cErr } = await supabaseAdmin
           .from('companies')
           .insert({
             name: data.empresa.name,
             legal_name: data.empresa.legal_name ?? null,
-            trade_name: data.empresa.name,
             document: data.empresa.document ?? null,
             email: data.empresa.email ?? data.admin.email,
-            whatsapp: data.empresa.whatsapp ?? null,
-            subdomain: null,
-            niche_id: data.empresa.niche_id ?? null,
-            primary_color: data.branding?.primary_color ?? null,
-            secondary_color: data.branding?.secondary_color ?? null,
+            phone: data.empresa.whatsapp ?? null,
             logo_url: data.branding?.logo_url ?? null,
-            country_code: data.empresa.country_code ?? 'BR',
-            locale: data.empresa.country_code === 'BO' ? 'es-BO' : 'pt-BR',
-            currency_code: data.empresa.country_code === 'BO' ? 'BOB' : 'BRL',
-            phone_country_code: data.empresa.country_code === 'BO' ? '+591' : '+55',
-            timezone: data.empresa.country_code === 'BO' ? 'America/La_Paz' : 'America/Sao_Paulo',
             is_master: false,
             is_active: true,
             is_demo: false,
             status: 'active',
-            company_kind: 'tenant',
           } as never)
           .select('id, name')
           .single()
@@ -93,8 +82,8 @@ export const provisionTenant = createServerFn({ method: 'POST' })
         if (cErr || !company) throw new Error(`Falha ao criar empresa: ${cErr?.message ?? 'desconhecido'}`)
         const companyId = (company as any).id as string
 
-        // 2. Se o operador escolheu slug, substitui o slug derivado pelo RPC
-        // canônico e reseta DNS/SSL para a reconciliação automática.
+        // O trigger universal cria enrollment/tenant/identity. O slug escolhido,
+        // quando houver, passa pela operação canônica única.
         let subdomain: string | null = null
         if (data.empresa.subdomain) {
           const { data: canonicalSlug, error: slugErr } = await supabaseAdmin.rpc('core_set_company_subdomain', {
@@ -113,33 +102,46 @@ export const provisionTenant = createServerFn({ method: 'POST' })
           subdomain = (identity as any)?.subdomain ?? null
         }
 
-        // 3. Registra somente a escolha do plano no onboarding. Contrato, cobrança,
-        // liberação e recorrência continuam fail-closed no billing canônico.
+        // Registra preferências de onboarding sem fingir contrato, pagamento ou
+        // liberação comercial. Tudo continua fail-closed no billing canônico.
+        const enrollmentPatch: Record<string, unknown> = {
+          updated_at: new Date().toISOString(),
+          metadata: {
+            requested_niche_id: data.empresa.niche_id ?? null,
+            country_code: data.empresa.country_code ?? 'BR',
+            branding: data.branding ?? {},
+            admin_email: data.admin.email,
+            provisioned_from: 'core_admin_dashboard',
+          },
+        }
         if (data.plano?.plan_id) {
           const { data: plan, error: planErr } = await supabaseAdmin
-            .from('billing_plans')
-            .select('id,is_active')
-            .eq('id', data.plano.plan_id)
-            .maybeSingle()
+            .from('billing_plans').select('id,is_active').eq('id', data.plano.plan_id).maybeSingle()
           if (planErr) throw new Error(planErr.message)
           if (!plan || !(plan as any).is_active) throw new Error('Plano informado não está ativo.')
-          const { error: enrollmentErr } = await supabaseAdmin
-            .from('core_client_enrollment')
-            .update({ plan_id: data.plano.plan_id, lifecycle_status: 'plan_selected', updated_at: new Date().toISOString() } as never)
-            .eq('company_id', companyId)
-          if (enrollmentErr) throw new Error(enrollmentErr.message)
+          enrollmentPatch.plan_id = data.plano.plan_id
+          enrollmentPatch.lifecycle_status = 'plan_selected'
         }
+        const { data: currentEnrollment, error: readEnrollmentErr } = await supabaseAdmin
+          .from('core_client_enrollment').select('metadata').eq('company_id', companyId).maybeSingle()
+        if (readEnrollmentErr) throw new Error(readEnrollmentErr.message)
+        enrollmentPatch.metadata = {
+          ...(((currentEnrollment as any)?.metadata ?? {}) as Record<string, unknown>),
+          ...(enrollmentPatch.metadata as Record<string, unknown>),
+        }
+        const { error: enrollmentErr } = await supabaseAdmin
+          .from('core_client_enrollment').update(enrollmentPatch as never).eq('company_id', companyId)
+        if (enrollmentErr) throw new Error(enrollmentErr.message)
 
-        // 4. Resolve usuário administrador existente ou envia convite.
+        // Resolve usuário gestor existente ou envia convite.
         let adminUserId: string | null = null
         let inviteSent = false
         try {
           const { data: existing, error: usersErr } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
           if (usersErr) throw usersErr
           const found = existing?.users?.find((u: any) => (u.email ?? '').toLowerCase() === data.admin.email.toLowerCase())
-          if (found) {
-            adminUserId = found.id
-          } else {
+          if (found) adminUserId = found.id
+          else {
             const { data: invited, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.admin.email, {
               data: { display_name: data.admin.display_name, tenant_company_id: companyId },
             })
@@ -158,16 +160,17 @@ export const provisionTenant = createServerFn({ method: 'POST' })
           } as never)
         }
 
-        // 5. Vínculo canônico de acesso. user_profiles é mantido apenas como
-        // compatibilidade de UI enquanto o painel legado ainda o consome.
         if (adminUserId) {
+          // `admin` de plataforma é resolvido por auth.raw_app_meta_data/has_role;
+          // cliente recebe papel empresarial `gestor`, nunca privilégio do Core.
           const { error: roleErr } = await supabaseAdmin.from('user_roles').upsert({
             user_id: adminUserId,
-            role: 'admin',
+            role: 'gestor',
             company_id: companyId,
           } as never, { onConflict: 'user_id,role,company_id' })
-          if (roleErr) throw new Error(`Falha ao vincular administrador: ${roleErr.message}`)
+          if (roleErr) throw new Error(`Falha ao vincular gestor: ${roleErr.message}`)
 
+          // Compatibilidade temporária de telas legadas; autorização canônica é user_roles.
           await supabaseAdmin.from('user_profiles').upsert({
             user_id: adminUserId,
             company_id: companyId,
@@ -177,8 +180,6 @@ export const provisionTenant = createServerFn({ method: 'POST' })
           } as never, { onConflict: 'user_id,company_id' })
         }
 
-        // 6. Registro de jornada do domínio; a publicação real é comprovada pelo
-        // reconciliador DNS/HTTPS, nunca por simples criação deste registro.
         if (subdomain) {
           await supabaseAdmin.from('onboarding_domain_requests').insert({
             company_id: companyId,
@@ -218,9 +219,9 @@ export const listTenantOnboarding = createServerFn({ method: 'GET' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { data: tenants, error: tenantErr } = await supabaseAdmin
       .from('companies')
-      .select('id, name, subdomain, email, status, is_active, created_at, company_kind')
-      .eq('company_kind', 'tenant')
+      .select('id,name,legal_name,document,email,phone,logo_url,status,is_active,is_demo,is_master,created_at')
       .eq('is_demo', false)
+      .eq('is_master', false)
       .order('created_at', { ascending: false })
       .limit(200)
     if (tenantErr) throw new Error(tenantErr.message)
@@ -228,10 +229,10 @@ export const listTenantOnboarding = createServerFn({ method: 'GET' })
     const ids = (tenants ?? []).map((t: any) => t.id)
     const safeIds = ids.length ? ids : ['00000000-0000-0000-0000-000000000000']
     const [{ data: domains }, { data: profiles }, { data: identities }, { data: enrollments }] = await Promise.all([
-      supabaseAdmin.from('onboarding_domain_requests').select('company_id, mode, requested_value, status, updated_at').in('company_id', safeIds),
-      supabaseAdmin.from('user_profiles').select('company_id, user_id, email, display_name, is_active').in('company_id', safeIds),
+      supabaseAdmin.from('onboarding_domain_requests').select('company_id,mode,requested_value,status,updated_at').in('company_id', safeIds),
+      supabaseAdmin.from('user_profiles').select('company_id,user_id,email,display_name,is_active').in('company_id', safeIds),
       supabaseAdmin.from('core_tenant_identity').select('company_id,subdomain,root_domain,dns_status,dns_error,dns_last_checked_at,ssl_status,ssl_issued_at,provisioned_at').in('company_id', safeIds),
-      supabaseAdmin.from('core_client_enrollment').select('company_id,lifecycle_status,plan_id,contract_id,billing_required').in('company_id', safeIds),
+      supabaseAdmin.from('core_client_enrollment').select('company_id,lifecycle_status,plan_id,contract_id,billing_required,metadata').in('company_id', safeIds),
     ])
 
     return {
@@ -279,14 +280,12 @@ export const updateTenantSubdomain = createServerFn({ method: 'POST' })
           p_requested_slug: data.subdomain,
         })
         if (error) throw new Error(error.message)
-
         await supabaseAdmin.from('onboarding_domain_requests').insert({
           company_id: data.companyId,
           mode: 'subdomain',
           requested_value: canonicalSlug,
           status: 'reserved',
         } as never)
-
         return { ok: true, subdomain: canonicalSlug, dnsStatus: 'pending', sslStatus: 'pending' }
       },
     )
