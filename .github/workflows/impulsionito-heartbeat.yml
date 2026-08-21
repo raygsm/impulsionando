@@ -1,0 +1,39 @@
+name: Impulsionito Core heartbeat
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: impulsionito-core-heartbeat
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CORE_URL: https://impulsionando.com.br
+      SERVICE_TOKEN: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Validate heartbeat credential
+        run: |
+          set -euo pipefail
+          test -n "$SERVICE_TOKEN" || { echo "::error::Missing SUPABASE_SERVICE_ROLE_KEY"; exit 1; }
+
+      - name: Wake Impulsionito committee
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer $SERVICE_TOKEN" \
+            -H "Content-Type: application/json" \
+            "$CORE_URL/api/public/cron/impulsionito-tick" \
+            -o /tmp/heartbeat.json
+          jq -e '.ok == true' /tmp/heartbeat.json >/dev/null
+          jq '{ok,observed,routed,decomposed,analyzed,blocked_for_human,llm_available,ran_at}' /tmp/heartbeat.json
