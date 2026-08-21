@@ -77,8 +77,14 @@ afterAll(async () => {
   if (userB) await admin.from("user_roles").delete().eq("user_id", userB);
   if (userA) await deleteUser(userA);
   if (userB) await deleteUser(userB);
-  if (companyA) await deleteCompany(companyA);
-  if (companyB) await deleteCompany(companyB);
+
+  // Production keeps service-access audit rows immutable to service_role by design.
+  // CI therefore delegates company/provisioning cleanup to a privileged DB step
+  // with an exact E2E name guard instead of weakening production grants.
+  if (process.env.CORE_E2E_PRIVILEGED_CLEANUP !== "1") {
+    if (companyA) await deleteCompany(companyA);
+    if (companyB) await deleteCompany(companyB);
+  }
 });
 
 describe("Core tenant isolation (E2E)", () => {
