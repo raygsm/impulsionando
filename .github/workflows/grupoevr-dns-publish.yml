@@ -1,19 +1,19 @@
 name: Grupo EVR DNS publish
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/grupoevr-dns-publish.yml
+  issue_comment:
+    types: [created]
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   publish-dns:
+    if: github.event_name == 'workflow_dispatch' || (github.event.issue.number == 87 && github.event.comment.body == '/publish-grupoevr-now')
     runs-on: ubuntu-latest
-    environment: production
     timeout-minutes: 10
     env:
       DOMAIN: grupoevr.impulsionando.com.br
@@ -22,54 +22,61 @@ jobs:
       CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Validate secrets
+      - name: Publish and validate
+        id: publish
+        shell: bash
         run: |
-          set -euo pipefail
-          for v in CF_API_TOKEN CF_ZONE_ID SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
-            test -n "${!v}" || { echo "::error::Missing $v"; exit 1; }
-          done
-          echo "CF_ZONE_ID=$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')" >> "$GITHUB_ENV"
-
-      - name: Upsert Cloudflare A record
-        run: |
-          set -euo pipefail
-          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
-          jq -e '.success == true' /tmp/dns.json >/dev/null
-          id="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/dns.json | head -n1)"
-          payload="$(jq -nc --arg name "$DOMAIN" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}')"
-          if [ -n "$id" ]; then
-            curl -fsS -X PUT -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" | jq -e '.success == true' >/dev/null
+          set +e
+          result='STARTED'
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then
+            result='FAIL missing Cloudflare repository secrets'
           else
-            curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" | jq -e '.success == true' >/dev/null
-          fi
-          echo "DNS_UPSERT=PASS $DOMAIN -> $ORIGIN_IP"
-
-      - name: Validate HTTPS
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 30); do
-            code="$(curl -sS -L -o /tmp/page -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
-            if [ "$code" = 200 ]; then
-              echo "HTTPS=PASS"
-              exit 0
+            zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
+            rc=$?
+            if [ $rc -ne 0 ] || ! jq -e '.success == true' /tmp/dns.json >/dev/null 2>&1; then
+              result='FAIL Cloudflare lookup'
+            else
+              id="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/dns.json | head -n1)"
+              payload="$(jq -nc --arg name "$DOMAIN" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}')"
+              if [ -n "$id" ]; then
+                curl -fsS -X PUT -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records/$id" -o /tmp/upsert.json
+              else
+                curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" -o /tmp/upsert.json
+              fi
+              rc=$?
+              if [ $rc -ne 0 ] || ! jq -e '.success == true' /tmp/upsert.json >/dev/null 2>&1; then
+                result='FAIL Cloudflare upsert'
+              else
+                result='DNS_OK'
+                for i in $(seq 1 24); do
+                  code="$(curl -sS -L -o /tmp/page -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
+                  if [ "$code" = 200 ]; then
+                    result='HTTPS_OK'
+                    break
+                  fi
+                  sleep 5
+                done
+                if [ "$result" = 'HTTPS_OK' ] && [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+                  now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                  core_payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
+                  curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$core_payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.grupoevr" >/dev/null || true
+                  endpoint_payload='{"status":"active","monitoring_enabled":true,"is_primary":true}'
+                  curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$endpoint_payload" "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.public_site&url=eq.https%3A%2F%2Fgrupoevr.impulsionando.com.br" >/dev/null || true
+                fi
+              fi
             fi
-            sleep 5
-          done
-          echo "::error::HTTPS did not reach 200"
-          exit 2
+          fi
+          echo "result=$result" >> "$GITHUB_OUTPUT"
+          echo "$result"
 
-      - name: Persist verified Core status
+      - name: Report result on PR 87
+        if: always()
         run: |
-          set -euo pipefail
-          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
-          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$payload" \
-            "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.grupoevr"
-          endpoint_payload='{"status":"active","monitoring_enabled":true,"is_primary":true}'
-          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$endpoint_payload" \
-            "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.public_site&url=eq.https%3A%2F%2Fgrupoevr.impulsionando.com.br"
-          echo "CORE_STATUS=ACTIVE"
+          gh api "repos/$GITHUB_REPOSITORY/issues/87/comments" -f body="GRUPOEVR_PUBLISH_RESULT: ${{ steps.publish.outputs.result }}"
+
+      - name: Fail unless public HTTPS is ready
+        if: steps.publish.outputs.result != 'HTTPS_OK'
+        run: exit 1
