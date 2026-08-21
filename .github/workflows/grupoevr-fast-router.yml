@@ -16,7 +16,7 @@ jobs:
   publish:
     if: github.head_ref == 'ops/grupoevr-fast-router'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       DOMAIN: grupoevr.impulsionando.com.br
       VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -24,19 +24,30 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Configure SSH
+      - name: Configure SSH with retries
         run: |
           set -euo pipefail
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          : > ~/.ssh/known_hosts
+          ok=0
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              if ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" 'true'; then
+                ok=1
+                break
+              fi
+            fi
+            sleep $((attempt * 3))
+          done
+          [ "$ok" = 1 ] || exit 42
 
       - name: Launch isolated runtime from active Core release
         id: deploy
         run: |
           set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" "DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
+          ssh -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" "DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
           set -euo pipefail
           current="$(readlink -f /var/www/impulsionando-core/current)"
           test -d "$current/.output"
@@ -84,23 +95,28 @@ jobs:
             [ "$code" = 200 ] && break
             sleep 2
           done
-          echo "container_http=$code"
-          grep -qi 'Grupo EVR' /tmp/evr && echo 'content=Grupo EVR' || echo 'content=missing'
+          [ "$code" = 200 ] || exit 60
+          grep -qi 'Grupo EVR' /tmp/evr || exit 61
           traefik="$(curl -k -sS --resolve "$DOMAIN:443:127.0.0.1" -o /tmp/evr-t -w '%{http_code}' --max-time 10 "https://$DOMAIN/" || true)"
-          echo "traefik_http=$traefik"
-          grep -qi 'Grupo EVR' /tmp/evr-t && echo 'traefik_content=Grupo EVR' || echo 'traefik_content=missing'
+          [ "$traefik" = 200 ] || exit 62
+          grep -qi 'Grupo EVR' /tmp/evr-t || exit 63
           REMOTE
 
-      - name: Public check
+      - name: Public check with retries
         id: public
         run: |
           set +e
-          code="$(curl -sS -L -o /tmp/public -w '%{http_code}' --max-time 15 "https://$DOMAIN/" || true)"
-          if [ "$code" = 200 ] && grep -qi 'Grupo EVR' /tmp/public; then
-            echo 'result=HTTPS_OK' >> "$GITHUB_OUTPUT"
-          else
-            echo "result=HTTP_$code" >> "$GITHUB_OUTPUT"
-          fi
+          code=000
+          for i in $(seq 1 20); do
+            code="$(curl -sS -L -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code}' --max-time 15 "https://$DOMAIN/" || true)"
+            if [ "$code" = 200 ] && grep -qi 'Grupo EVR' /tmp/public; then
+              echo 'result=HTTPS_OK' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "result=HTTP_$code" >> "$GITHUB_OUTPUT"
+          exit 1
 
       - name: Report
         if: always()
