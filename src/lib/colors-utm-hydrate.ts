@@ -4,7 +4,6 @@ import { appendUtm } from "./utm";
 const CHECKOUT_DOMAINS = [
   "hotmart.com", "monetizze.com.br", "perfectpay.com.br", "eduzz.com",
   "maisfy.com.br", "pay.kiwify.com", "kiwify.com.br", "kiwify.app",
-  "checkout.grupocolors.com.br", "grupocolors.com.br",
 ];
 const WHATSAPP_DOMAINS = ["wa.me", "api.whatsapp.com", "chat.whatsapp.com"];
 
