@@ -1,103 +1,30 @@
-name: Universal Client Subdomains
+name: Universal Client Subdomains Provisioning
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - infra/subdomains/clients.json
       - .github/workflows/universal-client-subdomains.yml
-  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: universal-client-subdomains
-  cancel-in-progress: false
-
 jobs:
-  provision:
+  validate-manifest:
     runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 30
-    env:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate manifest and credentials
+      - name: Validate tenant manifest only
         run: |
           set -euo pipefail
           jq -e '.version == 1 and (.clients|type=="array")' infra/subdomains/clients.json >/dev/null
-          for v in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do test -n "${!v}" || { echo "::error::Missing $v"; exit 1; }; done
-          echo "ORIGIN_IP=$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')" >> "$GITHUB_ENV"
-      - name: Configure SSH
+          jq -r '.clients[] | select(.enabled==true) | .domain' infra/subdomains/clients.json | grep -E '^[a-z0-9.-]+\.impulsionando\.com\.br$' >/dev/null
+          echo 'TENANT_MANIFEST=PASS'
+      - name: Architecture invariant
         run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-      - name: Provision Traefik routers idempotently
-        run: |
-          set -euo pipefail
-          enabled="$(jq -c '[.clients[]|select(.enabled==true)]' infra/subdomains/clients.json)"
-          encoded="$(printf '%s' "$enabled" | base64 -w0)"
-          ssh "$VPS_USER@$VPS_HOST" "CLIENTS_B64='$encoded' bash -s" <<'REMOTE'
-          set -euo pipefail
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.client-subdomains.yml
-          test -f "$base"
-          clients="$(printf '%s' "$CLIENTS_B64" | base64 -d)"
-          labels=''
-          while IFS=$'\t' read -r slug domain; do
-            [ -n "$slug" ] && [ -n "$domain" ] || continue
-            labels="$labels
-                traefik.http.routers.client-$slug.entrypoints: websecure
-                traefik.http.routers.client-$slug.rule: Host(\`$domain\`)
-                traefik.http.routers.client-$slug.service: impulsionando-core
-                traefik.http.routers.client-$slug.tls: \"true\"
-                traefik.http.routers.client-$slug.tls.certresolver: letsencrypt
-                traefik.http.routers.client-$slug.priority: \"220\""
-          done < <(printf '%s' "$clients" | jq -r '.[]|[.slug,.domain]|@tsv')
-          sudo tee "$override" >/dev/null <<YAML
-          services:
-            impulsionando-core:
-              labels:
-                traefik.enable: "true"$labels
-          YAML
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$base" -f "$override" config -q
-          sudo docker compose -f "$base" -f "$override" up -d --no-build impulsionando-core
-          REMOTE
-      - name: Provision Cloudflare DNS idempotently
-        run: |
-          set -euo pipefail
-          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          jq -r '.clients[]|select(.enabled==true)|.domain' infra/subdomains/clients.json | while read -r domain; do
-            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$domain&per_page=100" -o /tmp/dns.json
-            id="$(jq -r --arg ip "$ORIGIN_IP" '.result[]|select(.type=="A" and .content==$ip and .proxied==true)|.id' /tmp/dns.json | head -1)"
-            if [ -z "$id" ]; then
-              jq -r '.result[]|select(.type=="A" or .type=="AAAA" or .type=="CNAME")|.id' /tmp/dns.json | while read -r old; do [ -z "$old" ] || curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records/$old" >/dev/null; done
-              jq -nc --arg name "$domain" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/new.json
-              curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" | jq -e '.success==true' >/dev/null
-            fi
-            echo "DNS_READY $domain"
-          done
-      - name: Validate every enabled subdomain
-        run: |
-          set -euo pipefail
-          failed=0
-          jq -r '.clients[]|select(.enabled==true)|.domain' infra/subdomains/clients.json | while read -r domain; do
-            ok=0
-            for i in $(seq 1 24); do
-              code="$(curl -sSL --max-time 20 -o /tmp/page -w '%{http_code}' "https://$domain/" || true)"
-              [ "$code" = 200 ] && { ok=1; break; }
-              sleep 5
-            done
-            [ "$ok" = 1 ] || { echo "::error::$domain unavailable"; exit 70; }
-            echo "PUBLIC_READY $domain"
-          done
+          echo 'This workflow no longer publishes frontend builds or creates Traefik routers.'
+          echo 'DNS/SSL bootstrap for a brand-new tenant belongs to the infrastructure control plane.'
+          echo 'After bootstrap, all frontend releases are exclusively owned by Production Front.'
