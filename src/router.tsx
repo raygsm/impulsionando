@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
-import { createChrismedBrowserHistory } from "./lib/chrismed-clean-routes";
+import { createWhiteLabelBrowserHistory } from "./lib/white-label-clean-routes";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
@@ -8,7 +8,7 @@ export const getRouter = () => {
 
   const router = createRouter({
     routeTree,
-    history: createChrismedBrowserHistory(),
+    history: createWhiteLabelBrowserHistory(),
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
