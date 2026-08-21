@@ -17,11 +17,15 @@ jobs:
     timeout-minutes: 20
     env:
       CI: "true"
+      CORE_E2E_PRIVILEGED_CLEANUP: "1"
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      PROJECT_REF: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      PGHOST_SOURCE: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPASSWORD_SOURCE: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +35,7 @@ jobs:
       - name: Verify required secrets
         run: |
           missing=0
-          for v in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY; do
+          for v in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY PGHOST_SOURCE PGPASSWORD_SOURCE PROJECT_REF; do
             if [ -z "${!v}" ]; then echo "::error::Missing secret: $v"; missing=1; fi
           done
           test "$missing" = "0"
@@ -52,7 +56,7 @@ jobs:
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
 
-      - name: Run Core contract email delivery E2E
+      - name: Run Core contract email queue E2E
         id: email
         if: always()
         run: |
@@ -63,28 +67,64 @@ jobs:
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
 
-      - name: Snapshot email_send_log (last 50)
+      - name: Privileged cleanup of exact Core E2E companies
         if: always()
-        env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          if [ -n "${{ secrets.SUPABASE_DB_HOST }}" ]; then
-            psql "postgres://postgres:${PGPASSWORD}@${{ secrets.SUPABASE_DB_HOST }}:5432/postgres" \
-              -c "SELECT created_at, template_name, recipient_email, status, left(coalesce(error_message,''),120) AS error FROM email_send_log ORDER BY created_at DESC LIMIT 50;" \
-              > test-results/email_send_log_tail.txt 2>&1 || echo "snapshot skipped" > test-results/email_send_log_tail.txt
-          else
-            echo "SUPABASE_DB_HOST not set — snapshot skipped" > test-results/email_send_log_tail.txt
+          set -euo pipefail
+          cat > /tmp/cleanup-core-e2e.sql <<'SQL'
+          begin;
+          create temporary table _e2e_companies on commit drop as
+            select id from public.companies where name like 'E2E Core Iso %';
+
+          delete from public.core_service_access_events where company_id in (select id from _e2e_companies);
+          delete from public.core_service_access_state where company_id in (select id from _e2e_companies);
+          delete from public.communication_tenants where company_id in (select id from _e2e_companies);
+          delete from public.core_client_enrollment where company_id in (select id from _e2e_companies);
+          delete from public.user_roles where company_id in (select id from _e2e_companies);
+          delete from public.companies where id in (select id from _e2e_companies);
+          commit;
+          SQL
+
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host \
+            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v /tmp/cleanup-core-e2e.sql:/cleanup.sql:ro postgres:17 \
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 -f /cleanup.sql; then
+            docker run --rm --network host \
+              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -v /tmp/cleanup-core-e2e.sql:/cleanup.sql:ro postgres:17 \
+              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 -f /cleanup.sql
+          fi
+
+      - name: Snapshot canonical contract outbox metadata
+        if: always()
+        run: |
+          set -euo pipefail
+          cat > /tmp/outbox-snapshot.sql <<'SQL'
+          select created_at, event_code, status, left(coalesce(idempotency_key,''),80) as idempotency_key
+          from public.message_outbox
+          where event_code in ('contracts.contract-generated','contracts.contract-signed')
+          order by created_at desc
+          limit 50;
+          SQL
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host \
+            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v /tmp/outbox-snapshot.sql:/snapshot.sql:ro postgres:17 \
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -f /snapshot.sql \
+              > test-results/message_outbox_tail.txt 2>&1; then
+            echo "snapshot unavailable" > test-results/message_outbox_tail.txt
           fi
 
       - name: Publish summary
         if: always()
         run: |
           {
-            echo "## Core tenant isolation + contract email delivery"
+            echo "## Core tenant isolation + contract email queue"
             echo "| Suite | Outcome |"
             echo "|---|---|"
             echo "| tenant-isolation | ${{ steps.isolation.outcome }} |"
-            echo "| contract-email-delivery | ${{ steps.email.outcome }} |"
+            echo "| contract-email-queue | ${{ steps.email.outcome }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload all artifacts
