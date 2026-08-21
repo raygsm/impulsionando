@@ -1,9 +1,5 @@
 /**
  * Core E2E — isolamento real por company_id no schema vigente.
- *
- * Cria duas empresas e dois usuários com `user_roles`, sem depender de
- * estruturas legadas. Semeia dados operacionais da empresa A e prova que o
- * usuário da empresa B não consegue lê-los via Data API.
  */
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { admin, createUser, deleteUser, signIn, createCompany, deleteCompany } from "../helpers";
@@ -33,18 +29,9 @@ beforeAll(async () => {
   userA = a.id;
   userB = b.id;
 
-  const { error: roleAError } = await admin.from("user_roles").insert({
-    user_id: userA,
-    company_id: companyA,
-    role: "gestor",
-  });
+  const { error: roleAError } = await admin.from("user_roles").insert({ user_id: userA, company_id: companyA, role: "gestor" });
   if (roleAError) throw roleAError;
-
-  const { error: roleBError } = await admin.from("user_roles").insert({
-    user_id: userB,
-    company_id: companyB,
-    role: "gestor",
-  });
+  const { error: roleBError } = await admin.from("user_roles").insert({ user_id: userB, company_id: companyB, role: "gestor" });
   if (roleBError) throw roleBError;
 
   clientA = (await signIn(emails.a)).client;
@@ -55,7 +42,7 @@ beforeAll(async () => {
     .insert({
       company_id: companyA,
       requester_user_id: userA,
-      source_mode: "automated-test",
+      source_mode: "TEXT",
       raw_input: `core-isolation-${RUN}`,
       structured_request: { run: RUN },
       status: "draft",
@@ -96,19 +83,13 @@ afterAll(async () => {
 
 describe("Core tenant isolation (E2E)", () => {
   it("user B cannot read company A client request", async () => {
-    const { data, error } = await clientB
-      .from("core_client_request_intakes")
-      .select("id,company_id")
-      .eq("id", intakeIdA);
+    const { data, error } = await clientB.from("core_client_request_intakes").select("id,company_id").eq("id", intakeIdA);
     expect(error).toBeNull();
     expect(data ?? []).toHaveLength(0);
   });
 
   it("user A can read its company client request", async () => {
-    const { data, error } = await clientA
-      .from("core_client_request_intakes")
-      .select("id,company_id")
-      .eq("id", intakeIdA);
+    const { data, error } = await clientA.from("core_client_request_intakes").select("id,company_id").eq("id", intakeIdA);
     expect(error).toBeNull();
     expect(data ?? []).toHaveLength(1);
     expect(data![0].company_id).toBe(companyA);
@@ -121,10 +102,7 @@ describe("Core tenant isolation (E2E)", () => {
   });
 
   it("user B cannot enumerate any company A intake", async () => {
-    const { data, error } = await clientB
-      .from("core_client_request_intakes")
-      .select("id,company_id")
-      .eq("company_id", companyA);
+    const { data, error } = await clientB.from("core_client_request_intakes").select("id,company_id").eq("company_id", companyA);
     expect(error).toBeNull();
     expect(data ?? []).toHaveLength(0);
   });
