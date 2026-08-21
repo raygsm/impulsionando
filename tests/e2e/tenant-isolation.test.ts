@@ -45,7 +45,7 @@ beforeAll(async () => {
       source_mode: "TEXT",
       raw_input: `core-isolation-${RUN}`,
       structured_request: { run: RUN },
-      status: "draft",
+      status: "DRAFT",
       metadata: { automated_test: true },
     })
     .select("id")
