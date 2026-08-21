@@ -1,0 +1,47 @@
+name: CHRISMED Continuation 4 finalizer
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-continuation4-finalize.yml
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch CHRISMED final front deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/chrismed-front-hard-deploy-v2.yml/dispatches \
+            -d '{"ref":"main"}'
+      - name: Dispatch CHRISMED n8n finalizer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/chrismed-n8n-finalize-v4.yml/dispatches \
+            -d '{"ref":"main"}'
+      - name: Dispatch CHRISMED outbox worker repair
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/fix-chrismed-n8n-webhook.yml/dispatches \
+            -d '{"ref":"main"}'
