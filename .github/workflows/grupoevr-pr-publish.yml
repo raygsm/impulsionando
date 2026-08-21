@@ -15,7 +15,7 @@ jobs:
   publish:
     if: github.head_ref == 'ops/grupoevr-publish-pr-run'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       DOMAIN: grupoevr.impulsionando.com.br
       VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -58,24 +58,45 @@ jobs:
           test -d .output/public
           tar -czf /tmp/grupoevr-release.tgz .output scripts package.json package-lock.json
 
-      - name: Configure SSH
+      - name: Configure SSH with retries
         run: |
           set -euo pipefail
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           : > ~/.ssh/known_hosts
-          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          test -s ~/.ssh/known_hosts
+          ok=0
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              if ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" 'true'; then
+                ok=1
+                echo "SSH_READY attempt=$attempt"
+                break
+              fi
+            fi
+            sleep $((attempt * 3))
+          done
+          [ "$ok" = 1 ] || { echo '::error::VPS SSH unavailable after bounded retries'; exit 42; }
 
-      - name: Upload release
-        run: scp /tmp/grupoevr-release.tgz "$VPS_USER@$VPS_HOST:/tmp/grupoevr-release.tgz"
+      - name: Upload release with retries
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in $(seq 1 10); do
+            if scp -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 /tmp/grupoevr-release.tgz "$VPS_USER@$VPS_HOST:/tmp/grupoevr-release.tgz"; then
+              ok=1
+              echo "SCP_READY attempt=$attempt"
+              break
+            fi
+            sleep $((attempt * 5))
+          done
+          [ "$ok" = 1 ] || { echo '::error::SCP failed after bounded retries'; exit 43; }
 
       - name: Deploy isolated runtime and exact Traefik router
         id: deploy
         run: |
           set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
+          ssh -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
           set -euo pipefail
           release="/var/www/impulsionando-core/releases/grupoevr-$RELEASE_SHA"
           base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
