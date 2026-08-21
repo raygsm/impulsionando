@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/core-backup-restore.yml"
+      - "scripts/core-restore-*.sql"
       - "supabase/migrations/**"
   workflow_dispatch:
 
@@ -51,70 +52,32 @@ jobs:
           mkdir -p backup
           backup_name="core-$(date -u +%Y%m%dT%H%M%SZ).dump"
           source_user="postgres.${PROJECT_REF}"
-          if ! docker run --rm --network host \
-            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+          if ! docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
             -v "$PWD/backup:/backup" postgres:17 \
             pg_dump -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres \
-              --format=custom --no-owner --no-privileges \
-              --schema=public --schema=private \
+              --format=custom --no-owner --no-privileges --schema=public --schema=private \
               -f "/backup/$backup_name"; then
-            echo "Project-qualified DB user failed; retrying canonical postgres identity."
-            docker run --rm --network host \
-              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
               -v "$PWD/backup:/backup" postgres:17 \
               pg_dump -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
-                --format=custom --no-owner --no-privileges \
-                --schema=public --schema=private \
+                --format=custom --no-owner --no-privileges --schema=public --schema=private \
                 -f "/backup/$backup_name"
           fi
           test -s "backup/$backup_name"
-          sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')
-          size=$(stat -c%s "backup/$backup_name")
-          {
-            echo "backup_name=$backup_name"
-            echo "sha=$sha"
-            echo "size=$size"
-          } >> "$GITHUB_OUTPUT"
+          echo "backup_name=$backup_name" >> "$GITHUB_OUTPUT"
+          echo "sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          echo "size=$(stat -c%s "backup/$backup_name")" >> "$GITHUB_OUTPUT"
 
       - name: Bootstrap managed Supabase dependencies in disposable target
         run: |
           set -euo pipefail
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/scripts/core-restore-bootstrap.sql:/bootstrap.sql:ro" postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 -f /bootstrap.sql
           docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
-            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 <<'SQL'
-          create schema if not exists auth;
-          create table if not exists auth.users (
-            instance_id uuid,
-            id uuid primary key,
-            aud varchar(255),
-            role varchar(255),
-            email varchar(255),
-            encrypted_password varchar(255),
-            email_confirmed_at timestamptz,
-            invited_at timestamptz,
-            confirmation_token varchar(255) default '',
-            confirmation_sent_at timestamptz,
-            recovery_token varchar(255) default '',
-            recovery_sent_at timestamptz,
-            email_change_token_new varchar(255) default '',
-            email_change varchar(255) default '',
-            email_change_sent_at timestamptz,
-            last_sign_in_at timestamptz,
-            raw_app_meta_data jsonb default '{}'::jsonb,
-            raw_user_meta_data jsonb default '{}'::jsonb,
-            is_super_admin boolean,
-            created_at timestamptz,
-            updated_at timestamptz,
-            phone text,
-            phone_confirmed_at timestamptz,
-            banned_until timestamptz,
-            deleted_at timestamptz,
-            is_sso_user boolean default false,
-            is_anonymous boolean default false
-          );
-          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
-          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
-          create or replace function auth.role() returns text language sql stable as $$ select null::text $$;
-          SQL
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc \
+              "select case when to_regnamespace('auth') is not null and to_regprocedure('auth.uid()') is not null then 'READY' else 'MISSING' end" \
+            | grep -qx READY
 
       - name: Restore into disposable PostgreSQL 17
         run: |
@@ -122,8 +85,7 @@ jobs:
           docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
             psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 \
               -c "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS private CASCADE;"
-          docker run --rm --network host \
-            -e PGPASSWORD=restore-test \
+          docker run --rm --network host -e PGPASSWORD=restore-test \
             -v "$PWD/backup:/backup:ro" postgres:17 \
             pg_restore -h 127.0.0.1 -p 55433 -U postgres -d restore \
               --no-owner --no-privileges --exit-on-error \
@@ -132,19 +94,9 @@ jobs:
       - name: Validate restored Core invariants
         run: |
           set -euo pipefail
-          docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
-            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 <<'SQL'
-          DO $verify$
-          BEGIN
-            IF to_regclass('public.companies') IS NULL THEN RAISE EXCEPTION 'companies missing after restore'; END IF;
-            IF to_regclass('public.user_roles') IS NULL THEN RAISE EXCEPTION 'user_roles missing after restore'; END IF;
-            IF to_regclass('public.core_go_live_checks') IS NULL THEN RAISE EXCEPTION 'core_go_live_checks missing after restore'; END IF;
-            IF to_regclass('public.core_service_access_state') IS NULL THEN RAISE EXCEPTION 'core_service_access_state missing after restore'; END IF;
-            IF to_regclass('public.message_outbox') IS NULL THEN RAISE EXCEPTION 'message_outbox missing after restore'; END IF;
-            IF to_regclass('public.core_backup_evidence') IS NULL THEN RAISE EXCEPTION 'core_backup_evidence missing after restore'; END IF;
-          END
-          $verify$;
-          SQL
+          docker run --rm --network host -e PGPASSWORD=restore-test \
+            -v "$PWD/scripts/core-restore-verify.sql:/verify.sql:ro" postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 -f /verify.sql
           companies=$(docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
             psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc "select count(*) from public.companies")
           [ "$companies" -gt 0 ] || { echo "::error::Restored companies table is unexpectedly empty"; exit 1; }
@@ -164,22 +116,19 @@ jobs:
           update public.core_go_live_checks
           set status='passed',
               evidence_ref='core_backup_evidence:' || (
-                select id::text from public.core_backup_evidence
-                where raw_sha=:'backup_sha' order by created_at desc limit 1
+                select id::text from public.core_backup_evidence where raw_sha=:'backup_sha' order by created_at desc limit 1
               ),
               notes='Backup Core criado e restaurado em banco descartável com invariantes validados.',
               last_checked_at=now()
           where check_key='backup.restore';
           SQL
           source_user="postgres.${PROJECT_REF}"
-          if ! docker run --rm --network host \
-            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+          if ! docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
             -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
             psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 \
               -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
               -f /register-evidence.sql; then
-            docker run --rm --network host \
-              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            docker run --rm --network host -e PGPASSWORD="$PGPASSWORD_SOURCE" \
               -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
               psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 \
                 -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
