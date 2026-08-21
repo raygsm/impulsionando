@@ -70,9 +70,11 @@ jobs:
           test -s "backup/$backup_name"
           sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')
           size=$(stat -c%s "backup/$backup_name")
-          echo "backup_name=$backup_name" >> "$GITHUB_OUTPUT"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "size=$size" >> "$GITHUB_OUTPUT"
+          {
+            echo "backup_name=$backup_name"
+            echo "sha=$sha"
+            echo "size=$size"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Restore into disposable PostgreSQL 17
         run: |
