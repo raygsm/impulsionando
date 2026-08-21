@@ -1,6 +1,6 @@
 workflow=Universal Fast Front V4
-sha=b3d115f1ebcd3a3ee5e752c91f8425fcbe9e51e0
-started_at_utc=2026-08-21T03:57:51Z
+sha=bef1a77da91a7f88a972db4fe20a848507d42407
+started_at_utc=2026-08-21T04:29:07Z
 PASS product_guards
 PASS tenant_count=33
 PASS build_runner_only
@@ -8,9 +8,9 @@ PASS ssh_configured
 PASS wildcard_dns=187.77.232.52
 PASS artifact_uploaded
 FAIL promotion_rc=61
-curl: (7) Failed to connect to 172.16.1.9 port 3000 after 0 ms: Couldn't connect to server
+curl: (7) Failed to connect to 172.16.1.7 port 3000 after 0 ms: Couldn't connect to server
 CANARY_FAIL
-[Pulsonitor] started in hostinger-primary; concurrency=8
 [Colors Automation] started interval=60000ms
+[Pulsonitor] started in hostinger-primary; concurrency=8
 [Colors Automation] tick {"ok":true,"checkout_abandoned":0,"appointment_reminders":0,"event_reminders":0,"dispatch":{"processed":0,"waiting":0,"failed":0}}
-finished_at_utc=2026-08-21T04:07:21Z
+finished_at_utc=2026-08-21T04:39:16Z
