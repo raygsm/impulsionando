@@ -1,115 +1,30 @@
-# Trigger Colors P0 publish validation - 2026-08-21
-name: Colors P0 Repair
+name: Colors Front Verification (canonical)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/colors-p0-repair.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: colors-p0-repair
-  cancel-in-progress: false
-
 jobs:
-  repair:
+  verify:
     runs-on: ubuntu-latest
-    environment: production
-    env:
-      DOMAIN: colorssaude.impulsionando.com.br
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    timeout-minutes: 10
     steps:
-      - name: Guard scope and resolve origin
+      - name: Verify Colors canonical front and host retention
         run: |
-          set -euo pipefail
-          [ "$DOMAIN" = 'colorssaude.impulsionando.com.br' ] || exit 2
-          for v in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do test -n "${!v}" || { echo "::error::Missing $v"; exit 3; }; done
-          ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
-          test -n "$ORIGIN_IP"
-          echo "ORIGIN_IP=$ORIGIN_IP" >> "$GITHUB_ENV"
-
-      - name: Reconcile only Colors DNS to Impulsionando VPS
-        run: |
-          set -euo pipefail
-          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$DOMAIN&per_page=100" -o /tmp/colors-dns.json
-          jq -e '.success == true' /tmp/colors-dns.json >/dev/null
-          good="$(jq -r --arg ip "$ORIGIN_IP" '.result[] | select(.name=="colorssaude.impulsionando.com.br" and .type=="A" and .content==$ip and .proxied==true) | .id' /tmp/colors-dns.json | head -n1)"
-          if [ -z "$good" ]; then
-            jq -r '.result[] | select(.name=="colorssaude.impulsionando.com.br" and (.type=="A" or .type=="AAAA" or .type=="CNAME")) | .id' /tmp/colors-dns.json | while read -r id; do
-              [ -n "$id" ] && curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
-            done
-            jq -nc --arg name "$DOMAIN" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/colors-new-dns.json
-            curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/colors-new-dns.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/colors-created.json
-            jq -e '.success == true' /tmp/colors-created.json >/dev/null
-          fi
-          echo 'COLORS_DNS=RECONCILED'
-
-      - name: Configure SSH
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Install isolated Colors Traefik router
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
           set -euo pipefail
           domain='colorssaude.impulsionando.com.br'
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.colors-p0.yml
-          cd /opt/impulsionando/deploy/hostinger
-          test -f "$base"
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core:
-              labels:
-                traefik.http.routers.colorssaude-p0.entrypoints: websecure
-                traefik.http.routers.colorssaude-p0.rule: Host(`colorssaude.impulsionando.com.br`)
-                traefik.http.routers.colorssaude-p0.service: impulsionando-core
-                traefik.http.routers.colorssaude-p0.tls: "true"
-                traefik.http.routers.colorssaude-p0.tls.certresolver: letsencrypt
-                traefik.http.routers.colorssaude-p0.priority: "10000"
-          YAML
-          sudo docker compose -f "$base" -f "$override" config -q
-          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
-          for attempt in $(seq 1 45); do
-            headers="$(mktemp)"
-            code="$(curl -k -sS --resolve "$domain:443:127.0.0.1" -D "$headers" -o /tmp/colors-origin -w '%{http_code}' --max-time 20 "https://$domain/" || true)"
-            location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/,""); gsub(/\r/,""); print; exit}' "$headers")"
-            rm -f "$headers"
-            echo "COLORS_ORIGIN attempt=$attempt HTTP=$code LOCATION=${location:-none}"
-            if [ "$code" = 200 ] && [ -z "$location" ]; then break; fi
-            [ "$attempt" -lt 45 ] || exit 20
-            sleep 2
-          done
-          echo 'COLORS_TRAEFIK_P0=PASS'
-          REMOTE
-
-      - name: Validate public host never leaves Colors subdomain
-        run: |
-          set -euo pipefail
           for path in / /super-green-black /agenda /eventos /suporte /afiliados /rastreio; do
-            final=""; code=000
-            for attempt in $(seq 1 18); do
-              read -r code final < <(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/colors-public -w '%{http_code} %{url_effective}' --max-time 30 "https://$DOMAIN$path?colors_p0=${GITHUB_SHA}" || echo '000 -')
-              host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
-              echo "COLORS_PUBLIC $path attempt=$attempt HTTP=$code FINAL=$final"
-              if [ "$code" = 200 ] && [ "$host" = "$DOMAIN" ]; then break; fi
-              sleep 5
-            done
+            read -r code final < <(curl -sS -L -o /tmp/page -w '%{http_code} %{url_effective}' -H 'Cache-Control: no-cache' --max-time 20 "https://$domain$path")
             host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
-            [ "$code" = 200 ] && [ "$host" = "$DOMAIN" ] || exit 30
+            test "$code" = 200
+            test "$host" = "$domain"
           done
-          echo 'COLORS_P0_REPAIR=PASS'
+          marker="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$domain/impulsionando-front-sha.txt")"
+          printf '%s' "$marker" | grep -Eq '^[0-9a-f]{40}$'
+          echo "COLORS_CANONICAL_FRONT=PASS sha=$marker"
+      - name: Architecture invariant
+        run: |
+          echo 'Colors frontend publication belongs exclusively to Production Front.'
+          echo 'This workflow is verification-only and cannot mutate DNS, Traefik, images or containers.'
