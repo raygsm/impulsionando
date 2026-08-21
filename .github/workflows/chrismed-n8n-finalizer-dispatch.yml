@@ -1,0 +1,24 @@
+name: CHRISMED dispatch N8N finalizer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/chrismed-n8n-finalizer-dispatch.yml
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch verified CHRISMED N8N finalizer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run chrismed-n8n-finalize-v4.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'CHRISMED_N8N_FINALIZER_DISPATCHED=PASS'
