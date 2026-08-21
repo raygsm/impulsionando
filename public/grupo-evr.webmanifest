@@ -1,0 +1,13 @@
+{
+  "name": "Grupo EVR — Área do Paciente",
+  "short_name": "Grupo EVR",
+  "description": "Agenda, acompanhamento, pedidos, pagamentos e relacionamento do Grupo EVR.",
+  "start_url": "/grupo-evr/minha-conta",
+  "scope": "/grupo-evr/",
+  "display": "standalone",
+  "background_color": "#f4f5f1",
+  "theme_color": "#163d31",
+  "lang": "pt-BR",
+  "categories": ["medical", "health", "lifestyle"],
+  "icons": []
+}
