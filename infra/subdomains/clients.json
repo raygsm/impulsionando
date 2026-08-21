@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "zone": "impulsionando.com.br",
   "clients": [
     {"slug":"csi","domain":"csi.impulsionando.com.br","route":"/csi","enabled":true},
@@ -14,6 +14,7 @@
     {"slug":"ontap","domain":"ontap.impulsionando.com.br","route":"/ontap","enabled":true},
     {"slug":"raoni","domain":"raoni.impulsionando.com.br","route":"/raoni","enabled":true},
     {"slug":"spartacus","domain":"spartacus.impulsionando.com.br","route":"/spartacus","enabled":true},
-    {"slug":"haunted","domain":"haunted.impulsionando.com.br","route":"/haunted","enabled":true}
+    {"slug":"haunted","domain":"haunted.impulsionando.com.br","route":"/haunted","enabled":true},
+    {"slug":"grupoevr","domain":"grupoevr.impulsionando.com.br","route":"/grupo-evr","enabled":true}
   ]
 }
