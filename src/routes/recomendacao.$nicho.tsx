@@ -12,15 +12,11 @@ import ogDefaultAsset from "@/assets/og-recomendacao-default.jpg.asset.json";
 const formatBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
 
-// Mapeamento nicho → og:image. Hoje temos arte dedicada para Educação
-// (White Label Acadêmico) e um fallback de marca para os demais nichos.
-// Novas artes por nicho podem ser adicionadas aqui sem mexer no head().
 const SITE_ORIGIN = "https://impulsionando.com.br";
 const OG_IMAGES_BY_NICHO: Record<string, string> = {
   educacao: `${SITE_ORIGIN}${ogEducacaoAsset.url}`,
 };
 const OG_IMAGE_DEFAULT = `${SITE_ORIGIN}${ogDefaultAsset.url}`;
-// Imagens geradas em 1216x640 (proporção ~1.9:1 — Open Graph recomenda 1200x630).
 const OG_IMAGE_WIDTH = 1216;
 const OG_IMAGE_HEIGHT = 640;
 
@@ -35,7 +31,6 @@ export const Route = createFileRoute("/recomendacao/$nicho")({
       meta: [
         { title },
         { name: "description", content: description },
-        // Open Graph — leaf article com arte dedicada (URL absoluta).
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
@@ -45,7 +40,6 @@ export const Route = createFileRoute("/recomendacao/$nicho")({
         { property: "og:image:height", content: String(OG_IMAGE_HEIGHT) },
         { property: "og:image:type", content: "image/jpeg" },
         { property: "og:image:alt", content: title },
-        // Twitter card — large image herdando do og:image.
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
@@ -54,9 +48,6 @@ export const Route = createFileRoute("/recomendacao/$nicho")({
       links: [{ rel: "canonical", href: url }],
     };
   },
-
-
-
   loader: ({ params }) => {
     if (!RECOMENDACOES[params.nicho]) throw notFound();
     return { nicho: params.nicho };
@@ -93,11 +84,6 @@ type Recomendacao = {
   ganhos: string[];
   plans: RecPlan[];
   combo: { title: string; text: string };
-  /**
-   * Oferta vertical opcional: bloco destacado para um perfil específico
-   * dentro do nicho (ex.: universidade com muitos polos → White Label).
-   * Renderiza após o grid de planos com CTA direto para contratação.
-   */
   verticalOffer?: {
     eyebrow: string;
     title: string;
@@ -112,171 +98,91 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
   "bares-restaurantes": {
     nicheLabel: "Bar ou Restaurante",
     headline: "Para bares e restaurantes, o essencial é transformar atendimento em relacionamento",
-    lead:
-      "No salão, o garçom continua atendendo normalmente. O sistema entra para organizar cardápio digital, QR Code, identificação do cliente, comanda, vouchers, eventos, fidelidade e relacionamento depois da visita. O objetivo não é mandar WhatsApp avisando prato pronto — o objetivo é fazer o cliente voltar.",
-    ganhos: [
-      "Cliente identificado no momento em que abre o QR Code",
-      "Cardápio sempre atualizado, sem reimpressão",
-      "Comanda digital integrada à operação do salão",
-      "Pesquisa, voucher e campanhas pós-visita",
-      "Histórico de consumo para recorrência e fidelidade",
-    ],
+    lead: "No salão, o garçom continua atendendo normalmente. O sistema entra para organizar cardápio digital, QR Code, identificação do cliente, comanda, vouchers, eventos, fidelidade e relacionamento depois da visita. O objetivo não é mandar WhatsApp avisando prato pronto — o objetivo é fazer o cliente voltar.",
+    ganhos: ["Cliente identificado no momento em que abre o QR Code", "Cardápio sempre atualizado, sem reimpressão", "Comanda digital integrada à operação do salão", "Pesquisa, voucher e campanhas pós-visita", "Histórico de consumo para recorrência e fidelidade"],
     plans: [
-      {
-        level: "essencial",
-        modules: ["Cardápio Digital", "QR Code / Comanda", "Comunicação pós-visita"],
-        why: "Com isso você já identifica o cliente, mostra o cardápio, inicia a jornada e pode enviar pesquisa, voucher e campanhas futuras.",
-      },
-      {
-        level: "ideal",
-        modules: ["Cardápio Digital", "QR Code / Comanda", "CRM", "Comunicação", "Fidelidade", "Dashboards"],
-        why: "O Ideal permite transformar consumo em histórico, cliente em recorrência e visita em relacionamento.",
-      },
-      {
-        level: "full",
-        modules: ["PDV", "Eventos", "Ingressos", "Reservas", "BI avançado", "Integrações"],
-        why: "Indicado para casas com eventos, volume alto, reservas, múltiplas áreas ou necessidade de BI executivo.",
-      },
+      { level: "essencial", modules: ["Cardápio Digital", "QR Code / Comanda", "Comunicação pós-visita"], why: "Com isso você já identifica o cliente, mostra o cardápio, inicia a jornada e pode enviar pesquisa, voucher e campanhas futuras." },
+      { level: "ideal", modules: ["Cardápio Digital", "QR Code / Comanda", "CRM", "Comunicação", "Fidelidade", "Dashboards"], why: "O Ideal permite transformar consumo em histórico, cliente em recorrência e visita em relacionamento." },
+      { level: "full", modules: ["PDV", "Eventos", "Ingressos", "Reservas", "BI avançado", "Integrações"], why: "Indicado para casas com eventos, volume alto, reservas, múltiplas áreas ou necessidade de BI executivo." },
     ],
-    combo: {
-      title: "Por que Cardápio + QR Code + CRM + Comunicação funcionam juntos",
-      text: "Quando o cliente acessa o QR Code, você identifica quem está na mesa. Quando fecha a conta, pode enviar pesquisa. Depois, pode enviar voucher, evento ou promoção. Isso transforma uma visita em relacionamento.",
-    },
+    combo: { title: "Por que Cardápio + QR Code + CRM + Comunicação funcionam juntos", text: "Quando o cliente acessa o QR Code, você identifica quem está na mesa. Quando fecha a conta, pode enviar pesquisa. Depois, pode enviar voucher, evento ou promoção. Isso transforma uma visita em relacionamento." },
   },
   "clinicas": {
     nicheLabel: "Clínica ou Consultório",
     headline: "Para clínicas, organizar a agenda é o começo — o ganho real está na recorrência do paciente",
-    lead:
-      "Agenda online, confirmação automática, portal do paciente, pagamento antecipado e relacionamento pós-consulta. Menos no-show, mais retorno e dashboard claro de produtividade por profissional.",
-    ganhos: [
-      "Agenda sempre cheia, com confirmação automática",
-      "Redução de faltas com lembretes e pré-pagamento",
-      "Portal do paciente com histórico e remarcação",
-      "Visão clara de produtividade por profissional",
-    ],
+    lead: "Agenda online, confirmação automática, portal do paciente, pagamento antecipado e relacionamento pós-consulta. Menos no-show, mais retorno e dashboard claro de produtividade por profissional.",
+    ganhos: ["Agenda sempre cheia, com confirmação automática", "Redução de faltas com lembretes e pré-pagamento", "Portal do paciente com histórico e remarcação", "Visão clara de produtividade por profissional"],
     plans: [
-      { level: "essencial", modules: ["Agenda", "Profissionais", "Comunicação por e-mail"],
-        why: "Organiza horários, profissionais e confirmações básicas." },
-      { level: "ideal", modules: ["Agenda", "Portal do Paciente", "Pagamentos", "Comunicação", "Dashboard"],
-        why: "Reduz faltas, melhora remarcações, centraliza pacientes e permite acompanhar produtividade." },
-      { level: "full", modules: ["Múltiplas unidades", "BI avançado", "Integrações", "WhatsApp", "Automação avançada"],
-        why: "Para clínicas com várias unidades, BI executivo e automação de jornadas completas." },
+      { level: "essencial", modules: ["Agenda", "Profissionais", "Comunicação por e-mail"], why: "Organiza horários, profissionais e confirmações básicas." },
+      { level: "ideal", modules: ["Agenda", "Portal do Paciente", "Pagamentos", "Comunicação", "Dashboard"], why: "Reduz faltas, melhora remarcações, centraliza pacientes e permite acompanhar produtividade." },
+      { level: "full", modules: ["Múltiplas unidades", "BI avançado", "Integrações", "WhatsApp", "Automação avançada"], why: "Para clínicas com várias unidades, BI executivo e automação de jornadas completas." },
     ],
-    combo: {
-      title: "Por que Agenda + Portal + Comunicação + Dashboard combinam",
-      text: "Agenda organiza o atendimento. Portal do Paciente centraliza dados. Comunicação reduz faltas. Dashboard mostra produtividade.",
-    },
+    combo: { title: "Por que Agenda + Portal + Comunicação + Dashboard combinam", text: "Agenda organiza o atendimento. Portal do Paciente centraliza dados. Comunicação reduz faltas. Dashboard mostra produtividade." },
   },
   "psicologia": {
     nicheLabel: "Psicologia e Terapias",
     headline: "Para psicologia e terapias, sigilo + recorrência são o coração da operação",
-    lead:
-      "Agenda, prontuário sigiloso, sessões recorrentes, pagamento antecipado e relacionamento ético. Sem ruído operacional, sem furo de horário.",
-    ganhos: [
-      "Sessões recorrentes com pagamento automático",
-      "Prontuário sigiloso com auditoria LGPD",
-      "Lembretes humanos, sem invasão",
-      "Visão por terapeuta e por tipo de terapia",
-    ],
+    lead: "Agenda, prontuário sigiloso, sessões recorrentes, pagamento antecipado e relacionamento ético. Sem ruído operacional, sem furo de horário.",
+    ganhos: ["Sessões recorrentes com pagamento automático", "Prontuário sigiloso com auditoria LGPD", "Lembretes humanos, sem invasão", "Visão por terapeuta e por tipo de terapia"],
     plans: [
       { level: "essencial", modules: ["Agenda", "Prontuário", "Pagamento"], why: "Tudo o que um consultório solo precisa." },
       { level: "ideal", modules: ["Agenda", "Prontuário", "Portal do Paciente", "Pagamento recorrente", "Comunicação"], why: "Recorrência e relacionamento sem perder o tom clínico." },
       { level: "full", modules: ["Múltiplos terapeutas", "Supervisão", "BI", "Integrações"], why: "Clínicas com várias salas, equipes e supervisão." },
     ],
-    combo: {
-      title: "Agenda + Prontuário + Pagamento recorrente",
-      text: "O paciente entra, marca, paga e volta. Você só precisa atender — o sistema cuida do resto.",
-    },
+    combo: { title: "Agenda + Prontuário + Pagamento recorrente", text: "O paciente entra, marca, paga e volta. Você só precisa atender — o sistema cuida do resto." },
   },
   "imobiliaria": {
     nicheLabel: "Imobiliária",
     headline: "Para imobiliárias, o segredo é não perder o lead entre o primeiro contato e a chave",
-    lead:
-      "CRM imobiliário, vitrine integrada, visitas, propostas, contratos e portal do cliente em uma jornada única — do anúncio à entrega da chave.",
-    ganhos: [
-      "Lead atribuído ao corretor certo, no tempo certo",
-      "Visitas, propostas e contratos em um só funil",
-      "Visão de conversão por corretor, canal e imóvel",
-      "Portal do cliente para acompanhar a negociação",
-    ],
+    lead: "CRM imobiliário, vitrine integrada, visitas, propostas, contratos e portal do cliente em uma jornada única — do anúncio à entrega da chave.",
+    ganhos: ["Lead atribuído ao corretor certo, no tempo certo", "Visitas, propostas e contratos em um só funil", "Visão de conversão por corretor, canal e imóvel", "Portal do cliente para acompanhar a negociação"],
     plans: [
       { level: "essencial", modules: ["CRM Imobiliário", "Imóveis", "Visitas"], why: "Organiza leads, imóveis e visitas." },
       { level: "ideal", modules: ["CRM Imobiliário", "Imóveis", "Visitas", "Propostas", "Comunicação", "Dashboards"], why: "Permite acompanhar o funil completo, melhorar follow-up e controlar conversão por corretor." },
       { level: "full", modules: ["Site imobiliário", "Portais", "Locação", "Proprietário", "Inquilino", "BI executivo", "Integrações"], why: "Operações com locação, portais externos e múltiplas franquias." },
     ],
-    combo: {
-      title: "CRM + Imóveis + Visitas + Comunicação + BI",
-      text: "CRM acompanha o lead. Imóveis alimentam a busca. Visitas geram histórico. Comunicação mantém o cliente ativo. BI mostra onde a venda trava.",
-    },
+    combo: { title: "CRM + Imóveis + Visitas + Comunicação + BI", text: "CRM acompanha o lead. Imóveis alimentam a busca. Visitas geram histórico. Comunicação mantém o cliente ativo. BI mostra onde a venda trava." },
   },
   "contabilidade": {
     nicheLabel: "Contabilidade",
     headline: "Para contabilidade, portal + obrigações + comunicação reduzem 70% das mensagens repetitivas",
-    lead:
-      "Portal do cliente, calendário de obrigações, documentos centralizados, financeiro e dashboards — para o escritório atender mais clientes sem aumentar a equipe.",
-    ganhos: [
-      "Documentos chegam no portal, não no WhatsApp pessoal",
-      "Obrigações com alerta automático para cliente e equipe",
-      "Financeiro do cliente integrado",
-      "Visão de produtividade por departamento",
-    ],
+    lead: "Portal do cliente, calendário de obrigações, documentos centralizados, financeiro e dashboards — para o escritório atender mais clientes sem aumentar a equipe.",
+    ganhos: ["Documentos chegam no portal, não no WhatsApp pessoal", "Obrigações com alerta automático para cliente e equipe", "Financeiro do cliente integrado", "Visão de produtividade por departamento"],
     plans: [
       { level: "essencial", modules: ["Clientes", "Documentos", "Comunicação"], why: "Cadastros, recebimento de documentos e canal único." },
       { level: "ideal", modules: ["Portal do Cliente", "Obrigações", "Documentos", "Comunicação", "Financeiro", "Dashboards"], why: "Reduz pressão da equipe e profissionaliza o relacionamento." },
       { level: "full", modules: ["Folha dentro do ERP", "Fiscal", "BI", "Automações", "Integrações"], why: "Escritórios com muitos clientes, folhas e departamentos." },
     ],
-    combo: {
-      title: "Portal + Obrigações + Comunicação",
-      text: "O cliente sabe o que precisa entregar, quando precisa entregar e onde entregar. A equipe trabalha o que importa.",
-    },
+    combo: { title: "Portal + Obrigações + Comunicação", text: "O cliente sabe o que precisa entregar, quando precisa entregar e onde entregar. A equipe trabalha o que importa." },
   },
   "juridico": {
     nicheLabel: "Escritório Jurídico",
     headline: "Para escritórios, CRM jurídico + portal do cliente é o que separa banca de operação profissional",
-    lead:
-      "CRM jurídico, processos, prazos, portal do cliente, comunicação ética e financeiro. Tudo em um só ambiente seguro.",
-    ganhos: [
-      "Clientes acompanham o andamento sem ligar",
-      "Prazos com alerta automático",
-      "Histórico completo por processo e cliente",
-      "Financeiro de honorários integrado",
-    ],
+    lead: "CRM jurídico, processos, prazos, portal do cliente, comunicação ética e financeiro. Tudo em um só ambiente seguro.",
+    ganhos: ["Clientes acompanham o andamento sem ligar", "Prazos com alerta automático", "Histórico completo por processo e cliente", "Financeiro de honorários integrado"],
     plans: [
       { level: "essencial", modules: ["CRM Jurídico", "Clientes", "Documentos"], why: "Fundação organizada para a banca." },
       { level: "ideal", modules: ["CRM Jurídico", "Processos", "Portal do Cliente", "Comunicação", "Financeiro", "Dashboards"], why: "Operação profissional com transparência para o cliente." },
       { level: "full", modules: ["Monitoramento processual", "Integrações jurídicas", "Automações", "BI", "Múltiplos advogados/equipes"], why: "Escritórios maiores com várias equipes e integrações com tribunais." },
     ],
-    combo: {
-      title: "CRM + Processos + Portal + Financeiro",
-      text: "O cliente acompanha. A equipe foca no jurídico. O sócio enxerga o resultado em tempo real.",
-    },
+    combo: { title: "CRM + Processos + Portal + Financeiro", text: "O cliente acompanha. A equipe foca no jurídico. O sócio enxerga o resultado em tempo real." },
   },
   "microcervejarias": {
     nicheLabel: "Cervejaria",
     headline: "Para cervejarias, vender direto e ativar marca é o que sustenta a margem",
-    lead:
-      "Marketplace B2B, PDV, eventos, ações de marca e relacionamento com bares parceiros — tudo numa só plataforma.",
-    ganhos: [
-      "Pedidos B2B com taxa transparente",
-      "Eventos e ativações com gestão integrada",
-      "Bares parceiros ativos e fiéis",
-      "Marca conectada ao consumidor final",
-    ],
+    lead: "Marketplace B2B, PDV, eventos, ações de marca e relacionamento com bares parceiros — tudo numa só plataforma.",
+    ganhos: ["Pedidos B2B com taxa transparente", "Eventos e ativações com gestão integrada", "Bares parceiros ativos e fiéis", "Marca conectada ao consumidor final"],
     plans: [
       { level: "essencial", modules: ["Catálogo", "PDV"], why: "Vender com profissionalismo desde o dia 1." },
       { level: "ideal", modules: ["Marketplace B2B", "PDV", "CRM de Bares", "Comunicação"], why: "Recorrência de pedidos e ativação de marca." },
       { level: "full", modules: ["Eventos", "BI", "Integrações fiscais", "Automação"], why: "Cervejarias com volume, eventos e múltiplos canais." },
     ],
-    combo: {
-      title: "Marketplace + PDV + CRM de Bares",
-      text: "O bar pede no marketplace, recebe rápido, fideliza. Você vende mais sem aumentar a equipe comercial.",
-    },
+    combo: { title: "Marketplace + PDV + CRM de Bares", text: "O bar pede no marketplace, recebe rápido, fideliza. Você vende mais sem aumentar a equipe comercial." },
   },
   "eventos": {
     nicheLabel: "Eventos",
     headline: "Para eventos, vender ingresso é só o começo — o lucro está no pós-evento",
-    lead:
-      "Ingressos, listas, check-in, relacionamento com público e dashboards. Transforme cada evento em um asset de recorrência.",
+    lead: "Ingressos, listas, check-in, relacionamento com público e dashboards. Transforme cada evento em um asset de recorrência.",
     ganhos: ["Check-in rápido sem fila", "Listas e cortesias controladas", "Pesquisa e relacionamento pós-evento", "BI por evento e por canal de venda"],
     plans: [
       { level: "essencial", modules: ["Ingressos", "Check-in"], why: "Operação básica sem dor de cabeça." },
@@ -336,15 +242,8 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
   "saude": {
     nicheLabel: "Saúde",
     headline: "Para clínicas, terapias e cuidado, agenda + prontuário + relacionamento são o coração da operação",
-    lead:
-      "Fisioterapia, nutrição, odontologia, terapias integrativas e demais áreas de saúde. Agenda, prontuário, retorno automático, financeiro e portal do paciente em uma única plataforma — sem ferramentas soltas.",
-    ganhos: [
-      "Agenda multiprofissional sem furos nem sobreposição",
-      "Prontuário digital com histórico completo do paciente",
-      "Confirmação e retorno automáticos via WhatsApp",
-      "Portal do paciente com receitas, atestados e exames",
-      "Financeiro integrado a convênios e particulares",
-    ],
+    lead: "Fisioterapia, nutrição, odontologia, terapias integrativas e demais áreas de saúde. Agenda, prontuário, retorno automático, financeiro e portal do paciente em uma única plataforma — sem ferramentas soltas.",
+    ganhos: ["Agenda multiprofissional sem furos nem sobreposição", "Prontuário digital com histórico completo do paciente", "Confirmação e retorno automáticos via WhatsApp", "Portal do paciente com receitas, atestados e exames", "Financeiro integrado a convênios e particulares"],
     plans: [
       { level: "essencial", modules: ["Agenda", "Cadastro de pacientes"], why: "O básico para profissionalizar a operação e parar de perder paciente por desorganização." },
       { level: "ideal", modules: ["Agenda", "Prontuário", "Portal do paciente", "Comunicação", "Financeiro"], why: "Operação completa de cuidado — do agendamento ao financeiro, com relacionamento contínuo." },
@@ -355,15 +254,8 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
   "fitness": {
     nicheLabel: "Fitness e Performance",
     headline: "Para academias, boxes e estúdios, retenção é tudo — e retenção mora no relacionamento",
-    lead:
-      "Academias, CrossFit, funcional, personal trainers, pilates e yoga. Matrícula, agenda de aulas e personal, cobrança recorrente, frequência e relacionamento — para reduzir churn e aumentar LTV.",
-    ganhos: [
-      "Matrícula 100% digital com contrato assinado",
-      "Agenda de aulas, turmas e personal em um só calendário",
-      "Cobrança recorrente automática (Pix, cartão, boleto)",
-      "Acompanhamento de frequência e alerta de evasão",
-      "Comunicação automática para retenção e winback",
-    ],
+    lead: "Academias, CrossFit, funcional, personal trainers, pilates e yoga. Matrícula, agenda de aulas e personal, cobrança recorrente, frequência e relacionamento — para reduzir churn e aumentar LTV.",
+    ganhos: ["Matrícula 100% digital com contrato assinado", "Agenda de aulas, turmas e personal em um só calendário", "Cobrança recorrente automática (Pix, cartão, boleto)", "Acompanhamento de frequência e alerta de evasão", "Comunicação automática para retenção e winback"],
     plans: [
       { level: "essencial", modules: ["Matrícula digital", "Cobrança recorrente"], why: "Comece profissionalizando a entrada e a cobrança do aluno." },
       { level: "ideal", modules: ["Matrícula", "Agenda de aulas", "Frequência", "Comunicação", "Financeiro"], why: "Operação completa de retenção — do primeiro check-in à régua de winback." },
@@ -374,15 +266,8 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
   "fornecedores": {
     nicheLabel: "Fornecedores e Indústria",
     headline: "Para fornecedores B2B, catálogo digital + pedido + relacionamento com revenda é o que escala",
-    lead:
-      "Distribuidoras, vinícolas, destilarias, torrefações e indústrias. Catálogo B2B com tabelas por cliente, pedidos pelos próprios revendedores, comissões de representantes e relacionamento contínuo com o ponto de venda.",
-    ganhos: [
-      "Catálogo B2B com tabelas e condições por cliente",
-      "Pedido digital direto pelo revendedor (sem ligação)",
-      "Comissão automática de representantes",
-      "Histórico de compra e sell-out por revenda",
-      "Campanhas e blasts segmentados por canal",
-    ],
+    lead: "Distribuidoras, vinícolas, destilarias, torrefações e indústrias. Catálogo B2B com tabelas por cliente, pedidos pelos próprios revendedores, comissões de representantes e relacionamento contínuo com o ponto de venda.",
+    ganhos: ["Catálogo B2B com tabelas e condições por cliente", "Pedido digital direto pelo revendedor (sem ligação)", "Comissão automática de representantes", "Histórico de compra e sell-out por revenda", "Campanhas e blasts segmentados por canal"],
     plans: [
       { level: "essencial", modules: ["Catálogo B2B", "Pedidos"], why: "Tire o pedido do WhatsApp e do papel e tenha histórico de verdade." },
       { level: "ideal", modules: ["Catálogo B2B", "Pedidos", "Comissões", "CRM de revenda", "Comunicação"], why: "Operação completa de relacionamento com revenda, com comissão e CRM integrados." },
@@ -393,15 +278,8 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
   "educacao": {
     nicheLabel: "Educação",
     headline: "Para escolas e cursos, matrícula + portal do aluno + financeiro tiram a operação da planilha",
-    lead:
-      "Escolas, cursos livres, idiomas, faculdades e educação corporativa. Matrícula digital, portal do aluno, financeiro, polos e relacionamento — sem trocar de sistema a cada turma nova.",
-    ganhos: [
-      "Matrícula digital com contrato e cobrança",
-      "Portal do aluno com notas, frequência e documentos",
-      "Financeiro com mensalidades e inadimplência sob controle",
-      "Gestão de polos, turmas e professores",
-      "Comunicação automática com aluno e responsável",
-    ],
+    lead: "Escolas, cursos livres, idiomas, faculdades e educação corporativa. Matrícula digital, portal do aluno, financeiro, polos e relacionamento — sem trocar de sistema a cada turma nova.",
+    ganhos: ["Matrícula digital com contrato e cobrança", "Portal do aluno com notas, frequência e documentos", "Financeiro com mensalidades e inadimplência sob controle", "Gestão de polos, turmas e professores", "Comunicação automática com aluno e responsável"],
     plans: [
       { level: "essencial", modules: ["Matrícula digital", "Cobrança"], why: "Resolva matrícula e mensalidade antes de pensar em qualquer outra coisa." },
       { level: "ideal", modules: ["Matrícula", "Portal do aluno", "Financeiro", "Comunicação", "Turmas"], why: "Operação completa do ciclo do aluno — entrada, jornada e cobrança." },
@@ -411,20 +289,9 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
     verticalOffer: {
       eyebrow: "Universidade com muitos polos?",
       title: "White Label Acadêmico — sua marca, sua plataforma, todos os polos sob controle",
-      description:
-        "Reitoria centraliza políticas, matrícula, financeiro e BI; cada polo opera com a sua identidade, autonomia local e relatórios próprios. Tudo em uma instância White Label da Impulsionando, com sua marca, seu domínio e seu app.",
-      bullets: [
-        "Marca, domínio e app próprios — reitoria + cada polo com identidade local",
-        "Multi-polos com permissões por unidade, curso e coordenação",
-        "BI consolidado da reitoria com drill-down por polo, curso e turma",
-        "Matrícula, financeiro, EAD e portal do aluno padronizados em todos os polos",
-        "Onboarding assistido + migração de bases e contratos existentes",
-      ],
-      cta: {
-        label: "Contratar White Label Acadêmico",
-        to: "/orcamento",
-        search: { segmento: "white-label-educacao", origem: "recomendacao-educacao" },
-      },
+      description: "Reitoria centraliza políticas, matrícula, financeiro e BI; cada polo opera com a sua identidade, autonomia local e relatórios próprios. Tudo em uma instância White Label da Impulsionando, com sua marca, seu domínio e seu app.",
+      bullets: ["Marca, domínio e app próprios — reitoria + cada polo com identidade local", "Multi-polos com permissões por unidade, curso e coordenação", "BI consolidado da reitoria com drill-down por polo, curso e turma", "Matrícula, financeiro, EAD e portal do aluno padronizados em todos os polos", "Onboarding assistido + migração de bases e contratos existentes"],
+      cta: { label: "Contratar White Label Acadêmico", to: "/orcamento", search: { segmento: "white-label-educacao", origem: "recomendacao-educacao" } },
       secondaryCta: { label: "Ver como funciona o White Label", to: "/nichos/white-label" },
     },
   },
@@ -432,9 +299,15 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
 
 const PLAN_META = {
   essencial: { label: "Essencial", subtitle: "Para começar com o que realmente importa.", icon: Sparkles, color: "from-blue-500 to-blue-700" },
-  ideal:     { label: "Ideal",     subtitle: "Recomendado — transformar operação em relacionamento e gestão.", icon: Zap, color: "from-primary to-primary-glow" },
-  full:      { label: "Full",      subtitle: "Para operações completas, multiunidades, BI avançado e automações robustas.", icon: Crown, color: "from-indigo-700 to-blue-900" },
+  ideal: { label: "Ideal", subtitle: "Recomendado — transformar operação em relacionamento e gestão.", icon: Zap, color: "from-primary to-primary-glow" },
+  full: { label: "Full", subtitle: "Para operações completas, multiunidades, BI avançado e automações robustas.", icon: Crown, color: "from-indigo-700 to-blue-900" },
 } as const;
+
+const PLAN_CODE_BY_LEVEL: Record<RecPlan["level"], "ESSENCIAL" | "PRO" | "ENTERPRISE"> = {
+  essencial: "ESSENCIAL",
+  ideal: "PRO",
+  full: "ENTERPRISE",
+};
 
 function RecomendacaoPage() {
   const { nicho } = Route.useParams();
@@ -449,37 +322,21 @@ function RecomendacaoPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs mb-4">
-            <BookOpen className="w-3.5 h-3.5" /> Passo 2 de 3 — Recomendação para {r.nicheLabel}
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight max-w-4xl leading-tight">
-            {r.headline}
-          </h1>
-          <p className="mt-4 text-base sm:text-lg text-white/90 max-w-3xl leading-relaxed">
-            {r.lead}
-          </p>
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs mb-4"><BookOpen className="w-3.5 h-3.5" /> Passo 2 de 3 — Recomendação para {r.nicheLabel}</div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight max-w-4xl leading-tight">{r.headline}</h1>
+          <p className="mt-4 text-base sm:text-lg text-white/90 max-w-3xl leading-relaxed">{r.lead}</p>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14 space-y-12">
-        {/* O que você ganha */}
         <div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-4">O que a sua operação ganha</h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {r.ganhos.map((g) => (
-              <div key={g} className="flex items-start gap-2.5 p-4 rounded-lg bg-muted/40 border">
-                <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                <span className="text-sm leading-relaxed">{g}</span>
-              </div>
-            ))}
-          </div>
+          <div className="grid sm:grid-cols-2 gap-3">{r.ganhos.map((g) => <div key={g} className="flex items-start gap-2.5 p-4 rounded-lg bg-muted/40 border"><CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" /><span className="text-sm leading-relaxed">{g}</span></div>)}</div>
         </div>
 
-        {/* Recomendação por plano */}
         <div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">Recomendação inteligente por plano</h2>
           <p className="text-sm text-muted-foreground mb-6">Comece pelo que faz mais sentido hoje — você pode evoluir quando quiser.</p>
@@ -488,68 +345,27 @@ function RecomendacaoPage() {
               const meta = PLAN_META[p.level];
               const Icon = meta.icon;
               const isIdeal = p.level === "ideal";
+              const planCode = PLAN_CODE_BY_LEVEL[p.level];
               return (
-                <Card
-                  key={p.level}
-                  className={
-                    "relative p-6 flex flex-col border-2 " +
-                    (isIdeal ? "border-primary shadow-elegant" : "border-border")
-                  }
-                >
-                  {isIdeal && (
-                    <Badge className="absolute -top-3 left-6 bg-primary text-primary-foreground">
-                      Recomendado
-                    </Badge>
-                  )}
+                <Card key={p.level} className={"relative p-6 flex flex-col border-2 " + (isIdeal ? "border-primary shadow-elegant" : "border-border")}>
+                  {isIdeal && <Badge className="absolute -top-3 left-6 bg-primary text-primary-foreground">Recomendado</Badge>}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-lg grid place-items-center text-white bg-gradient-to-br ${meta.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-lg leading-tight">{meta.label}</div>
-                      <div className="text-xs text-muted-foreground leading-snug">{meta.subtitle}</div>
-                    </div>
+                    <div className={`w-10 h-10 rounded-lg grid place-items-center text-white bg-gradient-to-br ${meta.color}`}><Icon className="w-5 h-5" /></div>
+                    <div className="min-w-0"><div className="font-bold text-lg leading-tight">{meta.label}</div><div className="text-xs text-muted-foreground leading-snug">{meta.subtitle}</div></div>
                   </div>
                   <div className="mt-4 mb-3 pb-3 border-b">
-                    {PRICE_BY_LEVEL[p.level] != null ? (
-                      <>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-bold tracking-tight">{formatBRL(PRICE_BY_LEVEL[p.level]!)}</span>
-                          <span className="text-sm text-muted-foreground">/mês</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {p.level === "essencial" && "½ salário mínimo · sem fidelidade"}
-                          {p.level === "ideal" && "1 salário mínimo · cancela quando quiser"}
-                          {p.level === "full" && "2 salários mínimos · onboarding guiado incluso"}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-2xl font-bold tracking-tight">Sob consulta</div>
-                    )}
+                    {PRICE_BY_LEVEL[p.level] != null ? <><div className="flex items-baseline gap-1"><span className="text-3xl font-bold tracking-tight">{formatBRL(PRICE_BY_LEVEL[p.level]!)}</span><span className="text-sm text-muted-foreground">/mês</span></div><div className="text-xs text-muted-foreground mt-1">{p.level === "essencial" && "½ salário mínimo · sem fidelidade"}{p.level === "ideal" && "1 salário mínimo · cancela quando quiser"}{p.level === "full" && "2 salários mínimos · onboarding guiado incluso"}</div></> : <div className="text-2xl font-bold tracking-tight">Sob consulta</div>}
                   </div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Módulos recomendados</div>
-                  <ul className="space-y-1.5 mb-4">
-                    {p.modules.map((m) => (
-                      <li key={m} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <span>{m}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <ul className="space-y-1.5 mb-4">{p.modules.map((m) => <li key={m} className="flex items-start gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /><span>{m}</span></li>)}</ul>
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1">{p.why}</p>
                   <div className="mt-5 flex flex-col gap-2">
                     <Button asChild className={isIdeal ? "bg-gradient-primary" : ""}>
-                      <Link to="/planos" search={{ nicho, recomendado: p.level } as never}>
-                        {p.level === "full" ? "Solicitar proposta" : `Contratar ${meta.label}`} <ArrowRight className="w-4 h-4 ml-1" />
+                      <Link to="/auth" search={{ persona: "empresa", mode: "signup", next: `/onboarding/empresa?plano=${planCode}&nicho=${encodeURIComponent(nicho)}` }}>
+                        Contratar {meta.label} agora <ArrowRight className="w-4 h-4 ml-1" />
                       </Link>
                     </Button>
-                    {p.level !== "full" && (
-                      <Button asChild variant="outline" size="sm">
-                        <Link to="/planos" search={{ nicho, recomendado: p.level, trial: 1 } as never}>
-                          Começar trial
-                        </Link>
-                      </Button>
-                    )}
+                    {p.level !== "full" && <Button asChild variant="outline" size="sm"><Link to="/planos" search={{ nicho, recomendado: p.level, trial: 1 } as never}>Começar trial</Link></Button>}
                   </div>
                 </Card>
               );
@@ -557,90 +373,12 @@ function RecomendacaoPage() {
           </div>
         </div>
 
-        {/* Combo correlato */}
-        <Card className="p-6 lg:p-8 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold tracking-tight">{r.combo.title}</h3>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">{r.combo.text}</p>
-            </div>
-          </div>
-        </Card>
+        <Card className="p-6 lg:p-8 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20"><div className="flex items-start gap-3"><div className="w-10 h-10 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground"><Sparkles className="w-5 h-5" /></div><div className="min-w-0"><h3 className="text-lg sm:text-xl font-bold tracking-tight">{r.combo.title}</h3><p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">{r.combo.text}</p></div></div></Card>
 
-        {/* Oferta vertical (ex.: White Label para universidades com muitos polos) */}
-        {r.verticalOffer && (
-          <Card
-            data-vertical-offer={nicho}
-            className="relative overflow-hidden p-6 lg:p-10 bg-gradient-primary text-primary-foreground border-0 shadow-elegant"
-          >
-            <div className="pointer-events-none absolute -bottom-24 -right-24 w-[420px] h-[420px] rounded-full bg-accent/30 blur-3xl" />
-            <div className="relative grid lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
-              <div className="space-y-4 min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-xs font-medium">
-                  <Building2 className="w-3.5 h-3.5" /> {r.verticalOffer.eyebrow}
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">
-                  {r.verticalOffer.title}
-                </h3>
-                <p className="text-white/90 leading-relaxed text-base sm:text-lg">
-                  {r.verticalOffer.description}
-                </p>
-                <ul className="grid sm:grid-cols-2 gap-2.5 pt-1">
-                  {r.verticalOffer.bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-white" />
-                      <span className="text-white/95 leading-snug">{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-wrap gap-3 pt-3">
-                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
-                    <Link
-                      to={r.verticalOffer.cta.to}
-                      search={(r.verticalOffer.cta.search ?? {}) as never}
-                    >
-                      <Layers className="w-4 h-4 mr-1.5" /> {r.verticalOffer.cta.label}
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Link>
-                  </Button>
-                  {r.verticalOffer.secondaryCta && (
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="border-white/40 bg-white/10 text-white hover:bg-white/20"
-                    >
-                      <Link to={r.verticalOffer.secondaryCta.to}>
-                        {r.verticalOffer.secondaryCta.label}
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="hidden lg:flex justify-center">
-                <div className="relative w-56 h-56 rounded-3xl bg-white/10 backdrop-blur grid place-items-center ring-1 ring-white/20">
-                  <Network className="w-28 h-28 text-white/90" />
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
+        {r.verticalOffer && <Card data-vertical-offer={nicho} className="relative overflow-hidden p-6 lg:p-10 bg-gradient-primary text-primary-foreground border-0 shadow-elegant"><div className="pointer-events-none absolute -bottom-24 -right-24 w-[420px] h-[420px] rounded-full bg-accent/30 blur-3xl" /><div className="relative grid lg:grid-cols-[1.4fr_1fr] gap-8 items-center"><div className="space-y-4 min-w-0"><div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-xs font-medium"><Building2 className="w-3.5 h-3.5" /> {r.verticalOffer.eyebrow}</div><h3 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">{r.verticalOffer.title}</h3><p className="text-white/90 leading-relaxed text-base sm:text-lg">{r.verticalOffer.description}</p><ul className="grid sm:grid-cols-2 gap-2.5 pt-1">{r.verticalOffer.bullets.map((b) => <li key={b} className="flex items-start gap-2 text-sm"><CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-white" /><span className="text-white/95 leading-snug">{b}</span></li>)}</ul><div className="flex flex-wrap gap-3 pt-3"><Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold"><Link to={r.verticalOffer.cta.to} search={(r.verticalOffer.cta.search ?? {}) as never}><Layers className="w-4 h-4 mr-1.5" /> {r.verticalOffer.cta.label}<ArrowRight className="w-4 h-4 ml-1" /></Link></Button>{r.verticalOffer.secondaryCta && <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20"><Link to={r.verticalOffer.secondaryCta.to}>{r.verticalOffer.secondaryCta.label}</Link></Button>}</div></div><div className="hidden lg:flex justify-center"><div className="relative w-56 h-56 rounded-3xl bg-white/10 backdrop-blur grid place-items-center ring-1 ring-white/20"><Network className="w-28 h-28 text-white/90" /></div></div></div></Card>}
 
-
-        {/* Navegação */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/escolher-nicho">← Trocar de nicho</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/planos">Ver todos os planos</Link>
-          </Button>
-        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t"><Button asChild variant="ghost" size="sm"><Link to="/escolher-nicho">← Trocar de nicho</Link></Button><Button asChild variant="outline" size="sm"><Link to="/planos">Ver todos os planos</Link></Button></div>
       </section>
-
       <PublicFooter />
     </div>
   );
