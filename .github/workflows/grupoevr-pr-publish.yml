@@ -15,66 +15,157 @@ jobs:
   publish:
     if: github.head_ref == 'ops/grupoevr-publish-pr-run'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     env:
       DOMAIN: grupoevr.impulsionando.com.br
-      ORIGIN_IP: 187.77.232.52
-      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Upsert and verify Cloudflare record
-        id: publish
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Validate deploy inputs
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY; do
+            test -n "${!v}" || { echo "::error::Missing $v"; exit 1; }
+          done
+          grep -Fq 'grupoevr: "/grupo-evr"' src/lib/subdomain.ts
+          test -f src/routes/grupo-evr.index.tsx
+
+      - name: Build current main front
+        env:
+          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -f .output/server/index.mjs
+          test -d .output/public
+          tar -czf /tmp/grupoevr-release.tgz .output scripts package.json package-lock.json
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+
+      - name: Upload release
+        run: scp /tmp/grupoevr-release.tgz "$VPS_USER@$VPS_HOST:/tmp/grupoevr-release.tgz"
+
+      - name: Deploy isolated runtime and exact Traefik router
+        id: deploy
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
+          set -euo pipefail
+          release="/var/www/impulsionando-core/releases/grupoevr-$RELEASE_SHA"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.grupoevr.yml
+          envfile=/etc/impulsionando-core.env
+          sudo test -f "$base"
+          sudo test -f "$envfile"
+          sudo mkdir -p "$release"
+          sudo tar -xzf /tmp/grupoevr-release.tgz -C "$release"
+          rm -f /tmp/grupoevr-release.tgz
+          sudo test -f "$release/.output/server/index.mjs"
+          sudo docker inspect impulsionando-core >/dev/null
+          image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core)"
+          test -n "$image"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<YAML
+          services:
+            impulsionando-grupoevr:
+              image: $image
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              volumes:
+                - $release/.output:/app/.output:ro
+                - $release/scripts:/app/scripts:ro
+              command: ["node", "scripts/start-core-runtime.mjs"]
+              environment:
+                NODE_ENV: production
+                HOST: 0.0.0.0
+                PORT: 3000
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.grupoevr.entrypoints: websecure
+                traefik.http.routers.grupoevr.rule: "Host(\`$DOMAIN\`)"
+                traefik.http.routers.grupoevr.service: grupoevr
+                traefik.http.routers.grupoevr.tls: "true"
+                traefik.http.routers.grupoevr.tls.certresolver: letsencrypt
+                traefik.http.routers.grupoevr.priority: "9900"
+                traefik.http.services.grupoevr.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-grupoevr
+          for i in $(seq 1 45); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-grupoevr 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then
+              code="$(curl -sS -H "Host: $DOMAIN" -o /tmp/grupoevr-origin -w '%{http_code}' --max-time 8 "http://$ip:3000/" || true)"
+            fi
+            [ "$code" = 200 ] && break
+            [ "$i" -lt 45 ] || { sudo docker logs --tail 160 impulsionando-grupoevr || true; exit 60; }
+            sleep 2
+          done
+          grep -qi 'Grupo EVR' /tmp/grupoevr-origin || { echo '::error::Grupo EVR content not found at container origin'; exit 61; }
+          origin_code="$(curl -k -sS --resolve "$DOMAIN:443:127.0.0.1" -H 'Accept: text/html' -o /tmp/grupoevr-traefik -w '%{http_code}' --max-time 15 "https://$DOMAIN/" || true)"
+          [ "$origin_code" = 200 ] || { echo "::error::Traefik origin HTTP=$origin_code"; exit 62; }
+          grep -qi 'Grupo EVR' /tmp/grupoevr-traefik || { echo '::error::Grupo EVR content not found through Traefik'; exit 63; }
+          echo "ORIGIN_AND_TRAEFIK=PASS"
+          REMOTE
+
+      - name: Validate public HTTPS
+        id: public
         shell: bash
         run: |
           set +e
-          result='STARTED'
-          detail=''
-          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then
-            result='FAIL'
-            detail='missing Cloudflare repository secrets'
-          else
-            zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-            curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/dns.json
-            if [ $? -ne 0 ] || ! jq -e '.success == true' /tmp/dns.json >/dev/null 2>&1; then
-              result='FAIL'
-              detail='Cloudflare lookup failed'
-            else
-              id="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/dns.json | head -n1)"
-              payload="$(jq -nc --arg name "$DOMAIN" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}')"
-              if [ -n "$id" ]; then
-                curl -fsS -X PUT -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records/$id" -o /tmp/upsert.json
-              else
-                curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$payload" "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" -o /tmp/upsert.json
-              fi
-              if [ $? -ne 0 ] || ! jq -e '.success == true' /tmp/upsert.json >/dev/null 2>&1; then
-                result='FAIL'
-                detail='Cloudflare upsert failed'
-              else
-                rid="$(jq -r '.result.id // empty' /tmp/upsert.json)"
-                rcontent="$(jq -r '.result.content // empty' /tmp/upsert.json)"
-                rproxied="$(jq -r '.result.proxied // empty' /tmp/upsert.json)"
-                result='DNS_API_OK'
-                detail="record_id=$rid content=$rcontent proxied=$rproxied"
-                code="$(curl -sS -L -o /tmp/page -w '%{http_code}' --max-time 8 "https://$DOMAIN/" || true)"
-                if [ "$code" = 200 ]; then
-                  result='HTTPS_OK'
-                  detail="$detail http=200"
-                else
-                  detail="$detail http=$code"
-                fi
-              fi
+          code=000
+          for i in $(seq 1 30); do
+            code="$(curl -sS -L -H 'Cache-Control: no-cache' -o /tmp/grupoevr-public -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
+            if [ "$code" = 200 ] && grep -qi 'Grupo EVR' /tmp/grupoevr-public; then
+              echo 'result=HTTPS_OK' >> "$GITHUB_OUTPUT"
+              echo 'detail=public HTTP 200 with Grupo EVR content' >> "$GITHUB_OUTPUT"
+              exit 0
             fi
-          fi
-          echo "result=$result" >> "$GITHUB_OUTPUT"
-          echo "detail=$detail" >> "$GITHUB_OUTPUT"
+            sleep 4
+          done
+          echo 'result=FAIL' >> "$GITHUB_OUTPUT"
+          echo "detail=public HTTP $code" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Persist verified Core status
+        if: steps.public.outputs.result == 'HTTPS_OK' && env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != ''
+        run: |
+          set -euo pipefail
+          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          payload="$(jq -nc --arg now "$now" '{dns_status:"active",ssl_status:"issued",dns_last_checked_at:$now,provisioned_at:$now,dns_error:null}')"
+          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$payload" "$SUPABASE_URL/rest/v1/core_tenant_identity?subdomain=eq.grupoevr"
+          endpoint_payload='{"status":"active","monitoring_enabled":true,"is_primary":true}'
+          curl -fsS -X PATCH -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: return=minimal' --data "$endpoint_payload" "$SUPABASE_URL/rest/v1/core_company_endpoints?endpoint_kind=eq.public_site&url=eq.https%3A%2F%2Fgrupoevr.impulsionando.com.br"
 
       - name: Report result on this PR
         if: always()
         run: |
           gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
-            -f body="GRUPOEVR_PR_PUBLISH: ${{ steps.publish.outputs.result }} - ${{ steps.publish.outputs.detail }}"
-
-      - name: Fail only on Cloudflare API failure
-        if: steps.publish.outputs.result == 'FAIL'
-        run: exit 1
+            -f body="GRUPOEVR_RUNTIME_PUBLISH: ${{ steps.public.outputs.result || 'FAIL' }} - ${{ steps.public.outputs.detail || 'deployment failed before public validation' }}"
