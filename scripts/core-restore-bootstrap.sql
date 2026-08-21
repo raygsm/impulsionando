@@ -1,3 +1,5 @@
+create extension if not exists btree_gist;
+
 create schema if not exists auth;
 create table if not exists auth.users (
   instance_id uuid,
