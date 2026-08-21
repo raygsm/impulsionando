@@ -44,32 +44,28 @@ jobs:
             [ -n "${!v}" ] || { echo "::error::Missing required secret: $v"; exit 1; }
           done
 
-      - name: Install PostgreSQL 17 client
-        run: |
-          sudo install -d /usr/share/postgresql-common/pgdg
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo $VERSION_CODENAME)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17
-
       - name: Create read-only Core backup artifact
         id: dump
-        env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p backup
           backup_name="core-$(date -u +%Y%m%dT%H%M%SZ).dump"
-          user="postgres.${PROJECT_REF}"
-          if ! pg_dump -h "$PGHOST_SOURCE" -p 5432 -U "$user" -d postgres \
-            --format=custom --no-owner --no-privileges \
-            --schema=public --schema=private \
-            -f "backup/$backup_name"; then
-            echo "Primary project-qualified DB user failed; retrying canonical postgres identity."
-            pg_dump -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host \
+            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v "$PWD/backup:/backup" postgres:17 \
+            pg_dump -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres \
               --format=custom --no-owner --no-privileges \
               --schema=public --schema=private \
-              -f "backup/$backup_name"
+              -f "/backup/$backup_name"; then
+            echo "Project-qualified DB user failed; retrying canonical postgres identity."
+            docker run --rm --network host \
+              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -v "$PWD/backup:/backup" postgres:17 \
+              pg_dump -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
+                --format=custom --no-owner --no-privileges \
+                --schema=public --schema=private \
+                -f "/backup/$backup_name"
           fi
           test -s "backup/$backup_name"
           sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')
@@ -79,20 +75,20 @@ jobs:
           echo "size=$size" >> "$GITHUB_OUTPUT"
 
       - name: Restore into disposable PostgreSQL 17
-        env:
-          PGPASSWORD: restore-test
         run: |
           set -euo pipefail
-          pg_restore -h localhost -p 55433 -U postgres -d restore \
-            --no-owner --no-privileges --exit-on-error \
-            "backup/${{ steps.dump.outputs.backup_name }}"
+          docker run --rm --network host \
+            -e PGPASSWORD=restore-test \
+            -v "$PWD/backup:/backup:ro" postgres:17 \
+            pg_restore -h 127.0.0.1 -p 55433 -U postgres -d restore \
+              --no-owner --no-privileges --exit-on-error \
+              "/backup/${{ steps.dump.outputs.backup_name }}"
 
       - name: Validate restored Core invariants
-        env:
-          PGPASSWORD: restore-test
         run: |
           set -euo pipefail
-          psql -h localhost -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 <<'SQL'
+          docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 <<'SQL'
           DO $verify$
           BEGIN
             IF to_regclass('public.companies') IS NULL THEN RAISE EXCEPTION 'companies missing after restore'; END IF;
@@ -104,29 +100,48 @@ jobs:
           END
           $verify$;
           SQL
-          companies=$(psql -h localhost -p 55433 -U postgres -d restore -tAc "select count(*) from public.companies")
+          companies=$(docker run --rm --network host -e PGPASSWORD=restore-test postgres:17 \
+            psql -h 127.0.0.1 -p 55433 -U postgres -d restore -tAc "select count(*) from public.companies")
           [ "$companies" -gt 0 ] || { echo "::error::Restored companies table is unexpectedly empty"; exit 1; }
           echo "Restored Core company rows: $companies"
 
       - name: Register verified backup evidence in production Core
         env:
-          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           BACKUP_NAME: ${{ steps.dump.outputs.backup_name }}
           BACKUP_SHA: ${{ steps.dump.outputs.sha }}
           BACKUP_SIZE: ${{ steps.dump.outputs.size }}
         run: |
           set -euo pipefail
-          user="postgres.${PROJECT_REF}"
-          sql="insert into public.core_backup_evidence(status,source,backup_name,raw_size,raw_sha,details) values ('success','github_core_backup_restore', :'backup_name', :'backup_size'::bigint, :'backup_sha', jsonb_build_object('restore_verified',true,'workflow_run', :'run_id','postgres_version','17')); update public.core_go_live_checks set status='passed', evidence_ref='core_backup_evidence:' || (select id::text from public.core_backup_evidence where raw_sha=:'backup_sha' order by created_at desc limit 1), notes='Backup Core criado e restaurado em banco descartável com invariantes validados.', last_checked_at=now() where check_key='backup_restore_24h';"
-          if ! psql -h "$PGHOST_SOURCE" -p 5432 -U "$user" -d postgres -v ON_ERROR_STOP=1 \
-            -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
-            -c "$sql"; then
-            psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+          cat > /tmp/register-evidence.sql <<'SQL'
+          insert into public.core_backup_evidence(status,source,backup_name,raw_size,raw_sha,details)
+          values ('success','github_core_backup_restore', :'backup_name', :'backup_size'::bigint, :'backup_sha',
+                  jsonb_build_object('restore_verified',true,'workflow_run', :'run_id','postgres_version','17'));
+          update public.core_go_live_checks
+          set status='passed',
+              evidence_ref='core_backup_evidence:' || (
+                select id::text from public.core_backup_evidence
+                where raw_sha=:'backup_sha' order by created_at desc limit 1
+              ),
+              notes='Backup Core criado e restaurado em banco descartável com invariantes validados.',
+              last_checked_at=now()
+          where check_key='backup_restore_24h';
+          SQL
+          source_user="postgres.${PROJECT_REF}"
+          if ! docker run --rm --network host \
+            -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+            -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
+            psql -h "$PGHOST_SOURCE" -p 5432 -U "$source_user" -d postgres -v ON_ERROR_STOP=1 \
               -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
-              -c "$sql"
+              -f /register-evidence.sql; then
+            docker run --rm --network host \
+              -e PGPASSWORD="$PGPASSWORD_SOURCE" \
+              -v /tmp/register-evidence.sql:/register-evidence.sql:ro postgres:17 \
+              psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+                -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
+                -f /register-evidence.sql
           fi
 
-      - name: Upload encrypted-retention-safe metadata only
+      - name: Write verification metadata only
         if: always()
         run: |
           printf 'backup_name=%s\nsha256=%s\nsize=%s\n' \
