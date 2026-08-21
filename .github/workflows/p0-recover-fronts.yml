@@ -30,43 +30,44 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Inspect Nginx TLS and Core reachability
+      - name: Inspect Core 500 root cause
         run: |
           set -euo pipefail
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' | tee /tmp/p0-report.txt
           set -euo pipefail
-          echo '=== PORTS ==='
-          sudo ss -ltnp | grep -E ':(80|443|3000)\b' || true
-          echo '=== NGINX TEST ==='
-          sudo nginx -t || true
-          echo '=== NGINX RELEVANT CONFIG ==='
-          sudo nginx -T 2>&1 | grep -E 'server_name|listen |proxy_pass|ssl_certificate' || true
-          echo '=== SITES ENABLED ==='
-          sudo find /etc/nginx/sites-enabled -maxdepth 1 -type l -printf '%f -> %l\n' 2>/dev/null || true
-          echo '=== LETSENCRYPT CERTS ==='
-          sudo find /etc/letsencrypt/live -maxdepth 2 -type f -o -type l 2>/dev/null | sed -n '1,120p' || true
-          echo '=== DOCKER IPS ==='
-          for c in $(sudo docker ps --format '{{.Names}}'); do
-            case "$c" in *impulsionando-core*|impulsionando-core)
-              ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$c" 2>/dev/null || true)"
-              echo "$c IP=$ip"
-              ;;
-            esac
+          echo '=== HOST NODE PROCESS ==='
+          pid="$(sudo ss -ltnp | awk '/127.0.0.1:3000/ {match($0,/pid=([0-9]+)/,a); if(a[1]) print a[1]}' | head -n1)"
+          echo "PID=$pid"
+          if [ -n "$pid" ]; then
+            sudo ps -fp "$pid" || true
+            echo -n 'CWD='; sudo readlink -f "/proc/$pid/cwd" || true
+            echo -n 'CMD='; sudo tr '\0' ' ' < "/proc/$pid/cmdline"; echo
+            echo 'ENV_KEYS:'
+            sudo tr '\0' '\n' < "/proc/$pid/environ" | cut -d= -f1 | grep -E '^(NODE_ENV|HOST|PORT|VITE_|SUPABASE|PUBLIC|APP|SITE|BASE|URL)' || true
+          fi
+          echo '=== SYSTEMD CANDIDATES ==='
+          sudo systemctl list-units --type=service --all | grep -Ei 'impulsion|core|node|pm2' || true
+          echo '=== HOST NODE DIRECT ==='
+          for host in impulsionando.com.br chrismed.impulsionando.com.br grupoevr.impulsionando.com.br wmp.impulsionando.com.br; do
+            code="$(curl -sS -o /tmp/hostbody -w '%{http_code}' -H "Host: $host" --max-time 8 http://127.0.0.1:3000/ || true)"
+            echo "$host HOST_NODE=$code BODY=$(head -c 180 /tmp/hostbody 2>/dev/null | tr '\n' ' ')"
           done
-          echo '=== CORE DIRECT TESTS ==='
-          for c in $(sudo docker ps --format '{{.Names}}'); do
-            case "$c" in *impulsionando-core*|impulsionando-core)
-              ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$c" 2>/dev/null || true)"
-              [ -n "$ip" ] || continue
-              code="$(curl -sS -o /dev/null -w '%{http_code}' -H 'Host: chrismed.impulsionando.com.br' --max-time 8 "http://$ip:3000/" || true)"
-              echo "$c DIRECT=$code"
-              ;;
-            esac
+          echo '=== DOCKER DIRECT + LOG TAIL ==='
+          for c in impulsionando-core hostinger-impulsionando-core-multitenant-1 hostinger-impulsionando-core-universal-front-1; do
+            sudo docker inspect "$c" >/dev/null 2>&1 || continue
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$c" 2>/dev/null || true)"
+            code="$(curl -sS -o /tmp/body -w '%{http_code}' -H 'Host: chrismed.impulsionando.com.br' --max-time 8 "http://$ip:3000/" || true)"
+            echo "$c DIRECT=$code BODY=$(head -c 220 /tmp/body 2>/dev/null | tr '\n' ' ')"
+            echo "--- LOGS $c ---"
+            sudo docker logs --tail 80 "$c" 2>&1 || true
           done
+          echo '=== NGINX ACCESS/ERROR TAIL ==='
+          sudo tail -n 80 /var/log/nginx/error.log 2>/dev/null || true
+          sudo tail -n 40 /var/log/nginx/access.log 2>/dev/null || true
           REMOTE
 
       - name: Report inspection
         if: always()
         run: |
-          body="$(printf 'P0_NGINX_INSPECTION\n\n```text\n%s\n```\n' "$(tail -n 160 /tmp/p0-report.txt 2>/dev/null || true)")"
+          body="$(printf 'P0_CORE_500_INSPECTION\n\n```text\n%s\n```\n' "$(tail -n 260 /tmp/p0-report.txt 2>/dev/null || true)")"
           gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="$body"
