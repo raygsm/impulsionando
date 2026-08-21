@@ -15,7 +15,7 @@ jobs:
   recover:
     if: github.head_ref == 'ops/p0-recover-fronts-20260821'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -25,79 +25,48 @@ jobs:
       - name: Configure SSH
         run: |
           set -euo pipefail
-          for v in VPS_HOST VPS_USER VPS_SSH_KEY; do test -n "${!v}" || { echo "::error::Missing $v"; exit 2; }; done
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Diagnose and repair edge/runtime
-        id: repair
+      - name: Inspect Nginx TLS and Core reachability
         run: |
           set -euo pipefail
           ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' | tee /tmp/p0-report.txt
           set -euo pipefail
-          echo '=== DISK ==='
-          df -h /
-          echo '=== PORTS 80 443 ==='
-          sudo ss -ltnp | grep -E ':(80|443)\b' || true
-          echo '=== RUNNING CONTAINERS ==='
-          sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
-          echo '=== ALL CONTAINERS ==='
-          sudo docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
-
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          if [ -f "$base" ]; then
-            echo '=== COMPOSE SERVICES ==='
-            cd /opt/impulsionando/deploy/hostinger
-            sudo docker compose -f "$base" config --services | tee /tmp/services.txt
-
-            if grep -Fxq traefik /tmp/services.txt; then
-              echo '=== ENSURE TRAEFIK ==='
-              sudo docker compose -f "$base" up -d traefik
-            fi
-            if grep -Fxq impulsionando-core /tmp/services.txt; then
-              echo '=== ENSURE CORE ==='
-              sudo docker compose -f "$base" up -d --no-build impulsionando-core
-            fi
-            if grep -Fxq impulsionando-core-multitenant /tmp/services.txt; then
-              echo '=== ENSURE MULTITENANT ==='
-              sudo docker compose -f "$base" up -d --no-build impulsionando-core-multitenant
-            fi
-          fi
-
-          echo '=== TRY START STOPPED TRAEFIK-LIKE CONTAINER ==='
-          mapfile -t stopped_edge < <(sudo docker ps -a --filter status=exited --format '{{.Names}}' | grep -Ei 'traefik|proxy|edge' || true)
-          for c in "${stopped_edge[@]}"; do echo "START $c"; sudo docker start "$c" || true; done
-
-          echo '=== AFTER PORTS ==='
-          sleep 5
-          sudo ss -ltnp | grep -E ':(80|443)\b' || true
-          echo '=== AFTER CONTAINERS ==='
-          sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
-
-          echo '=== LOCAL HOST TESTS ==='
-          for host in impulsionando.com.br chrismed.impulsionando.com.br grupoevr.impulsionando.com.br wmp.impulsionando.com.br; do
-            code="$(curl -k -sS -o /tmp/local -w '%{http_code}' --resolve "$host:443:127.0.0.1" "https://$host/" --max-time 12 || true)"
-            echo "$host LOCAL_HTTPS=$code"
+          echo '=== PORTS ==='
+          sudo ss -ltnp | grep -E ':(80|443|3000)\b' || true
+          echo '=== NGINX TEST ==='
+          sudo nginx -t || true
+          echo '=== NGINX RELEVANT CONFIG ==='
+          sudo nginx -T 2>&1 | grep -E 'server_name|listen |proxy_pass|ssl_certificate' || true
+          echo '=== SITES ENABLED ==='
+          sudo find /etc/nginx/sites-enabled -maxdepth 1 -type l -printf '%f -> %l\n' 2>/dev/null || true
+          echo '=== LETSENCRYPT CERTS ==='
+          sudo find /etc/letsencrypt/live -maxdepth 2 -type f -o -type l 2>/dev/null | sed -n '1,120p' || true
+          echo '=== DOCKER IPS ==='
+          for c in $(sudo docker ps --format '{{.Names}}'); do
+            case "$c" in *impulsionando-core*|impulsionando-core)
+              ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$c" 2>/dev/null || true)"
+              echo "$c IP=$ip"
+              ;;
+            esac
+          done
+          echo '=== CORE DIRECT TESTS ==='
+          for c in $(sudo docker ps --format '{{.Names}}'); do
+            case "$c" in *impulsionando-core*|impulsionando-core)
+              ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$c" 2>/dev/null || true)"
+              [ -n "$ip" ] || continue
+              code="$(curl -sS -o /dev/null -w '%{http_code}' -H 'Host: chrismed.impulsionando.com.br' --max-time 8 "http://$ip:3000/" || true)"
+              echo "$c DIRECT=$code"
+              ;;
+            esac
           done
           REMOTE
 
-      - name: Public validation
-        id: public
-        run: |
-          set +e
-          result=''
-          for host in impulsionando.com.br chrismed.impulsionando.com.br grupoevr.impulsionando.com.br wmp.impulsionando.com.br; do
-            code="$(curl -sS -L -o /tmp/page -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 20 "https://$host/?p0=$(date +%s)" || true)"
-            echo "$host PUBLIC=$code" | tee -a /tmp/public-report.txt
-            result="$result $host=$code"
-          done
-          echo "result=$result" >> "$GITHUB_OUTPUT"
-
-      - name: Report result
+      - name: Report inspection
         if: always()
         run: |
-          tail -n 80 /tmp/p0-report.txt > /tmp/p0-tail.txt || true
-          body="$(printf 'P0_FRONT_RECOVERY\n\nPublic:%s\n\n```text\n%s\n```\n' '${{ steps.public.outputs.result }}' "$(cat /tmp/p0-tail.txt 2>/dev/null || true)")"
+          body="$(printf 'P0_NGINX_INSPECTION\n\n```text\n%s\n```\n' "$(tail -n 160 /tmp/p0-report.txt 2>/dev/null || true)")"
           gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="$body"
