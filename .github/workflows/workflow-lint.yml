@@ -34,7 +34,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
+            mapfile -t files < <(git diff --diff-filter=ACMRT --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
           else
             mapfile -t files < <(find .github/workflows -maxdepth 1 -type f -name '*.yml' | sort)
           fi
@@ -47,7 +47,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
+            mapfile -t files < <(git diff --diff-filter=ACMRT --name-only "$BASE_SHA" "$HEAD_SHA" -- '.github/workflows/*.yml')
           else
             mapfile -t files < <(find .github/workflows -maxdepth 1 -type f -name '*.yml' | sort)
           fi
