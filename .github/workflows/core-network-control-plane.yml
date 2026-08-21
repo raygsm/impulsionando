@@ -1,5 +1,6 @@
 name: Core network control plane
 
+# Recovery trigger refreshed after VPS disk expansion on 2026-08-21.
 on:
   push:
     branches: [main]
@@ -190,8 +191,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # checkout/build steps can legitimately modify ignored/untracked workspace files.
-          # Never rebase a dirty Actions workspace; reset it to origin/main before writing proof.
           git reset --hard HEAD
           git clean -fd
           git fetch origin main
