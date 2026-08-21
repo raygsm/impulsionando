@@ -67,6 +67,24 @@ export async function assignProfile(opts: {
     is_active: true,
   });
   if (error) throw error;
+
+  // Historical permission suites expect a commercially active company context.
+  // Seed an active trial so user_has_permission() exercises the intended RLS path
+  // without requiring a real subscription or external billing side effect.
+  const { error: trialError } = await admin.from("trial_subscriptions").insert({
+    company_id: opts.companyId,
+    user_id: opts.userId,
+    contact_name: opts.email.split("@")[0],
+    contact_company: `E2E ${opts.companyId.slice(0, 8)}`,
+    contact_email: opts.email,
+    contact_whatsapp: "+5500000000000",
+    chosen_plan: "essencial",
+    status: "ativo",
+    started_at: new Date().toISOString(),
+    ends_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    source: "e2e-helper",
+  });
+  if (trialError) throw trialError;
 }
 
 export async function createCompany(name: string) {
@@ -92,7 +110,9 @@ export async function deleteCompany(id: string) {
   // companies. Keep defensive cleanup for historical suites created before
   // synthetic companies were marked as demo.
   await deleteRows("user_roles", id);
-  await deleteRows("core_service_access_events", id);
+  await deleteRows("trial_subscriptions", id);
+  // core_service_access_events is an immutable ledger and intentionally cannot
+  // be deleted through service_role. Never weaken that guarantee for teardown.
   await deleteRows("core_service_access_state", id);
   await deleteRows("communication_tenants", id);
   await deleteRows("core_client_enrollment", id);
