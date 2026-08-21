@@ -1,127 +1,15 @@
-# trigger: 2026-08-21T01:56:30-03:00
-name: CSI Finalize
+name: CSI Legacy Final Guard
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/csi-finalize.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: csi-finalize
-  cancel-in-progress: true
-
 jobs:
-  publish:
+  guard:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      DOMAIN: csi.impulsionando.com.br
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Build current CSI front
-        env:
-          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
-        run: |
-          set -euo pipefail
-          npm ci --no-audit --no-fund
-          npm run build
-          test -f .output/server/index.mjs
-          test -d .output/public
-          printf '%s' "$GITHUB_SHA" > .output/public/csi-final-sha.txt
-      - name: Configure SSH
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-      - name: Upload CSI build
-        run: |
-          set -euo pipefail
-          tar -czf /tmp/csi-final.tgz .output scripts
-          scp /tmp/csi-final.tgz "$VPS_USER@$VPS_HOST:/tmp/csi-final.tgz"
-      - name: Promote on known-good Core runtime
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" "RELEASE_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
-          set -Eeuo pipefail
-          release="/var/www/impulsionando-core/releases/csi-final-$RELEASE_SHA"
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.csi-final.yml
-          base_image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core-universal-fastfront 2>/dev/null || true)"
-          if [ -z "$base_image" ]; then base_image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core 2>/dev/null || true)"; fi
-          test -n "$base_image"
-          sudo rm -rf "$release" && sudo mkdir -p "$release"
-          sudo tar -xzf /tmp/csi-final.tgz -C "$release"
-          rm -f /tmp/csi-final.tgz
-          printf 'node_modules\n' | sudo tee "$release/.dockerignore" >/dev/null
-          cat > /tmp/Dockerfile.csi-final <<'DOCKERFILE'
-          ARG BASE_IMAGE
-          FROM ${BASE_IMAGE}
-          WORKDIR /app
-          COPY .output ./.output
-          COPY scripts ./scripts
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-          sudo docker build --build-arg "BASE_IMAGE=$base_image" -f /tmp/Dockerfile.csi-final -t impulsionando-core:csi-final-current "$release"
-          cd /opt/impulsionando/deploy/hostinger
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core-csi-final:
-              image: impulsionando-core:csi-final-current
-              env_file:
-                - /etc/impulsionando-core.env
-              restart: unless-stopped
-              labels:
-                traefik.enable: "true"
-                traefik.http.routers.csi-final.entrypoints: websecure
-                traefik.http.routers.csi-final.rule: Host(`csi.impulsionando.com.br`) && !PathPrefix(`/api`)
-                traefik.http.routers.csi-final.service: impulsionando-core-csi-final
-                traefik.http.routers.csi-final.tls: "true"
-                traefik.http.routers.csi-final.tls.certresolver: letsencrypt
-                traefik.http.routers.csi-final.priority: "9000"
-                traefik.http.services.impulsionando-core-csi-final.loadbalancer.server.port: "3000"
-          YAML
-          sudo docker compose -f "$base" -f "$override" config -q
-          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core-csi-final
-          for i in $(seq 1 60); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core-csi-final 2>/dev/null || true)"
-            code=000
-            if [ -n "$ip" ]; then code="$(curl -sS -H 'Host: csi.impulsionando.com.br' -o /tmp/csi-origin -w '%{http_code}' --max-time 10 "http://$ip:3000/" || true)"; fi
-            [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/csi-origin && break
-            [ "$i" -lt 60 ] || { sudo docker logs --tail 200 impulsionando-core-csi-final || true; exit 61; }
-            sleep 2
-          done
-          REMOTE
-      - name: Validate CSI publicly
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 40); do
-            code="$(curl -sS -L -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/public -w '%{http_code}' --max-time 20 "https://$DOMAIN/?sha=$GITHUB_SHA" || true)"
-            echo "CSI_PUBLIC attempt=$i HTTP=$code"
-            if [ "$code" = 200 ] && grep -Eq 'CSI Invest|Patrimônio não é um saldo|Private Intelligence' /tmp/public; then echo 'CSI_PUBLIC=PASS'; exit 0; fi
-            sleep 3
-          done
-          exit 70
+      - run: |
+          echo 'Legacy CSI final publisher is retired.'
+          echo 'Production Front is the only frontend publication authority.'
