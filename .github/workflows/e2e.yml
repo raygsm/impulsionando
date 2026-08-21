@@ -85,14 +85,17 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: bunx playwright install-deps chromium firefox webkit
 
-      - name: Run CHRISMED PR suite (all engines · desktop+mobile)
+      - name: Run Core PR suite (all engines · desktop+mobile)
         if: github.event_name == 'pull_request'
         env:
           E2E_BASE_URL: ""
         run: >-
           bun run test:e2e --
-          e2e/chrismed-header-fixed.spec.ts
-          e2e/chrismed-oliver-only.spec.ts
+          e2e/admin-master-hub-automacao-filters.spec.ts
+          e2e/admin-master-hub-automacao-links.spec.ts
+          e2e/admin-vitrine-diagnostico.spec.ts
+          e2e/checkout-navegacao-fallback-a11y.spec.ts
+          e2e/checkout-planos.spec.ts
           --shard=${{ matrix.shard }}
 
       - name: Run full ecosystem suite on main/manual
@@ -189,7 +192,7 @@ jobs:
     needs: playwright
     runs-on: ubuntu-latest
     steps:
-      - name: Consolidate full-suite result
+      - name: Consolidate Core suite result
         env:
           SHARDS_RESULT: ${{ needs.playwright.result }}
         run: |
