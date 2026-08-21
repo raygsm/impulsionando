@@ -1,0 +1,143 @@
+name: Core Backup & Restore
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/core-backup-restore.yml"
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+concurrency:
+  group: core-backup-restore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backup-restore:
+    name: Production Core backup -> disposable restore
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      restore_db:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: restore-test
+          POSTGRES_DB: restore
+        ports:
+          - 55433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d restore"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST_SOURCE: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPASSWORD_SOURCE: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate source connection secrets
+        run: |
+          set -euo pipefail
+          for v in PGHOST_SOURCE PGPASSWORD_SOURCE PROJECT_REF; do
+            [ -n "${!v}" ] || { echo "::error::Missing required secret: $v"; exit 1; }
+          done
+
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo $VERSION_CODENAME)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Create read-only Core backup artifact
+        id: dump
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          backup_name="core-$(date -u +%Y%m%dT%H%M%SZ).dump"
+          user="postgres.${PROJECT_REF}"
+          if ! pg_dump -h "$PGHOST_SOURCE" -p 5432 -U "$user" -d postgres \
+            --format=custom --no-owner --no-privileges \
+            --schema=public --schema=private \
+            -f "backup/$backup_name"; then
+            echo "Primary project-qualified DB user failed; retrying canonical postgres identity."
+            pg_dump -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres \
+              --format=custom --no-owner --no-privileges \
+              --schema=public --schema=private \
+              -f "backup/$backup_name"
+          fi
+          test -s "backup/$backup_name"
+          sha=$(sha256sum "backup/$backup_name" | awk '{print $1}')
+          size=$(stat -c%s "backup/$backup_name")
+          echo "backup_name=$backup_name" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "size=$size" >> "$GITHUB_OUTPUT"
+
+      - name: Restore into disposable PostgreSQL 17
+        env:
+          PGPASSWORD: restore-test
+        run: |
+          set -euo pipefail
+          pg_restore -h localhost -p 55433 -U postgres -d restore \
+            --no-owner --no-privileges --exit-on-error \
+            "backup/${{ steps.dump.outputs.backup_name }}"
+
+      - name: Validate restored Core invariants
+        env:
+          PGPASSWORD: restore-test
+        run: |
+          set -euo pipefail
+          psql -h localhost -p 55433 -U postgres -d restore -v ON_ERROR_STOP=1 <<'SQL'
+          DO $verify$
+          BEGIN
+            IF to_regclass('public.companies') IS NULL THEN RAISE EXCEPTION 'companies missing after restore'; END IF;
+            IF to_regclass('public.user_roles') IS NULL THEN RAISE EXCEPTION 'user_roles missing after restore'; END IF;
+            IF to_regclass('public.core_go_live_checks') IS NULL THEN RAISE EXCEPTION 'core_go_live_checks missing after restore'; END IF;
+            IF to_regclass('public.core_service_access_state') IS NULL THEN RAISE EXCEPTION 'core_service_access_state missing after restore'; END IF;
+            IF to_regclass('public.message_outbox') IS NULL THEN RAISE EXCEPTION 'message_outbox missing after restore'; END IF;
+            IF to_regclass('public.core_backup_evidence') IS NULL THEN RAISE EXCEPTION 'core_backup_evidence missing after restore'; END IF;
+          END
+          $verify$;
+          SQL
+          companies=$(psql -h localhost -p 55433 -U postgres -d restore -tAc "select count(*) from public.companies")
+          [ "$companies" -gt 0 ] || { echo "::error::Restored companies table is unexpectedly empty"; exit 1; }
+          echo "Restored Core company rows: $companies"
+
+      - name: Register verified backup evidence in production Core
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          BACKUP_NAME: ${{ steps.dump.outputs.backup_name }}
+          BACKUP_SHA: ${{ steps.dump.outputs.sha }}
+          BACKUP_SIZE: ${{ steps.dump.outputs.size }}
+        run: |
+          set -euo pipefail
+          user="postgres.${PROJECT_REF}"
+          sql="insert into public.core_backup_evidence(status,source,backup_name,raw_size,raw_sha,details) values ('success','github_core_backup_restore', :'backup_name', :'backup_size'::bigint, :'backup_sha', jsonb_build_object('restore_verified',true,'workflow_run', :'run_id','postgres_version','17')); update public.core_go_live_checks set status='passed', evidence_ref='core_backup_evidence:' || (select id::text from public.core_backup_evidence where raw_sha=:'backup_sha' order by created_at desc limit 1), notes='Backup Core criado e restaurado em banco descartável com invariantes validados.', last_checked_at=now() where check_key='backup_restore_24h';"
+          if ! psql -h "$PGHOST_SOURCE" -p 5432 -U "$user" -d postgres -v ON_ERROR_STOP=1 \
+            -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
+            -c "$sql"; then
+            psql -h "$PGHOST_SOURCE" -p 5432 -U postgres -d postgres -v ON_ERROR_STOP=1 \
+              -v backup_name="$BACKUP_NAME" -v backup_size="$BACKUP_SIZE" -v backup_sha="$BACKUP_SHA" -v run_id="$GITHUB_RUN_ID" \
+              -c "$sql"
+          fi
+
+      - name: Upload encrypted-retention-safe metadata only
+        if: always()
+        run: |
+          printf 'backup_name=%s\nsha256=%s\nsize=%s\n' \
+            '${{ steps.dump.outputs.backup_name }}' '${{ steps.dump.outputs.sha }}' '${{ steps.dump.outputs.size }}' \
+            > backup-metadata.txt
+
+      - name: Upload verification metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-backup-restore-metadata
+          path: backup-metadata.txt
+          retention-days: 30
+          if-no-files-found: error
