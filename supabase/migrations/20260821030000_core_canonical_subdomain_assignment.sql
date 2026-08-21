@@ -209,7 +209,7 @@ begin
     nullif(regexp_replace(coalesce(p_document,''),'[^0-9]','','g'),''),
     lower(trim(v_email)),
     nullif(trim(p_phone),''),
-    false,true,false,'active','tenant'
+    false,true,false,'active','real'
   ) returning * into v_company;
 
   insert into public.user_roles(user_id,role,company_id)
