@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   rls-suite:
-    name: Security scan + RLS regression
+    name: Security scan + Core RLS regression
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -53,26 +53,23 @@ jobs:
           set -o pipefail
           bunx supabase@latest --version
           bunx supabase@latest link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
-          # ERROR level fails the job; WARNING is informational.
           bunx supabase@latest db lint --linked --level error --fail-on error \
             2>&1 | tee test-results/db-lint-errors.txt
           bunx supabase@latest db lint --linked --level warning --fail-on none \
             2>&1 | tee test-results/db-lint-warn.txt || true
 
-      - name: RLS regression suite (vitest)
+      - name: Core RLS regression suite
         id: rls
         run: |
           set -o pipefail
-          schema_code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "$SUPABASE_URL/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY")
-          if [ "$schema_code" = "200" ]; then
-            suites=(tests/rls-permission-hardening.test.ts tests/rls-contab-rules-isolation.test.ts tests/rls-contracts-isolation.test.ts tests/rls-permissions.test.ts tests/rls-exports-isolation.test.ts tests/audit-denied-exports.test.ts)
-          else
-            echo "Core atual detectado (user_roles); executando contratos CHRISMED compatíveis."
-            suites=(tests/chrismed-booking-security.test.ts tests/chrismed-multiprofessional-migration.test.ts)
-          fi
+          suites=(
+            tests/rls-recent-hardening.test.ts
+            tests/storage-buckets-access.test.ts
+            tests/rls-contracts-isolation.test.ts
+          )
+          for suite in "${suites[@]}"; do
+            test -f "$suite" || { echo "::error::Missing ecosystem security suite: $suite"; exit 2; }
+          done
           bunx vitest run "${suites[@]}" \
             --reporter=verbose --reporter=junit \
             --outputFile=test-results/rls.junit.xml 2>&1 | tee test-results/rls.log
@@ -92,42 +89,17 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Security scan + RLS regression"
+            echo "## Security scan + Core RLS regression"
             echo "| Suite | Outcome |"
             echo "|---|---|"
             echo "| supabase db lint (error) | ${{ steps.linter.outcome }} |"
-            echo "| rls regression | ${{ steps.rls.outcome }} |"
+            echo "| Core RLS regression | ${{ steps.rls.outcome }} |"
             echo ""
             echo "### DB linter errors (tail)"
             echo '```'; tail -n 80 test-results/db-lint-errors.txt 2>/dev/null || echo "no output"; echo '```'
             echo "### RLS log (tail)"
             echo '```'; tail -n 120 test-results/rls.log 2>/dev/null || echo "no log"; echo '```'
-            echo "### Recent denials"
-            echo '```'; cat test-results/audit_tail.txt 2>/dev/null || echo "no snapshot"; echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload Security scan report (db lint)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-scan-report
-          path: |
-            test-results/db-lint-errors.txt
-            test-results/db-lint-warn.txt
-            test-results/audit_tail.txt
-          retention-days: 30
-          if-no-files-found: ignore
-
-      - name: Upload RLS test report (JUnit + log)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rls-test-report
-          path: |
-            test-results/rls.junit.xml
-            test-results/rls.log
-          retention-days: 30
-          if-no-files-found: ignore
 
       - name: Upload combined results
         if: always()
@@ -142,7 +114,6 @@ jobs:
         if: always()
         run: |
           fail=0
-          # The DB linter "error" run is required when the secrets are present.
           if [ "${{ steps.linter.outcome }}" = "failure" ]; then fail=1; fi
           if [ "${{ steps.rls.outcome }}" != "success" ]; then fail=1; fi
           test "$fail" = "0" || { echo "::error::security-rls failed"; exit 1; }
