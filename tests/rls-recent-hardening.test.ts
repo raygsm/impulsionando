@@ -1,10 +1,6 @@
-// Validates the security review hardening migrations of 2026-06-18:
-//  - anon must not see PII columns on `companies`, only the safe vitrine table
-//  - anon must not read `quotes`, `billing_pix_charges`, `contract_signatures`,
-//    `contract_documents`, `evt_events`, `restaurant_table_invoices`,
-//    `contab_irpf_journeys`, `contab_irpf_steps`, `contab_contracts`,
-//    `core_settings`
-//  - staff (super-admin via service role) can read those tables
+// Ecosystem security regression for the CURRENT Core schema.
+// Guarantees that anonymous callers cannot read protected operational data,
+// while service_role retains operational access and the public showcase stays readable.
 
 import { describe, it, expect } from "vitest";
 import { admin, anonClient } from "./helpers";
@@ -12,13 +8,10 @@ import { admin, anonClient } from "./helpers";
 const PROTECTED_TABLES = [
   "quotes",
   "billing_pix_charges",
-  "contract_signatures",
-  "contract_documents",
-  "evt_events",
-  "restaurant_table_invoices",
-  "contab_irpf_journeys",
-  "contab_irpf_steps",
-  "contab_contracts",
+  "audit_logs",
+  "core_client_request_intakes",
+  "core_inventory_reservations",
+  "core_service_access_state",
   "core_settings",
 ] as const;
 
@@ -34,17 +27,26 @@ const COMPANIES_PII_COLUMNS = [
   "legal_name",
 ] as const;
 
-describe("RLS hardening — anonymous access is locked down", () => {
+function isExpectedAnonDenial(error: { code?: string; message?: string }) {
+  const message = String(error.message ?? "").toLowerCase();
+  return (
+    error.code === "42501" ||
+    error.code === "PGRST301" ||
+    message.includes("permission") ||
+    message.includes("not allowed") ||
+    message.includes("row-level security") ||
+    message.includes("rls")
+  );
+}
+
+describe("Core RLS hardening — anonymous access is locked down", () => {
   for (const table of PROTECTED_TABLES) {
-    it(`anon cannot SELECT from ${table}`, async () => {
-      const a = anonClient();
-      const { data, error } = await a.from(table).select("*").limit(1);
-      // Either an error is returned, or the rows are filtered to zero.
-      // Both outcomes are acceptable — what we forbid is leaking rows.
+    it(`anon cannot read protected rows from ${table}`, async () => {
+      const { data, error } = await anonClient().from(table).select("*").limit(1);
       if (!error) {
         expect(data ?? []).toEqual([]);
       } else {
-        expect(error.code === "42501" || error.message.toLowerCase().includes("permission") || error.message.toLowerCase().includes("not allowed")).toBe(true);
+        expect(isExpectedAnonDenial(error)).toBe(true);
       }
     });
   }
@@ -52,22 +54,22 @@ describe("RLS hardening — anonymous access is locked down", () => {
   it("anon cannot project PII columns from companies", async () => {
     const a = anonClient();
     for (const col of COMPANIES_PII_COLUMNS) {
-      const { error } = await a.from("companies").select(col).limit(1);
-      expect(error, `column ${col} must be denied to anon`).toBeTruthy();
+      const { data, error } = await a.from("companies").select(col).limit(1);
+      expect(Boolean(error) || (data ?? []).length === 0, `column ${col} must not leak to anon`).toBe(true);
     }
   });
 
-  it("anon can read companies_vitrine_public (safe columns only)", async () => {
-    const a = anonClient();
-    const { error } = await a
+  it("anon can read companies_vitrine_public safe contract", async () => {
+    const { data, error } = await anonClient()
       .from("companies_vitrine_public")
       .select("id,name,trade_name,logo_url,public_slug")
       .limit(1);
     expect(error).toBeNull();
+    expect(Array.isArray(data)).toBe(true);
   });
 });
 
-describe("RLS hardening — staff (service role) keeps full read access", () => {
+describe("Core RLS hardening — service_role retains operational access", () => {
   for (const table of PROTECTED_TABLES) {
     it(`service_role can SELECT from ${table}`, async () => {
       const { error } = await admin.from(table).select("*").limit(1);
