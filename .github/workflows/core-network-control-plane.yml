@@ -41,11 +41,22 @@ jobs:
           ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
           test -n "$ORIGIN_IP"
           printf 'CF_ZONE_ID=%s\nORIGIN_IP=%s\n' "$CF_ZONE_ID" "$ORIGIN_IP" >> "$GITHUB_ENV"
+          # Use canonical persisted tables instead of depending on a PostgREST-exposed helper view.
           curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            "$SUPABASE_URL/rest/v1/core_production_tenant_domains?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
-          jq -e 'type=="array" and length>0' /tmp/tenants.json >/dev/null
-          jq -r '.[]|select(.root_domain=="impulsionando.com.br")|(.subdomain+"."+.root_domain)' /tmp/tenants.json | sort -u >/tmp/domains.txt
+            "$SUPABASE_URL/rest/v1/companies?select=id,name,is_active,is_demo,status&is_active=eq.true&is_demo=eq.false&status=eq.active" -o /tmp/companies.json
+          jq -e 'type=="array" and length>0' /tmp/companies.json >/dev/null
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=company_id,subdomain,root_domain,metadata&subdomain=neq.impulsionando&order=subdomain.asc" -o /tmp/identities.json
+          jq -e 'type=="array" and length>0' /tmp/identities.json >/dev/null
+          jq -n -r --slurpfile c /tmp/companies.json --slurpfile t /tmp/identities.json '
+            ($c[0] | map(.id) | INDEX(.)) as $active |
+            $t[0][] |
+            select($active[.company_id] != null) |
+            select(.root_domain == "impulsionando.com.br") |
+            select((.metadata.test_fixture // false) != true) |
+            (.subdomain + "." + .root_domain)' | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
+          echo "PRODUCTION_TENANTS=$(wc -l </tmp/domains.txt | tr -d ' ')"
 
       - name: Build and test one Core
         env:
@@ -82,7 +93,6 @@ jobs:
           sudo docker ps --format '{{.Names}} {{.Image}}' | sudo tee "$backup/docker-ps.txt" >/dev/null
           sudo docker inspect $(sudo docker ps -q) 2>/dev/null | sudo tee "$backup/docker-inspect.json" >/dev/null || true
           sudo cp -a /opt/impulsionando/deploy/hostinger "$backup/hostinger" 2>/dev/null || true
-
           release="/var/www/impulsionando-core/releases/canonical-$RELEASE_SHA"
           base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
           override=/opt/impulsionando/deploy/hostinger/docker-compose.multitenant.yml
@@ -140,17 +150,13 @@ jobs:
         run: |
           set -euo pipefail
           name='*.impulsionando.com.br'
-          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' \
-            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$name&per_page=100" -o /tmp/wild.json
+          curl -fsS -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?name=$name&per_page=100" -o /tmp/wild.json
           jq -e '.success==true' /tmp/wild.json >/dev/null
           good="$(jq -r --arg ip "$ORIGIN_IP" '.result[]|select(.type=="A" and .content==$ip and .proxied==true)|.id' /tmp/wild.json|head -n1)"
           if [ -z "$good" ]; then
-            jq -r '.result[]|select(.type=="A" or .type=="AAAA" or .type=="CNAME")|.id' /tmp/wild.json | while read -r id; do
-              [ -n "$id" ] && curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null
-            done
+            jq -r '.result[]|select(.type=="A" or .type=="AAAA" or .type=="CNAME")|.id' /tmp/wild.json | while read -r id; do [ -n "$id" ] && curl -fsS -X DELETE -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$id" >/dev/null; done
             jq -nc --arg name "$name" --arg ip "$ORIGIN_IP" '{type:"A",name:$name,content:$ip,ttl:1,proxied:true}' >/tmp/new.json
-            curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json \
-              "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/create.json
+            curl -fsS -X POST -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data @/tmp/new.json "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" -o /tmp/create.json
             jq -e '.success==true' /tmp/create.json >/dev/null
           fi
           echo 'WILDCARD_DNS=PASS'
@@ -163,11 +169,7 @@ jobs:
           set -Eeuo pipefail
           canonical=impulsionando-core-multitenant
           mapfile -t conflicts < <(sudo docker ps --format '{{.Names}}' | grep -E '^impulsionando-core-(csi|wmp|colors|chrismed|anamadu|grupo-evr|grupoevr|ontap|raoni|riobeer|spartacus|perola|sulatlantica)' || true)
-          for c in "${conflicts[@]}"; do
-            [ "$c" = "$canonical" ] && continue
-            echo "STOP_CONFLICT $c"
-            sudo docker stop "$c" >/dev/null || true
-          done
+          for c in "${conflicts[@]}"; do [ "$c" = "$canonical" ] && continue; echo "STOP_CONFLICT $c"; sudo docker stop "$c" >/dev/null || true; done
           echo 'CONFLICTING_ROUTERS_DISABLED=PASS'
           REMOTE
 
@@ -179,7 +181,7 @@ jobs:
           while read -r domain; do
             code=000; final=''
             for i in $(seq 1 18); do
-              read -r code final < <(curl -sS -L -A 'ImpulsionandoControlPlane/1.0' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
+              read -r code final < <(curl -sS -L -A 'ImpulsionandoControlPlane/1.1' -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code} %{url_effective}' --max-time 25 "https://$domain/" || echo '000 -')
               host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
               [ "$code" = 200 ] && [ "$host" = "$domain" ] && break
               sleep 4
@@ -198,8 +200,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p docs/ops
-          jq -nc --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg sha "$GITHUB_SHA" \
-            '{generated_at_utc:$generated_at_utc,commit:$sha,architecture:"wildcard-dns + single-traefik-router + single-core + canonical-tenant-resolver",status:"control-plane-executed"}' >docs/ops/core-network-control-plane.json
+          jq -nc --arg generated_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg sha "$GITHUB_SHA" '{generated_at_utc:$generated_at_utc,commit:$sha,architecture:"wildcard-dns + single-traefik-router + single-core + canonical-tenant-resolver",status:"control-plane-executed"}' >docs/ops/core-network-control-plane.json
           git config user.name 'Impulsionito Core Control Plane'
           git config user.email 'automation@impulsionando.com.br'
           git add docs/ops/core-network-control-plane.json
