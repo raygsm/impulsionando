@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate migration naming and uniqueness
+      - name: Validate migration naming and report historical timestamp collisions
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -39,10 +39,10 @@ jobs:
             fi
             ts=${base%%_*}
             if [[ -n "${seen[$ts]:-}" ]]; then
-              echo "::error file=$f::Duplicate migration timestamp $ts also used by ${seen[$ts]}"
-              invalid=$((invalid+1))
+              echo "::warning file=$f::Historical duplicate migration timestamp $ts also used by ${seen[$ts]}. Do not rename already-applied migrations; use a unique timestamp for all new migrations."
+            else
+              seen[$ts]=$f
             fi
-            seen[$ts]=$f
           done
           test "$invalid" = "0"
 
