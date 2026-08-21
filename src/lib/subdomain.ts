@@ -17,6 +17,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   wmp: "/wmp",
   csi: "/csi",
   anamadu: "/anamadu",
+  grupoevr: "/grupo-evr",
   garrido: "/garrido",
   colorssaude: "/colors",
   it: "/tour",
