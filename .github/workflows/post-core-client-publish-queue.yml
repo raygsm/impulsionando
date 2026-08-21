@@ -1,0 +1,91 @@
+name: Post-Core Client Publish Queue
+
+on:
+  workflow_run:
+    workflows: ["Deploy Core Frontend"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-core-client-publish-queue
+  cancel-in-progress: false
+
+jobs:
+  colors:
+    name: Publish/verify Colors Saúde
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate Colors host stays isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          host='colorssaude.impulsionando.com.br'
+          paths=(/ /super-green-black /agenda /eventos /suporte /afiliados /rastreio /entrar /criar-conta /privacidade /termos)
+          for path in "${paths[@]}"; do
+            url="https://$host$path"
+            result="$(curl -sS -L --max-time 30 -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/colors-page -w '%{http_code} %{url_effective}' "$url")"
+            code="${result%% *}"
+            final="${result#* }"
+            final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            echo "COLORS $path HTTP=$code FINAL=$final"
+            [ "$code" = '200' ] || exit 41
+            [ "$final_host" = "$host" ] || { echo "::error::Colors escaped to $final_host"; exit 42; }
+          done
+
+      - name: Validate Colors backend endpoints do not cross tenant
+        shell: bash
+        run: |
+          set -euo pipefail
+          host='colorssaude.impulsionando.com.br'
+          for path in /api/public/webhooks/maisfy-colors /api/public/webhooks/monetizze-colors /api/public/webhooks/perfectpay-colors; do
+            result="$(curl -sS -L --max-time 20 -o /tmp/colors-api -w '%{http_code} %{url_effective}' "https://$host$path" || true)"
+            code="${result%% *}"
+            final="${result#* }"
+            final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            echo "COLORS_API $path HTTP=$code FINAL=$final"
+            [ "$final_host" = "$host" ] || { echo "::error::Colors API escaped to $final_host"; exit 43; }
+            case "$code" in 200|400|401|405) ;; *) exit 44 ;; esac
+          done
+          echo 'COLORS_PUBLISH=PASS'
+
+  wmp:
+    name: Publish/verify WMP
+    needs: colors
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate WMP host stays isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          host='wmp.impulsionando.com.br'
+          paths=(/ /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /cases /pacotes)
+          for path in "${paths[@]}"; do
+            url="https://$host$path"
+            result="$(curl -sS -L --max-time 30 -H 'Cache-Control: no-cache' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/wmp-page -w '%{http_code} %{url_effective}' "$url")"
+            code="${result%% *}"
+            final="${result#* }"
+            final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+            echo "WMP $path HTTP=$code FINAL=$final"
+            [ "$code" = '200' ] || exit 51
+            [ "$final_host" = "$host" ] || { echo "::error::WMP escaped to $final_host"; exit 52; }
+          done
+
+      - name: Validate WMP HMAC endpoint remains on WMP host
+        shell: bash
+        run: |
+          set -euo pipefail
+          host='wmp.impulsionando.com.br'
+          result="$(curl -sS -L --max-time 20 -o /tmp/wmp-hmac -w '%{http_code} %{url_effective}' "https://$host/api/public/hooks/n8n-verify" || true)"
+          code="${result%% *}"
+          final="${result#* }"
+          final_host="$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')"
+          echo "WMP_HMAC HTTP=$code FINAL=$final"
+          [ "$final_host" = "$host" ] || { echo "::error::WMP API escaped to $final_host"; exit 53; }
+          [ "$code" = '200' ] || exit 54
+          echo 'WMP_PUBLISH=PASS'
