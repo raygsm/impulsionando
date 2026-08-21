@@ -1,3 +1,4 @@
+# DNS publicly propagated; rerun exact EVR router validation
 name: Grupo EVR fast router
 
 on:
