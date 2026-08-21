@@ -1,169 +1,26 @@
-name: Ana Madu Emergency Publish
+name: Ana Madu Front Verification (canonical)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/anamadu-emergency-publish.yml
-      - src/components/anamadu/**
-      - src/lib/anamadu/**
-      - src/lib/agents/omnichannel.server.ts
-      - src/routes/api/anamadu/**
-      - src/routes/anamadu.tsx
-      - src/routes/index.tsx
-      - src/routes/__root.tsx
-
-concurrency:
-  group: anamadu-emergency-publish
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 45
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Build current main
-        env:
-          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Verify Ana Madu canonical front
         run: |
           set -euo pipefail
-          npm ci --no-audit --no-fund
-          npx vitest run src/lib/subdomain.test.ts
-          npm run build
-          test -f .output/server/index.mjs
-          test -f scripts/start-core-runtime.mjs
-
-      - name: Configure SSH
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          domain='anamadu.impulsionando.com.br'
+          code="$(curl -sS -L -o /tmp/home -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 20 "https://$domain/")"
+          marker="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$domain/impulsionando-front-sha.txt")"
+          test "$code" = 200
+          printf '%s' "$marker" | grep -Eq '^[0-9a-f]{40}$'
+          echo "ANAMADU_CANONICAL_FRONT=PASS sha=$marker"
+      - name: Architecture invariant
         run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          : > ~/.ssh/known_hosts
-          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          test -s ~/.ssh/known_hosts
-
-      - name: Package release
-        env:
-          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
-          DEPLOY_USER: ${{ secrets.VPS_USER }}
-        run: |
-          set -euo pipefail
-          tar -czf /tmp/anamadu-current.tgz .output scripts package.json package-lock.json
-          scp /tmp/anamadu-current.tgz "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/anamadu-current.tgz"
-
-      - name: Publish same release to systemd and Traefik
-        env:
-          DEPLOY_HOST: ${{ secrets.VPS_HOST }}
-          DEPLOY_USER: ${{ secrets.VPS_USER }}
-        run: |
-          set -euo pipefail
-          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_SHA='${GITHUB_SHA}' bash -s" <<'REMOTE'
-          set -euo pipefail
-          release="/var/www/impulsionando-core/releases/$RELEASE_SHA"
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.anamadu.yml
-          envfile=/etc/impulsionando-core.env
-          test -f "$base"
-          sudo test -f "$envfile"
-          sudo grep -q '^OPENAI_API_KEY=.' "$envfile"
-
-          mkdir -p "$release"
-          tar -xzf /tmp/anamadu-current.tgz -C "$release"
-          rm -f /tmp/anamadu-current.tgz
-          cd "$release"
-          test -f .output/server/index.mjs
-          npm ci --omit=dev --no-audit --no-fund
-          sudo ln -sfn "$release" /var/www/impulsionando-core/current
-          sudo systemctl restart impulsionando-core
-
-          for attempt in $(seq 1 45); do
-            code="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-systemd -w '%{http_code}' http://127.0.0.1:3000/ || true)"
-            case "$code" in 2*|3*) break ;; esac
-            [ "$attempt" -lt 45 ] || { sudo journalctl --no-pager -u impulsionando-core -n 160; exit 70; }
-            sleep 2
-          done
-
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core:
-              env_file:
-                - /etc/impulsionando-core.env
-              labels:
-                traefik.http.routers.anamadu.entrypoints: websecure
-                traefik.http.routers.anamadu.rule: Host(`anamadu.impulsionando.com.br`)
-                traefik.http.routers.anamadu.service: impulsionando-core
-                traefik.http.routers.anamadu.tls: "true"
-                traefik.http.routers.anamadu.tls.certresolver: letsencrypt
-                traefik.http.routers.anamadu.priority: "200"
-          YAML
-          sudo docker compose -f "$base" -f "$override" config -q
-
-          printf 'node_modules\n' > "$release/.dockerignore"
-          cat > /tmp/Dockerfile.anamadu-current <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-          sudo docker build -f /tmp/Dockerfile.anamadu-current -t impulsionando-core:latest "$release"
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
-
-          for attempt in $(seq 1 60); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-            home='000'; health='000'; catalog='000'
-            if [ -n "$ip" ]; then
-              home="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-home -w '%{http_code}' "http://$ip:3000/" || true)"
-              health="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-health -w '%{http_code}' "http://$ip:3000/api/anamadu/health" || true)"
-              catalog="$(curl -sS -H 'Host: anamadu.impulsionando.com.br' -o /tmp/a-catalog -w '%{http_code}' "http://$ip:3000/api/anamadu/catalog" || true)"
-              if [ "$home" = '200' ] && [ "$health" = '200' ] && [ "$catalog" = '200' ]; then break; fi
-            fi
-            [ "$attempt" -lt 60 ] || { echo "EDGE home=$home health=$health catalog=$catalog"; cat /tmp/a-health || true; sudo docker logs --tail 200 impulsionando-core || true; exit 71; }
-            sleep 2
-          done
-          grep -q '"openaiConfigured":true' /tmp/a-health
-          grep -q '"openaiCredentialScope":"impulsionando_central"' /tmp/a-health
-          grep -Eq '"productCount":[1-9][0-9]*' /tmp/a-health
-          echo "ANAMADU_EDGE_PASS home=$home health=$health catalog=$catalog"
-          REMOTE
-
-      - name: Validate public Ana Madu
-        run: |
-          set -euo pipefail
-          for attempt in $(seq 1 30); do
-            home="$(curl -sSL --max-time 20 -o /tmp/public-home -w '%{http_code}' 'https://anamadu.impulsionando.com.br/' || true)"
-            health="$(curl -sS --max-time 20 -o /tmp/public-health -w '%{http_code}' 'https://anamadu.impulsionando.com.br/api/anamadu/health' || true)"
-            catalog="$(curl -sS --max-time 20 -o /tmp/public-catalog -w '%{http_code}' 'https://anamadu.impulsionando.com.br/api/anamadu/catalog' || true)"
-            echo "PUBLIC home=$home health=$health catalog=$catalog attempt=$attempt"
-            if [ "$home" = '200' ] && [ "$health" = '200' ] && [ "$catalog" = '200' ]; then
-              grep -q '"openaiConfigured":true' /tmp/public-health
-              grep -q '"openaiCredentialScope":"impulsionando_central"' /tmp/public-health
-              grep -Eq '"productCount":[1-9][0-9]*' /tmp/public-health
-              exit 0
-            fi
-            sleep 3
-          done
-          exit 72
+          echo 'Ana Madu frontend publication belongs exclusively to Production Front.'
+          echo 'This workflow is verification-only and cannot mutate DNS, Traefik, systemd, images or containers.'
