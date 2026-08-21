@@ -71,7 +71,9 @@ jobs:
 
       - name: Report result on this PR
         if: always()
-        run: gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="GRUPOEVR_PR_PUBLISH: ${{ steps.publish.outputs.result }} — ${{ steps.publish.outputs.detail }}"
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            -f body="GRUPOEVR_PR_PUBLISH: ${{ steps.publish.outputs.result }} - ${{ steps.publish.outputs.detail }}"
 
       - name: Fail only on Cloudflare API failure
         if: steps.publish.outputs.result == 'FAIL'
