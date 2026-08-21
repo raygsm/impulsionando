@@ -1,7 +1,6 @@
 name: Production Front
 
 # Single frontend publication authority for Impulsionando and every tenant.
-# Canonical release trigger after final legacy publisher retirement: 2026-08-21T16:43-03:00.
 on:
   workflow_dispatch:
   push:
@@ -21,10 +20,8 @@ on:
 concurrency:
   group: production-front
   cancel-in-progress: true
-
 permissions:
   contents: read
-
 jobs:
   publish:
     name: Build once and publish all tenants
@@ -38,13 +35,9 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 1
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
       - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
+        with: {node-version: '22', cache: npm}
       - name: Validate and discover tenants
         run: |
           set -euo pipefail
@@ -105,17 +98,11 @@ jobs:
           sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core
           for i in $(seq 1 45); do
             sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/',{headers:{host:'chrismed.impulsionando.com.br'}}).then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(2))" >/dev/null 2>&1 && break
-            [ "$i" -lt 45 ] || exit 30
-            sleep 2
+            [ "$i" -lt 45 ] || exit 30; sleep 2
           done
           for name in $(sudo docker ps -a --format '{{.Names}}'); do
             [ "$name" = impulsionando-core ] && continue
-            case "$name" in
-              *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary)
-                sudo docker rm -f "$name" >/dev/null 2>&1 || true
-                echo "REMOVED_COMPETING_FRONT=$name"
-                ;;
-            esac
+            case "$name" in *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary) sudo docker rm -f "$name" >/dev/null 2>&1 || true;; esac
           done
           offenders=''
           for name in $(sudo docker ps --format '{{.Names}}'); do
@@ -126,23 +113,28 @@ jobs:
           test -z "$offenders" || { echo "COMPETING_FRONT_ROUTERS:$offenders"; exit 31; }
           sudo ln -sfn "$release" /var/www/impulsionando-core/current-front
           REMOTE
-      - name: Verify exact SHA on apex and every tenant
+      - name: Verify exact SHA and persist evidence
         run: |
           set -euo pipefail
+          : > /tmp/evidence.ndjson
           verify() {
-            d="$1"
+            d="$1"; code=000; sha=''; final=''
             for i in $(seq 1 20); do
               code="$(curl -sS -L -o /tmp/h -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?release=$GITHUB_SHA" || true)"
+              final="$(curl -sS -L -o /dev/null -w '%{url_effective}' --max-time 15 "https://$d/?release=$GITHUB_SHA" || true)"
               sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?release=$GITHUB_SHA" 2>/dev/null || true)"
-              [ "$code" = 200 ] && [ "$sha" = "$GITHUB_SHA" ] && { echo "PASS $d $sha"; return 0; }
+              [ "$code" = 200 ] && [ "$sha" = "$GITHUB_SHA" ] && break
               sleep 3
             done
-            echo "::error::$d expected=$GITHUB_SHA got=${sha:-none} http=${code:-none}"
-            return 1
+            status=FAILED; [ "$code" = 200 ] && [ "$sha" = "$GITHUB_SHA" ] && status=PASSED
+            jq -nc --arg release_sha "$GITHUB_SHA" --arg domain "$d" --arg served_sha "$sha" --arg final_url "$final" --arg status "$status" --argjson http_status "${code:-0}" '{release_sha:$release_sha,domain:$domain,http_status:$http_status,served_sha:$served_sha,final_url:$final_url,status:$status,verified_at:(now|todateiso8601),details:{run_id:env.GITHUB_RUN_ID,repository:env.GITHUB_REPOSITORY}}' >> /tmp/evidence.ndjson
+            [ "$status" = PASSED ]
           }
           failed=0
           verify impulsionando.com.br || failed=1
           verify www.impulsionando.com.br || failed=1
           while read -r d; do [ -z "$d" ] || verify "$d" || failed=1; done < /tmp/domains.txt
+          jq -s '.' /tmp/evidence.ndjson > /tmp/evidence.json
+          curl -fsS -X POST "$SUPABASE_URL/rest/v1/core_front_release_deployments?on_conflict=release_sha,domain" -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' --data-binary @/tmp/evidence.json
           [ "$failed" -eq 0 ]
           echo "PRODUCTION_FRONT=PASS sha=$GITHUB_SHA"
