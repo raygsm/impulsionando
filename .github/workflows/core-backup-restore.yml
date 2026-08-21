@@ -126,7 +126,7 @@ jobs:
               ),
               notes='Backup Core criado e restaurado em banco descartável com invariantes validados.',
               last_checked_at=now()
-          where check_key='backup_restore_24h';
+          where check_key='backup.restore';
           SQL
           source_user="postgres.${PROJECT_REF}"
           if ! docker run --rm --network host \
