@@ -1,5 +1,6 @@
 name: Production Front
 
+# Single frontend publication authority for Impulsionando and every tenant.
 on:
   workflow_dispatch:
   push:
