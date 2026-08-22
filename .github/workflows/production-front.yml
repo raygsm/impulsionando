@@ -2,21 +2,17 @@ name: Production Front
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/production-front.yml
 
 concurrency:
   group: production-front
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   recover:
-    name: Recover canonical Core
+    name: Recover canonical Core via systemd
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -31,18 +27,19 @@ jobs:
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+
     steps:
-      - name: Checkout 18h hotfix release
+      - name: Checkout primary
         uses: actions/checkout@v4
         with:
-          ref: d2f7c2ba02e441b5230d5a94b076a98c11171125
+          ref: ${{ env.PRIMARY_SHA }}
           path: primary
           fetch-depth: 1
 
-      - name: Checkout yesterday fallback
+      - name: Checkout fallback
         uses: actions/checkout@v4
         with:
-          ref: c998b87c49b1950f03898e0de9c4cf4a1e942e84
+          ref: ${{ env.FALLBACK_SHA }}
           path: fallback
           fetch-depth: 1
 
@@ -50,17 +47,21 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Preflight and discover tenants
+      - name: Discover production tenants
         run: |
           set -euo pipefail
           for v in VPS_HOST VPS_USER VPS_SSH_KEY SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
             test -n "${!v:-}" || { echo "::error::Missing $v"; exit 10; }
           done
-          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
+          curl -fsS \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" \
+            -o /tmp/tenants.json
           jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando" and (.subdomain | startswith("e2e-") | not) and (.subdomain | startswith("rls-") | not)) | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
 
-      - name: Build both candidates before touching production
+      - name: Build immutable candidates before touching production
         run: |
           set -uo pipefail
           build_candidate() {
@@ -83,7 +84,7 @@ jobs:
           printf 'PRIMARY_BUILD_OK=%s\nFALLBACK_BUILD_OK=%s\n' "$primary_ok" "$fallback_ok" > /tmp/build.env
           [ "$primary_ok" -eq 1 ] || [ "$fallback_ok" -eq 1 ] || exit 20
 
-      - name: Upload available immutable candidates
+      - name: Upload candidates
         run: |
           set -euo pipefail
           . /tmp/build.env
@@ -97,70 +98,56 @@ jobs:
           [ "$FALLBACK_BUILD_OK" = 1 ] && files+=(/tmp/fallback.tgz /tmp/fallback.sha256)
           scp "${files[@]}" "$VPS_USER@$VPS_HOST:/tmp/"
 
-      - name: Promote first healthy candidate with rollback
+      - name: Promote first healthy candidate through canonical systemd runtime
         id: promote
         run: |
           set -euo pipefail
           . /tmp/build.env
-          ssh "$VPS_USER@$VPS_HOST" "PRIMARY_SHA='$PRIMARY_SHA' FALLBACK_SHA='$FALLBACK_SHA' PRIMARY_BUILD_OK='$PRIMARY_BUILD_OK' FALLBACK_BUILD_OK='$FALLBACK_BUILD_OK' RUN_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
-          set -uo pipefail
-          compose=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          test -f "$compose" || exit 30
-          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
-          [ -z "$old_image" ] || sudo docker tag "$old_image" "impulsionando-core:pre-recovery-$RUN_ID"
+          ssh "$VPS_USER@$VPS_HOST" "PRIMARY_SHA='$PRIMARY_SHA' FALLBACK_SHA='$FALLBACK_SHA' PRIMARY_BUILD_OK='$PRIMARY_BUILD_OK' FALLBACK_BUILD_OK='$FALLBACK_BUILD_OK' bash -s" <<'REMOTE'
+          set -u
+          root=/var/www/impulsionando-core
+          previous="$(readlink -f "$root/current" 2>/dev/null || true)"
+          test -n "$previous" || exit 30
 
-          restore_previous() {
-            if sudo docker image inspect "impulsionando-core:pre-recovery-$RUN_ID" >/dev/null 2>&1; then
-              sudo docker tag "impulsionando-core:pre-recovery-$RUN_ID" impulsionando-core:latest
-              cd /opt/impulsionando/deploy/hostinger
-              sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core >/dev/null 2>&1 || true
-            fi
+          rollback() {
+            sudo ln -sfn "$previous" "$root/current"
+            sudo systemctl daemon-reload
+            sudo systemctl restart impulsionando-core.service
           }
 
           try_candidate() {
             label="$1"; sha="$2"
             cd /tmp || return 1
             sha256sum -c "$label.sha256" || return 1
-            release="/var/www/impulsionando-core/releases/recovery-$sha"
-            sudo rm -rf "$release" && sudo mkdir -p "$release"
+            release="$root/releases/recovery-$sha"
+            sudo rm -rf "$release"
+            sudo mkdir -p "$release"
             sudo tar -xzf "$label.tgz" -C "$release" || return 1
             test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$sha" || return 1
-            cat >/tmp/Dockerfile.production-front <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-            sudo docker build -f /tmp/Dockerfile.production-front -t "impulsionando-core:$sha" "$release" || return 1
-            sudo docker tag "impulsionando-core:$sha" impulsionando-core:latest || return 1
-            cd /opt/impulsionando/deploy/hostinger || return 1
-            sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core || return 1
-            for i in $(seq 1 45); do
-              served="$(sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/impulsionando-front-sha.txt',{headers:{host:'impulsionando.com.br'}}).then(async r=>process.stdout.write((await r.text()).trim())).catch(()=>process.exit(2))" 2>/dev/null || true)"
-              [ "$served" = "$sha" ] && { sudo ln -sfn "$release" /var/www/impulsionando-core/current-front; echo "$sha" > /tmp/selected-recovery-sha; return 0; }
+            sudo chown -R www-data:www-data "$release"
+            sudo ln -sfn "$release" "$root/current"
+            sudo systemctl daemon-reload
+            sudo systemctl restart impulsionando-core.service || { rollback; return 1; }
+            for i in $(seq 1 30); do
+              served="$(curl -fsS --max-time 3 -H 'Host: impulsionando.com.br' http://127.0.0.1/impulsionando-front-sha.txt 2>/dev/null | tr -d '\r\n' || true)"
+              if [ "$served" = "$sha" ]; then
+                echo "$sha" >/tmp/selected-recovery-sha
+                return 0
+              fi
               sleep 2
             done
+            rollback
             return 1
           }
 
           selected=''
           if [ "$PRIMARY_BUILD_OK" = 1 ] && try_candidate primary "$PRIMARY_SHA"; then
             selected="$PRIMARY_SHA"
-          else
-            restore_previous
-            if [ "$FALLBACK_BUILD_OK" = 1 ] && try_candidate fallback "$FALLBACK_SHA"; then selected="$FALLBACK_SHA"; fi
+          elif [ "$FALLBACK_BUILD_OK" = 1 ] && try_candidate fallback "$FALLBACK_SHA"; then
+            selected="$FALLBACK_SHA"
           fi
-          if [ -z "$selected" ]; then restore_previous; exit 40; fi
-
-          for name in $(sudo docker ps -a --format '{{.Names}}'); do
-            [ "$name" = impulsionando-core ] && continue
-            case "$name" in *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary) sudo docker rm -f "$name" >/dev/null 2>&1 || true;; esac
-          done
+          [ -n "$selected" ] || exit 40
+          sudo systemctl is-active --quiet impulsionando-core.service || { rollback; exit 41; }
           echo "RECOVERY_PROMOTION=PASS sha=$selected"
           REMOTE
           selected="$(ssh "$VPS_USER@$VPS_HOST" 'cat /tmp/selected-recovery-sha')"
