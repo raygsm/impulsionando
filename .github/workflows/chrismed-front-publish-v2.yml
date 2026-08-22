@@ -1,85 +1,20 @@
-name: CHRISMED publish front v2
+name: RETIRED - CHRISMED publish front v2
 
+# Historical workflow kept as a fail-closed tombstone.
+# It previously invoked the legacy VPS publisher directly.
+# Production Front is the single frontend publication authority.
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/chrismed-front-publish-v2.yml
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - name: Configure SSH
-        shell: bash
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-      - name: Repair CHRISMED runtime env
-        shell: bash
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          ENV_FILE=/etc/impulsionando-core.env
-          EVO=impulsionando-evolution-api
-          sudo test -f "$ENV_FILE"
-          sudo docker inspect "$EVO" >/dev/null
-          EVO_KEY="$(sudo docker inspect "$EVO" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^AUTHENTICATION_API_KEY=//p' | head -n1)"
-          test -n "$EVO_KEY"
-          set_env(){ local key="$1" value="$2" tmp; tmp="$(mktemp)"; sudo awk -F= -v k="$key" '$1!=k{print}' "$ENV_FILE" > "$tmp"; printf '%s=%s\n' "$key" "$value" >> "$tmp"; sudo install -o root -g root -m 0600 "$tmp" "$ENV_FILE"; rm -f "$tmp"; }
-          set_env CHRISMED_EVOLUTION_BASE_URL 'http://impulsionando-evolution-api:8080'
-          set_env CHRISMED_EVOLUTION_API_KEY "$EVO_KEY"
-          unset EVO_KEY
-          echo 'CHRISMED_RUNTIME_ENV=READY'
-          REMOTE
-      - name: Publish latest main safely
-        shell: bash
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' > /tmp/chrismed-front-v2.txt 2>&1 <<'REMOTE'
-          set -euo pipefail
-          PUBLISHER=/usr/local/lib/impulsionando/publisher/publish-core-now.sh
-          sudo test -x "$PUBLISHER"
-          sudo "$PUBLISHER"
-          echo '--- runtime ---'
-          sudo systemctl is-active impulsionando-core
-          sudo docker inspect impulsionando-core --format 'docker={{.State.Status}} image={{.Image}}'
-          echo '--- version ---'
-          curl -fsS --max-time 20 https://chrismed.impulsionando.com.br/api/public/version
-          echo
-          home_code="$(curl -sS -o /tmp/chrismed-home.html -w '%{http_code}' --max-time 20 https://chrismed.impulsionando.com.br/)"
-          admin_code="$(curl -sS -o /tmp/chrismed-admin.html -w '%{http_code}' --max-time 20 https://chrismed.impulsionando.com.br/chrismed/admin)"
-          echo "home_http=$home_code admin_http=$admin_code"
-          test "$home_code" = 200
-          test "$admin_code" = 200
-          REMOTE
-      - name: Persist proof
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p docs/ops
-          cp /tmp/chrismed-front-v2.txt docs/ops/chrismed-front-publish-v2.txt || true
-          git config user.name 'Impulsionito CHRISMED QA'
-          git config user.email 'automation@impulsionando.com.br'
-          git add docs/ops/chrismed-front-publish-v2.txt
-          git commit -m 'chore(chrismed): record front publication v2 proof' || exit 0
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo "::error::RETIRED: CHRISMED frontend publisher v2 is disabled."
+          echo "Use .github/workflows/production-front.yml (Production Front)."
+          exit 1
