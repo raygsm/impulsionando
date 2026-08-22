@@ -1,0 +1,54 @@
+name: P0 Core error diagnostic
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/p0-core-error-diagnostic.yml
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'ops/p0-recover-fronts-20260821'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: SSH diagnostic
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' | tee /tmp/report.txt
+          set -euo pipefail
+          echo '=== UNIT ==='
+          sudo systemctl cat impulsionando-core.service || true
+          echo '=== STATUS ==='
+          sudo systemctl status impulsionando-core.service --no-pager -l || true
+          echo '=== SYMLINKS ==='
+          sudo find /var/www/impulsionando-core -maxdepth 1 -type l -printf '%p -> %l\n' 2>/dev/null || true
+          echo '=== RECENT RELEASES ==='
+          sudo find /var/www/impulsionando-core/releases -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -25 || true
+          echo '=== REQUEST 500 ==='
+          curl -sS -o /tmp/body -w 'HTTP=%{http_code}\n' -H 'Host: grupoevr.impulsionando.com.br' http://127.0.0.1:3000/ || true
+          head -c 600 /tmp/body || true
+          echo
+          sleep 1
+          echo '=== JOURNAL ==='
+          sudo journalctl -u impulsionando-core.service --since '-3 min' --no-pager -l | tail -n 180 || true
+          REMOTE
+      - name: Report
+        if: always()
+        run: |
+          body="$(printf 'P0_CORE_ERROR_DIAGNOSTIC\n\n```text\n%s\n```\n' "$(tail -n 300 /tmp/report.txt 2>/dev/null || true)")"
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="$body"

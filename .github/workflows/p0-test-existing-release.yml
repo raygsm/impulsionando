@@ -1,0 +1,63 @@
+name: P0 test existing release
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/p0-test-existing-release.yml
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  test-release:
+    if: github.head_ref == 'ops/p0-recover-fronts-20260821'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Test newest production release on isolated port
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' | tee /tmp/report.txt
+          set -euo pipefail
+          target=/var/www/impulsionando-core/releases/prod-c8916dd0590c9dda24fba66175fd7cf511d93869
+          test -f "$target/.output/server/index.mjs"
+          test -f "$target/scripts/start-core-runtime.mjs"
+          sudo systemctl stop p0-release-test.service 2>/dev/null || true
+          sudo systemd-run --unit=p0-release-test \
+            -p Type=simple \
+            -p User=www-data -p Group=www-data \
+            -p WorkingDirectory="$target" \
+            -p Environment=NODE_ENV=production \
+            -p Environment=HOST=127.0.0.1 -p Environment=PORT=3101 \
+            -p Environment=NITRO_HOST=127.0.0.1 -p Environment=NITRO_PORT=3101 \
+            -p EnvironmentFile=/etc/impulsionando-core.env \
+            -p EnvironmentFile=/etc/impulsionando-security.env \
+            /usr/bin/node scripts/start-core-runtime.mjs
+          sleep 4
+          failed=0
+          for host in impulsionando.com.br chrismed.impulsionando.com.br grupoevr.impulsionando.com.br wmp.impulsionando.com.br; do
+            code="$(curl -sS -o /tmp/body -w '%{http_code}' -H "Host: $host" --max-time 10 http://127.0.0.1:3101/ || true)"
+            echo "$host TEST_RELEASE=$code"
+            [ "$code" = 200 ] || failed=1
+          done
+          sudo journalctl -u p0-release-test.service -n 80 --no-pager || true
+          sudo systemctl stop p0-release-test.service || true
+          [ "$failed" -eq 0 ]
+          REMOTE
+      - name: Report
+        if: always()
+        run: |
+          body="$(printf 'P0_EXISTING_RELEASE_TEST\n\n```text\n%s\n```\n' "$(tail -n 140 /tmp/report.txt 2>/dev/null || true)")"
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" -f body="$body"
