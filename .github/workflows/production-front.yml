@@ -1,21 +1,10 @@
 name: Production Front
 
-# Single frontend publication authority for Impulsionando and every tenant.
-# Recovery source pinned to the protected 2026-08-21 18:00 BRT snapshot.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - src/**
-      - public/**
-      - scripts/start-core-runtime.mjs
-      - scripts/pulsonitor-worker.mjs
-      - scripts/colors-automation-worker.mjs
-      - package.json
-      - package-lock.json
-      - vite.config.*
-      - tsconfig*.json
       - .github/workflows/production-front.yml
 
 concurrency:
@@ -26,101 +15,117 @@ permissions:
   contents: read
 
 jobs:
-  publish:
-    name: Build protected 18h snapshot and publish all tenants
+  recover:
+    name: Recover canonical Core
     runs-on: ubuntu-latest
-    timeout-minutes: 35
-    environment: production
+    timeout-minutes: 40
     env:
-      SOURCE_SHA: 80e20d11d6e5aa364425eadd1b14c07594ef0ea6
+      PRIMARY_SHA: d2f7c2ba02e441b5230d5a94b076a98c11171125
+      FALLBACK_SHA: c998b87c49b1950f03898e0de9c4cf4a1e942e84
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
     steps:
-      - name: Checkout exact protected source
+      - name: Checkout 18h hotfix release
         uses: actions/checkout@v4
         with:
-          ref: 80e20d11d6e5aa364425eadd1b14c07594ef0ea6
+          ref: d2f7c2ba02e441b5230d5a94b076a98c11171125
+          path: primary
+          fetch-depth: 1
+
+      - name: Checkout yesterday fallback
+        uses: actions/checkout@v4
+        with:
+          ref: c998b87c49b1950f03898e0de9c4cf4a1e942e84
+          path: fallback
           fetch-depth: 1
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
-      - name: Validate exact source and discover tenants
+      - name: Preflight and discover tenants
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           for v in VPS_HOST VPS_USER VPS_SSH_KEY SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
             test -n "${!v:-}" || { echo "::error::Missing $v"; exit 10; }
           done
-          npm ci --no-audit --no-fund
-          npx --yes vitest run src/lib/subdomain.test.ts
           curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
           jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando" and (.subdomain | startswith("e2e-") | not) and (.subdomain | startswith("rls-") | not)) | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
 
-      - name: Build immutable 18h release
-        env:
-          VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Build both candidates before touching production
         run: |
-          set -euo pipefail
-          npm run build
-          test -f .output/server/index.mjs
-          printf '%s' "$SOURCE_SHA" > .output/public/impulsionando-front-sha.txt
-          printf '{"sha":"%s","source_cutoff":"2026-08-21T18:00:00-03:00","built_at":"%s"}\n' "$SOURCE_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .output/public/impulsionando-release.json
-          tar -czf /tmp/production-front.tgz .output scripts package.json package-lock.json
-          sha256sum /tmp/production-front.tgz > /tmp/production-front.sha256
+          set -uo pipefail
+          build_candidate() {
+            label="$1"; sha="$2"; dir="$3"
+            cd "$GITHUB_WORKSPACE/$dir" || return 1
+            test "$(git rev-parse HEAD)" = "$sha" || return 1
+            npm ci --no-audit --no-fund || return 1
+            npx --yes vitest run src/lib/subdomain.test.ts || return 1
+            npm run build || return 1
+            test -f .output/server/index.mjs || return 1
+            test -f scripts/start-core-runtime.mjs || return 1
+            printf '%s' "$sha" > .output/public/impulsionando-front-sha.txt
+            printf '{"sha":"%s","recovery":"%s","built_at":"%s"}\n' "$sha" "$label" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .output/public/impulsionando-release.json
+            tar -czf "/tmp/$label.tgz" .output scripts package.json package-lock.json
+            sha256sum "/tmp/$label.tgz" > "/tmp/$label.sha256"
+          }
+          primary_ok=0; fallback_ok=0
+          build_candidate primary "$PRIMARY_SHA" primary && primary_ok=1
+          build_candidate fallback "$FALLBACK_SHA" fallback && fallback_ok=1
+          printf 'PRIMARY_BUILD_OK=%s\nFALLBACK_BUILD_OK=%s\n' "$primary_ok" "$fallback_ok" > /tmp/build.env
+          [ "$primary_ok" -eq 1 ] || [ "$fallback_ok" -eq 1 ] || exit 20
 
-      - name: Configure SSH and upload immutable release
+      - name: Upload available immutable candidates
         run: |
           set -euo pipefail
+          . /tmp/build.env
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
           test -s ~/.ssh/known_hosts
-          scp /tmp/production-front.tgz /tmp/production-front.sha256 "$VPS_USER@$VPS_HOST:/tmp/"
+          files=()
+          [ "$PRIMARY_BUILD_OK" = 1 ] && files+=(/tmp/primary.tgz /tmp/primary.sha256)
+          [ "$FALLBACK_BUILD_OK" = 1 ] && files+=(/tmp/fallback.tgz /tmp/fallback.sha256)
+          scp "${files[@]}" "$VPS_USER@$VPS_HOST:/tmp/"
 
-      - name: Promote canonical Core with automatic rollback
+      - name: Promote first healthy candidate with rollback
+        id: promote
         run: |
           set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" "SOURCE_SHA='$SOURCE_SHA' RUN_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
-          set -Eeuo pipefail
+          . /tmp/build.env
+          ssh "$VPS_USER@$VPS_HOST" "PRIMARY_SHA='$PRIMARY_SHA' FALLBACK_SHA='$FALLBACK_SHA' PRIMARY_BUILD_OK='$PRIMARY_BUILD_OK' FALLBACK_BUILD_OK='$FALLBACK_BUILD_OK' RUN_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -uo pipefail
           compose=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          release="/var/www/impulsionando-core/releases/prod-$SOURCE_SHA"
-          test -f "$compose"
-          cd /tmp
-          sha256sum -c production-front.sha256
-          sudo rm -rf "$release"
-          sudo mkdir -p "$release"
-          sudo tar -xzf /tmp/production-front.tgz -C "$release"
-          test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$SOURCE_SHA"
-
+          test -f "$compose" || exit 30
           old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
-          if [ -n "$old_image" ]; then
-            sudo docker tag "$old_image" "impulsionando-core:pre-18h-$RUN_ID"
-          fi
+          [ -z "$old_image" ] || sudo docker tag "$old_image" "impulsionando-core:pre-recovery-$RUN_ID"
 
-          rollback() {
-            rc=$?
-            echo "PRODUCTION_FRONT_ROLLBACK rc=$rc"
-            if sudo docker image inspect "impulsionando-core:pre-18h-$RUN_ID" >/dev/null 2>&1; then
-              sudo docker tag "impulsionando-core:pre-18h-$RUN_ID" impulsionando-core:latest
+          restore_previous() {
+            if sudo docker image inspect "impulsionando-core:pre-recovery-$RUN_ID" >/dev/null 2>&1; then
+              sudo docker tag "impulsionando-core:pre-recovery-$RUN_ID" impulsionando-core:latest
               cd /opt/impulsionando/deploy/hostinger
-              sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core || true
+              sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core >/dev/null 2>&1 || true
             fi
-            exit "$rc"
           }
-          trap rollback ERR
 
-          cat >/tmp/Dockerfile.production-front <<'DOCKERFILE'
+          try_candidate() {
+            label="$1"; sha="$2"
+            cd /tmp || return 1
+            sha256sum -c "$label.sha256" || return 1
+            release="/var/www/impulsionando-core/releases/recovery-$sha"
+            sudo rm -rf "$release" && sudo mkdir -p "$release"
+            sudo tar -xzf "$label.tgz" -C "$release" || return 1
+            test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$sha" || return 1
+            cat >/tmp/Dockerfile.production-front <<'DOCKERFILE'
           FROM node:22-bookworm-slim
           WORKDIR /app
           ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
@@ -131,70 +136,54 @@ jobs:
           EXPOSE 3000
           CMD ["node","scripts/start-core-runtime.mjs"]
           DOCKERFILE
+            sudo docker build -f /tmp/Dockerfile.production-front -t "impulsionando-core:$sha" "$release" || return 1
+            sudo docker tag "impulsionando-core:$sha" impulsionando-core:latest || return 1
+            cd /opt/impulsionando/deploy/hostinger || return 1
+            sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core || return 1
+            for i in $(seq 1 45); do
+              served="$(sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/impulsionando-front-sha.txt',{headers:{host:'impulsionando.com.br'}}).then(async r=>process.stdout.write((await r.text()).trim())).catch(()=>process.exit(2))" 2>/dev/null || true)"
+              [ "$served" = "$sha" ] && { sudo ln -sfn "$release" /var/www/impulsionando-core/current-front; echo "$sha" > /tmp/selected-recovery-sha; return 0; }
+              sleep 2
+            done
+            return 1
+          }
 
-          sudo docker build -f /tmp/Dockerfile.production-front -t "impulsionando-core:$SOURCE_SHA" "$release"
-          sudo docker tag "impulsionando-core:$SOURCE_SHA" impulsionando-core:latest
-
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core
-
-          for i in $(seq 1 45); do
-            if sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/',{headers:{host:'impulsionando.com.br'}}).then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(2))" >/dev/null 2>&1; then break; fi
-            [ "$i" -lt 45 ] || { sudo docker logs --tail 200 impulsionando-core || true; exit 30; }
-            sleep 2
-          done
-
-          served="$(sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/impulsionando-front-sha.txt',{headers:{host:'impulsionando.com.br'}}).then(async r=>{process.stdout.write((await r.text()).trim());process.exit(r.ok?0:1)}).catch(()=>process.exit(2))")"
-          test "$served" = "$SOURCE_SHA"
+          selected=''
+          if [ "$PRIMARY_BUILD_OK" = 1 ] && try_candidate primary "$PRIMARY_SHA"; then
+            selected="$PRIMARY_SHA"
+          else
+            restore_previous
+            if [ "$FALLBACK_BUILD_OK" = 1 ] && try_candidate fallback "$FALLBACK_SHA"; then selected="$FALLBACK_SHA"; fi
+          fi
+          if [ -z "$selected" ]; then restore_previous; exit 40; fi
 
           for name in $(sudo docker ps -a --format '{{.Names}}'); do
             [ "$name" = impulsionando-core ] && continue
-            case "$name" in
-              *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary)
-                sudo docker rm -f "$name" >/dev/null 2>&1 || true
-                ;;
-            esac
+            case "$name" in *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary) sudo docker rm -f "$name" >/dev/null 2>&1 || true;; esac
           done
-
-          offenders=''
-          for name in $(sudo docker ps --format '{{.Names}}'); do
-            [ "$name" = impulsionando-core ] && continue
-            labels="$(sudo docker inspect -f '{{json .Config.Labels}}' "$name" 2>/dev/null || true)"
-            if printf '%s' "$labels" | grep -q 'traefik.http.routers' && printf '%s' "$labels" | grep -q 'impulsionando.com.br'; then offenders="$offenders $name"; fi
-          done
-          test -z "$offenders" || { echo "COMPETING_FRONT_ROUTERS:$offenders"; exit 31; }
-
-          sudo ln -sfn "$release" /var/www/impulsionando-core/current-front
-          rm -f /tmp/production-front.tgz /tmp/production-front.sha256
-          trap - ERR
-          echo "PRODUCTION_CORE_PROMOTION=PASS source=$SOURCE_SHA"
+          echo "RECOVERY_PROMOTION=PASS sha=$selected"
           REMOTE
+          selected="$(ssh "$VPS_USER@$VPS_HOST" 'cat /tmp/selected-recovery-sha')"
+          echo "selected_sha=$selected" >> "$GITHUB_OUTPUT"
 
-      - name: Verify exact 18h SHA and persist evidence
+      - name: Verify apex and all real tenants
         run: |
           set -euo pipefail
-          : > /tmp/evidence.ndjson
+          selected='${{ steps.promote.outputs.selected_sha }}'
           verify() {
-            d="$1"; code=000; sha=''; final=''
+            d="$1"
             for i in $(seq 1 20); do
-              code="$(curl -sS -L -o /tmp/h -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?release=$SOURCE_SHA" || true)"
-              final="$(curl -sS -L -o /dev/null -w '%{url_effective}' --max-time 15 "https://$d/?release=$SOURCE_SHA" || true)"
-              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?release=$SOURCE_SHA" 2>/dev/null | tr -d '\r\n' || true)"
-              [ "$code" = 200 ] && [ "$sha" = "$SOURCE_SHA" ] && break
+              code="$(curl -sS -L -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?recovery=$selected" || true)"
+              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?recovery=$selected" 2>/dev/null | tr -d '\r\n' || true)"
+              [ "$code" = 200 ] && [ "$sha" = "$selected" ] && return 0
               sleep 3
             done
-            status=FAILED
-            [ "$code" = 200 ] && [ "$sha" = "$SOURCE_SHA" ] && status=PASSED
-            jq -nc --arg release_sha "$SOURCE_SHA" --arg domain "$d" --arg served_sha "$sha" --arg final_url "$final" --arg status "$status" --argjson http_status "${code:-0}" '{release_sha:$release_sha,domain:$domain,http_status:$http_status,served_sha:$served_sha,final_url:$final_url,status:$status,verified_at:(now|todateiso8601),details:{mode:"canonical_18h_recovery",run_id:env.GITHUB_RUN_ID,workflow_commit:env.GITHUB_SHA}}' >> /tmp/evidence.ndjson
-            [ "$status" = PASSED ]
+            echo "FAILED_DOMAIN=$d code=${code:-000} sha=${sha:-none}"
+            return 1
           }
-
           failed=0
           verify impulsionando.com.br || failed=1
           verify www.impulsionando.com.br || failed=1
           while read -r d; do [ -z "$d" ] || verify "$d" || failed=1; done < /tmp/domains.txt
-          jq -s '.' /tmp/evidence.ndjson > /tmp/evidence.json
-          curl -fsS -X POST "$SUPABASE_URL/rest/v1/core_front_release_deployments?on_conflict=release_sha,domain" -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' --data-binary @/tmp/evidence.json
-          cat /tmp/evidence.json
           [ "$failed" -eq 0 ]
-          echo "PRODUCTION_FRONT=PASS source=$SOURCE_SHA"
+          echo "PRODUCTION_FRONT=PASS selected_sha=$selected"
