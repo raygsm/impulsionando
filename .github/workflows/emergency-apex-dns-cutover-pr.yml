@@ -1,0 +1,79 @@
+name: Emergency Apex DNS Cutover PR
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: emergency-apex-dns-cutover-pr
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cutover:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'chore/remove-lovable-runtime-legacy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: production
+    env:
+      DOMAIN: impulsionando.com.br
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Resolve canonical VPS and validate secrets
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST CF_API_TOKEN CF_ZONE_ID; do test -n "${!v:-}" || exit 10; done
+          CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          VPS_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test -n "$VPS_IP"
+          echo "CF_ZONE_ID=$CF_ZONE_ID" >> "$GITHUB_ENV"
+          echo "VPS_IP=$VPS_IP" >> "$GITHUB_ENV"
+
+      - name: Backup and update only apex A record
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records"
+          headers=(-H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json')
+          curl --fail --silent --show-error "${headers[@]}" "$api?name=$DOMAIN&per_page=100" -o /tmp/apex-before.json
+          jq -e '.success == true' /tmp/apex-before.json >/dev/null
+          count="$(jq '[.result[] | select(.type=="A")] | length' /tmp/apex-before.json)"
+          [ "$count" = 1 ] || exit 20
+          id="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/apex-before.json)"
+          echo "CF_RECORD_ID=$id" >> "$GITHUB_ENV"
+          jq -nc --arg name "$DOMAIN" --arg content "$VPS_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/apex-new.json
+          curl --fail --silent --show-error -X PUT "${headers[@]}" --data @/tmp/apex-new.json "$api/$id" -o /tmp/apex-updated.json
+          jq -e --arg ip "$VPS_IP" '.success == true and .result.content == $ip and .result.proxied == true' /tmp/apex-updated.json >/dev/null
+
+      - name: Verify public apex
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            code="$(curl -sS -L -o /dev/null -w '%{http_code}' --max-time 15 "https://$DOMAIN/?apex_cutover=${GITHUB_RUN_ID}-$i" || true)"
+            [ "$code" = 200 ] && exit 0
+            sleep 5
+          done
+          exit 30
+
+      - name: Roll back apex DNS on failure
+        if: failure()
+        run: |
+          set -uo pipefail
+          test -s /tmp/apex-before.json || exit 0
+          id="${CF_RECORD_ID:-}"; [ -n "$id" ] || exit 0
+          old="$(jq -c '.result[] | select(.type=="A") | {type,name,content,ttl,proxied}' /tmp/apex-before.json | head -n1)"
+          api="https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records"
+          curl --silent --show-error -X PUT -H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json' --data "$old" "$api/$id" >/dev/null || true
+
+      - name: Save backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apex-dns-before-${{ github.run_id }}
+          path: /tmp/apex-before.json
+          if-no-files-found: ignore
+          retention-days: 30
