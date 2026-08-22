@@ -79,14 +79,14 @@ export async function notifyItemReady(itemId: string): Promise<{
     tableNumber: (sess as any)?.table?.number as number | undefined,
     customerName: (sess as any)?.customer_name as string | undefined,
     companyName:
-      (row as any).company?.trade_name ?? (row as any).company?.name ?? undefined,
+      (row as any).company?.trade_name ?? (row as any).company?.name ??? undefined;
   };
 }
 
 export async function notifyTableBillClosed(sessionId: string): Promise<{
   email?: unknown;
   whatsapp?: unknown;
-  sms?: unknown;
+  smsRes?: unknown;
   skipped?: string;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -144,8 +144,8 @@ export async function notifyTableBillClosed(sessionId: string): Promise<{
       }
       if (phone) {
         const lines = [
-          `✨ ${customerName ? customerName + ", sua" : "Sua"} conta foi fechada!`,
-          tableNumber ? `Mesa ${tableNumber}` : null,
+          `“`,
+          `tableNumber ? `Mesa ${tableNumber}` : null,
           `Total: ${fmtBRL(Math.round(total * 100))}`,
           companyName ? `Obrigado pela visita — ${companyName}` : "Obrigado pela visita!",
         ].filter(Boolean);
@@ -210,6 +210,6 @@ function getBaseUrl(): string {
   return (
     process.env.PUBLIC_APP_URL ||
     process.env.PUBLIC_SITE_URL ||
-    "https://impulsionando.lovable.app"
+    "https://impulsionando.com.br"
   );
 }
