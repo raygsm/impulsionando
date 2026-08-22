@@ -1,22 +1,19 @@
 /**
- * SMS via Twilio (Connector Gateway) — helper server-only.
+ * SMS via Twilio — helper server-only com integração nativa.
  *
  * Requisitos:
- *   - LOVABLE_API_KEY  → autenticação do gateway (auto-provisionado).
- *   - TWILIO_API_KEY   → connection key do Twilio no gateway.
- *   - TWILIO_FROM_PHONE → número Twilio remetente (E.164: +15551234567).
+ *   - TWILIO_ACCOUNT_SID
+ *   - TWILIO_AUTH_TOKEN
+ *   - TWILIO_FROM_PHONE
  *
  * Se algum estiver ausente, o helper retorna `{ ok: false, skipped: ... }`
  * em vez de lançar — não derruba o fluxo principal.
  */
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-
 function digitsOnly(s: string): string {
   return (s || "").replace(/\D/g, "");
 }
 
-/** Normaliza para E.164 BR (+55DDDNUMERO). */
 export function toE164Brazil(raw?: string | null): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
@@ -41,36 +38,38 @@ export async function sendSms(args: {
   to: string;
   body: string;
 }): Promise<SmsResult> {
-  const lovableKey = process.env.LOVABLE_API_KEY;
-  const twilioKey = process.env.TWILIO_API_KEY;
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
   const fromPhone = process.env.TWILIO_FROM_PHONE;
-  if (!lovableKey) return { ok: false, skipped: "lovable_api_key_missing" };
-  if (!twilioKey) return { ok: false, skipped: "twilio_api_key_missing" };
+  if (!accountSid) return { ok: false, skipped: "twilio_account_sid_missing" };
+  if (!authToken) return { ok: false, skipped: "twilio_auth_token_missing" };
   if (!fromPhone) return { ok: false, skipped: "twilio_from_missing" };
 
   const to = toE164Brazil(args.to);
   if (!to) return { ok: false, skipped: "invalid_to" };
 
-  // Modo simulação local (testes/preview).
   if (process.env.SMS_SIMULATE === "1") {
     console.log("[sms simulate]", { to, body: args.body.slice(0, 80) });
     return { ok: true, simulated: true };
   }
 
   try {
-    const res = await fetch(`${GATEWAY_URL}/Messages.json`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": twilioKey,
-        "Content-Type": "application/x-www-form-urlencoded",
+    const basic = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(accountSid)}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${basic}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          To: to,
+          From: fromPhone,
+          Body: args.body.slice(0, 1000),
+        }),
       },
-      body: new URLSearchParams({
-        To: to,
-        From: fromPhone,
-        Body: args.body.slice(0, 1000),
-      }),
-    });
+    );
     const json: any = await res.json().catch(() => ({}));
     if (!res.ok) {
       console.warn("[sms twilio] failed", res.status, json);
