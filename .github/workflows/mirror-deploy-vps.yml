@@ -1,98 +1,20 @@
-name: VPS Recovery Deploy Impulsionando (187)
+name: RETIRED - VPS Recovery Deploy Impulsionando
 
-# Workflow manual de contingencia para a infraestrutura definitiva da Impulsionando.
-# A unica origem de deploy e o repositorio raygsm/impulsionando e o unico destino
-# operacional e a VPS Hostinger 187.77.232.52. Nao existe espelhamento de ambiente antigo.
-# Cada release e imutavel, versionada por timestamp + SHA, e o symlink `current`
-# so troca depois do build bem-sucedido.
-#
-# Secrets obrigatorios (GitHub -> Settings -> Secrets -> Actions):
-#   VPS_HOST         deve resolver para 187.77.232.52
-#   VPS_USER         usuario SSH (ex.: deploy)
-#   VPS_SSH_KEY      chave privada ED25519 autorizada na VPS
-#   VPS_PORT         opcional, porta SSH, padrao 22
-
+# Historical workflow kept as a fail-closed tombstone.
+# A second PM2 publication path can diverge from the canonical Docker release.
+# Production Front is the single frontend publication authority.
 on:
-  # Contingencia manual. O deploy automatico oficial continua sendo
-  # o workflow Deploy Core Frontend, que publica os artefatos na VPS 187.
   workflow_dispatch:
 
-concurrency:
-  group: recovery-deploy-impulsionando-vps-187
-  cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
-  deploy:
+  retired:
     runs-on: ubuntu-latest
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      EXPECTED_VPS_HOST: 187.77.232.52
     steps:
-      - name: Validar VPS definitiva
-        shell: bash
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          if [ "${{ secrets.VPS_HOST }}" != "$EXPECTED_VPS_HOST" ]; then
-            echo "::error::VPS_HOST deve ser exatamente $EXPECTED_VPS_HOST"
-            exit 1
-          fi
-
-      - name: Publicar release na VPS 187
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          command_timeout: 20m
-          script_stop: true
-          envs: GITHUB_SHA,OPENAI_API_KEY
-          script: |
-            set -euo pipefail
-            APP_ROOT=/var/www/impulsionando
-            RELEASES=$APP_ROOT/releases
-            SHARED=$APP_ROOT/shared
-            TS=$(date +%Y%m%d-%H%M%S)
-            SHA_SHORT=${GITHUB_SHA:0:7}
-            TARGET=$RELEASES/${TS}-${SHA_SHORT}
-
-            mkdir -p $RELEASES $SHARED
-            test -n "$OPENAI_API_KEY"
-            ENV_TMP=$(mktemp)
-            if [ -f "$SHARED/.env" ]; then
-              grep -v '^OPENAI_API_KEY=' "$SHARED/.env" >"$ENV_TMP" || true
-            fi
-            printf 'OPENAI_API_KEY=%s\n' "$OPENAI_API_KEY" >>"$ENV_TMP"
-            install -m 0600 "$ENV_TMP" "$SHARED/.env"
-            rm -f "$ENV_TMP"
-
-            git clone --depth=1 https://github.com/raygsm/impulsionando.git $TARGET
-            cd $TARGET
-
-            if [ -f "$SHARED/.env" ]; then ln -sf $SHARED/.env $TARGET/.env; fi
-
-            npm ci
-            npm run prebuild
-            node --max-old-space-size=4096 node_modules/vite/bin/vite.js build
-            test -d $TARGET/.output || test -d $TARGET/dist
-
-            ln -sfn $TARGET $APP_ROOT/current
-            ls -1dt $RELEASES/*/ | tail -n +8 | xargs -r rm -rf
-
-            pm2 reload impulsionando --update-env || \
-              pm2 start $APP_ROOT/current/deploy/ecosystem.config.cjs --name impulsionando
-            pm2 save
-
-            echo "Release ${TS}-${SHA_SHORT} publicada na VPS 187.77.232.52."
-
-      - name: Smoke test HTTP na VPS 187
-        shell: bash
-        run: |
-          set -euo pipefail
-          for host in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br; do
-            code=$(curl -sk -o /dev/null -w "%{http_code}" --resolve $host:443:${{ secrets.VPS_HOST }} https://$host/ || echo "000")
-            echo "VPS 187 $host -> $code"
-            if [ "$code" != "200" ] && [ "$code" != "301" ] && [ "$code" != "302" ]; then
-              echo "::warning::Host $host respondeu $code na VPS 187"
-            fi
-          done
+          echo "::error::RETIRED: competing PM2 recovery deploy is disabled."
+          echo "Use .github/workflows/production-front.yml (Production Front)."
+          exit 1
