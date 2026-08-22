@@ -1,156 +1,20 @@
-name: CHRISMED final front hard deploy v2
+name: RETIRED - CHRISMED final front hard deploy v2
 
+# Historical workflow kept as a fail-closed tombstone.
+# It previously built, switched and recreated the shared Core for one tenant.
+# Production Front is the single frontend publication authority.
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/chrismed-front-hard-deploy-v2.yml
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: chrismed-front-hard-deploy-v2
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  deploy:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Build current main
-        shell: bash
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          echo "TARGET_SHA=$GITHUB_SHA"
-          npm ci --no-audit --no-fund
-          npx vitest run src/lib/subdomain.test.ts
-          npm run build
-          test -f .output/server/index.mjs
-          test -d .output/public
-          printf '%s\n' "$GITHUB_SHA" > .output/public/chrismed-release-sha.txt
-          tar -czf /tmp/chrismed-release-v2.tgz .output scripts package.json package-lock.json
-      - name: Configure SSH
-        shell: bash
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-      - name: Upload
-        shell: bash
-        run: scp /tmp/chrismed-release-v2.tgz "$VPS_USER@$VPS_HOST:/tmp/chrismed-release-v2.tgz"
-      - name: Promote with rollback and verify
-        shell: bash
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" "TARGET_SHA='$GITHUB_SHA' bash -s" > /tmp/chrismed-front-v2-proof.txt 2>&1 <<'REMOTE'
-          set -Eeuo pipefail
-          ROOT=/var/www/impulsionando-core/releases
-          CURRENT=/var/www/impulsionando-core/current
-          COMPOSE=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          RELEASE="$ROOT/chrismed-final-$TARGET_SHA"
-          PREVIOUS="$(readlink -f "$CURRENT" 2>/dev/null || true)"
-          OLD_IMAGE="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
-          system_switched=0
-          edge_switched=0
-          rollback(){
-            rc=$?
-            set +e
-            echo "DEPLOY_FAILED rc=$rc rollback=true"
-            if [ "$system_switched" -eq 1 ] && [ -n "$PREVIOUS" ] && [ -f "$PREVIOUS/.output/server/index.mjs" ]; then
-              sudo ln -sfn "$PREVIOUS" "$CURRENT"
-              sudo systemctl restart impulsionando-core >/dev/null 2>&1 || true
-            fi
-            if [ "$edge_switched" -eq 1 ] && sudo docker image inspect impulsionando-core:chrismed-v2-rollback >/dev/null 2>&1; then
-              sudo docker tag impulsionando-core:chrismed-v2-rollback impulsionando-core:latest
-              cd /opt/impulsionando/deploy/hostinger
-              sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core >/dev/null 2>&1 || true
-            fi
-            exit "$rc"
-          }
-          trap rollback ERR
-          sudo rm -rf "$RELEASE"
-          sudo mkdir -p "$RELEASE"
-          sudo tar -xzf /tmp/chrismed-release-v2.tgz -C "$RELEASE"
-          sudo chown -R "$(id -u):$(id -g)" "$RELEASE"
-          cd "$RELEASE"
-          npm ci --omit=dev --no-audit --no-fund
-          test -f .output/server/index.mjs
-          grep -Fxq "$TARGET_SHA" .output/public/chrismed-release-sha.txt
-          sudo ln -sfn "$RELEASE" "$CURRENT"
-          system_switched=1
-          sudo systemctl restart impulsionando-core
-          for i in $(seq 1 45); do
-            curl -fsS --max-time 5 http://127.0.0.1:3000/ >/dev/null 2>&1 && break
-            [ "$i" -lt 45 ] || exit 61
-            sleep 1
-          done
-          if [ -n "$OLD_IMAGE" ]; then sudo docker tag "$OLD_IMAGE" impulsionando-core:chrismed-v2-rollback; fi
-          cat >/tmp/Dockerfile.chrismed-v2 <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-          printf 'node_modules\n' > .dockerignore
-          sudo docker build -f /tmp/Dockerfile.chrismed-v2 -t impulsionando-core:latest "$RELEASE"
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
-          edge_switched=1
-          for i in $(seq 1 60); do
-            IP="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-            if [ -n "$IP" ] && curl -fsS --max-time 5 -H 'Host: chrismed.impulsionando.com.br' -H 'Accept: text/html' "http://$IP:3000/" >/tmp/ch-home.html 2>/dev/null; then break; fi
-            [ "$i" -lt 60 ] || exit 62
-            sleep 2
-          done
-          grep -qi 'CHRISMED' /tmp/ch-home.html
-          PUBLIC_SHA="$(curl -fsS --max-time 20 https://chrismed.impulsionando.com.br/chrismed-release-sha.txt | tr -d '\r\n')"
-          echo "PUBLIC_SHA=$PUBLIC_SHA"
-          echo "TARGET_SHA=$TARGET_SHA"
-          [ "$PUBLIC_SHA" = "$TARGET_SHA" ]
-          for path in / /agendar /eventos /ocupacional /contato /auth /chrismed/admin /chrismed/convites /chrismed/pacientes-gestao /ehr; do
-            code="$(curl -sS --max-time 15 -o /tmp/ch-probe -w '%{http_code}' -H 'Host: chrismed.impulsionando.com.br' -H 'Accept: text/html' "http://$IP:3000$path")"
-            echo "ROUTE $path HTTP=$code"
-            case "$code" in 200|302|307) ;; *) exit 63 ;; esac
-          done
-          code="$(curl -sS --max-time 15 -o /tmp/webhook-probe -w '%{http_code}' -X POST -H 'Host: chrismed.impulsionando.com.br' -H 'content-type: application/json' "http://$IP:3000/api/communication/whatsapp/chrismed" -d '{}')"
-          echo "WHATSAPP_WEBHOOK_UNSIGNED_HTTP=$code"
-          [ "$code" = 401 ] || [ "$code" = 503 ]
-          echo 'CHRISMED_FRONT_V2=PASS'
-          REMOTE
-      - name: Persist proof
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p docs/ops
-          cp /tmp/chrismed-front-v2-proof.txt docs/ops/chrismed-front-v2-proof.txt || echo 'proof missing' > docs/ops/chrismed-front-v2-proof.txt
-          git config user.name 'Impulsionito CHRISMED QA'
-          git config user.email 'automation@impulsionando.com.br'
-          git add docs/ops/chrismed-front-v2-proof.txt
-          git commit -m 'chore(chrismed): record front v2 go-live proof' || exit 0
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo "::error::RETIRED: CHRISMED hard frontend deploy v2 is disabled."
+          echo "Use .github/workflows/production-front.yml (Production Front)."
+          exit 1
