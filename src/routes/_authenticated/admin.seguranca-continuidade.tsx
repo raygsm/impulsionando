@@ -36,7 +36,7 @@ const getSecurityStatus = createServerFn({ method: "POST" })
       runtime: { count: runtime.count ?? 0, recent: runtime.data ?? [] },
       audits: { count: audits.count ?? 0, recent: audits.data ?? [] },
       backup: {
-        provider: "Lovable Cloud (PITR diário)",
+        provider: "Supabase gerenciado + política de backup do Core",
         last_check: new Date().toISOString(),
         retention_days: 7,
       },
@@ -132,7 +132,7 @@ function SegurancaContinuidade() {
             "Tenant isolation via user_belongs_to_company()",
             "Audit log para alterações de menu e roles",
             "Índices em colunas tenant-scope",
-            "Backup PITR Lovable Cloud ativo",
+            "Backup gerenciado e política de continuidade do Core ativos",
           ].map((t) => (
             <div key={t} className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
