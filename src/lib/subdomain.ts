@@ -29,6 +29,12 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   "plataforma-saude": "/vitrine/patricia-lenine",
   relacionamento: "/vitrine/relacionamento",
   "impulsionando-brasil": "/vitrine/impulsionando-brasil",
+  sulatlantica: "/vitrine/sulatlantica",
+  ontap: "/vitrine/ontap",
+  raoni: "/vitrine/raoni",
+  riobeer: "/vitrine/riobeer",
+  spartacus: "/vitrine/spartacus",
+  peroladavila: "/vitrine/peroladavila",
 };
 
 export const CUSTOM_HOST_LANDING: Record<string, string> = {
