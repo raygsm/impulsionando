@@ -1,154 +1,20 @@
-name: WMP finalize go-live
+name: RETIRED - WMP finalize go-live
 
+# Historical workflow kept as a fail-closed tombstone.
+# It previously promoted a pinned release and rebuilt/recreated the shared Core before n8n setup.
+# Production Front is the single frontend/Core publication authority.
 on:
-  push:
-    paths:
-      - .github/workflows/wmp-finalize-go-live.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: wmp-finalize-go-live
-  cancel-in-progress: false
-
 jobs:
-  finalize:
+  retired:
     runs-on: ubuntu-latest
-    environment: production
     steps:
-      - name: Configure SSH
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          : > ~/.ssh/known_hosts
-          for i in $(seq 1 10); do
-            ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts && exit 0
-            sleep $((i * 3))
-          done
-          exit 41
-
-      - name: Promote validated WMP release
-        env:
-          H: ${{ secrets.VPS_HOST }}
-          U: ${{ secrets.VPS_USER }}
-        run: |
-          ssh "$U@$H" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          RELEASE='/var/www/impulsionando-core/releases/ce6031ff16167acf8da1716bde3c64d0dd58d74c'
-          COMPOSE='/opt/impulsionando/deploy/hostinger/docker-compose.yml'
-          test -f "$RELEASE/.output/server/index.mjs"
-          sudo grep -q '^IMPULSIONANDO_WEBHOOK_SECRET=.' /etc/impulsionando-core.env
-          sudo ln -sfn "$RELEASE" /var/www/impulsionando-core/current
-          sudo systemctl restart impulsionando-core
-          for i in $(seq 1 30); do
-            curl -fsS --max-time 5 http://127.0.0.1:3000/ >/dev/null 2>&1 && break
-            [ "$i" -lt 30 ] || exit 42
-            sleep 1
-          done
-
-          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
-          [ -z "$old_image" ] || sudo docker tag "$old_image" impulsionando-core:wmp-final-rollback
-          printf 'node_modules\n' > "$RELEASE/.dockerignore"
-          cat >/tmp/Dockerfile.wmp-final <<'DOCKERFILE'
-          FROM node:22-bookworm-slim
-          WORKDIR /app
-          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
-          COPY package.json package-lock.json ./
-          RUN npm ci --omit=dev --no-audit --no-fund
-          COPY .output ./.output
-          COPY scripts ./scripts
-          EXPOSE 3000
-          CMD ["node","scripts/start-core-runtime.mjs"]
-          DOCKERFILE
-          sudo docker build -f /tmp/Dockerfile.wmp-final -t impulsionando-core:latest "$RELEASE" >/tmp/wmp-final-build.log
-          cd /opt/impulsionando/deploy/hostinger
-          sudo docker compose -f "$COMPOSE" up -d --no-build --force-recreate impulsionando-core
-
-          for i in $(seq 1 45); do
-            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core 2>/dev/null || true)"
-            if [ -n "$ip" ] && curl -fsS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' "http://$ip:3000/auth" >/dev/null 2>&1; then break; fi
-            [ "$i" -lt 45 ] || exit 43
-            sleep 2
-          done
-          ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-core)"
-          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /cases /pacotes; do
-            code="$(curl -sS -H 'Host: wmp.impulsionando.com.br' -H 'Accept: text/html,application/xhtml+xml' -o /tmp/wmp -w '%{http_code}' "http://$ip:3000$path")"
-            echo "WMP_INTERNAL $path HTTP=$code"
-            [ "$code" = '200' ] || exit 44
-          done
-          echo 'WMP_ORIGIN_PASS'
-          REMOTE
-
-      - name: Validate WMP public production
-        run: |
-          set -euo pipefail
-          for path in / /auth /dashboard /seguranca/senha /djs /empresas /orcamento /parceiro /onde-estou /cases /pacotes; do
-            code="$(curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' -o /tmp/wmp -w '%{http_code}' --max-time 30 "https://wmp.impulsionando.com.br$path?wmp_final=${GITHUB_RUN_ID}" || true)"
-            echo "WMP_PUBLIC $path HTTP=$code"
-            [ "$code" = '200' ] || exit 50
-          done
-          curl -sS -L -H 'Accept: text/html,application/xhtml+xml' -H 'Cache-Control: no-cache' "https://wmp.impulsionando.com.br/?wmp_content=${GITHUB_RUN_ID}" -o /tmp/wmp-home.html
-          for marker in '+850' 'R$ 2.900' 'R$ 7.400' 'Tech Corp' 'Festival Sertanejo de Verão' '8.000 pessoas' 'resposta garantida'; do
-            ! grep -Fqi "$marker" /tmp/wmp-home.html || { echo "LEGACY_MARKER=$marker"; exit 51; }
-          done
-          echo 'WMP_PUBLIC_PASS'
-
-      - name: Install and prove canonical n8n workflows
-        env:
-          H: ${{ secrets.VPS_HOST }}
-          U: ${{ secrets.VPS_USER }}
-        run: |
-          ssh "$U@$H" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          C=n8n-umlg-n8n-1
-          CORE_VERIFY='https://wmp.impulsionando.com.br/api/public/hooks/n8n-verify'
-          SEC='/etc/impulsionando-security.env'
-          [ "$(curl -sS -o /tmp/v -w '%{http_code}' --max-time 20 "$CORE_VERIFY")" = '200' ] || exit 60
-          test -n "$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
-
-          make_workflow() {
-            id="$1"; name="$2"; path="$3"; slug="$4"; hook="$5"; file="/tmp/$id.json"
-            cat >"$file" <<JSON
-          {"id":"$id","name":"$name","active":false,"nodes":[{"parameters":{"httpMethod":"POST","path":"$path","responseMode":"responseNode","options":{}},"id":"$id-webhook","name":"WMP Lifecycle Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[0,0],"webhookId":"$hook"},{"parameters":{"method":"POST","url":"$CORE_VERIFY","sendHeaders":true,"headerParameters":{"parameters":[{"name":"x-impulsionando-signature","value":"={{ \$json.headers?.['x-impulsionando-signature'] || '' }}"},{"name":"Content-Type","value":"application/json"}]},"sendBody":true,"contentType":"raw","rawContentType":"application/json","body":"={{ JSON.stringify(\$json.body) }}","options":{"response":{"response":{"fullResponse":true,"neverError":true,"responseFormat":"json"}},"timeout":15000}},"id":"$id-verify","name":"Verify signature in Core","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[260,0]},{"parameters":{"jsCode":"const r=\$input.first().json,b=r.body||{};const ok=Number(r.statusCode)===200&&b.authorized===true&&b.ok===true;return [{json:{authorized:ok,error:ok?null:(b.error||'verification_failed')}}];"},"id":"$id-normalize","name":"Normalize verification result","type":"n8n-nodes-base.code","typeVersion":2,"position":[520,0]},{"parameters":{"respondWith":"json","responseBody":"={{ { ok: \$json.authorized === true, workflow: '$slug', error: \$json.authorized === true ? null : \$json.error } }}","options":{"responseCode":"={{ \$json.authorized === true ? 200 : 401 }}"}},"id":"$id-respond","name":"Respond Security Result","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.4,"position":[780,0]}],"connections":{"WMP Lifecycle Webhook":{"main":[[{"node":"Verify signature in Core","type":"main","index":0}]]},"Verify signature in Core":{"main":[[{"node":"Normalize verification result","type":"main","index":0}]]},"Normalize verification result":{"main":[[{"node":"Respond Security Result","type":"main","index":0}]]}},"settings":{"executionOrder":"v1"}}
-          JSON
-            sudo docker cp "$file" "$C:$file"
-            sudo docker exec "$C" n8n import:workflow --input="$file"
-            sudo docker exec "$C" n8n publish:workflow --id="$id"
-            sudo docker exec "$C" n8n update:workflow --id="$id" --active=true
-          }
-
-          make_workflow wmpLeadIntake01 'WMP Lead Intake' wmp-lead-intake wmp_lead_intake wmp-lead-v4
-          make_workflow wmpProposalLifecycle01 'WMP Proposal Lifecycle' wmp-proposal-lifecycle wmp_proposal_lifecycle wmp-proposal-v4
-          make_workflow wmpDjLifecycle01 'WMP DJ Booking Lifecycle' wmp-dj-booking-lifecycle wmp_dj_booking_lifecycle wmp-dj-v4
-          make_workflow wmpPostEvent01 'WMP Post Event Relationship' wmp-post-event-relationship wmp_post_event_relationship wmp-post-v4
-          sudo docker restart "$C" >/dev/null
-          for i in $(seq 1 45); do
-            sudo docker exec "$C" node -e "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" >/dev/null 2>&1 && break
-            [ "$i" -lt 45 ] || exit 61
-            sleep 2
-          done
-
-          probe() {
-            id="$1"; path="$2"; event="$3"; url="https://n8n.impulsionando.com.br/webhook/$path"; ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-            payload="{\"workflow_name\":\"$id\",\"event_code\":\"$event\",\"tenant_slug\":\"wmp\",\"correlation_id\":\"probe-$id\",\"company_id\":null,\"dispatched_at\":\"$ts\",\"data\":{\"probe\":true}}"
-            uc="$(curl -sS -o /tmp/u -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -d "$payload")"
-            echo "$id unsigned=$uc"; [ "$uc" = '401' ] || exit 62
-            secret="$(sudo sed -n 's/^IMPULSIONANDO_WEBHOOK_SECRET=//p' "$SEC" | head -n1)"
-            sig="$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $2}')"
-            sc="$(curl -sS -o /tmp/s -w '%{http_code}' --max-time 20 -X POST "$url" -H 'content-type: application/json' -H "x-impulsionando-signature: $sig" -d "$payload")"
-            echo "$id signed=$sc"; [ "$sc" = '200' ] || exit 63; grep -q '"ok":true' /tmp/s || exit 64
-            sudo docker exec "$C" n8n export:workflow --id="$id" --output="/tmp/$id-final.json" >/dev/null
-            sudo docker exec -e WID="$id" "$C" node -e "const fs=require('fs'),id=process.env.WID,r=JSON.parse(fs.readFileSync('/tmp/'+id+'-final.json','utf8')),w=Array.isArray(r)?r[0]:r;if(!w.active||!w.activeVersionId)process.exit(1);"
-          }
-          probe wmpLeadIntake01 wmp-lead-intake wmp.lead.received
-          probe wmpProposalLifecycle01 wmp-proposal-lifecycle wmp.proposal.sent
-          probe wmpDjLifecycle01 wmp-dj-booking-lifecycle wmp.dj.offered
-          probe wmpPostEvent01 wmp-post-event-relationship wmp.event.completed
-          echo 'WMP_N8N_HMAC_PASS'
-          REMOTE
+          echo "::error::RETIRED: WMP go-live Core promotion is disabled."
+          echo "Use Production Front for Core publication and tenant-safe automation workflows separately."
+          exit 1
