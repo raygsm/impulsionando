@@ -1,0 +1,239 @@
+name: Emergency Edge Origin Repair
+
+on:
+  push:
+    branches:
+      - chore/remove-lovable-runtime-legacy
+    paths:
+      - .github/workflows/emergency-edge-origin-repair.yml
+  workflow_dispatch:
+
+concurrency:
+  group: emergency-edge-origin-repair
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - name: Validate secrets and resolve canonical VPS
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
+            test -n "${!v:-}" || { echo "::error::Missing $v"; exit 10; }
+          done
+          CF_ZONE_ID="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
+          VPS_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
+          test -n "$VPS_IP"
+          echo "CF_ZONE_ID=$CF_ZONE_ID" >> "$GITHUB_ENV"
+          echo "VPS_IP=$VPS_IP" >> "$GITHUB_ENV"
+          echo "CANONICAL_VPS_IP=$VPS_IP"
+
+      - name: Backup and reconcile canonical DNS records
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records"
+          headers=(-H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json')
+          curl --fail --silent --show-error "${headers[@]}" "$api?per_page=5000" -o /tmp/dns-before.json
+          jq -e '.success == true' /tmp/dns-before.json >/dev/null
+
+          domains=(
+            impulsionando.com.br
+            www.impulsionando.com.br
+            chrismed.impulsionando.com.br
+            wmp.impulsionando.com.br
+            colorssaude.impulsionando.com.br
+            csi.impulsionando.com.br
+            marocas.impulsionando.com.br
+            anamadu.impulsionando.com.br
+            riomed.impulsionando.com.br
+            sulatlantica.impulsionando.com.br
+          )
+
+          for domain in "${domains[@]}"; do
+            curl --fail --silent --show-error "${headers[@]}" "$api?name=$domain&per_page=100" -o /tmp/records.json
+            jq -e '.success == true' /tmp/records.json >/dev/null
+            aid="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/records.json | head -n1)"
+            if [ -n "$aid" ] && [ "$aid" != null ]; then
+              jq -nc --arg name "$domain" --arg content "$VPS_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/record-new.json
+              curl --fail --silent --show-error -X PUT "${headers[@]}" --data @/tmp/record-new.json "$api/$aid" -o /tmp/record-updated.json
+              jq -e '.success == true' /tmp/record-updated.json >/dev/null
+              echo "DNS_A_RECONCILED=$domain"
+            else
+              cname_count="$(jq '[.result[] | select(.type=="CNAME")] | length' /tmp/records.json)"
+              if [ "$cname_count" -gt 0 ]; then
+                echo "DNS_CNAME_PRESERVED=$domain"
+              else
+                jq -nc --arg name "$domain" --arg content "$VPS_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/record-new.json
+                curl --fail --silent --show-error -X POST "${headers[@]}" --data @/tmp/record-new.json "$api" -o /tmp/record-created.json
+                jq -e '.success == true' /tmp/record-created.json >/dev/null
+                echo "DNS_A_CREATED=$domain"
+              fi
+            fi
+          done
+
+          # Ensure wildcard fallback goes to canonical VPS without deleting existing exact records.
+          wildcard='*.impulsionando.com.br'
+          curl --fail --silent --show-error "${headers[@]}" "$api?name=$wildcard&per_page=100" -o /tmp/wildcard.json
+          wid="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/wildcard.json | head -n1)"
+          jq -nc --arg name "$wildcard" --arg content "$VPS_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}' >/tmp/wildcard-new.json
+          if [ -n "$wid" ] && [ "$wid" != null ]; then
+            curl --fail --silent --show-error -X PUT "${headers[@]}" --data @/tmp/wildcard-new.json "$api/$wid" -o /tmp/wildcard-result.json
+          else
+            curl --fail --silent --show-error -X POST "${headers[@]}" --data @/tmp/wildcard-new.json "$api" -o /tmp/wildcard-result.json
+          fi
+          jq -e '.success == true' /tmp/wildcard-result.json >/dev/null
+          echo 'WILDCARD_RECONCILED=PASS'
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+
+      - name: Issue DNS certificate and enable Nginx TLS
+        run: |
+          set -euo pipefail
+          # Pass token only through stdin into a root-only temporary credential file. Never echo it.
+          printf '%s' "$CF_API_TOKEN" | ssh "$VPS_USER@$VPS_HOST" 'sudo bash -s' <<'REMOTE'
+          set -euo pipefail
+          token="$(cat)"
+          test -n "$token"
+          backup="/var/backups/impulsionando-edge-$(date -u +%Y%m%dT%H%M%SZ)"
+          mkdir -p "$backup"
+          cp -a /etc/nginx/sites-available/impulsionando-core "$backup/impulsionando-core.before"
+          cp -a /etc/nginx/sites-available/chrismed.impulsionando.com.br "$backup/chrismed.before" 2>/dev/null || true
+
+          if ! certbot plugins 2>/dev/null | grep -q 'dns-cloudflare'; then
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -qq
+            apt-get install -y -qq python3-certbot-dns-cloudflare
+          fi
+
+          cred="$(mktemp /root/.cf-certbot.XXXXXX)"
+          trap 'rm -f "$cred"' EXIT
+          chmod 600 "$cred"
+          printf 'dns_cloudflare_api_token = %s\n' "$token" > "$cred"
+
+          certbot certonly \
+            --dns-cloudflare \
+            --dns-cloudflare-credentials "$cred" \
+            --dns-cloudflare-propagation-seconds 30 \
+            --non-interactive \
+            --agree-tos \
+            --register-unsafely-without-email \
+            --cert-name impulsionando-origin \
+            -d impulsionando.com.br \
+            -d '*.impulsionando.com.br'
+
+          cert=/etc/letsencrypt/live/impulsionando-origin/fullchain.pem
+          key=/etc/letsencrypt/live/impulsionando-origin/privkey.pem
+          test -s "$cert" && test -s "$key"
+
+          cat > /etc/nginx/sites-available/impulsionando-core <<NGINX
+server {
+  listen 80;
+  listen [::]:80;
+  server_name impulsionando.com.br www.impulsionando.com.br app.impulsionando.com.br *.impulsionando.com.br;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name impulsionando.com.br www.impulsionando.com.br app.impulsionando.com.br *.impulsionando.com.br;
+
+  ssl_certificate $cert;
+  ssl_certificate_key $key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_timeout 1d;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+NGINX
+
+          # The dedicated CHRISMED HTTP-only block would shadow the wildcard; disable it after backup.
+          rm -f /etc/nginx/sites-enabled/chrismed.impulsionando.com.br
+
+          nginx -t
+          systemctl reload nginx
+          ss -ltnp | grep -q ':443 '
+          systemctl is-active --quiet impulsionando-core.service
+
+          for d in impulsionando.com.br chrismed.impulsionando.com.br wmp.impulsionando.com.br colorssaude.impulsionando.com.br csi.impulsionando.com.br marocas.impulsionando.com.br anamadu.impulsionando.com.br riomed.impulsionando.com.br sulatlantica.impulsionando.com.br; do
+            code="$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$d:443:127.0.0.1" "https://$d/")"
+            [ "$code" = 200 ] || { echo "LOCAL_TLS_FAILED=$d code=$code"; exit 30; }
+            echo "LOCAL_TLS_PASS=$d"
+          done
+          echo "NGINX_TLS_REPAIR=PASS backup=$backup"
+          REMOTE
+
+      - name: Verify public HTTPS matrix
+        run: |
+          set -euo pipefail
+          domains=(
+            impulsionando.com.br
+            chrismed.impulsionando.com.br
+            wmp.impulsionando.com.br
+            colorssaude.impulsionando.com.br
+            csi.impulsionando.com.br
+            marocas.impulsionando.com.br
+            anamadu.impulsionando.com.br
+            riomed.impulsionando.com.br
+            sulatlantica.impulsionando.com.br
+          )
+          failed=0
+          for d in "${domains[@]}"; do
+            code=000
+            for i in $(seq 1 12); do
+              code="$(curl -sS -L -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?edge_repair=${GITHUB_RUN_ID}" || true)"
+              [ "$code" = 200 ] && break
+              sleep 5
+            done
+            echo "PUBLIC_HTTPS=$d code=$code"
+            [ "$code" = 200 ] || failed=1
+          done
+          [ "$failed" -eq 0 ]
+          echo 'PUBLIC_HTTPS_MATRIX=PASS'
+
+      - name: Upload DNS backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emergency-edge-dns-before-${{ github.run_id }}
+          path: /tmp/dns-before.json
+          retention-days: 30
