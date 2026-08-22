@@ -18,15 +18,14 @@ function safe(cmd) {
 }
 
 const envSha =
-  process.env.LOVABLE_COMMIT_SHA ||
+  process.env.GITHUB_SHA ||
   process.env.GIT_SHA ||
   process.env.CF_PAGES_COMMIT_SHA ||
-  process.env.VERCEL_GIT_COMMIT_SHA ||
   "";
 
 const commit = envSha || safe("git rev-parse HEAD") || "unknown";
 const branch =
-  process.env.LOVABLE_BRANCH ||
+  process.env.GITHUB_REF_NAME ||
   process.env.CF_PAGES_BRANCH ||
   safe("git rev-parse --abbrev-ref HEAD") ||
   "main";
