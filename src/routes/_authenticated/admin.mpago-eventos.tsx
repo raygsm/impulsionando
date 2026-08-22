@@ -50,6 +50,9 @@ const fmtDate = (s?: string | null) =>
 const brl = (c: number) =>
   (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const MPAGO_WEBHOOK_URL =
+  "https://arygtqrdpcdkwnuwsgmm.supabase.co/functions/v1/mpago-webhook?company_id=<UUID>";
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string; Icon: typeof CheckCircle2 }> = {
     approved: { label: "Aprovado", cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300", Icon: CheckCircle2 },
@@ -136,9 +139,7 @@ function MpagoEventsPage() {
                 <p className="text-xs">
                   Configure no painel do MP a URL:
                   <br />
-                  <code className="text-[10px] break-all">
-                    https://impulsionando.lovable.app/functions/v1/mpago-webhook?company_id=&lt;UUID&gt;
-                  </code>
+                  <code className="text-[10px] break-all">{MPAGO_WEBHOOK_URL}</code>
                 </p>
               </div>
             ) : (
