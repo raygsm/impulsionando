@@ -1,9 +1,4 @@
-/**
- * /vitrine/$slug — Página pública da empresa participante.
- * Mostra dados básicos, rating real, lista de avaliações e permite ao usuário logado
- * criar, editar e remover a própria avaliação.
- */
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -15,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import {
-  getPublicCompanyBySlug,
+  getClubCompanyBySlug,
   submitCompanyReview,
   getMyReviewForCompany,
   deleteCompanyReview,
@@ -23,7 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  MapPin, Instagram, Facebook, Globe, MessageCircle, Crown, Heart, Star, Loader2, Trash2, Pencil,
+  MapPin, Instagram, Globe, MessageCircle, Crown, Heart, Star, Loader2, Trash2, Pencil, LockKeyhole,
 } from "lucide-react";
 
 const COMMENT_MAX = 1000;
@@ -34,45 +29,44 @@ const reviewSchema = z.object({
 });
 
 export const Route = createFileRoute("/vitrine/$slug")({
-  loader: async ({ params }) => {
-    try {
-      return await getPublicCompanyBySlug({ data: { slug: params.slug } });
-    } catch {
-      throw notFound();
+  ssr: false,
+  beforeLoad: async ({ params }) => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({
+        to: "/auth",
+        search: {
+          persona: "clube",
+          mode: "signin",
+          next: `/vitrine/${params.slug}`,
+        },
+      });
     }
   },
+  loader: async ({ params }) => getClubCompanyBySlug({ data: { slug: params.slug } }),
   head: ({ loaderData }) => {
     const c = loaderData?.company;
-    const title = c ? `${c.trade_name || c.name} — Vitrine Impulsionando` : "Vitrine Impulsionando";
-    const desc = c ? `Conheça ${c.trade_name || c.name}${c.address_city ? ` em ${c.address_city}` : ""}. Reserve, peça e ganhe benefícios pelo Clube Premium.` : "Vitrine de parceiros Impulsionando.";
+    const title = c ? `${c.trade_name || c.name} — Clube Impulsionando` : "Clube Impulsionando";
+    const desc = c ? `Detalhes de ${c.trade_name || c.name} disponíveis para membros do Clube Impulsionando.` : "Área exclusiva para membros do Clube Impulsionando.";
     return {
       meta: [
         { title },
         { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        ...(c?.logo_url ? [{ property: "og:image", content: c.logo_url }] : []),
+        { name: "robots", content: "noindex, nofollow" },
       ],
     };
   },
   errorComponent: ({ error, reset }) => (
-    <div className="min-h-dvh flex items-center justify-center p-6 text-center">
-      <div>
-        <h1 className="text-xl font-semibold">Não foi possível carregar a empresa</h1>
-        <p className="text-sm text-muted-foreground mt-2">{(error as Error)?.message}</p>
-        <div className="mt-4 flex gap-2 justify-center">
+    <div className="min-h-dvh flex items-center justify-center p-6 text-center bg-background">
+      <Card className="max-w-md p-8">
+        <LockKeyhole className="mx-auto h-9 w-9 text-primary" />
+        <h1 className="mt-4 text-xl font-semibold">Conteúdo exclusivo do Clube</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{(error as Error)?.message || "Não foi possível carregar os detalhes desta empresa."}</p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button onClick={reset} variant="outline">Tentar novamente</Button>
           <Button asChild><Link to="/vitrine">Voltar à vitrine</Link></Button>
         </div>
-      </div>
-    </div>
-  ),
-  notFoundComponent: () => (
-    <div className="min-h-dvh flex items-center justify-center p-6 text-center">
-      <div>
-        <h1 className="text-xl font-semibold">Empresa não encontrada</h1>
-        <Button asChild className="mt-4"><Link to="/vitrine">Voltar à vitrine</Link></Button>
-      </div>
+      </Card>
     </div>
   ),
   component: VitrineDetailPage,
@@ -91,11 +85,17 @@ function Stars({ value, size = 14 }: { value: number; size?: number }) {
 function VitrineDetailPage() {
   const { company: c, reviews } = Route.useLoaderData();
   const router = useRouter();
-
   const [userId, setUserId] = useState<string | null>(null);
+  const [stars, setStars] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setUserId(s?.user?.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => setUserId(session?.user?.id ?? null));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -107,14 +107,6 @@ function VitrineDetailPage() {
   });
   const myReview = myReviewQ.data?.review ?? null;
 
-  const [stars, setStars] = useState<number>(0);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [fieldError, setFieldError] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-
-  // Pré-preenche o formulário quando minha avaliação carrega
   useEffect(() => {
     if (myReview && !editing) {
       setStars(myReview.stars);
@@ -125,28 +117,20 @@ function VitrineDetailPage() {
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();
     setFieldError(null);
-
-    if (!userId) {
-      toast.error("Faça login para avaliar");
-      return;
-    }
-    const trimmedComment = comment.trim();
-    const parsed = reviewSchema.safeParse({ stars, comment: trimmedComment || undefined });
+    const parsed = reviewSchema.safeParse({ stars, comment: comment.trim() || undefined });
     if (!parsed.success) {
       const msg = parsed.error.issues[0]?.message ?? "Dados inválidos";
       setFieldError(msg);
-      toast.error(msg);
       return;
     }
-
     setSubmitting(true);
     try {
       await submitCompanyReview({ data: { company_id: c.id, stars: parsed.data.stars, comment: parsed.data.comment } });
-      toast.success(myReview ? "Avaliação atualizada!" : "Avaliação enviada!");
+      toast.success(myReview ? "Avaliação atualizada." : "Avaliação enviada.");
       setEditing(false);
       await Promise.all([myReviewQ.refetch(), router.invalidate()]);
     } catch (err) {
-      toast.error((err as Error).message || "Não foi possível enviar");
+      toast.error((err as Error).message || "Não foi possível salvar a avaliação.");
     } finally {
       setSubmitting(false);
     }
@@ -154,17 +138,16 @@ function VitrineDetailPage() {
 
   async function handleDelete() {
     if (!myReview) return;
-    if (!confirm("Remover sua avaliação?")) return;
     setDeleting(true);
     try {
       await deleteCompanyReview({ data: { company_id: c.id } });
-      toast.success("Avaliação removida");
       setStars(0);
       setComment("");
       setEditing(false);
+      toast.success("Avaliação removida.");
       await Promise.all([myReviewQ.refetch(), router.invalidate()]);
     } catch (err) {
-      toast.error((err as Error).message || "Não foi possível remover");
+      toast.error((err as Error).message || "Não foi possível remover a avaliação.");
     } finally {
       setDeleting(false);
     }
@@ -172,154 +155,82 @@ function VitrineDetailPage() {
 
   const ratingAvg = Number(c.rating_avg ?? 0);
   const ratingCount = Number(c.rating_count ?? 0);
-  const canSubmit = stars >= 1 && !submitting && !deleting;
-  const showForm = !myReview || editing;
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <PublicHeader />
-      <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <Badge variant="secondary"><LockKeyhole className="mr-1 h-3.5 w-3.5" />Área de membros do Clube</Badge>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight">{c.trade_name || c.name}</h1>
+            {c.segment ? <p className="mt-1 text-sm text-muted-foreground">{c.segment}</p> : null}
+          </div>
+          <Button asChild variant="outline"><Link to="/vitrine">Voltar à Vitrine</Link></Button>
+        </div>
+
         <Card className="p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row gap-6">
-            {c.logo_url ? (
-              <img src={c.logo_url} alt={c.name} className="w-24 h-24 rounded-xl object-cover" />
-            ) : (
-              <div className="w-24 h-24 rounded-xl bg-primary/10" />
-            )}
+          <div className="flex flex-col gap-6 sm:flex-row">
+            {c.logo_url ? <img src={c.logo_url} alt={c.name} className="h-24 w-24 rounded-xl object-cover" /> : <div className="h-24 w-24 rounded-xl bg-primary/10" />}
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{c.trade_name || c.name}</h1>
-              <div className="mt-2 flex flex-wrap gap-2 items-center">
-                {c.segment && <Badge variant="outline">{c.segment}</Badge>}
-                {(c.address_city || c.address_state) && (
-                  <Badge variant="secondary" className="gap-1"><MapPin className="w-3 h-3" /> {c.address_city}{c.address_state ? `, ${c.address_state}` : ""}</Badge>
-                )}
-                {ratingCount > 0 && (
-                  <span className="inline-flex items-center gap-2 text-sm">
-                    <Stars value={ratingAvg} />
-                    <span className="font-medium">{ratingAvg.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({ratingCount})</span>
-                  </span>
-                )}
-              </div>
-              {c.address_line && <p className="text-sm text-muted-foreground mt-3">{c.address_line}</p>}
+              <p className="text-sm leading-relaxed text-muted-foreground">{c.description || c.tagline || "Empresa participante do Ecossistema Impulsionando."}</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {c.whatsapp && <Button asChild variant="outline" size="sm"><a href={`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener"><MessageCircle className="w-4 h-4 mr-1" /> WhatsApp</a></Button>}
-                {c.instagram && <Button asChild variant="outline" size="sm"><a href={`https://instagram.com/${c.instagram.replace("@", "")}`} target="_blank" rel="noopener"><Instagram className="w-4 h-4 mr-1" /> Instagram</a></Button>}
-                {c.facebook && <Button asChild variant="outline" size="sm"><a href={c.facebook} target="_blank" rel="noopener"><Facebook className="w-4 h-4 mr-1" /> Facebook</a></Button>}
-                {c.website && <Button asChild variant="outline" size="sm"><a href={c.website} target="_blank" rel="noopener"><Globe className="w-4 h-4 mr-1" /> Site</a></Button>}
+                {(c.address_city || c.address_state) && <Badge variant="outline"><MapPin className="mr-1 h-3.5 w-3.5" />{c.address_city}{c.address_state ? `, ${c.address_state}` : ""}</Badge>}
+                {ratingCount > 0 && <Badge variant="outline"><Stars value={ratingAvg} /><span className="ml-1">{ratingAvg.toFixed(1)} ({ratingCount})</span></Badge>}
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {c.whatsapp ? <Button asChild size="sm" variant="outline"><a href={`https://wa.me/${String(c.whatsapp).replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />WhatsApp</a></Button> : null}
+                {c.instagram ? <Button asChild size="sm" variant="outline"><a href={`https://instagram.com/${String(c.instagram).replace("@", "")}`} target="_blank" rel="noopener noreferrer"><Instagram className="mr-2 h-4 w-4" />Instagram</a></Button> : null}
+                {c.website ? <Button asChild size="sm" variant="outline"><a href={c.website} target="_blank" rel="noopener noreferrer"><Globe className="mr-2 h-4 w-4" />Site</a></Button> : null}
               </div>
             </div>
           </div>
         </Card>
 
         <Card className="p-6 bg-gradient-primary text-primary-foreground">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Crown className="w-10 h-10 shrink-0" />
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <Crown className="h-10 w-10 shrink-0" />
             <div className="flex-1">
-              <h2 className="text-lg font-semibold">Desbloqueie benefícios em {c.trade_name || c.name}</h2>
-              <p className="text-sm text-white/85 mt-1">Com o Clube Premium R$ 9,99/mês você ganha descontos, prioridade em reservas e ofertas exclusivas dos parceiros.</p>
+              <h2 className="text-lg font-semibold">Amplie seus benefícios no Clube</h2>
+              <p className="mt-1 text-sm text-white/85">O plano Free garante acesso aos detalhes da Vitrine. Planos pagos podem liberar benefícios, ofertas e experiências adicionais conforme disponibilidade.</p>
             </div>
-            <Button asChild className="bg-white text-primary hover:bg-white/90"><Link to="/clube"><Heart className="w-4 h-4 mr-1" /> Virar Premium</Link></Button>
+            <Button asChild className="bg-white text-primary hover:bg-white/90"><Link to="/clube"><Heart className="mr-1 h-4 w-4" />Ver planos</Link></Button>
           </div>
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Avaliações</h2>
-
-          {/* Minha avaliação atual */}
-          {userId && myReviewQ.isLoading && (
-            <p className="text-sm text-muted-foreground flex items-center gap-2 mb-4"><Loader2 className="w-4 h-4 animate-spin" /> Carregando sua avaliação…</p>
-          )}
-          {userId && myReview && !editing && (
-            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 mb-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs uppercase tracking-wide text-primary mb-1">Sua avaliação</div>
-                  <Stars value={myReview.stars} size={16} />
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setEditing(true)} disabled={deleting}>
-                    <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={handleDelete} disabled={deleting}>
-                    {deleting ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 mr-1" />} Remover
-                  </Button>
-                </div>
-              </div>
-              {myReview.comment && <p className="text-sm mt-2 whitespace-pre-wrap">{myReview.comment}</p>}
-            </div>
-          )}
-
-          {/* Formulário (criar ou editar) */}
-          {showForm && (
-            <form onSubmit={handleSubmitReview} className="space-y-3 border-b pb-4 mb-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-muted-foreground">Sua nota:</span>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => { setStars(n); setFieldError(null); }}
-                    className="p-1 rounded hover:bg-muted disabled:opacity-50"
-                    aria-label={`${n} estrela${n > 1 ? "s" : ""}`}
-                    aria-pressed={stars === n}
-                    disabled={submitting || deleting}
-                  >
-                    <Star className={n <= stars ? "w-7 h-7 fill-amber-400 text-amber-400" : "w-7 h-7 text-muted-foreground/40"} />
-                  </button>
-                ))}
-                {stars > 0 && <span className="text-sm font-medium">{stars}/5</span>}
-              </div>
-              <div>
-                <Textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value.slice(0, COMMENT_MAX))}
-                  placeholder="Conte como foi sua experiência (opcional)"
-                  rows={3}
-                  maxLength={COMMENT_MAX}
-                  disabled={submitting || deleting}
-                />
-                <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                  <span>{fieldError && <span className="text-destructive">{fieldError}</span>}</span>
-                  <span>{comment.length}/{COMMENT_MAX}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" disabled={!canSubmit}>
-                  {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {submitting ? "Enviando…" : (myReview ? "Salvar alterações" : "Enviar avaliação")}
-                </Button>
-                {editing && (
-                  <Button type="button" variant="ghost" onClick={() => {
-                    setEditing(false);
-                    setStars(myReview?.stars ?? 0);
-                    setComment(myReview?.comment ?? "");
-                    setFieldError(null);
-                  }} disabled={submitting}>
-                    Cancelar
-                  </Button>
-                )}
-              </div>
-              {!userId && <p className="text-xs text-muted-foreground">É preciso estar logado para avaliar.</p>}
-            </form>
-          )}
-
-          {/* Lista pública */}
-          {reviews.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Seja o primeiro a avaliar.</p>
-          ) : (
-            <ul className="space-y-3">
-              {reviews.map((r: { id: string; stars: number; comment: string | null; created_at: string }) => (
-                <li key={r.id} className="border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <Stars value={r.stars} />
-                    <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("pt-BR")}</span>
+          <h2 className="text-lg font-semibold">Avaliações</h2>
+          <div className="mt-4 space-y-4">
+            {myReviewQ.isLoading ? <p className="text-sm text-muted-foreground"><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Carregando sua avaliação…</p> : null}
+            {myReview && !editing ? (
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div><div className="text-xs uppercase tracking-wide text-primary">Sua avaliação</div><Stars value={myReview.stars} size={16} /></div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Pencil className="mr-1 h-3.5 w-3.5" />Editar</Button>
+                    <Button size="sm" variant="outline" onClick={handleDelete} disabled={deleting}>{deleting ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Trash2 className="mr-1 h-3.5 w-3.5" />}Remover</Button>
                   </div>
-                  {r.comment && <p className="text-sm mt-2 whitespace-pre-wrap">{r.comment}</p>}
-                </li>
-              ))}
-            </ul>
-          )}
+                </div>
+                {myReview.comment ? <p className="mt-2 text-sm whitespace-pre-wrap">{myReview.comment}</p> : null}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitReview} className="space-y-3">
+                <div className="flex flex-wrap items-center gap-1">
+                  {[1,2,3,4,5].map((n) => <button key={n} type="button" aria-label={`${n} estrela${n > 1 ? "s" : ""}`} onClick={() => setStars(n)} className="rounded p-1 hover:bg-muted"><Star className={n <= stars ? "h-7 w-7 fill-amber-400 text-amber-400" : "h-7 w-7 text-muted-foreground/40"} /></button>)}
+                </div>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, COMMENT_MAX))} maxLength={COMMENT_MAX} rows={3} placeholder="Conte como foi sua experiência (opcional)" />
+                {fieldError ? <p className="text-xs text-destructive">{fieldError}</p> : null}
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={submitting || stars < 1}>{submitting ? "Salvando…" : myReview ? "Salvar alterações" : "Enviar avaliação"}</Button>
+                  {editing ? <Button type="button" variant="ghost" onClick={() => { setEditing(false); setStars(myReview?.stars ?? 0); setComment(myReview?.comment ?? ""); }}>Cancelar</Button> : null}
+                </div>
+              </form>
+            )}
+
+            <div className="border-t pt-4 space-y-3">
+              {reviews.length === 0 ? <p className="text-sm text-muted-foreground">Ainda não há avaliações publicadas.</p> : reviews.map((r: any) => <div key={r.id} className="rounded-lg border p-4"><Stars value={Number(r.stars)} />{r.comment ? <p className="mt-2 text-sm">{r.comment}</p> : null}<p className="mt-2 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("pt-BR")}</p></div>)}
+            </div>
+          </div>
         </Card>
       </main>
       <PublicFooter />
