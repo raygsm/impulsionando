@@ -1,0 +1,151 @@
+name: Controlled Republish 2026-08-21 18:00 BRT
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/controlled-republish-20260821-1800.yml
+  workflow_dispatch:
+
+concurrency:
+  group: controlled-republish-20260821-1800
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: production
+    env:
+      SOURCE_SHA: 80e20d11d6e5aa364425eadd1b14c07594ef0ea6
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Checkout exact protected source snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: 80e20d11d6e5aa364425eadd1b14c07594ef0ea6
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Preflight exact source and credentials
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do test -n "${!v:-}" || { echo "::error::Missing $v"; exit 10; }; done
+          npm ci --no-audit --no-fund
+          npx --yes vitest run src/lib/subdomain.test.ts
+          npm run build
+          test -f .output/server/index.mjs
+          test -f scripts/start-core-runtime.mjs
+          printf '%s' "$SOURCE_SHA" > .output/public/impulsionando-front-sha.txt
+          printf '{"sha":"%s","source_cutoff":"2026-08-21T18:00:00-03:00","built_at":"%s"}\n' "$SOURCE_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .output/public/impulsionando-release.json
+      - name: Discover real production tenants only
+        run: |
+          set -euo pipefail
+          curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
+          jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando" and (.subdomain | startswith("e2e-") | not) and (.subdomain | startswith("rls-") | not)) | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
+          test -s /tmp/domains.txt
+      - name: Package immutable Core artifact
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/controlled-republish.tgz .output scripts package.json package-lock.json
+          sha256sum /tmp/controlled-republish.tgz | tee /tmp/controlled-republish.sha256
+      - name: Configure SSH and upload artifact
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts
+          scp /tmp/controlled-republish.tgz /tmp/controlled-republish.sha256 "$VPS_USER@$VPS_HOST:/tmp/"
+      - name: Promote exact snapshot with rollback guard
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" "SOURCE_SHA='$SOURCE_SHA' RUN_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          compose=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          release="/var/www/impulsionando-core/releases/recovery-$SOURCE_SHA"
+          test -f "$compose"
+          cd /tmp
+          sha256sum -c controlled-republish.sha256
+          sudo rm -rf "$release"
+          sudo mkdir -p "$release"
+          sudo tar -xzf /tmp/controlled-republish.tgz -C "$release"
+          test "$(sudo cat "$release/.output/public/impulsionando-front-sha.txt")" = "$SOURCE_SHA"
+          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
+          if [ -n "$old_image" ]; then sudo docker tag "$old_image" "impulsionando-core:pre-republish-$RUN_ID"; fi
+          cat >/tmp/Dockerfile.controlled-republish <<'DOCKERFILE'
+          FROM node:22-bookworm-slim
+          WORKDIR /app
+          ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+          COPY package.json package-lock.json ./
+          RUN npm ci --omit=dev --no-audit --no-fund
+          COPY .output ./.output
+          COPY scripts ./scripts
+          EXPOSE 3000
+          CMD ["node","scripts/start-core-runtime.mjs"]
+          DOCKERFILE
+          sudo docker build -f /tmp/Dockerfile.controlled-republish -t "impulsionando-core:$SOURCE_SHA" "$release"
+          sudo docker tag "impulsionando-core:$SOURCE_SHA" impulsionando-core:latest
+          rollback() {
+            rc=$?
+            echo "CONTROLLED_REPUBLISH_ROLLBACK rc=$rc"
+            if sudo docker image inspect "impulsionando-core:pre-republish-$RUN_ID" >/dev/null 2>&1; then
+              sudo docker tag "impulsionando-core:pre-republish-$RUN_ID" impulsionando-core:latest
+              cd /opt/impulsionando/deploy/hostinger
+              sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core || true
+            fi
+            exit "$rc"
+          }
+          trap rollback ERR
+          cd /opt/impulsionando/deploy/hostinger
+          sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core
+          for i in $(seq 1 45); do
+            if sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/',{headers:{host:'impulsionando.com.br'}}).then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(2))" >/dev/null 2>&1; then break; fi
+            [ "$i" -lt 45 ] || { sudo docker logs --tail 200 impulsionando-core || true; exit 30; }
+            sleep 2
+          done
+          served="$(sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/impulsionando-front-sha.txt',{headers:{host:'impulsionando.com.br'}}).then(async r=>{process.stdout.write(await r.text());process.exit(r.ok?0:1)}).catch(()=>process.exit(2))")"
+          test "$served" = "$SOURCE_SHA"
+          sudo ln -sfn "$release" /var/www/impulsionando-core/current-front
+          rm -f /tmp/controlled-republish.tgz /tmp/controlled-republish.sha256
+          trap - ERR
+          echo "CONTROLLED_CORE_PROMOTION=PASS source=$SOURCE_SHA"
+          REMOTE
+      - name: Verify apex and every real tenant on exact snapshot
+        run: |
+          set -euo pipefail
+          : > /tmp/evidence.ndjson
+          verify() {
+            d="$1"; code=000; sha=''; final=''
+            for i in $(seq 1 20); do
+              code="$(curl -sS -L -o /tmp/body -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?recovery=$SOURCE_SHA" || true)"
+              final="$(curl -sS -L -o /dev/null -w '%{url_effective}' --max-time 15 "https://$d/?recovery=$SOURCE_SHA" || true)"
+              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?recovery=$SOURCE_SHA" 2>/dev/null || true)"
+              [ "$code" = 200 ] && [ "$sha" = "$SOURCE_SHA" ] && break
+              sleep 3
+            done
+            status=FAILED
+            [ "$code" = 200 ] && [ "$sha" = "$SOURCE_SHA" ] && status=PASSED
+            jq -nc --arg release_sha "$SOURCE_SHA" --arg domain "$d" --arg served_sha "$sha" --arg final_url "$final" --arg status "$status" --argjson http_status "${code:-0}" '{release_sha:$release_sha,domain:$domain,http_status:$http_status,served_sha:$served_sha,final_url:$final_url,status:$status,verified_at:(now|todateiso8601),details:{mode:"controlled_republish_1800",run_id:env.GITHUB_RUN_ID,workflow_commit:env.GITHUB_SHA}}' >> /tmp/evidence.ndjson
+            [ "$status" = PASSED ]
+          }
+          failed=0
+          verify impulsionando.com.br || failed=1
+          verify www.impulsionando.com.br || failed=1
+          while read -r d; do [ -z "$d" ] || verify "$d" || failed=1; done < /tmp/domains.txt
+          jq -s '.' /tmp/evidence.ndjson > /tmp/evidence.json
+          curl -fsS -X POST "$SUPABASE_URL/rest/v1/core_front_release_deployments?on_conflict=release_sha,domain" -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'Content-Type: application/json' -H 'Prefer: resolution=merge-duplicates,return=minimal' --data-binary @/tmp/evidence.json
+          cat /tmp/evidence.json
+          [ "$failed" -eq 0 ]
+          echo "CONTROLLED_REPUBLISH=PASS source=$SOURCE_SHA"
