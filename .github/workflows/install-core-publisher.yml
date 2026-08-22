@@ -1,58 +1,20 @@
-name: Install Core one-click publisher
+name: RETIRED - Install Core one-click publisher
 
+# Historical workflow kept as a fail-closed tombstone.
+# The legacy VPS publisher/worker must not be installed or enabled.
+# Production Front is the single frontend publication authority.
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/install-core-publisher.yml
-      - scripts/publish-core-now.sh
-      - scripts/core-publish-worker.sh
-      - deploy/impulsionando-publish-worker.service
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: install-core-publisher
-  cancel-in-progress: true
-
 jobs:
-  install:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure SSH
-        shell: bash
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
-      - name: Install publisher and worker
-        shell: bash
-        run: |
-          set -euo pipefail
-          scp scripts/publish-core-now.sh scripts/core-publish-worker.sh deploy/impulsionando-publish-worker.service "$VPS_USER@$VPS_HOST:/tmp/"
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          sudo install -d -o root -g root -m 0755 /usr/local/lib/impulsionando/publisher
-          sudo install -o root -g root -m 0755 /tmp/publish-core-now.sh /usr/local/lib/impulsionando/publisher/publish-core-now.sh
-          sudo install -o root -g root -m 0755 /tmp/core-publish-worker.sh /usr/local/lib/impulsionando/publisher/core-publish-worker.sh
-          sudo install -o root -g root -m 0644 /tmp/impulsionando-publish-worker.service /etc/systemd/system/impulsionando-publish-worker.service
-          sudo test -s /etc/impulsionando-core.env
-          sudo grep -q '^SUPABASE_URL=.' /etc/impulsionando-core.env
-          sudo grep -q '^SUPABASE_SERVICE_ROLE_KEY=.' /etc/impulsionando-core.env
-          sudo systemctl daemon-reload
-          sudo systemctl enable --now impulsionando-publish-worker.service
-          sleep 2
-          sudo systemctl is-active --quiet impulsionando-publish-worker.service
-          sudo systemctl --no-pager --full status impulsionando-publish-worker.service | head -30
-          rm -f /tmp/publish-core-now.sh /tmp/core-publish-worker.sh /tmp/impulsionando-publish-worker.service
-          REMOTE
+          echo "::error::RETIRED: legacy Core publisher installer is disabled."
+          echo "Use .github/workflows/production-front.yml (Production Front)."
+          exit 1
