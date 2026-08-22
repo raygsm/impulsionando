@@ -1,0 +1,66 @@
+name: Fronts Live Matrix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fronts-live-matrix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check production fronts
+        shell: bash
+        run: |
+          set -uo pipefail
+          domains=(
+            impulsionando.com.br
+            chrismed.impulsionando.com.br
+            colorssaude.impulsionando.com.br
+            wmp.impulsionando.com.br
+            anamadu.impulsionando.com.br
+            marocas.impulsionando.com.br
+            csi.impulsionando.com.br
+            sulatlantica.impulsionando.com.br
+            ontap.impulsionando.com.br
+            raoni.impulsionando.com.br
+            riobeer.impulsionando.com.br
+            spartacus.impulsionando.com.br
+            peroladavila.impulsionando.com.br
+            riomed.impulsionando.com.br
+          )
+          printf 'domain\tdns\thttp\tfinal_host\tsha\ttitle\n' | tee /tmp/fronts.tsv
+          failed=0
+          for d in "${domains[@]}"; do
+            dns=$(getent ahostsv4 "$d" | awk 'NR==1{print $1}' || true)
+            [ -n "$dns" ] || dns=NO_DNS
+            body=$(mktemp)
+            meta=$(curl --silent --show-error --location --connect-timeout 5 --max-time 20 -H 'Cache-Control: no-cache' -o "$body" -w '%{http_code}\t%{url_effective}' "https://$d/" 2>/dev/null || true)
+            code=$(printf '%s' "$meta" | cut -f1)
+            final=$(printf '%s' "$meta" | cut -f2)
+            [ -n "$code" ] || code=000
+            final_host=$(printf '%s' "$final" | sed -E 's#^[a-zA-Z]+://([^/:]+).*#\1#')
+            title=$(grep -oim1 '<title[^>]*>[^<]*</title>' "$body" | sed -E 's/<[^>]+>//g' | tr '\t\r\n' '   ' | cut -c1-100)
+            sha=$(curl --silent --show-error --location --connect-timeout 4 --max-time 10 -H 'Cache-Control: no-cache' "https://$d/impulsionando-front-sha.txt" 2>/dev/null | tr -d '\r\n' || true)
+            printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$' || sha=NO_SHA
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$d" "$dns" "$code" "${final_host:-NO_FINAL}" "$sha" "${title:-NO_TITLE}" | tee -a /tmp/fronts.tsv
+            if [ "$dns" = NO_DNS ] || [ "$code" != 200 ] || [ "$final_host" != "$d" ]; then failed=1; fi
+            rm -f "$body"
+          done
+          echo '--- FRONT MATRIX ---'
+          cat /tmp/fronts.tsv
+          echo '--- SUMMARY ---'
+          total=$((${#domains[@]}))
+          ok=$(awk -F '\t' 'NR>1 && $2!="NO_DNS" && $3=="200" && $1==$4 {n++} END{print n+0}' /tmp/fronts.tsv)
+          echo "FRONTS_OK=$ok/$total"
+          if [ "$failed" -ne 0 ]; then
+            echo 'FRONTS_LIVE_MATRIX=FAIL'
+            exit 1
+          fi
+          echo 'FRONTS_LIVE_MATRIX=PASS'
