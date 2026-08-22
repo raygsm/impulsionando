@@ -1,0 +1,1 @@
+Guarded one-time trigger for emergency apex DNS cutover on 2026-08-22.

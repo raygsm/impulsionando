@@ -115,7 +115,7 @@ function CofrePage() {
           </Card>
 
           <Card className="p-3 text-xs text-muted-foreground">
-            <strong>Como rotacionar de fato:</strong> 1) gere uma nova chave no provedor; 2) atualize o segredo no Lovable Cloud (Project Settings → Secrets); 3) clique em "Marcar rotação" aqui para registrar a data e o motivo no audit trail. A "Idade" reseta para 0.
+            <strong>Como rotacionar de fato:</strong> 1) gere uma nova chave no provedor; 2) atualize o segredo no cofre/ambiente server-side correspondente (Supabase Secrets ou EnvironmentFile protegido da VPS); 3) reinicie somente o serviço afetado, quando necessário; 4) clique em "Marcar rotação" aqui para registrar a data e o motivo no audit trail. A "Idade" reseta para 0.
           </Card>
         </>
       )}

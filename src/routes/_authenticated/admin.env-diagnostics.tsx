@@ -73,7 +73,6 @@ function EnvDiagnosticsPage() {
   );
   const hasCriticalMissing = missingServer.length > 0 || missingClient.length > 0;
 
-  // Dispara alerta (webhook + e-mail) automaticamente na primeira detecção.
   useEffect(() => {
     if (!hasCriticalMissing || alertSentRef.current || isLoading) return;
     alertSentRef.current = true;
@@ -118,29 +117,22 @@ function EnvDiagnosticsPage() {
                 Variáveis obrigatórias ausentes no ambiente publicado
               </div>
               <p className="text-muted-foreground">
-                O domínio atual não recebeu as env vars do Lovable Cloud. O app carrega, mas
-                chamadas ao banco falham com{" "}
-                <em>“Missing Supabase environment variable(s)”</em>.
+                O runtime ou o bundle atual não recebeu todas as variáveis obrigatórias. O app pode carregar,
+                mas chamadas ao banco falham com <em>“Missing Supabase environment variable(s)”</em>.
               </p>
               <div className="text-foreground">Como corrigir:</div>
               <ol className="list-decimal ml-5 space-y-1 text-muted-foreground">
                 <li>
-                  Abra <b>Project Settings → Project → Domains</b> e verifique se o domínio
-                  customizado está com status <b>Active</b>. Se aparecer <b>Failed</b>,{" "}
-                  <b>Offline</b> ou <b>Setting up</b>, clique em <b>Retry</b> ou remova e
-                  reconecte.
+                  Valide no Cloudflare se o domínio resolve para a infraestrutura canônica e confirme o SSL ativo.
                 </li>
                 <li>
-                  Confirme que <b>Lovable Cloud</b> está habilitado neste projeto{" "}
-                  (Cloud → Overview).
+                  Confirme as variáveis server-side nos EnvironmentFiles protegidos da VPS e os segredos gerenciados no Supabase, sem expor valores em logs.
                 </li>
                 <li>
-                  Publique novamente pelo botão <b>Publish</b>. As env vars são injetadas
-                  no build da publicação — reconectar o domínio ou republicar reprovisiona.
+                  Para variáveis <code>VITE_*</code>, gere uma nova release pelo pipeline canônico do GitHub e promova-a via <code>/current</code> + <code>impulsionando-core</code>.
                 </li>
                 <li>
-                  Como alternativa imediata, use a URL nativa{" "}
-                  <code>impulsionando.lovable.app</code>, que sempre recebe as env vars.
+                  Após a promoção, valide <code>https://impulsionando.com.br</code> e os subdomínios reais antes de encerrar o incidente.
                 </li>
               </ol>
               {alertStatus && (
@@ -197,7 +189,7 @@ function EnvDiagnosticsPage() {
           </li>
           <li>
             Variáveis <code>VITE_*</code> são incorporadas no bundle no momento do build.
-            Republicar após reconectar o domínio é obrigatório.
+            Uma nova release precisa ser construída e promovida após qualquer alteração.
           </li>
         </ul>
       </Card>
