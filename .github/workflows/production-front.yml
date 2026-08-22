@@ -45,7 +45,7 @@ jobs:
           npm ci --no-audit --no-fund
           npx --yes vitest run src/lib/subdomain.test.ts
           curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
-          jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando") | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
+          jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando" and (.subdomain | startswith("e2e-") | not) and (.subdomain | startswith("rls-") | not)) | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
       - name: Build immutable release
         env:
