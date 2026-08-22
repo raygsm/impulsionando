@@ -1,112 +1,20 @@
-name: Tour IT publication
+name: RETIRED - Tour IT publication
 
+# Historical workflow kept as a fail-closed tombstone.
+# It previously mutated Traefik/DNS and recreated the shared Core outside the canonical pipeline.
+# Production Front is the single frontend publication authority.
 on:
-  push:
-    branches: [main]
-    paths:
-      - src/lib/subdomain.ts
-      - src/routes/index.tsx
-      - src/routes/tour.index.tsx
-      - .github/workflows/tour-it-publication.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: tour-it-publication
-  cancel-in-progress: false
-
 jobs:
-  publish:
+  retired:
     runs-on: ubuntu-latest
-    environment: production
-    env:
-      DOMAIN: it.impulsionando.com.br
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
-      - name: Validate required production secrets
+      - name: Canonical publication authority
         run: |
-          set -euo pipefail
-          for value in VPS_HOST VPS_USER VPS_SSH_KEY CF_API_TOKEN CF_ZONE_ID; do
-            test -n "${!value}" || { echo "::error::Missing $value"; exit 1; }
-          done
-          ORIGIN_IP="$(getent ahostsv4 "$VPS_HOST" | awk 'NR==1{print $1}')"
-          test -n "$ORIGIN_IP"
-          printf 'ORIGIN_IP=%s\n' "$ORIGIN_IP" >> "$GITHUB_ENV"
-
-      - name: Configure SSH
-        run: |
-          set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -T 10 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Persist explicit Tour TLS router
-        run: |
-          set -euo pipefail
-          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
-          set -euo pipefail
-          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          override=/opt/impulsionando/deploy/hostinger/docker-compose.tour-it.yml
-          cd /opt/impulsionando/deploy/hostinger
-          test -f "$base"
-          sudo tee "$override" >/dev/null <<'YAML'
-          services:
-            impulsionando-core:
-              labels:
-                traefik.http.routers.tour-it.entrypoints: websecure
-                traefik.http.routers.tour-it.rule: Host(`it.impulsionando.com.br`)
-                traefik.http.routers.tour-it.service: impulsionando-core
-                traefik.http.routers.tour-it.tls: "true"
-                traefik.http.routers.tour-it.tls.certresolver: letsencrypt
-                traefik.http.routers.tour-it.priority: "200"
-          YAML
-          sudo docker compose -f "$base" -f "$override" config -q
-          current="$(sudo docker inspect -f '{{index .Config.Labels "traefik.http.routers.tour-it.rule"}}' impulsionando-core 2>/dev/null || true)"
-          if [ "$current" != 'Host(`it.impulsionando.com.br`)' ]; then
-            sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-core
-          fi
-          REMOTE
-
-      - name: Upsert Cloudflare DNS record
-        run: |
-          set -euo pipefail
-          zone="$(printf '%s' "$CF_ZONE_ID" | tr -d '[:space:]')"
-          auth=(-H "Authorization: Bearer $CF_API_TOKEN" -H 'Content-Type: application/json')
-          curl --fail --silent --show-error "${auth[@]}" \
-            "https://api.cloudflare.com/client/v4/zones/$zone/dns_records?name=$DOMAIN&per_page=100" -o /tmp/tour-dns.json
-          jq -e '.success == true' /tmp/tour-dns.json >/dev/null
-          id="$(jq -r '.result[] | select(.type=="A") | .id' /tmp/tour-dns.json | head -n1)"
-          payload="$(jq -nc --arg name "$DOMAIN" --arg content "$ORIGIN_IP" '{type:"A",name:$name,content:$content,ttl:1,proxied:true}')"
-          if [ -n "$id" ]; then
-            curl --fail --silent --show-error -X PUT "${auth[@]}" --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$zone/dns_records/$id" | jq -e '.success == true' >/dev/null
-          else
-            curl --fail --silent --show-error -X POST "${auth[@]}" --data "$payload" \
-              "https://api.cloudflare.com/client/v4/zones/$zone/dns_records" | jq -e '.success == true' >/dev/null
-          fi
-
-      - name: Validate origin and public HTTPS
-        run: |
-          set -euo pipefail
-          for attempt in $(seq 1 30); do
-            origin="$(curl -sk --resolve "$DOMAIN:443:$ORIGIN_IP" -o /tmp/tour-origin -w '%{http_code}' --max-time 20 "https://$DOMAIN/" || true)"
-            echo "TOUR_ORIGIN attempt=$attempt HTTP=$origin"
-            [ "$origin" = "200" ] && break
-            [ "$attempt" -lt 30 ] || exit 31
-            sleep 3
-          done
-          for attempt in $(seq 1 30); do
-            code="$(curl -sSL -A 'Mozilla/5.0 TourPublication/1.0' -H 'Cache-Control: no-cache' -o /tmp/tour-public -w '%{http_code}' --max-time 30 "https://$DOMAIN/" || true)"
-            echo "TOUR_PUBLIC attempt=$attempt HTTP=$code"
-            [ "$code" = "200" ] && break
-            [ "$attempt" -lt 30 ] || exit 32
-            sleep 5
-          done
-          echo 'TOUR_IT_PUBLICATION=PASS'
+          echo "::error::RETIRED: Tour IT independent publication is disabled."
+          echo "Use .github/workflows/production-front.yml (Production Front)."
+          exit 1
