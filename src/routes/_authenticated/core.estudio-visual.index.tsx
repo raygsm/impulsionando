@@ -16,7 +16,7 @@ function EstudioVisualHub() {
         <div className="space-y-1">
           <p>Cada versão registra: tenant, prompt, objetivo, origem (Core/Lovable/Bolt/Importado), tipo, status, autor e histórico.</p>
           <p className="text-xs">
-            Homologação oficial em <code>impulsionando.lovable.app</code>. Produção só via
+            Homologação oficial no ambiente canônico do Core. Produção só via
             <code className="mx-1">Publicar Tenant [nome] no domínio principal [domínio completo]</code>.
           </p>
         </div>
