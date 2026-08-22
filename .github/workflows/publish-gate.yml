@@ -53,11 +53,11 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
 
-      - name: Smoke test public routes (preview URL)
+      - name: Smoke test canonical public routes
         if: github.event_name == 'pull_request'
         run: |
           set -e
-          BASE="https://id-preview--d5a31290-577c-4ca5-895e-72d4b8643439.lovable.app"
+          BASE="https://impulsionando.com.br"
           for p in / /clube /consumidor /planos /white-label; do
             code=$(curl -s -o /dev/null -w "%{http_code}" -L "$BASE$p")
             echo "$code $p"
