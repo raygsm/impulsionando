@@ -42,6 +42,36 @@ function money(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function stripProtocol(value: string) {
+  return value.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+}
+
+function canonicalCompanyUrl(company: Company): { host: string | null; url: string | null } {
+  const subdomain = company.subdomain?.trim().toLowerCase().replace(/\.+$/, "") || null;
+  if (subdomain) {
+    const host = subdomain.endsWith(".impulsionando.com.br") ? subdomain : `${subdomain}.impulsionando.com.br`;
+    return { host, url: `https://${host}` };
+  }
+
+  const domain = company.domain?.trim() || null;
+  if (domain) {
+    const host = stripProtocol(domain).split("/")[0];
+    return { host, url: `https://${host}` };
+  }
+
+  const website = company.website?.trim() || null;
+  if (website) {
+    const url = /^https?:\/\//i.test(website) ? website : `https://${website}`;
+    try {
+      return { host: new URL(url).host, url };
+    } catch {
+      return { host: stripProtocol(website).split("/")[0] || null, url };
+    }
+  }
+
+  return { host: null, url: null };
+}
+
 function VitrinePage() {
   const fetchVitrine = useServerFn(getPublicVitrine);
   const fetchPlans = useServerFn(listClubePlans);
@@ -114,16 +144,16 @@ function VitrinePage() {
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {rows.map((c) => {
-                const canonicalHost = c.domain || (c.subdomain ? `${c.subdomain}.impulsionando.com.br` : null);
+                const canonical = canonicalCompanyUrl(c);
                 return (
                   <Card key={c.id} className="flex flex-col p-6 transition-shadow hover:shadow-elegant">
                     <div className="flex items-start justify-between gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div><Badge variant="outline">{c.segment || "serviços"}</Badge></div>
                     <h2 className="mt-4 text-xl font-semibold">{c.trade_name || c.name}</h2>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{c.description || c.tagline || "Operação conectada ao Core Impulsionando."}</p>
-                    {canonicalHost ? <div className="mt-4 rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"><span className="font-medium text-foreground">{canonicalHost}</span>{!c.website ? <span className="ml-2">· provisionamento DNS/SSL em andamento</span> : <span className="ml-2">· ativo</span>}</div> : null}
+                    {canonical.host ? <div className="mt-4 rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"><span className="font-medium text-foreground">{canonical.host}</span><span className="ml-2">· endereço oficial</span></div> : null}
                     <div className="mt-5 flex gap-2">
                       {c.public_slug ? <Button asChild size="sm" variant="outline" className="flex-1"><Link to="/vitrine/$slug" params={{ slug: c.public_slug }}>Perfil</Link></Button> : null}
-                      {c.website ? <Button asChild size="sm" className="flex-1"><a href={c.website} target="_blank" rel="noreferrer"><Globe className="mr-2 h-3.5 w-3.5" />Abrir site</a></Button> : <Button size="sm" className="flex-1" disabled>Site em ativação</Button>}
+                      {canonical.url ? <Button asChild size="sm" className="flex-1"><a href={canonical.url} target="_blank" rel="noreferrer"><Globe className="mr-2 h-3.5 w-3.5" />Abrir site</a></Button> : <Button size="sm" className="flex-1" disabled>Site em ativação</Button>}
                     </div>
                   </Card>
                 );
