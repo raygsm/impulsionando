@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, MessageCircle, LogIn, ShieldCheck } from "lucide-react";
+import { Menu, MessageCircle, LogIn, ShieldCheck, LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -44,63 +44,37 @@ export function PublicHeader() {
 
         <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Navegação principal">
           {NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              aria-label={navAriaLabel(item)}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive(pathname, item.to)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
-              )}
-            >
-              {item.label}
-            </Link>
+            <Link key={item.to} to={item.to} aria-label={navAriaLabel(item)} className={cn("rounded-md px-3 py-2 text-sm font-medium transition-colors", isActive(pathname, item.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>{item.label}</Link>
           ))}
         </nav>
 
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/seguranca"><ShieldCheck className="mr-2 h-4 w-4" />Segurança</Link>
+            <Link to="/seguranca"><ShieldCheck className="mr-2 h-4 w-4" />Segurança e Privacidade</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/auth"><LogIn className="mr-2 h-4 w-4" />Entrar</Link>
+          <Button asChild variant="outline" size="sm" className="relative overflow-hidden border-slate-800 bg-slate-950 text-white hover:bg-slate-900 hover:text-white">
+            <Link to="/cp" aria-label="CP — Chat Privado | Segurança e Privacidade">
+              <span className="absolute left-1.5 top-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+              <LockKeyhole className="mr-2 h-4 w-4" />Chat Privado <span className="ml-1 hidden xl:inline">| Privacidade</span>
+            </Link>
           </Button>
-          <Button type="button" size="sm" onClick={openImpulsionito}>
-            <MessageCircle className="mr-2 h-4 w-4" />Impulsionito
-          </Button>
+          <Button asChild variant="outline" size="sm"><Link to="/auth"><LogIn className="mr-2 h-4 w-4" />Entrar</Link></Button>
+          <Button type="button" size="sm" onClick={openImpulsionito}><MessageCircle className="mr-2 h-4 w-4" />Impulsionito</Button>
         </div>
 
         <div className="ml-auto lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Abrir menu"><Menu className="h-5 w-5" /></Button>
-            </SheetTrigger>
+            <SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Abrir menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
             <SheetContent side="right" className="w-[88vw] max-w-sm">
               <SheetTitle className="sr-only">Menu principal</SheetTitle>
               <div className="mb-6"><LogoImpulsionando variant="light" size="sm" /></div>
               <nav className="flex flex-col gap-1" aria-label="Navegação mobile">
-                {NAV.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    aria-label={navAriaLabel(item)}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "rounded-lg px-3 py-3 text-sm font-semibold transition-colors",
-                      isActive(pathname, item.to) ? "bg-primary/10 text-primary" : "hover:bg-accent",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {NAV.map((item) => <Link key={item.to} to={item.to} aria-label={navAriaLabel(item)} onClick={() => setOpen(false)} className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isActive(pathname, item.to) ? "bg-primary/10 text-primary" : "hover:bg-accent")}>{item.label}</Link>)}
                 <Link to="/seguranca" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Segurança e Privacidade</Link>
+                <Link to="/cp" onClick={() => setOpen(false)} className="my-1 flex items-center rounded-xl bg-slate-950 px-3 py-3 text-sm font-bold text-white"><span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-400"/><LockKeyhole className="mr-2 h-4 w-4"/>Chat Privado | Segurança e Privacidade</Link>
                 <Link to="/auth" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Entrar no Core</Link>
               </nav>
-              <Button type="button" className="mt-6 w-full" onClick={() => { setOpen(false); openImpulsionito(); }}>
-                <MessageCircle className="mr-2 h-4 w-4" />Falar com Impulsionito
-              </Button>
+              <Button type="button" className="mt-6 w-full" onClick={() => { setOpen(false); openImpulsionito(); }}><MessageCircle className="mr-2 h-4 w-4" />Falar com Impulsionito</Button>
             </SheetContent>
           </Sheet>
         </div>
