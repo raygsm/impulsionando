@@ -92,11 +92,11 @@ function Page() {
         <CardContent>
           <ul className="space-y-2 text-sm">
             <li>• Identidade visual aprovada e tokens publicados</li>
-            <li>• DNS apontado (CNAME → impulsionando.lovable.app)</li>
+            <li>• DNS validado no Cloudflare para riomed.impulsionando.com.br</li>
             <li>• Certificado SSL emitido</li>
             <li>• Páginas públicas (cotizar, hospitales, serviço técnico) validadas</li>
             <li>• Webhooks de pagamento e N8N ativos</li>
-            <li>• Implantação 100% no painel correspondente</li>
+            <li>• Release promovida pelo pipeline canônico GitHub → VPS</li>
           </ul>
         </CardContent>
       </Card>

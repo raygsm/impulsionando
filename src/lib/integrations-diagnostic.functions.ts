@@ -67,7 +67,7 @@ async function probeN8N(supabaseAdmin: any): Promise<ProbeResult> {
 
 async function probeGitHub(): Promise<ProbeResult> {
   const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO; // owner/name
+  const repo = process.env.GITHUB_REPO;
   if (!token || !repo) {
     return { slug: "github", name: "GitHub", ok: false, configured: false, missing: [!token && "GITHUB_TOKEN", !repo && "GITHUB_REPO"].filter(Boolean) as string[], duration_ms: 0, checked_at: new Date().toISOString(), error: "Credenciais ausentes" };
   }
@@ -98,7 +98,7 @@ async function probeSupabase(supabaseAdmin: any): Promise<ProbeResult> {
     return { count };
   });
   return {
-    slug: "supabase", name: "Supabase / Lovable Cloud",
+    slug: "supabase", name: "Supabase",
     ok: !r.error, configured: true, missing: [],
     duration_ms: r.ms,
     details: r.result, error: r.error ?? null,
@@ -138,13 +138,13 @@ async function probeEmail(supabaseAdmin: any): Promise<ProbeResult> {
     if (error) throw error;
     const rows = data ?? [];
     const by: Record<string, number> = {};
-    for (const r of rows) by[r.status] = (by[r.status] ?? 0) + 1;
+    for (const row of rows) by[row.status] = (by[row.status] ?? 0) + 1;
     return { last_24h: rows.length, by_status: by };
   });
   const r2 = r.result as any;
   const failed = (r2?.by_status?.failed ?? 0) + (r2?.by_status?.dlq ?? 0);
   return {
-    slug: "email", name: "E-mail (Lovable)",
+    slug: "email", name: "E-mail",
     ok: !r.error && failed === 0,
     configured: true, missing: [],
     duration_ms: r.ms,
@@ -189,7 +189,7 @@ async function probeWebhooks(supabaseAdmin: any): Promise<ProbeResult> {
     if (error) throw error;
     const rows = data ?? [];
     const by: Record<string, number> = {};
-    for (const r of rows) by[r.status] = (by[r.status] ?? 0) + 1;
+    for (const row of rows) by[row.status] = (by[row.status] ?? 0) + 1;
     return { last_7d: rows.length, by_status: by };
   });
   const r2 = r.result as any;
@@ -221,7 +221,6 @@ export const runFullDiagnostic = createServerFn({ method: "POST" })
       probeWebhooks(supabaseAdmin),
     ]);
 
-    // Persist log
     await supabaseAdmin.from("core_integration_logs").insert(
       results.map((r) => ({
         integration_slug: r.slug,

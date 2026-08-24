@@ -15,7 +15,6 @@ export function TenantHostFallback() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   if (isCore || isLoading || tenant) return null;
-  // Não interceptar rotas administrativas ou de auth do próprio core.
   if (
     pathname.startsWith("/auth") ||
     pathname.startsWith("/_authenticated") ||
@@ -53,16 +52,15 @@ export function TenantHostFallback() {
           <li className="flex gap-2">
             <span className="text-primary">•</span>
             <span>
-              O domínio custom foi conectado no Lovable mas ainda <strong>não foi cadastrado</strong>{" "}
-              como tenant no core.
+              O domínio foi configurado no DNS, mas ainda <strong>não foi cadastrado</strong>{" "}
+              como tenant no Core.
             </span>
           </li>
           <li className="flex gap-2">
             <span className="text-primary">•</span>
             <span>
               O registro <code className="font-mono text-xs">A</code> /{" "}
-              <code className="font-mono text-xs">CNAME</code> aponta para o Impulsionando, mas o{" "}
-              <code className="font-mono text-xs">TXT _lovable</code> ainda está propagando.
+              <code className="font-mono text-xs">CNAME</code> ainda está propagando ou não aponta para a infraestrutura canônica.
             </span>
           </li>
           <li className="flex gap-2">

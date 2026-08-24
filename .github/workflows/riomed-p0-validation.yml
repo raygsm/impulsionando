@@ -47,7 +47,7 @@ jobs:
           grep -q 'JSON.stringify({ text: userMessage' src/routes/riomed.medicito.tsx
           grep -q 'uploadId' src/routes/riomed.medicito.tsx
           grep -q 'riomed:web:' src/routes/riomed.medicito.tsx
-          ! grep -q 'LOVABLE_API_KEY' src/routes/api/riomed/medicito/chat.ts
-          ! grep -q 'createLovableAiGatewayProvider' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'resolveProvider' src/routes/api/riomed/medicito/chat.ts
+          grep -q 'provider: "openai"' src/routes/api/riomed/medicito/chat.ts
       - name: Build universal Core with RioMed changes
         run: npm run build

@@ -63,7 +63,6 @@ export async function notifyItemReady(itemId: string): Promise<{
     .eq("sales_order_id", (row as any).order_id)
     .maybeSingle();
 
-  // Lock idempotente — mesmo sem disparar canais, evita reprocessar.
   if (!(row as any).notified_ready_at) {
     await supabaseAdmin
       .from("sales_order_items")
@@ -210,6 +209,6 @@ function getBaseUrl(): string {
   return (
     process.env.PUBLIC_APP_URL ||
     process.env.PUBLIC_SITE_URL ||
-    "https://impulsionando.lovable.app"
+    "https://impulsionando.com.br"
   );
 }

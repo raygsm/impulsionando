@@ -1,19 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
+const WEBMASTERS_BASE = "https://www.googleapis.com/webmasters/v3";
+const INSPECTION_BASE = "https://searchconsole.googleapis.com/v1";
 
 function authHeaders() {
-  const lovableKey = process.env.LOVABLE_API_KEY;
-  const gscKey = process.env.GOOGLE_SEARCH_CONSOLE_API_KEY;
-  if (!lovableKey || !gscKey) {
+  const accessToken = process.env.GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN;
+  if (!accessToken) {
     throw new Error(
-      "Search Console não configurado. Conecte o Google Search Console em Connectors.",
+      "Search Console não configurado. Defina GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN no ambiente server-side.",
     );
   }
   return {
-    Authorization: `Bearer ${lovableKey}`,
-    "X-Connection-Api-Key": gscKey,
+    Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
   } as Record<string, string>;
 }
@@ -26,8 +25,8 @@ async function ensureAdmin(ctx: any) {
   if (!isAdmin) throw new Error("Forbidden — admin only");
 }
 
-async function gwFetch(path: string, init?: RequestInit) {
-  const res = await fetch(`${GATEWAY}${path}`, {
+async function gscFetch(base: string, path: string, init?: RequestInit) {
+  const res = await fetch(`${base}${path}`, {
     ...init,
     headers: { ...authHeaders(), ...(init?.headers ?? {}) },
   });
@@ -43,12 +42,11 @@ export interface GscSite {
   permissionLevel: string;
 }
 
-/** Lista propriedades verificadas na conta Google conectada. */
 export const listGscSitesFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await ensureAdmin(context);
-    const data = await gwFetch("/webmasters/v3/sites");
+    const data = await gscFetch(WEBMASTERS_BASE, "/sites");
     return (data.siteEntry ?? []) as GscSite[];
   });
 
@@ -62,13 +60,12 @@ export interface GscQueryRow {
 
 export interface GscQueryInput {
   siteUrl: string;
-  startDate: string; // YYYY-MM-DD
+  startDate: string;
   endDate: string;
   dimensions?: Array<"query" | "page" | "country" | "device" | "date">;
   rowLimit?: number;
 }
 
-/** Executa searchAnalytics.query para uma propriedade verificada. */
 export const querySearchAnalyticsFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: GscQueryInput) => {
@@ -85,8 +82,9 @@ export const querySearchAnalyticsFn = createServerFn({ method: "POST" })
       dimensions: data.dimensions ?? ["query"],
       rowLimit: data.rowLimit ?? 25,
     };
-    const res = await gwFetch(
-      `/webmasters/v3/sites/${encoded}/searchAnalytics/query`,
+    const res = await gscFetch(
+      WEBMASTERS_BASE,
+      `/sites/${encoded}/searchAnalytics/query`,
       { method: "POST", body: JSON.stringify(body) },
     );
     return (res.rows ?? []) as GscQueryRow[];
@@ -94,7 +92,6 @@ export const querySearchAnalyticsFn = createServerFn({ method: "POST" })
 
 export interface UrlInspectInput { siteUrl: string; inspectionUrl: string }
 
-/** URL Inspection API (Google Search Console). */
 export const inspectUrlFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: UrlInspectInput) => {
@@ -103,7 +100,7 @@ export const inspectUrlFn = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const res = await gwFetch(`/v1/urlInspection/index:inspect`, {
+    const res = await gscFetch(INSPECTION_BASE, "/urlInspection/index:inspect", {
       method: "POST",
       body: JSON.stringify({ inspectionUrl: data.inspectionUrl, siteUrl: data.siteUrl }),
     });

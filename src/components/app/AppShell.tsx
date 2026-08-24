@@ -9,7 +9,7 @@ import { CommandPalette } from "./CommandPalette";
 import { QuickActions } from "./QuickActions";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { PublishNowButton } from "./PublishNowButton";
-import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
+import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDockVisible";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";

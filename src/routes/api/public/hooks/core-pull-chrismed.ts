@@ -2,7 +2,7 @@
  * Core ↔ CHRISMED pull connector.
  *
  * Puxa os eventos espelhados no endpoint /api/public/core-sync do projeto
- * CHRISMED (https://chrismed.lovable.app) e grava como linhas em
+ * CHRISMED (https://chrismed.impulsionando.com.br) e grava como linhas em
  * `runtime_events` (scope='core_pull.chrismed') vinculadas ao company_id
  * do tenant CHRISMED dentro do Core Impulsionando.
  *
@@ -18,14 +18,14 @@
  *     (scope='core_pull.chrismed.cursor') — pega o último occurred_at.
  *
  * Uso (pg_cron a cada 5 min):
- *   GET https://impulsionando.lovable.app/api/public/hooks/core-pull-chrismed
+ *   GET https://impulsionando.com.br/api/public/hooks/core-pull-chrismed
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { createHmac } from 'crypto'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2'
-const CHRISMED_BASE_URL = 'https://chrismed.lovable.app'
+const CHRISMED_BASE_URL = 'https://chrismed.impulsionando.com.br'
 const SOURCE_SCOPE = 'core_pull.chrismed'
 const CURSOR_SCOPE = 'core_pull.chrismed.cursor'
 
