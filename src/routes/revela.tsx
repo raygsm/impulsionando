@@ -1,7 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Building2, GraduationCap, Heart, LineChart, Sparkles, Users } from "lucide-react";
 
-export const Route = createFileRoute("/revela")({ component: RevelaLanding });
+export const Route = createFileRoute("/revela")({
+  head: () => ({
+    meta: [
+      { title: "REVELA — Potencial além da nota e do currículo" },
+      {
+        name: "description",
+        content:
+          "REVELA é uma iniciativa da Impulsionando que conecta escuta, observação, experiências, competências demonstradas e oportunidades reais sem rotular trajetórias.",
+      },
+    ],
+  }),
+  component: RevelaLanding,
+});
 
 const pillars = [
   { icon: Heart, title: "Escutar", text: "Perguntas mensais e trimestrais acompanham interesses, bem-estar, curiosidades e mudanças sem rotular." },
