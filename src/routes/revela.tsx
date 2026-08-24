@@ -24,7 +24,7 @@ const pillars = [
   { icon: GraduationCap, title: "Conectar", text: "Escola, aluno e oportunidades se encontram com consentimento, explicabilidade e participação humana." },
 ];
 
-function RevelaLanding() {
+export function RevelaLanding() {
   return (
     <main className="min-h-screen bg-[#f6f3ec] text-[#17231c]">
       <section className="mx-auto flex min-h-[72vh] max-w-7xl flex-col justify-center px-6 py-20 lg:px-10">
