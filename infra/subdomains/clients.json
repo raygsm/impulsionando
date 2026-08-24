@@ -8,6 +8,7 @@
     {"slug":"anamadu","domain":"anamadu.impulsionando.com.br","route":"/anamadu","enabled":true},
     {"slug":"marocas","domain":"marocas.impulsionando.com.br","route":"/marocas","enabled":true},
     {"slug":"riomed","domain":"riomed.impulsionando.com.br","route":"/riomed","enabled":true},
-    {"slug":"grupoevr","domain":"grupoevr.impulsionando.com.br","route":"/grupo-evr","enabled":true}
+    {"slug":"grupoevr","domain":"grupoevr.impulsionando.com.br","route":"/grupo-evr","enabled":true},
+    {"slug":"revela","domain":"revela.impulsionando.com.br","route":"/revela","enabled":true}
   ]
 }
