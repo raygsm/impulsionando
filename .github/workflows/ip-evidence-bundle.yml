@@ -1,0 +1,73 @@
+name: IP Evidence Bundle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ip-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout canonical source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build forensic manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/commit.txt
+          git rev-parse HEAD^{tree} > evidence/tree.txt
+          git show -s --format='commit=%H%ntree=%T%nparents=%P%nauthor_name=%an%nauthor_email=%ae%nauthor_date=%aI%ncommitter_name=%cn%ncommitter_email=%ce%ncommitter_date=%cI%nsubject=%s' HEAD > evidence/commit-metadata.txt
+          git log --show-signature -1 HEAD > evidence/git-log-signature.txt 2>&1 || true
+          git ls-tree -r --full-tree HEAD > evidence/tree-manifest.txt
+          git archive --format=tar.gz --prefix=impulsionando-${GITHUB_SHA}/ -o evidence/source-${GITHUB_SHA}.tar.gz HEAD
+          sha256sum evidence/source-${GITHUB_SHA}.tar.gz > evidence/source-${GITHUB_SHA}.sha256
+          sha256sum evidence/commit.txt evidence/tree.txt evidence/commit-metadata.txt evidence/tree-manifest.txt > evidence/manifest.sha256
+          cat > evidence/chain-of-custody.txt <<EOF
+          repository=${GITHUB_REPOSITORY}
+          github_server_url=${GITHUB_SERVER_URL}
+          workflow=${GITHUB_WORKFLOW}
+          workflow_run_id=${GITHUB_RUN_ID}
+          workflow_run_attempt=${GITHUB_RUN_ATTEMPT}
+          actor=${GITHUB_ACTOR}
+          ref=${GITHUB_REF}
+          sha=${GITHUB_SHA}
+          generated_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          evidence_policy=technical-proof-of-existence-and-provenance
+          EOF
+          sha256sum evidence/* | sort > evidence/ALL-SHA256SUMS.txt
+
+      - name: Attest source archive provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: evidence/source-${{ github.sha }}.tar.gz
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ip-evidence-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Evidence summary
+        run: |
+          echo "## IP Evidence Bundle" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Repository: $GITHUB_REPOSITORY" >> "$GITHUB_STEP_SUMMARY"
+          echo "Artifact: ip-evidence-$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Provenance attestation generated with GitHub OIDC." >> "$GITHUB_STEP_SUMMARY"
