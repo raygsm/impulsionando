@@ -65,7 +65,11 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
           build-args: |
             VITE_PUBLIC_SITE_URL=https://impulsionando.com.br
-            VITE_SUPABASE_URL=https://arygtqrdpcdkwnuwsgmm.supabase.co
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+            VITE_SUPABASE_PROJECT_ID=${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+            VITE_GIT_COMMIT=${{ github.sha }}
+            VITE_GIT_BRANCH=${{ github.ref_name }}
 
       - name: Publish build identity
         run: |
