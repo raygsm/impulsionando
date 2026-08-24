@@ -29,6 +29,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.output ./.output
 COPY --from=build /app/public ./public
 COPY --from=build /app/scripts/pulsonitor-worker.mjs ./scripts/pulsonitor-worker.mjs
+COPY --from=build /app/scripts/colors-automation-worker.mjs ./scripts/colors-automation-worker.mjs
 COPY --from=build /app/scripts/start-core-runtime.mjs ./scripts/start-core-runtime.mjs
 
 EXPOSE 3000
