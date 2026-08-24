@@ -20,6 +20,7 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   grupoevr: "/grupo-evr",
   garrido: "/garrido",
   colorssaude: "/colors",
+  revela: "/revela",
   it: "/tour",
   ip: "/tour",
   tour: "/tour",
