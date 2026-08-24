@@ -6,6 +6,12 @@ on:
     branches: [main]
     paths:
       - .github/workflows/production-front.yml
+      - src/**
+      - public/**
+      - scripts/**
+      - infra/subdomains/**
+      - package.json
+      - package-lock.json
 
 concurrency:
   group: production-front
@@ -16,11 +22,11 @@ permissions:
 
 jobs:
   recover:
-    name: Recover canonical Core
+    name: Publish canonical Core
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      PRIMARY_SHA: d2f7c2ba02e441b5230d5a94b076a98c11171125
+      PRIMARY_SHA: ${{ github.sha }}
       FALLBACK_SHA: c998b87c49b1950f03898e0de9c4cf4a1e942e84
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -32,17 +38,17 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
     steps:
-      - name: Checkout 18h hotfix release
+      - name: Checkout current main release
         uses: actions/checkout@v4
         with:
-          ref: d2f7c2ba02e441b5230d5a94b076a98c11171125
+          ref: ${{ github.sha }}
           path: primary
           fetch-depth: 1
 
-      - name: Checkout yesterday fallback
+      - name: Checkout known-good fallback
         uses: actions/checkout@v4
         with:
-          ref: c998b87c49b1950f03898e0de9c4cf4a1e942e84
+          ref: ${{ env.FALLBACK_SHA }}
           path: fallback
           fetch-depth: 1
 
@@ -173,8 +179,8 @@ jobs:
           verify() {
             d="$1"
             for i in $(seq 1 20); do
-              code="$(curl -sS -L -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?recovery=$selected" || true)"
-              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?recovery=$selected" 2>/dev/null | tr -d '\r\n' || true)"
+              code="$(curl -sS -L -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?release=$selected" || true)"
+              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?release=$selected" 2>/dev/null | tr -d '\r\n' || true)"
               [ "$code" = 200 ] && [ "$sha" = "$selected" ] && return 0
               sleep 3
             done
