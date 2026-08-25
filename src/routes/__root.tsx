@@ -10,12 +10,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
-import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { TenantHostFallback } from "@/components/app/TenantHostFallback";
 import { ImpulsionitoConcierge } from "@/components/marketing/ImpulsionitoConcierge";
@@ -171,7 +170,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } } });
 type RouterContext = { queryClient: QueryClient };
-export const Route = createRootRouteWithContext<RouterContext>()({ head: () => ({ meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { name: "theme-color", content: "#020617" }], links: [{ rel: "stylesheet", href: appCss }] }), shellComponent: RootDocument, component: RootComponent, notFoundComponent: NotFoundComponent, errorComponent: ErrorComponent });
+export const Route = createRootRouteWithContext<RouterContext>()({ head: () => ({ meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, { name: "theme-color", content: "#020617" }], links: [{ rel: "stylesheet", href: appCss }] }), component: RootComponent, notFoundComponent: NotFoundComponent, errorComponent: ErrorComponent });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -200,5 +199,5 @@ function RootComponent() {
   const isRiomed = host === "riomed.impulsionando.com.br" || pathname === "/riomed" || pathname.startsWith("/riomed/");
   const hasDedicatedClientAgent = CLIENT_AGENT_HOSTS.has(host) || pathname === "/anamadu" || pathname.startsWith("/anamadu/") || pathname === "/chrismed" || pathname.startsWith("/chrismed/") || pathname === "/colors" || pathname.startsWith("/colors/") || pathname === "/wmp" || pathname.startsWith("/wmp/") || pathname === "/marocas" || pathname.startsWith("/marocas/");
 
-  return <QueryClientProvider client={queryClient}><TenantBrandingProvider><WmpNavigationLock />{!isWmp && <TenantSubdomainRedirect />}{!isWmp && <MaintenanceGate />}{!isWmp && <TenantHostFallback />}{!isWmp && <EnvHealthBanner />}<RocketRouteLoader />{!isWmp && <CoreCopyGuard />}{!isWmp && <SkipLink />}<ScrollGuidance /><Outlet /><LGPDBanner />{isRiomed ? <MedicitoConcierge /> : hasDedicatedClientAgent ? null : <ImpulsionitoConcierge />}{!isWmp && <PoweredByImpulsionando />}<Toaster richColors position="top-right" /></TenantBrandingProvider></QueryClientProvider>;
+  return <RootDocument><QueryClientProvider client={queryClient}><TenantBrandingProvider><WmpNavigationLock />{!isWmp && <TenantSubdomainRedirect />}{!isWmp && <MaintenanceGate />}{!isWmp && <TenantHostFallback />}{!isWmp && <EnvHealthBanner />}<RocketRouteLoader />{!isWmp && <CoreCopyGuard />}{!isWmp && <SkipLink />}<ScrollGuidance /><Outlet /><LGPDBanner />{isRiomed ? <MedicitoConcierge /> : hasDedicatedClientAgent ? null : <ImpulsionitoConcierge />}{!isWmp && <PoweredByImpulsionando />}<Toaster richColors position="top-right" /></TenantBrandingProvider></QueryClientProvider></RootDocument>;
 }
