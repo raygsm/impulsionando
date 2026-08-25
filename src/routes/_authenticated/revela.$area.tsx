@@ -38,7 +38,8 @@ const areas: Record<string, AreaConfig> = {
 async function loadAccess() {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { user:null, roles:[] as string[], isMaster:false };
-  const { data } = await supabase.from("revela_memberships").select("role,status").eq("user_id",auth.user.id).eq("status","active");
+  const { data, error } = await supabase.from("revela_memberships").select("role,is_active").eq("user_id",auth.user.id).eq("is_active",true);
+  if (error) throw error;
   const m = auth.user.app_metadata as Record<string,unknown> | undefined;
   return { user:auth.user, roles:(data ?? []).map((x:any)=>String(x.role)), isMaster:m?.is_super_admin===true || m?.is_impulsionando_staff===true };
 }
@@ -46,9 +47,10 @@ async function loadAccess() {
 function RevelaAreaPage(){
   const { area } = Route.useParams();
   const cfg = areas[area];
-  const { data, isLoading } = useQuery({queryKey:["revela-access",area],queryFn:loadAccess});
+  const { data, isLoading, error } = useQuery({queryKey:["revela-access",area],queryFn:loadAccess});
   if(!cfg) return <Card className="p-6">Área REVELA não encontrada.</Card>;
   if(isLoading) return <Card className="p-6">Carregando sua área REVELA…</Card>;
+  if(error) return <Card className="mx-auto max-w-xl p-6"><h1 className="text-xl font-semibold">Não foi possível carregar seu acesso</h1><p className="mt-2 text-sm text-muted-foreground">Tente novamente. Se persistir, abra um chamado de suporte.</p></Card>;
   const allowed = data?.isMaster || data?.roles.includes(cfg.role);
   if(!allowed) return <Card className="mx-auto max-w-xl p-6"><h1 className="text-xl font-semibold">Acesso não autorizado</h1><p className="mt-2 text-sm text-muted-foreground">Esta área pertence a outro perfil do REVELA. Seus dados e permissões foram preservados.</p></Card>;
   return <div className="mx-auto max-w-6xl space-y-6">
