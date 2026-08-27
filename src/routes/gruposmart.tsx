@@ -16,12 +16,15 @@ const modules = [
 ];
 
 function GrupoSmartHome() {
-  return <main className="min-h-screen bg-slate-950 text-white" data-tenant="gruposmart">
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/90 backdrop-blur">
+  return <main className="min-h-screen bg-slate-950 text-white" data-tenant="gruposmart" data-environment="demo">
+    <div className="sticky top-0 z-50 border-b border-amber-300/30 bg-amber-300 px-4 py-2 text-center text-xs font-black uppercase tracking-[.16em] text-slate-950">
+      DEMONSTRAÇÃO · Ambiente de avaliação · operações, cobranças e contratações são simulações
+    </div>
+    <header className="sticky top-[33px] z-40 border-b border-white/10 bg-slate-950/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="/gruposmart" className="text-xl font-black tracking-tight">GRUPO <span className="text-sky-400">SMART</span></a>
         <nav className="hidden gap-6 text-sm text-slate-300 md:flex"><a href="#solucoes">Soluções</a><a href="#operacao">Operação comercial</a><a href="#full">Plano Full</a></nav>
-        <a href="/gruposmart/app" className="rounded-full bg-sky-500 px-5 py-2 text-sm font-bold text-slate-950">Acessar gestão</a>
+        <a href="/gruposmart/app" className="rounded-full bg-sky-500 px-5 py-2 text-sm font-bold text-slate-950">Acessar demonstração</a>
       </div>
     </header>
 
@@ -31,7 +34,7 @@ function GrupoSmartHome() {
         <div><div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[.18em] text-sky-300"><Sparkles size={15}/> Conveniência corporativa conectada</div>
           <h1 className="max-w-4xl text-5xl font-black leading-[1.02] tracking-tight md:text-7xl">Duas soluções.<br/><span className="text-sky-400">Uma inteligência comercial.</span></h1>
           <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">wizMart e Smart Café preservam seus produtos, públicos e jornadas. O Grupo Smart conecta dados, oportunidades, equipe, marketing, ERP, agenda, vídeo, automações e relacionamento em uma única estrutura preparada para crescer.</p>
-          <div className="mt-9 flex flex-wrap gap-3"><a href="#full" className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-6 py-3 font-bold text-slate-950">Ver ecossistema Full <ArrowRight size={18}/></a><a href="/gruposmart/app" className="rounded-xl border border-white/20 px-6 py-3 font-semibold">Entrar no cockpit Full</a></div>
+          <div className="mt-9 flex flex-wrap gap-3"><a href="#full" className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-6 py-3 font-bold text-slate-950">Ver ecossistema Full <ArrowRight size={18}/></a><a href="/gruposmart/app" className="rounded-xl border border-white/20 px-6 py-3 font-semibold">Simular operação Full</a></div>
         </div>
         <div id="solucoes" className="grid gap-4">
           <a href="#wizmart" className="group rounded-3xl border border-sky-400/25 bg-gradient-to-br from-sky-500/15 to-white/5 p-7 transition hover:-translate-y-1 hover:border-sky-300/60"><ShoppingBasket className="mb-5 text-sky-300" size={36}/><p className="text-xs font-bold uppercase tracking-[.2em] text-sky-300">Maior frente comercial</p><h2 className="mt-2 text-3xl font-black">wizMart</h2><p className="mt-3 text-slate-300">Mercadinhos e conveniência para operações com aderência ao formato completo.</p><span className="mt-5 inline-flex items-center gap-2 font-bold text-sky-300">Explorar <ArrowRight size={17}/></span></a>
@@ -49,6 +52,6 @@ function GrupoSmartHome() {
     <section id="wizmart" className="px-6 pb-6"><div className="mx-auto max-w-7xl rounded-3xl bg-sky-500 p-8 text-slate-950 md:p-12"><ShoppingBasket size={38}/><h2 className="mt-5 text-4xl font-black">wizMart</h2><p className="mt-3 max-w-3xl text-lg font-medium">Funil próprio, ICP próprio e abordagem própria. Toda oportunidade mantém sua cicatriz de origem e pode gerar cross-sell para Smart Café sem duplicar cadastro.</p></div></section>
     <section id="smartcafe" className="px-6 pb-20"><div className="mx-auto max-w-7xl rounded-3xl bg-indigo-500 p-8 md:p-12"><Coffee size={38}/><h2 className="mt-5 text-4xl font-black">Smart Café</h2><p className="mt-3 max-w-3xl text-lg font-medium">Jornada comercial especializada para café corporativo, integrada ao mesmo cockpit de dados e executivos regionais quando a conta exigir visita e fechamento em campo.</p></div></section>
 
-    <section className="border-t border-white/10 px-6 py-20"><div className="mx-auto max-w-5xl text-center"><CheckCircle2 className="mx-auto text-sky-400" size={42}/><h2 className="mt-5 text-4xl font-black">Homologar primeiro. Crescer depois.</h2><p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-300">Implantação prevista em 30–45 dias no subdomínio Impulsionando, com testes de jornadas, integrações, ERP, agenda, vídeo, WhatsApp e e-mail. Após homologação, os domínios próprios podem ser direcionados sem desmontar a estrutura atual.</p><a href="/gruposmart/app" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-sky-500 px-7 py-4 font-black text-slate-950">Abrir cockpit do Grupo Smart <ArrowRight size={18}/></a></div></section>
+    <section className="border-t border-white/10 px-6 py-20"><div className="mx-auto max-w-5xl text-center"><CheckCircle2 className="mx-auto text-sky-400" size={42}/><h2 className="mt-5 text-4xl font-black">Teste tudo antes de qualquer go-live.</h2><p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-300">Neste ambiente DEMO é possível simular cadastro, agendamento, proposta, compra, cancelamento, cobrança, mensagens e jornadas. Nenhuma simulação representa contratação, pagamento, emissão fiscal ou obrigação financeira real.</p><a href="/gruposmart/app" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-sky-500 px-7 py-4 font-black text-slate-950">Abrir demonstração do Grupo Smart <ArrowRight size={18}/></a></div></section>
   </main>;
 }
