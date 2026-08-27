@@ -3,15 +3,13 @@ create extension if not exists pgcrypto;
 
 do $$ declare cid uuid; begin
   select id into cid from public.companies where lower(name)=lower('Grupo Smart') limit 1;
-  if cid is null then
-    insert into public.companies(name,legal_name,is_master,is_active,status,is_demo) values ('Grupo Smart','Grupo Smart',false,true,'active',false) returning id into cid;
-  end if;
+  if cid is null then insert into public.companies(name,legal_name,is_master,is_active,status,is_demo) values ('Grupo Smart','Grupo Smart',false,true,'active',false) returning id into cid; end if;
   insert into public.communication_tenants(kind,slug,display_name,locale,timezone,settings,active,company_id)
   select 'company','grupo-smart','Grupo Smart','pt-BR','America/Sao_Paulo',jsonb_build_object('plan','full','brands',jsonb_build_array('wizmart','smart_cafe'),'agent','Smartito','homologation_subdomain','gruposmart.impulsionando.com.br'),true,cid
   where not exists(select 1 from public.communication_tenants where slug='grupo-smart' and deleted_at is null);
-  insert into public.company_settings(company_id,key,value,value_type,category)
-  values (cid,'gruposmart.full',jsonb_build_object('plan','Full','shared_database',true,'cross_sell',true,'n8n',true,'whatsapp','activation_required','email_templates',true,'smartito',true),'json','tenant')
-  on conflict do nothing;
+  if not exists(select 1 from public.company_settings where company_id=cid and key='gruposmart.full') then
+    insert into public.company_settings(company_id,key,value,value_type,category) values (cid,'gruposmart.full',jsonb_build_object('plan','Full','shared_database',true,'cross_sell',true,'n8n',true,'whatsapp','activation_required','email_templates',true,'smartito',true),'json','tenant');
+  end if;
 end $$;
 
 create table if not exists public.gruposmart_leads (
@@ -41,18 +39,13 @@ create table if not exists public.gruposmart_journeys (
  channels text[] not null default array['email']::text[], n8n_workflow_key text, active boolean not null default true,
  config jsonb not null default '{}'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique(company_id,code)
 );
-
 create table if not exists public.gruposmart_agent_events (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete cascade,
  lead_id uuid references public.gruposmart_leads(id) on delete set null, agent text not null default 'Smartito', event_type text not null,
  detected_vertical text, intent text, next_best_action text, payload jsonb not null default '{}'::jsonb, created_at timestamptz not null default now()
 );
 
-alter table public.gruposmart_leads enable row level security;
-alter table public.gruposmart_activities enable row level security;
-alter table public.gruposmart_journeys enable row level security;
-alter table public.gruposmart_agent_events enable row level security;
-
+alter table public.gruposmart_leads enable row level security; alter table public.gruposmart_activities enable row level security; alter table public.gruposmart_journeys enable row level security; alter table public.gruposmart_agent_events enable row level security;
 grant select,insert,update,delete on public.gruposmart_leads,public.gruposmart_activities,public.gruposmart_journeys,public.gruposmart_agent_events to authenticated;
 grant all on public.gruposmart_leads,public.gruposmart_activities,public.gruposmart_journeys,public.gruposmart_agent_events to service_role;
 
