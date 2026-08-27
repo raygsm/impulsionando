@@ -1,0 +1,73 @@
+-- Grupo Smart | Plano Full | Core Impulsionando
+create extension if not exists pgcrypto;
+
+do $$ declare cid uuid; begin
+  select id into cid from public.companies where lower(name)=lower('Grupo Smart') limit 1;
+  if cid is null then
+    insert into public.companies(name,legal_name,is_master,is_active,status,is_demo) values ('Grupo Smart','Grupo Smart',false,true,'active',false) returning id into cid;
+  end if;
+  insert into public.communication_tenants(kind,slug,display_name,locale,timezone,settings,active,company_id)
+  select 'company','grupo-smart','Grupo Smart','pt-BR','America/Sao_Paulo',jsonb_build_object('plan','full','brands',jsonb_build_array('wizmart','smart_cafe'),'agent','Smartito','homologation_subdomain','gruposmart.impulsionando.com.br'),true,cid
+  where not exists(select 1 from public.communication_tenants where slug='grupo-smart' and deleted_at is null);
+  insert into public.company_settings(company_id,key,value,value_type,category)
+  values (cid,'gruposmart.full',jsonb_build_object('plan','Full','shared_database',true,'cross_sell',true,'n8n',true,'whatsapp','activation_required','email_templates',true,'smartito',true),'json','tenant')
+  on conflict do nothing;
+end $$;
+
+create table if not exists public.gruposmart_leads (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete cascade,
+ company_name text not null, contact_name text, email text, phone text, city text, state text,
+ vertical text not null default 'undetermined' check(vertical in ('wizmart','smart_cafe','both','undetermined')),
+ source text not null default 'manual', stage text not null default 'new' check(stage in ('new','contacting','qualified','meeting','visit','proposal','negotiation','won','lost')),
+ employee_count integer, monthly_flow integer, score integer not null default 0, cross_sell_eligible boolean not null default false,
+ owner_user_id uuid references auth.users(id) on delete set null, created_by uuid references auth.users(id) on delete set null,
+ notes text, metadata jsonb not null default '{}'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create index if not exists gruposmart_leads_company_stage_idx on public.gruposmart_leads(company_id,stage,created_at desc);
+create index if not exists gruposmart_leads_vertical_idx on public.gruposmart_leads(company_id,vertical);
+
+create table if not exists public.gruposmart_activities (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete cascade,
+ lead_id uuid not null references public.gruposmart_leads(id) on delete cascade, owner_user_id uuid references auth.users(id) on delete set null,
+ type text not null check(type in ('call','online_meeting','field_visit','follow_up','proposal','task')), title text not null, notes text,
+ scheduled_at timestamptz not null, completed_at timestamptz, status text not null default 'scheduled' check(status in ('scheduled','done','cancelled','no_show')),
+ metadata jsonb not null default '{}'::jsonb, created_at timestamptz not null default now()
+);
+create index if not exists gruposmart_activities_schedule_idx on public.gruposmart_activities(company_id,scheduled_at);
+
+create table if not exists public.gruposmart_journeys (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete cascade,
+ code text not null, name text not null, vertical text not null default 'both', audience text not null, trigger_event text not null,
+ channels text[] not null default array['email']::text[], n8n_workflow_key text, active boolean not null default true,
+ config jsonb not null default '{}'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique(company_id,code)
+);
+
+create table if not exists public.gruposmart_agent_events (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references public.companies(id) on delete cascade,
+ lead_id uuid references public.gruposmart_leads(id) on delete set null, agent text not null default 'Smartito', event_type text not null,
+ detected_vertical text, intent text, next_best_action text, payload jsonb not null default '{}'::jsonb, created_at timestamptz not null default now()
+);
+
+alter table public.gruposmart_leads enable row level security;
+alter table public.gruposmart_activities enable row level security;
+alter table public.gruposmart_journeys enable row level security;
+alter table public.gruposmart_agent_events enable row level security;
+
+grant select,insert,update,delete on public.gruposmart_leads,public.gruposmart_activities,public.gruposmart_journeys,public.gruposmart_agent_events to authenticated;
+grant all on public.gruposmart_leads,public.gruposmart_activities,public.gruposmart_journeys,public.gruposmart_agent_events to service_role;
+
+do $$ declare t text; begin foreach t in array array['gruposmart_leads','gruposmart_activities','gruposmart_journeys','gruposmart_agent_events'] loop
+ execute format('drop policy if exists gruposmart_company_access on public.%I',t);
+ execute format($p$create policy gruposmart_company_access on public.%I for all to authenticated using (exists(select 1 from public.user_roles ur where ur.user_id=auth.uid() and ur.company_id=%I.company_id) or public.has_role(auth.uid(),'admin')) with check (exists(select 1 from public.user_roles ur where ur.user_id=auth.uid() and ur.company_id=%I.company_id) or public.has_role(auth.uid(),'admin'))$p$,t,t,t);
+ end loop; end $$;
+
+do $$ declare cid uuid; begin select company_id into cid from public.communication_tenants where slug='grupo-smart' and deleted_at is null limit 1;
+ insert into public.gruposmart_journeys(company_id,code,name,vertical,audience,trigger_event,channels,n8n_workflow_key,config) values
+ (cid,'lead_new','Novo lead e SLA','both','lead','lead.created',array['email','whatsapp'],'gruposmart_lead_new',jsonb_build_object('sla_minutes',15)),
+ (cid,'lead_qualified','Qualificado para executivo','both','sales','lead.qualified',array['email','whatsapp'],'gruposmart_qualified_handoff',jsonb_build_object('route_by_region',true)),
+ (cid,'meeting_reminder','Lembrete de reunião','both','lead','meeting.scheduled',array['email','whatsapp'],'gruposmart_meeting_reminder',jsonb_build_object('reminders',jsonb_build_array('24h','2h'))),
+ (cid,'field_visit','Visita comercial','both','sales','visit.scheduled',array['email','whatsapp'],'gruposmart_field_visit',jsonb_build_object('checklist',true)),
+ (cid,'proposal_followup','Follow-up de proposta','both','lead','proposal.sent',array['email','whatsapp'],'gruposmart_proposal_followup',jsonb_build_object('cadence_days',jsonb_build_array(1,3,7))),
+ (cid,'cross_sell','Cross-sell inteligente','both','customer','opportunity.won',array['email','whatsapp'],'gruposmart_cross_sell',jsonb_build_object('smartito',true)),
+ (cid,'lost_reactivation','Reativação de oportunidade','both','lead','opportunity.lost',array['email','whatsapp'],'gruposmart_reactivation',jsonb_build_object('delay_days',30))
+ on conflict(company_id,code) do nothing; end $$;
