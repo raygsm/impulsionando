@@ -12,12 +12,14 @@ async function getGrupoSmartCompanyId(supabase: any) {
 export const getGrupoSmartDashboard = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { supabase } = context as any;
   const companyId = await getGrupoSmartCompanyId(supabase);
-  const [{ data: leads, error: le }, { data: activities, error: ae }] = await Promise.all([
+  const [leadsQ, activitiesQ, journeysQ, agentQ] = await Promise.all([
     supabase.from('gruposmart_leads').select('*').eq('company_id', companyId).order('created_at', { ascending: false }).limit(250),
     supabase.from('gruposmart_activities').select('*').eq('company_id', companyId).order('scheduled_at', { ascending: true }).limit(250),
+    supabase.from('gruposmart_journeys').select('*').eq('company_id', companyId).order('name', { ascending: true }).limit(100),
+    supabase.from('gruposmart_agent_events').select('*').eq('company_id', companyId).order('created_at', { ascending: false }).limit(50),
   ]);
-  if (le) throw new Error(le.message); if (ae) throw new Error(ae.message);
-  const rows = leads ?? [];
+  for (const result of [leadsQ, activitiesQ, journeysQ, agentQ]) if (result.error) throw new Error(result.error.message);
+  const rows = leadsQ.data ?? [];
   const metrics = {
     total: rows.length,
     wizmart: rows.filter((x:any)=>x.vertical==='wizmart'||x.vertical==='both').length,
@@ -25,8 +27,10 @@ export const getGrupoSmartDashboard = createServerFn({ method: 'GET' }).middlewa
     qualified: rows.filter((x:any)=>['qualified','meeting','visit','proposal','negotiation'].includes(x.stage)).length,
     won: rows.filter((x:any)=>x.stage==='won').length,
     crossSell: rows.filter((x:any)=>x.cross_sell_eligible).length,
+    journeys: (journeysQ.data ?? []).filter((x:any)=>x.active).length,
+    agentEvents: (agentQ.data ?? []).length,
   };
-  return { metrics, leads: rows, activities: activities ?? [] };
+  return { metrics, leads: rows, activities: activitiesQ.data ?? [], journeys: journeysQ.data ?? [], agentEvents: agentQ.data ?? [] };
 });
 
 const leadInput = z.object({
