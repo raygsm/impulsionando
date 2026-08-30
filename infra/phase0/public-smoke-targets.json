@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "description": "Read-only public HTTP characterization targets for Phase 0",
+  "targets": [
+    {
+      "id": "apex",
+      "url": "https://impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "www",
+      "url": "https://www.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "csi",
+      "url": "https://csi.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "wmp",
+      "url": "https://wmp.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "chrismed",
+      "url": "https://chrismed.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "anamadu",
+      "url": "https://anamadu.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "marocas",
+      "url": "https://marocas.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "riomed",
+      "url": "https://riomed.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "grupoevr",
+      "url": "https://grupoevr.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "revela",
+      "url": "https://revela.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "colorssaude",
+      "url": "https://colorssaude.impulsionando.com.br/",
+      "expectedStatus": [200, 301, 302, 307, 308]
+    },
+    {
+      "id": "public-health",
+      "url": "https://impulsionando.com.br/api/public/health",
+      "expectedStatus": [200]
+    },
+    {
+      "id": "public-version",
+      "url": "https://impulsionando.com.br/api/public/version",
+      "expectedStatus": [200]
+    },
+    {
+      "id": "release-sha",
+      "url": "https://impulsionando.com.br/impulsionando-front-sha.txt",
+      "expectedStatus": [200]
+    },
+    {
+      "id": "release-meta",
+      "url": "https://impulsionando.com.br/impulsionando-release.json",
+      "expectedStatus": [200]
+    }
+  ]
+}

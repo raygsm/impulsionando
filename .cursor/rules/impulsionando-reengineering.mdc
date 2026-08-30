@@ -1,0 +1,36 @@
+---
+description: Impulsionando reengineering program — authority, Phase 0 lock, target stack (Proposed)
+alwaysApply: true
+---
+
+# Impulsionando reengineering
+
+## Authority
+
+Source of truth: `docs/reengineering/`.
+
+Conflict order: accepted ADRs → `02-target-architecture/` → `STATUS.md` → observed evidence → legacy `docs/` / `mem/`.
+
+Stakeholder vision is input only — never skips phase gates.
+
+## Current authorization
+
+Only **Phase 0** (containment + discovery) is authorized.
+
+Do **not**: implement monorepo/Nest/Dokploy; rebuild VPS; change DNS/routing; migrate tenants; clean Docker/releases; change DB schema; start Phases 1–7; re-enable contained workflows without a recorded decision.
+
+Do **not** treat Proposed ADRs as implementation license.
+
+## Target stack (Proposed — see TARGET-STACK.md)
+
+Intended: pnpm modular monolith — `platform-web` / `tenant-web` / `app-web` (TanStack Start) + NestJS/Fastify `api` + independent `worker`; managed Supabase; Dokploy+Traefik+Cloudflare; GHCR SHA images; adapter integrations; governed AI later.
+
+Full detail: `docs/reengineering/02-target-architecture/TARGET-STACK.md`.
+
+## Hard safety
+
+No secrets in chat/docs/git. No prod writes as diagnostics. No workers during SSR-only probes. HTTP 200 ≠ release proof. Backup ≠ proven without restore. Tenant isolation needs allow **and** deny tests. Mark unproven claims UNKNOWN. Prefer paths, SHAs, service names, timestamps as evidence.
+
+## Working tree hazards
+
+Do not stage/revert/regenerate `src/routeTree.gen.ts` without dedicated investigation + approval. Treat `src/generated/build-info.ts` as local build noise, not release identity.
