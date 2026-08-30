@@ -1,5 +1,7 @@
 # Fase 2 — Plataforma e staging
 
+Planejamento aberto **2026-08-30** (ADRs Aceitas; Aceita ≠ provisionar hoje). Board: [`phase-2/README.md`](phase-2/README.md).
+
 ## Objetivo
 
 Construir o caminho seguro de entrega antes de migrar o produto.

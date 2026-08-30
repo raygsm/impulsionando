@@ -2,7 +2,9 @@
 
 ## Estado
 
-Proposta
+Aceita-com-condições
+
+Aceite formal: 2026-08-30 — Cauã + Raygs (WhatsApp / pacote de aceite). Aceita ≠ implementar Nest/Dokploy/monorepo/DNS no dia do aceite; gates das Fases 2+.
 
 ## Contexto
 

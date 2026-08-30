@@ -15,11 +15,11 @@ Stakeholder vision is input only — never skips phase gates.
 
 ## Current authorization
 
-Only **Phase 0** (containment + discovery) is authorized.
+**Phase 0** closed. **ADRs 001–008 Aceitas** (2026-08-30). Phase 1 closing (staging restore + auth/tenant non-prod). **Phase 2 planning** authorized.
 
-Do **not**: implement monorepo/Nest/Dokploy; rebuild VPS; change DNS/routing; migrate tenants; clean Docker/releases; change DB schema; start Phases 1–7; re-enable contained workflows without a recorded decision.
+Do **not**: implement Nest bootstrap; mechanically move monorepo routes; provision Dokploy on **legacy** VPS; wipe VPS; change prod DNS/routing; migrate tenants; `db push`/reset prod; re-enable contained workflows without a recorded decision.
 
-Do **not** treat Proposed ADRs as implementation license.
+Aceita ≠ license to scaffold Nest/Dokploy today — follow phase gates in `STATUS.md`.
 
 ## Target stack (Proposed — see TARGET-STACK.md)
 

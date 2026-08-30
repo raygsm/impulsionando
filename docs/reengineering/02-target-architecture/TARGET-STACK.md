@@ -1,6 +1,6 @@
 # Target technology stack
 
-Status: **intended architecture / Proposed ADRs — not formally accepted.**
+Status: **intended architecture — ADRs Aceitas 2026-08-30 (with conditions). Implementation still phase-gated.**
 
 This document records the intended stack for the Impulsionando reengineering program. It aligns with [`SYSTEM.md`](SYSTEM.md), [`TECHNOLOGY-BOUNDARIES.md`](TECHNOLOGY-BOUNDARIES.md), [`REPOSITORY.md`](REPOSITORY.md), and the proposed ADRs in [`../05-governance/DECISIONS.md`](../05-governance/DECISIONS.md).
 

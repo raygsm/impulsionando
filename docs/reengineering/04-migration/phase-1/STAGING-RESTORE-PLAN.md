@@ -173,7 +173,7 @@ After structure OK:
 
 - [ ] Create **staging-only** Auth users for allow and deny cases (or document restored users + rotation).
 - [ ] Smoke: sign-in against staging project URL/keys from a local or non-prod app config (not prod `.env`).
-- [ ] Plan (execute when contracts P1-C / P1-D ready): membership allow for company A; deny cross-tenant read — evidence belongs with auth/tenant test notes, not necessarily this file.
+- [ ] Plan (execute when contracts P1-C / P1-D ready): membership allow for company A; deny cross-tenant read — evidence in [`AUTH-TENANT-BASELINE-TESTS.md`](AUTH-TENANT-BASELINE-TESTS.md) (P1-J).
 
 ### 7.3 Record RPO / RTO
 

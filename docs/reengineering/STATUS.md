@@ -1,44 +1,40 @@
 # Status do Programa
 
-Atualizado em: 2026-08-30 (Phase 0 CLOSED)
+Atualizado em: 2026-08-30 (ADRs Aceitas; Fase 2 planejamento autorizado)
 
 ## Estado geral
 
-**FASE 0 CONCLUÍDA. FASE 1 AUTORIZADA (contratos e fundação — sem Nest/Dokploy até ADRs Aceitas).**
+**FASE 0 CONCLUÍDA. ADRs 001–008 ACEITAS (com condições onde aplicável). FASE 1 em fechamento (staging restore + auth/tenant baseline). FASE 2 PLANEJAMENTO AUTORIZADO — sem provisionar Dokploy/DNS/Nest ainda.**
 
 | Fase | Estado | Entrada obrigatória | Evidência para encerrar |
 | --- | --- | --- | --- |
 | 0. Contenção e descoberta | **Concluída** | autorização 2026-08-28 | [`01-current-state/phase-0/PHASE-0-EXIT-REPORT.md`](01-current-state/phase-0/PHASE-0-EXIT-REPORT.md) |
-| 1. Contratos e fundação | **Em execução** | fase 0 concluída | ADRs Aceitas, contratos e testes-base aprovados |
-| 2. Plataforma e staging | Não iniciada | fase 1 concluída | deploy e rollback reproduzidos em staging |
-| 3. Nova API modular | Não iniciada | staging saudável | primeiro módulo operando em paralelo |
-| 4. Frontends e tenants | Não iniciada | API estável para o módulo | primeiro tenant migrado e observável |
-| 5. Workers e integrações | Não iniciada | contratos e filas definidos | jobs idempotentes e recuperáveis |
-| 6. Plataforma de IA | Não iniciada | segurança e auditoria prontas | evals, limites e approval gates aprovados |
-| 7. Cutover e retirada do legado | Não iniciada | tenants críticos migrados | legado fora do tráfego e rollback encerrado |
+| 1. Contratos e fundação | **Fechamento** | fase 0 concluída | ADRs Aceitas ✅; contratos ✅; piloto Support ✅; **falta** restore staging + testes auth/tenant non-prod |
+| 2. Plataforma e staging | **Planejamento** | ADRs Aceitas + contratos | deploy/rollback em staging em infra limpa (sem SSH manual) |
+| 3. Nova API modular | Não iniciada | staging saudável | Support piloto em paralelo |
+| 4. Frontends e tenants | Não iniciada | API estável para o módulo | primeiro tenant migrado |
+| 5. Workers e integrações | Não iniciada | contratos e filas | jobs idempotentes |
+| 6. Plataforma de IA | Não iniciada | segurança/auditoria | evals + gates |
+| 7. Cutover e retirada do legado | Não iniciada | tenants críticos | legado fora do tráfego |
 
-## Próximo gate (Fase 1)
+## Próximo gate
 
-1. Day-0: terminar contenção dos ~129 workflows mutativos/diagnose ainda `active` (lista em [`01-current-state/phase-0/CONTAINMENT.md`](01-current-state/phase-0/CONTAINMENT.md)).
-2. Aceitar ou rejeitar ADRs 001–008 formalmente.
-3. Contratos de identidade tenant/`company_id`, RBAC, eventos/jobs; piloto vertical não-pagamento/não-clínico (Support / J-13 paper).
-4. Plano de staging Supabase + restore isolado (fecha dívida J-16).
+1. Executar [`STAGING-RESTORE-PLAN.md`](04-migration/phase-1/STAGING-RESTORE-PLAN.md) (humano) + registrar RPO/RTO.
+2. Rodar baseline auth/tenant allow/deny em non-prod (ver Phase 1 residual / Phase 2 board).
+3. Phase 2: workboard em [`04-migration/phase-2/`](04-migration/phase-2/) — Dokploy **clean** infra, GHCR SHA, Traefik staging — **não** no VPS legado.
+4. Prod VPS hoje **não** serve `main` tip (`bfdc9dd8`); split-brain `ebcc52f0` host Node + `80e20d11` Docker — não “consertar” com wipe; só cutover Fase 7 / publish consciente.
 
-**Proibido ainda:** Nest bootstrap, monorepo move mecânico, Dokploy em prod, wipe VPS, DNS cutover, `db push`/reset.
+**Proibido ainda sem gate explícito:** Nest bootstrap, monorepo move mecânico, Dokploy no VPS legado, wipe VPS, DNS cutover prod, `db push`/reset prod.
 
 ## Evidência corrente
 
-- Exit Phase 0: [`01-current-state/phase-0/PHASE-0-EXIT-REPORT.md`](01-current-state/phase-0/PHASE-0-EXIT-REPORT.md).
-- Phase 1 board: [`04-migration/phase-1/README.md`](04-migration/phase-1/README.md) — **P1-A…I all done** (docs/contracts/containment); human Aceita + staging restore + pilot review still open.
-- ADR acceptance packet (sign): [`05-governance/ADR-ACCEPTANCE-PACKET.md`](05-governance/ADR-ACCEPTANCE-PACKET.md).
-- Contenção LIVE after P1-A: **163** `disabled_manually`; **46** `active`; **18** residual mutative name-matches still active.
-- Candidate `:3500` **parado**.
-- Backup Supabase: **confirmado**; restore plan: [`04-migration/phase-1/STAGING-RESTORE-PLAN.md`](04-migration/phase-1/STAGING-RESTORE-PLAN.md).
-- Pagamentos canônicos: [`01-current-state/phase-0/PAYMENTS-CANONICAL.md`](01-current-state/phase-0/PAYMENTS-CANONICAL.md).
-- ADRs 001–008: still **Proposta** until packet signed.
+- ADRs: [`05-governance/ADR-ACCEPTANCE-PACKET.md`](05-governance/ADR-ACCEPTANCE-PACKET.md) signed; [`DECISIONS.md`](05-governance/DECISIONS.md).
+- Phase 1 board: [`04-migration/phase-1/README.md`](04-migration/phase-1/README.md).
+- Contenção: **163** `disabled_manually`; **46** `active`; **18** residual name-matches.
+- Prod identity (2026-08-30 probe): apex/app often `commit:unknown` / host Node `ebcc52f0`; Docker core `80e20d11` — **não** GitHub `main` tip.
 
 ## Como atualizar
 
 - Nunca marcar fase concluída só porque código foi escrito.
 - Incluir evidências reproduzíveis.
-- Manter no máximo uma fase principal em execução.
+- Manter no máximo uma fase principal de *implementação* viva; planejamento da seguinte pode ser paralelo.

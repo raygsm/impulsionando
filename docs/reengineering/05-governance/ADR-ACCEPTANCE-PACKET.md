@@ -9,9 +9,9 @@ Signatários (Aceita): **somente Cauã + Raygs** — agentes recomendam; humanos
 
 | Item | Valor |
 | --- | --- |
-| `Estado` nos arquivos de ADR | Ainda **Proposta** — este pacote **não** os altera |
-| Recomendações | Apenas recomendação de agente (`Aceita` / `Aceita-com-condições` / `Adiar` / `Rejeitar`) |
-| Licença de implementação | **Nenhuma** até humanos assinarem Aceita **e** o gate da fase correspondente estar aberto |
+| `Estado` nos arquivos de ADR | **Aceita** / **Aceita-com-condições** (atualizado 2026-08-30) |
+| Recomendações | Aceitas por humanos (Cauã + Raygs via WhatsApp) |
+| Licença de implementação | **Ainda gated por fase** — Aceita ≠ Nest/Dokploy/monorepo/DNS hoje |
 
 ## Aceita ≠ implementar Dokploy / Nest / monorepo hoje
 
@@ -365,21 +365,23 @@ Ao assinar, Cauã e Raygs:
 
 | ID | Recomendação neste pacote | Status humano (preencher) | Data Cauã | Data Raygs | Notas / condições reconhecidas |
 | --- | --- | --- | --- | --- | --- |
-| ADR-001 | Aceita-com-condições | _Pendente_ | | | |
-| ADR-002 | Aceita | _Pendente_ | | | |
-| ADR-003 | Aceita-com-condições | _Pendente_ | | | |
-| ADR-004 | Aceita-com-condições | _Pendente_ | | | |
-| ADR-005 | Aceita-com-condições | _Pendente_ | | | |
-| ADR-006 | Aceita-com-condições | _Pendente_ | | | |
-| ADR-007 | Aceita | _Pendente_ | | | |
-| ADR-008 | Aceita-com-condições | _Pendente_ | | | |
+| ADR-001 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | Condições do pacote reconhecidas |
+| ADR-002 | Aceita | **Aceita** | 2026-08-30 | 2026-08-30 | |
+| ADR-003 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | Nest só Fase 3+; piloto Support |
+| ADR-004 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | Staging + restore antes de cutover trust |
+| ADR-005 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | pgmq inicial; prova em staging |
+| ADR-006 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | Infra limpa só; sem wipe VPS legado |
+| ADR-007 | Aceita | **Aceita** | 2026-08-30 | 2026-08-30 | |
+| ADR-008 | Aceita-com-condições | **Aceita-com-condições** | 2026-08-30 | 2026-08-30 | Split físico Fase 4+ |
 
 **Assinatura do programa (pacote revisado):**
 
 | Papel | Nome | Data | Assinatura / confirmação |
 | --- | --- | --- | --- |
-| Operador técnico | Cauã | | |
-| Dono de produto / plataforma | Raygs | | |
+| Operador técnico | Cauã | 2026-08-30 | Confirmado (operador; registra Aceita no repo) |
+| Dono de produto / plataforma | Raygs | 2026-08-30 | Confirmado via WhatsApp (Cauã reportou acordo com recomendações do pacote) |
+
+Piloto vertical: **Support (J-13)** aceito formalmente na mesma data — ver [`PILOT-SUPPORT.md`](../04-migration/phase-1/PILOT-SUPPORT.md).
 
 Após ambos assinarem Aceita para uma ADR: atualizar o `Estado` daquela ADR, sincronizar [`DECISIONS.md`](DECISIONS.md) e [`adrs/README.md`](adrs/README.md), e registrar a decisão no log de execução se o processo da Fase 1 exigir.
 

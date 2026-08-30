@@ -1,9 +1,9 @@
 # P1-H — Support pilot (J-13) contract + test plan
 
 Opened: 2026-08-30  
-Status: **FORMALIZED** (Phase 1 track P1-H)  
+Status: **FORMALIZED + ACCEPTED** (2026-08-30 — Cauã + Raygs; Support = Phase 1/3 pilot)  
 Evidence level for legacy map: **STATIC**  
-Nest implementation: **NOT AUTHORIZED** (Phase 3 after Phase 1 + 2 gates)
+Nest implementation: **NOT AUTHORIZED** (Phase 3 after Phase 1 residual exit + Phase 2 staging healthy)
 
 Authority: [`docs/reengineering/`](../../README.md). Conflict order per program rules. Companion paper: [`../exploratory/NEST-DOMAIN-PAPER-DESIGN.md`](../exploratory/NEST-DOMAIN-PAPER-DESIGN.md). HTTP envelope conventions: [`CONTRACT-HTTP-API.md`](CONTRACT-HTTP-API.md) (P1-E; this sketch must stay compatible).
 
@@ -222,6 +222,8 @@ Capabilities are provisional names pending [`CONTRACT-RBAC.md`](CONTRACT-RBAC.md
 | A12 | Platform staff capability (if proven) listing cross-tenant | **allow** only if capability explicitly grants platform scope; otherwise deny |
 
 RLS remains defense in depth; application policy is primary for complex rules ([`SECURITY-MULTITENANCY.md`](../../02-target-architecture/SECURITY-MULTITENANCY.md)).
+
+Executable Phase 1 baseline (T + RBAC + A1–A12 how-to / pass-fail): [`AUTH-TENANT-BASELINE-TESTS.md`](AUTH-TENANT-BASELINE-TESTS.md).
 
 ---
 

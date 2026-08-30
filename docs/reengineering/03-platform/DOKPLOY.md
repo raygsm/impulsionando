@@ -131,17 +131,19 @@ Production data is not copied into staging without an approved anonymization and
 
 ## Phase boundary and decision status
 
-This architecture is the proposed target for Phase 2. It does not authorize provisioning, installation, migration, routing changes, or cleanup during Phase 0.
+**Phase 2 planning opened 2026-08-30.** ADRs 001–008 are Aceita / Aceita-com-condições (Cauã + Raygs). Aceita records direction — it does **not** authorize provisioning Dokploy, DNS/Traefik cutover, Nest bootstrap, monorepo mechanical moves, or legacy VPS wipe/reinstall today.
 
-The following decisions remain proposals until accepted through ADRs:
+This document remains the intended Phase 2+ platform architecture. Implementation waits on: Phase 1 residual (staging restore + auth/tenant non-prod), cost/capacity expectations, and an explicit Phase 2 implementation gate. Planning artifacts: [`../04-migration/phase-2/README.md`](../04-migration/phase-2/README.md), [`../04-migration/phase-2/CLEAN-INFRA-TOPOLOGY.md`](../04-migration/phase-2/CLEAN-INFRA-TOPOLOGY.md), [`../04-migration/phase-2/GHCR-AND-PROMOTE.md`](../04-migration/phase-2/GHCR-AND-PROMOTE.md).
 
-- Dokploy as the deployment control plane;
-- GHCR and full-SHA immutable images;
-- separation of `platform-web`, `tenant-web`, and `app-web`;
-- NestJS/Fastify for the modular API;
-- the exact number and placement of control, staging, and production servers.
+Accepted (direction, still phase-gated for install):
 
-Before implementation, the team must approve the relevant ADRs, complete the required Phase 0 evidence, define cost/capacity expectations, and document the transition from the legacy Nginx/Docker/systemd topology.
+- Dokploy as the deployment control plane on **clean** infra (ADR-006 Aceita-com-condições);
+- GHCR and full-SHA immutable images (ADR-007 Aceita);
+- separation of `platform-web`, `tenant-web`, and `app-web` (ADR-008 Aceita-com-condições — physical split later);
+- NestJS/Fastify for the modular API (ADR-003 Aceita-com-condições — **Phase 3**, not Phase 2 Day-0);
+- preferred three-server topology; budget may share control + staging (ADR-006) — exact placement still human-gated.
+
+The legacy VPS remains rollback-only until Phase 7. Do not install Dokploy on it as prep.
 
 ## What Dokploy does not solve
 
