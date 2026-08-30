@@ -39,7 +39,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="shrink-0" aria-label="Impulsionando Tecnologia — início">
-          <LogoImpulsionando variant="light" size="sm" />
+          <LogoImpulsionando variant="light" size="sm" asLink={false} />
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Navegação principal">
