@@ -1,0 +1,38 @@
+{
+  "name": "@impulsionando/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Phase 1 HTTP/support Zod envelopes (no Nest). Peer on root zod.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./http-envelope": {
+      "types": "./src/http-envelope.ts",
+      "import": "./src/http-envelope.ts",
+      "default": "./src/http-envelope.ts"
+    },
+    "./support": {
+      "types": "./src/support.ts",
+      "import": "./src/support.ts",
+      "default": "./src/support.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "zod": "^3.23.8"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": false
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

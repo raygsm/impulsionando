@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/worker",
+  "private": true,
+  "description": "Independent Node.js worker process. Placeholder — Phase 5 initially."
+}

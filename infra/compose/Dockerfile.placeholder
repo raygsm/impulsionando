@@ -1,0 +1,10 @@
+# Reengineering GHCR SHA placeholder — Phase 2 planning stub.
+# Not for production. Does not auto-deploy. Promote-same-SHA only.
+
+FROM alpine:3.20
+ARG GIT_SHA=unknown
+LABEL org.opencontainers.image.revision="${GIT_SHA}"
+LABEL org.opencontainers.image.description="Impulsionando reengineering placeholder — not a product image"
+RUN echo "impulsionando-reengineering-placeholder GIT_SHA=${GIT_SHA}" > /placeholder.txt \
+  && cat /placeholder.txt
+CMD ["cat", "/placeholder.txt"]

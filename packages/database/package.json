@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/database",
+  "private": true,
+  "description": "Database access adapters and query helpers. Placeholder."
+}

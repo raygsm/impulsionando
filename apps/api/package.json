@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/api",
+  "private": true,
+  "description": "NestJS/Fastify modular API. Placeholder — Phase 3; Nest not authorized yet."
+}

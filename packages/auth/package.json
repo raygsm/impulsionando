@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/auth",
+  "private": true,
+  "description": "Auth helpers and session/tenant context. Placeholder."
+}

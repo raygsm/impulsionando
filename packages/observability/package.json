@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/observability",
+  "private": true,
+  "description": "Logging, metrics, and tracing helpers. Placeholder."
+}

@@ -1,0 +1,5 @@
+{
+  "name": "@impulsionando/config",
+  "private": true,
+  "description": "Shared config and environment validation helpers. Placeholder."
+}

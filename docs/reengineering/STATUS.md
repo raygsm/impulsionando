@@ -1,40 +1,38 @@
 # Status do Programa
 
-Atualizado em: 2026-08-30 (ADRs Aceitas; Fase 2 planejamento autorizado)
+Atualizado em: 2026-08-30 (Phase 2 scaffold started)
 
 ## Estado geral
 
-**FASE 0 CONCLUÍDA. ADRs 001–008 ACEITAS (com condições onde aplicável). FASE 1 em fechamento (staging restore + auth/tenant baseline). FASE 2 PLANEJAMENTO AUTORIZADO — sem provisionar Dokploy/DNS/Nest ainda.**
+**FASE 0 CONCLUÍDA. ADRs 001–008 ACEITAS. FASE 1 em fechamento (restore evidence + live auth baseline). FASE 2 IMPLEMENTAÇÃO INICIAL — workspace + contracts + GHCR stub (sem Dokploy/Nest/DNS).**
 
 | Fase | Estado | Entrada obrigatória | Evidência para encerrar |
 | --- | --- | --- | --- |
 | 0. Contenção e descoberta | **Concluída** | autorização 2026-08-28 | [`01-current-state/phase-0/PHASE-0-EXIT-REPORT.md`](01-current-state/phase-0/PHASE-0-EXIT-REPORT.md) |
-| 1. Contratos e fundação | **Fechamento** | fase 0 concluída | ADRs Aceitas ✅; contratos ✅; piloto Support ✅; **falta** restore staging + testes auth/tenant non-prod |
-| 2. Plataforma e staging | **Planejamento** | ADRs Aceitas + contratos | deploy/rollback em staging em infra limpa (sem SSH manual) |
-| 3. Nova API modular | Não iniciada | staging saudável | Support piloto em paralelo |
-| 4. Frontends e tenants | Não iniciada | API estável para o módulo | primeiro tenant migrado |
-| 5. Workers e integrações | Não iniciada | contratos e filas | jobs idempotentes |
-| 6. Plataforma de IA | Não iniciada | segurança/auditoria | evals + gates |
-| 7. Cutover e retirada do legado | Não iniciada | tenants críticos | legado fora do tráfego |
+| 1. Contratos e fundação | **Fechamento** | fase 0 | ADRs ✅ contratos ✅ piloto ✅; **humano:** staging restore evidence + live auth baseline |
+| 2. Plataforma e staging | **Em execução (scaffold)** | ADRs + contracts | workspace skeleton ✅; GHCR stub ✅; still need clean hosts + Dokploy + staging bind |
+| 3. Nova API modular | Não iniciada | staging saudável | Support no Nest |
+| 4–7 | Não iniciadas | gates anteriores | ver docs da fase |
 
 ## Próximo gate
 
-1. Executar [`STAGING-RESTORE-PLAN.md`](04-migration/phase-1/STAGING-RESTORE-PLAN.md) (humano) + registrar RPO/RTO.
-2. Rodar baseline auth/tenant allow/deny em non-prod (ver Phase 1 residual / Phase 2 board).
-3. Phase 2: workboard em [`04-migration/phase-2/`](04-migration/phase-2/) — Dokploy **clean** infra, GHCR SHA, Traefik staging — **não** no VPS legado.
-4. Prod VPS hoje **não** serve `main` tip (`bfdc9dd8`); split-brain `ebcc52f0` host Node + `80e20d11` Docker — não “consertar” com wipe; só cutover Fase 7 / publish consciente.
+1. Human: fill [`04-migration/phase-2/STAGING-RESTORE-EVIDENCE.md`](04-migration/phase-2/STAGING-RESTORE-EVIDENCE.md) after restore drill.
+2. Human: quotes/provision **clean** hosts (not legacy VPS) — [`phase-2/CLEAN-INFRA-TOPOLOGY.md`](04-migration/phase-2/CLEAN-INFRA-TOPOLOGY.md).
+3. Bind staging Supabase env names — [`phase-2/STAGING-ENV-INVENTORY.md`](04-migration/phase-2/STAGING-ENV-INVENTORY.md).
+4. `workflow_dispatch` [`reengineering-ghcr-sha.yml`](../../.github/workflows/reengineering-ghcr-sha.yml) when ready to prove placeholder publish.
+5. Nest remains **Phase 3** — `apps/api` is placeholder only.
 
-**Proibido ainda sem gate explícito:** Nest bootstrap, monorepo move mecânico, Dokploy no VPS legado, wipe VPS, DNS cutover prod, `db push`/reset prod.
+**Proibido:** Dokploy on legacy VPS, wipe VPS, prod DNS cutover, Nest bootstrap, `db push`/reset prod, mechanical move of all routes.
 
 ## Evidência corrente
 
-- ADRs: [`05-governance/ADR-ACCEPTANCE-PACKET.md`](05-governance/ADR-ACCEPTANCE-PACKET.md) signed; [`DECISIONS.md`](05-governance/DECISIONS.md).
-- Phase 1 board: [`04-migration/phase-1/README.md`](04-migration/phase-1/README.md).
-- Contenção: **163** `disabled_manually`; **46** `active`; **18** residual name-matches.
-- Prod identity (2026-08-30 probe): apex/app often `commit:unknown` / host Node `ebcc52f0`; Docker core `80e20d11` — **não** GitHub `main` tip.
+- Branch: `reengineering/program`
+- Workspace: `pnpm-workspace.yaml` + `apps/*` + `packages/*` stubs; legacy root still `impulsionando-core`
+- Contracts package: `@impulsionando/contracts` (HTTP envelope + Support pilot schemas)
+- Phase 2 board: [`04-migration/phase-2/README.md`](04-migration/phase-2/README.md)
+- Prod hotfix (parallel agent): apex/`app` may be on canary `:3488` / `bfdc9dd8…`; CHRISMED often still `:3000` / `ebcc52f0` — not Phase 2 work
 
 ## Como atualizar
 
-- Nunca marcar fase concluída só porque código foi escrito.
-- Incluir evidências reproduzíveis.
-- Manter no máximo uma fase principal de *implementação* viva; planejamento da seguinte pode ser paralelo.
+- Nunca marcar fase concluída só porque scaffolding existe.
+- Evidências reproduzíveis (SHA, timestamps, project refs sem secrets).

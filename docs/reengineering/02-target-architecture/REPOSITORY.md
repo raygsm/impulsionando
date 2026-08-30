@@ -47,6 +47,8 @@ Frontends não importam implementações internas do API. API e worker podem com
 
 Não mover 1.083 rotas mecanicamente. Criar o workspace e migrar um fluxo vertical por vez. Código legado permanece no local até haver substituto testado e tráfego migrado.
 
+Workspace skeleton added **2026-08-30** on branch `reengineering/program` (`pnpm-workspace.yaml` with `apps/*` + `packages/*` only; placeholder apps/packages + `infra/dokploy` / `infra/compose` READMEs). Legacy root (`impulsionando-core`, npm lockfile) remains unchanged until strangler.
+
 ## Convenções mínimas
 
 - `pnpm` como único gerenciador de pacote.

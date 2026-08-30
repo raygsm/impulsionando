@@ -1,7 +1,7 @@
 # Phase 2 — parallel workboard (planning)
 
 Opened: **2026-08-30**  
-Status: **PLANNING AUTHORIZED** — ADRs 001–008 Aceitas / Aceita-com-condições; Aceita ≠ provision Dokploy / DNS / Nest / wipe VPS today  
+Status: **IMPLEMENTATION STARTED (scaffold)** — workspace + `@impulsionando/contracts` + GHCR placeholder workflow; Dokploy/DNS/Nest still gated  
 Phase overview: [`../PHASE-2-PLATFORM.md`](../PHASE-2-PLATFORM.md)
 
 ## Exit criteria (implementation — later)
@@ -10,14 +10,16 @@ A single commit passes CI → one immutable GHCR image (full SHA) → deploys to
 
 ## Authorization boundary (2026-08-30)
 
-| Allowed now | Forbidden until explicit Phase 2 implementation gate |
+| Allowed now | Forbidden until explicit gate |
 | --- | --- |
-| Planning docs, inventories, cost/capacity notes | Provision Dokploy / Traefik / clean hosts |
-| Naming staging DNS *plans* (no zone edits) | Change Cloudflare / prod DNS / apex cutover |
-| GHCR/CI promote *design* (no prod publish path) | Bootstrap Nest / monorepo mechanical move |
-| Wire *plans* for staging Supabase (after P1-I restore) | `db push` / reset / corrective prod schema |
-| Rollback / health drill *runbooks on paper* | Wipe or reinstall legacy VPS `187.77.232.52` |
-| Observability minimum *spec* | Touch prod publishers / re-enable contained workflows |
+| Workspace skeleton (`apps/*`, `packages/*`), contracts package | Nest business logic in `apps/api` |
+| `workflow_dispatch` GHCR **placeholder** SHA publish | Dokploy / Traefik / clean host provision without human |
+| Staging evidence + env-name inventories | Change Cloudflare / prod DNS / apex cutover |
+| Planning docs, inventories | Wipe or reinstall legacy VPS `187.77.232.52` |
+| | `db push` / reset / corrective prod schema |
+| | Re-enable contained workflows without recorded decision |
+
+**Scaffold landed 2026-08-30:** `pnpm-workspace.yaml`, placeholder apps/packages, `@impulsionando/contracts`, `.github/workflows/reengineering-ghcr-sha.yml`, [`STAGING-RESTORE-EVIDENCE.md`](STAGING-RESTORE-EVIDENCE.md), [`STAGING-ENV-INVENTORY.md`](STAGING-ENV-INVENTORY.md).
 
 Legacy VPS remains **rollback-only**. Prod today is split-brain (nginx → host Node `ebcc52f0` on `:3000`; Docker `impulsionando-core:latest` = `80e20d11`; public apex often `commit:unknown`) — do not “fix” with wipe. See [`STATUS.md`](../../STATUS.md).
 
