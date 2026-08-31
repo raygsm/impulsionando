@@ -74,7 +74,7 @@ jobs:
             cd "$GITHUB_WORKSPACE/$dir" || return 1
             test "$(git rev-parse HEAD)" = "$sha" || return 1
             npm ci --no-audit --no-fund || return 1
-            npx --yes vitest run src/lib/subdomain.test.ts || return 1
+            npx --yes vitest run src/lib/subdomain.test.ts src/lib/release-marker.test.ts || return 1
             npm run build || return 1
             test -f .output/server/index.mjs || return 1
             test -f scripts/start-core-runtime.mjs || return 1
@@ -110,17 +110,40 @@ jobs:
           . /tmp/build.env
           ssh "$VPS_USER@$VPS_HOST" "PRIMARY_SHA='$PRIMARY_SHA' FALLBACK_SHA='$FALLBACK_SHA' PRIMARY_BUILD_OK='$PRIMARY_BUILD_OK' FALLBACK_BUILD_OK='$FALLBACK_BUILD_OK' RUN_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
           set -uo pipefail
-          compose=/opt/impulsionando/deploy/hostinger/docker-compose.yml
-          test -f "$compose" || exit 30
-          old_image="$(sudo docker inspect -f '{{.Image}}' impulsionando-core 2>/dev/null || true)"
-          [ -z "$old_image" ] || sudo docker tag "$old_image" "impulsionando-core:pre-recovery-$RUN_ID"
+          PUBLIC_NAME=core-bfdc-canary
+          PUBLIC_PORT=3488
+          KEEP="$PUBLIC_NAME-pre-recovery-$RUN_ID"
+          ENVF=/tmp/core-3488-env-$RUN_ID.env
+          OLD_CURRENT="$(readlink -f /var/www/impulsionando-core/current 2>/dev/null || true)"
+
+          dump_public_env() {
+            sudo docker inspect "$PUBLIC_NAME" >/dev/null 2>&1 || return 1
+            sudo docker inspect "$PUBLIC_NAME" --format '{{range .Config.Env}}{{println .}}{{end}}' \
+              | awk -F= '$1!="PATH" && $1!="NODE_VERSION" && $1!="YARN_VERSION" && NF>0' \
+              > "$ENVF"
+            chmod 600 "$ENVF"
+            test -s "$ENVF"
+          }
 
           restore_previous() {
-            if sudo docker image inspect "impulsionando-core:pre-recovery-$RUN_ID" >/dev/null 2>&1; then
-              sudo docker tag "impulsionando-core:pre-recovery-$RUN_ID" impulsionando-core:latest
-              cd /opt/impulsionando/deploy/hostinger
-              sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core >/dev/null 2>&1 || true
+            sudo docker rm -f "$PUBLIC_NAME" >/dev/null 2>&1 || true
+            if sudo docker inspect "$KEEP" >/dev/null 2>&1; then
+              sudo docker rename "$KEEP" "$PUBLIC_NAME" >/dev/null 2>&1 || true
+              sudo docker start "$PUBLIC_NAME" >/dev/null 2>&1 || true
             fi
+            if [ -n "$OLD_CURRENT" ] && [ -d "$OLD_CURRENT" ]; then
+              sudo ln -sfn "$OLD_CURRENT" /var/www/impulsionando-core/current
+              sudo ln -sfn "$OLD_CURRENT" /var/www/impulsionando-core/current-front
+              sudo systemctl restart impulsionando-core.service >/dev/null 2>&1 || true
+            fi
+          }
+
+          probe_sha() {
+            sha="$1"
+            disk="$(sudo docker exec "$PUBLIC_NAME" cat /app/.output/public/impulsionando-front-sha.txt 2>/dev/null | tr -d '\r\n' || true)"
+            http="$(curl -fsS --max-time 8 -H 'Host: impulsionando.com.br' -H 'Cache-Control: no-cache' "http://127.0.0.1:$PUBLIC_PORT/impulsionando-front-sha.txt" 2>/dev/null | tr -d '\000\r\n' || true)"
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 8 -H 'Host: impulsionando.com.br' "http://127.0.0.1:$PUBLIC_PORT/" || true)"
+            [ "$disk" = "$sha" ] && [ "$http" = "$sha" ] && [ "$code" = 200 ]
           }
 
           try_candidate() {
@@ -143,31 +166,42 @@ jobs:
           CMD ["node","scripts/start-core-runtime.mjs"]
           DOCKERFILE
             sudo docker build -f /tmp/Dockerfile.production-front -t "impulsionando-core:$sha" "$release" || return 1
-            sudo docker tag "impulsionando-core:$sha" impulsionando-core:latest || return 1
-            cd /opt/impulsionando/deploy/hostinger || return 1
-            sudo docker compose -f "$compose" up -d --no-build --force-recreate impulsionando-core || return 1
+            test -s "$ENVF" || return 1
+            if sudo docker inspect "$PUBLIC_NAME" >/dev/null 2>&1; then
+              if sudo docker inspect "$KEEP" >/dev/null 2>&1; then
+                sudo docker rm -f "$PUBLIC_NAME" >/dev/null 2>&1 || true
+              else
+                sudo docker stop "$PUBLIC_NAME" >/dev/null
+                sudo docker rename "$PUBLIC_NAME" "$KEEP"
+              fi
+            fi
+            sudo docker run -d --name "$PUBLIC_NAME" --restart unless-stopped --env-file "$ENVF" -p "127.0.0.1:$PUBLIC_PORT:3000" "impulsionando-core:$sha" || return 1
+            ok=0
             for i in $(seq 1 45); do
-              served="$(sudo docker exec impulsionando-core node -e "fetch('http://127.0.0.1:3000/impulsionando-front-sha.txt',{headers:{host:'impulsionando.com.br'}}).then(async r=>process.stdout.write((await r.text()).trim())).catch(()=>process.exit(2))" 2>/dev/null || true)"
-              [ "$served" = "$sha" ] && { sudo ln -sfn "$release" /var/www/impulsionando-core/current-front; echo "$sha" > /tmp/selected-recovery-sha; return 0; }
+              probe_sha "$sha" && { ok=1; break; }
               sleep 2
             done
-            return 1
+            [ "$ok" = 1 ] || return 1
+            sudo chmod -R a+rX "$release"
+            sudo ln -sfn "$release" /var/www/impulsionando-core/current
+            sudo ln -sfn "$release" /var/www/impulsionando-core/current-front
+            sudo systemctl restart impulsionando-core.service >/dev/null 2>&1 || true
+            echo "$sha" > /tmp/selected-recovery-sha
+            return 0
           }
+
+          dump_public_env || { echo "could not read public canary env"; exit 30; }
 
           selected=''
           if [ "$PRIMARY_BUILD_OK" = 1 ] && try_candidate primary "$PRIMARY_SHA"; then
             selected="$PRIMARY_SHA"
           else
             restore_previous
+            dump_public_env || true
             if [ "$FALLBACK_BUILD_OK" = 1 ] && try_candidate fallback "$FALLBACK_SHA"; then selected="$FALLBACK_SHA"; fi
           fi
           if [ -z "$selected" ]; then restore_previous; exit 40; fi
-
-          for name in $(sudo docker ps -a --format '{{.Names}}'); do
-            [ "$name" = impulsionando-core ] && continue
-            case "$name" in *fastfront*|*fast-front*|*front-emergency*|*universal-front*|*multitenant*|*csi-final*|*csi-fast*|chrismed-front-final-live|chrismed-front-final-canary) sudo docker rm -f "$name" >/dev/null 2>&1 || true;; esac
-          done
-          echo "RECOVERY_PROMOTION=PASS sha=$selected"
+          echo "RECOVERY_PROMOTION=PASS sha=$selected origin=127.0.0.1:$PUBLIC_PORT"
           REMOTE
           selected="$(ssh "$VPS_USER@$VPS_HOST" 'cat /tmp/selected-recovery-sha')"
           echo "selected_sha=$selected" >> "$GITHUB_OUTPUT"
@@ -180,7 +214,7 @@ jobs:
             d="$1"
             for i in $(seq 1 20); do
               code="$(curl -sS -L -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' --max-time 15 "https://$d/?release=$selected" || true)"
-              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?release=$selected" 2>/dev/null | tr -d '\r\n' || true)"
+              sha="$(curl -fsSL -H 'Cache-Control: no-cache' --max-time 15 "https://$d/impulsionando-front-sha.txt?release=$selected" 2>/dev/null | tr -d '\000\r\n' || true)"
               [ "$code" = 200 ] && [ "$sha" = "$selected" ] && return 0
               sleep 3
             done

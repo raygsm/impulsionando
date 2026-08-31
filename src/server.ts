@@ -4,6 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleN8nHmacVerifier } from "./lib/n8n-hmac-verifier.server";
 import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
+import { releaseMarkerResponse } from "./lib/release-marker";
 import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toColorsInternalPathname, toWmpInternalPathname, wmpRedirectLeavesCanonicalHost } from "./lib/subdomain";
 
 type ServerEntry = {
@@ -144,6 +145,9 @@ export default {
       ) {
         return applySecurityHeaders(wmpDomainLockResponse(request));
       }
+
+      const releaseMarker = releaseMarkerResponse(request);
+      if (releaseMarker) return applySecurityHeaders(releaseMarker);
 
       if (!isWmpHost) {
         const canonicalTenantUrl = canonicalTenantHostRedirect({

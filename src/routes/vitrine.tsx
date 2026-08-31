@@ -32,6 +32,10 @@ type Company = {
   segment: string | null;
   tagline: string | null;
   description: string | null;
+  logo_url?: string | null;
+  website?: string | null;
+  route?: string | null;
+  subdomain?: string | null;
 };
 
 function money(cents: number) {
@@ -97,10 +101,30 @@ function VitrinePage() {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {rows.map((c) => (
                 <Card key={c.id} className="flex flex-col p-6 transition-shadow hover:shadow-elegant">
-                  <div className="flex items-start justify-between gap-3"><div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div><Badge variant="outline">{c.segment || "serviços"}</Badge></div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary">
+                      {c.logo_url ? <img src={c.logo_url} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-5 w-5" />}
+                    </div>
+                    <Badge variant="outline">{c.segment || "serviços"}</Badge>
+                  </div>
                   <h2 className="mt-4 text-xl font-semibold">{c.trade_name || c.name}</h2>
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{c.description || c.tagline || "Operação conectada ao Core Impulsionando."}</p>
-                  {c.public_slug ? <Button asChild className="mt-5 w-full"><Link to="/auth" search={{ persona: "clube", mode: "signin", next: `/vitrine/${c.public_slug}` }}><LockKeyhole className="mr-2 h-4 w-4" />Ver detalhes no Clube</Link></Button> : <Button className="mt-5 w-full" disabled>Detalhes em ativação</Button>}
+                  <div className="mt-5 grid gap-2">
+                    {c.route && c.route !== `/vitrine/${c.public_slug}` ? (
+                      <Button asChild className="w-full"><a href={c.route}>Abrir operação</a></Button>
+                    ) : c.website ? (
+                      <Button asChild className="w-full"><a href={c.website} target="_blank" rel="noopener noreferrer">Abrir site</a></Button>
+                    ) : null}
+                    {c.public_slug ? (
+                      <Button asChild variant={c.route || c.website ? "outline" : "default"} className="w-full">
+                        <Link to="/auth" search={{ persona: "clube", mode: "signin", next: `/vitrine/${c.public_slug}` }}>
+                          <LockKeyhole className="mr-2 h-4 w-4" />Ver detalhes no Clube
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button className="w-full" disabled>Detalhes em ativação</Button>
+                    )}
+                  </div>
                 </Card>
               ))}
             </div>
