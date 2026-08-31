@@ -7,48 +7,88 @@ A partir de agora, qualquer pedido novo relacionado à própria Impulsionando ou
 
 O usuário pode simplesmente escrever, falar ou transcrever uma frase em linguagem natural, por exemplo:
 
-- "Tem um erro no botão da Ana Madú."
-- "Quero mudar a configuração desse tenant."
-- "Crie uma nova jornada para recuperação de clientes."
-- "No futuro, quero que o ERP faça X."
-- "Corrija esse problema no backend."
+- "Intake: tem um erro no botão da Ana Madú."
+- "Intake: quero mudar a configuração desse tenant."
+- "Intake: cria uma nova jornada para recuperação de clientes."
+- "Intake: no futuro quero que o ERP faça X."
+- "Intake: corrige esse problema no backend."
 
 Não é necessário preencher formulário, usar sintaxe especial ou escrever prompt complexo.
 
-## Gatilhos de linguagem natural
-As palavras **`intake`** e **`socializar`** passam a ser gatilhos oficiais para ativar este fluxo.
+## Gatilho oficial único
+A palavra **`intake`** é o único gatilho oficial para ativar este fluxo.
 
 Quando o usuário disser algo como:
 
 - "Intake: esse botão está errado."
 - "Intake Ana Madú: quero mudar esse trecho."
-- "Socializar: pensei numa melhoria para o ERP."
-- "Socializa isso para a Diba."
 - "Intake, vê esse erro aqui."
-- "Socializar essa ideia pro futuro."
+- "Intake: pensei numa melhoria para o ERP."
+- "Intake Diba: quero mudar a busca de produto."
+- "Intake: olha esse print e ajusta isso."
 
 O agente deve entender automaticamente que precisa transformar a fala informal em um Product Intake estruturado.
 
-Esses gatilhos **não exigem formato adicional**. A mensagem pode ser curta, incompleta, coloquial, conter erro de digitação, vir de áudio transcrito, imagem, print ou contexto anterior. O agente deve usar o contexto disponível e conduzir o restante.
+O gatilho **não exige formato adicional**. A mensagem pode ser curta, incompleta, coloquial, conter erro de digitação, vir de áudio transcrito, imagem, print ou contexto anterior. O agente deve usar o contexto disponível e conduzir o restante.
 
-`intake` e `socializar` são equivalentes como intenção de registrar, estruturar, contextualizar e preparar uma demanda para governança e execução. Quando a fala também contiver ordem clara de execução, o agente deve registrar o intake e seguir o fluxo de execução aplicável, sem obrigar o usuário a repetir o pedido.
+## Experiência obrigatória do usuário
+O usuário fala de forma simples e natural. O agente assume o trabalho de:
+
+1. entender a intenção real;
+2. recuperar o contexto relevante;
+3. organizar o pedido tecnicamente;
+4. estruturar a demanda em ordem lógica e cronológica;
+5. identificar impactos, dependências, riscos, regressões potenciais e critérios de aceite;
+6. transformar a fala informal em uma especificação clara e executável;
+7. apresentar ao usuário exatamente o que entendeu;
+8. permitir que o usuário apenas incremente, ajuste ou confirme;
+9. somente após confirmação explícita, iniciar a execução.
+
+A interação ideal é:
+
+`INTAKE EM LINGUAGEM NATURAL -> AGENTE INTERPRETA -> AGENTE ESTRUTURA -> AGENTE APRESENTA O QUE ENTENDEU -> USUÁRIO AJUSTA/INCREMENTA OU CONFIRMA -> EXECUÇÃO -> REVISÃO -> QA -> DEPLOY -> VERIFICAÇÃO -> FECHAMENTO`
+
+## Regra de confirmação
+Dizer `intake` **não autoriza automaticamente alterações em produção, código, banco, infraestrutura ou configuração**.
+
+O agente deve primeiro consolidar a demanda e apresentar uma versão organizada ao usuário.
+
+A execução começa quando o usuário confirmar de forma inequívoca, por exemplo:
+
+- "É exatamente isso."
+- "Confirmado."
+- "Pode executar."
+- "Siga."
+- "Avance."
+- "Perfeito, faça."
+
+Se o usuário corrigir ou acrescentar algo, o agente atualiza o Intake e reapresenta a versão consolidada antes da execução, salvo quando a própria mensagem já contiver confirmação inequívoca da versão final.
+
+Exceção: incidente P0 com risco imediato de indisponibilidade, segurança, perda ou corrupção de dados pode exigir contenção emergencial. Nesse caso, o agente registra o Intake em paralelo e limita a intervenção à contenção necessária, preservando evidências e rollback.
 
 ## Papel do agente
-Ao receber uma intenção de execução ou um dos gatilhos oficiais, o agente deve:
+Ao receber `intake`, o agente deve:
 
-1. identificar automaticamente que se trata de Product Intake;
-2. interpretar linguagem informal e normalizar a intenção sem exigir jargão técnico;
-3. classificar o tipo de demanda;
-4. identificar tenant/cliente, front, back, infraestrutura, integração ou Core afetado;
-5. recuperar contexto existente, histórico, decisões anteriores e estado atual quando disponíveis;
-6. fazer perguntas simples em português, uma por vez, somente quando houver informação realmente necessária que não possa ser inferida com segurança;
-7. nunca perguntar novamente algo que já esteja claro no contexto ou possa ser verificado nas fontes conectadas;
-8. inferir impacto técnico, impacto de negócio, dependências, riscos, segurança, LGPD e prioridade sugerida;
-9. verificar duplicidade, conflito, regressão potencial, dependência e relação com demandas anteriores;
-10. registrar o documento correspondente em `docs/product-intake/`;
-11. produzir um bloco final `Resumo para o dono de produto`;
-12. encaminhar para planejamento e execução quando houver ordem de execução, exceto incidente P0, cuja contenção pode ocorrer em paralelo ao intake;
-13. após execução, atualizar o item com evidências, testes, validação, deploy e status final.
+1. identificar automaticamente o fluxo de Product Intake;
+2. interpretar linguagem informal sem exigir jargão técnico;
+3. identificar tenant/cliente, Core, front, back, infraestrutura, integração, automação ou módulo afetado;
+4. recuperar contexto existente, decisões anteriores, código, configuração e estado real quando as fontes conectadas permitirem;
+5. não perguntar novamente algo que já esteja claro no contexto ou possa ser verificado diretamente;
+6. fazer perguntas simples em português, uma por vez, somente quando uma informação realmente necessária não puder ser inferida com segurança;
+7. classificar a demanda: bug, melhoria, novo recurso, configuração, segurança, infraestrutura, conteúdo, UX/UI, integração, automação, compliance ou outro tipo pertinente;
+8. analisar impacto técnico e de negócio;
+9. mapear públicos e jornadas afetadas;
+10. analisar frontend, backend, dados, APIs, N8N, agentes, MCPs/tools, billing, permissões, segurança e LGPD quando aplicável;
+11. verificar duplicidade, conflito, dependência, complementaridade e regressão potencial em relação a demandas anteriores;
+12. definir prioridade e risco sugeridos;
+13. definir critérios objetivos de aceite e plano de validação;
+14. organizar um plano técnico e cronológico de execução;
+15. registrar ou atualizar o documento correspondente em `docs/product-intake/`;
+16. gerar `Resumo para o dono de produto` em linguagem simples;
+17. apresentar a especificação consolidada ao usuário para ajuste ou confirmação;
+18. após confirmação, executar apenas o escopo aprovado;
+19. realizar revisão, QA, deploy e verificação no ambiente correto;
+20. atualizar o Intake com evidências e status final.
 
 ## Escopo
 Aplica-se a:
@@ -80,14 +120,19 @@ Aplica-se a:
 - ideias futuras e backlog.
 
 ## Estados
-`DRAFT -> TRIAGE -> APPROVED -> PLANNED -> IN_PROGRESS -> REVIEW -> QA -> READY_FOR_DEPLOY -> DEPLOYED -> VERIFIED -> CLOSED`
+`DRAFT -> TRIAGE -> AWAITING_OWNER_CONFIRMATION -> APPROVED -> PLANNED -> IN_PROGRESS -> REVIEW -> QA -> READY_FOR_DEPLOY -> DEPLOYED -> VERIFIED -> CLOSED`
 
 `DEPLOYED` nunca equivale automaticamente a `CLOSED`.
 
 ## Regra de continuidade
-Um novo pedido não substitui automaticamente um pedido anterior. O agente deve verificar duplicidade, conflito, dependência, complemento e prioridade antes de alterar o backlog ou a execução existente.
+Um novo Intake não substitui automaticamente um pedido anterior. O agente deve verificar duplicidade, conflito, dependência, complemento e prioridade antes de alterar backlog ou execução existente.
+
+## Regra de preservação
+Toda execução deve partir do estado real atual, preservar o que estiver correto e alterar apenas o necessário. Não reiniciar, reescrever ou substituir componentes funcionais sem justificativa técnica.
 
 ## Regra de simplicidade
-A interface do usuário com este processo deve permanecer deliberadamente simples: o usuário fala normalmente; o agente transforma a intenção em documentação estruturada e governança de execução.
+A interface do usuário com este processo deve permanecer deliberadamente simples.
 
-A melhor experiência possível é: **uma frase do usuário deve ser suficiente para iniciar o processo**. O ônus de estruturar, investigar, perguntar, documentar e preparar a execução pertence ao agente, não ao usuário.
+**Uma frase iniciada por `intake` deve ser suficiente para começar.**
+
+O trabalho de investigar, interpretar, estruturar, organizar, documentar, perguntar, planejar e preparar a execução pertence ao agente. Ao usuário cabe apenas complementar, corrigir ou confirmar o entendimento antes da execução.
