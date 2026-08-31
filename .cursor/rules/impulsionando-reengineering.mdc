@@ -15,11 +15,15 @@ Stakeholder vision is input only — never skips phase gates.
 
 ## Current authorization
 
-**Phase 0** closed. **ADRs 001–008 Aceitas** (2026-08-30). Phase 1 closing (staging restore + auth/tenant non-prod). **Phase 2 planning** authorized.
+**Phase 0** closed. **ADRs 001–008 Aceitas** (2026-08-30). Phase 1 closing (staging restore + auth/tenant non-prod). **Phase 2 in progress** on clean host (Dokploy installed) — follow `STATUS.md`.
 
 Do **not**: implement Nest bootstrap; mechanically move monorepo routes; provision Dokploy on **legacy** VPS; wipe VPS; change prod DNS/routing; migrate tenants; `db push`/reset prod; re-enable contained workflows without a recorded decision.
 
-Aceita ≠ license to scaffold Nest/Dokploy today — follow phase gates in `STATUS.md`.
+Aceita ≠ license to skip phase gates — Nest remains Phase 3; prod cutover later.
+
+## Clean VPS evidence
+
+Mutations on clean host `2.25.123.224` **must** be logged in `docs/reengineering/04-migration/phase-2/clean-host/` (see rule `impulsionando-clean-vps-log`).
 
 ## Target stack (Proposed — see TARGET-STACK.md)
 
@@ -30,6 +34,10 @@ Full detail: `docs/reengineering/02-target-architecture/TARGET-STACK.md`.
 ## Hard safety
 
 No secrets in chat/docs/git. No prod writes as diagnostics. No workers during SSR-only probes. HTTP 200 ≠ release proof. Backup ≠ proven without restore. Tenant isolation needs allow **and** deny tests. Mark unproven claims UNKNOWN. Prefer paths, SHAs, service names, timestamps as evidence.
+
+## Every implementation
+
+Follow root `AGENTS.md` and `.cursor/rules/impulsionando-implementation.mdc`: report + record evidence on close-out. Governance copy: `docs/reengineering/05-governance/IMPLEMENTATION-RULES.md`.
 
 ## Working tree hazards
 

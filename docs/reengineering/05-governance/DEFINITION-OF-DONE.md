@@ -39,3 +39,6 @@ Uma funcionalidade migrada só está concluída quando:
 
 “Funciona na minha máquina” ou “o deploy ficou verde” não satisfaz esta definição.
 
+Agent close-out for every implementation task: [`IMPLEMENTATION-RULES.md`](IMPLEMENTATION-RULES.md) · root [`AGENTS.md`](../../../AGENTS.md).
+
+

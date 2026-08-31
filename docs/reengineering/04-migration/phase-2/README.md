@@ -1,7 +1,7 @@
 # Phase 2 — parallel workboard (planning)
 
 Opened: **2026-08-30**  
-Status: **IMPLEMENTATION STARTED (scaffold)** — workspace + `@impulsionando/contracts` + GHCR placeholder workflow; Dokploy/DNS/Nest still gated  
+Status: **IMPLEMENTATION IN PROGRESS** — Dokploy on clean host; restore/auth residual still parallel  
 Phase overview: [`../PHASE-2-PLATFORM.md`](../PHASE-2-PLATFORM.md)
 
 ## Exit criteria (implementation — later)
@@ -13,38 +13,44 @@ A single commit passes CI → one immutable GHCR image (full SHA) → deploys to
 | Allowed now | Forbidden until explicit gate |
 | --- | --- |
 | Workspace skeleton (`apps/*`, `packages/*`), contracts package | Nest business logic in `apps/api` |
-| `workflow_dispatch` GHCR **placeholder** SHA publish | Dokploy / Traefik / clean host provision without human |
-| Staging evidence + env-name inventories | Change Cloudflare / prod DNS / apex cutover |
-| Planning docs, inventories | Wipe or reinstall legacy VPS `187.77.232.52` |
+| `workflow_dispatch` GHCR **placeholder** SHA publish | Change Cloudflare / **prod** DNS / apex cutover |
+| Staging evidence + env-name inventories | Wipe or reinstall legacy VPS `187.77.232.52` |
+| Dokploy on **clean** host `2.25.123.224` | Dokploy on legacy VPS |
 | | `db push` / reset / corrective prod schema |
 | | Re-enable contained workflows without recorded decision |
 
-**Scaffold landed 2026-08-30:** `pnpm-workspace.yaml`, placeholder apps/packages, `@impulsionando/contracts`, `.github/workflows/reengineering-ghcr-sha.yml`, [`STAGING-RESTORE-EVIDENCE.md`](STAGING-RESTORE-EVIDENCE.md), [`STAGING-ENV-INVENTORY.md`](STAGING-ENV-INVENTORY.md).
+**Landed:** workspace scaffold · contracts · GHCR stub workflow · clean host inventory · **Dokploy v0.30.3** + Traefik on `2.25.123.224` (UI `:3000`) · staging Supabase project created (empty; restore open).
 
-Legacy VPS remains **rollback-only**. Prod today is split-brain (nginx → host Node `ebcc52f0` on `:3000`; Docker `impulsionando-core:latest` = `80e20d11`; public apex often `commit:unknown`) — do not “fix” with wipe. See [`STATUS.md`](../../STATUS.md).
+## Restore independence (explicit)
 
-## Residual Phase 1 (blocks full Phase 2 *implementation*)
+| Depends on staging **restore** | Does **not** depend on restore |
+| --- | --- |
+| P1-I RPO/RTO evidence | Dokploy / Traefik on clean host |
+| P1-J auth/tenant live allow/deny on real schema | GHCR placeholder build/publish |
+| App bind that needs prod-like tables/RLS | Staging hostname **planning**; admin UI setup |
+| Phase 1 **exit** | Placeholder container deploy without Supabase |
+| P2-A full data wiring | Env **name** inventory (values later) |
+
+## Residual Phase 1 (blocks Phase 1 *exit*, not all of Phase 2)
 
 | Residual | Owner | Doc |
 | --- | --- | --- |
 | Human staging restore + RPO/RTO | Human | [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLAN.md) |
 | Auth/tenant allow+deny baseline non-prod | Human / agent assist | Phase 1 board P1-J |
 
-Phase 2 **planning** may proceed in parallel; provisioning waits on residual + human gate.
-
 ## Parallel tracks
 
 | ID | Track | Mode | Gate | Output |
 | --- | --- | --- | --- | --- |
-| **P2-A** | Staging Supabase wiring | **plan-only** until P1-I restore proven; then **human-gated** project bind | ADR-004; no secrets in Git | Named staging project ref; env inventory (names only); app↔staging mapping; no prod credentials in staging |
-| **P2-B** | Clean host inventory | **plan-only** / **human-gated** quotes | ADR-006 | Size/region/cost for control / staging / prod-clean; what stays on legacy |
-| **P2-C** | Dokploy control plane plan | **plan-only**; install **human-gated** | ADR-006 Aceita-com-condições | Install runbook on clean host only; networks; no app business logic on control plane |
-| **P2-D** | GHCR / CI promote path | **plan-only**; CI enable **human-gated** | ADR-007 Aceita | Build-once → `GHCR:<full-sha>` → staging → promote same SHA; forbid `latest` as authority — [`GHCR-AND-PROMOTE.md`](GHCR-AND-PROMOTE.md) |
-| **P2-E** | Traefik + Cloudflare staging DNS | **plan-only**; DNS edits **human-gated** | ADR-006; no prod apex | Staging hostnames, Traefik as origin, Cloudflare edge; prod DNS untouched |
-| **P2-F** | Health / rollback drill | **plan-only** until staging runtime exists; then **human-gated** rehearsal | Exit criterion | Readiness gates; previous SHA redeploy; drill record (timestamp + SHAs) |
-| **P2-G** | Observability minimum | **plan-only**; ship with first staging deploy | TARGET-STACK | Structured logs, correlation IDs, per-service health/readiness, release identity, actionable alert stub |
+| **P2-A** | Staging Supabase wiring | **partial** — project exists; restore open | ADR-004 | ref `kyiczxtcoexnvcqgrgkr`; bind secrets after restore |
+| **P2-B** | Clean host inventory | **done** (budget A) | ADR-006 | `2.25.123.224` Ubuntu 24.04 · 1 vCPU · 4G |
+| **P2-C** | Dokploy control plane | **installed** | ADR-006 | Dokploy v0.30.3 · http://2.25.123.224:3000 · human admin signup |
+| **P2-D** | GHCR / CI promote path | **stub ready**; dispatch human | ADR-007 | workflow `reengineering-ghcr-sha.yml` |
+| **P2-E** | Traefik + Cloudflare staging DNS | Traefik up; DNS **human** | ADR-006 | choose staging hostnames; no prod apex |
+| **P2-F** | Health / rollback drill | **blocked on first app image** | Exit criterion | after GHCR + deploy |
+| **P2-G** | Observability minimum | with first staging deploy | TARGET-STACK | logs / readiness / release SHA |
 
-Topology detail: [`CLEAN-INFRA-TOPOLOGY.md`](CLEAN-INFRA-TOPOLOGY.md). Platform intent: [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md), [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md).
+Topology detail: [`CLEAN-INFRA-TOPOLOGY.md`](CLEAN-INFRA-TOPOLOGY.md). **VPS mutation log (mandatory):** [`clean-host/`](clean-host/README.md). Platform intent: [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md), [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md).
 
 ## Track notes (planning depth)
 

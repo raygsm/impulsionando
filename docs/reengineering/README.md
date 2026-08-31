@@ -36,7 +36,7 @@ Em caso de conflito:
 | Arquitetura    | [Sistema-alvo](02-target-architecture/SYSTEM.md), [stack-alvo](02-target-architecture/TARGET-STACK.md) e [fronteiras de tecnologia](02-target-architecture/TECHNOLOGY-BOUNDARIES.md) | Como será o sistema novo e qual tecnologia faz o quê?                                            |
 | Plataforma     | [Dokploy](03-platform/DOKPLOY.md) e [CI/CD](03-platform/CI-CD.md)                                                                               | Como ambientes, builds e releases funcionarão?                                                   |
 | Migração       | [Plano por fases](04-migration/README.md)                                                                                                       | Em que ordem migraremos sem interromper produção?                                                |
-| Governança     | [Decisões](05-governance/DECISIONS.md), [riscos](05-governance/RISKS.md) e [Definition of Done](05-governance/DEFINITION-OF-DONE.md)            | Como decisões, riscos e conclusão serão controlados?                                             |
+| Governança     | [Decisões](05-governance/DECISIONS.md), [riscos](05-governance/RISKS.md), [Definition of Done](05-governance/DEFINITION-OF-DONE.md), [Implementation rules (agents)](05-governance/IMPLEMENTATION-RULES.md) | Como decisões, riscos, close-out de agentes e conclusão serão controlados? |
 | Acompanhamento | [Status](STATUS.md)                                                                                                                             | Onde estamos e qual é o próximo gate?                                                            |
 
 ## Sequência obrigatória

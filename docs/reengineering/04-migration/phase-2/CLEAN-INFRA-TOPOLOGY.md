@@ -35,7 +35,30 @@ Managed Supabase (staging project + prod project)
 | **Clean production server** | Traefik + prod application containers only when cutover is gated | Build host; staging; legacy coexistence host; silent dual-publish with old VPS |
 | **Managed Supabase** | PostgreSQL, Auth, Storage, Realtime, Queues when approved | Installed inside Dokploy or on app VPS |
 
-Exact host sizes, regions, IPs, and monthly cost: **UNKNOWN** until human quotes (track P2-B).
+Exact host sizes, regions, IPs, and monthly cost: partially observed below (track P2-B).
+
+## Observed clean host inventory (2026-08-30)
+
+Budget option candidate: **shared Dokploy control + staging** (not prod; not legacy).
+
+| Field | Value |
+| --- | --- |
+| Role (intended) | Clean Server A — **Dokploy control + staging** (ADR-006 budget option) |
+| Public IPv4 | `2.25.123.224` |
+| Hostname | `srv1942777` |
+| SSH | `root@2.25.123.224` via key `id_ed25519_impulsionando` (BatchMode OK 2026-08-30) |
+| OS | Ubuntu **24.04.4 LTS** (Noble), kernel `6.8.0-137-generic` |
+| Resources | **1** vCPU · **3.8 GiB** RAM · **48G** root (`/dev/sda1`) |
+| Docker | **29.x**; Swarm **initialized** advertise `2.25.123.224` |
+| Dokploy | **Installed 2026-08-30** — `v0.30.3`; UI `http://2.25.123.224:3000` (create admin on first visit; no secrets in git) |
+| Traefik | Bundled with Dokploy install (`traefik:v3.6.7` pulled) |
+| Listeners (post-install) | Expect `3000` (Dokploy) + Traefik `80`/`443` when converged |
+| Supabase | Remains **managed external** — staging ref `kyiczxtcoexnvcqgrgkr` (empty until restore); do not install app Postgres on this box |
+| Deny | Not legacy prod (`187.77.232.52`); no prod DNS; no wipe of legacy |
+
+Probe notes: up ~16 min at first agent SSH; Hostinger/KVM VM. Cost SKU: **UNKNOWN** (operator Hostinger panel).
+
+**Mandatory mutation log:** [`clean-host/`](./clean-host/README.md) (`HOST.md` + `IMPLEMENTATION-LOG.md`). Cursor rule: `.cursor/rules/impulsionando-clean-vps-log.mdc`.
 
 ## What stays on the legacy VPS
 
@@ -119,7 +142,11 @@ No date commitments in this doc. Capacity and cost approval are human gates befo
 
 ## Open UNKNOWN items
 
-- Provider and SKUs for control / staging / prod-clean
-- Whether budget option (shared A) is chosen
+- Hostinger SKU / monthly cost for `2.25.123.224`
+- Confirm budget option (this box = shared A) vs separate control-only later
 - Staging hostname scheme and Cloudflare zone ownership details (no secrets)
-- Whether any existing non-prod host can be reused — default assume **no** reuse of legacy VPS
+- Dokploy install gate — **done 2026-08-30** on `2.25.123.224` (v0.30.3); admin signup still human
+- Clean prod server B — not provisioned
+- Staging hostname / Cloudflare — not bound
+- App deploy from GHCR — not yet
+- Staging Supabase restore — still open (independent track)

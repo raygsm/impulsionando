@@ -21,6 +21,8 @@ Staging apps below are the **target** deployables. Nest `api` remains Phase 3; n
 
 ## Supabase (staging project)
 
+**Project (non-secret):** `impulsionando-staging` · ref `kyiczxtcoexnvcqgrgkr` · region `us-east-2` · created 2026-08-30 · restore **not** done (empty OK for platform work).
+
 | Name | Used by (intended) | Notes |
 | --- | --- | --- |
 | `SUPABASE_URL` | api, worker, web SSR | staging project URL |

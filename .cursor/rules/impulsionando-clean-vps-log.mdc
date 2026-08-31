@@ -1,0 +1,38 @@
+---
+description: Clean Hostinger VPS mutations must be logged under phase-2/clean-host
+alwaysApply: true
+---
+
+# Clean VPS implementation log
+
+## Evidence folder (mandatory)
+
+All work on the **clean** Phase 2 VPS is recorded under:
+
+`docs/reengineering/04-migration/phase-2/clean-host/`
+
+| File | Use |
+| --- | --- |
+| `README.md` | Index + rules for the folder |
+| `HOST.md` | Current identity (IP, OS, ports, Dokploy version) |
+| `IMPLEMENTATION-LOG.md` | Append-only mutation log |
+
+## After every VPS change
+
+1. Append a dated entry to `IMPLEMENTATION-LOG.md` (operator, change, method **without secrets**, result, docs touched).
+2. Update `HOST.md` if IP/OS/listeners/Dokploy version/role changed.
+3. Keep `STATUS.md` / phase-2 board in sync when the change is a phase gate.
+
+## Host identity (do not confuse)
+
+| Host | Role |
+| --- | --- |
+| `2.25.123.224` (`srv1942777`) | **Clean** — Dokploy + staging (log here) |
+| `187.77.232.52` | **Legacy prod** — rollback only; no Dokploy; no wipe as Phase 2 prep |
+
+## Hard limits
+
+- No secrets in the log folder (passwords, tokens, swarm join tokens, DB URIs, keys).
+- No Dokploy / destructive prep on legacy prod from this track.
+- Managed Supabase stays outside the VPS; `dokploy-postgres` ≠ app database.
+- Logging is required; it does **not** bypass phase gates in `STATUS.md`.

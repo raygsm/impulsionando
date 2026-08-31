@@ -18,7 +18,7 @@ Contracts, ADR Aceita, and Support pilot readiness are done. Exit remains blocke
 
 | # | Blocker | Status | Evidence |
 | ---: | --- | --- | --- |
-| 1 | Staging Supabase isolated restore + RPO/RTO | **OPEN** — plan only | Plan: [`STAGING-RESTORE-PLAN.md`](STAGING-RESTORE-PLAN.md). Restore **not** executed. Backup confirmed (Phase 0) ≠ restore proven. |
+| 1 | Staging Supabase isolated restore + RPO/RTO | **OPEN** — project created; restore not run | Staging `impulsionando-staging` ref `kyiczxtcoexnvcqgrgkr` (us-east-2), created 2026-08-30T23:50:43Z, was COMING_UP at record. Evidence: [`../phase-2/STAGING-RESTORE-EVIDENCE.md`](../phase-2/STAGING-RESTORE-EVIDENCE.md). Restore **not** executed → RPO/RTO still open. |
 | 2 | Auth / tenant allow/deny baseline on non-prod | **OPEN** — not yet green | Track P1-J in flight per [`README.md`](README.md). Must run against staging/non-prod only — not prod. |
 | 3 | ADRs Aceitas | **CLOSED for Phase 1** | Aceita recorded **2026-08-30** — [`ADR-ACCEPTANCE-PACKET.md`](../../05-governance/ADR-ACCEPTANCE-PACKET.md), [`DECISIONS.md`](../../05-governance/DECISIONS.md). |
 | 4 | Contracts P1-C…G | **CLOSED for Phase 1** | See completed table below. |

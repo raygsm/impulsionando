@@ -1,0 +1,36 @@
+---
+description: Mandatory close-out and quality bar for every Impulsionando implementation task
+alwaysApply: true
+---
+
+# Implementation rules (every task)
+
+Canonical agent entry: `AGENTS.md`. Program SoT: `docs/reengineering/STATUS.md`.
+
+## Before you implement
+
+1. Read `STATUS.md` — confirm the change is allowed in the current phase.
+2. Prefer the smallest diff that matches existing patterns; no drive-by refactors.
+3. If the task spans prod vs staging vs clean VPS, name the target explicitly.
+
+## While you implement
+
+- **Stability:** no prod schema writes / `db push` / reset; no workers during SSR-only probes; no Dokploy on legacy VPS; expand/contract for schema when migrations are later authorized.
+- **Maintainability:** one concern per change; update contracts/docs when behavior is intentional; leave placeholders clearly marked; do not invent Nest/business modules before Phase 3.
+- **Readability:** match local naming and file layout; avoid clever indirection; comments only for non-obvious intent.
+- **Evidence:** paths, SHAs, service names, timestamps, project refs — never secrets.
+- **Hazards:** do not touch `src/routeTree.gen.ts` or treat `src/generated/build-info.ts` as release identity without approval.
+
+## Implementation close-out (mandatory)
+
+Before ending the turn after any real change (code, infra, docs-as-evidence):
+
+1. **Report** in the user reply: what shipped, where (paths/hosts/refs), what was verified, what remains open / UNKNOWN.
+2. **Record** evidence in the right place:
+   - Clean VPS → `docs/reengineering/04-migration/phase-2/clean-host/IMPLEMENTATION-LOG.md` (+ `HOST.md` if facts changed)
+   - Staging restore → `…/phase-2/STAGING-RESTORE-EVIDENCE.md`
+   - Phase movement → `docs/reengineering/STATUS.md` and the phase board README
+3. **Do not** mark a phase complete on scaffolding alone, HTTP 200 alone, or backup-without-restore.
+4. **Link** evidence paths in the report when useful.
+
+Logging does not bypass phase gates.
