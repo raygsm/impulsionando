@@ -1,8 +1,9 @@
 # Phase 2 — parallel workboard (planning)
 
 Opened: **2026-08-30**  
-Status: **IMPLEMENTATION IN PROGRESS** — Dokploy on clean host; restore/auth residual still parallel  
-Phase overview: [`../PHASE-2-PLATFORM.md`](../PHASE-2-PLATFORM.md)
+Status: **IMPLEMENTATION IN PROGRESS** — Dokploy on clean host; GHCR PR #100 open; restore/auth residual still parallel  
+Phase overview: [`../PHASE-2-PLATFORM.md`](../PHASE-2-PLATFORM.md)  
+Rollback drill: [`ROLLBACK-DRILL.md`](./ROLLBACK-DRILL.md) · Smoke: `npm run phase2:smoke:placeholder`
 
 ## Exit criteria (implementation — later)
 

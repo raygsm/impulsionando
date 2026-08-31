@@ -420,13 +420,28 @@ describe("P1-J auth/tenant baseline — policy stub (mock)", () => {
 });
 
 const liveEnabled = process.env.AUTH_TENANT_BASELINE_LIVE === "1";
+const STAGING_REF = "kyiczxtcoexnvcqgrgkr";
+const PROD_REF = "arygtqrdpcdkwnuwsgmm";
 
 describe.skipIf(!liveEnabled)("P1-J auth/tenant baseline — live staging (gated)", () => {
-  it("documents that live run requires staging env (no secrets in repo)", () => {
-    // Operator checklist when AUTH_TENANT_BASELINE_LIVE=1:
-    // - SUPABASE_URL / keys point at staging only
-    // - fixtures A/B + operators exist
-    // - execute T-01..T-07, A1..A11 against staging (see AUTH-TENANT-BASELINE-TESTS.md §5)
-    expect(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL).toBeTruthy();
+  it("refuses prod and requires staging URL before any live probe", () => {
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+    expect(url, "SUPABASE_URL / VITE_SUPABASE_URL required when AUTH_TENANT_BASELINE_LIVE=1").toBeTruthy();
+    expect(url.includes(PROD_REF), `must not target prod ${PROD_REF}`).toBe(false);
+    expect(url.includes(STAGING_REF), `must target staging ${STAGING_REF}`).toBe(true);
+  });
+
+  it("service_role key is present for staging probes (value never asserted)", () => {
+    expect(Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)).toBe(true);
+  });
+
+  it("structure smoke: companies table readable on staging (post-restore)", async () => {
+    const { createClient } = await import("@supabase/supabase-js");
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL!;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const sb = createClient(url, key, { auth: { persistSession: false } });
+    const { count, error } = await sb.from("companies").select("*", { count: "exact", head: true });
+    expect(error, error?.message).toBeNull();
+    expect((count ?? 0) > 0, "empty companies — restore or fixtures missing").toBe(true);
   });
 });

@@ -71,11 +71,23 @@ Format per entry:
   - External `:8088/health` smoke from operator network
 - Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../STATUS.md`](../../STATUS.md)
 
+## 2026-08-31 — GHCR unblock PR + local smoke/scripts (no VPS mutation)
+
+- Operator: Agent
+- Change: Opened minimal PR to `main` with workflow + Dockerfile; added smoke script + rollback runbook on `reengineering/program`
+- Commands / method:
+  - PR https://github.com/raygsm/impulsionando/pull/100 (branch `chore/reengineering-ghcr-on-main`)
+  - `npm run phase2:smoke:placeholder` (script added)
+  - [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md)
+- Result / evidence: PR open (not merged); VPS placeholder unchanged (`97d167bd`)
+- Docs updated: this log, [`../GHCR-AND-PROMOTE.md`](../GHCR-AND-PROMOTE.md), [`../../STATUS.md`](../../STATUS.md)
+
 ## Pending (not done on VPS yet)
 
-- GHCR publish of same Dockerfile (workflow must land on default branch for `workflow_dispatch`)
+- Merge PR #100 → GHCR `workflow_dispatch` → Dokploy pull by full SHA
 - Staging hostname + Cloudflare (human DNS) — see [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md)
-- App env bind to staging Supabase (after restore track as needed)
+- Rollback drill after ≥2 GHCR SHAs — [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md)
+- App env bind to staging Supabase (after restore evidence)
 - Resource limits Dokploy vs staging apps (document numbers when set)
 - ACME email still install default — replace before public TLS
 - Prefer recreating placeholder via Dokploy UI + GHCR once registry login exists

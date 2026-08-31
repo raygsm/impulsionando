@@ -1,7 +1,7 @@
 # GHCR and promote path (Phase 2 planning)
 
 Opened: **2026-08-30**  
-Status: **PARTIAL** — placeholder HTTP image built; GHCR `workflow_dispatch` needs file on default branch; promote-same-SHA rule unchanged  
+Status: **PARTIAL** — placeholder live on clean host; **PR #100** lands workflow+Dockerfile on `main` (merge human-gated); promote-same-SHA unchanged  
 Authority: [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md), [`../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md`](../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md), [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md)
 
 ## Evidence (2026-08-31)
@@ -9,11 +9,13 @@ Authority: [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md), [`../../0
 | Item | Status |
 | --- | --- |
 | Workflow file on `reengineering/program` | yes — `.github/workflows/reengineering-ghcr-sha.yml` |
-| `gh workflow run` | **404** — GitHub only lists workflows present on the **default** branch |
+| Minimal PR to default branch | **open** — https://github.com/raygsm/impulsionando/pull/100 (`chore/reengineering-ghcr-on-main`) |
+| `gh workflow run` | **404 until #100 merges** — GitHub only lists workflows on the **default** branch |
 | Interim deploy | Built on clean host; Swarm `reengineering-placeholder:97d167bd`; `/health` returns `gitSha` |
 | GHCR push of that SHA | **not yet** |
+| Rollback drill runbook | [`ROLLBACK-DRILL.md`](./ROLLBACK-DRILL.md) |
 
-**Next:** merge workflow (and Dockerfile) to default branch **or** open PR that lands the workflow, then `workflow_dispatch` and point Dokploy at `ghcr.io/.../impulsionando-reengineering-placeholder:<full-sha>`.
+**Next:** merge [#100](https://github.com/raygsm/impulsionando/pull/100) → `gh workflow run "Reengineering GHCR SHA placeholder"` → Dokploy pull `ghcr.io/raygsm/impulsionando-reengineering-placeholder:<full-sha>` → run rollback drill.
 
 
 ## Goal

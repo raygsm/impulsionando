@@ -150,7 +150,17 @@ Pass = all mock/contract assertions green. Does **not** alone close Phase 1 exit
 2. Export staging env **locally only** (never commit):
 
 ```bash
-# Staging project only — never production
+# Prefer loading .env.staging (gitignored) — never production
+cp -n .env.staging.example .env.staging   # fill keys from Dashboard once
+npm run verify:staging-supabase           # refuses prod ref arygtqrdpcdkwnuwsgmm
+npm run test:auth-baseline                # mock/contract (always)
+npm run test:auth-baseline:live           # sets AUTH_TENANT_BASELINE_LIVE=1
+```
+
+Or export manually:
+
+```bash
+# Staging project only — never production (ref kyiczxtcoexnvcqgrgkr)
 export SUPABASE_URL='…staging…'
 export SUPABASE_PUBLISHABLE_KEY='…'
 export SUPABASE_SERVICE_ROLE_KEY='…'   # server/admin seed only
@@ -161,7 +171,7 @@ export AUTH_TENANT_BASELINE_LIVE=1     # opt-in gate
 4. Record evidence in §6 table (timestamps, fixture labels, pass/fail) — **no secrets, no PII dumps**.
 5. Existing live RLS helpers under `tests/*.test.ts` that import `tests/helpers.ts` require the same env pattern and **must** target staging when used for this exit — they throw if env missing and are **not** safe against prod.
 
-Live suite in this track: the contract file’s `describe.skipIf(!process.env.AUTH_TENANT_BASELINE_LIVE)` block documents the live checklist; expand with real clients only when staging fixtures exist. Default CI remains mock-only.
+Live suite in this track: `describe.skipIf(!AUTH_TENANT_BASELINE_LIVE)` refuses prod ref, requires staging URL + service_role, and probes `companies` count (post-restore). Expand T/A matrix with real client sessions when fixtures exist. Default CI remains mock-only.
 
 ### 4.3 What not to run
 
