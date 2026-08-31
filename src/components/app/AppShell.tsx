@@ -10,6 +10,7 @@ import { QuickActions } from "./QuickActions";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { PublishNowButton } from "./PublishNowButton";
 import { ImpulsionitoDock } from "@/components/impulsionito/ImpulsionitoDock";
+import { ImpulsionitoGuideLauncher } from "@/components/impulsionito/ImpulsionitoGuideLauncher";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -138,6 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileBottomNav />
       <CommandPalette />
       <QuickActions />
+      <ImpulsionitoGuideLauncher />
       <ImpulsionitoDock />
     </div>
   );
