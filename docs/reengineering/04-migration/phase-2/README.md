@@ -43,13 +43,13 @@ A single commit passes CI → one immutable GHCR image (full SHA) → deploys to
 
 | ID | Track | Mode | Gate | Output |
 | --- | --- | --- | --- | --- |
-| **P2-A** | Staging Supabase wiring | **partial** — project exists; restore open | ADR-004 | ref `kyiczxtcoexnvcqgrgkr`; bind secrets after restore |
+| **P2-A** | Staging Supabase wiring | **partial** — project exists; restore evidence open | ADR-004 | ref `kyiczxtcoexnvcqgrgkr`; bind secrets after restore |
 | **P2-B** | Clean host inventory | **done** (budget A) | ADR-006 | `2.25.123.224` Ubuntu 24.04 · 1 vCPU · 4G |
 | **P2-C** | Dokploy control plane | **installed** | ADR-006 | Dokploy v0.30.3 · http://2.25.123.224:3000 · human admin signup |
-| **P2-D** | GHCR / CI promote path | **stub on branch**; dispatch **blocked** until workflow on default branch | ADR-007 | Local/VPS image `97d167bd` deployed; GHCR publish next |
-| **P2-E** | Traefik + Cloudflare staging DNS | Traefik ✅ Host header smoke; DNS **human** | ADR-006 | [`STAGING-HOSTNAMES.md`](STAGING-HOSTNAMES.md) |
-| **P2-F** | Health / rollback drill | **partial** — `/health`+`/ready` live; rollback SHA drill not yet | Exit criterion | Redeploy previous SHA still open |
-| **P2-G** | Observability minimum | with first staging deploy | TARGET-STACK | logs / readiness / release SHA |
+| **P2-D** | GHCR / CI promote path | **done** (placeholder) | ADR-007 | PR #100 merged; two SHA tags published; public pull OK |
+| **P2-E** | Traefik + Cloudflare staging DNS | Traefik ✅; DNS **human** | ADR-006 | [`STAGING-HOSTNAMES.md`](STAGING-HOSTNAMES.md) |
+| **P2-F** | Health / rollback drill | **done** | Exit criterion | A→B→A PASS — [`ROLLBACK-DRILL.md`](ROLLBACK-DRILL.md) |
+| **P2-G** | Observability minimum | **partial** — SHA on `/health` | TARGET-STACK | alert destinations still UNKNOWN |
 
 Topology detail: [`CLEAN-INFRA-TOPOLOGY.md`](CLEAN-INFRA-TOPOLOGY.md). **VPS mutation log (mandatory):** [`clean-host/`](clean-host/README.md). Platform intent: [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md), [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md).
 

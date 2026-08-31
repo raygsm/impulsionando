@@ -71,23 +71,27 @@ Format per entry:
   - External `:8088/health` smoke from operator network
 - Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../STATUS.md`](../../STATUS.md)
 
-## 2026-08-31 — GHCR unblock PR + local smoke/scripts (no VPS mutation)
+## 2026-08-31T~20:00Z — GHCR promote + rollback drill (P2-D / P2-F)
 
-- Operator: Agent
-- Change: Opened minimal PR to `main` with workflow + Dockerfile; added smoke script + rollback runbook on `reengineering/program`
-- Commands / method:
-  - PR https://github.com/raygsm/impulsionando/pull/100 (branch `chore/reengineering-ghcr-on-main`)
-  - `npm run phase2:smoke:placeholder` (script added)
-  - [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md)
-- Result / evidence: PR open (not merged); VPS placeholder unchanged (`97d167bd`)
-- Docs updated: this log, [`../GHCR-AND-PROMOTE.md`](../GHCR-AND-PROMOTE.md), [`../../STATUS.md`](../../STATUS.md)
+- Operator: Agent (authorized after PR #100 merge)
+- Change:
+  - `workflow_dispatch` published SHA-A `647308e7…` and SHA-B `7db6ceaf…` to GHCR
+  - Pulled images on clean host (no registry login required — package publicly pullable)
+  - `docker service update` A → B → A on `reengineering-placeholder`
+  - Set `--update-order start-first` / `--rollback-order start-first` (host-mode `:8088`)
+- Result / evidence:
+  - Health after A: `gitSha=647308e7bed44576c794211e44952c0cf93b03df`
+  - Health after B: `gitSha=7db6ceaf0aaf4fe9db2478da5d10597dd4c07c3f`
+  - Health after rollback A: same as A; external `npm run phase2:smoke:placeholder` OK
+  - Digests: A `sha256:04ffacfc…` · B `sha256:a6daa06f…`
+  - Runs: https://github.com/raygsm/impulsionando/actions/runs/33433542700 · https://github.com/raygsm/impulsionando/actions/runs/33433588827
+- Docs updated: this log, [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md), [`../GHCR-AND-PROMOTE.md`](../GHCR-AND-PROMOTE.md), [`../../STATUS.md`](../../STATUS.md)
 
 ## Pending (not done on VPS yet)
 
-- Merge PR #100 → GHCR `workflow_dispatch` → Dokploy pull by full SHA
 - Staging hostname + Cloudflare (human DNS) — see [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md)
-- Rollback drill after ≥2 GHCR SHAs — [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md)
-- App env bind to staging Supabase (after restore evidence)
-- Resource limits Dokploy vs staging apps (document numbers when set)
 - ACME email still install default — replace before public TLS
-- Prefer recreating placeholder via Dokploy UI + GHCR once registry login exists
+- Prefer recreating placeholder via Dokploy UI (CLI Swarm path proven)
+- App env bind to staging Supabase (after restore evidence + `.env.staging`)
+- Resource limits Dokploy vs staging apps (document numbers when set)
+- Alert destinations (P2-G)

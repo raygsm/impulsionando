@@ -1,51 +1,51 @@
 # Phase 2 — placeholder rollback drill (P2-F)
 
 Opened: **2026-08-31**  
-Status: **RUNBOOK READY — execute after ≥2 SHA tags exist in GHCR**  
+Status: **DRILL COMPLETE — PASS**  
 Authority: [`GHCR-AND-PROMOTE.md`](./GHCR-AND-PROMOTE.md), ADR-007
 
-**Hard rule:** no secrets, PATs, or connection strings in this file. Prefer Dokploy UI over SSH rewrite.
+**Hard rule:** no secrets, PATs, or connection strings in this file.
 
 ## Goal
 
 Prove rollback = **redeploy previous known-good SHA** (same image, no rebuild).
 
-## Preconditions
+## Evidence (2026-08-31 UTC)
 
-1. PR landing workflow on default branch merged ([`#100`](https://github.com/raygsm/impulsionando/pull/100) or successor).
-2. Two successful `workflow_dispatch` publishes, e.g. SHA-A and SHA-B:
-   - `ghcr.io/raygsm/impulsionando-reengineering-placeholder:<40-hex-A>`
-   - `ghcr.io/raygsm/impulsionando-reengineering-placeholder:<40-hex-B>`
-3. Dokploy registry login for GHCR (human vault — not in git).
-4. Placeholder service reachable for smoke (`:8088` and/or Traefik Host).
+| Field | Value |
+| --- | --- |
+| SHA-A (main merge of PR #100) | `647308e7bed44576c794211e44952c0cf93b03df` |
+| SHA-A digest | `sha256:04ffacfc8aafc37a32f254c9b1347e048dc64d394fdd159ae456d6cb6ecec914` |
+| SHA-B (`reengineering/program` wiring commit) | `7db6ceaf0aaf4fe9db2478da5d10597dd4c07c3f` |
+| SHA-B digest | `sha256:a6daa06fe41cc719d5659610280331ca5aca0917e7269ecd85f7dbaa438027e4` |
+| Image | `ghcr.io/raygsm/impulsionando-reengineering-placeholder` |
+| Workflow runs | [A 33433542700](https://github.com/raygsm/impulsionando/actions/runs/33433542700) · [B 33433588827](https://github.com/raygsm/impulsionando/actions/runs/33433588827) |
+| Host | `2.25.123.224` service `reengineering-placeholder` |
+| Method | `docker service update --image …:<full-sha>` (GHCR pull; no rebuild on VPS) |
+| Post-drill live | SHA-A · `npm run phase2:smoke:placeholder` OK |
+| Follow-up | Swarm `--update-order start-first` (host-mode port 8088) |
 
-## Drill steps
+### Pass checklist
 
-| Step | Action | Record |
-| --- | --- | --- |
-| 1 | Deploy **SHA-A** via Dokploy (image tag = full SHA). | Deploy time UTC, digest if shown |
-| 2 | Smoke: `npm run phase2:smoke:placeholder` with `PLACEHOLDER_EXPECT_SHA=<A>` | Pass/fail + observed `gitSha` |
-| 3 | Deploy **SHA-B** the same way (no rebuild). | Deploy time UTC |
-| 4 | Smoke with `PLACEHOLDER_EXPECT_SHA=<B>` | Pass/fail |
-| 5 | **Rollback:** redeploy **SHA-A** (same tag/digest as step 1). | Deploy time UTC |
-| 6 | Smoke with `PLACEHOLDER_EXPECT_SHA=<A>` | Must match A again |
-| 7 | Append results to [`clean-host/IMPLEMENTATION-LOG.md`](./clean-host/IMPLEMENTATION-LOG.md) | This drill row |
-
-## Pass criteria
-
-- [ ] SHA-B `/health` shows B’s `gitSha`
-- [ ] After rollback, `/health` shows A’s `gitSha` again
-- [ ] No rebuild on the VPS for rollback
-- [ ] No use of `latest` as authority
+- [x] SHA-B `/health` showed B’s `gitSha` (`7db6ceaf…`)
+- [x] After rollback, `/health` showed A’s `gitSha` again (`647308e7…`)
+- [x] No rebuild on the VPS for rollback
+- [x] No use of `latest` as authority
 
 ## Evidence log
 
 | Date (UTC) | SHA-A | SHA-B | Rollback OK? | Operator | Notes |
 | --- | --- | --- | --- | --- | --- |
-| _pending_ | | | | | Waiting GHCR on `main` |
+| 2026-08-31 ~20:00–20:02Z | `647308e7…` | `7db6ceaf…` | **YES** | Agent | A→B→A; interim `stop-first` caused port-in-use retries; then converged. `start-first` set after. |
+
+## Remaining Phase 2 (not this drill)
+
+- Public staging DNS + TLS (human Cloudflare)
+- Prefer Dokploy UI as day-2 path (this drill used Swarm CLI with GHCR)
+- Alert destinations (P2-G)
 
 ## Related
 
-- Smoke script: `npm run phase2:smoke:placeholder`
-- Clean host: [`clean-host/HOST.md`](./clean-host/HOST.md)
+- Smoke: `npm run phase2:smoke:placeholder`
+- Log: [`clean-host/IMPLEMENTATION-LOG.md`](./clean-host/IMPLEMENTATION-LOG.md)
 - Status: [`../../STATUS.md`](../../STATUS.md)

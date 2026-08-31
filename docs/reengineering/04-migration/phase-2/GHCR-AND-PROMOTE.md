@@ -1,21 +1,21 @@
 # GHCR and promote path (Phase 2 planning)
 
 Opened: **2026-08-30**  
-Status: **PARTIAL** — placeholder live on clean host; **PR #100** lands workflow+Dockerfile on `main` (merge human-gated); promote-same-SHA unchanged  
+Status: **PROMOTE PATH LIVE** — PR #100 merged; GHCR publishes; rollback drill PASS; DNS/TLS staging still human  
 Authority: [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md), [`../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md`](../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md), [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md)
 
 ## Evidence (2026-08-31)
 
 | Item | Status |
 | --- | --- |
-| Workflow file on `reengineering/program` | yes — `.github/workflows/reengineering-ghcr-sha.yml` |
-| Minimal PR to default branch | **open** — https://github.com/raygsm/impulsionando/pull/100 (`chore/reengineering-ghcr-on-main`) |
-| `gh workflow run` | **404 until #100 merges** — GitHub only lists workflows on the **default** branch |
-| Interim deploy | Built on clean host; Swarm `reengineering-placeholder:97d167bd`; `/health` returns `gitSha` |
-| GHCR push of that SHA | **not yet** |
-| Rollback drill runbook | [`ROLLBACK-DRILL.md`](./ROLLBACK-DRILL.md) |
+| Workflow on default branch (`main`) | **yes** — merged PR [#100](https://github.com/raygsm/impulsionando/pull/100) @ `647308e7` |
+| `gh workflow run` | **works** — runs [33433542700](https://github.com/raygsm/impulsionando/actions/runs/33433542700), [33433588827](https://github.com/raygsm/impulsionando/actions/runs/33433588827) |
+| GHCR images | `ghcr.io/raygsm/impulsionando-reengineering-placeholder:<full-sha>` (public pull OK from clean host) |
+| Rollback drill | **PASS** — [`ROLLBACK-DRILL.md`](./ROLLBACK-DRILL.md) |
+| Live placeholder | full SHA `647308e7…` on `:8088` + Traefik Host `placeholder.staging.local` |
+| Staging DNS / TLS | **still human** |
 
-**Next:** merge [#100](https://github.com/raygsm/impulsionando/pull/100) → `gh workflow run "Reengineering GHCR SHA placeholder"` → Dokploy pull `ghcr.io/raygsm/impulsionando-reengineering-placeholder:<full-sha>` → run rollback drill.
+**Next:** Cloudflare staging hostnames; optional Dokploy UI recreate; ACME email.
 
 
 ## Goal

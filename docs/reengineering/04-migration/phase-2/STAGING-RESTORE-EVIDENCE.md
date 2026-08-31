@@ -1,7 +1,7 @@
 # Staging restore evidence (Phase 2)
 
 Opened: **2026-08-30**  
-Status: **PROJECT CREATED — waiting healthy + restore drill**  
+Status: **PROJECT CREATED — restore evidence still OPEN (blocks Phase 1 exit)**  
 Authority: [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLAN.md)
 
 **Hard rule:** no secrets, connection strings, dump paths with credentials, or API keys in this file.
@@ -43,6 +43,7 @@ Authority: [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLA
 | 2026-08-30 | Agent | Attempt execute P1-I restore end-to-end | **BLOCKED** — Dashboard unauthenticated in agent session | `/sign-in` |
 | 2026-08-30 | Agent | Confirm prod ref for deny-list | OK | `arygtqrdpcdkwnuwsgmm` |
 | 2026-08-30 ~23:50Z | Cauã + org AI | Create sibling project `impulsionando-staging` | **CREATED** — status COMING_UP; restore not run; prod untouched | ref `kyiczxtcoexnvcqgrgkr`, region `us-east-2`, PG 17.6.1.166 |
+| 2026-08-31 ~20:05Z | Agent | Attempt close P1-I via local `.env.staging` | **BLOCKED** — no `.env.staging` on operator machine; cannot claim restore without evidence timestamps | scripts ready: `npm run verify:staging-supabase` |
 
 ## Next (restore — only after healthy)
 
