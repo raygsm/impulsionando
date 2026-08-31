@@ -10,16 +10,30 @@ function publicClient() {
 }
 
 export const getPublicVitrine = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ segment:z.string().optional(), q:z.string().optional(), sort:z.enum(["recent","name"]).default("name"), limit:z.number().int().min(1).max(200).default(120) }).parse(d ?? {}))
+  .inputValidator((d: unknown) => z.object({ segment:z.string().optional(), q:z.string().optional(), sort:z.enum(["recent","name","rating"]).default("name"), limit:z.number().int().min(1).max(200).default(120) }).parse(d ?? {}))
   .handler(async ({ data }) => {
-    const sb = publicClient();
-    let query = sb.from("companies_vitrine_teaser_public").select("id,name,trade_name,segment,tagline,description,public_slug").limit(data.limit);
-    if (data.segment) query = query.eq("segment", data.segment);
-    if (data.q) { const term=`%${data.q}%`; query=query.or(`name.ilike.${term},trade_name.ilike.${term},tagline.ilike.${term},description.ilike.${term}`); }
-    query=query.order("name",{ascending:true});
-    const { data: rows, error }=await query;
-    if(error) return {companies:[],error:error.message};
-    return {companies:rows??[]};
+    try {
+      const { loadActiveVitrineTeasers } = await import("@/lib/vitrine-active-tenants.server");
+      const { filterVitrineTeasers } = await import("@/lib/vitrine-active-tenants");
+      const teasers = filterVitrineTeasers(await loadActiveVitrineTeasers(), {
+        segment: data.segment,
+        q: data.q,
+        limit: data.limit,
+      });
+      if (data.sort === "rating") {
+        teasers.sort((a, b) => Number(b.rating_avg ?? 0) - Number(a.rating_avg ?? 0) || (a.trade_name || a.name).localeCompare(b.trade_name || b.name, "pt-BR"));
+      }
+      return { companies: teasers };
+    } catch (error) {
+      const sb = publicClient();
+      let query = sb.from("companies_vitrine_teaser_public").select("id,name,trade_name,segment,tagline,description,public_slug").limit(data.limit);
+      if (data.segment) query = query.eq("segment", data.segment);
+      if (data.q) { const term=`%${data.q}%`; query=query.or(`name.ilike.${term},trade_name.ilike.${term},tagline.ilike.${term},description.ilike.${term}`); }
+      query=query.order("name",{ascending:true});
+      const { data: rows, error: viewError }=await query;
+      if(viewError) return {companies:[],error:viewError.message};
+      return {companies:rows??[], error: error instanceof Error ? error.message : undefined};
+    }
   });
 
 export const getClubCompanyBySlug = createServerFn({ method:"GET" })
@@ -29,9 +43,20 @@ export const getClubCompanyBySlug = createServerFn({ method:"GET" })
     const sb=context.supabase as any;
     const {data:row,error}=await sb.from("companies_vitrine_public").select("*").eq("public_slug",data.slug).maybeSingle();
     if(error)throw new Error(error.message);
-    if(!row)throw new Error("Empresa não encontrada");
-    const {data:reviews}=await sb.from("ecosystem_reviews").select("id,stars,comment,created_at").eq("company_id",row.id).order("created_at",{ascending:false}).limit(20);
-    return{company:row,reviews:reviews??[]};
+    if(row) {
+      const {data:reviews}=await sb.from("ecosystem_reviews").select("id,stars,comment,created_at").eq("company_id",row.id).order("created_at",{ascending:false}).limit(20);
+      return{company:row,reviews:reviews??[]};
+    }
+    try {
+      const { loadActiveVitrineTeasers } = await import("@/lib/vitrine-active-tenants.server");
+      const teaser = (await loadActiveVitrineTeasers()).find((item) => item.public_slug === data.slug || item.subdomain === data.slug);
+      if (!teaser) throw new Error("Empresa não encontrada");
+      const {data:reviews}=await sb.from("ecosystem_reviews").select("id,stars,comment,created_at").eq("company_id",teaser.id).order("created_at",{ascending:false}).limit(20);
+      return { company: teaser, reviews: reviews ?? [] };
+    } catch (fallbackError) {
+      if (fallbackError instanceof Error && fallbackError.message === "Empresa não encontrada") throw fallbackError;
+      throw new Error("Empresa não encontrada");
+    }
   });
 
 export const submitCompanyReview = createServerFn({method:"POST"}).middleware([requireSupabaseAuth]).inputValidator((d:unknown)=>z.object({company_id:z.string().uuid(),stars:z.number().int().min(1).max(5),comment:z.string().max(1000).optional()}).parse(d)).handler(async({data,context})=>{const{error}=await(context.supabase as any).from("ecosystem_reviews").upsert({company_id:data.company_id,user_id:context.userId,stars:data.stars,comment:data.comment??null},{onConflict:"company_id,user_id"});if(error)throw new Error(error.message);return{ok:true};});
