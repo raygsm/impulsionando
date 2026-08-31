@@ -420,7 +420,7 @@ describe("P1-J auth/tenant baseline — policy stub (mock)", () => {
 });
 
 const liveEnabled = process.env.AUTH_TENANT_BASELINE_LIVE === "1";
-const STAGING_REF = "kyiczxtcoexnvcqgrgkr";
+const STAGING_REF = "aamorcqznimmleafavai";
 const PROD_REF = "arygtqrdpcdkwnuwsgmm";
 
 describe.skipIf(!liveEnabled)("P1-J auth/tenant baseline — live staging (gated)", () => {

@@ -9,8 +9,10 @@ import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-const STAGING_REF = "kyiczxtcoexnvcqgrgkr";
+// Operator-confirmed staging project (2026-08-31). Older docs mentioned kyiczxt… — superseded.
+const STAGING_REF = "aamorcqznimmleafavai";
 const PROD_REF = "arygtqrdpcdkwnuwsgmm";
+const LEGACY_STAGING_REF = "kyiczxtcoexnvcqgrgkr"; // DNS dead; do not use
 
 const root = process.cwd();
 const stagingEnv = resolve(root, ".env.staging");
@@ -19,11 +21,14 @@ const stagingLocal = resolve(root, ".env.staging.local");
 if (!existsSync(stagingEnv) && !existsSync(stagingLocal)) {
   fail("Create .env.staging from .env.staging.example (staging API keys from Dashboard)");
 }
-if (existsSync(stagingEnv)) config({ path: stagingEnv });
+// Always let .env.staging win over shell/.env.local prod leftovers.
+if (existsSync(stagingEnv)) config({ path: stagingEnv, override: true });
 if (existsSync(stagingLocal)) config({ path: stagingLocal, override: true });
 
 const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const publishable =
+  process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 function fail(msg) {
   console.error(`verify:staging-supabase FAIL — ${msg}`);
@@ -32,9 +37,14 @@ function fail(msg) {
 
 if (!url) fail("SUPABASE_URL or VITE_SUPABASE_URL missing (use .env.staging)");
 if (!serviceKey) fail("SUPABASE_SERVICE_ROLE_KEY missing (staging API → service_role in vault only)");
+if (serviceKey.includes("...") || /^eyJ\.\.\./i.test(serviceKey)) {
+  fail("SUPABASE_SERVICE_ROLE_KEY looks like a placeholder (contains ...). Paste the real service_role from Dashboard → API");
+}
+if (!publishable) fail("SUPABASE_PUBLISHABLE_KEY missing");
 if (url.includes(PROD_REF)) fail(`URL contains prod ref ${PROD_REF} — use staging only`);
-if (!url.includes(STAGING_REF)) fail(`URL must contain staging ref ${STAGING_REF}`);
-
+if (!url.includes(STAGING_REF)) {
+  fail(`URL must contain staging ref ${STAGING_REF} (got host from .env.staging — wrong project?)`);
+}
 const sb = createClient(url, serviceKey, { auth: { persistSession: false } });
 
 const probes = [

@@ -22,4 +22,6 @@ Follow **Implementation close-out** in `.cursor/rules/impulsionando-implementati
 
 ## Never without an explicit gate
 
-Nest bootstrap · Dokploy on legacy VPS · wipe legacy · prod DNS cutover · `db push`/reset prod · mechanical move of all routes · secrets in git/chat · treat `latest` / `build-info.ts` as release identity
+Dokploy on legacy VPS · wipe legacy · prod DNS cutover · `db push`/reset prod · mechanical move of all routes · secrets in git/chat · treat `latest` / `build-info.ts` as release identity
+
+**Phase 3 (authorized 2026-08-31 after Phase 1 close):** Nest bootstrap in `apps/api` for **Support pilot only** — not full monorepo move, not prod cutover.

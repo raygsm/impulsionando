@@ -1,7 +1,7 @@
 # Staging restore evidence (Phase 2)
 
 Opened: **2026-08-30**  
-Status: **PROJECT CREATED — restore evidence still OPEN (blocks Phase 1 exit)**  
+Status: **STAGING REACHABLE — data present (companies/user_roles); formal RPO/RTO drill fields still open**  
 Authority: [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLAN.md)
 
 **Hard rule:** no secrets, connection strings, dump paths with credentials, or API keys in this file.
@@ -18,23 +18,52 @@ Authority: [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLA
 
 | Field | Value |
 | --- | --- |
-| Project name | `impulsionando-staging` |
-| Project ref | `kyiczxtcoexnvcqgrgkr` |
-| Region | `us-east-2` |
-| Plan / compute | Paid additional project in org; compute size **not yet reported** by create integration |
-| PostgreSQL | **17.6.1.166** (engine 17) |
-| Created at (UTC) | **2026-08-30T23:50:43.273537Z** |
-| Project status at record | **COMING_UP** (initializing — not healthy yet) |
-| Restore method (A managed / B hand dump) | _pending — not executed_ |
+| Project name | staging (operator-confirmed) |
+| Project ref | **`aamorcqznimmleafavai`** |
+| Project status | Healthy (operator 2026-08-31) |
+| Local wiring | `.env.staging` + `npm run verify:staging-supabase` **OK** 2026-08-31 |
+| Structure smoke (app-level) | `companies` count=313 · `user_roles` count=3 |
+| Restore method (A managed / B hand dump) | _pending formal record_ |
 | Backup / dump timestamp (UTC) | _pending_ |
 | Restore start (UTC) | _pending_ |
 | Restore ready (UTC) | _pending_ |
 | RPO (achieved) | _pending_ |
 | RTO (achieved) | _pending_ |
-| Structure smoke result | _pending — `scripts/audits/phase0-supabase-structure.sql` on staging only_ |
-| Operator | Cauã (org AI integration + human) |
-| Recorded at (UTC) | **2026-08-30** (create report ingested) |
-| Notes (no secrets) | Sibling project created; **produção não foi alterada**. Restore **not** run. Empty staging ≠ restore proven. |
+| Notes (no secrets) | Old ref `kyiczxtcoexnvcqgrgkr` superseded (no DNS). Prod deny = `arygtqrdpcdkwnuwsgmm`. Data present ⇒ restore-or-seed already happened; still need timestamps for Phase 1 exit. |
+
+## Drill log
+
+| Date (UTC) | Operator | Action | Result | Evidence (refs only) |
+| --- | --- | --- | --- | --- |
+| 2026-08-30 | Agent | Attempt execute P1-I restore end-to-end | **BLOCKED** — Dashboard unauthenticated | `/sign-in` |
+| 2026-08-30 ~23:50Z | Cauã + org AI | Create sibling project (logged as `kyiczxt…`) | recorded; later superseded | dead DNS |
+| 2026-08-31 | Cauã | Confirmed live staging ref `aamorcqznimmleafavai` + API keys | Healthy | Dashboard |
+| 2026-08-31 ~20:24Z | Agent | `npm run verify:staging-supabase` | **OK** — companies=313 user_roles=3 | local `.env.staging` |
+  
+Authority: [`../phase-1/STAGING-RESTORE-PLAN.md`](../phase-1/STAGING-RESTORE-PLAN.md)
+
+**Hard rule:** no secrets, connection strings, dump paths with credentials, or API keys in this file.
+
+## Known production identity (DO NOT restore here)
+
+| Field | Value |
+| --- | --- |
+| Prod project ref | `arygtqrdpcdkwnuwsgmm` |
+| Prod posture | Managed Pro; daily backup **confirmed** by Cauã 2026-08-30 ([`BACKUPS.md`](../../01-current-state/phase-0/BACKUPS.md)) |
+| Isolated restore onto prod | **Forbidden** |
+
+## Evidence table (staging)
+
+| Field | Value |
+| --- | --- |
+| Project name | `impulsionando-staging` (operator-confirmed) |
+| Project ref | **`aamorcqznimmleafavai`** (canonical as of 2026-08-31) |
+| Region | _confirm in Dashboard_ |
+| Plan / compute | _confirm in Dashboard_ |
+| PostgreSQL | _confirm in Dashboard_ |
+| Created at (UTC) | _confirm in Dashboard_ |
+| Project status at record | **Healthy** (operator 2026-08-31) |
+| Notes (no secrets) | Earlier create log used ref `kyiczxtcoexnvcqgrgkr` — **superseded**; that hostname does not resolve. Staging = `aamorcqznimmleafavai`. Prod deny = `arygtqrdpcdkwnuwsgmm`. |
 
 ## Drill log
 

@@ -1,5 +1,31 @@
 {
   "name": "@impulsionando/api",
+  "version": "0.0.1",
   "private": true,
-  "description": "NestJS/Fastify modular API. Placeholder — Phase 3; Nest not authorized yet."
+  "description": "Phase 3 NestJS/Fastify modular API — Support pilot first",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "start:dev": "tsx watch src/main.ts",
+    "start:prod": "node dist/main.js"
+  },
+  "dependencies": {
+    "@impulsionando/contracts": "workspace:*",
+    "@nestjs/common": "^11.0.12",
+    "@nestjs/core": "^11.0.12",
+    "@nestjs/platform-fastify": "^11.0.12",
+    "@supabase/supabase-js": "^2.49.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
