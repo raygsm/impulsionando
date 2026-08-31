@@ -2,12 +2,8 @@
  * Health check per-tenant do Mercado Pago.
  * Rota: /api/public/health/mp/:slug
  *
- * Retorna, sem expor segredos:
- *   - environment / active
- *   - public_key configurada
- *   - access_token válido (chamada real a /v1/payment_methods)
- *   - webhook_secret configurado
- *
+ * Resolve o tenant pela fonte canônica `core_tenant_identity` e nunca por
+ * colunas legadas/inexistentes em `companies`.
  * Nunca lê MERCADOPAGO_ACCESS_TOKEN global — puramente per-tenant.
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -17,18 +13,32 @@ export const Route = createFileRoute("/api/public/health/mp/$slug")({
     handlers: {
       GET: async ({ params }) => {
         const t0 = Date.now();
-        const slug = params.slug;
+        const slug = params.slug.toLowerCase();
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        const { data: identity } = await (supabaseAdmin as any)
+          .from("core_tenant_identity")
+          .select("company_id,subdomain,root_domain,custom_domain,dns_status,ssl_status")
+          .eq("subdomain", slug)
+          .maybeSingle();
+
+        if (!identity?.company_id) {
+          return new Response(JSON.stringify({ status: "not_found", tenant: slug }), {
+            status: 404,
+            headers: { "content-type": "application/json", "cache-control": "no-store" },
+          });
+        }
 
         const { data: company } = await (supabaseAdmin as any)
           .from("companies")
-          .select("id,name")
-          .or(`subdomain.eq.${slug},public_slug.eq.${slug}`)
+          .select("id,name,is_active,status")
+          .eq("id", identity.company_id)
           .maybeSingle();
 
         if (!company) {
           return new Response(JSON.stringify({ status: "not_found", tenant: slug }), {
-            status: 404, headers: { "content-type": "application/json", "cache-control": "no-store" },
+            status: 404,
+            headers: { "content-type": "application/json", "cache-control": "no-store" },
           });
         }
 
@@ -76,11 +86,19 @@ export const Route = createFileRoute("/api/public/health/mp/$slug")({
           }
         }
 
-        const ok = !!prod && !!prod.active && apiOk === true && !!prod.public_key;
+        const ok = !!company.is_active && !!prod && !!prod.active && apiOk === true && !!prod.public_key;
         return new Response(JSON.stringify({
           status: ok ? "ok" : "degraded",
           service: "mercadopago-tenant",
-          tenant: { slug, name: company.name, id: company.id },
+          tenant: {
+            slug,
+            name: company.name,
+            id: company.id,
+            active: !!company.is_active,
+            lifecycle_status: company.status,
+            dns_status: identity.dns_status,
+            ssl_status: identity.ssl_status,
+          },
           elapsed_ms: Date.now() - t0,
           ts: new Date().toISOString(),
           environments: rows.map((r) => ({
