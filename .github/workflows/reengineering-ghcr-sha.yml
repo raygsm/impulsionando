@@ -1,0 +1,79 @@
+# Reengineering GHCR SHA promote stub (Phase 2 planning).
+#
+# Manual only — never push-to-main auto-deploy.
+# Tags the placeholder image with the full commit SHA only (never `latest` as authority).
+# Promote rule: staging and (later gated) prod must run the SAME image digest/SHA — no rebuild.
+
+name: Reengineering GHCR SHA placeholder
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: reengineering-ghcr-sha-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/impulsionando-reengineering-placeholder
+
+jobs:
+  build-placeholder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push SHA-tagged placeholder
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/compose/Dockerfile.placeholder
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.title=impulsionando-reengineering-placeholder
+
+      - name: Job summary (promote-same-SHA)
+        run: |
+          {
+            echo "## Reengineering GHCR SHA placeholder"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Image | \`${IMAGE_NAME}:${GITHUB_SHA}\` |"
+            echo "| Tag authority | **full commit SHA only** (no \`latest\`) |"
+            echo "| Trigger | \`workflow_dispatch\` only — no push-to-main auto-deploy |"
+            echo "| Environment | **Not for production** |"
+            echo "| Phase | Phase 2 planning / promote path stub |"
+            echo ""
+            echo "### Promote-same-SHA rule"
+            echo ""
+            echo "1. Build **once** from a known commit."
+            echo "2. Tag and pull by **full SHA** (\`github.sha\` / 40-hex)."
+            echo "3. Staging and any later gated production promote must reference the **same SHA** (same digest) — never rebuild for prod."
+            echo "4. \`latest\` must never be the sole promote authority."
+            echo "5. This workflow publishes a **placeholder** image only; product services (platform-web / api / worker) remain gated separately."
+            echo ""
+            echo "See \`docs/reengineering/04-migration/phase-2/GHCR-AND-PROMOTE.md\` and ADR-007."
+          } >> "$GITHUB_STEP_SUMMARY"

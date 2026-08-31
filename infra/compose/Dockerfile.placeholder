@@ -1,0 +1,25 @@
+# Reengineering GHCR SHA placeholder — Phase 2.
+# Not for production. Promote-same-SHA only. Serves release identity over HTTP.
+
+FROM alpine:3.20
+ARG GIT_SHA=unknown
+ENV GIT_SHA=${GIT_SHA}
+LABEL org.opencontainers.image.revision="${GIT_SHA}"
+LABEL org.opencontainers.image.description="Impulsionando reengineering placeholder — not a product image"
+
+RUN apk add --no-cache busybox-extras \
+  && mkdir -p /www \
+  && printf '%s\n' \
+       "<!doctype html><meta charset=utf-8><title>reengineering-placeholder</title>" \
+       "<pre>impulsionando-reengineering-placeholder\nGIT_SHA=${GIT_SHA}\n</pre>" \
+       > /www/index.html \
+  && printf '%s\n' \
+       "{\"ok\":true,\"service\":\"impulsionando-reengineering-placeholder\",\"gitSha\":\"${GIT_SHA}\"}" \
+       > /www/health \
+  && printf '%s\n' \
+       "{\"ready\":true,\"service\":\"impulsionando-reengineering-placeholder\",\"gitSha\":\"${GIT_SHA}\"}" \
+       > /www/ready \
+  && printf '%s\n' "impulsionando-reengineering-placeholder GIT_SHA=${GIT_SHA}" > /placeholder.txt
+
+EXPOSE 8080
+CMD ["httpd", "-f", "-p", "8080", "-h", "/www"]
