@@ -6,10 +6,14 @@ type OutboxRow = { id:string; event_code:string; recipient:string; payload:Recor
 
 const TEMPLATE_MAP: Record<string,string> = {
   appointment_created:"appointment.created",
+  management_appointment_created:"appointment.confirmed.management",
   payment_pending:"payment.pending",
   appointment_confirmed:"appointment.confirmed",
   appointment_confirmed_management:"appointment.confirmed.management",
   appointment_rescheduled:"appointment.rescheduled",
+  appointment_reminder_d7:"chrismed.appointment.reminder.d7",
+  appointment_reminder_d1:"chrismed.appointment.reminder.d1",
+  appointment_reminder_day6:"chrismed.appointment.reminder.day6",
   appointment_reminder_72h:"appointment.reminder.72h",
   appointment_reminder_24h:"appointment.reminder.24h",
   appointment_reminder_2h:"appointment.reminder.2h",
@@ -52,7 +56,7 @@ const TEMPLATE_MAP: Record<string,string> = {
   conversation_export_authenticated:"chrismed.conversation.export.authenticated",
 };
 
-const SENSITIVE_PREFIXES=["appointment_","payment_","pega_agenda_","conversation_export_","chrismed.appointment."];
+const SENSITIVE_PREFIXES=["appointment_","management_appointment_","payment_","pega_agenda_","conversation_export_","chrismed.appointment."];
 const required=(n:string)=>{const v=Deno.env.get(n)?.trim();if(!v)throw new Error(`missing_secret:${n}`);return v;};
 const json=(b:unknown,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const escapeHtml=(v:string)=>v.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
