@@ -7,6 +7,7 @@ import { getCart } from "@/lib/riomed-portal.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RiomedMark } from "@/components/brand/BrandMarks";
 import {
   ShoppingCart,
   Headphones,
@@ -91,11 +92,7 @@ function RiomedLayout() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           {/* Logo */}
           <Link to="/riomed" className="flex items-center gap-2 shrink-0">
-            <img
-              src="/__l5e/assets-v1/4066b94d-f9a6-431a-81f4-82a420c64bc3/riomed-logo.png"
-              alt="RIO MED — Equipos & Insumos Médicos"
-              className="h-11 w-auto object-contain"
-            />
+            <RiomedMark />
           </Link>
 
           {/* Nav desktop */}
@@ -129,7 +126,7 @@ function RiomedLayout() {
 
             <Link
               to="/riomed/soporte"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-white bg-[color:var(--riomed-orange)] shadow-md shadow-orange-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-slate-950 bg-[color:var(--riomed-orange)] shadow-md shadow-orange-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
             >
               <Headphones className="h-4 w-4" />
               Quero suporte técnico
@@ -137,7 +134,7 @@ function RiomedLayout() {
 
             <Link
               to="/riomed/vendedor"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-white bg-[color:var(--riomed-accent)] shadow-md shadow-teal-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-slate-950 bg-[color:var(--riomed-accent)] shadow-md shadow-teal-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
             >
               <MessageCircle className="h-4 w-4" />
               Falar com vendedor
@@ -170,14 +167,14 @@ function RiomedLayout() {
               <div className="pt-3 grid grid-cols-1 gap-2">
                 <Link
                   to="/riomed/soporte"
-                  className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-orange)]"
+                  className="text-center rounded-lg px-3 py-2.5 font-bold text-slate-950 bg-[color:var(--riomed-orange)]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Quero suporte técnico
                 </Link>
                 <Link
                   to="/riomed/vendedor"
-                  className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-accent)]"
+                  className="text-center rounded-lg px-3 py-2.5 font-bold text-slate-950 bg-[color:var(--riomed-accent)]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Falar com vendedor
@@ -484,7 +481,7 @@ function CartWidget() {
         >
           <ShoppingCart className="h-5 w-5" />
           {count > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[color:var(--riomed-orange)] text-white text-[11px] font-bold flex items-center justify-center shadow">
+            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[color:var(--riomed-orange)] text-slate-950 text-[11px] font-bold flex items-center justify-center shadow">
               {count > 99 ? "99+" : count}
             </span>
           )}
@@ -548,7 +545,7 @@ function CartWidget() {
                 <Link
                   to="/riomed/checkout"
                   onClick={() => setOpen(false)}
-                  className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-bold text-white bg-[color:var(--riomed-orange)] hover:brightness-110"
+                  className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-bold text-slate-950 bg-[color:var(--riomed-orange)] hover:brightness-110"
                 >
                   Finalizar
                 </Link>

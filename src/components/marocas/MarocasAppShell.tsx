@@ -38,7 +38,7 @@ import {
   BellRing,
 } from "lucide-react";
 import { MaroquitoFab } from "./MarocasHelpFab";
-import marocasLogo from "@/assets/marocas-logo.png.asset.json";
+import { MarocasMark } from "@/components/brand/BrandMarks";
 
 export type MarocasProfile = "anfitriao" | "hospede" | "prestador";
 
@@ -221,7 +221,7 @@ function SidebarHeader({ compact }: { compact?: boolean } = {}) {
   return (
     <Link to="/marocas/app" className="flex items-center gap-2.5 p-4 border-b">
       <span className="grid place-items-center h-9 w-9 rounded-full bg-white shadow-sm overflow-hidden ring-1 ring-black/5">
-        <img src={marocasLogo.url} alt="" className="h-8 w-8 object-contain" />
+        <MarocasMark />
       </span>
       {!compact && (
         <span className="leading-tight">

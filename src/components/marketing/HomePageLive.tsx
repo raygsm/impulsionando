@@ -100,7 +100,7 @@ export function HomePageLive() {
                   <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90"><Link to="/planos">Conhecer os planos <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                   <Button size="lg" variant="outline" className="border-white/35 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={() => openImpulsionito("home-hero")}><MessageCircle className="mr-2 h-4 w-4" /> Falar com o Impulsionito</Button>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/75">
+                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/90">
                   <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Área do cliente em todos os planos</span>
                   <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Dashboard incluído</span>
                   <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Evolução sem trocar de plataforma</span>

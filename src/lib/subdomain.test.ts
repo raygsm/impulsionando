@@ -4,11 +4,13 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
+  isImpulsionandoPlatformHost,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
   toColorsInternalPathname,
   toWmpInternalPathname,
   wmpHostLockTarget,
+  wmpRedirectLeavesCanonicalHost,
 } from "./subdomain";
 
 const base = { protocol: "https:", pathname: "/", search: "", hash: "" };
@@ -67,9 +69,9 @@ describe("Colors clean public path routing", () => {
 });
 
 describe("WMP clean public path routing", () => {
-  it("maps the WMP root to its internal namespace", () => expect(toWmpInternalPathname(WMP, "/")).toBe("/wmp/"));
+  it("maps the WMP root to its internal namespace", () => expect(toWmpInternalPathname(WMP, "/")).toBe("/wmp"));
   it("locks every public WMP route to a same-host internal path", () => {
-    expect(wmpHostLockTarget(WMP, "/")).toBe("/wmp/");
+    expect(wmpHostLockTarget(WMP, "/")).toBe("/wmp");
     expect(wmpHostLockTarget(WMP, "/djs")).toBe("/wmp/djs");
     expect(wmpHostLockTarget(WMP, "/empresas")).toBe("/wmp/empresas");
     expect(wmpHostLockTarget(WMP, "/orcamento")).toBe("/wmp/orcamento");
@@ -87,6 +89,12 @@ describe("WMP clean public path routing", () => {
     expect(wmpHostLockTarget(WMP, "/dashboard")).toBeNull();
     expect(wmpHostLockTarget(WMP, "/wmp/djs")).toBeNull();
   });
+  it("allows same-host and relative WMP redirects, and blocks cross-domain ones", () => {
+    expect(wmpRedirectLeavesCanonicalHost("/wmp", WMP)).toBe(false);
+    expect(wmpRedirectLeavesCanonicalHost("https://wmp.impulsionando.com.br/wmp", WMP)).toBe(false);
+    expect(wmpRedirectLeavesCanonicalHost("https://impulsionando.com.br/", WMP)).toBe(true);
+    expect(wmpRedirectLeavesCanonicalHost("https://chrismed.impulsionando.com.br/", WMP)).toBe(true);
+  });
 });
 
 describe("tenant landing resolution", () => {
@@ -96,4 +104,18 @@ describe("tenant landing resolution", () => {
   it("routes CSI to its dedicated landing", () => expect(tenantLandingTargetForHost("csi.impulsionando.com.br")).toBe("/csi"));
   it("uses the storefront for a tenant without a dedicated landing", () => expect(tenantSubdomainTarget("cliente-novo")).toBe("/vitrine/cliente-novo"));
   it("does not treat the apex domain as a tenant", () => expect(tenantLandingTargetForHost("impulsionando.com.br")).toBeNull());
+});
+
+describe("platform core hosts", () => {
+  it("treats apex, www and app as core — not unknown tenants", () => {
+    expect(isImpulsionandoPlatformHost("impulsionando.com.br")).toBe(true);
+    expect(isImpulsionandoPlatformHost("www.impulsionando.com.br")).toBe(true);
+    expect(isImpulsionandoPlatformHost("app.impulsionando.com.br")).toBe(true);
+    expect(isImpulsionandoPlatformHost("admin.impulsionando.com.br")).toBe(true);
+  });
+  it("does not treat customer tenant hosts as core", () => {
+    expect(isImpulsionandoPlatformHost("chrismed.impulsionando.com.br")).toBe(false);
+    expect(isImpulsionandoPlatformHost("riomed.impulsionando.com.br")).toBe(false);
+    expect(isImpulsionandoPlatformHost("wmp.impulsionando.com.br")).toBe(false);
+  });
 });

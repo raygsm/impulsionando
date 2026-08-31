@@ -76,7 +76,7 @@ function RiomedHome() {
               <MapPin className="h-3.5 w-3.5" /> Atendemos toda Bolivia · Sede La Paz
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-              Equipamiento médico-hospitalario, <span className="text-[color:var(--riomed-accent)]">a la altura</span> de tu operación.
+              Equipamiento médico-hospitalario, <span className="text-white underline decoration-[#7ee7dc] decoration-2 underline-offset-4">a la altura</span> de tu operación.
             </h1>
             <p className="text-lg md:text-xl text-white/85 max-w-2xl leading-relaxed">
               Importación y distribución directa, venta, alquiler y servicio técnico certificado para hospitales, clínicas, consultorios, ambulancias y pacientes en home care.
@@ -84,7 +84,7 @@ function RiomedHome() {
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 to="/riomed/cotizar"
-                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--riomed-accent)] hover:bg-[color:var(--riomed-accent)]/90 text-white font-semibold px-6 py-3 min-h-11 shadow-lg transition"
+                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--riomed-accent)] hover:bg-[color:var(--riomed-accent)]/90 text-slate-950 font-semibold px-6 py-3 min-h-11 shadow-lg transition"
               >
                 <ShoppingCart className="h-5 w-5" /> Solicitar cotización
               </Link>

@@ -27,18 +27,11 @@ import { ScrollGuidance } from "@/components/core/ScrollGuidance";
 import { RocketRouteLoader } from "@/components/app/RocketRouteLoader";
 import { CoreCopyGuard } from "@/components/app/CoreCopyGuard";
 import { openImpulsionito } from "@/lib/impulsionito-tracking";
+import { hasDedicatedClientAgent } from "@/lib/client-agent-scope";
 import { SkipLink } from "@/components/impulsionando/SkipLink";
 
 const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
 const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
-const CLIENT_AGENT_HOSTS = new Set([
-  "anamadu.impulsionando.com.br",
-  "chrismed.impulsionando.com.br",
-  COLORS_CANONICAL_HOST,
-  WMP_CANONICAL_HOST,
-  "riomed.impulsionando.com.br",
-  "marocas.impulsionando.com.br",
-]);
 
 function isWmpBrowser(): boolean {
   return typeof window !== "undefined" && window.location.hostname.toLowerCase() === WMP_CANONICAL_HOST;
@@ -197,7 +190,7 @@ function RootComponent() {
   const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
   const isWmp = host === WMP_CANONICAL_HOST;
   const isRiomed = host === "riomed.impulsionando.com.br" || pathname === "/riomed" || pathname.startsWith("/riomed/");
-  const hasDedicatedClientAgent = CLIENT_AGENT_HOSTS.has(host) || pathname === "/anamadu" || pathname.startsWith("/anamadu/") || pathname === "/chrismed" || pathname.startsWith("/chrismed/") || pathname === "/colors" || pathname.startsWith("/colors/") || pathname === "/wmp" || pathname.startsWith("/wmp/") || pathname === "/marocas" || pathname.startsWith("/marocas/");
+  const dedicatedClientAgent = hasDedicatedClientAgent(host, pathname);
 
-  return <RootDocument><QueryClientProvider client={queryClient}><TenantBrandingProvider /><WmpNavigationLock />{!isWmp && <TenantSubdomainRedirect />}{!isWmp && <MaintenanceGate />}{!isWmp && <TenantHostFallback />}{!isWmp && <EnvHealthBanner />}<RocketRouteLoader />{!isWmp && <CoreCopyGuard />}{!isWmp && <SkipLink />}<ScrollGuidance /><Outlet /><LGPDBanner />{isRiomed ? <MedicitoConcierge /> : hasDedicatedClientAgent ? null : <ImpulsionitoConcierge />}{!isWmp && <PoweredByImpulsionando />}<Toaster richColors position="top-right" /></QueryClientProvider></RootDocument>;
+  return <RootDocument><QueryClientProvider client={queryClient}><TenantBrandingProvider /><WmpNavigationLock />{!isWmp && <TenantSubdomainRedirect />}{!isWmp && <MaintenanceGate />}{!isWmp && <TenantHostFallback />}{!isWmp && <EnvHealthBanner />}<RocketRouteLoader />{!isWmp && <CoreCopyGuard />}{!isWmp && <SkipLink />}<ScrollGuidance /><Outlet /><LGPDBanner />{isRiomed ? <MedicitoConcierge /> : dedicatedClientAgent ? null : <ImpulsionitoConcierge />}{!isWmp && <PoweredByImpulsionando />}<Toaster richColors position="top-right" /></QueryClientProvider></RootDocument>;
 }

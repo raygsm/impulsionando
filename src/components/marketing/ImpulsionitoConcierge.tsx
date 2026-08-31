@@ -33,6 +33,7 @@ import {
   type ImpulsionitoMessage,
 } from "@/components/impulsionito/transport";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { hasDedicatedClientAgent } from "@/lib/client-agent-scope";
 
 // ---------------------------------------------------------------------------
 // Rotas onde o concierge não aparece.
@@ -336,10 +337,13 @@ export function ImpulsionitoConcierge() {
     [audience, messages, pathname, sending, transport, captureNichoContext],
   );
 
-  // Não renderiza em rotas ocultas.
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+
+  // Não renderiza em rotas ocultas nem ao lado do agente do próprio tenant.
   if (
     pathname.startsWith("/_authenticated") ||
-    HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
+    HIDDEN_PREFIXES.some((p) => pathname.startsWith(p)) ||
+    hasDedicatedClientAgent(host, pathname)
   ) {
     return null;
   }

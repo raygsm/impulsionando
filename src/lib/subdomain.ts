@@ -75,6 +75,24 @@ const RESERVED_SUBDOMAINS = new Set([
   "id-preview","preview","dev","staging","project",
 ]);
 
+const PLATFORM_CORE_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "impulsionando.com.br",
+  "www.impulsionando.com.br",
+]);
+
+/** Apex, www, app, and other reserved platform hosts — not customer tenants. */
+export function isImpulsionandoPlatformHost(host: string | null | undefined): boolean {
+  if (!host) return true;
+  const clean = host.toLowerCase().split(":")[0];
+  if (PLATFORM_CORE_HOSTS.has(clean)) return true;
+  if (!clean.endsWith(".impulsionando.com.br")) return false;
+  const firstSeg = clean.slice(0, -".impulsionando.com.br".length).split(".")[0];
+  return Boolean(firstSeg) && (RESERVED_SUBDOMAINS.has(firstSeg) || firstSeg.startsWith("id-preview"));
+}
+
 export type TenantSubdomainMatch = { slug: string; host: string; rootDomain: string };
 
 export function getTenantSubdomain(host: string | null | undefined): TenantSubdomainMatch | null {
@@ -115,7 +133,9 @@ export function wmpHostLockTarget(host: string | null | undefined, pathname: str
   if (path === "/wmp" || path.startsWith("/wmp/")) return null;
   if (WMP_GLOBAL_CORE_ROUTES.has(path)) return null;
   if (CLEAN_PATH_EXCLUDED_PREFIXES.some((prefix) => path.startsWith(prefix))) return null;
-  return path === "/" ? "/wmp/" : `/wmp${path.startsWith("/") ? path : `/${path}`}`;
+  // Use /wmp (no trailing slash). /wmp/ makes TanStack emit a same-host 3xx that
+  // the old deny-all WMP redirect policy turned into HTTP 409 for real browsers.
+  return path === "/" ? "/wmp" : `/wmp${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function toColorsInternalPathname(host: string | null | undefined, pathname: string): string {
@@ -131,4 +151,19 @@ export function toColorsInternalPathname(host: string | null | undefined, pathna
 export function toWmpInternalPathname(host: string | null | undefined, pathname: string): string {
   const locked = wmpHostLockTarget(host, pathname);
   return locked ?? pathname;
+}
+
+/** True when a 3xx Location would send the browser off wmp.impulsionando.com.br. */
+export function wmpRedirectLeavesCanonicalHost(location: string | null, requestHostname: string): boolean {
+  if (!location) return false;
+  try {
+    const url = new URL(location, `https://${WMP_CANONICAL_HOST}/`);
+    const host = url.hostname.toLowerCase();
+    if (host === WMP_CANONICAL_HOST) return false;
+    if (host === requestHostname.toLowerCase()) return false;
+    if (host === "localhost" || host === "127.0.0.1") return false;
+    return true;
+  } catch {
+    return true;
+  }
 }

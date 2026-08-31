@@ -165,7 +165,7 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
 
   if (variant === "minimal") {
     return (
-      <header data-chrismed-header className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-white/10 bg-[var(--chrismed-forest-deep)] shadow-[0_12px_34px_rgba(7,28,24,0.18)]">
+      <header data-chrismed-header className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-white/10 bg-[var(--chrismed-forest-deep)] text-white shadow-[0_12px_34px_rgba(7,28,24,0.18)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
           <Link to="/chrismed" aria-label="CHRISMED — voltar ao início"><div className="rounded-lg bg-white px-3 py-2"><ChrismedWordmark variant="sm" /></div></Link>
           <Link to="/chrismed/contato" className="inline-flex items-center gap-2 text-sm font-medium text-white/85 hover:text-white"><Phone className="h-4 w-4" aria-hidden /> Ajuda</Link>
@@ -175,7 +175,7 @@ export function ChrismedHeader({ variant = "full" }: { variant?: "full" | "minim
   }
 
   return (
-    <header data-chrismed-header className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-white/10 bg-[var(--chrismed-forest-deep)] shadow-[0_16px_42px_rgba(5,28,22,0.18)]">
+    <header data-chrismed-header className="chrismed-fixed-header fixed inset-x-0 top-0 z-[80] border-b border-white/10 bg-[var(--chrismed-forest-deep)] text-white shadow-[0_16px_42px_rgba(5,28,22,0.18)]">
       <div className="mx-auto flex min-h-[5.4rem] max-w-[96rem] items-stretch px-4 md:px-6">
         <Link to="/chrismed" className="flex shrink-0 items-center pr-6 2xl:border-r 2xl:border-white/10" aria-label="CHRISMED — Dra. Christiane Alencar">
           <div className="rounded-lg bg-white px-3 py-2 shadow-[0_4px_18px_rgba(0,0,0,0.10)]"><ChrismedWordmark variant="header" /></div>
@@ -268,15 +268,27 @@ export function ChrismedFooter() {
 
 export function ChrismedShell({ children, headerVariant = "full" }: { children: React.ReactNode; headerVariant?: "full" | "minimal" }) {
   const nested = useContext(ChrismedShellContext);
+
+  useEffect(() => {
+    if (nested) return;
+    const root = document.documentElement;
+    const previous = root.getAttribute("data-tenant");
+    root.setAttribute("data-tenant", "chrismed");
+    return () => {
+      if (previous) root.setAttribute("data-tenant", previous);
+      else root.removeAttribute("data-tenant");
+    };
+  }, [nested]);
+
   if (nested) return <>{children}</>;
   return (
     <ChrismedShellContext.Provider value>
       <ChrismedOliverProvider>
         <ChrismedPreloader />
         <ChrismedCleanLinkBridge />
-        <div className="min-h-screen bg-[var(--chrismed-ivory)] text-[var(--chrismed-graphite)]">
+        <div data-tenant="chrismed" className="min-h-screen bg-[var(--chrismed-ivory)] text-[var(--chrismed-graphite)]">
           <ChrismedHeader variant={headerVariant} />
-          <main className="pt-[5.4rem]">{children}</main>
+          <main id="chrismed-main" className="pt-[5.4rem]">{children}</main>
           <ChrismedFooter />
           <button type="button" onClick={() => openChrismedOliver({ source: "journey_assist", intent: "help" })} className="fixed bottom-5 right-5 z-[70] rounded-full border border-white/20 bg-[var(--chrismed-forest-deep)] px-4 py-3 text-left text-xs font-semibold text-white shadow-2xl" aria-label="Pedir ajuda ao assistente CHRISMED"><span className="block text-[10px] uppercase tracking-[0.16em] text-[var(--chrismed-amber-soft)]">Impulsionito a postos</span><span className="block">Precisa de orientação? Fale com Oliver.</span></button>
         </div>
