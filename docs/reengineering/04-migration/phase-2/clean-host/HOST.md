@@ -15,7 +15,8 @@ Recorded: **2026-08-30** (post Dokploy install). Update when facts change. **No 
 | Dokploy | **v0.30.3** · service `dokploy` 1/1 |
 | Dokploy UI | `http://2.25.123.224:3000` |
 | Traefik | Installed with Dokploy (`traefik:v3.6.7` pulled at install) |
-| Public listeners (observed) | `22` (sshd), `80`/`443` (Traefik/docker-proxy), `3000` (Dokploy) |
+| Public listeners (observed) | `22` (sshd), `80`/`443` (Traefik), `3000` (Dokploy), **`8088`** (reengineering-placeholder host publish) |
+| Placeholder app | Swarm service `reengineering-placeholder` · image `reengineering-placeholder:97d167bd` · Host `placeholder.staging.local` · `/health` returns `gitSha` |
 | Dokploy internal DB | Swarm service `dokploy-postgres` (Postgres 16) — **not** Impulsionando app data |
 | App Supabase | Managed external — staging ref `kyiczxtcoexnvcqgrgkr` (restore open) |
 | Legacy prod (deny) | `187.77.232.52` — do not mutate from Phase 2 clean-host work |

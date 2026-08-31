@@ -1,8 +1,20 @@
 # GHCR and promote path (Phase 2 planning)
 
 Opened: **2026-08-30**  
-Status: **PLAN ONLY** — ADR-007 Aceita; Aceita ≠ enable prod publish pipelines today  
+Status: **PARTIAL** — placeholder HTTP image built; GHCR `workflow_dispatch` needs file on default branch; promote-same-SHA rule unchanged  
 Authority: [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md), [`../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md`](../../05-governance/adrs/ADR-007-ghcr-immutable-sha-images.md), [`../../03-platform/DOKPLOY.md`](../../03-platform/DOKPLOY.md)
+
+## Evidence (2026-08-31)
+
+| Item | Status |
+| --- | --- |
+| Workflow file on `reengineering/program` | yes — `.github/workflows/reengineering-ghcr-sha.yml` |
+| `gh workflow run` | **404** — GitHub only lists workflows present on the **default** branch |
+| Interim deploy | Built on clean host; Swarm `reengineering-placeholder:97d167bd`; `/health` returns `gitSha` |
+| GHCR push of that SHA | **not yet** |
+
+**Next:** merge workflow (and Dockerfile) to default branch **or** open PR that lands the workflow, then `workflow_dispatch` and point Dokploy at `ghcr.io/.../impulsionando-reengineering-placeholder:<full-sha>`.
+
 
 ## Goal
 

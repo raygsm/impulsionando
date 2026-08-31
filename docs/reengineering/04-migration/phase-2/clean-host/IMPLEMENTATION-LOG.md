@@ -57,10 +57,25 @@ Format per entry:
 - Result / evidence: UI accessible; admin session exists — **password not recorded**
 - Docs updated: this log
 
+## 2026-08-31T~04:20Z — Placeholder service deployed (platform smoke)
+
+- Operator: Agent (Cauã: implement Phase 2 tasks)
+- Change: Build + Swarm-deploy **reengineering placeholder** (new structure only — not legacy monolith)
+- Commands / method:
+  - Built on host from `infra/compose/Dockerfile.placeholder` with `GIT_SHA=97d167bd`
+  - `docker service create --name reengineering-placeholder` on `dokploy-network`, publish `8088→8080`, Traefik Host `placeholder.staging.local`
+  - Image local tag `reengineering-placeholder:97d167bd` (GHCR dispatch blocked until workflow exists on default branch)
+- Result / evidence:
+  - `GET http://127.0.0.1:8088/health` → `{"ok":true,"service":"impulsionando-reengineering-placeholder","gitSha":"97d167bd"}`
+  - Traefik: `Host: placeholder.staging.local` → same JSON on `:80`
+  - External `:8088/health` smoke from operator network
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../STATUS.md`](../../STATUS.md)
+
 ## Pending (not done on VPS yet)
 
-- GHCR placeholder image pull/deploy (in progress / next)
+- GHCR publish of same Dockerfile (workflow must land on default branch for `workflow_dispatch`)
 - Staging hostname + Cloudflare (human DNS) — see [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md)
 - App env bind to staging Supabase (after restore track as needed)
 - Resource limits Dokploy vs staging apps (document numbers when set)
 - ACME email still install default — replace before public TLS
+- Prefer recreating placeholder via Dokploy UI + GHCR once registry login exists
