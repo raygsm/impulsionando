@@ -4,20 +4,20 @@ Atualizado em: 2026-08-31 (Phase 1 CLOSED; Phase 2 residual DNS; Phase 3 startin
 
 ## Estado geral
 
-**FASE 0 CONCLUÍDA. FASE 1 CONCLUÍDA. FASE 2 quase fechada (GHCR+rollback OK; DNS/TLS humano). FASE 3 INICIANDO — Nest Support API.**
+**FASE 0 CONCLUÍDA. FASE 1 CONCLUÍDA. FASE 2 quase fechada (GHCR+rollback OK; stg DNS LIVE). FASE 3 INICIANDO — Nest Support API.**
 
 | Fase | Estado | Evidência / residual |
 | --- | --- | --- |
 | 0 | **Concluída** | Phase-0 exit report |
 | 1 | **Concluída** | [`04-migration/phase-1/PHASE-1-EXIT-REPORT.md`](04-migration/phase-1/PHASE-1-EXIT-REPORT.md) · staging `aamorcqznimmleafavai` verify OK · live auth 20/20 |
-| 2 | **Quase fechada** | GHCR + A→B→A rollback ✅ · smoke ✅ · **DNS/TLS staging ⏳** · alerts ⏳ |
+| 2 | **Quase fechada** | GHCR + A→B→A rollback ✅ · smoke ✅ · **DNS `stg`/`api.stg`/`dokploy.stg` LIVE** ✅ · alerts ⏳ |
 | 3 | **Em execução** | Nest Support bootstrap (apps/api) |
 | 4–7 | Não iniciadas | gates Phase 3+ |
 
 ## Próximo gate
 
 1. Phase 3: Nest + Fastify Support module (pilot) consuming staging Supabase.
-2. Human: Cloudflare staging DNS → `2.25.123.224` + ACME email.
+2. Optional: grey-cloud `dokploy.stg` if TLS flaky; set real ACME inbox.
 3. Optional: fill numeric RPO/RTO in restore evidence when timestamps known.
 
 **Proibido:** Dokploy on legacy VPS, wipe VPS, prod DNS cutover, `db push`/reset prod, deploy legacy monolith onto clean host.

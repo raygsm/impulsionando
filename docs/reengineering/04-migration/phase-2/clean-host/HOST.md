@@ -13,12 +13,12 @@ Recorded: **2026-08-30** (post Dokploy install). Update when facts change. **No 
 | SSH | `root@2.25.123.224` · key `id_ed25519_impulsionando` (pubkey auth OK) |
 | Docker | Present; Swarm manager advertise `2.25.123.224` |
 | Dokploy | **v0.30.3** · service `dokploy` 1/1 |
-| Dokploy UI | `http://2.25.123.224:3000` |
-| Traefik | Installed with Dokploy (`traefik:v3.6.7` pulled at install) |
-| Public listeners (observed) | `22` (sshd), `80`/`443` (Traefik), `3000` (Dokploy), **`8088`** (reengineering-placeholder host publish) |
-| Placeholder app | Swarm `reengineering-placeholder` · **GHCR** `…/impulsionando-reengineering-placeholder:647308e7bed44576c794211e44952c0cf93b03df` · Host `placeholder.staging.local` · `/health` full `gitSha` · rollback drill PASS 2026-08-31 |
-| Dokploy internal DB | Swarm service `dokploy-postgres` (Postgres 16) — **not** Impulsionando app data |
-| App Supabase | Managed external — staging ref `kyiczxtcoexnvcqgrgkr` (restore evidence open) |
+| Dokploy UI | `http://2.25.123.224:3000` · also `https://dokploy.stg.impulsionando.com.br` |
+| Traefik | Installed with Dokploy (`traefik:v3.6.7`); ACME email `stg-ops@impulsionando.com.br` |
+| Public listeners (observed) | `22` (sshd), `80`/`443` (Traefik), `3000` (Dokploy), **`8088`** (placeholder host publish) |
+| Placeholder app | Swarm `reengineering-placeholder` · GHCR SHA `647308e7…` · Hosts `stg.impulsionando.com.br` + `api.stg.impulsionando.com.br` (+ local) · `/health` full `gitSha` |
+| Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` → `2.25.123.224` (DNS only); `dokploy.stg` proxied |
+| App Supabase | Managed external — staging ref **`aamorcqznimmleafavai`** |
 | Legacy prod (deny) | `187.77.232.52` — do not mutate from Phase 2 clean-host work |
 
 ## Intended role

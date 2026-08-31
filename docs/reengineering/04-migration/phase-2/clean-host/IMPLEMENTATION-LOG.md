@@ -87,11 +87,16 @@ Format per entry:
   - Runs: https://github.com/raygsm/impulsionando/actions/runs/33433542700 · https://github.com/raygsm/impulsionando/actions/runs/33433588827
 - Docs updated: this log, [`../ROLLBACK-DRILL.md`](../ROLLBACK-DRILL.md), [`../GHCR-AND-PROMOTE.md`](../GHCR-AND-PROMOTE.md), [`../../STATUS.md`](../../STATUS.md)
 
-## Pending (not done on VPS yet)
+## 2026-08-31T~20:40Z — Staging public DNS + Traefik hosts
 
-- Staging hostname + Cloudflare (human DNS) — see [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md)
-- ACME email still install default — replace before public TLS
-- Prefer recreating placeholder via Dokploy UI (CLI Swarm path proven)
-- App env bind to staging Supabase (after restore evidence + `.env.staging`)
-- Resource limits Dokploy vs staging apps (document numbers when set)
-- Alert destinations (P2-G)
+- Operator: Cauã (DNS) + Agent (Traefik)
+- Change:
+  - Cloudflare A records: `stg`, `api.stg` → `2.25.123.224` (DNS only); `dokploy.stg` proxied
+  - Placeholder labels: Host `stg.impulsionando.com.br` \|\| `api.stg.impulsionando.com.br` (+ local) on `web`/`websecure` + LE
+  - `/etc/dokploy/traefik/dynamic/dokploy.yml` Host `dokploy.stg.impulsionando.com.br`
+  - ACME email `test@localhost.com` → `stg-ops@impulsionando.com.br`; restart `dokploy-traefik`
+- Result / evidence:
+  - `http(s)://stg.impulsionando.com.br/health` → 200 `gitSha=647308e7…`
+  - `http(s)://api.stg.impulsionando.com.br/health` → 200 (same placeholder until Nest image)
+  - `https://dokploy.stg.impulsionando.com.br/` → 200 via Cloudflare
+- Docs: [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`HOST.md`](./HOST.md)
