@@ -74,10 +74,11 @@
   --wmp-accent:  oklch(0.30 0.11 260);
   --wmp-surface: oklch(0.99 0.005 240);
 
-  /* Marocas — verde eventos + areia */
-  --marocas-primary: oklch(0.55 0.12 155);
-  --marocas-accent:  oklch(0.80 0.09 75);
-  --marocas-surface: oklch(0.99 0.006 100);
+  /* Marocas — navy confiança + coral cuidado + dourado excelência */
+  --marocas-primary: oklch(0.25 0.09 255);
+  --marocas-accent:  oklch(0.68 0.17 35);
+  --marocas-gold:    oklch(0.80 0.11 85);
+  --marocas-surface: oklch(0.985 0.008 255);
 
   /* White Label — índigo SaaS + violeta parceiro */
   --whitelabel-primary: oklch(0.52 0.18 275);
@@ -97,7 +98,11 @@
 [data-tenant="riomed"]   { --primary: var(--riomed-primary);   --ring: var(--riomed-primary); }
 [data-tenant="garrido"]  { --primary: var(--garrido-primary);  --ring: var(--garrido-primary); }
 [data-tenant="wmp"]      { --primary: var(--wmp-primary);      --ring: var(--wmp-primary); }
-[data-tenant="marocas"]  { --primary: var(--marocas-primary);  --ring: var(--marocas-primary); }
+[data-tenant="marocas"]  {
+  --primary: var(--marocas-primary);
+  --ring: var(--marocas-accent);
+  --accent: var(--marocas-accent);
+}
 [data-tenant="foodservice"] { --primary: oklch(0.66 0.16 55);  --ring: oklch(0.66 0.16 55); }
 [data-tenant="whitelabel"]  { --primary: var(--whitelabel-primary); --ring: var(--whitelabel-primary); }
 [data-tenant="clube"]       { --primary: var(--clube-primary);       --ring: var(--clube-primary); }

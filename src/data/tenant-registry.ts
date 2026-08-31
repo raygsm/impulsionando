@@ -182,18 +182,18 @@ export const TENANT_MODELS: TenantModel[] = [
     route: "/marocas",
     segment: "property-management",
     segmentLabel: "Property Management",
-    tagline: "Gestão completa de aluguel por temporada e imóveis prontos para hóspedes.",
+    tagline: "Você não precisa ir ao imóvel. A Marocas cuida de tudo.",
     description:
-      "Modelo oficial do segmento Property Management / Short Stay: enxoval, limpeza, manutenção, vistoria, planos recorrentes e concierge. Referência para gestores de temporada.",
+      "Modelo oficial de cuidado integral para imóveis: limpeza, reposições, vistorias, manutenção, planos recorrentes e acompanhamento com evidências para proprietários que estão à distância."
     primaryVar: "--marocas-primary",
     dataTenant: "marocas",
     impulsionitoDimensoes: ["servicos", "reservas"],
     semantica: {
-      objetivos: ["gestao-imovel", "aluguel-temporada", "manutencao", "enxoval"],
+      objetivos: ["gestao-imovel", "aluguel-temporada", "limpeza", "reposicao", "manutencao", "vistoria"],
       publico: ["proprietario", "investidor-imobiliario", "hospede"],
       faixaPreco: "premium",
       regioes: ["RJ"],
-      tags: ["property-management", "short-stay", "temporada", "concierge"],
+      tags: ["property-management", "short-stay", "temporada", "limpeza", "reposicao", "manutencao", "confianca"],
     },
     status: "homologado",
   },

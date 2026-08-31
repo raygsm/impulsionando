@@ -22,4 +22,9 @@ export const BRAND_ASSETS = {
     lockup: "/brand/chrismed/logo-horizontal.webp",
     alt: "CHRISMED",
   },
+  marocas: {
+    lockup: "/brand/marocas/logo.png",
+    mark: "/brand/marocas/mark.png",
+    alt: "Marocas — Cuidamos de tudo",
+  },
 } as const;

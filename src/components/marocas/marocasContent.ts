@@ -8,11 +8,11 @@ export const MAROCAS_BRAND = {
   cidade: "Rio de Janeiro",
   bairroBase: "",
   fundacao: null as number | null,
-  slogan: "Operação organizada para imóveis de temporada.",
+  slogan: "Você não precisa ir ao imóvel. A Marocas cuida de tudo.",
   descricaoCurta:
-    "Limpeza, reposição, manutenção, comunicação com hóspedes e agenda operacional em uma única experiência de gestão.",
+    "Limpeza, reposições, vistorias e manutenções coordenadas de ponta a ponta, com acompanhamento e evidências para você ter tranquilidade mesmo à distância.",
   promessa:
-    "Centralizar a rotina operacional do imóvel, com registros, acompanhamento e histórico para anfitriões, hóspedes e prestadores.",
+    "Cuidar de cada detalhe do imóvel com presença operacional, registros, acompanhamento e histórico — para que o proprietário não precise se deslocar nem coordenar prestadores.",
 };
 
 export const MAROCAS_CONTATO = {

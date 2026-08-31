@@ -65,17 +65,31 @@ export function RiomedMark({
   );
 }
 
-/** Letter mark until an official Marocas PNG is provided (Lovable `__l5e` URLs 404 on this origin). */
-export function MarocasMark({ className }: { className?: string }) {
+export function MarocasMark({ className, size = 40 }: { className?: string; size?: number }) {
   return (
-    <span
-      className={cn(
-        "grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white font-black text-[oklch(0.45_0.14_32)] ring-1 ring-black/5",
-        className,
-      )}
+    <img
+      src={BRAND_ASSETS.marocas.mark}
+      alt=""
+      width={size}
+      height={size}
+      className={cn("shrink-0 object-contain", className)}
       aria-hidden
-    >
-      M
+      draggable={false}
+    />
+  );
+}
+
+export function MarocasLogo({ className, plate = false }: { className?: string; plate?: boolean }) {
+  return (
+    <span className={cn("inline-flex items-center", plate && "rounded-xl bg-white px-2.5 py-1.5 shadow-sm ring-1 ring-black/5")}>
+      <img
+        src={BRAND_ASSETS.marocas.lockup}
+        alt={BRAND_ASSETS.marocas.alt}
+        width={270}
+        height={100}
+        className={cn("h-10 w-auto object-contain object-left sm:h-11", className)}
+        draggable={false}
+      />
     </span>
   );
 }
