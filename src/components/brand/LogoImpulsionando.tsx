@@ -2,10 +2,10 @@
  * LogoImpulsionando — componente único da marca.
  *
  * Regras de identidade (não negociáveis):
- *  - Fundos claros: logo transparente, sem caixa, sem borda.
+ *  - Asset oficial: PNG 224×224 com fundo branco (não usar em fundo colorido nu).
+ *  - Fundos claros: logo direto, sem caixa extra.
  *  - Fundos escuros: logo OBRIGATORIAMENTE dentro de um cartão branco
- *    com padding e cantos levemente arredondados, para preservar
- *    o azul e o laranja originais da marca.
+ *    com padding e cantos levemente arredondados.
  *
  * Use `variant="auto"` (padrão) quando o componente puder herdar o tom do
  * pai via `data-bg-tone="dark"` em qualquer ancestral; caso contrário passe

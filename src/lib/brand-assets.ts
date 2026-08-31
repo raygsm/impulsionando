@@ -1,6 +1,7 @@
 /** Official brand lockups served from `public/brand/`. Never point at Lovable `__l5e` URLs. */
 export const BRAND_ASSETS = {
   impulsionando: {
+    /** Official lockup PNG (224×224), white background only. */
     lockup: "/brand/impulsionando/logo.png",
     alt: "Impulsionando Tecnologia",
   },
