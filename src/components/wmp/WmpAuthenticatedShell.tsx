@@ -3,6 +3,7 @@ import { KeyRound, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/integrations/supabase/client'
+import { WmpMark } from '@/components/brand/BrandMarks'
 
 const NAV = [
   { label: 'Visão geral', to: '/dashboard' },
@@ -29,12 +30,8 @@ export function WmpAuthenticatedShell({ children }: { children: React.ReactNode 
     <div className="min-h-dvh bg-[#f7f3fb] text-[#24112f]">
       <header className="sticky top-0 z-40 border-b border-[#decbe9] bg-[#2a1238] text-white shadow-sm">
         <div className="mx-auto flex min-h-16 max-w-[1500px] items-center gap-4 px-4 sm:px-6 lg:px-8">
-          <Link to="/dashboard" className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d9b66f]/50 bg-white/10 font-bold text-[#f4cf87]">W</div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold tracking-[0.16em] text-[#f4cf87]">WMP</p>
-              <p className="truncate text-xs text-white/70">Wagner Miller Produções</p>
-            </div>
+          <Link to="/dashboard" className="flex min-w-0 items-center" aria-label="WMP — Wagner Miller Produções">
+            <WmpMark plate />
           </Link>
           <nav className="ml-auto hidden items-center gap-1 xl:flex" aria-label="Gestão WMP">
             {NAV.map((item) => (

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { maskCEP, maskCNPJ, maskCPF, maskPhone, isValidCEP, isValidEmail, isValidPhoneBR, lookupCEP } from '@/lib/validators'
+import { WmpMark } from '@/components/brand/BrandMarks'
 
 export const Route = createFileRoute('/wmp/conversa/$protocol')({
   ssr: false,
@@ -156,4 +156,4 @@ function WmpConversationExportPage() {
 }
 
 function Field({ label, children, className = '' }: { label: string; children: React.ReactNode; className?: string }) { return <div className={`space-y-1.5 ${className}`}><Label>{label}</Label>{children}</div> }
-function Frame({ children }: { children: React.ReactNode }) { return <div className="min-h-dvh bg-[#f7f3fb] text-[#281535]"><header className="border-b border-white/10 bg-[#2a1238]"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6"><Link to="/wmp" className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d9b66f]/50 bg-white/10 font-bold text-[#f4cf87]">W</div><div><div className="font-semibold text-white">WMP</div><div className="text-xs text-white/60">Wagner Miller Produções</div></div></Link><div className="text-xs text-white/60">Atendimento com Milito</div></div></header><main className="px-4 py-10 sm:px-6">{children}</main></div> }
+function Frame({ children }: { children: React.ReactNode }) { return <div className="min-h-dvh bg-[#f7f3fb] text-[#281535]"><header className="border-b border-white/10 bg-[#2a1238]"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6"><Link to="/wmp" className="flex items-center" aria-label="WMP — Wagner Miller Produções"><WmpMark plate /></Link><div className="text-xs text-white/80">Atendimento com Milito</div></div></header><main className="px-4 py-10 sm:px-6">{children}</main></div> }

@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Menu, MessageCircle, Music2, Sparkles, X } from "lucide-react";
+import { MapPin, Menu, MessageCircle, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MoreContentFab } from "@/components/impulsionando";
+import { WmpMark } from "@/components/brand/BrandMarks";
 
 type Crumb = { label: string; to?: string };
 type Point = { x: number; y: number };
@@ -152,10 +153,8 @@ export function WmpShell({ children, breadcrumbs }: { children: React.ReactNode;
 
       <header className="sticky top-0 z-40 border-b border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)] bg-[color-mix(in_oklab,var(--wmp-bg)_75%,transparent)] backdrop-blur-md" role="banner">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link to="/wmp" className="wmp-display flex min-w-0 items-center gap-2 text-xl" aria-label="WMP — Wagner Miller Produções, ir para o início">
-            <Music2 className="size-5 shrink-0" style={{ color: "var(--wmp-gold)" }} aria-hidden />
-            <span>WMP</span>
-            <span className="hidden truncate text-xs font-normal opacity-70 sm:inline" style={{ fontFamily: "Inter" }}>Wagner Miller Produções</span>
+          <Link to="/wmp" className="flex min-w-0 items-center" aria-label="WMP — Wagner Miller Produções, ir para o início">
+            <WmpMark plate />
           </Link>
 
           <nav className="hidden items-center gap-4 text-sm xl:flex" aria-label="Menu principal">
@@ -197,12 +196,12 @@ export function WmpShell({ children, breadcrumbs }: { children: React.ReactNode;
 
       <footer className="mt-16 border-t border-[color-mix(in_oklab,var(--wmp-gold)_18%,transparent)] sm:mt-24" role="contentinfo">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm sm:px-6 sm:py-12 md:grid-cols-4">
-          <div><div className="wmp-display mb-2 text-lg">WMP</div><p className="leading-relaxed opacity-70">Produção e operação de eventos, DJs, som, luz, palco, audiovisual e rede de parceiros para clientes, hotéis e empresas.</p></div>
+          <div><div className="mb-3"><WmpMark plate /></div><p className="leading-relaxed opacity-80">Produção e operação de eventos, DJs, som, luz, palco, audiovisual e rede de parceiros para clientes, hotéis e empresas.</p></div>
           <div><div className="wmp-display mb-3 text-sm opacity-90">Contratar</div><ul className="space-y-2 opacity-80"><li><Link to="/wmp/orcamento">Solicitar proposta</Link></li><li><Link to="/wmp/djs">Contratar DJ</Link></li><li><Link to="/wmp/empresas">Hotéis & Empresas</Link></li><li><Link to="/wmp/onde-estou">Onde Estou</Link></li></ul></div>
           <div><div className="wmp-display mb-3 text-sm opacity-90">Institucional</div><ul className="space-y-2 opacity-80"><li><Link to="/wmp/sobre">Sobre a WMP</Link></li><li><Link to="/wmp/faq">Perguntas frequentes</Link></li><li><Link to="/wmp/parceiro">Seja parceiro</Link></li></ul></div>
           <div><div className="wmp-display mb-3 text-sm opacity-90">Atendimento</div><div className="flex items-start gap-2 opacity-80"><MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden style={{ color: "var(--wmp-gold)" }} /><span>Use o Milito para iniciar, continuar ou qualificar seu atendimento. Quando necessário, ele encaminha para a equipe WMP.</span></div></div>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-4 pb-8 text-xs opacity-60 sm:px-6 md:flex-row"><span>© {new Date().getFullYear()} Wagner Miller Produções — todos os direitos reservados.</span><span>Operado no ecossistema <a href="/" className="underline">Impulsionando</a>.</span></div>
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-4 pb-8 text-xs opacity-80 sm:px-6 md:flex-row"><span>© {new Date().getFullYear()} Wagner Miller Produções — todos os direitos reservados.</span><span>Operado no ecossistema <a href="/" className="underline">Impulsionando</a>.</span></div>
       </footer>
 
       <WhereaboutsFloatingWidget />

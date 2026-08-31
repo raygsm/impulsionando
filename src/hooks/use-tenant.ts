@@ -5,24 +5,7 @@ import {
   resolveTenantByHost,
   type TenantContext,
 } from "@/lib/tenant-resolver.functions";
-import { getTenantSubdomain, TENANT_LANDING_BY_SUBDOMAIN } from "@/lib/subdomain";
-
-/**
- * Hostnames que NÃO devem disparar lookup de tenant — são o CORE/marketing.
- * Qualquer outro hostname (subdomínio próprio ou domínio cliente) vira tenant.
- */
-const CORE_HOSTS = new Set<string>([
-  "localhost",
-  "127.0.0.1",
-  "0.0.0.0",
-  "impulsionando.com.br",
-  "www.impulsionando.com.br",
-]);
-
-function isCoreHost(host: string): boolean {
-  if (!host) return true;
-  return CORE_HOSTS.has(host);
-}
+import { getTenantSubdomain, isImpulsionandoPlatformHost, TENANT_LANDING_BY_SUBDOMAIN } from "@/lib/subdomain";
 
 export function useTenant(): {
   tenant: TenantContext | null;
@@ -36,7 +19,7 @@ export function useTenant(): {
     if (typeof window !== "undefined") setHost(window.location.hostname);
   }, []);
 
-  const core = useMemo(() => isCoreHost(host), [host]);
+  const core = useMemo(() => isImpulsionandoPlatformHost(host), [host]);
   const knownSubdomainTenant = useMemo(() => {
     const match = getTenantSubdomain(host);
     if (!match || !TENANT_LANDING_BY_SUBDOMAIN[match.slug]) return null;

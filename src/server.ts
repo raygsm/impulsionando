@@ -4,7 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleN8nHmacVerifier } from "./lib/n8n-hmac-verifier.server";
 import { toChrismedInternalPathname } from "./lib/chrismed-clean-paths";
-import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toColorsInternalPathname, toWmpInternalPathname } from "./lib/subdomain";
+import { canonicalTenantHostRedirect, tenantLandingTargetForHost, toColorsInternalPathname, toWmpInternalPathname, wmpRedirectLeavesCanonicalHost } from "./lib/subdomain";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -107,6 +107,13 @@ function enforceWmpNoRedirect(hostname: string, response: Response): Response {
   headers.set("x-wmp-redirect-policy", "deny-all");
 
   if (response.status >= 300 && response.status < 400) {
+    if (!wmpRedirectLeavesCanonicalHost(response.headers.get("location"), hostname)) {
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
     headers.delete("location");
     headers.set("content-type", "text/plain; charset=utf-8");
     headers.set("cache-control", "no-store");

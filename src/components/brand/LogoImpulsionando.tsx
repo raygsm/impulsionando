@@ -11,19 +11,20 @@
  * pai via `data-bg-tone="dark"` em qualquer ancestral; caso contrário passe
  * `variant="light"` ou `variant="dark"` explicitamente.
  */
+import { BRAND_ASSETS } from "@/lib/brand-assets";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 type Variant = "auto" | "light" | "dark";
 type Size = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
-const SIZE: Record<Size, { icon: string; name: string; tagline: string; gap: string }> = {
-  xs: { icon: "h-6 w-6", name: "text-sm", tagline: "hidden", gap: "gap-1.5" },
-  sm: { icon: "h-8 w-8", name: "text-base", tagline: "hidden", gap: "gap-2" },
-  md: { icon: "h-10 w-10", name: "text-lg", tagline: "text-[8px]", gap: "gap-2.5" },
-  lg: { icon: "h-12 w-12", name: "text-xl", tagline: "text-[9px]", gap: "gap-3" },
-  xl: { icon: "h-16 w-16", name: "text-2xl", tagline: "text-[10px]", gap: "gap-3.5" },
-  "2xl": { icon: "h-20 w-20", name: "text-3xl", tagline: "text-xs", gap: "gap-4" },
+const SIZE: Record<Size, string> = {
+  xs: "h-8",
+  sm: "h-10",
+  md: "h-12",
+  lg: "h-14",
+  xl: "h-16",
+  "2xl": "h-20",
 };
 
 export interface LogoImpulsionandoProps {
@@ -87,40 +88,19 @@ export function LogoImpulsionando({
   }, [variant]);
 
   const effective: "light" | "dark" = variant === "auto" ? (detected ?? "light") : variant;
-  const dimensions = SIZE[size];
 
   const img = (
-    <span className={cn("inline-flex items-center", dimensions.gap)}>
-      <img
-        src="/pwa-icon-192.png"
-        alt={alt}
-        width={192}
-        height={192}
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
-        className={cn(dimensions.icon, "shrink-0 rounded-[22%] object-contain")}
-        draggable={false}
-      />
-      <span aria-hidden="true" className="flex min-w-0 flex-col leading-none">
-        <span
-          className={cn(
-            dimensions.name,
-            "whitespace-nowrap font-bold tracking-tight text-slate-950",
-          )}
-        >
-          Impulsionando
-        </span>
-        <span
-          className={cn(
-            dimensions.tagline,
-            "mt-1 whitespace-nowrap font-semibold uppercase tracking-[0.22em] text-blue-700",
-          )}
-        >
-          Tecnologia
-        </span>
-      </span>
-    </span>
+    <img
+      src={BRAND_ASSETS.impulsionando.lockup}
+      alt={alt}
+      width={224}
+      height={224}
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
+      className={cn(SIZE[size], "w-auto shrink-0 object-contain object-left")}
+      draggable={false}
+    />
   );
 
   const inner =

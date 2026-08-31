@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const layout = readFileSync("src/routes/chrismed.tsx", "utf8");
 const offers = readFileSync("src/routes/chrismed.ofertas.tsx", "utf8");
 const tokens = readFileSync("src/styles/tokens-tenants.css", "utf8");
+const shell = readFileSync("src/components/chrismed/ChrismedShell.tsx", "utf8");
 
 function hexToRgb(hex: string) {
   const value = hex.replace("#", "");
@@ -43,6 +44,11 @@ describe("CHRISMED frontend quality contract", () => {
     expect(layout).toContain("errorComponent: ChrismedRouteError");
     expect(layout).toContain("Não foi possível concluir esta etapa agora");
     expect(layout).not.toMatch(/\{\s*error\.message\s*\}/);
+  });
+
+  it("activates CHRISMED tokens on the shell so forest bands are not transparent", () => {
+    expect(shell).toContain('data-tenant="chrismed"');
+    expect(shell).toContain('root.setAttribute("data-tenant", "chrismed")');
   });
 
   it("protects form controls from dark-surface color inheritance", () => {
