@@ -1,18 +1,9 @@
 /**
  * Webhook Mercado Pago per-tenant.
- *
  * Rota: /api/public/mercado-pago/:slug
  *
- * Regras (Onda H2 CHRISMED — segregação total):
- *   1. Resolve a empresa pelo slug (subdomain OR public_slug).
- *   2. Carrega credenciais da PRÓPRIA empresa em `mpago_credentials`
- *      (production preferido, active=true). Nunca cai em fallback global.
- *   3. Valida assinatura HMAC com o webhook_secret DESTA empresa.
- *   4. Consulta o pagamento na API do MP usando o access_token DESTA empresa.
- *   5. Atualiza mpago_payments/payments e loga em runtime_events + audit.
- *
- * Se qualquer credencial estiver ausente/invalid → 424 e log de erro.
- * Nunca usa MERCADOPAGO_ACCESS_TOKEN global.
+ * Resolve a empresa por `core_tenant_identity`, carrega exclusivamente as
+ * credenciais da própria empresa e nunca usa fallback global.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
@@ -43,12 +34,10 @@ function verifyHmac(secret: string, request: Request, body: string): boolean {
     (() => { try { return JSON.parse(body)?.data?.id ?? ""; } catch { return ""; } })();
   const manifest = `id:${dataId};request-id:${reqId};ts:${ts};`;
   const expected = createHmac("sha256", secret).update(manifest).digest("hex");
-  try {
-    return timingSafeEqual(Buffer.from(expected), Buffer.from(v1));
-  } catch { return false; }
+  try { return timingSafeEqual(Buffer.from(expected), Buffer.from(v1)); }
+  catch { return false; }
 }
 
-// Fallback: assinatura Impulsionando (diagnóstico interno)
 function verifyImpulsionandoTestHmac(secret: string, body: string, header: string | null): boolean {
   if (!header || !header.startsWith("sha256=")) return false;
   const provided = header.slice("sha256=".length);
@@ -66,14 +55,12 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
         hint: "POST-only webhook. Configure esta URL no painel Mercado Pago do cliente.",
       }),
       POST: async ({ request, params }) => {
-        const slug = params.slug;
+        const slug = params.slug.toLowerCase();
         const body = await request.text();
         let payload: any = {};
         try { payload = body ? JSON.parse(body) : {}; } catch { /* keep {} */ }
 
-        const { supabaseAdmin } = await import(
-          "@/integrations/supabase/client.server"
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const logRuntime = async (
           level: "info" | "warn" | "error",
@@ -82,39 +69,49 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
         ) => {
           try {
             await (supabaseAdmin as any).from("runtime_events").insert({
-              level, scope: "mercadopago.webhook.tenant", message,
+              level,
+              scope: "mercadopago.webhook.tenant",
+              message,
               context: { slug, ...context },
               route: `/api/public/mercado-pago/${slug}`,
             });
-          } catch { /* silent */ }
+          } catch { /* logging cannot break webhook */ }
         };
 
-        // 1. Resolve empresa
-        const { data: company } = await (supabaseAdmin as any)
-          .from("companies")
-          .select("id,name,subdomain,public_slug,is_active")
-          .or(`subdomain.eq.${slug},public_slug.eq.${slug}`)
+        // 1. Resolve a identidade canônica do tenant.
+        const { data: identity } = await (supabaseAdmin as any)
+          .from("core_tenant_identity")
+          .select("company_id,subdomain,dns_status,ssl_status")
+          .eq("subdomain", slug)
           .maybeSingle();
 
-        if (!company) {
-          await logRuntime("error", "tenant não encontrado", { });
+        if (!identity?.company_id) {
+          await logRuntime("error", "tenant não encontrado", {});
           return new Response("Tenant not found", { status: 404 });
         }
 
-        // 2. Credenciais desta empresa — nunca fallback global
+        const { data: company } = await (supabaseAdmin as any)
+          .from("companies")
+          .select("id,name,is_active,status")
+          .eq("id", identity.company_id)
+          .maybeSingle();
+
+        if (!company || !company.is_active) {
+          await logRuntime("error", "empresa ausente ou inativa", { company_id: identity.company_id });
+          return new Response("Tenant inactive or not found", { status: 404 });
+        }
+
+        // 2. Credenciais desta empresa — nunca fallback global.
         const { data: creds } = await (supabaseAdmin as any)
           .from("mpago_credentials")
           .select("environment,active,access_token_secret_name,webhook_secret_name")
           .eq("company_id", company.id)
           .eq("active", true)
-          .order("environment", { ascending: false }); // production primeiro
+          .order("environment", { ascending: false });
 
         const cred = (creds ?? [])[0];
         if (!cred) {
-          await logRuntime("error", "credencial MP não configurada para o tenant", {
-            company_id: company.id,
-          });
-          // 424: dependência externa (credencial) faltando; MP faz retry.
+          await logRuntime("error", "credencial MP não configurada para o tenant", { company_id: company.id });
           return new Response("Missing tenant Mercado Pago credentials", { status: 424 });
         }
 
@@ -130,8 +127,6 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
           return new Response("Missing tenant access token", { status: 424 });
         }
 
-        // 3. Assinatura — em produção exige secret; sem secret aceita apenas
-        // eventos de diagnóstico marcados com header interno.
         const isDiagnostic = request.headers.get("x-impulsionando-test") === "true";
         let signatureOk = false;
         if (webhookSecret) {
@@ -152,7 +147,6 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
           return new Response("Invalid signature", { status: 401 });
         }
 
-        // Log do evento (mp_webhook_log é global mas gravamos slug em payload)
         const { data: logRow } = await (supabaseAdmin as any)
           .from("mp_webhook_log")
           .insert({
@@ -163,7 +157,6 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
           .select()
           .single();
 
-        // Ping de diagnóstico interno
         if (isDiagnostic || payload?.type === "test.ping") {
           await logRuntime("info", "diagnóstico recebido", { company_id: company.id });
           if (logRow) {
@@ -186,7 +179,9 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
             const paidAt = p.status === "approved" ? new Date().toISOString() : null;
 
             await (supabaseAdmin as any).from("payments").update({
-              status: internal, paid_at: paidAt, raw_response: p,
+              status: internal,
+              paid_at: paidAt,
+              raw_response: p,
               webhook_received_at: new Date().toISOString(),
             }).eq("payment_id", String(resourceId));
 
@@ -211,7 +206,9 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
             }, { onConflict: "mp_payment_id" });
 
             await logRuntime("info", "pagamento processado", {
-              company_id: company.id, mp_payment_id: String(resourceId), status: internal,
+              company_id: company.id,
+              mp_payment_id: String(resourceId),
+              status: internal,
             });
           }
 
@@ -226,7 +223,8 @@ export const Route = createFileRoute("/api/public/mercado-pago/$slug")({
               .update({ error: e?.message ?? String(e) }).eq("id", logRow.id);
           }
           await logRuntime("error", e?.message ?? "erro processando webhook", {
-            company_id: company.id, stack: e?.stack?.slice(0, 2000) ?? null,
+            company_id: company.id,
+            stack: e?.stack?.slice(0, 2000) ?? null,
           });
           return Response.json({ ok: false, error: e?.message }, { status: 500 });
         }
