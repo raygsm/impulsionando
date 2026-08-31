@@ -136,3 +136,34 @@ A interface do usuário com este processo deve permanecer deliberadamente simple
 **Uma frase iniciada por `intake` deve ser suficiente para começar.**
 
 O trabalho de investigar, interpretar, estruturar, organizar, documentar, perguntar, planejar e preparar a execução pertence ao agente. Ao usuário cabe apenas complementar, corrigir ou confirmar o entendimento antes da execução.
+## Commit e push automáticos (obrigatório)
+
+Sempre que o agente **criar, atualizar, categorizar ou mover** qualquer arquivo sob `docs/product-intake/` — após terminar o bloco de escrita atual — **deve** fazer commit e push **sem perguntar** e **mesmo que o usuário não peça**.
+
+### Escopo permitido
+
+Inclua **apenas**:
+
+- `docs/product-intake/**`
+- `.cursor/rules/impulsionando-feature-intake.mdc` (se alterada na mesma sessão)
+
+Não faça stage de `src/`, `package.json`, `.env*`, nem do restante do repo.
+
+### Quando disparar
+
+1. Depois de criar rascunho / Intake estruturado.
+2. Depois de cada bloco relevante de informação gravado.
+3. Depois de mover/categorizar o arquivo.
+4. No fechamento da entrevista / confirmação do dono — sempre.
+
+### Como executar
+
+```bash
+git add -- docs/product-intake/
+# opcional:
+# git add -- .cursor/rules/impulsionando-feature-intake.mdc
+git commit -m "docs(product-intake): <tipo> <app> — <slug curto>"
+git push
+```
+
+Detalhe operacional completo: `AGENTS.md` e `.cursor/rules/impulsionando-feature-intake.mdc`.
