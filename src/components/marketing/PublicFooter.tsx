@@ -73,7 +73,7 @@ export function PublicFooter() {
       <div className="container-narrow section-tight">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,3fr)]">
           <div className="space-y-4 min-w-0">
-            <LogoImpulsionando variant="light" size="xl" />
+            <LogoImpulsionando variant="light" size="2xl" />
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Uma plataforma que entende sua empresa, organiza suas jornadas e cresce com você.
             </p>

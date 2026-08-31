@@ -81,14 +81,14 @@ export function DemoShell({ trackLabel, trackTagline, storageKey, nav, activeId,
 
         <div className="flex flex-1 min-h-0">
           <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
-            <div className="h-20 px-5 flex items-center gap-2 border-b border-sidebar-border"><LogoImpulsionando variant="dark" size="sm" /><div className="leading-tight"><div className="text-sm font-semibold">Impulsionando</div><div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">DEMO</div></div></div>
+            <div className="h-24 px-5 flex items-center gap-2 border-b border-sidebar-border"><LogoImpulsionando variant="dark" size="md" /><div className="leading-tight"><div className="text-sm font-semibold">Impulsionando</div><div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">DEMO</div></div></div>
             {navList}
             <div className="p-3 border-t border-sidebar-border"><Button onClick={resetData} size="sm" className="w-full gap-2 bg-destructive text-destructive-foreground"><RotateCcw className="w-3.5 h-3.5" /> Zerar dados do DEMO</Button></div>
           </aside>
 
           <main className="flex-1 min-w-0 overflow-x-hidden">
             <div className="lg:hidden flex items-center justify-between gap-2 px-4 py-3 border-b bg-card">
-              <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Abrir menu"><Menu className="w-5 h-5" /></Button></SheetTrigger><SheetContent side="left" className="p-0 w-72 bg-sidebar text-sidebar-foreground"><div className="h-20 px-5 flex items-center gap-2 border-b border-sidebar-border"><LogoImpulsionando variant="dark" size="sm" /><div className="text-sm font-semibold">Impulsionando DEMO</div></div>{navList}</SheetContent></Sheet>
+              <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Abrir menu"><Menu className="w-5 h-5" /></Button></SheetTrigger><SheetContent side="left" className="p-0 w-72 bg-sidebar text-sidebar-foreground"><div className="h-24 px-5 flex items-center gap-2 border-b border-sidebar-border"><LogoImpulsionando variant="dark" size="md" /><div className="text-sm font-semibold">Impulsionando DEMO</div></div>{navList}</SheetContent></Sheet>
               <div className="flex items-center gap-2 text-sm font-medium">{activeItem?.icon ? <activeItem.icon className="w-4 h-4" /> : null}{activeItem?.label}</div><div className="w-9" />
             </div>
 

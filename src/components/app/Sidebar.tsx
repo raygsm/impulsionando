@@ -18,13 +18,9 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Ir para a home Impulsionando (abre em nova aba)"
-          className="aspect-square w-40 rounded-xl bg-card ring-1 ring-border shadow-sm flex items-center justify-center p-3 hover:opacity-90 hover-lift focus-ring transition-opacity"
+          className="aspect-square w-44 rounded-xl bg-card ring-1 ring-border shadow-sm flex items-center justify-center p-3 hover:opacity-90 hover-lift focus-ring transition-opacity"
         >
-         <LogoImpulsionando
-  variant="dark"
-  size="xl"
-  asLink={false}
-/>
+          <LogoImpulsionando variant="dark" size="2xl" asLink={false} />
         </a>
       </div>
 

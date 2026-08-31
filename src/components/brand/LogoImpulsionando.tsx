@@ -18,13 +18,14 @@ import { useEffect, useRef, useState } from "react";
 type Variant = "auto" | "light" | "dark";
 type Size = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
+/** Heights tuned for the 224px lockup — text stays legible from `sm` upward. */
 const SIZE: Record<Size, string> = {
-  xs: "h-8",
-  sm: "h-10",
-  md: "h-12",
-  lg: "h-14",
-  xl: "h-16",
-  "2xl": "h-20",
+  xs: "h-12",
+  sm: "h-16",
+  md: "h-20",
+  lg: "h-24",
+  xl: "h-28",
+  "2xl": "h-32",
 };
 
 export interface LogoImpulsionandoProps {

@@ -27,7 +27,7 @@ export function ClientDashboardHero({
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-start gap-5">
             <div className="flex flex-col items-center gap-1.5">
-              <LogoImpulsionando variant="light" size="sm" />
+              <LogoImpulsionando variant="light" size="md" />
               <span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-primary/80">
                 Seu Dashboard
               </span>

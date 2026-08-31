@@ -24,13 +24,10 @@ export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Ir para a home Impulsionando (abre em nova aba)"
-            className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 focus-ring transition-opacity"
+            className="aspect-square w-44 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 focus-ring transition-opacity"
           >
-            <LogoImpulsionando
-  variant="dark"
-  size="xl"
-  asLink={false}
-/>          </a>
+            <LogoImpulsionando variant="dark" size="2xl" asLink={false} />
+          </a>
         </div>
 
         <SidebarNav currentUser={currentUser} onNavigate={() => setOpen(false)} />

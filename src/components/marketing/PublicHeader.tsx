@@ -37,9 +37,9 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="shrink-0" aria-label="Impulsionando Tecnologia — início">
-          <LogoImpulsionando variant="light" size="sm" asLink={false} />
+          <LogoImpulsionando variant="light" size="lg" asLink={false} />
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Navegação principal">
@@ -67,7 +67,7 @@ export function PublicHeader() {
             <SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Abrir menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
             <SheetContent side="right" className="w-[88vw] max-w-sm">
               <SheetTitle className="sr-only">Menu principal</SheetTitle>
-              <div className="mb-6"><LogoImpulsionando variant="light" size="sm" /></div>
+              <div className="mb-6"><LogoImpulsionando variant="light" size="lg" /></div>
               <nav className="flex flex-col gap-1" aria-label="Navegação mobile">
                 {NAV.map((item) => <Link key={item.to} to={item.to} aria-label={navAriaLabel(item)} onClick={() => setOpen(false)} className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isActive(pathname, item.to) ? "bg-primary/10 text-primary" : "hover:bg-accent")}>{item.label}</Link>)}
                 <Link to="/seguranca" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Segurança e Privacidade</Link>

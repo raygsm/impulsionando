@@ -212,7 +212,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-gradient-hero text-primary-foreground overflow-hidden">
-        <div className="relative z-10"><div className="flex items-center gap-3 text-lg font-semibold tracking-tight"><LogoImpulsionando variant="dark" size="xl" /></div></div>
+        <div className="relative z-10"><div className="flex items-center gap-3 text-lg font-semibold tracking-tight"><LogoImpulsionando variant="dark" size="2xl" /></div></div>
         <div className="relative z-10 max-w-md space-y-6">
           <h1 className="text-4xl font-bold leading-tight">{copy.headline}</h1><p className="text-white/80 text-base leading-relaxed">{copy.sub}</p>
           <div className="grid gap-3 pt-2">{[{ icon: ShieldCheck, t: "Dados isolados por empresa", d: "Row Level Security em todas as tabelas" }, { icon: Layers, t: "Modular", d: "Ative só o que cada cliente precisa" }, { icon: Zap, t: "Pronto para escalar", d: "Edge Functions, automações e BI" }].map(({ icon: Icon, t, d }) => (<div key={t} className="flex items-start gap-3"><div className="w-9 h-9 rounded-md bg-white/10 backdrop-blur flex items-center justify-center shrink-0"><Icon className="w-4 h-4" /></div><div><div className="font-medium text-sm">{t}</div><div className="text-xs text-white/70">{d}</div></div></div>))}</div>
@@ -221,7 +221,7 @@ function AuthPage() {
       </div>
       <div className="flex items-center justify-center p-6 sm:p-12 bg-background">
         <Card className="w-full max-w-md p-8 shadow-elegant">
-          <div className="flex items-center justify-center mb-6 lg:hidden"><LogoImpulsionando variant="light" size="md" /></div><h2 className="text-2xl font-semibold tracking-tight">{copy.rightTitle}</h2><p className="text-sm text-muted-foreground mt-1">{copy.rightSub}</p>
+          <div className="flex items-center justify-center mb-6 lg:hidden"><LogoImpulsionando variant="light" size="lg" /></div><h2 className="text-2xl font-semibold tracking-tight">{copy.rightTitle}</h2><p className="text-sm text-muted-foreground mt-1">{copy.rightSub}</p>
           <Tabs defaultValue={mode === "signup" ? "signup" : "login"} className="mt-6">
             <TabsList className="grid grid-cols-2 w-full"><TabsTrigger value="login">Entrar</TabsTrigger><TabsTrigger value="signup">Criar conta</TabsTrigger></TabsList>
             <div className="mt-4 space-y-3"><Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>Continuar com Google</Button><div className="relative flex items-center gap-3 text-xs text-muted-foreground"><div className="h-px flex-1 bg-border" /><span>ou</span><div className="h-px flex-1 bg-border" /></div></div>
