@@ -53,8 +53,7 @@ describe('CHRISMED secure booking gate', () => {
     expect(healthcheck).not.toContain('fpywvlhsfdtztkbncmdt');
     expect(createPayment).toContain("rpc('reveal_secret_value'");
     expect(webhook).toContain("rpc('reveal_secret_value'");
-    expect(webhook).toContain('signatureValid !== true');
-    expect(webhook).toContain("status: 401");
+    expect(webhook).toContain("if (!(await verifySignature(String(webhookSecret), resourceId, requestId, signature))) return json({ error: 'invalid_webhook_signature' }, 401);");
     expect(webhook).toContain("status: 500");
   });
 
@@ -78,7 +77,7 @@ describe('CHRISMED secure booking gate', () => {
 
   it('confirms appointments and queues idempotent reminders only from the authenticated webhook', () => {
     expect(webhook).toContain("const nextAppointmentStatus = status === 'approved'");
-    expect(webhook).toContain('signatureValid !== true');
+    expect(webhook).toContain("invalid_webhook_signature");
     expect(webhook).toContain('appointment_reminder_24h');
     expect(webhook).toContain('appointment_reminder_2h');
     expect(migration).toContain('idempotency_key text NOT NULL UNIQUE');
@@ -97,7 +96,7 @@ describe('CHRISMED secure booking gate', () => {
   });
 
   it('serves clean CHRISMED subdomain paths through internal tenant routes', () => {
-    expect(server).toContain('toChrismedInternalPathname(url.hostname, url.pathname)');
+    expect(server).toContain('toChrismedInternalPathname(routedUrl.hostname, routedUrl.pathname)');
     expect(server).toContain('canonicalTenantHostRedirect({');
     expect(server).toContain('Response.redirect(canonicalTenantUrl, 308)');
     expect(cleanPaths).toContain('PUBLIC_ROUTE_ROOTS');
