@@ -54,7 +54,7 @@ describe('CHRISMED secure booking gate', () => {
     expect(createPayment).toContain("rpc('reveal_secret_value'");
     expect(webhook).toContain("rpc('reveal_secret_value'");
     expect(webhook).toContain("if (!(await verifySignature(String(webhookSecret), resourceId, requestId, signature))) return json({ error: 'invalid_webhook_signature' }, 401);");
-    expect(webhook).toContain("status: 500");
+    expect(webhook).toContain("return json({ error: 'webhook_processing_failed' }, 500);");
   });
 
   it('keeps the Mercado Pago healthcheck read-only', () => {
