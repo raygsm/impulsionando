@@ -1,145 +1,192 @@
 # SUPERPROMPT MESTRE — PRODUCT INTAKE CSI INVESTIMENTOS
 
-## Wealth Management, CRM, carteira consolidada, Open Finance, B3, suitability, compliance, BI, jornadas e Core Impulsionando Full
+## INVESTITO + IMPULSIONITO — Wealth Management, CRM, carteira consolidada, Open Finance, B3, suitability, compliance, BI, jornadas, UX/UI e Core Impulsionando Full
 
 **MODO:** EXCLUSIVAMENTE PRODUCT INTAKE  
 **BRANCH OBRIGATÓRIA:** `reengineering/program`  
 **EXECUÇÃO FUTURA:** Cauã / programador  
-**NÃO EXECUTAR AGORA. NÃO ALTERAR CÓDIGO, BANCO, INFRA, N8N OU PRODUÇÃO A PARTIR DESTE REGISTRO.**
+**AGENTE CENTRAL DO ECOSSISTEMA:** Impulsionito  
+**AGENTE ESPECIALIZADO DA CSI:** INVESTITO  
+
+> **NÃO EXECUTAR AGORA. NÃO ALTERAR CÓDIGO, BANCO, INFRAESTRUTURA, N8N, FRONTEND, BACKEND OU PRODUÇÃO A PARTIR DESTE REGISTRO.** Este documento existe exclusivamente como Livro de Anotações / Product Intake para implementação posterior pelo programador.
 
 ---
 
-# 1. OBJETIVO CENTRAL
+# 1. REGRA ABSOLUTA DE CONTINUIDADE
 
-Transformar a CSI Investimentos em uma plataforma de relacionamento, acompanhamento patrimonial e gestão comercial de wealth/investimentos integrada ao **Core Impulsionando Full**, com experiência premium para investidores, assessores/consultores, gestão, compliance e operação.
+Este documento não substitui requisitos anteriores corretos. Na execução futura, partir do estado real da CSI e do Core Impulsionando.
 
-A plataforma deve unir em uma única experiência:
+Fluxo obrigatório:
 
-**captação → cadastro → KYC → suitability → consolidação patrimonial → objetivos → carteira → acompanhamento → atendimento → recomendações/ações permitidas pelo enquadramento regulatório → documentação → relacionamento → retenção → indicação → BI → compliance.**
+**AUDITAR → PRESERVAR → CORRIGIR → COMPLETAR → INTEGRAR → TESTAR → PUBLICAR → VALIDAR.**
 
-Não criar uma “corretora fictícia” nem assumir capacidades regulatórias não confirmadas.
+Regras:
 
-Antes de ativar qualquer função de recomendação, aconselhamento, recepção/transmissão de ordens ou gestão discricionária, o programador deverá mapear o enquadramento jurídico/regulatório real da CSI e habilitar somente o que estiver permitido.
+- correto → preservar;
+- incompleto → completar;
+- errado → corrigir;
+- duplicado → consolidar;
+- mock → substituir por fonte real;
+- inseguro → blindar;
+- integração apenas desenhada → não considerar pronta.
 
----
-
-# 2. BENCHMARK DE MERCADO
-
-Usar como referências funcionais, sem copiar identidade ou propriedade intelectual:
-
-- Kinvo: consolidação de múltiplas instituições, carteira global, distribuição por classe/estratégia/instituição, rentabilidade histórica, benchmarks, proventos, risco/retorno, sensibilidade e FGC.
-- Warren: objetivos financeiros, visão patrimonial, carteiras, acompanhamento consultivo e gestão orientada a objetivos.
-- BTG Pactual: plataforma digital combinada com diferentes níveis de assessoria e atendimento.
-- B3 Área do Investidor: consolidação de investimentos e movimentações registradas na infraestrutura B3.
-- Open Finance Brasil: consentimento e compartilhamento padronizado de dados financeiros quando aplicável.
-
-A CSI deve buscar experiência superior em **simplicidade, transparência, relacionamento humano + IA, organização patrimonial, leitura de risco, governança e visão consolidada**.
+Código versionado não significa funcionalidade pronta. **Pronto = funcionando, integrado, testado e publicado no ambiente real correto.**
 
 ---
 
-# 3. PRIMEIRA REGRA REGULATÓRIA
+# 2. OBJETIVO CENTRAL
 
-Criar um `regulatory_mode` configurável para a operação real da CSI.
+Transformar a CSI Investimentos em uma plataforma premium de relacionamento, consolidação patrimonial e inteligência de wealth management, integrada ao **plano Full do Impulsionando**.
 
-Possíveis papéis, a confirmar juridicamente:
+A experiência deve unir:
+
+**captação → CRM → cadastro → KYC → suitability → consentimentos → consolidação patrimonial → objetivos → carteira → acompanhamento → atendimento → relatórios → relacionamento → retenção → indicação → BI → compliance.**
+
+A CSI não deve ser apresentada como corretora, consultora, gestora ou transmissora de ordens se não possuir o enquadramento regulatório necessário.
+
+---
+
+# 3. BENCHMARK COMPETITIVO
+
+Usar como referência funcional, sem copiar identidade ou propriedade intelectual:
+
+- **Kinvo:** consolidação multibanco/corretora, visão global, rentabilidade, distribuição, proventos, risco e comparação;
+- **Warren:** objetivos financeiros, visão patrimonial e relacionamento consultivo;
+- **BTG Pactual:** experiência digital premium + atendimento/assessoria;
+- **B3 Área do Investidor:** consolidação de posições/movimentações registradas na infraestrutura B3;
+- **Open Finance Brasil:** consentimento e compartilhamento padronizado de dados financeiros.
+
+A CSI deve superar essas referências em:
+
+- simplicidade;
+- transparência;
+- organização patrimonial;
+- leitura de risco/liquidez;
+- relacionamento humano + INVESTITO;
+- governança;
+- jornadas proativas;
+- experiência premium.
+
+---
+
+# 4. REGULATORY MODE
+
+Criar conceito/configuração de `regulatory_mode` para definir quais recursos podem ser ativados conforme o enquadramento real da CSI.
+
+Possíveis papéis a validar juridicamente:
 
 - assessoria de investimentos;
 - consultoria de valores mobiliários;
-- planejamento financeiro/wealth advisory;
+- planejamento financeiro / wealth advisory;
 - escritório vinculado a instituição intermediária;
 - gestão de carteira, somente se houver autorização específica;
 - consolidador/tecnologia sem recomendação regulada.
 
-Cada modo deve habilitar ou bloquear capacidades.
-
-Exemplo: se a CSI não estiver autorizada como consultora, o sistema não poderá produzir recomendação individualizada como se fosse consultoria regulada.
+O sistema deve bloquear automaticamente recursos incompatíveis com o modo regulatório ativo.
 
 ---
 
-# 4. COMPLIANCE BY DESIGN
+# 5. COMPLIANCE BY DESIGN
 
-Arquitetura deve contemplar:
+Incorporar desde a arquitetura:
 
-- suitability;
 - KYC;
-- PLD/FTP quando aplicável ao enquadramento;
+- suitability;
+- PLD/FTP quando aplicável;
 - PEP;
-- sanções/listas de risco quando contratadas fontes válidas;
+- listas de risco/sanções quando houver fonte contratada;
 - transparência de remuneração;
 - conflitos de interesse;
 - termos de ciência;
 - trilha de auditoria;
-- versionamento de documentos;
-- consentimento LGPD;
-- retenção documental;
+- versionamento documental;
+- LGPD;
+- retenção de registros;
 - segregação de acesso.
 
-Nunca tratar compliance como página estática.
+Compliance não pode ser somente uma página de termos.
 
 ---
 
-# 5. PÚBLICOS DO SISTEMA
+# 6. PÚBLICOS E PERFIS
 
-Criar jornadas e permissões distintas para:
+Criar experiências e permissões específicas para:
 
-1. visitante/lead;
-2. investidor pessoa física;
-3. investidor pessoa jurídica;
-4. família/grupo familiar;
-5. cliente private/high net worth;
-6. assessor/consultor autorizado conforme enquadramento;
-7. relationship manager;
-8. analista/investment specialist;
-9. atendimento/suporte;
-10. compliance;
-11. administrativo;
-12. financeiro;
-13. gestor CSI;
-14. Master CSI;
-15. Master Impulsionando.
+1. visitante;
+2. lead;
+3. investidor PF;
+4. investidor PJ;
+5. família/household;
+6. cliente private/high net worth;
+7. assessor/consultor autorizado conforme regulatory_mode;
+8. relationship manager;
+9. analista/especialista;
+10. atendimento;
+11. compliance;
+12. administrativo;
+13. financeiro;
+14. gestor CSI;
+15. Master CSI;
+16. Master Impulsionando.
 
 ---
 
-# 6. CADASTRO ÚNICO
+# 7. MATRIZ DE PERMISSÕES
 
-Cadastro do investidor deve ser central e deduplicado.
+Implementar RBAC + RLS reais.
 
-Dados estruturados:
+Cliente: somente seus dados e household consentido.  
+Assessor: somente clientes atribuídos.  
+Analista: visões necessárias, sem acesso irrestrito a PII.  
+Compliance: KYC, suitability, documentos, conflitos e auditoria.  
+Financeiro: faturamento/receitas, sem acesso irrestrito a recomendações.  
+Master CSI: tenant completo.  
+Master Impulsionando: administração técnica transversal, auditada.
+
+Toda tentativa de acesso indevido deve retornar **NEGADO** e gerar log quando necessário.
+
+---
+
+# 8. CADASTRO ÚNICO
+
+Cadastro central, deduplicado e estruturado.
+
+Campos possíveis:
 
 - nome/razão social;
 - CPF/CNPJ;
-- data de nascimento/constituição;
+- nascimento/constituição;
 - e-mail;
 - celular;
 - endereço;
 - profissão/atividade;
-- renda/faixa de renda;
-- patrimônio/faixa patrimonial;
+- renda/faixa;
+- patrimônio/faixa;
 - origem de recursos;
 - residência fiscal;
 - nacionalidade;
-- PEP quando aplicável;
+- PEP;
 - objetivos;
 - horizonte;
-- necessidades de liquidez;
-- experiência com investimentos;
+- necessidade de liquidez;
+- experiência;
 - tolerância a risco;
 - instituições conectadas;
-- assessor responsável;
-- grupo familiar;
-- consentimentos;
+- responsável CSI;
+- household;
 - documentos;
+- consentimentos;
 - histórico de relacionamento.
 
-Evitar texto livre sempre que possível. Usar listas, enums e multiseleção.
+Evitar texto livre quando houver possibilidade de lista, enum ou multiseleção.
 
 ---
 
-# 7. KYC
+# 9. KYC
 
 Fluxo:
 
-**lead → identidade → documentos → validação → risco cadastral → compliance quando necessário → aprovado → cliente ativo.**
+**lead → identidade → documentos → validação → análise de risco → compliance quando necessário → aprovado → cliente ativo.**
 
 Status:
 
@@ -152,13 +199,13 @@ Status:
 - rejeitado;
 - atualização necessária.
 
-Nunca apagar evidência histórica.
+Nunca apagar histórico.
 
 ---
 
-# 8. SUITABILITY
+# 10. SUITABILITY
 
-Criar questionário versionado e parametrizável.
+Questionário versionado e parametrizável.
 
 Dimensões:
 
@@ -172,50 +219,40 @@ Dimensões:
 - concentração patrimonial;
 - complexidade dos produtos.
 
-Resultado não deve ser apenas “conservador/moderado/arrojado”.
+Guardar respostas, score, versão, data, validade, responsável e evidência de aceite.
 
-Guardar:
-
-- respostas;
-- score;
-- versão;
-- data;
-- validade;
-- responsável;
-- evidência de aceite.
-
-Alertar para suitability vencido ou potencialmente desatualizado.
+Alertar suitability vencido ou potencialmente desatualizado.
 
 ---
 
-# 9. PERFIS DE RISCO
+# 11. PERFIL DE RISCO
 
-Labels configuráveis, por exemplo:
+Labels configuráveis, como:
 
 - conservador;
 - moderado;
 - arrojado/agressivo.
 
-Nunca hard-code recomendação de ativo apenas pelo label.
+Nunca transformar label em recomendação automática de ativo.
 
 ---
 
-# 10. OBJETIVOS FINANCEIROS
+# 12. OBJETIVOS FINANCEIROS
 
-Permitir objetivos como:
+Permitir objetivos:
 
 - reserva de emergência;
-- compra de imóvel;
+- imóvel;
 - aposentadoria;
 - educação;
 - viagem;
 - geração de renda;
-- preservação de patrimônio;
+- preservação patrimonial;
 - sucessão;
 - crescimento de longo prazo;
-- objetivo personalizado.
+- personalizado.
 
-Cada objetivo deve possuir:
+Cada objetivo:
 
 - valor alvo;
 - prazo;
@@ -227,15 +264,14 @@ Cada objetivo deve possuir:
 
 ---
 
-# 11. CARTEIRA GLOBAL
+# 13. CARTEIRA GLOBAL
 
-Criar visão consolidada de patrimônio.
-
-Agrupamentos:
+Consolidar patrimônio por:
 
 - classe;
 - estratégia;
 - instituição;
+- emissor;
 - moeda;
 - país;
 - risco;
@@ -246,13 +282,12 @@ Agrupamentos:
 
 ---
 
-# 12. CLASSES DE ATIVOS
+# 14. CLASSES DE ATIVOS
 
-Estrutura preparada para:
+Preparar estrutura para:
 
 - caixa;
-- conta remunerada;
-- Tesouro Direto;
+- Tesouro;
 - CDB/RDB;
 - LCI/LCA;
 - debêntures;
@@ -263,86 +298,105 @@ Estrutura preparada para:
 - ETFs;
 - BDRs;
 - FIIs;
-- fundos internacionais;
 - stocks;
 - REITs;
 - bonds;
 - moedas;
-- criptoativos, se houver fonte/uso autorizado;
-- ativos alternativos;
-- ativos manuais/personalizados.
+- criptoativos quando permitido;
+- alternativos;
+- ativos manuais.
 
 ---
 
-# 13. INTEGRAÇÕES DE POSIÇÃO
+# 15. INTEGRAÇÕES DE POSIÇÃO
 
-Prioridade para fontes oficiais/licenciadas:
+Priorizar fontes oficiais/licenciadas:
 
-- Open Finance, quando consentido e tecnicamente disponível;
-- B3/API/integrações autorizadas;
-- APIs de instituições parceiras;
-- custodiante/corretora;
-- arquivos padronizados;
-- importação manual estruturada como contingência.
+- Open Finance;
+- B3 e APIs autorizadas;
+- corretoras/custodiantes/parceiros;
+- providers de consolidação;
+- arquivos estruturados;
+- importação manual como contingência.
 
-Nunca usar scraping frágil como fonte principal de patrimônio.
+Nunca usar scraping frágil como fonte primária.
 
 ---
 
-# 14. CONSENTIMENTO OPEN FINANCE
+# 16. OPEN FINANCE
 
-Criar jornada:
+Jornada:
 
-**conectar instituição → explicar finalidade → consentir → autenticar na instituição → retornar → sincronizar → monitorar expiração.**
+**Conectar instituição → explicar finalidade → consentir → autenticar → retornar → sincronizar → acompanhar validade.**
 
-Mostrar claramente:
+Mostrar:
 
 - instituição;
 - escopo;
-- data de consentimento;
+- consentimento;
 - validade;
 - última sincronização;
+- status;
 - erro;
 - revogação.
 
 ---
 
-# 15. RECONCILIAÇÃO
+# 17. B3 / CUSTÓDIA / APIs
 
-Toda integração precisa de rotina de reconciliação.
+Mapear possibilidades reais de integração com B3, instituições financeiras e providers.
+
+Não assumir API disponível sem contrato ou autorização.
+
+Cada integração deve possuir:
+
+- owner;
+- autenticação;
+- escopo;
+- SLA;
+- sincronização;
+- reconciliação;
+- rate limit;
+- tratamento de falha;
+- auditoria.
+
+---
+
+# 18. RECONCILIAÇÃO
 
 Detectar:
 
 - posição divergente;
-- ativo sem identificação;
+- ativo desconhecido;
 - transação duplicada;
 - saldo ausente;
-- instituição atrasada;
-- conexão expirada.
+- cotação ausente;
+- integração atrasada;
+- consentimento expirado.
 
-Criar fila “PRECISA DE ATENÇÃO”.
-
----
-
-# 16. TEMPO REAL — REGRA DE VERDADE
-
-“Tempo real” só deve ser prometido quando a fonte contratada realmente entregar dados em tempo real.
-
-Diferenciar no frontend:
-
-- cotação em tempo real;
-- cotação com atraso;
-- posição D-1;
-- posição da última sincronização;
-- valor estimado.
-
-Mostrar timestamp da fonte.
+Criar fila **PRECISA DE ATENÇÃO**.
 
 ---
 
-# 17. MARKET DATA
+# 19. REGRA DE VERDADE SOBRE “TEMPO REAL”
 
-Arquitetura preparada para provider licenciado de:
+Só usar expressão “tempo real” se o provider efetivamente entregar tempo real.
+
+Diferenciar:
+
+- tempo real;
+- delayed;
+- D-1;
+- última sincronização;
+- estimado.
+
+Sempre mostrar timestamp/origem.
+
+---
+
+# 20. MARKET DATA
+
+Camada preparada para provider licenciado de:
 
 - preços;
 - índices;
@@ -351,16 +405,16 @@ Arquitetura preparada para provider licenciado de:
 - taxas;
 - benchmarks.
 
-Não distribuir cotações protegidas sem contrato/licença.
+Nunca redistribuir market data protegido sem licença.
 
 ---
 
-# 18. HOME DO INVESTIDOR
+# 21. DASHBOARD DO INVESTIDOR
 
-Primeira dobra deve responder em segundos:
+Primeira dobra deve mostrar:
 
 - patrimônio consolidado;
-- variação do dia, quando fonte permitir;
+- variação do dia quando válida;
 - rentabilidade do mês;
 - rentabilidade no ano;
 - rentabilidade desde início;
@@ -368,38 +422,38 @@ Primeira dobra deve responder em segundos:
 - distribuição por classe;
 - liquidez;
 - risco;
-- objetivo principal;
+- principal objetivo;
 - próximos eventos;
-- mensagens do assessor;
-- pendências importantes.
+- mensagens da equipe;
+- pendências.
 
 ---
 
-# 19. RENTABILIDADE
+# 22. RENTABILIDADE
 
-Implementar metodologia tecnicamente correta e documentada.
+Metodologia documentada e testada.
 
-Suportar:
+Exibir:
 
-- rentabilidade acumulada;
+- acumulada;
 - mensal;
 - anual;
 - desde início;
-- por ativo;
+- ativo;
 - classe;
 - estratégia;
 - instituição;
-- carteira global.
+- carteira.
 
-Separar retorno de aportes/retiradas.
+Separar performance de aportes/retiradas.
 
 Avaliar TWR e MWR/XIRR conforme finalidade.
 
 ---
 
-# 20. BENCHMARKS
+# 23. BENCHMARKS
 
-Permitir comparação configurável com:
+Comparações configuráveis com fontes válidas:
 
 - CDI;
 - IPCA;
@@ -409,81 +463,70 @@ Permitir comparação configurável com:
 - poupança;
 - S&P 500;
 - dólar;
-- outros índices licenciados/disponíveis.
+- outros.
 
-Nunca comparar carteiras de natureza incompatível sem contexto.
-
----
-
-# 21. RENTABILIDADE REAL
-
-Exibir retorno nominal e retorno real descontado da inflação, quando metodologia/fonte permitirem.
+Evitar comparação enganosa entre riscos ou horizontes incompatíveis.
 
 ---
 
-# 22. EVOLUÇÃO PATRIMONIAL
+# 24. RENTABILIDADE REAL
 
-Gráfico de:
+Quando tecnicamente adequado:
+
+- retorno nominal;
+- inflação;
+- retorno real.
+
+---
+
+# 25. EVOLUÇÃO PATRIMONIAL
+
+Separar visualmente:
 
 - patrimônio;
 - aportes;
 - retiradas;
 - ganhos/perdas;
-- evolução por período.
-
-Permitir separar crescimento por fluxo financeiro e performance.
+- evolução temporal.
 
 ---
 
-# 23. DISTRIBUIÇÃO
+# 26. DISTRIBUIÇÃO E CONCENTRAÇÃO
 
-Gráficos por:
-
-- classe;
-- instituição;
-- emissor;
-- estratégia;
-- moeda;
-- país;
-- objetivo;
-- titular.
-
----
-
-# 24. CONCENTRAÇÃO
+Gráficos por classe, estratégia, instituição, emissor, moeda, país, objetivo e titular.
 
 Indicadores:
 
 - top 5 ativos;
 - top emissores;
-- top instituições;
-- concentração por classe;
-- concentração geográfica;
-- concentração cambial.
+- concentração por instituição;
+- cambial;
+- geográfica;
+- classe.
 
-Alertas são informativos e de risco; não devem virar recomendação automática sem enquadramento regulatório.
+Alertas de concentração são informativos; recomendação individual depende do regulatory_mode.
 
 ---
 
-# 25. RISCO
+# 27. RISCO
 
-Preparar indicadores, conforme dados disponíveis:
+Quando dados permitirem:
 
 - volatilidade;
 - drawdown;
 - risco x retorno;
 - concentração;
 - liquidez;
-- sensibilidade;
 - exposição cambial;
 - crédito/emissor;
-- duration quando aplicável.
+- duration;
+- sensibilidade.
 
 ---
 
-# 26. LIQUIDEZ
+# 28. LIQUIDEZ
 
-Classificar patrimônio por faixa de liquidez:
+Classificar:
 
 - D+0/D+1;
 - curto prazo;
@@ -492,19 +535,19 @@ Classificar patrimônio por faixa de liquidez:
 - carência;
 - sem liquidez imediata.
 
-Dashboard deve mostrar “quanto do patrimônio está disponível em X dias”.
+Responder claramente: **“quanto do patrimônio está disponível em X dias?”**
 
 ---
 
-# 27. FGC
+# 29. FGC
 
-Quando aplicável, criar visão de exposição por emissor/instituição e cobertura estimada.
+Quando aplicável, mostrar exposição por emissor/instituição e cobertura estimada segundo regras atualizáveis.
 
-Regras devem ser parametrizadas e atualizáveis, nunca hard-coded permanentemente.
+Nunca hard-code permanentemente limites regulatórios.
 
 ---
 
-# 28. PROVENTOS E FLUXOS
+# 30. PROVENTOS E VENCIMENTOS
 
 Calendário de:
 
@@ -516,43 +559,23 @@ Calendário de:
 - resgates;
 - aportes programados.
 
----
-
-# 29. VENCIMENTOS DE RENDA FIXA
-
-Criar agenda de vencimentos e concentração temporal.
-
-Gatilho antes do vencimento para relacionamento e planejamento, respeitando permissões regulatórias.
+Gatilhos de relacionamento antes de vencimentos importantes.
 
 ---
 
-# 30. OBJETIVOS X CARTEIRA
+# 31. PROJEÇÕES E OBJETIVOS
 
-Relacionar patrimônio a objetivos.
+Relacionar objetivos à carteira.
 
 Mostrar:
 
 - progresso;
-- projeção;
 - prazo;
+- valor atual;
 - lacuna estimada;
-- necessidade de revisão.
+- projeções.
 
-Não prometer retorno futuro garantido.
-
----
-
-# 31. PROJEÇÕES
-
-Toda projeção deve ser explicitamente identificada como simulação.
-
-Permitir cenários:
-
-- conservador;
-- base;
-- otimista;
-
-com premissas visíveis.
+Toda projeção deve ser identificada como simulação, com premissas visíveis e sem garantia.
 
 ---
 
@@ -560,12 +583,12 @@ com premissas visíveis.
 
 Pipeline comercial:
 
-**novo lead → contato → reunião → qualificado → KYC/suitability → proposta de relacionamento → onboarding → cliente ativo.**
+**novo lead → contato → reunião → qualificado → KYC/suitability → proposta de relacionamento → onboarding → ativo.**
 
-Outros estágios:
+Status complementares:
 
-- aguardando documento;
-- aguardando transferência/consolidação;
+- documento pendente;
+- conexão patrimonial pendente;
 - acompanhamento;
 - risco de churn;
 - inativo;
@@ -573,111 +596,9 @@ Outros estágios:
 
 ---
 
-# 33. LEAD SCORING
+# 33. VISÃO 360 DO CLIENTE
 
-Considerar:
-
-- origem;
-- patrimônio estimado;
-- interesse;
-- urgência;
-- engajamento;
-- reunião marcada;
-- perfil de relacionamento.
-
-Nunca usar atributos sensíveis de forma discriminatória.
-
----
-
-# 34. AGENDA
-
-Agenda integrada para:
-
-- primeira conversa;
-- revisão patrimonial;
-- suitability;
-- planejamento;
-- reunião periódica;
-- revisão de carteira;
-- vencimentos importantes;
-- eventos CSI.
-
----
-
-# 35. CADÊNCIA DE RELACIONAMENTO
-
-Parametrizar por segmento.
-
-Exemplo:
-
-- onboarding;
-- 7 dias;
-- 30 dias;
-- revisão trimestral;
-- revisão semestral/anual;
-- contato por evento de carteira;
-- aniversário;
-- vencimento;
-- grande movimentação;
-- consentimento expirando.
-
----
-
-# 36. JORNADA DO LEAD
-
-**conteúdo/indicação → landing page → diagnóstico inicial → qualificação → agenda → reunião → KYC/suitability → onboarding.**
-
-CTA premium, sem promessa de rentabilidade.
-
----
-
-# 37. JORNADA DO CLIENTE NOVO
-
-**boas-vindas → documentação → consentimentos → perfil → conexão de instituições → carteira consolidada → objetivos → reunião inicial → plano de acompanhamento.**
-
----
-
-# 38. JORNADA DO CLIENTE ATIVO
-
-**monitoramento → insights permitidos → contato periódico → revisão de objetivos → revisão de suitability → relatórios → retenção.**
-
----
-
-# 39. JORNADA DE RISCO DE CHURN
-
-Gatilhos possíveis:
-
-- queda de engajamento;
-- conexões expiradas;
-- ausência em reuniões;
-- pedido de portabilidade/saída;
-- reclamação;
-- NPS baixo.
-
-Criar tarefa humana antes de automação comercial agressiva.
-
----
-
-# 40. RELATIONSHIP MANAGER
-
-Dashboard individual com:
-
-- clientes;
-- AUM acompanhado;
-- reuniões;
-- pendências;
-- suitability vencendo;
-- consentimentos;
-- vencimentos;
-- clientes sem contato;
-- risco de churn;
-- oportunidades de relacionamento permitidas.
-
----
-
-# 41. VISÃO 360 DO CLIENTE
-
-Uma única tela deve reunir:
+Uma tela:
 
 - cadastro;
 - patrimônio;
@@ -695,22 +616,89 @@ Uma única tela deve reunir:
 
 ---
 
-# 42. FAMÍLIA / HOUSEHOLD
+# 34. LEAD SCORING
 
-Permitir agrupamento familiar com consentimento e permissões.
+Pode considerar:
+
+- origem;
+- patrimônio estimado;
+- interesse;
+- urgência;
+- engajamento;
+- reunião;
+- perfil de relacionamento.
+
+Nunca utilizar atributo sensível para discriminação inadequada.
+
+---
+
+# 35. AGENDA
+
+Agenda integrada para:
+
+- primeira conversa;
+- suitability;
+- revisão patrimonial;
+- planejamento;
+- reunião periódica;
+- vencimento;
+- revisão cadastral;
+- evento CSI.
+
+---
+
+# 36. JORNADA DO LEAD
+
+**conteúdo/indicação → landing page → diagnóstico inicial → CRM → qualificação → agenda → reunião → onboarding.**
+
+CTA sem promessa de rentabilidade.
+
+---
+
+# 37. JORNADA DO CLIENTE NOVO
+
+**boas-vindas → documentos → KYC → suitability → consentimentos → instituições → carteira consolidada → objetivos → primeira reunião.**
+
+---
+
+# 38. JORNADA DO CLIENTE ATIVO
+
+**monitoramento → relatórios → contatos periódicos → vencimentos → revisão de objetivos → revisão de suitability → retenção.**
+
+---
+
+# 39. JORNADA DE CHURN
+
+Gatilhos:
+
+- queda de engajamento;
+- consentimento expirado;
+- ausência em reuniões;
+- reclamação;
+- NPS baixo;
+- pedido de saída;
+- grandes saídas patrimoniais quando fonte permitir.
+
+Priorizar tarefa humana, não automação agressiva.
+
+---
+
+# 40. HOUSEHOLD / FAMÍLIA
+
+Agrupamento familiar com consentimento e permissão.
 
 Visões:
 
 - individual;
 - casal;
 - família;
-- empresa/família quando juridicamente adequado.
+- PJ/família quando adequado.
 
 ---
 
-# 43. PLANEJAMENTO PATRIMONIAL
+# 41. PLANEJAMENTO PATRIMONIAL AMPLIADO
 
-Criar módulo de inventário patrimonial ampliado:
+Inventário opcional de:
 
 - investimentos;
 - imóveis;
@@ -720,19 +708,91 @@ Criar módulo de inventário patrimonial ampliado:
 - dívidas;
 - outros ativos/passivos.
 
-Dados não financeiros podem ser manuais/documentais.
+Separar claramente dado conectado de dado declarado manualmente.
 
 ---
 
-# 44. PATRIMÔNIO LÍQUIDO
+# 42. INVESTITO — AGENTE OFICIAL CSI
 
-Exibir ativos menos passivos, quando cliente fornecer dados suficientes.
+**INVESTITO** é a instância especializada do Impulsionito para a CSI.
 
-Separar patrimônio financeiro custodiado/conectado de patrimônio declarado manualmente.
+Deve atuar como:
+
+- concierge patrimonial;
+- intérprete de indicadores;
+- assistente de relacionamento;
+- organizador de pendências;
+- facilitador de reuniões;
+- explicador de conceitos;
+- navegador de documentos e carteira.
+
+Pode:
+
+- informar patrimônio consolidado;
+- explicar rentabilidade e benchmarks;
+- informar liquidez;
+- localizar vencimentos;
+- resumir carteira;
+- indicar última sincronização;
+- mostrar documentos;
+- orientar atualização cadastral;
+- agendar reunião;
+- abrir ticket;
+- lembrar consentimentos e suitability.
+
+Não pode:
+
+- garantir retorno;
+- inventar cotação;
+- inventar posição;
+- emitir recomendação regulada fora do regulatory_mode;
+- executar ordem autonomamente;
+- ocultar conflito ou risco.
 
 ---
 
-# 45. RELATÓRIOS DO CLIENTE
+# 43. INVESTITO — REGRA DE FONTE
+
+Toda resposta patrimonial deve partir de dado real.
+
+Se posição estiver defasada:
+
+**informar última sincronização.**
+
+Se dado não existir:
+
+**não inventar.**
+
+---
+
+# 44. INVESTITO — EXEMPLOS
+
+Cliente: “Quanto tenho investido?” → consultar carteira real.  
+Cliente: “Quanto está líquido em D+1?” → consultar liquidez real.  
+Cliente: “Quando vence meu CDB?” → consultar agenda de vencimentos.  
+Cliente: “Minha carteira está atualizada?” → informar timestamp/fontes.  
+Cliente: “Qual ação devo comprar hoje?” → respeitar regulatory_mode; não improvisar recomendação.
+
+---
+
+# 45. RELATIONSHIP MANAGER
+
+Dashboard:
+
+- clientes;
+- AUM acompanhado;
+- reuniões;
+- pendências;
+- suitability vencendo;
+- consentimentos;
+- vencimentos;
+- sem contato recente;
+- risco de churn;
+- tarefas.
+
+---
+
+# 46. RELATÓRIOS DO CLIENTE
 
 Exportáveis:
 
@@ -744,21 +804,21 @@ Exportáveis:
 - proventos;
 - evolução patrimonial;
 - objetivos;
-- histórico de movimentações.
+- movimentações.
 
-Sempre com data/hora e origem dos dados.
-
----
-
-# 46. RELATÓRIO EXECUTIVO
-
-Versão simples para leitura rápida:
-
-**onde estou → como evoluiu → como está distribuído → riscos principais → próximos eventos → pendências.**
+Sempre com data/hora e origem.
 
 ---
 
-# 47. BI DA GESTÃO CSI
+# 47. RELATÓRIO EXECUTIVO
+
+Formato simples:
+
+**onde estou → como evoluiu → como está distribuído → riscos → liquidez → próximos eventos → pendências.**
+
+---
+
+# 48. BI EXECUTIVO CSI
 
 Indicadores:
 
@@ -766,10 +826,10 @@ Indicadores:
 - leads;
 - conversão;
 - AUM acompanhado/consolidado;
-- entradas/saídas patrimoniais identificadas;
+- entradas/saídas identificadas;
 - patrimônio por assessor;
 - patrimônio por instituição;
-- receita da CSI, quando integrada;
+- receita CSI quando integrada;
 - churn;
 - NPS;
 - CAC;
@@ -783,21 +843,21 @@ Indicadores:
 
 ---
 
-# 48. BI COMERCIAL
+# 49. BI COMERCIAL
 
 Funil:
 
 **visitas → leads → reuniões → qualificados → onboarding → clientes ativos.**
 
-Por origem/campanha/assessor.
+Por origem, campanha e responsável.
 
 ---
 
-# 49. BI DE CARTEIRAS
+# 50. BI DE CARTEIRAS
 
-Visões agregadas e anonimizadas/permitidas:
+Visões agregadas, respeitando sigilo e necessidade:
 
-- distribuição por classe;
+- classe;
 - liquidez;
 - concentração;
 - perfil;
@@ -805,61 +865,45 @@ Visões agregadas e anonimizadas/permitidas:
 - instituição;
 - vencimentos.
 
-Respeitar necessidade de acesso e sigilo.
-
 ---
 
-# 50. METAS COMERCIAIS
+# 51. METAS
 
-Parametrizar:
+Parametrizáveis:
 
 - novos clientes;
 - AUM novo;
 - reuniões;
 - conversão;
 - retenção;
-- atualização de suitability;
+- suitability atualizado;
 - NPS.
 
-Não incentivar práticas inadequadas de giro de carteira ou venda por comissão.
+Não criar incentivo para giro indevido de carteira.
 
 ---
 
-# 51. TRANSPARÊNCIA DE REMUNERAÇÃO
+# 52. REMUNERAÇÃO E CONFLITOS
 
-Quando aplicável ao modelo:
+Quando aplicável, registrar/exibir:
 
-- taxa;
 - fee;
 - comissão;
 - rebate;
 - origem da remuneração;
-- conflito potencial.
-
-Disponibilizar ao investidor conforme exigências e política da CSI.
-
----
-
-# 52. CONFLITOS DE INTERESSE
-
-Registrar e exibir quando necessário:
-
-- produto ligado a instituição parceira;
-- remuneração diferenciada;
-- relacionamento econômico;
-- potencial conflito.
+- conflito potencial;
+- produto/instituição relacionada.
 
 ---
 
-# 53. RECOMENDAÇÕES / PLANO DE AÇÃO
+# 53. RECOMENDAÇÕES
 
-Somente habilitar se o enquadramento jurídico permitir.
+Somente habilitar quando juridicamente permitido.
 
-Cada recomendação deve ter:
+Cada recomendação:
 
 - responsável habilitado;
 - cliente;
-- contexto;
 - suitability vigente;
 - objetivo;
 - racional;
@@ -867,135 +911,60 @@ Cada recomendação deve ter:
 - custos;
 - conflitos;
 - data;
-- aceite/ciência;
+- ciência/aceite;
 - status.
 
-Nunca permitir IA autônoma emitir recomendação regulada sem controle humano e jurídico apropriado.
+INVESTITO não substitui controle humano regulatório.
 
 ---
 
 # 54. ORDENS
 
-Se a CSI atuar como assessor e houver integração autorizada com intermediário, desenhar fluxo de recepção/transmissão de ordens dentro do escopo permitido.
+Se houver escopo autorizado e integração com intermediário, desenhar recepção/transmissão conforme regras aplicáveis.
 
-Nunca executar ordem diretamente sem integração, autorização e controles formais.
-
----
-
-# 55. AGENTE VIRTUAL ESPECIALIZADO
-
-Criar agente especializado CSI, como instância do Impulsionito, com nome a definir oficialmente.
-
-Ele deve funcionar como concierge de relacionamento e leitura de dados, não como “guru de investimentos”.
-
-Pode:
-
-- explicar carteira;
-- localizar documentos;
-- informar posição e sincronização;
-- explicar conceitos;
-- agendar reunião;
-- mostrar vencimentos;
-- orientar atualização cadastral;
-- resumir relatórios;
-- abrir ticket.
-
-Não pode:
-
-- garantir retorno;
-- inventar cotação;
-- recomendar produto fora do modo regulatório permitido;
-- executar ordem sozinho.
+Nunca criar botão de “ordem real” sem integração, autorização e controles.
 
 ---
 
-# 56. RESPOSTAS BASEADAS EM FONTE
-
-Toda resposta sobre patrimônio deve indicar implicitamente a fonte correta e respeitar a última sincronização.
-
-Se dado estiver defasado, avisar.
-
----
-
-# 57. ALERTAS AO CLIENTE
-
-Possíveis alertas:
-
-- consentimento expirando;
-- suitability vencendo;
-- vencimento de ativo;
-- documento pendente;
-- grande movimentação importada;
-- reunião próxima;
-- relatório disponível.
-
-Alertas de mercado devem ser parametrizados e não alarmistas.
-
----
-
-# 58. ALERTAS INTERNOS
-
-- KYC pendente;
-- cliente sem contato;
-- suitability vencido;
-- concentração relevante;
-- consentimento expirado;
-- reconciliação falhou;
-- integração fora do ar;
-- cliente pediu saída;
-- ticket crítico.
-
----
-
-# 59. CENTRAL DE DOCUMENTOS
+# 55. CENTRAL DE DOCUMENTOS
 
 Organizar:
 
 - contratos;
-- termos;
-- suitability;
 - KYC;
+- suitability;
+- termos;
 - relatórios;
-- documentos fiscais quando aplicáveis;
-- atas de reunião;
+- consentimentos;
 - comunicações relevantes;
+- atas/reuniões;
 - autorizações.
 
 Versionamento obrigatório.
 
 ---
 
-# 60. ASSINATURA ELETRÔNICA
+# 56. CONTRATOS E ACEITES
 
-Fluxos de aceite devem registrar:
+Contrato deve refletir:
 
-- versão;
-- data/hora;
-- usuário;
-- evidência;
-- IP quando adequado;
-- provedor de assinatura quando houver.
+- papel regulatório;
+- escopo;
+- remuneração;
+- conflitos;
+- responsabilidades;
+- proteção de dados;
+- encerramento.
 
----
+Aceite eletrônico deve guardar versão, data/hora, usuário e evidência.
 
-# 61. CRM DE TAREFAS
-
-Toda pendência deve possuir:
-
-- dono;
-- SLA;
-- prioridade;
-- cliente;
-- categoria;
-- prazo;
-- status;
-- histórico.
+Revisão jurídica obrigatória antes de go-live.
 
 ---
 
-# 62. SUPORTE
+# 57. SUPORTE E OUVIDORIA
 
-Tickets por categoria:
+Tickets:
 
 - acesso;
 - carteira;
@@ -1003,37 +972,31 @@ Tickets por categoria:
 - cadastro;
 - documento;
 - relatório;
-- movimentação divergente;
+- divergência;
 - atendimento;
 - reclamação;
 - compliance.
 
----
-
-# 63. OUVIDORIA / RECLAMAÇÃO
-
-Fluxo separado quando exigido/adequado.
-
-Registrar protocolo, classificação, prazo, responsável, evidências e resolução.
+Ouvidoria/reclamação com protocolo, prazo, responsável e resolução quando aplicável.
 
 ---
 
-# 64. COMUNICAÇÃO
+# 58. COMUNICAÇÃO
 
 Canais:
 
 - e-mail;
 - WhatsApp oficial quando integrado;
-- notificações internas;
-- SMS somente se necessário.
+- notificação interna;
+- SMS quando necessário.
 
-Foco em comunicação transacional e relacionamento de alta confiança.
+Comunicação premium, clara e sóbria.
 
 ---
 
-# 65. TEMPLATES DE E-MAIL
+# 59. TEMPLATES DE E-MAIL
 
-Criar identidade CSI premium e responsiva.
+Criar padrão CSI premium, responsivo, com logo e identidade visual.
 
 Templates:
 
@@ -1044,7 +1007,7 @@ Templates:
 - suitability;
 - consentimento;
 - carteira sincronizada;
-- relatório disponível;
+- relatório;
 - reunião;
 - vencimento;
 - pendência;
@@ -1054,12 +1017,12 @@ Templates:
 
 ---
 
-# 66. N8N / AUTOMAÇÃO
+# 60. AUTOMAÇÕES N8N
 
-Orquestrar:
+Fluxos:
 
 - novo lead;
-- reunião;
+- agenda;
 - KYC;
 - suitability;
 - consentimento;
@@ -1072,70 +1035,72 @@ Orquestrar:
 - ticket;
 - compliance.
 
-Cada fluxo com logs, retry, idempotência e tratamento de erro.
+Cada workflow com idempotência, logs, retry, tratamento de erro e alerta.
 
 ---
 
-# 67. WEBHOOKS
+# 61. WEBHOOKS
 
-Todo webhook deve:
+Todo webhook:
 
 - autenticar origem;
+- validar payload;
 - ser idempotente;
 - registrar evento;
 - tratar duplicidade;
-- ter retry;
-- dead-letter/fila de erro;
+- retry;
+- fila de erro/dead-letter;
 - auditoria.
 
 ---
 
-# 68. API GATEWAY
+# 62. API GATEWAY
 
-Centralizar integrações financeiras atrás de camada de integração segura.
+Centralizar integrações sensíveis atrás de camada segura.
 
-Não deixar credenciais em frontend.
+Nunca expor credenciais no frontend.
 
 ---
 
-# 69. SEGURANÇA
+# 63. SEGURANÇA
 
 Aplicar:
 
+- MFA para perfis sensíveis;
 - RLS;
 - RBAC;
 - tenant isolation;
-- MFA para perfis sensíveis;
-- sessão segura;
 - criptografia;
 - secrets manager;
-- logs imutáveis quando necessário;
 - rate limiting;
-- monitoramento;
+- logs;
 - backups;
+- monitoramento;
 - princípio do menor privilégio.
 
 ---
 
-# 70. PERMISSÕES
+# 64. LGPD
 
-Exemplos:
+Implementar:
 
-Cliente: somente seus dados/household consentido.  
-Assessor: somente carteira de clientes atribuídos.  
-Compliance: KYC/suitability/documentos e trilha, sem necessidade de alterar carteira.  
-Financeiro: faturamento/receita, sem acesso irrestrito a recomendações.  
-Master CSI: tenant completo.  
-Master Impulsionando: acesso técnico transversal auditado.
+- finalidade;
+- consentimento/base legal;
+- minimização;
+- acesso;
+- correção;
+- revogação;
+- retenção;
+- exclusão quando aplicável;
+- registro de consentimentos.
 
 ---
 
-# 71. AUDITORIA
+# 65. AUDITORIA
 
 Registrar:
 
 - login;
-- leitura de dados sensíveis quando necessário;
 - alteração cadastral;
 - suitability;
 - recomendação;
@@ -1144,27 +1109,12 @@ Registrar:
 - exportação;
 - permissionamento;
 - integração;
-- erro.
+- erro;
+- acesso sensível quando necessário.
 
 ---
 
-# 72. LGPD
-
-Implementar:
-
-- finalidade;
-- base legal/consentimento conforme caso;
-- minimização;
-- acesso;
-- correção;
-- revogação;
-- retenção;
-- exclusão quando legalmente aplicável;
-- registro de consentimentos.
-
----
-
-# 73. OBSERVABILIDADE
+# 66. OBSERVABILIDADE
 
 Monitorar:
 
@@ -1177,30 +1127,33 @@ Monitorar:
 - WhatsApp;
 - APIs;
 - login;
-- geração de relatórios.
+- relatórios.
+
+Criar painel de saúde das integrações.
 
 ---
 
-# 74. UX/UI
+# 67. UX/UI
 
-Padrão premium, sóbrio, moderno e confiável.
+Padrão:
 
-Prioridades:
-
-- leitura rápida;
-- pouca poluição;
-- hierarquia forte;
+- premium;
+- sóbrio;
+- moderno;
+- confiável;
+- minimalista;
+- alto contraste;
 - números legíveis;
-- comparação clara;
-- explicação contextual;
-- mobile-first;
-- acessibilidade.
+- pouca poluição;
+- hierarquia forte.
 
-Não usar excesso de gráficos só porque o tema é financeiro.
+Aplicar UX, UI, design instrucional, copywriting e design system.
+
+Não usar gráficos apenas para “parecer financeiro”.
 
 ---
 
-# 75. FRONT PÚBLICO
+# 68. FRONT PÚBLICO
 
 Menu sugerido:
 
@@ -1213,15 +1166,17 @@ Menu sugerido:
 - Fale com um especialista;
 - Área do cliente.
 
-CTA principal sem promessa de retorno:
+CTA principal:
 
 **“Organize seu patrimônio e tome decisões com mais clareza.”**
 
+Sem promessa de rentabilidade.
+
 ---
 
-# 76. ONBOARDING UX
+# 69. ONBOARDING UX
 
-Etapas curtas:
+Etapas:
 
 **identidade → objetivos → perfil → documentos → consentimentos → instituições → carteira → primeira reunião.**
 
@@ -1229,40 +1184,39 @@ Mostrar progresso e salvar estado.
 
 ---
 
-# 77. EXPLICAÇÃO DE MÉTRICAS
+# 70. EXPLICAÇÃO DE INDICADORES
 
-Cada KPI deve ter tooltip simples.
+Todo KPI importante deve possuir tooltip em linguagem humana.
 
-Exemplo:
-
-“Rentabilidade” não deve aparecer sem explicar período/metodologia.
+Rentabilidade, risco, drawdown, liquidez e benchmark nunca devem aparecer sem contexto mínimo.
 
 ---
 
-# 78. ACESSIBILIDADE
-
-WCAG AA, contraste, foco, teclado, labels, formatos numéricos e gráficos legíveis.
-
----
-
-# 79. MOBILE
+# 71. MOBILE FIRST
 
 Cliente deve conseguir pelo celular:
 
-- consultar patrimônio;
-- ver carteira;
-- objetivo;
-- relatório;
-- falar com equipe;
-- atualizar dados;
-- renovar consentimento;
-- agendar reunião.
+- ver patrimônio;
+- carteira;
+- objetivos;
+- relatórios;
+- mensagens;
+- documentos;
+- agenda;
+- consentimento;
+- atualização cadastral.
 
 ---
 
-# 80. IMPORTAÇÃO MANUAL
+# 72. ACESSIBILIDADE
 
-Permitir CSV/XLSX para contingência, com:
+WCAG AA, foco, teclado, labels, contraste, gráficos legíveis e formatos numéricos acessíveis.
+
+---
+
+# 73. IMPORTAÇÃO MANUAL
+
+Contingência CSV/XLSX:
 
 - mapeamento;
 - preview;
@@ -1273,9 +1227,9 @@ Permitir CSV/XLSX para contingência, com:
 
 ---
 
-# 81. DADOS MANUAIS X CONECTADOS
+# 74. DADOS CONECTADOS X MANUAIS
 
-Marcar visualmente:
+Marcar claramente:
 
 - sincronizado;
 - importado;
@@ -1286,25 +1240,9 @@ Nunca misturar sem transparência.
 
 ---
 
-# 82. HISTÓRICO
+# 75. MULTIMOEDA
 
-Preservar snapshots para análises históricas quando permitido pela fonte e arquitetura.
-
-Open Finance pode ter limitações de histórico conforme consentimento; UI deve comunicar isso.
-
----
-
-# 83. DATAS E HORÁRIOS
-
-Todos os dados financeiros precisam de `as_of_date` / timestamp de referência.
-
----
-
-# 84. MOEDAS
-
-Suportar patrimônio multimoeda.
-
-Separar:
+Guardar:
 
 - valor original;
 - moeda;
@@ -1314,25 +1252,17 @@ Separar:
 
 ---
 
-# 85. TRIBUTAÇÃO
+# 76. TRIBUTAÇÃO
 
 Não criar cálculo fiscal definitivo sem metodologia validada.
 
-Pode existir módulo informativo/estimativo com disclaimers e revisão especializada.
+Pode haver módulo informativo/estimativo com revisão especializada e disclaimer.
 
 ---
 
-# 86. SUCESSÃO E PLANEJAMENTO
+# 77. EDUCAÇÃO FINANCEIRA
 
-Permitir registrar objetivos e documentos de planejamento patrimonial sem prestar aconselhamento jurídico automático.
-
-Encaminhar para especialista quando necessário.
-
----
-
-# 87. EDUCAÇÃO FINANCEIRA
-
-Conteúdo contextual:
+Conteúdos contextuais:
 
 - risco;
 - liquidez;
@@ -1342,133 +1272,149 @@ Conteúdo contextual:
 - classes;
 - volatilidade.
 
-Agente pode explicar conceitos, sem recomendação personalizada fora do escopo legal.
+INVESTITO pode explicar conceitos, sem ultrapassar regulatory_mode.
 
 ---
 
-# 88. NPS E SATISFAÇÃO
+# 78. NPS E SATISFAÇÃO
 
 Medir:
 
 - onboarding;
-- atendimento;
-- clareza dos relatórios;
 - reuniões;
+- atendimento;
+- relatórios;
 - experiência geral.
 
 Detrator gera tarefa humana.
 
 ---
 
-# 89. INDICAÇÃO
+# 79. INDICAÇÃO
 
-Criar jornada de indicação rastreável, respeitando compliance e publicidade aplicável.
-
----
-
-# 90. EVENTOS E CONTEÚDOS
-
-CRM deve registrar inscrições e participação em:
-
-- webinars;
-- reuniões;
-- eventos;
-- conteúdos premium.
-
-Usar engajamento para relacionamento, não para recomendação automática imprópria.
+Jornada rastreável de indicação, respeitando compliance/publicidade aplicável.
 
 ---
 
-# 91. SEGMENTAÇÃO
+# 80. EVENTOS E CONTEÚDO
 
-Segmentos operacionais possíveis:
+Registrar no CRM:
+
+- inscrição;
+- presença;
+- engajamento;
+- conteúdo acessado.
+
+Usar para relacionamento, não para recomendação automatizada imprópria.
+
+---
+
+# 81. SEGMENTAÇÃO
+
+Segmentos:
 
 - lead;
-- prospect qualificado;
+- prospect;
 - cliente novo;
-- cliente ativo;
-- high net worth;
+- ativo;
+- private/HNW;
 - família;
 - PJ;
 - consentimento pendente;
 - suitability vencendo;
-- sem contato recente;
-- risco de churn.
+- sem contato;
+- churn risk.
 
 ---
 
-# 92. PLANOS / NÍVEIS DE SERVIÇO CSI
+# 82. PLANOS / NÍVEIS DE SERVIÇO
 
-Se a CSI comercializar planos de relacionamento, modelar de forma parametrizável.
+Se a CSI comercializar níveis de relacionamento, modelar como configuração.
 
-Possíveis diferenciações, somente após definição comercial/regulatória:
+Possíveis conceitos:
 
 - digital;
 - acompanhamento dedicado;
 - wealth/private;
-- family/empresarial.
+- família/empresarial.
 
-Não copiar nomenclatura de concorrentes.
+Não copiar nomes de concorrentes.
 
-Exibir claramente o que cada nível inclui, preço/fee quando houver, SLA, frequência de reunião e canais.
-
----
-
-# 93. CONTRATOS
-
-Contrato deve refletir exatamente o papel regulatório, escopo, remuneração, conflitos, responsabilidades, tratamento de dados e encerramento.
-
-Revisão jurídica obrigatória antes do go-live.
+Explicar escopo, preço/fee, SLA, frequência de reunião e canais.
 
 ---
 
-# 94. PORTABILIDADE / SAÍDA
+# 83. CANCELAMENTO / SAÍDA
 
-Criar processo de saída respeitoso:
+Fluxo:
 
-- solicitação;
-- motivo;
-- contato humano;
-- documentos;
-- status;
-- encerramento;
-- retenção de registros obrigatórios.
+**solicitação → motivo → contato humano → documentos → status → encerramento → retenção obrigatória de registros.**
 
-Nunca usar dark pattern.
+Sem dark patterns.
 
 ---
 
-# 95. TESTE — LEAD
+# 84. ALERTAS AO CLIENTE
 
-Simular:
+- consentimento expirando;
+- suitability vencendo;
+- vencimento de ativo;
+- documento pendente;
+- relatório disponível;
+- reunião;
+- sincronização com problema.
+
+---
+
+# 85. ALERTAS INTERNOS
+
+- KYC pendente;
+- cliente sem contato;
+- suitability vencido;
+- concentração relevante;
+- consentimento expirado;
+- reconciliação falhou;
+- integração fora;
+- pedido de saída;
+- ticket crítico.
+
+---
+
+# 86. CENTRAL DE PENDÊNCIAS
+
+Fila **PRECISA DE ATENÇÃO** com dono, prioridade, SLA, cliente, categoria, prazo e histórico.
+
+---
+
+# 87. TESTE — LEAD
 
 **origem → landing → cadastro → CRM → agenda → reunião → qualificação.**
 
 ---
 
-# 96. TESTE — ONBOARDING
+# 88. TESTE — ONBOARDING
 
-**cliente → KYC → suitability → consentimento → conexão → carteira global → objetivos → primeira reunião.**
+**cliente → KYC → suitability → consentimento → conexão → carteira → objetivos → reunião.**
 
 ---
 
-# 97. TESTE — CARTEIRA
+# 89. TESTE — CARTEIRA MULTI-INSTITUIÇÃO
 
-Conectar duas instituições e validar:
+Conectar duas instituições/fixtures oficiais e validar:
 
 - ativos;
-- saldos;
-- classes;
-- moedas;
-- distribuição;
+- saldo;
+- classe;
+- moeda;
 - duplicidade;
-- atualização.
+- atualização;
+- origem.
 
 ---
 
-# 98. TESTE — RENTABILIDADE
+# 90. TESTE — RENTABILIDADE
 
-Validar com fixtures controladas:
+Fixtures controladas:
 
 - aporte;
 - retirada;
@@ -1476,61 +1422,70 @@ Validar com fixtures controladas:
 - rendimento;
 - benchmark.
 
-Comparar cálculo com valores conhecidos.
+Comparar com resultados matematicamente conhecidos.
 
 ---
 
-# 99. TESTE — SUITABILITY
+# 91. TESTE — SUITABILITY
 
-Perfil válido, vencido, incompleto e alterado.
+Testar:
 
-Bloquear ações incompatíveis conforme modo regulatório.
+- válido;
+- vencido;
+- incompleto;
+- alterado.
 
----
-
-# 100. TESTE — CONSENTIMENTO
-
-Ativo, expirando, expirado, revogado e falha de sincronização.
-
----
-
-# 101. TESTE — PERMISSÕES
-
-Cliente A tenta Cliente B → NEGADO.  
-Assessor A tenta cliente não atribuído → NEGADO.  
-Financeiro tenta documento de suitability sem necessidade → NEGADO.  
-Compliance tenta alterar performance → NEGADO.  
-Master audita conforme regra → PERMITIDO/AUDITADO.
+Bloquear ações incompatíveis quando aplicável.
 
 ---
 
-# 102. TESTE — IA
+# 92. TESTE — CONSENTIMENTO
+
+- ativo;
+- expirando;
+- expirado;
+- revogado;
+- erro de sincronização.
+
+---
+
+# 93. TESTE — INVESTITO
 
 Perguntas:
 
-- “Quanto tenho investido?”
-- “Qual foi minha rentabilidade no ano?”
-- “Quanto está líquido?”
-- “Quando vence meu CDB?”
-- “Minha carteira está atualizada?”
-- “Quero agendar uma reunião.”
+“Quanto tenho investido?”  
+“Qual minha rentabilidade no ano?”  
+“Quanto está líquido?”  
+“Quando vence meu CDB?”  
+“Minha carteira está atualizada?”  
+“Quero marcar uma reunião.”
 
-Responder somente com fonte real e timestamp.
+Todas devem consultar fonte real.
 
-Pergunta:
+Pergunta regulatória:
 
-- “Qual ação devo comprar hoje?”
+“Qual ação devo comprar hoje?”
 
-Comportamento deve respeitar regulatory_mode e nunca improvisar recomendação.
+INVESTITO deve respeitar regulatory_mode e nunca improvisar.
 
 ---
 
-# 103. TESTES DE EXCEÇÃO
+# 94. TESTE — PERMISSÕES
+
+Cliente A → Cliente B = NEGADO.  
+Assessor A → cliente não atribuído = NEGADO.  
+Financeiro → suitability sem necessidade = NEGADO.  
+Compliance → alteração de performance = NEGADO.  
+Master → acesso conforme política = PERMITIDO/AUDITADO.
+
+---
+
+# 95. TESTE — EXCEÇÕES
 
 Simular:
 
-- Open Finance fora do ar;
-- B3/provider atrasado;
+- Open Finance fora;
+- provider B3 atrasado;
 - webhook duplicado;
 - ativo desconhecido;
 - preço ausente;
@@ -1542,22 +1497,23 @@ Simular:
 
 ---
 
-# 104. ZERO MOCK
+# 96. ZERO MOCK
 
-Produção não pode mostrar patrimônio, rentabilidade, AUM ou cotação fictícios.
+Produção não pode mostrar patrimônio, rentabilidade, AUM, cotação, cliente ou benchmark fictícios.
 
-Demo apenas em ambiente explicitamente marcado.
+Demo somente em ambiente explicitamente marcado como demonstração.
 
 ---
 
-# 105. PROIBIÇÕES
+# 97. PROIBIÇÕES
 
 Não considerar pronto:
 
 - carteira estática;
-- gráfico com número inventado;
+- gráfico inventado;
 - cotação sem fonte;
-- recomendação por IA não autorizada;
+- INVESTITO respondendo por imaginação;
+- recomendação não autorizada;
 - integração apenas desenhada;
 - compliance sem backend;
 - botão sem ação;
@@ -1566,68 +1522,67 @@ Não considerar pronto:
 
 ---
 
-# 106. PUBLICAÇÃO
+# 98. PUBLICAÇÃO FUTURA
 
-Após execução futura:
+Após implementação pelo Cauã:
 
-**commit → `reengineering/program` → testes/gates → fluxo de engenharia aprovado → deploy → domínio real → prova de funcionamento.**
+**commit → `reengineering/program` → testes/gates → fluxo de engenharia aprovado → deploy → domínio/subdomínio real → prova de funcionamento.**
 
-`product-intake/*` permanece exclusivamente em `reengineering/program`.
+O diretório `product-intake/*` permanece exclusivamente em `reengineering/program`.
 
 ---
 
-# 107. CRITÉRIO DE GO-LIVE
+# 99. CRITÉRIO DE GO-LIVE
 
-Somente liberar com:
+Somente liberar quando:
 
 - regulatory_mode validado;
-- KYC = PASS;
-- suitability = PASS;
-- RBAC/RLS = PASS;
-- integrações = PASS;
-- reconciliação = PASS;
-- carteira = PASS;
-- cálculos = PASS;
-- CRM = PASS;
-- jornadas = PASS;
-- agente = PASS;
-- segurança = PASS;
-- publicação = PASS;
+- KYC PASS;
+- suitability PASS;
+- RBAC/RLS PASS;
+- integrações PASS;
+- reconciliação PASS;
+- carteira PASS;
+- cálculos PASS;
+- CRM PASS;
+- jornadas PASS;
+- INVESTITO PASS;
+- segurança PASS;
+- publicação PASS;
 - P0 = zero;
 - P1 impeditivo = zero.
 
 ---
 
-# 108. ACEITE POR PERSONA
+# 100. ACEITE FINAL POR PERSONA
 
-Investidor: “Consigo entender meu patrimônio e meus próximos passos sem ficar perdido?”
+**Investidor:** consigo enxergar e compreender meu patrimônio?  
+**Assessor/consultor:** consigo saber quem precisa de mim e por quê?  
+**Compliance:** consigo provar o que foi feito, por quem, com qual perfil e consentimento?  
+**Gestor CSI:** consigo visualizar crescimento, AUM, conversão, risco operacional e qualidade do atendimento?  
+**Master Impulsionando:** consigo administrar o tenant sem romper segurança, isolamento ou Core?  
+**INVESTITO:** consigo responder somente com dados reais e dentro do escopo regulatório?
 
-Assessor/consultor: “Consigo saber quem precisa de mim hoje e por quê?”
-
-Compliance: “Consigo provar quem fez o quê, com qual perfil, documento e consentimento?”
-
-Gestor CSI: “Consigo ver crescimento, AUM, conversão, risco operacional e qualidade da carteira de clientes?”
-
-Master Impulsionando: “Consigo operar o tenant sem quebrar isolamento, segurança ou Core?”
-
-Se qualquer resposta for NÃO, o módulo permanece aberto.
+Se alguma resposta for “não”, o módulo continua aberto.
 
 ---
 
-# 109. RESULTADO FINAL ESPERADO
+# 101. RESULTADO FINAL ESPERADO
 
-A experiência ideal deve funcionar assim:
+A arquitetura ideal:
 
-**CAPTAÇÃO → CRM → KYC → SUITABILITY → CONSENTIMENTOS → OPEN FINANCE/B3/APIs → CARTEIRA GLOBAL → OBJETIVOS → RELACIONAMENTO HUMANO + AGENTE CSI/IMPULSIONITO → RELATÓRIOS → RETENÇÃO → BI + COMPLIANCE.**
+**CAPTAÇÃO → CRM → KYC → SUITABILITY → CONSENTIMENTOS → OPEN FINANCE/B3/APIs → CARTEIRA GLOBAL → OBJETIVOS → INVESTITO + EQUIPE CSI → RELATÓRIOS → RELACIONAMENTO → RETENÇÃO → BI + COMPLIANCE.**
 
-O investidor deve sentir:
+O cliente deve sentir:
 
 **“Eu consigo enxergar meu patrimônio, entender o que está acontecendo e tenho acompanhamento confiável.”**
 
-A CSI deve operar com visão 360º, sem planilhas paralelas como fonte principal e sem prometer capacidades regulatórias que não possua.
+A CSI deve operar com visão 360º, sem planilhas paralelas como fonte principal, sem dados fictícios e sem prometer capacidades regulatórias que não possua.
 
 ---
 
-**STATUS:** PRODUCT INTAKE SALVO PARA EXECUÇÃO FUTURA.  
-**EXECUTOR FUTURO:** CAUÃ / PROGRAMADOR.  
+**STATUS:** PRODUCT INTAKE RECOMPILADO E SALVO.  
+**BRANCH:** `reengineering/program`  
+**AGENTE OFICIAL:** INVESTITO  
+**EXECUTOR FUTURO:** CAUÃ / PROGRAMADOR  
 **NÃO EXECUTAR AUTOMATICAMENTE A PARTIR DESTE DOCUMENTO.**
