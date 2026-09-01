@@ -8,7 +8,7 @@ import IrisDock from "@/components/colors/IrisDock";
  */
 export const Route = createFileRoute("/colors")({
   head: () => ({
-    meta: [{ property: "og:site_name", content: "Colors Saúde" }],
+    meta: [{ property: "og:site_name", content: "Color Saúde" }],
   }),
   component: ColorsLayout,
 });
