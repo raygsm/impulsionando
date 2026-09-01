@@ -28,16 +28,17 @@ export async function dispatchN8nByEvent(
   tenant_slug = "impulsionando",
 ): Promise<{ ok: boolean; skipped?: boolean; status?: number; error?: string; workflow_slug?: string }> {
   const normalizedSlug = normalizeWorkflowSlug(event_code, tenant_slug);
+  const tenantDbSlug = tenant_slug === "colors-saude" ? "colorssaude" : tenant_slug;
 
   const { data: tenant, error: tenantError } = await supabaseAdmin
     .from("communication_tenants" as never)
     .select("id" as never)
-    .eq("slug" as never, tenant_slug)
+    .eq("slug" as never, tenantDbSlug)
     .eq("active" as never, true)
     .limit(1)
     .maybeSingle();
   if (tenantError) return { ok: false, error: tenantError.message, workflow_slug: normalizedSlug };
-  if (!tenant) return { ok: false, error: `tenant_not_found:${tenant_slug}`, workflow_slug: normalizedSlug };
+  if (!tenant) return { ok: false, error: `tenant_not_found:${tenantDbSlug}`, workflow_slug: normalizedSlug };
 
   let registry: any = null;
   const { data: exact, error: exactError } = await supabaseAdmin
