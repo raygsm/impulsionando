@@ -1,0 +1,13 @@
+-- CHRISMED physical-resource and Pega-Agenda foundation.
+create table if not exists public.chrismed_physical_resources (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null, slug text not null, name text not null, resource_type text not null default 'office', address jsonb not null default '{}'::jsonb, active boolean not null default true, metadata jsonb not null default '{}'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique(company_id,slug));
+create table if not exists public.chrismed_resource_windows (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null, resource_id uuid not null references public.chrismed_physical_resources(id) on delete cascade, owner_professional_id uuid references public.agenda_professionals(id) on delete set null, starts_at timestamptz not null, ends_at timestamptz not null, status text not null default 'owned', release_scope jsonb not null default '{}'::jsonb, created_by uuid, created_at timestamptz not null default now(), updated_at timestamptz not null default now(), check(ends_at>starts_at), check(status in ('owned','released','assigned','cancelled')));
+create table if not exists public.chrismed_resource_assignments (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null, window_id uuid not null references public.chrismed_resource_windows(id) on delete cascade, professional_id uuid not null references public.agenda_professionals(id) on delete cascade, accepted_at timestamptz not null default now(), term_version text not null, term_hash text not null, consent_audit jsonb not null default '{}'::jsonb, status text not null default 'active', created_at timestamptz not null default now(), unique(window_id), check(status in ('active','cancelled','completed')));
+create index if not exists idx_chrismed_resource_windows_resource_time on public.chrismed_resource_windows(resource_id,starts_at,ends_at) where status<>'cancelled';
+create index if not exists idx_chrismed_resource_assignments_professional on public.chrismed_resource_assignments(professional_id,status);
+alter table public.chrismed_appointments add column if not exists resource_id uuid references public.chrismed_physical_resources(id) on delete set null;
+insert into public.chrismed_physical_resources(company_id,slug,name,resource_type,address,metadata)
+values ('642096b5-a9ff-4521-a82a-c004f6d2e2d2'::uuid,'copacabana-consultorio','Consultório CHRISMED — Copacabana','office','{"city":"Rio de Janeiro","state":"RJ","neighborhood":"Copacabana"}'::jsonb,'{"pega_agenda":true}'::jsonb)
+on conflict(company_id,slug) do update set active=true,metadata=excluded.metadata,updated_at=now();
