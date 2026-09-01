@@ -1,0 +1,71 @@
+name: Reengineering staging observability
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: reengineering-staging-observability
+  cancel-in-progress: true
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check staging surfaces
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_http() {
+            local name="$1"
+            local url="$2"
+            local expected="$3"
+            local body
+            body="$(mktemp)"
+            code="$(curl --silent --show-error --location \
+              --connect-timeout 5 --max-time 15 \
+              --output "$body" --write-out '%{http_code}' "$url")"
+
+            echo "$name http=$code url=$url"
+            if [ "$code" != "200" ]; then
+              echo "FAIL: $name returned HTTP $code" >&2
+              cat "$body" >&2 || true
+              return 1
+            fi
+
+            if ! grep -Fq "$expected" "$body"; then
+              echo "FAIL: $name response does not contain required marker: $expected" >&2
+              cat "$body" >&2 || true
+              return 1
+            fi
+          }
+
+          check_http "staging-web" "https://stg.impulsionando.com.br" "impulsionando-reengineering-placeholder"
+          check_http "staging-api-health" "https://api.stg.impulsionando.com.br/health" '"ok":true'
+          check_http "staging-api-readiness" "https://api.stg.impulsionando.com.br/health/ready" '"ready":true'
+
+      - name: Open or update incident issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="[OBS] Reengineering staging unhealthy"
+          existing="$(gh issue list --repo "$REPO" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          body="Automated staging observability gate failed.\n\nRun: $RUN_URL\nChecked: stg.impulsionando.com.br, API /health, API /health/ready.\n\nThis issue is an operational alert; investigate before promotion."
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "$body"
+          else
+            gh issue create --repo "$REPO" --title "$title" --body "$body"
+          fi
