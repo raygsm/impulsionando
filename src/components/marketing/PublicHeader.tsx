@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, MessageCircle, LogIn, ShieldCheck, LockKeyhole } from "lucide-react";
+import { Menu, MessageCircle, LogIn, ShieldCheck, LockKeyhole, Crown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/demo", label: "Demonstrações" },
   { to: "/apresentacao", label: "Apresentação" },
   { to: "/vitrine", label: "Vitrine" },
+  { to: "/clube", label: "Clube Impulsionando" },
   { to: "/planos", label: "Planos" },
 ] as const;
 
@@ -23,7 +24,9 @@ function isActive(pathname: string, to: string) {
 }
 
 function navAriaLabel(item: (typeof NAV)[number]) {
-  return item.to === "/nichos" ? `${item.label} — ${PUBLIC_NICHE_COUNT} setores disponíveis` : item.label;
+  if (item.to === "/nichos") return `${item.label} — ${PUBLIC_NICHE_COUNT} setores disponíveis`;
+  if (item.to === "/clube") return "Clube Impulsionando — benefícios, 10% de desconto, vitrine e estoque próximo";
+  return item.label;
 }
 
 function openImpulsionito() {
@@ -49,6 +52,9 @@ export function PublicHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-2 lg:flex">
+          <Button asChild variant="outline" size="sm" className="border-primary/40">
+            <Link to="/clube"><Crown className="mr-2 h-4 w-4" />Clube</Link>
+          </Button>
           <Button asChild variant="ghost" size="sm">
             <Link to="/seguranca"><ShieldCheck className="mr-2 h-4 w-4" />Segurança e Privacidade</Link>
           </Button>
@@ -70,6 +76,7 @@ export function PublicHeader() {
               <div className="mb-6"><LogoImpulsionando variant="light" size="lg" /></div>
               <nav className="flex flex-col gap-1" aria-label="Navegação mobile">
                 {NAV.map((item) => <Link key={item.to} to={item.to} aria-label={navAriaLabel(item)} onClick={() => setOpen(false)} className={cn("rounded-lg px-3 py-3 text-sm font-semibold transition-colors", isActive(pathname, item.to) ? "bg-primary/10 text-primary" : "hover:bg-accent")}>{item.label}</Link>)}
+                <Link to="/clube/minha-conta" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Já sou assinante do Clube</Link>
                 <Link to="/seguranca" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Segurança e Privacidade</Link>
                 <Link to="/cp" onClick={() => setOpen(false)} className="my-1 flex items-center rounded-xl bg-slate-950 px-3 py-3 text-sm font-bold text-white"><span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-400"/><LockKeyhole className="mr-2 h-4 w-4"/>Chat Privado | Segurança e Privacidade</Link>
                 <Link to="/auth" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent">Entrar no Core</Link>
