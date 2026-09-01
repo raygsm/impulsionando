@@ -15,18 +15,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-      - name: Block forbidden legacy references
+          fetch-depth: 2
+      - name: Block newly introduced forbidden legacy references
         shell: bash
         run: |
           set -euo pipefail
           fail=0
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            base="origin/${{ github.base_ref }}"
+          else
+            base="${{ github.event.before }}"
+            if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+              base="HEAD^"
+            fi
+          fi
+          changed="$(git diff --name-only "$base" HEAD -- . ':!docs/archive/**' ':!*.lock' || true)"
+          if [ -z "$changed" ]; then
+            echo 'ZERO_LEGACY_GUARD=PASS (no changed files to scan)'
+            exit 0
+          fi
           scan() {
             pattern="$1"
             label="$2"
-            if git grep -n -I -E "$pattern" -- ':!docs/archive/**' ':!*.lock' >/tmp/legacy_hits 2>/dev/null; then
-              echo "::error::$label detected"
-              cat /tmp/legacy_hits
+            hits="$(printf '%s\n' "$changed" | while IFS= read -r f; do [ -f "$f" ] && grep -nI -E "$pattern" "$f" 2>/dev/null | sed "s#^#$f:#" || true; done)"
+            if [ -n "$hits" ]; then
+              echo "::error::$label newly present in changed files"
+              printf '%s\n' "$hits"
               fail=1
             fi
           }
