@@ -1,5 +1,5 @@
 /**
- * Analytics client-side para o site Colors Saúde (FRONT-END).
+ * Analytics client-side para o site Color Saúde (FRONT-END).
  * Usa o wrapper unificado GA4 do core (`src/lib/analytics.ts`), que respeita
  * Consent Mode v2 e é inicializado no root. Nenhum backend envolvido.
  *
@@ -41,7 +41,7 @@ function currentPath(): string {
 function extractUtmFromHref(href: unknown): Record<string, string> {
   if (typeof href !== "string") return {};
   try {
-    const u = new URL(href, typeof window !== "undefined" ? window.location.origin : "https://colors.impulsionando.com.br");
+    const u = new URL(href, typeof window !== "undefined" ? window.location.origin : "https://colorssaude.impulsionando.com.br");
     return {
       utm_source: u.searchParams.get("utm_source") ?? "",
       utm_medium: u.searchParams.get("utm_medium") ?? "",
@@ -111,7 +111,6 @@ export function readColorsEventBuffer(): LocalEvent[] {
   try {
     const raw = window.localStorage.getItem(BUFFER_KEY);
     const list = raw ? (JSON.parse(raw) as LocalEvent[]) : [];
-    // Retrocompat: eventos antigos sem session_id/visitor_id.
     return list.map((e) => ({
       ...e,
       session_id: e.session_id ?? "legacy",
@@ -149,13 +148,9 @@ export const colorsEvents = {
     track("lead_submit", { source }),
 };
 
-// Compat: componentes antigos podem chamar ensureGaInstalled(); agora é no-op
-// porque a inicialização acontece no root via initAnalytics().
 export function ensureGaInstalled() {
   /* no-op: unified via src/lib/analytics.ts (initAnalytics in root) */
 }
-
-/* ----------------------- CSV export utilities ----------------------- */
 
 const CSV_COLUMNS = [
   "ts",
@@ -188,7 +183,7 @@ function csvCell(v: unknown): string {
 function extractUtm(href: unknown): Record<string, string> {
   if (typeof href !== "string") return {};
   try {
-    const u = new URL(href, "https://colors.impulsionando.com.br");
+    const u = new URL(href, "https://colorssaude.impulsionando.com.br");
     return {
       utm_source: u.searchParams.get("utm_source") ?? "",
       utm_medium: u.searchParams.get("utm_medium") ?? "",
