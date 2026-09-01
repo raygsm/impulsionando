@@ -52,11 +52,21 @@ jobs:
           curl -fsS -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" "$SUPABASE_URL/rest/v1/core_tenant_identity?select=subdomain,root_domain&order=subdomain.asc" -o /tmp/tenants.json
           jq -r '.[] | select(.subdomain != null and .root_domain == "impulsionando.com.br" and .subdomain != "impulsionando" and (.subdomain | startswith("e2e-") | not) and (.subdomain | startswith("rls-") | not)) | (.subdomain + ".impulsionando.com.br")' /tmp/tenants.json | sort -u > /tmp/domains.txt
           test -s /tmp/domains.txt
-      - name: Build both candidates before touching production
+      - name: Build current main; fallback only if needed
         run: |
           set -uo pipefail
           build_candidate() { label="$1"; sha="$2"; dir="$3"; cd "$GITHUB_WORKSPACE/$dir" || return 1; test "$(git rev-parse HEAD)" = "$sha" || return 1; npm ci --no-audit --no-fund || return 1; npx --yes vitest run src/lib/subdomain.test.ts src/lib/release-marker.test.ts || return 1; npm run build || return 1; test -f .output/server/index.mjs || return 1; test -f scripts/start-core-runtime.mjs || return 1; printf '%s' "$sha" > .output/public/impulsionando-front-sha.txt; printf '{"sha":"%s","recovery":"%s","built_at":"%s"}\n' "$sha" "$label" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > .output/public/impulsionando-release.json; tar -czf "/tmp/$label.tgz" .output scripts package.json package-lock.json; sha256sum "/tmp/$label.tgz" > "/tmp/$label.sha256"; }
-          primary_ok=0; fallback_ok=0; build_candidate primary "$PRIMARY_SHA" primary && primary_ok=1; build_candidate fallback "$FALLBACK_SHA" fallback && fallback_ok=1; printf 'PRIMARY_BUILD_OK=%s\nFALLBACK_BUILD_OK=%s\n' "$primary_ok" "$fallback_ok" > /tmp/build.env; [ "$primary_ok" -eq 1 ] || [ "$fallback_ok" -eq 1 ] || exit 20
+          primary_ok=0
+          fallback_ok=0
+          if build_candidate primary "$PRIMARY_SHA" primary; then
+            primary_ok=1
+            echo 'PRIMARY_BUILD=PASS; fallback build skipped'
+          else
+            echo '::warning::PRIMARY_BUILD=FAIL; building known-good fallback'
+            build_candidate fallback "$FALLBACK_SHA" fallback && fallback_ok=1
+          fi
+          printf 'PRIMARY_BUILD_OK=%s\nFALLBACK_BUILD_OK=%s\n' "$primary_ok" "$fallback_ok" > /tmp/build.env
+          [ "$primary_ok" -eq 1 ] || [ "$fallback_ok" -eq 1 ] || exit 20
       - name: Upload available immutable candidates
         run: |
           set -euo pipefail; . /tmp/build.env; install -m 700 -d ~/.ssh; printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519; chmod 600 ~/.ssh/id_ed25519; ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null; test -s ~/.ssh/known_hosts; files=(); [ "$PRIMARY_BUILD_OK" = 1 ] && files+=(/tmp/primary.tgz /tmp/primary.sha256); [ "$FALLBACK_BUILD_OK" = 1 ] && files+=(/tmp/fallback.tgz /tmp/fallback.sha256); scp "${files[@]}" "$VPS_USER@$VPS_HOST:/tmp/"
