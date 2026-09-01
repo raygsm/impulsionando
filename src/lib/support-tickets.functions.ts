@@ -1,255 +1,39 @@
 // Suporte / Tickets — server functions ponta-a-ponta.
-// RLS faz o gating; aqui só validação, derivação de contexto e ações privilegiadas.
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { withInstrumentation } from './instrumentation'
 
-const TYPES = [
-  'financial','payment','payout','commission','contract','access','technical',
-  'whatsapp','email','mercadopago','dashboard','permission','registration',
-  'marketplace','clube','consumer','lgpd','suggestion','question','commercial','other',
-] as const
-const PRIORITIES = ['low','medium','high','critical'] as const
-const STATUSES = [
-  'new','received','in_review','waiting_customer','waiting_core',
-  'waiting_third_party','in_development','resolved','closed','reopened','cancelled',
-] as const
+const TYPES=['financial','payment','payout','commission','contract','access','technical','whatsapp','email','mercadopago','dashboard','permission','registration','marketplace','clube','consumer','lgpd','suggestion','question','commercial','other'] as const
+const PRIORITIES=['low','medium','high','critical'] as const
+const STATUSES=['new','received','in_review','waiting_customer','waiting_core','waiting_third_party','in_development','resolved','closed','reopened','cancelled'] as const
+const REQUEST_KINDS=['support','emergency','improvement'] as const
 
-const slaHoursFor = (p: typeof PRIORITIES[number]): number =>
-  ({ low: 72, medium: 24, high: 8, critical: 2 }[p])
+function addBusinessHours(start:Date,hours:number){let cursor=new Date(start);let remaining=Math.max(0,hours);while(remaining>0){cursor=new Date(cursor.getTime()+3600_000);const day=cursor.getDay();if(day!==0&&day!==6)remaining--}return cursor}
+function slaHoursFor(priority:typeof PRIORITIES[number]){return({low:72,medium:24,high:24,critical:24}[priority])}
+function requestSlaHours(kind:typeof REQUEST_KINDS[number]){return kind==='improvement'?72:24}
 
-/** Cria ticket. Auto-detecta scope (empresa membro OU consumidor). */
-export const createTicket = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    subject: string; description: string;
-    type?: typeof TYPES[number]; priority?: typeof PRIORITIES[number];
-    company_id?: string;
-  }) =>
-    z.object({
-      subject: z.string().trim().min(3).max(200),
-      description: z.string().trim().min(5).max(8000),
-      type: z.enum(TYPES).optional(),
-      priority: z.enum(PRIORITIES).optional(),
-      company_id: z.string().uuid().optional(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) =>
-    withInstrumentation('support.createTicket', { user_id: context.userId }, async () => {
-      const priority = data.priority ?? 'medium'
-      const slaDue = new Date(Date.now() + slaHoursFor(priority) * 3600_000).toISOString()
+async function resolveCompany(context:any,explicit?:string){if(explicit)return explicit;const{data:prof}=await context.supabase.from('user_profiles').select('company_id').eq('user_id',context.userId).maybeSingle();return prof?.company_id??null}
+async function insertTicket(context:any,input:{subject:string;description:string;type?:typeof TYPES[number];priority?:typeof PRIORITIES[number];company_id?:string|null;origin?:string;metadata?:Record<string,unknown>;slaHours?:number}){const priority=input.priority??'medium';const companyId=input.company_id===undefined?await resolveCompany(context):input.company_id;const isConsumer=!companyId;const{data:userInfo}=await context.supabase.auth.getUser();const slaDue=addBusinessHours(new Date(),input.slaHours??slaHoursFor(priority)).toISOString();const{data:row,error}=await context.supabase.from('support_tickets').insert({company_id:companyId,consumer_user_id:isConsumer?context.userId:null,requester_user_id:context.userId,requester_email:userInfo.user?.email??null,subject:input.subject,description:input.description,type:input.type??'question',priority,status:'new',origin:input.origin??'form',sla_due_at:slaDue,metadata:input.metadata??{}}).select('id,protocol,sla_due_at').single();if(error)throw error;return row}
 
-      // Determina se é consumidor (sem empresa) ou cliente (membro de companies)
-      let companyId = data.company_id ?? null
-      if (!companyId) {
-        const { data: prof } = await context.supabase
-          .from('user_profiles').select('company_id').eq('user_id', context.userId).maybeSingle()
-        companyId = prof?.company_id ?? null
-      }
-      const isConsumer = !companyId
+export const createTicket=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{subject:string;description:string;type?:typeof TYPES[number];priority?:typeof PRIORITIES[number];company_id?:string})=>z.object({subject:z.string().trim().min(3).max(200),description:z.string().trim().min(5).max(8000),type:z.enum(TYPES).optional(),priority:z.enum(PRIORITIES).optional(),company_id:z.string().uuid().optional()}).parse(d)).handler(async({data,context})=>withInstrumentation('support.createTicket',{user_id:context.userId},()=>insertTicket(context,data)))
 
-      const { data: userInfo } = await context.supabase.auth.getUser()
-      const email = userInfo.user?.email ?? null
+export const createRequestIntake=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{raw_request:string;request_kind:typeof REQUEST_KINDS[number];company_id?:string;source?:'impulsionito'|'form'|'voice'|'manual';consolidated_title?:string;consolidated_summary?:string})=>z.object({raw_request:z.string().trim().min(5).max(12000),request_kind:z.enum(REQUEST_KINDS),company_id:z.string().uuid().optional(),source:z.enum(['impulsionito','form','voice','manual']).default('impulsionito'),consolidated_title:z.string().trim().min(3).max(200).optional(),consolidated_summary:z.string().trim().min(5).max(8000).optional()}).parse(d)).handler(async({data,context})=>{const companyId=await resolveCompany(context,data.company_id);const ready=!!(data.consolidated_title&&data.consolidated_summary);const{data:row,error}=await context.supabase.from('support_request_intakes').insert({company_id:companyId,requester_user_id:context.userId,source:data.source,request_kind:data.request_kind,raw_request:data.raw_request,consolidated_title:data.consolidated_title??null,consolidated_summary:data.consolidated_summary??null,acceptance_status:ready?'awaiting_acceptance':'draft',committee_status:data.request_kind==='improvement'?'pending':'not_applicable'}).select('id,acceptance_status,request_kind,created_at').single();if(error)throw error;return row})
 
-      const { data: row, error } = await context.supabase
-        .from('support_tickets')
-        .insert({
-          company_id: companyId,
-          consumer_user_id: isConsumer ? context.userId : null,
-          requester_user_id: context.userId,
-          requester_email: email,
-          subject: data.subject,
-          description: data.description,
-          type: data.type ?? 'question',
-          priority,
-          status: 'new',
-          origin: 'form',
-          sla_due_at: slaDue,
-        })
-        .select('id, protocol')
-        .single()
-      if (error) throw error
-      return row
-    }),
-  )
+export const updateRequestConsolidation=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{intake_id:string;title:string;summary:string})=>z.object({intake_id:z.string().uuid(),title:z.string().trim().min(3).max(200),summary:z.string().trim().min(5).max(8000)}).parse(d)).handler(async({data,context})=>{const{data:row,error}=await context.supabase.from('support_request_intakes').update({consolidated_title:data.title,consolidated_summary:data.summary,acceptance_status:'awaiting_acceptance'}).eq('id',data.intake_id).eq('requester_user_id',context.userId).in('acceptance_status',['draft','awaiting_acceptance']).select('id,acceptance_status').maybeSingle();if(error)throw error;if(!row)throw new Error('Solicitação não encontrada ou já finalizada');return row})
 
-/** Lista tickets — RLS filtra automaticamente por papel. */
-export const listTickets = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    status?: typeof STATUSES[number]; priority?: typeof PRIORITIES[number];
-    company_id?: string; limit?: number;
-  }) =>
-    z.object({
-      status: z.enum(STATUSES).optional(),
-      priority: z.enum(PRIORITIES).optional(),
-      company_id: z.string().uuid().optional(),
-      limit: z.number().int().min(1).max(500).optional(),
-    }).parse(d ?? {}),
-  )
-  .handler(async ({ data, context }) =>
-    withInstrumentation('support.listTickets', { user_id: context.userId }, async () => {
-      let q = context.supabase
-        .from('support_tickets')
-        .select('id, protocol, company_id, subject, type, priority, status, origin, assigned_to, sla_due_at, first_response_at, resolved_at, created_at, updated_at, companies:companies(name)')
-        .order('created_at', { ascending: false })
-        .limit(data.limit ?? 200)
-      if (data.status) q = q.eq('status', data.status)
-      if (data.priority) q = q.eq('priority', data.priority)
-      if (data.company_id) q = q.eq('company_id', data.company_id)
-      const { data: rows, error } = await q
-      if (error) throw error
-      return rows ?? []
-    }),
-  )
+export const acceptRequestIntake=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{intake_id:string})=>z.object({intake_id:z.string().uuid()}).parse(d)).handler(async({data,context})=>withInstrumentation('support.acceptRequestIntake',{user_id:context.userId,intake_id:data.intake_id},async()=>{const{data:intake,error}=await context.supabase.from('support_request_intakes').select('*').eq('id',data.intake_id).eq('requester_user_id',context.userId).eq('acceptance_status','awaiting_acceptance').maybeSingle();if(error)throw error;if(!intake)throw new Error('Solicitação não encontrada ou não está aguardando aceite');if(!intake.consolidated_title||!intake.consolidated_summary)throw new Error('Consolidação incompleta');const kind=intake.request_kind as typeof REQUEST_KINDS[number];const priority=kind==='emergency'?'critical':kind==='improvement'?'low':'medium';const ticket=await insertTicket(context,{subject:intake.consolidated_title,description:intake.consolidated_summary,type:kind==='improvement'?'suggestion':kind==='emergency'?'technical':'question',priority,company_id:intake.company_id,origin:'manual',slaHours:requestSlaHours(kind),metadata:{request_intake_id:intake.id,request_kind:kind,source:intake.source,accepted:true}});const committeeStatus=kind==='improvement'?'pending':'not_applicable';const{error:updateError}=await context.supabase.from('support_request_intakes').update({acceptance_status:'accepted',accepted_at:new Date().toISOString(),accepted_by:context.userId,ticket_id:ticket.id,committee_status:committeeStatus}).eq('id',intake.id);if(updateError)throw updateError;await context.supabase.from('support_ticket_messages').insert({ticket_id:ticket.id,author_user_id:context.userId,author_role:intake.company_id?'customer':'consumer',body:'Solicitação consolidada pelo Impulsionito e aceita pelo solicitante. O conteúdo validado está registrado na descrição inicial deste ticket.',is_internal:false});return{intake_id:intake.id,ticket_id:ticket.id,protocol:ticket.protocol,sla_due_at:ticket.sla_due_at,committee_status:committeeStatus}})))
 
-/** Detalhe de ticket + mensagens (RLS oculta mensagens internas para não-staff). */
-export const getTicket = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { ticket_id: string }) => z.object({ ticket_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) =>
-    withInstrumentation('support.getTicket', { user_id: context.userId, ticket_id: data.ticket_id }, async () => {
-      const { data: ticket, error } = await context.supabase
-        .from('support_tickets')
-        .select('*, companies:companies(name, niche)')
-        .eq('id', data.ticket_id)
-        .maybeSingle()
-      if (error) throw error
-      if (!ticket) throw new Error('Ticket não encontrado')
+export const listRequestIntakes=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{const{data,error}=await context.supabase.from('support_request_intakes').select('id,company_id,source,request_kind,raw_request,consolidated_title,consolidated_summary,acceptance_status,accepted_at,ticket_id,committee_status,committee_notes,created_at,updated_at').order('created_at',{ascending:false}).limit(200);if(error)throw error;return data??[]})
 
-      const { data: messages, error: mErr } = await context.supabase
-        .from('support_ticket_messages')
-        .select('id, author_user_id, author_role, body, is_internal, attachments, created_at')
-        .eq('ticket_id', data.ticket_id)
-        .order('created_at', { ascending: true })
-      if (mErr) throw mErr
+export const updateCommitteeStatus=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{intake_id:string;status:'pending'|'in_review'|'approved'|'rejected'|'scheduled'|'implemented';notes?:string})=>z.object({intake_id:z.string().uuid(),status:z.enum(['pending','in_review','approved','rejected','scheduled','implemented']),notes:z.string().max(8000).optional()}).parse(d)).handler(async({data,context})=>{const{data:isStaff}=await context.supabase.rpc('is_impulsionando_staff',{_user:context.userId});if(!isStaff)throw new Error('Forbidden: staff only');const{error}=await context.supabase.from('support_request_intakes').update({committee_status:data.status,committee_notes:data.notes??null}).eq('id',data.intake_id).eq('request_kind','improvement').eq('acceptance_status','accepted');if(error)throw error;return{ok:true}})
 
-      return { ticket, messages: messages ?? [] }
-    }),
-  )
+export const listTickets=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{status?:typeof STATUSES[number];priority?:typeof PRIORITIES[number];company_id?:string;limit?:number})=>z.object({status:z.enum(STATUSES).optional(),priority:z.enum(PRIORITIES).optional(),company_id:z.string().uuid().optional(),limit:z.number().int().min(1).max(500).optional()}).parse(d??{})).handler(async({data,context})=>{let q=context.supabase.from('support_tickets').select('id,protocol,company_id,subject,type,priority,status,origin,assigned_to,sla_due_at,first_response_at,resolved_at,created_at,updated_at,metadata,companies:companies(name)').order('created_at',{ascending:false}).limit(data.limit??200);if(data.status)q=q.eq('status',data.status);if(data.priority)q=q.eq('priority',data.priority);if(data.company_id)q=q.eq('company_id',data.company_id);const{data:rows,error}=await q;if(error)throw error;return rows??[]})
 
-/** Adiciona mensagem. is_internal só passa para staff (RLS reforça). */
-export const addTicketMessage = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { ticket_id: string; body: string; is_internal?: boolean }) =>
-    z.object({
-      ticket_id: z.string().uuid(),
-      body: z.string().trim().min(1).max(8000),
-      is_internal: z.boolean().optional(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) =>
-    withInstrumentation('support.addMessage', { user_id: context.userId, ticket_id: data.ticket_id }, async () => {
-      const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', { _user: context.userId })
-      const role: 'staff' | 'customer' | 'consumer' = isStaff
-        ? 'staff'
-        : (await (async () => {
-            const { data: prof } = await context.supabase
-              .from('user_profiles').select('company_id').eq('user_id', context.userId).maybeSingle()
-            return prof?.company_id ? 'customer' : 'consumer'
-          })())
-      const { error } = await context.supabase
-        .from('support_ticket_messages')
-        .insert({
-          ticket_id: data.ticket_id,
-          author_user_id: context.userId,
-          author_role: role,
-          body: data.body,
-          is_internal: !!(data.is_internal && isStaff),
-        })
-      if (error) throw error
-      return { ok: true }
-    }),
-  )
+export const getTicket=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{ticket_id:string})=>z.object({ticket_id:z.string().uuid()}).parse(d)).handler(async({data,context})=>{const{data:ticket,error}=await context.supabase.from('support_tickets').select('*, companies:companies(name,niche)').eq('id',data.ticket_id).maybeSingle();if(error)throw error;if(!ticket)throw new Error('Ticket não encontrado');const{data:messages,error:mErr}=await context.supabase.from('support_ticket_messages').select('id,author_user_id,author_role,body,is_internal,attachments,created_at').eq('ticket_id',data.ticket_id).order('created_at',{ascending:true});if(mErr)throw mErr;return{ticket,messages:messages??[]}})
 
-/** Muda status (staff) ou reabre/avalia (requester). */
-export const updateTicketStatus = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    ticket_id: string;
-    status?: typeof STATUSES[number];
-    assigned_to?: string | null;
-    priority?: typeof PRIORITIES[number];
-    rating?: number; rating_comment?: string;
-  }) =>
-    z.object({
-      ticket_id: z.string().uuid(),
-      status: z.enum(STATUSES).optional(),
-      assigned_to: z.string().uuid().nullable().optional(),
-      priority: z.enum(PRIORITIES).optional(),
-      rating: z.number().int().min(1).max(5).optional(),
-      rating_comment: z.string().max(2000).optional(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) =>
-    withInstrumentation('support.updateStatus', { user_id: context.userId, ticket_id: data.ticket_id }, async () => {
-      const patch: {
-        status?: typeof STATUSES[number]
-        priority?: typeof PRIORITIES[number]
-        assigned_to?: string | null
-        rating?: number
-        rating_comment?: string
-      } = {}
-      if (data.status) patch.status = data.status
-      if (data.priority) patch.priority = data.priority
-      if (data.assigned_to !== undefined) patch.assigned_to = data.assigned_to
-      if (data.rating !== undefined) patch.rating = data.rating
-      if (data.rating_comment !== undefined) patch.rating_comment = data.rating_comment
+export const addTicketMessage=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{ticket_id:string;body:string;is_internal?:boolean})=>z.object({ticket_id:z.string().uuid(),body:z.string().trim().min(1).max(8000),is_internal:z.boolean().optional()}).parse(d)).handler(async({data,context})=>{const{data:isStaff}=await context.supabase.rpc('is_impulsionando_staff',{_user:context.userId});let role:'staff'|'customer'|'consumer'='staff';if(!isStaff){const{data:prof}=await context.supabase.from('user_profiles').select('company_id').eq('user_id',context.userId).maybeSingle();role=prof?.company_id?'customer':'consumer'}const{error}=await context.supabase.from('support_ticket_messages').insert({ticket_id:data.ticket_id,author_user_id:context.userId,author_role:role,body:data.body,is_internal:!!(data.is_internal&&isStaff)});if(error)throw error;return{ok:true}})
 
-      const { error } = await context.supabase
-        .from('support_tickets')
-        .update(patch)
-        .eq('id', data.ticket_id)
-      if (error) throw error
-      return { ok: true }
-    }),
-  )
+export const updateTicketStatus=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator((d:{ticket_id:string;status?:typeof STATUSES[number];assigned_to?:string|null;priority?:typeof PRIORITIES[number];rating?:number;rating_comment?:string})=>z.object({ticket_id:z.string().uuid(),status:z.enum(STATUSES).optional(),assigned_to:z.string().uuid().nullable().optional(),priority:z.enum(PRIORITIES).optional(),rating:z.number().int().min(1).max(5).optional(),rating_comment:z.string().max(2000).optional()}).parse(d)).handler(async({data,context})=>{const patch:any={};if(data.status)patch.status=data.status;if(data.priority){patch.priority=data.priority;patch.sla_due_at=addBusinessHours(new Date(),slaHoursFor(data.priority)).toISOString()}if(data.assigned_to!==undefined)patch.assigned_to=data.assigned_to;if(data.rating!==undefined)patch.rating=data.rating;if(data.rating_comment!==undefined)patch.rating_comment=data.rating_comment;const{error}=await context.supabase.from('support_tickets').update(patch).eq('id',data.ticket_id);if(error)throw error;return{ok:true}})
 
-/** Dashboard de suporte — staff only. */
-export const supportDashboard = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) =>
-    withInstrumentation('support.dashboard', { user_id: context.userId }, async () => {
-      const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', { _user: context.userId })
-      if (!isStaff) throw new Error('Forbidden: staff only')
-
-      const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-      const since30d = new Date(Date.now() - 30 * 86400_000).toISOString()
-      const { data: rows, error } = await supabaseAdmin
-        .from('support_tickets')
-        .select('id, status, priority, type, created_at, first_response_at, resolved_at, sla_due_at, company_id')
-        .gte('created_at', since30d)
-      if (error) throw error
-      const tickets = rows ?? []
-
-      const open = tickets.filter((t) => !['resolved','closed','cancelled'].includes(t.status))
-      const overdue = open.filter((t) => t.sla_due_at && new Date(t.sla_due_at) < new Date())
-      const firstResp = tickets.filter((t) => t.first_response_at).map((t) =>
-        (new Date(t.first_response_at!).getTime() - new Date(t.created_at).getTime()) / 60000)
-      const resolveT = tickets.filter((t) => t.resolved_at).map((t) =>
-        (new Date(t.resolved_at!).getTime() - new Date(t.created_at).getTime()) / 60000)
-      const avg = (a: number[]) => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0
-
-      const byPriority: Record<string, number> = {}
-      const byType: Record<string, number> = {}
-      const byStatus: Record<string, number> = {}
-      for (const t of tickets) {
-        byPriority[t.priority] = (byPriority[t.priority] ?? 0) + 1
-        byType[t.type] = (byType[t.type] ?? 0) + 1
-        byStatus[t.status] = (byStatus[t.status] ?? 0) + 1
-      }
-
-      return {
-        totals: {
-          period_days: 30,
-          total: tickets.length,
-          open: open.length,
-          overdue: overdue.length,
-          first_response_avg_min: avg(firstResp),
-          resolve_avg_min: avg(resolveT),
-        },
-        byPriority, byType, byStatus,
-      }
-    }),
-  )
+export const supportDashboard=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).handler(async({context})=>{const{data:isStaff}=await context.supabase.rpc('is_impulsionando_staff',{_user:context.userId});if(!isStaff)throw new Error('Forbidden: staff only');const{supabaseAdmin}=await import('@/integrations/supabase/client.server');const since30d=new Date(Date.now()-30*86400_000).toISOString();const[{data:rows,error},{data:intakes,error:intakeError}]=await Promise.all([supabaseAdmin.from('support_tickets').select('id,status,priority,type,created_at,first_response_at,resolved_at,sla_due_at,company_id').gte('created_at',since30d),supabaseAdmin.from('support_request_intakes').select('id,request_kind,acceptance_status,committee_status,created_at').gte('created_at',since30d)]);if(error)throw error;if(intakeError)throw intakeError;const tickets=rows??[];const requests=intakes??[];const open=tickets.filter((t:any)=>!['resolved','closed','cancelled'].includes(t.status));const overdue=open.filter((t:any)=>t.sla_due_at&&new Date(t.sla_due_at)<new Date());const firstResp=tickets.filter((t:any)=>t.first_response_at).map((t:any)=>(new Date(t.first_response_at).getTime()-new Date(t.created_at).getTime())/60000);const resolveT=tickets.filter((t:any)=>t.resolved_at).map((t:any)=>(new Date(t.resolved_at).getTime()-new Date(t.created_at).getTime())/60000);const avg=(a:number[])=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;const byPriority:Record<string,number>={},byType:Record<string,number>={},byStatus:Record<string,number>={};for(const t of tickets as any[]){byPriority[t.priority]=(byPriority[t.priority]??0)+1;byType[t.type]=(byType[t.type]??0)+1;byStatus[t.status]=(byStatus[t.status]??0)+1}return{totals:{period_days:30,total:tickets.length,open:open.length,overdue:overdue.length,first_response_avg_min:avg(firstResp),resolve_avg_min:avg(resolveT),awaiting_customer_acceptance:requests.filter((r:any)=>r.acceptance_status==='awaiting_acceptance').length,committee_pending:requests.filter((r:any)=>r.request_kind==='improvement'&&['pending','in_review'].includes(r.committee_status)).length},byPriority,byType,byStatus}})
