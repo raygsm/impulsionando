@@ -1,4 +1,4 @@
-/** Colors — Pré-checkout modal. */
+/** Color Saúde — Pré-checkout modal. */
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { X, Loader2, ShieldCheck } from "lucide-react";
@@ -92,6 +92,7 @@ export default function PreCheckoutModal({ open, onClose, product, origin }: Pro
       }});
       const url = new URL(product.offerUrl, window.location.origin);
       const ccid = result.colorsCheckoutId;
+      sessionStorage.setItem("color_saude_checkout_id", ccid);
       url.searchParams.set("sub_id", ccid); url.searchParams.set("external_id", ccid); url.searchParams.set("ref", ccid);
       if (form.email) url.searchParams.set("email", form.email);
       if (form.whatsapp) url.searchParams.set("phone", form.whatsapp.replace(/\D/g, ""));
@@ -105,7 +106,7 @@ export default function PreCheckoutModal({ open, onClose, product, origin }: Pro
   return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
     <div className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-emerald-500/30 bg-neutral-950 p-6 text-white shadow-2xl">
       <button onClick={onClose} aria-label="Fechar" className="absolute right-4 top-4 rounded-full p-1.5 text-white/60 hover:bg-white/10 hover:text-white"><X className="h-5 w-5" /></button>
-      <div className="mb-4"><p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Colors · Pedido seguro</p><h2 className="mt-1 text-2xl font-black">Complete seus dados para continuar</h2><p className="mt-1 text-sm text-white/60">{product.name} {product.kitSize && product.kitSize > 1 ? `· kit ${product.kitSize} potes` : ""}</p></div>
+      <div className="mb-4"><p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Color Saúde · Pedido seguro</p><h2 className="mt-1 text-2xl font-black">Complete seus dados para continuar</h2><p className="mt-1 text-sm text-white/60">{product.name} {product.kitSize && product.kitSize > 1 ? `· kit ${product.kitSize} potes` : ""}</p></div>
       <form onSubmit={submit} className="space-y-3">
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
           <Field label="CEP — comece por aqui"><div className="relative"><input inputMode="numeric" value={form.cep} onChange={(e)=>setForm({...form,cep:maskCep(e.target.value),addressLine1:"",neighborhood:"",city:"",state:"",municipalityIbge:""})} className={inputCls} placeholder="00000-000" autoComplete="postal-code" />{cepBusy && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-emerald-400" />}</div></Field>
@@ -118,10 +119,10 @@ export default function PreCheckoutModal({ open, onClose, product, origin }: Pro
           <div className="grid gap-3 sm:grid-cols-2"><Field label="Município"><input value={form.city} readOnly className={inputCls} /></Field><Field label="UF"><input value={form.state} readOnly className={inputCls} /></Field></div>
           <div className="grid gap-3 sm:grid-cols-2"><Field label="Número"><input value={form.addressNumber} onChange={(e)=>setForm({...form,addressNumber:e.target.value})} className={inputCls} /></Field><Field label="Complemento"><input value={form.addressComplement} onChange={(e)=>setForm({...form,addressComplement:e.target.value})} className={inputCls} /></Field></div>
         </>}
-        <label className="flex items-start gap-2 pt-1 text-xs text-white/70"><input type="checkbox" checked={form.consentLgpd} onChange={(e)=>setForm({...form,consentLgpd:e.target.checked})} className="mt-0.5 h-4 w-4 accent-emerald-500" required /><span>Autorizo a Colors a usar meus dados para concluir esta compra e me contatar sobre o pedido, conforme a Política de Privacidade (LGPD).</span></label>
+        <label className="flex items-start gap-2 pt-1 text-xs text-white/70"><input type="checkbox" checked={form.consentLgpd} onChange={(e)=>setForm({...form,consentLgpd:e.target.checked})} className="mt-0.5 h-4 w-4 accent-emerald-500" required /><span>Autorizo a Color Saúde a usar meus dados para concluir esta compra e me contatar sobre o pedido, conforme a Política de Privacidade (LGPD).</span></label>
         {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert">{error}</p>}
         <button type="submit" disabled={loading||cepBusy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-lime-400 px-6 py-3.5 text-base font-black text-black shadow-xl transition hover:scale-[1.01] disabled:opacity-60">{loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}{loading ? "Salvando seu pedido…" : "Continuar para o pagamento"}</button>
-        <p className="text-center text-[11px] text-white/50">Você será direcionado para o ambiente seguro de pagamento. Seus dados de cartão nunca são armazenados pela Colors.</p>
+        <p className="text-center text-[11px] text-white/50">Você será direcionado para o ambiente seguro de pagamento. Seus dados de cartão nunca são armazenados pela Color Saúde.</p>
       </form>
     </div>
   </div>;
