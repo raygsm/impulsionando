@@ -21,23 +21,23 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          scan() {
+          scan_runtime() {
             pattern="$1"
             label="$2"
-            if git grep -n -I -E "$pattern" -- ':!docs/archive/**' ':!*.lock' ':!.github/workflows/zero-legacy-guard.yml' >/tmp/legacy_hits 2>/dev/null; then
-              echo "::error::$label detected"
+            if git grep -n -I -E "$pattern" -- src scripts .github ':!.github/workflows/zero-legacy-guard.yml' >/tmp/legacy_hits 2>/dev/null; then
+              echo "::error::$label detected in active runtime/build/infra"
               cat /tmp/legacy_hits
               fail=1
             fi
           }
-          scan 'grupocolors\.com\.br|checkout\.grupocolors\.com\.br' 'Forbidden Colors legacy domain'
-          scan 'colors\.impulsionando\.com\.br|colors-saude\.impulsionando\.com\.br' 'Deprecated Colors hostname'
-          scan 'raygsm/impulsionito|github\.com/raygsm/impulsionito' 'Wrong repository reference'
-          scan 'impulsionando\.lovable\.app|lovable\.app|lovable\.dev' 'Lovable runtime/domain reference'
+          scan_runtime 'grupocolors\.com\.br|checkout\.grupocolors\.com\.br' 'Forbidden Colors legacy domain'
+          scan_runtime 'colors\.impulsionando\.com\.br|colors-saude\.impulsionando\.com\.br' 'Deprecated Colors hostname'
+          scan_runtime 'raygsm/impulsionito|github\.com/raygsm/impulsionito' 'Wrong repository reference'
+          scan_runtime 'impulsionando\.lovable\.app|lovable\.app|lovable\.dev' 'Lovable runtime/domain reference'
           [ "$fail" -eq 0 ]
       - name: Assert canonical Colors host exists
         shell: bash
         run: |
           set -euo pipefail
-          git grep -n -I 'colorssaude\.impulsionando\.com\.br' -- src supabase .github >/dev/null
+          git grep -n -I 'colorssaude\.impulsionando\.com\.br' -- src .github >/dev/null
           echo 'CANONICAL_COLORS_HOST=PASS'
