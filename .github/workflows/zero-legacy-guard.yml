@@ -30,9 +30,9 @@ jobs:
               base="HEAD^"
             fi
           fi
-          changed="$(git diff --name-only "$base" HEAD -- . ':!docs/archive/**' ':!*.lock' || true)"
+          changed="$(git diff --name-only "$base" HEAD -- . ':!docs/archive/**' ':!*.lock' ':!.github/workflows/zero-legacy-guard.yml' || true)"
           if [ -z "$changed" ]; then
-            echo 'ZERO_LEGACY_GUARD=PASS (no changed files to scan)'
+            echo 'ZERO_LEGACY_GUARD=PASS (no changed application files to scan)'
             exit 0
           fi
           scan() {
