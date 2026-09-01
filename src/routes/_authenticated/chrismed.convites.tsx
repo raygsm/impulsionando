@@ -1,134 +1,37 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { Building2, Mail, MessageCircle, RefreshCw, Send, Stethoscope, Upload, UserRound } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Building2, CalendarDays, FileSpreadsheet, History, Loader2, Mail, RefreshCw, Send, Stethoscope, UserRound } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { requireChrismedManagement } from '@/lib/chrismed-management';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-export const Route = createFileRoute('/_authenticated/chrismed/convites')({
-  beforeLoad: requireChrismedManagement,
-  component: ChrismedInvitesPage,
-  head: () => ({ meta: [{ title: 'Convites — Gestão CHRISMED' }] }),
-});
-
-type InviteType = 'professional' | 'company' | 'patient';
-type Invite = {
-  id: string;
-  invite_type: InviteType;
-  recipient_name: string;
-  recipient_email: string;
-  organization_name: string | null;
-  status: string;
-  created_at: string;
-  sent_at: string | null;
-};
-
-const typeLabel: Record<InviteType, string> = {
-  professional: 'Profissional da saúde',
-  company: 'Empresa',
-  patient: 'Paciente',
-};
-
-function ChrismedInvitesPage() {
-  const [type, setType] = useState<InviteType>('professional');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [sending, setSending] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState<Invite[]>([]);
-
-  async function load() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('chrismed_management_invitations')
-      .select('id,invite_type,recipient_name,recipient_email,organization_name,status,created_at,sent_at')
-      .order('created_at', { ascending: false })
-      .limit(100);
-    setLoading(false);
-    if (error) {
-      toast.error('Não foi possível carregar os convites.');
-      return;
-    }
-    setRows((data ?? []) as Invite[]);
-  }
-
-  useEffect(() => { void load(); }, []);
-
-  async function sendInvite() {
-    if (!name.trim() || !email.trim()) {
-      toast.error('Informe nome e e-mail.');
-      return;
-    }
-    setSending(true);
-    const { error } = await (supabase as any).rpc('chrismed_send_management_invitation', {
-      p_invite_type: type,
-      p_recipient_name: name.trim(),
-      p_recipient_email: email.trim(),
-      p_recipient_phone: phone.trim() || null,
-      p_organization_name: organization.trim() || null,
-      p_metadata: { source: 'chrismed_management_invites_ui' },
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message || 'Não foi possível enviar o convite.');
-      return;
-    }
-    toast.success('Convite colocado na mensageria CHRISMED.');
-    setName(''); setEmail(''); setPhone(''); setOrganization('');
-    await load();
-  }
-
-  return (
-    <main className="min-h-screen bg-[#f7f8f7] px-4 py-7 text-[#0b2523] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-3xl border bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#61706d]">Gestão CHRISMED · Captação e relacionamento</p>
-              <h1 className="mt-2 text-3xl font-bold">Central de Convites</h1>
-              <p className="mt-2 max-w-3xl text-sm text-[#53615e]">Convide profissionais, empresas e pacientes com registro auditável e comunicação automática. Para bases maiores, use a importação em massa do Core.</p>
-            </div>
-            <Button variant="outline" onClick={() => void load()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />Atualizar</Button>
-          </div>
-        </header>
-
-        <section className="grid gap-3 md:grid-cols-3">
-          <Link to="/admin/comunicacoes/email-massa" className="block"><Card className="h-full transition hover:shadow-md"><CardContent className="flex items-center gap-3 p-5"><Upload className="h-5 w-5 text-[#087f79]"/><div><strong>Importar lista / E-mail em massa</strong><p className="text-xs text-muted-foreground">Base segmentada, consentimento e campanhas.</p></div></CardContent></Card></Link>
-          <Link to="/chrismed/whatsapp" className="block"><Card className="h-full transition hover:shadow-md"><CardContent className="flex items-center gap-3 p-5"><MessageCircle className="h-5 w-5 text-[#087f79]"/><div><strong>WhatsApp</strong><p className="text-xs text-muted-foreground">Conexão por QR e canal oficial.</p></div></CardContent></Card></Link>
-          <Link to="/chrismed/time" className="block"><Card className="h-full transition hover:shadow-md"><CardContent className="flex items-center gap-3 p-5"><Stethoscope className="h-5 w-5 text-[#087f79]"/><div><strong>Comitê CHRISMED</strong><p className="text-xs text-muted-foreground">Aprovação e ativação dos profissionais.</p></div></CardContent></Card></Link>
-        </section>
-
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Send className="h-5 w-5"/>Novo convite</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div><Label>Categoria</Label><Select value={type} onValueChange={(v) => setType(v as InviteType)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="professional">Profissional da saúde</SelectItem><SelectItem value="company">Empresa</SelectItem><SelectItem value="patient">Paciente</SelectItem></SelectContent></Select></div>
-            <div><Label>{type === 'company' ? 'Nome do contato' : 'Nome'}</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" /></div>
-            <div><Label>E-mail</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@dominio.com.br" /></div>
-            <div><Label>Celular / WhatsApp</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+55 21 ..." /></div>
-            {type === 'company' && <div className="md:col-span-2"><Label>Empresa</Label><Input value={organization} onChange={(e) => setOrganization(e.target.value)} placeholder="Razão social ou nome fantasia" /></div>}
-            <div className="md:col-span-2 flex flex-wrap gap-3"><Button onClick={() => void sendInvite()} disabled={sending}><Mail className="mr-2 h-4 w-4"/>{sending ? 'Enviando…' : 'Enviar convite por e-mail'}</Button><p className="self-center text-xs text-muted-foreground">O envio entra na fila transacional CHRISMED e fica registrado na timeline operacional.</p></div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Convites recentes</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {!loading && !rows.length && <p className="py-8 text-center text-sm text-muted-foreground">Nenhum convite registrado ainda.</p>}
-            {rows.map((r) => {
-              const Icon = r.invite_type === 'professional' ? Stethoscope : r.invite_type === 'company' ? Building2 : UserRound;
-              return <div key={r.id} className="grid gap-3 rounded-2xl border bg-white p-4 md:grid-cols-[1.4fr_1.4fr_1fr_auto] md:items-center"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#e8f4f2]"><Icon className="h-4 w-4 text-[#087f79]"/></span><div><strong>{r.recipient_name}</strong><p className="text-xs text-muted-foreground">{typeLabel[r.invite_type]}</p></div></div><div className="text-sm"><p>{r.recipient_email}</p>{r.organization_name && <p className="text-xs text-muted-foreground">{r.organization_name}</p>}</div><div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString('pt-BR')}</div><Badge variant={r.status === 'sent' || r.status === 'accepted' ? 'default' : 'secondary'}>{r.status.toUpperCase()}</Badge></div>;
-            })}
-          </CardContent>
-        </Card>
-      </div>
-    </main>
-  );
+export const Route = createFileRoute('/_authenticated/chrismed/convites')({ beforeLoad: requireChrismedManagement, component: ChrismedInvitesPage, head: () => ({ meta: [{ title: 'Central de Convites — CHRISMED' }] }) });
+type InviteType='professional'|'company'|'patient';
+type Invite={id:string;invite_type:InviteType;recipient_name:string;recipient_email:string;organization_name:string|null;status:string;created_at:string;sent_at:string|null;accepted_at:string|null};
+type Recipient={name:string;email:string;organization?:string};
+const info:Record<InviteType,{title:string;description:string;icon:any}>={professional:{title:'Profissional de saúde',description:'Cadastro, análise e entrada segura na rede de profissionais.',icon:Stethoscope},patient:{title:'Paciente',description:'Acesso direto à experiência pública de serviços e agendamento.',icon:UserRound},company:{title:'Empresa',description:'Serviços empresariais, medicina ocupacional e eventos.',icon:Building2}};
+const emailRx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+function parseBulk(raw:string):Recipient[]{const seen=new Set<string>(),out:Recipient[]=[];for(const line of raw.split(/\r?\n/)){const p=line.split(/[;,\t]/).map(v=>v.trim()).filter(Boolean);const email=p.find(v=>emailRx.test(v))?.toLowerCase();if(!email||seen.has(email))continue;seen.add(email);const name=p.find(v=>v.toLowerCase()!==email&&!emailRx.test(v))||email.split('@')[0];out.push({name,email,organization:p.length>2?p[2]:undefined});}return out;}
+function ChrismedInvitesPage(){
+ const [type,setType]=useState<InviteType>('professional'),[name,setName]=useState(''),[email,setEmail]=useState(''),[phone,setPhone]=useState(''),[organization,setOrganization]=useState(''),[bulk,setBulk]=useState('');
+ const [sending,setSending]=useState(false),[loading,setLoading]=useState(true),[rows,setRows]=useState<Invite[]>([]);const bulkRows=useMemo(()=>parseBulk(bulk),[bulk]);
+ async function load(){setLoading(true);const {data,error}=await supabase.from('chrismed_management_invitations').select('id,invite_type,recipient_name,recipient_email,organization_name,status,created_at,sent_at,accepted_at').order('created_at',{ascending:false}).limit(100);setLoading(false);if(error)return toast.error('Não foi possível carregar os convites.');setRows((data??[]) as Invite[]);}
+ useEffect(()=>{const q=new URLSearchParams(window.location.search).get('type');if(q==='professional'||q==='patient'||q==='company')setType(q);void load();},[]);
+ async function dispatch(r:Recipient){const {error}=await (supabase as any).rpc('chrismed_send_management_invitation',{p_invite_type:type,p_recipient_name:r.name,p_recipient_email:r.email,p_recipient_phone:phone.trim()||null,p_organization_name:(r.organization||organization).trim()||null,p_metadata:{source:'chrismed_invitation_center'}});if(error)throw error;}
+ async function sendOne(){if(name.trim().length<2||!emailRx.test(email.trim()))return toast.error('Informe nome e e-mail válidos.');setSending(true);try{await dispatch({name:name.trim(),email:email.trim().toLowerCase(),organization});toast.success('Convite colocado na mensageria CHRISMED.');setName('');setEmail('');setPhone('');setOrganization('');await load();}catch{toast.error('Não foi possível enviar o convite.');}finally{setSending(false);}}
+ async function sendBulk(){if(!bulkRows.length)return toast.error('Cole ou carregue uma lista válida.');setSending(true);let ok=0,fail=0;for(const r of bulkRows){try{await dispatch(r);ok++;}catch{fail++;}}setSending(false);if(ok)toast.success(`${ok} convite(s) colocado(s) na fila.`);if(fail)toast.error(`${fail} registro(s) não puderam ser enviados.`);if(ok)setBulk('');await load();}
+ async function loadCsv(f:File){setBulk(await f.text());toast.success('CSV carregado. Confira a prévia antes de confirmar.');}
+ return <main className="min-h-screen bg-[#f4f7f6] px-4 py-7 text-[#153a38] sm:px-6 lg:px-8"><div className="mx-auto max-w-7xl space-y-6">
+  <header className="rounded-3xl border border-[#d9e5e2] bg-white p-6 shadow-sm"><div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-[#9a7b35]">Gestão CHRISMED · Relacionamento</p><h1 className="mt-2 text-3xl font-bold">Central de Convites</h1><p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#61706d]">Escolha quem deseja convidar, envie individualmente ou importe uma lista. O sistema valida, elimina duplicidades e registra o histórico operacional.</p></div><div className="flex gap-2"><Button asChild variant="outline"><Link to="/chrismed/admin">Gestão</Link></Button><Button variant="outline" onClick={()=>void load()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading?'animate-spin':''}`}/>Atualizar</Button></div></div></header>
+  <section className="grid gap-3 md:grid-cols-4">{(Object.keys(info) as InviteType[]).map(k=>{const I=info[k].icon;return <button key={k} onClick={()=>setType(k)} className={`rounded-2xl border p-4 text-left transition ${type===k?'border-[#087f79] bg-[#edf8f6] shadow-sm':'border-[#dbe4e2] bg-white hover:border-[#87b8b3]'}`}><I className="h-5 w-5 text-[#087f79]"/><strong className="mt-3 block text-sm">{info[k].title}</strong><span className="mt-1 block text-xs leading-relaxed text-[#667774]">{info[k].description}</span></button>})}<a href="/chrismed/eventos-gestao" className="rounded-2xl border border-[#dbe4e2] bg-white p-4 transition hover:border-[#87b8b3]"><CalendarDays className="h-5 w-5 text-[#087f79]"/><strong className="mt-3 block text-sm">Evento</strong><span className="mt-1 block text-xs leading-relaxed text-[#667774]">Crie ou selecione um evento e use convites, inscrição, QR Code e check-in.</span></a></section>
+  <section className="grid gap-5 lg:grid-cols-2"><Card><CardHeader><CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-[#087f79]"/>Convite individual</CardTitle></CardHeader><CardContent className="space-y-4"><div><Label>Nome</Label><Input value={name} onChange={e=>setName(e.target.value)} placeholder="Nome do destinatário"/></div><div><Label>E-mail</Label><Input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="nome@dominio.com.br"/></div><div><Label>Celular (opcional)</Label><Input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+55 21 ..."/></div>{type==='company'?<div><Label>Empresa</Label><Input value={organization} onChange={e=>setOrganization(e.target.value)} placeholder="Nome da empresa"/></div>:null}<div className="rounded-xl border bg-[#f8fbfa] p-4 text-sm"><strong>{info[type].title}</strong><p className="mt-1 text-xs leading-relaxed text-[#667774]">{info[type].description} O link individual e seguro é criado automaticamente.</p></div><Button className="w-full" onClick={()=>void sendOne()} disabled={sending}><Send className="mr-2 h-4 w-4"/>{sending?'Enviando…':'Enviar convite'}</Button></CardContent></Card>
+  <Card><CardHeader><CardTitle className="flex items-center gap-2"><FileSpreadsheet className="h-5 w-5 text-[#087f79]"/>Lista em lote</CardTitle></CardHeader><CardContent className="space-y-4"><p className="text-sm text-[#667774]">Cole uma pessoa por linha no formato <strong>nome; e-mail</strong> ou carregue um CSV. E-mails repetidos são removidos antes do envio.</p><Textarea className="min-h-44" value={bulk} onChange={e=>setBulk(e.target.value)} placeholder={'Maria Silva; maria@exemplo.com\nJoão Souza; joao@exemplo.com'}/><div className="flex flex-wrap items-center gap-3"><Label className="cursor-pointer rounded-md border bg-white px-3 py-2 text-sm">Carregar CSV<input className="hidden" type="file" accept=".csv,text/csv" onChange={e=>{const f=e.target.files?.[0];if(f)void loadCsv(f)}}/></Label><Badge variant="secondary">{bulkRows.length} destinatário(s) válido(s)</Badge></div>{bulkRows.length?<div className="max-h-40 overflow-auto rounded-xl border bg-[#fafcfb] p-3 text-xs">{bulkRows.slice(0,10).map(r=><div key={r.email} className="flex justify-between gap-3 border-b py-1 last:border-0"><span>{r.name}</span><span className="text-muted-foreground">{r.email}</span></div>)}{bulkRows.length>10?<p className="pt-2 text-muted-foreground">+ {bulkRows.length-10} outros</p>:null}</div>:null}<Button className="w-full" variant="outline" onClick={()=>void sendBulk()} disabled={sending||!bulkRows.length}><Send className="mr-2 h-4 w-4"/>Confirmar disparo em lote</Button></CardContent></Card></section>
+  <Card id="historico"><CardHeader><CardTitle className="flex items-center gap-2"><History className="h-5 w-5 text-[#087f79]"/>Histórico</CardTitle></CardHeader><CardContent>{loading?<div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/>Carregando…</div>:rows.length?<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground"><th className="py-2">Destinatário</th><th>Tipo</th><th>Status</th><th>Enviado</th><th>Aceito</th></tr></thead><tbody>{rows.map(r=><tr key={r.id} className="border-b last:border-0"><td className="py-3"><strong className="block">{r.recipient_name}</strong><span className="text-xs text-muted-foreground">{r.recipient_email}</span></td><td>{info[r.invite_type]?.title||r.invite_type}</td><td><Badge variant="secondary">{r.status}</Badge></td><td>{r.sent_at?new Date(r.sent_at).toLocaleString('pt-BR'):'Fila'}</td><td>{r.accepted_at?new Date(r.accepted_at).toLocaleString('pt-BR'):'—'}</td></tr>)}</tbody></table></div>:<p className="text-sm text-muted-foreground">Nenhum convite registrado ainda.</p>}</CardContent></Card>
+ </div></main>;
 }
