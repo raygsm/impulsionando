@@ -24,7 +24,7 @@ jobs:
           scan() {
             pattern="$1"
             label="$2"
-            if git grep -n -I -E "$pattern" -- ':!docs/archive/**' ':!*.lock' >/tmp/legacy_hits 2>/dev/null; then
+            if git grep -n -I -E "$pattern" -- ':!docs/archive/**' ':!*.lock' ':!.github/workflows/zero-legacy-guard.yml' >/tmp/legacy_hits 2>/dev/null; then
               echo "::error::$label detected"
               cat /tmp/legacy_hits
               fail=1
