@@ -1,6 +1,6 @@
 /**
  * Anexa parâmetros UTM a uma URL sem sobrescrever valores já presentes.
- * Usado nos CTAs de checkout, WhatsApp e e-book do site Colors Saúde para
+ * Usado nos CTAs de checkout, WhatsApp e e-book do site Color Saúde para
  * rastrear campanha/origem no GA4 e no Search Console.
  */
 
@@ -15,7 +15,7 @@ export type UtmParams = {
 export function appendUtm(rawUrl: string, utm: UtmParams): string {
   if (!rawUrl) return rawUrl;
   try {
-    const url = new URL(rawUrl, typeof window !== "undefined" ? window.location.origin : "https://colors.impulsionando.com.br");
+    const url = new URL(rawUrl, typeof window !== "undefined" ? window.location.origin : "https://colorssaude.impulsionando.com.br");
     const map: Record<string, string | undefined> = {
       utm_source: utm.source,
       utm_medium: utm.medium,
@@ -25,7 +25,7 @@ export function appendUtm(rawUrl: string, utm: UtmParams): string {
     };
     for (const [k, v] of Object.entries(map)) {
       if (!v) continue;
-      if (url.searchParams.has(k)) continue; // não sobrescreve
+      if (url.searchParams.has(k)) continue;
       url.searchParams.set(k, v);
     }
     return url.toString();
@@ -34,7 +34,7 @@ export function appendUtm(rawUrl: string, utm: UtmParams): string {
   }
 }
 
-/** Preset padrão da Colors — mantém origem única no GA4. */
+/** Preset padrão da Color Saúde — mantém origem única no GA4. */
 export function colorsUtm(campaign: string, content?: string): UtmParams {
   return {
     source: "colors_site",
@@ -44,7 +44,7 @@ export function colorsUtm(campaign: string, content?: string): UtmParams {
   };
 }
 
-/** Aplica preset Colors direto na URL. */
+/** Aplica preset Color Saúde direto na URL. */
 export function withColorsUtm(url: string, campaign: string, content?: string) {
   return appendUtm(url, colorsUtm(campaign, content));
 }
