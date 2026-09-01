@@ -24,15 +24,19 @@ function getAnonymousWebSessionId(): string {
   } catch { return `web:ephemeral:${Date.now()}-${Math.random().toString(36).slice(2)}`; }
 }
 
+function isDemoPath(pathname: string): boolean {
+  return pathname === "/demo" || pathname.startsWith("/demo/");
+}
+
 function pickMockReply(input: SendMessageInput): string {
   const t = input.text.toLowerCase().trim(); const path = input.context.pathname;
-  if (!t) return "Diga o que você precisa que eu já te ajudo aqui no Core.";
-  if (t.includes("ola") || t.includes("olá") || t === "oi") return "Olá! Sou o Impulsionito. Como posso te ajudar nesta tela?";
-  if (t.includes("agenda")) return "Você pode abrir a Agenda pelo menu lateral. Quer que eu detalhe algum recurso específico?";
-  if (t.includes("financeiro") || t.includes("pagamento") || t.includes("pix")) return "Para pagamentos e faturas, vá em Financeiro → Minha Assinatura.";
-  if (t.includes("whatsapp")) return "O WhatsApp é gerenciado pelo Core. Posso orientar sobre conexão, saúde do canal e políticas disponíveis nesta tela.";
-  if (path.startsWith("/admin")) return "Você está na área administrativa. Posso te orientar sobre métricas, ajustes ou próximas ações.";
-  return `Entendi. Registrei "${input.text.slice(0,80)}". Como posso avançar?`;
+  if (!t) return "Diga o que você quer explorar nesta demonstração e eu mostro como o recurso funciona.";
+  if (t.includes("ola") || t.includes("olá") || t === "oi") return "Olá! Sou o Impulsionito desta demonstração. Posso guiar você pelos recursos deste cenário.";
+  if (t.includes("agenda")) return "Nesta demonstração, a Agenda representa a jornada contratada: disponibilidade, encaixes, pega-agenda, antecipação e automações.";
+  if (t.includes("financeiro") || t.includes("pagamento") || t.includes("pix")) return "Nesta demonstração, o Financeiro mostra cobrança, conciliação, recorrência, PIX/cartão e indicadores sem usar dados reais de clientes.";
+  if (t.includes("whatsapp")) return "Nesta demonstração, o WhatsApp mostra templates, jornadas e automações que o cliente poderá editar ou solicitar ao time Impulsionando.";
+  if (path.startsWith("/demo")) return `Entendi. Vou usar o cenário demonstrativo para mostrar como "${input.text.slice(0,80)}" funciona no produto contratado.`;
+  return "Demonstração indisponível fora de /demo.";
 }
 
 async function* streamMock(input: SendMessageInput): AsyncIterable<TokenChunk> {
@@ -42,11 +46,7 @@ async function* streamMock(input: SendMessageInput): AsyncIterable<TokenChunk> {
 }
 
 async function authenticatedHeaders(): Promise<Record<string,string>> {
-  const headers: Record<string,string> = {
-    "Content-Type":"application/json",
-    Accept:"text/plain",
-    "X-Impulsionando-Session":getAnonymousWebSessionId(),
-  };
+  const headers: Record<string,string> = { "Content-Type":"application/json", Accept:"text/plain", "X-Impulsionando-Session":getAnonymousWebSessionId() };
   try {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token?.trim();
@@ -72,17 +72,32 @@ async function* streamLive(input: SendMessageInput): AsyncIterable<TokenChunk> {
   finally { try{reader.releaseLock();}catch{} }
 }
 
-function forcedMockMode(): boolean {
+function forcedMockMode(pathname?: string): boolean {
+  if (!pathname || !isDemoPath(pathname)) return false;
   try { return (import.meta as unknown as {env?:Record<string,string>}).env?.VITE_IMPULSIONITO_MODE === "mock"; } catch { return false; }
 }
 
 const liveTransport: ImpulsionitoTransport = { mode:"live", sendMessage:(input)=>({ [Symbol.asyncIterator]:async function*(){
-  if(typeof navigator!=="undefined" && navigator.onLine===false){ yield* streamMock(input); return; }
-  try { const it=streamLive(input)[Symbol.asyncIterator](); const first=await it.next(); if(first.done)return; yield first.value; while(true){const n=await it.next();if(n.done)return;yield n.value;} }
-  catch(err){ if(input.signal?.aborted)return; console.warn("[impulsionito] live falhou, usando mock:",err); yield{delta:""}; yield* streamMock(input); }
+  const demo = isDemoPath(input.context.pathname);
+  if(typeof navigator!=="undefined" && navigator.onLine===false){
+    if (demo) { yield* streamMock(input); return; }
+    throw new Error("Sem conexão. Fora da área de demonstração o Impulsionito não gera respostas fictícias.");
+  }
+  try {
+    const it=streamLive(input)[Symbol.asyncIterator](); const first=await it.next(); if(first.done)return; yield first.value;
+    while(true){const n=await it.next();if(n.done)return;yield n.value;}
+  } catch(err){
+    if(input.signal?.aborted)return;
+    if (demo) { console.warn("[impulsionito/demo] live falhou; usando cenário demonstrativo isolado",err); yield* streamMock(input); return; }
+    console.error("[impulsionito] falha live sem fallback fictício", err);
+    throw err;
+  }
 }})};
 const mockTransport: ImpulsionitoTransport = { mode:"mock",sendMessage:(input)=>streamMock(input) };
-export function useImpulsionitoTransport(): ImpulsionitoTransport { return forcedMockMode()?mockTransport:liveTransport; }
+export function useImpulsionitoTransport(): ImpulsionitoTransport {
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  return forcedMockMode(pathname)?mockTransport:liveTransport;
+}
 
 const NICHO_SUGGESTIONS: Record<string,string[]> = {
   clinicas:["Como funciona a agenda de consultas?","Como enviar lembretes por WhatsApp?","Como emitir recibo/NFS-e?"],
