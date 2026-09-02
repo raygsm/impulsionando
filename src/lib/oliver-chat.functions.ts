@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { readFileSync } from 'node:fs';
+import { resolveProvider } from '@/lib/impulsionito/providers.server';
 import { generateText } from 'ai';
 
 type OliverMessage = { role: 'user' | 'assistant'; content: string };
@@ -227,34 +226,33 @@ Segurança clínica + precisão administrativa + experiência humana + resoluç�
 export const askOliver = createServerFn({ method: 'POST' })
   .inputValidator(validate)
   .handler(async ({ data }) => {
-    let key = process.env.OPENAI_API_KEY?.trim();
-    if (!key) {
-      try {
-        key = readFileSync('/run/secrets/openai_api_key', 'utf8').trim();
-      } catch {
-        key = undefined;
-      }
-    }
-    if (!key) {
+    let model;
+    try {
+      model = resolveProvider({
+        agentKey: 'chrismed-oliver',
+        llm: {
+          provider: 'openai',
+          model: process.env.CHRISMED_OLIVER_MODEL?.trim() || 'gpt-4o-mini',
+        },
+        allowFallback: false,
+      }).model;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[askOliver] provider unavailable:', msg);
       return {
         reply:
           'Estou temporariamente sem conexão com o cérebro central. Enquanto isso, fale com nossa recepção no WhatsApp +55 (21) 97253-7868 ou agende em /chrismed/agendar.',
-        error: 'missing_key',
+        error: 'provider_unavailable',
       };
     }
 
-    const openai = createOpenAICompatible({
-      name: 'openai',
-      baseURL: 'https://api.openai.com/v1',
-      headers: { Authorization: `Bearer ${key}` },
-    });
     const contextNote = data.pathname
       ? `\n\n[Contexto: usuário está agora em ${data.pathname}. Idioma preferido: ${data.lang ?? 'pt'}.]`
       : '';
 
     try {
       const { text } = await generateText({
-        model: openai(process.env.CHRISMED_OLIVER_MODEL?.trim() || 'gpt-4o-mini'),
+        model,
         system: SYSTEM_PROMPT + contextNote,
         messages: data.messages,
       });
