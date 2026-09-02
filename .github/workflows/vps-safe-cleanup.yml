@@ -1,0 +1,105 @@
+name: VPS safe cleanup
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/vps-safe-cleanup.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  cleanup:
+    if: github.head_ref == 'ops-vps-cleanup'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          for v in VPS_HOST VPS_USER VPS_SSH_KEY; do
+            test -n "${!v}" || { echo "::error::Missing $v"; exit 1; }
+          done
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$VPS_HOST" > ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Audit and clean VPS safely
+        id: clean
+        run: |
+          set -euo pipefail
+          ssh "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE' | tee /tmp/cleanup-report.txt
+          set -euo pipefail
+          echo '=== BEFORE ==='
+          df -h /
+          echo '=== TOP LEVEL ==='
+          sudo du -xhd1 / 2>/dev/null | sort -h || true
+          echo '=== DOCKER BEFORE ==='
+          sudo docker system df || true
+
+          echo '=== SAFE CLEANUP ==='
+          sudo apt-get clean || true
+          sudo journalctl --vacuum-time=7d || true
+          sudo docker container prune -f || true
+          sudo docker image prune -f || true
+          sudo docker builder prune -af --filter 'until=168h' || true
+          sudo rm -rf /root/.npm/_cacache /root/.cache/pip 2>/dev/null || true
+          rm -rf "$HOME/.npm/_cacache" "$HOME/.cache/pip" 2>/dev/null || true
+
+          echo '=== OLD RELEASE CLEANUP ==='
+          relroot=/var/www/impulsionando-core/releases
+          if [ -d "$relroot" ]; then
+            active_targets=''
+            for link in /var/www/impulsionando-core/current /var/www/impulsionando-core/current-*; do
+              [ -L "$link" ] || continue
+              target="$(readlink -f "$link" 2>/dev/null || true)"
+              [ -n "$target" ] && active_targets="$active_targets\n$target"
+            done
+            mapfile -t releases < <(find "$relroot" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | awk '{print $2}')
+            keep_count=5
+            idx=0
+            for r in "${releases[@]}"; do
+              idx=$((idx+1))
+              if printf '%b\n' "$active_targets" | grep -Fxq "$r"; then
+                echo "KEEP active $r"
+                continue
+              fi
+              if [ "$idx" -le "$keep_count" ]; then
+                echo "KEEP recent $r"
+                continue
+              fi
+              if find "$r" -maxdepth 0 -mtime +7 -print -quit | grep -q .; then
+                echo "REMOVE old release $r"
+                sudo rm -rf --one-file-system "$r"
+              else
+                echo "KEEP younger-than-7d $r"
+              fi
+            done
+          fi
+
+          echo '=== LARGE LOG FILES ==='
+          sudo find /var/log -type f -size +100M -printf '%s %p\n' 2>/dev/null | sort -nr | head -20 || true
+          echo '=== AFTER ==='
+          df -h /
+          echo '=== DOCKER AFTER ==='
+          sudo docker system df || true
+          echo '=== RUNNING CONTAINERS ==='
+          sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+          REMOTE
+
+      - name: Report cleanup result
+        if: always()
+        run: |
+          before="$(grep -A1 '^=== BEFORE ===' /tmp/cleanup-report.txt | tail -n1 | tr -s ' ' | cut -d' ' -f3-5 || true)"
+          after="$(grep -A1 '^=== AFTER ===' /tmp/cleanup-report.txt | tail -n1 | tr -s ' ' | cut -d' ' -f3-5 || true)"
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            -f body="VPS_SAFE_CLEANUP_COMPLETED\n\nBefore: $before\nAfter: $after\n\nNo Docker volumes or running containers were deleted."
