@@ -219,17 +219,26 @@ export class SupportService {
     }
 
     if (!staff) {
+      let companyId: string | null = null;
       const { data: prof, error: profErr } = await sb
         .from("user_profiles")
         .select("company_id")
         .eq("user_id", actor.id)
         .maybeSingle();
       if (profErr) {
-        throw new Error(
-          `SUPPORT_PROFILE_LOOKUP_FAILED:${profErr.code || "unknown"}:${profErr.message || ""}`,
-        );
+        // Staging restore may lack user_profiles row — fall back to user_roles
+        const { data: roleRow, error: roleErr } = await sb
+          .from("user_roles")
+          .select("company_id")
+          .eq("user_id", actor.id)
+          .limit(1)
+          .maybeSingle();
+        if (!roleErr) {
+          companyId = (roleRow as { company_id?: string | null } | null)?.company_id ?? null;
+        }
+      } else {
+        companyId = (prof as { company_id?: string | null } | null)?.company_id ?? null;
       }
-      const companyId = (prof as { company_id?: string | null } | null)?.company_id ?? null;
       if (companyId) {
         q = q.or(`company_id.eq.${companyId},requester_user_id.eq.${actor.id}`);
       } else {

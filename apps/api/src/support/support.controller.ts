@@ -126,7 +126,19 @@ export class SupportController {
       });
     }
 
-    const result = await this.support.listTickets(parsed.data, req.user);
+    const result = await this.support.listTickets(parsed.data, req.user).catch((e: unknown) => {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.startsWith("SUPPORT_")) {
+        throw new ServiceUnavailableException({
+          error: {
+            code: "SUPPORT_LIST_UNAVAILABLE",
+            message: msg,
+            correlationId: corr,
+          },
+        });
+      }
+      throw e;
+    });
     return {
       data: result.tickets,
       meta: {

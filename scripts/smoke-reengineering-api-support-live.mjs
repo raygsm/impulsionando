@@ -64,6 +64,28 @@ function assertStagingSupabaseUrl(url) {
   }
 }
 
+/** signInWithPassword needs the legacy anon JWT (eyJ…), not sb_publishable. */
+function resolveAnonKeyForAuth() {
+  const candidates = [
+    process.env.SUPABASE_ANON_KEY,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  ].filter(Boolean);
+  const jwt = candidates.find((k) => k.startsWith("eyJ") && k.length > 100);
+  if (jwt) return jwt;
+  const bad = candidates.find((k) => k.startsWith("sb_"));
+  if (bad) {
+    warn(
+      "SUPABASE_PUBLISHABLE_KEY is sb_publishable format — signInWithPassword will fail. " +
+        "Copy the legacy anon JWT (eyJ…, ~200+ chars) from staging Dashboard → Settings → API → anon public " +
+        "into SUPABASE_PUBLISHABLE_KEY and VITE_SUPABASE_PUBLISHABLE_KEY. " +
+        "(impulsionando.com.br uses PROD keys; .env.staging needs STAGING keys.)",
+    );
+    return bad;
+  }
+  return candidates[0] || "";
+}
+
 async function request(method, path, { token, body, headers = {} } = {}) {
   const reqHeaders = {
     accept: "application/json",
@@ -112,8 +134,7 @@ async function validateAccessToken(token, { url, publishable }) {
 
 async function resolveAccessToken() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
-  const publishable =
-    process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+  const publishable = resolveAnonKeyForAuth();
 
   const direct = process.env.SUPPORT_SMOKE_ACCESS_TOKEN?.trim();
   if (direct) {
@@ -245,8 +266,9 @@ async function main() {
 
   if (!listOk) {
     console.log(JSON.stringify(report, null, 2));
+    const code = list.body?.error?.code ?? list.body?.message ?? "not an array";
     fail(
-      `GET /api/v1/support/tickets expected 200 + data[] (got ${list.status}: ${list.body?.error?.code ?? "not an array"})`,
+      `GET /api/v1/support/tickets expected 200 + data[] (got ${list.status}: ${code})`,
     );
   }
   log(`OK — GET /api/v1/support/tickets (${listData.length} rows)`);

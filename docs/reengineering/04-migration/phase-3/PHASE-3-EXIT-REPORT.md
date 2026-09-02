@@ -27,7 +27,7 @@ The Nest Support pilot is **LIVE** on `api.stg.impulsionando.com.br`, public cre
 | 4 | `support_ticket_seq` 42501 workaround | **CLOSED** (workaround) | Explicit `ticket_code` on insert bypasses sequence DEFAULT; operator GRANT on staging remains **optional** follow-up — adapter doc §Sequence |
 | 5 | TanStack strangler (`abrir-ticket` path) | **CLOSED** | `src/routes/api/public/support/create-ticket.ts` delegates to Nest when `PHASE3_API_BASE` set; `src/lib/reengineering/support-api.ts`; `.env.staging.example` — [`../../../../packages/api-client/README.md`](../../../../packages/api-client/README.md) |
 | 6 | GHCR SHA promote | **OPEN** | Workflow `.github/workflows/reengineering-ghcr-api.yml` ready; running image is local tag `reengineering-api:phase3-local` — checklist item #1 ⏳ |
-| 7 | Staff list + update-status smoke (JWT) | **OPEN** | Smoke script validates JWT shape; `.env.staging` `SUPPORT_SMOKE_ACCESS_TOKEN` is **not** a JWT (32 chars — ignored). Set `TEST_USER_PASSWORD` or paste fresh `access_token` from staging sign-in. Create smoke **201** ✅ |
+| 7 | Staff list + update-status smoke (JWT) | **CLOSED** (list 200; PATCH 403 non-staff = expected) | `npm run phase3:smoke:support-live` PASS — sign-in via `TEST_USER_EMAIL` + legacy anon JWT; `npm run staging:ensure-smoke-user` syncs staging Auth password |
 
 ## Completed tracks
 
@@ -60,7 +60,7 @@ The Nest Support pilot is **LIVE** on `api.stg.impulsionando.com.br`, public cre
 | 2 | Swarm `reengineering-api` 1/1 on `2.25.123.224` | ✅ |
 | 3 | `GET https://api.stg.impulsionando.com.br/health` → Nest | ✅ |
 | 4 | Create against staging CRM schema (adapter mapping) | ✅ POST **201** |
-| 5 | List + update-status (staff) on `api.stg` | ⏳ |
+| 5 | List + update-status (staff) on `api.stg` | ✅ list **200** · PATCH **403** non-staff (expected) |
 | 6 | Entry in clean-host `IMPLEMENTATION-LOG.md` | ✅ |
 
 When rows 1 and 5 are ✅, update this report to **Status: CLOSED** and sync [`../../STATUS.md`](../../STATUS.md).
