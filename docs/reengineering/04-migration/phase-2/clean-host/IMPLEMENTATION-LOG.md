@@ -100,3 +100,119 @@ Format per entry:
   - `http(s)://api.stg.impulsionando.com.br/health` → 200 (same placeholder until Nest image)
   - `https://dokploy.stg.impulsionando.com.br/` → 200 via Cloudflare
 - Docs: [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`HOST.md`](./HOST.md)
+
+## 2026-08-31T~20:55Z — Nest API deploy prep (pending)
+
+- Operator: Agent (docs + deploy artifact; no Swarm mutate yet)
+- Change:
+  - Phase 3 board + CRM schema adapter docs
+  - Deploy script for Swarm service `reengineering-api` → Traefik Host `api.stg.impulsionando.com.br` (port 3100)
+  - Image expected: `ghcr.io/raygsm/impulsionando-api:<full-sha>`
+- Commands / method (when executed — **not run yet**):
+  - `IMAGE_TAG=<full-sha> ./scripts/deploy-reengineering-api-clean-host.sh`
+  - SSH `root@2.25.123.224` key `id_ed25519_impulsionando` only (never legacy `187.77.232.52`)
+  - Before cutover: remove `api.stg` from `reengineering-placeholder` Traefik Host rule so Nest owns the hostname
+- Result / evidence: **pending** — service not created; `api.stg` still placeholder
+- Docs updated: [`../../phase-3/README.md`](../../phase-3/README.md), [`../../phase-3/SUPPORT-SCHEMA-ADAPTER.md`](../../phase-3/SUPPORT-SCHEMA-ADAPTER.md), [`../../../STATUS.md`](../../../STATUS.md), this log
+
+## 2026-08-31T21:12Z — Phase 3 Nest API local image on clean host (no GHCR wait)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Built context rsynced to `/opt/reengineering/api-build/` (`package.json`, lockfile, workspace, `packages/contracts`, `apps/api`, `infra/compose/Dockerfile.api`)
+  - `Dockerfile.api` minimally pinned `pnpm@10.34.4` (corepack default 11.x failed `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` on monorepo lockfile)
+  - `docker build -f infra/compose/Dockerfile.api -t reengineering-api:phase3-local --build-arg GIT_SHA=phase3-local-e8da0e8d .`
+  - Env file scp’d to host `/tmp/reengineering-api.stg.env` (keys only: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `API_PORT`, `GIT_SHA`, `SUPPORT_PLATFORM_COMPANY_ID`) — not committed
+  - Traefik on `reengineering-placeholder`: removed `Host(api.stg.impulsionando.com.br)` from `web` + `websecure` rules; kept `stg.impulsionando.com.br` (+ `placeholder.staging.local` on `web`)
+  - Created Swarm service `reengineering-api` image `reengineering-api:phase3-local`, network `dokploy-network`, Traefik Host `api.stg.impulsionando.com.br` on `web`/`websecure`, port `3100`, `tls.certresolver=letsencrypt`
+- Result / evidence:
+  - Service `reengineering-api` 1/1 Running on `srv1942777`
+  - `https://api.stg.impulsionando.com.br/health` → `{"ok":true,"service":"impulsionando-api","phase":3,"pilot":"support","gitSha":"phase3-local-e8da0e8d"}`
+  - `https://api.stg.impulsionando.com.br/health/ready` → `{"ready":true,"service":"impulsionando-api","supabaseConfigured":true}`
+  - Note: local tag (not GHCR digest); Swarm warned image not on a registry
+- Docs updated: this log, [`HOST.md`](./HOST.md)
+
+## 2026-08-31T21:28Z — Nest API CRM adapter rebuild + create smoke (blocked on sequence GRANT)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Re-rsynced `/opt/reengineering/api-build/` from Mac workspace (contracts + `apps/api` CRM map/service)
+  - No-cache `docker build` → `reengineering-api:phase3-local` with `GIT_SHA=phase3-crm-1824`
+  - `docker service update --force --image reengineering-api:phase3-local --env-add GIT_SHA=phase3-crm-1824`
+  - Env confirmed: `SUPABASE_*`, `SUPPORT_PLATFORM_COMPANY_ID=bda711e0-cbfa-4899-a068-0c75f96d4e59`, `API_PORT=3100`
+- Prior create failure (pre-rebuild logs):
+  - `SUPPORT_INSERT_FAILED:42501:permission denied for sequence support_ticket_seq`
+- Result / evidence:
+  - `GET https://api.stg.impulsionando.com.br/health` → `{"ok":true,"service":"impulsionando-api","phase":3,"pilot":"support","gitSha":"phase3-crm-1824"}`
+  - `POST /api/v1/support/tickets` (idempotency `p3-remote-smoke-crm-1`) → **HTTP 500** same error: `SUPPORT_INSERT_FAILED:42501:permission denied for sequence support_ticket_seq`
+  - Not PGRST204 / column mismatch — staging DB role lacks `USAGE`/`SELECT` on `support_ticket_seq` (service_role insert path)
+  - **Blocker:** CRM adapter redeploy alone cannot clear 42501; needs staging grant on sequence (Supabase SQL), outside Swarm image
+- Docs updated: this log
+
+## 2026-08-31T21:30Z — Nest API explicit ticket_code deploy + create smoke OK
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Rsynced updated `apps/api` (explicit `ticket_code` bypasses `support_ticket_seq` DEFAULT / 42501)
+  - Rebuilt `reengineering-api:phase3-local` with `GIT_SHA=phase3-tcode-1830`
+  - `docker service update --force --image reengineering-api:phase3-local` (+ env `GIT_SHA`)
+- Result / evidence:
+  - `GET /health` → `{"ok":true,"service":"impulsionando-api","phase":3,"pilot":"support","gitSha":"phase3-tcode-1830"}`
+  - `POST /api/v1/support/tickets` idempotency `p3-remote-smoke-tcode-1` → **HTTP 201**
+    - `id=29b702f1-901c-4c54-97f2-01a076717610` · `protocol=IMP-P3-20260831-929F0F34` · `status=new`
+  - Replay same key → **HTTP 201** same `id`/`protocol`, `meta.idempotencyReplay=true`
+- Docs updated: this log
+
+## 2026-09-01T~00:30Z — Phase 3 deploy LIVE confirmed (evidence sync)
+
+- Operator: Agent (docs sync from verified remote state)
+- Change: Mark Phase 3 clean-host deploy **LIVE** in program evidence (no Swarm mutate)
+- Commands / method: Verified existing state on `2.25.123.224` / public `api.stg` (no new deploy)
+- Result / evidence:
+  - `https://api.stg.impulsionando.com.br/health` → Nest `impulsionando-api` · `gitSha=phase3-tcode-1830` (not Phase 2 placeholder)
+  - Swarm `reengineering-api` 1/1 on `srv1942777` · Traefik Host `api.stg.impulsionando.com.br` → `:3100`
+  - Create smoke: `POST /api/v1/support/tickets` → **HTTP 201** (explicit `ticket_code` workaround for `support_ticket_seq` 42501)
+  - **Phase 3 still IN PROGRESS** — not closed: TanStack adapter, GHCR full-SHA promote, staff list + update-status smoke pending
+- Docs updated: [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-3/README.md`](../../phase-3/README.md), [`HOST.md`](./HOST.md), this log
+
+## 2026-09-01T23:37Z — Nest API TenantsModule deploy (resolve RPC missing on staging)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Rsynced build context to `/opt/reengineering/api-build/` including `packages/tenant-context` + updated `apps/api` (`TenantsModule`, `GET /api/v1/tenants/resolve`)
+  - `docker build` → `reengineering-api:phase3-local` with `GIT_SHA=phase4-tenants-2034`
+  - `docker service update --force --image reengineering-api:phase3-local` (+ env `GIT_SHA`)
+- Result / evidence:
+  - `GET /health` → `gitSha=phase4-tenants-2034`; route mapped `/api/v1/tenants/resolve`
+  - `GET /api/v1/tenants/resolve?host=chrismed.impulsionando.com.br` → **HTTP 500** (`TENANT_RESOLVE_FAILED:PGRST202` — function `public.resolve_tenant_by_host` not in PostgREST schema cache on staging)
+  - **Follow-up:** apply staging migration/RPC for tenant resolve before expecting 200/`data.id` or `data: null`
+- Docs updated: this log
+
+## 2026-09-01T23:55Z — Staging RPC applied + Nest API redeploy (full git SHA)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Operator applied `scripts/staging/phase4-resolve-tenant-rpc.sql` on staging (`aamorcqznimmleafavai`) via Supabase SQL Editor
+  - Rsynced `/opt/reengineering/api-build/` (contracts + tenant-context + `apps/api` incl. TenantsModule 503 mapping)
+  - `docker build` → `reengineering-api:phase3-local` + `ghcr.io/raygsm/impulsionando-api:badfb94d01cec685736bc1377f008adf3acd863b` with `GIT_SHA=badfb94d01cec685736bc1377f008adf3acd863b`
+  - `docker service update --force --image reengineering-api:phase3-local` (+ env `GIT_SHA`)
+- Result / evidence:
+  - `GET https://api.stg.impulsionando.com.br/health` → `gitSha=badfb94d01cec685736bc1377f008adf3acd863b`
+  - `GET /api/v1/tenants/resolve?host=chrismed.impulsionando.com.br` → **HTTP 200** · `data: null` (no matching active company on staging — endpoint OK)
+  - `npm run phase4:smoke:tenant-resolve` → **PASS** (200)
+  - `npm run phase3:smoke:api` → **PASS** (health + ready)
+  - GHCR **push** of `ghcr.io/raygsm/impulsionando-api:badfb94d…` → **denied** (clean host has no GHCR login; needs `gh workflow_dispatch` after committing `reengineering-ghcr-api.yml` or operator `docker login ghcr.io`)
+- Docs updated: this log, [`../../phase-4/README.md`](../../phase-4/README.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-02T00:05Z — Staff smoke JWT diagnosis + smoke script hardening
+
+- Operator: Agent (local)
+- Change:
+  - `scripts/smoke-reengineering-api-support-live.mjs` — validate `SUPPORT_SMOKE_ACCESS_TOKEN` as JWT via `getUser`; ignore malformed tokens; clearer fallback messaging
+  - `.env.staging.example` — document token must be `access_token` JWT (`eyJ…`), not anon/service keys
+- Result / evidence:
+  - Root cause of list **401**: `.env.staging` `SUPPORT_SMOKE_ACCESS_TOKEN` is 32 chars (malformed JWT); API auth guard correctly returns `UNAUTHENTICATED`
+  - `TEST_USER_EMAIL` set; `TEST_USER_PASSWORD` **not** set — sign-in fallback unavailable
+  - `npm run phase3:smoke:support-live` → **PASS** (health + create); list/update soft-skipped until valid JWT or password
+  - GHCR push from clean host → `denied` (no registry credentials on VPS)
+- Docs updated: this log, [`../../phase-3/PHASE-3-EXIT-REPORT.md`](../../phase-3/PHASE-3-EXIT-REPORT.md)

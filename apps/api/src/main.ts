@@ -4,6 +4,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
+import { RequestMethod } from "@nestjs/common";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -12,7 +13,13 @@ async function bootstrap() {
     new FastifyAdapter({ logger: true }),
   );
 
-  app.setGlobalPrefix("api/v1");
+  // Traefik / Phase-2 smoke use /health; Support pilot lives under /api/v1.
+  app.setGlobalPrefix("api/v1", {
+    exclude: [
+      { path: "health", method: RequestMethod.GET },
+      { path: "health/ready", method: RequestMethod.GET },
+    ],
+  });
 
   const port = Number(process.env.API_PORT || 3100);
   await app.listen({ port, host: "0.0.0.0" });

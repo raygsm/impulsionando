@@ -1,5 +1,19 @@
 {
   "name": "@impulsionando/worker",
+  "version": "0.0.1",
   "private": true,
-  "description": "Independent Node.js worker process. Placeholder — Phase 5 initially."
+  "description": "Independent Node.js worker — Phase 5 seed (no SSR co-start)",
+  "type": "commonjs",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "start:dev": "tsx watch src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

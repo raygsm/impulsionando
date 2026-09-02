@@ -6,12 +6,13 @@
   "type": "commonjs",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
+    "start": "tsx src/main.ts",
     "start:dev": "tsx watch src/main.ts",
-    "start:prod": "node dist/main.js"
+    "start:prod": "tsx src/main.ts"
   },
   "dependencies": {
     "@impulsionando/contracts": "workspace:*",
+    "@impulsionando/tenant-context": "workspace:*",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-fastify": "^11.0.12",

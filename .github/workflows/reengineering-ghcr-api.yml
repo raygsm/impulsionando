@@ -1,0 +1,69 @@
+# Reengineering GHCR Nest API (Phase 3 Support pilot).
+#
+# Manual only — never push-to-main auto-deploy.
+# Tags with full commit SHA only (never `latest` as authority).
+
+name: Reengineering GHCR API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: reengineering-ghcr-api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/impulsionando-api
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push SHA-tagged API
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/compose/Dockerfile.api
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.title=impulsionando-api
+
+      - name: Job summary
+        run: |
+          {
+            echo "## Reengineering GHCR API (Phase 3)"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Image | \`${IMAGE_NAME}:${GITHUB_SHA}\` |"
+            echo "| Tag authority | **full commit SHA only** |"
+            echo "| Trigger | \`workflow_dispatch\` only |"
+            echo "| Environment | **staging / clean host — not production** |"
+            echo ""
+            echo "Deploy: pull SHA on clean host \`2.25.123.224\`; Traefik Host \`api.stg.impulsionando.com.br\`."
+          } >> "$GITHUB_STEP_SUMMARY"

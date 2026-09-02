@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
+import { phase3ApiBase } from "@/lib/reengineering/support-api";
+import { resolveTenantViaNest } from "@/lib/reengineering/tenant-resolve-api";
 
 export type TenantContext = {
   id: string;
@@ -24,6 +26,10 @@ export const resolveTenantByHost = createServerFn({ method: "GET" })
     z.object({ host: z.string().min(1).max(253) }).parse(input),
   )
   .handler(async ({ data }): Promise<TenantContext | null> => {
+    if (phase3ApiBase()) {
+      return resolveTenantViaNest(data.host);
+    }
+
     const supabase = createClient<Database>(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY!,

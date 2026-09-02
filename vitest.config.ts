@@ -8,6 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@impulsionando/tenant-context": path.resolve(
+        __dirname,
+        "packages/tenant-context/src/index.ts",
+      ),
     },
   },
   test: {

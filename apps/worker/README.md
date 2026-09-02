@@ -1,5 +1,12 @@
-# @impulsionando/worker
+# @impulsionando/worker — Phase 5 seed
 
-**DO NOT IMPLEMENT.** Placeholder only.
+Independent Node process (not co-started with TanStack SSR).
 
-Owned by **Phase 5** initially (async workers after API verticals). Placeholder is enough for workspace layout. See `docs/reengineering/`.
+```bash
+pnpm install --filter @impulsionando/worker...
+pnpm --filter @impulsionando/worker start:dev
+```
+
+Emits JSON heartbeat every `WORKER_HEARTBEAT_MS` (default 60s).
+
+**Not yet:** pgmq consumer, job handlers, prod deploy.

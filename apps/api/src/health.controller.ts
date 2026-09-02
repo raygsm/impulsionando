@@ -1,7 +1,10 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Inject } from "@nestjs/common";
+import { SupabaseService } from "./supabase/supabase.service";
 
 @Controller("health")
 export class HealthController {
+  constructor(@Inject(SupabaseService) private readonly supabase: SupabaseService) {}
+
   @Get()
   getHealth() {
     return {
@@ -15,11 +18,11 @@ export class HealthController {
 
   @Get("ready")
   getReady() {
-    const hasStagingUrl = Boolean(process.env.SUPABASE_URL);
+    const configured = this.supabase.configured();
     return {
-      ready: hasStagingUrl,
+      ready: configured,
       service: "impulsionando-api",
-      supabaseConfigured: hasStagingUrl,
+      supabaseConfigured: configured,
     };
   }
 }

@@ -316,6 +316,9 @@ importers:
       '@impulsionando/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@impulsionando/tenant-context':
+        specifier: workspace:*
+        version: link:../../packages/tenant-context
       '@nestjs/common':
         specifier: ^11.0.12
         version: 11.2.3(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -354,7 +357,17 @@ importers:
 
   apps/tenant-web: {}
 
-  apps/worker: {}
+  apps/worker:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.13
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
 
   packages/auth: {}
 
@@ -373,6 +386,12 @@ importers:
   packages/integrations: {}
 
   packages/observability: {}
+
+  packages/tenant-context:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
 
   packages/testing: {}
 

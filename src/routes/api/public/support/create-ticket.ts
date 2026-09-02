@@ -1,8 +1,12 @@
 // Public endpoint para abertura de ticket de suporte sem autenticação.
-// Insere em support_tickets via service role (RLS bypass) com validação Zod-like.
-// Retorna o protocolo gerado para o solicitante acompanhar.
+// Phase 3 strangler: quando PHASE3_API_BASE está definido, delega ao Nest Support API.
+// Caso contrário, insert legado via service role (prod / rollback).
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import {
+  createSupportTicketViaNest,
+  phase3ApiBase,
+} from '@/lib/reengineering/support-api'
 
 type TicketType = 'question' | 'technical' | 'suggestion' | 'financial' | 'commercial' | 'other'
 type TicketPriority = 'low' | 'medium' | 'high' | 'critical'
@@ -56,6 +60,25 @@ export const Route = createFileRoute('/api/public/support/create-ticket')({
         const parsed = validate(raw)
         if (!parsed.ok) return Response.json({ ok: false, error: parsed.error }, { status: 400 })
         const input = parsed.value
+
+        if (phase3ApiBase()) {
+          const correlationId = request.headers.get('x-correlation-id') ?? undefined
+          const idempotencyKey = request.headers.get('idempotency-key') ?? undefined
+          const nest = await createSupportTicketViaNest(input, { correlationId, idempotencyKey })
+          if (!nest.ok) {
+            return Response.json(
+              { ok: false, error: nest.error, detail: nest.detail },
+              { status: nest.error === 'invalid_json' || nest.error === 'VALIDATION_FAILED' ? 400 : 502 },
+            )
+          }
+          return Response.json({
+            ok: true,
+            ticket_id: nest.ticket_id,
+            protocol: nest.protocol,
+            via: 'phase3-api',
+          })
+        }
+
         const ua = request.headers.get('user-agent') ?? null
         const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || ''
 
