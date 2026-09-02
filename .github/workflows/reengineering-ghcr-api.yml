@@ -2,18 +2,27 @@
 #
 # Manual only — never push-to-main auto-deploy.
 # Tags with full commit SHA only (never `latest` as authority).
+#
+# This file lives on `main` so GitHub registers the workflow.
+# Default build ref is `reengineering/program` (Nest API + Dockerfile.api).
 
 name: Reengineering GHCR API
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or SHA to build (must contain apps/api and infra/compose/Dockerfile.api)
+        required: true
+        default: reengineering/program
+        type: string
 
 permissions:
   contents: read
   packages: write
 
 concurrency:
-  group: reengineering-ghcr-api-${{ github.ref }}
+  group: reengineering-ghcr-api-${{ inputs.ref }}
   cancel-in-progress: true
 
 env:
@@ -26,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -60,10 +71,11 @@ jobs:
             echo ""
             echo "| Field | Value |"
             echo "| --- | --- |"
+            echo "| Built ref | \`${{ inputs.ref }}\` |"
             echo "| Image | \`${IMAGE_NAME}:${GITHUB_SHA}\` |"
             echo "| Tag authority | **full commit SHA only** |"
             echo "| Trigger | \`workflow_dispatch\` only |"
             echo "| Environment | **staging / clean host — not production** |"
             echo ""
-            echo "Deploy: pull SHA on clean host \`2.25.123.224\`; Traefik Host \`api.stg.impulsionando.com.br\`."
+            echo "Deploy: \`IMAGE_TAG=${GITHUB_SHA} ./scripts/deploy-reengineering-api-clean-host.sh\` on clean host \`2.25.123.224\`."
           } >> "$GITHUB_STEP_SUMMARY"
