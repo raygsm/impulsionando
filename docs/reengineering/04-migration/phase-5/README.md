@@ -1,11 +1,12 @@
 # Phase 5 — Worker skeleton (independent process)
 
 Opened: **2026-09-01**  
-Status: **STARTED (seed only)** — documentation + process bootstrap; **not** prod queues or co-start with SSR
+Status: **5A repo-complete · 5B repo-complete** — staging queue smokes pending operator
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)  
 ADR: [`../../05-governance/adrs/ADR-005-supabase-queues-initially.md`](../../05-governance/adrs/ADR-005-supabase-queues-initially.md)
+Detailed plan: [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 5
 
 ## Goal
 
@@ -48,6 +49,10 @@ Minimum skeleton:
 - Worker image on GHCR with full SHA tag
 - Swarm service on clean host (separate from `reengineering-api`)
 - Staging queue publish/consume smoke (pgmq) with idempotency test
+- Transactional outbox/event contract and secure webhook proof
+- Communication adapter with consent/deduplication/delivery-state proof
+- One synthetic/allowlisted end-to-end async journey
+- Queue/integration observability and recovery runbook
 - Evidence in `STATUS.md` and clean-host log
 
 ## Evidence checklist (seed)
@@ -55,7 +60,7 @@ Minimum skeleton:
 | # | Check | State |
 | --- | --- | --- |
 | 1 | Phase 5 README + STATUS row | ✅ seed |
-| 2 | `apps/worker` bootstrap | ⏳ |
-| 3 | Health probe | ⏳ |
-| 4 | Dockerfile + deploy doc | ⏳ |
-| 5 | Staging queue smoke | ⏳ |
+| 2 | `apps/worker` bootstrap | ✅ health + heartbeat |
+| 3 | Health probe | ✅ `GET /health` / `ready` on port 3200 |
+| 4 | Dockerfile + deploy doc | ✅ `Dockerfile.worker` · `reengineering-ghcr-worker.yml` |
+| 5 | Staging queue smoke | ⏳ 5B migration + smokes pending |

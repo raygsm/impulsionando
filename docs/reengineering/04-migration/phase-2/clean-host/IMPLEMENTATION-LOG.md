@@ -216,3 +216,33 @@ Format per entry:
   - `npm run phase3:smoke:support-live` → **PASS** (health + create); list/update soft-skipped until valid JWT or password
   - GHCR push from clean host → `denied` (no registry credentials on VPS)
 - Docs updated: this log, [`../../phase-3/PHASE-3-EXIT-REPORT.md`](../../phase-3/PHASE-3-EXIT-REPORT.md)
+
+## 2026-09-02T00:32Z — GHCR API image published (workflow on main)
+
+- Operator: Agent (`gh workflow run reengineering-ghcr-api.yml --ref main -f ref=reengineering/program`)
+- Change: GitHub Actions build + push to GHCR
+- Result / evidence:
+  - Image `ghcr.io/raygsm/impulsionando-api:b58d4c111b0b37bc48dacad3a7e12c1506f9d6e1`
+  - Workflow run [33575721274](https://github.com/raygsm/impulsionando/actions/runs/33575721274) — **success**
+  - Built from `reengineering/program`; tag SHA = `main` workflow commit (documented quirk)
+- Docs updated: this log
+
+## 2026-09-02T00:38Z — GHCR API Swarm promote (Phase 2–3 close)
+
+- Operator: Agent (`IMAGE_TAG=b58d4c11… ./scripts/deploy-reengineering-api-clean-host.sh`)
+- Change: `docker service update --image ghcr.io/raygsm/impulsionando-api:b58d4c11…` on `reengineering-api`
+- Result / evidence:
+  - Swarm **1/1** Running; replaced `reengineering-api:phase3-local`
+  - `GET https://api.stg.impulsionando.com.br/health` → `gitSha=badfb94d01cec685736bc1377f008adf3acd863b`
+  - `npm run phase3:smoke:support-live` → **PASS**
+  - `npm run phase4:smoke:tenant-resolve` → **PASS** (after chrismed seed)
+  - `npm run phase4:smoke:tenant-resolve-deny` → **PASS**
+  - `npm run phase2:smoke:placeholder` → **PASS**
+- Docs updated: this log, [`HOST.md`](./HOST.md), Phase 2–4 exit reports, [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-02T00:39Z — Phase 4 Chrismed staging seed
+
+- Operator: Agent (`npm run staging:seed:chrismed-tenant`)
+- Change: Updated staging `companies` row `642096b5…` with `subdomain=chrismed`, `domain=chrismed.impulsionando.com.br`
+- Result / evidence: resolve smoke returns `data.id=642096b5-a9ff-4521-a82a-c004f6d2e2d2`
+- Docs updated: [`../../phase-4/PHASE-4-EXIT-REPORT.md`](../../phase-4/PHASE-4-EXIT-REPORT.md)

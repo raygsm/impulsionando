@@ -1,35 +1,39 @@
 # Status do Programa
 
-Atualizado em: 2026-09-01 (Phase 1 CLOSED; Phase 2 residual; Phase 3 IN PROGRESS — exit report; Phase 4–5 seeds opened)
+Atualizado em: 2026-09-02 (Phase 4B repo-complete; Phase 5B repo-complete; staging verification pending)
 
 ## Estado geral
 
-**FASE 0 CONCLUÍDA. FASE 1 CONCLUÍDA. FASE 2 quase fechada (GHCR+rollback OK; stg DNS LIVE). FASE 3 IN PROGRESS — pilot LIVE em `api.stg`; exit report publicado; close bloqueado por GHCR SHA promote + staff list/update smoke. FASES 4–5 INICIADAS (seed) — paralelismo via [`04-migration/ACCELERATION-BOARD.md`](04-migration/ACCELERATION-BOARD.md).**
+**FASES 0–3 CONCLUÍDAS. FASE 4A CONCLUÍDA. FASE 4B REPO-COMPLETA (staging smokes pendentes). FASE 5A+5B REPO-COMPLETAS (staging queue smokes pendentes). FASES 6–7 NÃO INICIADAS.**
 
-| Fase | Estado | Evidência / residual |
+| Fase | Estado | Evidência |
 | --- | --- | --- |
 | 0 | **Concluída** | Phase-0 exit report |
-| 1 | **Concluída** | [`04-migration/phase-1/PHASE-1-EXIT-REPORT.md`](04-migration/phase-1/PHASE-1-EXIT-REPORT.md) · staging `aamorcqznimmleafavai` verify OK · live auth 20/20 |
-| 2 | **Quase fechada** | GHCR + A→B→A rollback ✅ · smoke ✅ · **DNS `stg`/`api.stg`/`dokploy.stg` LIVE** ✅ · alerts ⏳ |
-| 3 | **In progress** | Exit report [`04-migration/phase-3/PHASE-3-EXIT-REPORT.md`](04-migration/phase-3/PHASE-3-EXIT-REPORT.md) · **LIVE** ✅ Nest `api.stg` · create **201** · CRM adapter · `ticket_code` workaround · TanStack strangler ✅ · **residual** ⏳ GHCR SHA promote · staff list/update JWT smoke · optional `support_ticket_seq` GRANT — [`04-migration/phase-3/`](04-migration/phase-3/) |
-| 4 | **In progress** | Tenant resolve — RPC applied ✅ · smoke **200** ✅ · API redeployed `gitSha=badfb94d…` · GHCR push pending — [`04-migration/phase-4/`](04-migration/phase-4/) |
-| 5 | **Iniciada (seed)** | Worker skeleton — processo independente (health, bootstrap) — [`04-migration/phase-5/`](04-migration/phase-5/) |
+| 1 | **Concluída** | [`04-migration/phase-1/PHASE-1-EXIT-REPORT.md`](04-migration/phase-1/PHASE-1-EXIT-REPORT.md) |
+| 2 | **Concluída** | [`04-migration/phase-2/PHASE-2-EXIT-REPORT.md`](04-migration/phase-2/PHASE-2-EXIT-REPORT.md) · GHCR + rollback ✅ · DNS LIVE ✅ · observability minimum ✅ |
+| 3 | **Concluída** | [`04-migration/phase-3/PHASE-3-EXIT-REPORT.md`](04-migration/phase-3/PHASE-3-EXIT-REPORT.md) · Nest `api.stg` LIVE · GHCR promote ✅ · staff smoke ✅ |
+| 4A | **Concluída** | [`04-migration/phase-4/PHASE-4-EXIT-REPORT.md`](04-migration/phase-4/PHASE-4-EXIT-REPORT.md) · resolve **200** · chrismed seed ✅ · deny smokes ✅ |
+| 4B | **Repo-completa** | [`04-migration/phase-4/PHASE-4B-EXIT-REPORT.md`](04-migration/phase-4/PHASE-4B-EXIT-REPORT.md) · 8/8 packages in git · **CLOSE pending staging smokes** |
+| 5 | **5A+5B repo-completas** | Worker + queue semantics — [`04-migration/phase-5/PHASE-5B-EXIT-REPORT.md`](04-migration/phase-5/PHASE-5B-EXIT-REPORT.md) · **CLOSE pending staging smokes** |
 | 6–7 | Não iniciadas | gates Phase 5+ |
 
 ## Próximo gate
 
-1. Phase 3 close (residual): **GHCR push** — image built locally + on clean host as `ghcr.io/raygsm/impulsionando-api:badfb94d…`; push **denied** (gh token lacks `packages:write`; commit + `workflow_dispatch` on `reengineering-ghcr-api.yml` or operator `docker login` with PAT). Staff list/update smoke: fix `.env.staging` — `SUPPORT_SMOKE_ACCESS_TOKEN` must be JWT (`eyJ…`) or set `TEST_USER_PASSWORD`.
-2. Phase 4 (parallel): optional staging seed row for a known host (e.g. `chrismed`) to return non-null `data`; deny tests for unknown/suspended hosts.
-3. Optional: grey-cloud `dokploy.stg` if TLS flaky; set real ACME inbox; fill numeric RPO/RTO in restore evidence when timestamps known.
-
-**Proibido:** Dokploy on legacy VPS, wipe VPS, prod DNS cutover, `db push`/reset prod, deploy legacy monolith onto clean host.
+1. **Operator — close Phase 4B on staging** — apply migration `20260902120000_phase4b_*`, deploy API/tenant-web/worker GHCR images, run [`PHASE-4B-EXIT-REPORT.md`](04-migration/phase-4/PHASE-4B-EXIT-REPORT.md) smoke checklist.
+2. **Operator — close Phase 5B on staging** — apply migration `20260902130000_phase5b_*`, deploy API+worker with consumer enabled, run [`PHASE-5B-EXIT-REPORT.md`](04-migration/phase-5/PHASE-5B-EXIT-REPORT.md) smokes.
+3. **Phase 5C–5G** — outbox/events, webhooks, communications, synthetic journey, ops runbooks.
+4. **Phase 6 later** — governed AI gateway/tools/read-only tenant agent; no autonomous regulated actions.
+5. **Vertical waves before Phase 7** — shared modules first, tenant configuration second.
+6. Full action plan: [`04-migration/PRODUCT-INTAKE-ACTION-PLAN.md`](04-migration/PRODUCT-INTAKE-ACTION-PLAN.md).
+7. **Proibido:** Dokploy on legacy VPS, wipe VPS, prod DNS cutover, `db push`/reset prod, real-recipient campaign blast, intake-driven fintech/clinical/investment execution without dedicated gates.
 
 ## Evidência corrente
 
 | Item | Value |
 | --- | --- |
 | Staging ref | `aamorcqznimmleafavai` |
-| Verify | `companies=313` `user_roles=3` |
-| Live auth | 20/20 pass |
-| GHCR / rollback | PASS · live SHA-A `647308e7…` |
+| Live API | `https://api.stg.impulsionando.com.br` |
+| GHCR API image | `ghcr.io/raygsm/impulsionando-api:b58d4c111b0b37bc48dacad3a7e12c1506f9d6e1` |
+| Runtime gitSha | `badfb94d01cec685736bc1377f008adf3acd863b` |
 | Clean host | `2.25.123.224` |
+| GHCR workflow | [33575721274](https://github.com/raygsm/impulsionando/actions/runs/33575721274) |

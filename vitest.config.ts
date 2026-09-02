@@ -12,6 +12,14 @@ export default defineConfig({
         __dirname,
         "packages/tenant-context/src/index.ts",
       ),
+      "@impulsionando/contracts": path.resolve(
+        __dirname,
+        "packages/contracts/src/index.ts",
+      ),
+      "@impulsionando/tenant-host": path.resolve(
+        __dirname,
+        "packages/tenant-host/src/index.ts",
+      ),
     },
   },
   test: {

@@ -351,13 +351,57 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
-  apps/app-web: {}
+  apps/app-web:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.13
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
 
-  apps/platform-web: {}
+  apps/platform-web:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.13
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
 
-  apps/tenant-web: {}
+  apps/tenant-web:
+    dependencies:
+      '@impulsionando/tenant-host':
+        specifier: workspace:*
+        version: link:../../packages/tenant-host
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.13
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
 
   apps/worker:
+    dependencies:
+      '@impulsionando/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@supabase/supabase-js':
+        specifier: ^2.49.1
+        version: 2.112.4(@opentelemetry/api@1.9.1)
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.13.10
@@ -392,6 +436,8 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.25.76
+
+  packages/tenant-host: {}
 
   packages/testing: {}
 

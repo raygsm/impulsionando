@@ -1,5 +1,19 @@
 {
   "name": "@impulsionando/platform-web",
+  "version": "0.0.1",
   "private": true,
-  "description": "Impulsionando institutional website (TanStack Start). Placeholder — Phase 4."
+  "description": "Marketing / platform web runtime (Phase 4B strangler stub)",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "start:dev": "tsx watch src/server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

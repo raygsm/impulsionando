@@ -49,3 +49,40 @@ export {
   type SupportTicketUpdateStatusResponse,
   type SupportTicketAuditV1,
 } from "./support";
+
+export {
+  TENANT_CONFIG_SCHEMA_VERSION,
+  TENANT_ENTITLEMENTS_SCHEMA_VERSION,
+  TenantBrandingSchema,
+  TenantConfigV1Schema,
+  TenantEntitlementsV1Schema,
+  TenantLocaleSchema,
+  featureFlagKey,
+  mergeModuleLimits,
+  resolveEffectiveFlags,
+  resolveEffectiveModules,
+  resolveFlagValue,
+  type FeatureFlagCatalogRow,
+  type FeatureFlagOverrideRow,
+  type TenantBranding,
+  type TenantConfigV1,
+  type TenantEntitlementsV1,
+  type TenantLocale,
+} from "./tenant";
+
+export {
+  DEFAULT_MAX_JOB_ATTEMPTS,
+  DEFAULT_VISIBILITY_TIMEOUT_SECONDS,
+  JOB_SCHEMA_VERSION,
+  JobEnvelopeSchema,
+  JobMessageSchema,
+  REENGINEERING_JOBS_DLQ,
+  REENGINEERING_JOBS_QUEUE,
+  computeBackoffMs,
+  idempotencyScopeKey,
+  shouldMoveToDlq,
+  shouldSkipDuplicate,
+  type IdempotencyState,
+  type JobEnvelope,
+  type JobMessage,
+} from "./job";

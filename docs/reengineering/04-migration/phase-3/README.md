@@ -1,7 +1,7 @@
 # Phase 3 — Nest Support API (pilot)
 
 Opened: **2026-08-31**  
-Status: **IN PROGRESS** — pilot **LIVE** on `api.stg`; residuals block close (GHCR SHA promote, staff list/update smoke)  
+Status: **CLOSED** — pilot **LIVE** on `api.stg`; see [`PHASE-3-EXIT-REPORT.md`](./PHASE-3-EXIT-REPORT.md) (2026-09-02)
 Exit report: [`PHASE-3-EXIT-REPORT.md`](./PHASE-3-EXIT-REPORT.md)
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  

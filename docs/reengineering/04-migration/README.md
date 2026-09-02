@@ -8,10 +8,18 @@ A migração segue o padrão strangler: o sistema novo assume fluxos completos g
 | 1 | [Contratos e fundação](PHASE-1-FOUNDATION.md) · [board](phase-1/README.md) | contratos, segurança e módulos definidos |
 | 2 | [Plataforma e staging](PHASE-2-PLATFORM.md) · [board](phase-2/README.md) | staging e deploy reproduzível |
 | 3 | [Nova API modular](PHASE-3-API.md) | API modular operando em paralelo |
-| 4 | [Frontends e tenants](PHASE-4-TENANTS.md) | frontends e tenants migrados gradualmente |
+| 4 | [Frontends e tenants](PHASE-4-TENANTS.md) | 4A resolve fechado; 4B configuração/frontends/tenant piloto aberta |
 | 5 | [Workers e integrações](PHASE-5-INTEGRATIONS.md) | workers e integrações desacoplados |
 | 6 | [Plataforma de IA](PHASE-6-AI.md) | IA governada e mensurável |
 | 7 | [Cutover e retirada do legado](PHASE-7-CUTOVER.md) | produção consolidada e legado retirado |
+
+## Product-intake integration plan
+
+Raygs's root [`../../../product-intake/`](../../../product-intake/) corpus is mapped into phase-gated platform foundations, vertical waves, and separately gated regulated programs in:
+
+[`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md)
+
+The plan adds Phase 4B, explicit Phase 5A–5G and Phase 6A–6F gates, vertical migration waves, and a narrow Phase 7 cutover boundary. Intake remains product input; it does not authorize implementation by itself.
 
 ## Phase 2 planning opened 2026-08-30
 

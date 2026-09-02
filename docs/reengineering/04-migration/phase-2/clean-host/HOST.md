@@ -1,6 +1,6 @@
 # Clean host — current identity
 
-Recorded: **2026-09-01** (Phase 3 Nest API LIVE on `api.stg`). Update when facts change. **No secrets.**
+Recorded: **2026-09-02** (Phases 2–3 and 4A closed; GHCR API on Swarm). Update when facts change. **No secrets.**
 
 | Field | Value |
 | --- | --- |
@@ -17,7 +17,7 @@ Recorded: **2026-09-01** (Phase 3 Nest API LIVE on `api.stg`). Update when facts
 | Traefik | Installed with Dokploy (`traefik:v3.6.7`); ACME email `stg-ops@impulsionando.com.br` |
 | Public listeners (observed) | `22` (sshd), `80`/`443` (Traefik), `3000` (Dokploy), **`8088`** (placeholder host publish) |
 | Placeholder app | Swarm `reengineering-placeholder` · GHCR SHA `647308e7…` · Host **`stg.impulsionando.com.br`** only (+ `placeholder.staging.local`) · `/health` full `gitSha` |
-| Nest API (Phase 3 pilot) | Swarm **`reengineering-api`** · image `reengineering-api:phase3-local` (local tag; GHCR `badfb94d…` built, push pending) · Host **`api.stg.impulsionando.com.br`** · port **3100** · `/health` `gitSha=badfb94d01cec685736bc1377f008adf3acd863b` · service `impulsionando-api` |
+| Nest API (Phase 3 pilot) | Swarm **`reengineering-api`** · image `ghcr.io/raygsm/impulsionando-api:b58d4c111b0b37bc48dacad3a7e12c1506f9d6e1` · Host **`api.stg.impulsionando.com.br`** · port **3100** · `/health` `gitSha=badfb94d01cec685736bc1377f008adf3acd863b` |
 | Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` → `2.25.123.224` (DNS only); `dokploy.stg` proxied |
 | App Supabase | Managed external — staging ref **`aamorcqznimmleafavai`** |
 | Legacy prod (deny) | `187.77.232.52` — do not mutate from Phase 2 clean-host work |

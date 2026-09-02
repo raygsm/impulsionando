@@ -2,11 +2,16 @@
   "name": "@impulsionando/worker",
   "version": "0.0.1",
   "private": true,
-  "description": "Independent Node.js worker — Phase 5 seed (no SSR co-start)",
+  "description": "Independent Node.js worker — Phase 5 queue consumer",
   "type": "commonjs",
   "scripts": {
     "start": "tsx src/main.ts",
     "start:dev": "tsx watch src/main.ts"
+  },
+  "dependencies": {
+    "@impulsionando/contracts": "workspace:*",
+    "@supabase/supabase-js": "^2.49.1",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
