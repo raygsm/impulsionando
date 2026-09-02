@@ -1,0 +1,125 @@
+# DNS publicly propagated; rerun exact EVR router validation
+name: Grupo EVR fast router
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/grupoevr-fast-router.yml
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  publish:
+    if: github.head_ref == 'ops/grupoevr-fast-router'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DOMAIN: grupoevr.impulsionando.com.br
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Configure SSH with retries
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          : > ~/.ssh/known_hosts
+          ok=0
+          for attempt in $(seq 1 10); do
+            if ssh-keyscan -T 15 -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null && test -s ~/.ssh/known_hosts; then
+              if ssh -o ConnectTimeout=15 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" 'true'; then
+                ok=1
+                break
+              fi
+            fi
+            sleep $((attempt * 3))
+          done
+          [ "$ok" = 1 ] || exit 42
+
+      - name: Launch isolated runtime from active Core release
+        id: deploy
+        run: |
+          set -euo pipefail
+          ssh -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 "$VPS_USER@$VPS_HOST" "DOMAIN='$DOMAIN' bash -s" <<'REMOTE'
+          set -euo pipefail
+          current="$(readlink -f /var/www/impulsionando-core/current)"
+          test -d "$current/.output"
+          test -d "$current/scripts"
+          base=/opt/impulsionando/deploy/hostinger/docker-compose.yml
+          override=/opt/impulsionando/deploy/hostinger/docker-compose.grupoevr-fast.yml
+          envfile=/etc/impulsionando-core.env
+          sudo test -f "$base"
+          sudo test -f "$envfile"
+          sudo docker inspect impulsionando-core >/dev/null
+          image="$(sudo docker inspect -f '{{.Config.Image}}' impulsionando-core)"
+          test -n "$image"
+          cd /opt/impulsionando/deploy/hostinger
+          sudo tee "$override" >/dev/null <<YAML
+          services:
+            impulsionando-grupoevr-fast:
+              image: $image
+              env_file:
+                - /etc/impulsionando-core.env
+              restart: unless-stopped
+              volumes:
+                - $current/.output:/app/.output:ro
+                - $current/scripts:/app/scripts:ro
+              command: ["node", "scripts/start-core-runtime.mjs"]
+              environment:
+                NODE_ENV: production
+                HOST: 0.0.0.0
+                PORT: 3000
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.grupoevr-fast.entrypoints: websecure
+                traefik.http.routers.grupoevr-fast.rule: "Host(\`$DOMAIN\`)"
+                traefik.http.routers.grupoevr-fast.service: grupoevr-fast
+                traefik.http.routers.grupoevr-fast.tls: "true"
+                traefik.http.routers.grupoevr-fast.tls.certresolver: letsencrypt
+                traefik.http.routers.grupoevr-fast.priority: "9950"
+                traefik.http.services.grupoevr-fast.loadbalancer.server.port: "3000"
+          YAML
+          sudo docker compose -f "$base" -f "$override" config -q
+          sudo docker compose -f "$base" -f "$override" up -d --no-build --force-recreate impulsionando-grupoevr-fast
+          for i in $(seq 1 30); do
+            ip="$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' impulsionando-grupoevr-fast 2>/dev/null || true)"
+            code=000
+            if [ -n "$ip" ]; then code="$(curl -sS -H "Host: $DOMAIN" -o /tmp/evr -w '%{http_code}' --max-time 8 "http://$ip:3000/" || true)"; fi
+            [ "$code" = 200 ] && break
+            sleep 2
+          done
+          [ "$code" = 200 ] || exit 60
+          grep -qi 'Grupo EVR' /tmp/evr || exit 61
+          traefik="$(curl -k -sS --resolve "$DOMAIN:443:127.0.0.1" -o /tmp/evr-t -w '%{http_code}' --max-time 10 "https://$DOMAIN/" || true)"
+          [ "$traefik" = 200 ] || exit 62
+          grep -qi 'Grupo EVR' /tmp/evr-t || exit 63
+          REMOTE
+
+      - name: Public check with retries
+        id: public
+        run: |
+          set +e
+          code=000
+          for i in $(seq 1 20); do
+            code="$(curl -sS -L -H 'Cache-Control: no-cache' -o /tmp/public -w '%{http_code}' --max-time 15 "https://$DOMAIN/" || true)"
+            if [ "$code" = 200 ] && grep -qi 'Grupo EVR' /tmp/public; then
+              echo 'result=HTTPS_OK' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "result=HTTP_$code" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Report
+        if: always()
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            -f body="GRUPOEVR_FAST_ROUTER: ${{ steps.public.outputs.result || 'DEPLOY_FAILED' }}"
