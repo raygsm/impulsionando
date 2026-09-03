@@ -46,7 +46,7 @@ Approval-gated sensitive actions; **no autonomous writes** this wave:
 - Registry: `effect.gated.noop` listed as `APPROVAL_REQUIRED` **non-executable**; FORBIDDEN / AUTO_SAFE still denied
 - Contracts: `npm run test:phase6e:contracts` (folded into `test:phase6:contracts`)
 
-Do **not** mark Phase 6 CLOSED. Worker effect handler remains noop (no writes). Staging live smoke for 6E = **UNKNOWN** (no SSH/deploy this wave).
+Do **not** mark Phase 6 CLOSED. Worker effect handler is **sink** (ledger + structured log, no domain writes). Staging live smoke for 6E = **UNKNOWN** until Wave 2 promote.
 
 ## 6D note (2026-09-03) — scaffolding IN PROGRESS
 
