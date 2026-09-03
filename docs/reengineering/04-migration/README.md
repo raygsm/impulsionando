@@ -13,6 +13,10 @@ A migração segue o padrão strangler: o sistema novo assume fluxos completos g
 | 6 | [Plataforma de IA](PHASE-6-AI.md) | IA governada e mensurável |
 | 7 | [Cutover e retirada do legado](PHASE-7-CUTOVER.md) | produção consolidada e legado retirado |
 
+## Operational canvas (current)
+
+Live task board + parallel speed lanes (Phase 6 critical path): [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) · [`ACCELERATION-BOARD.md`](./ACCELERATION-BOARD.md)
+
 ## Product-intake integration plan
 
 Raygs's root [`../../../product-intake/`](../../../product-intake/) corpus is mapped into phase-gated platform foundations, vertical waves, and separately gated regulated programs in:

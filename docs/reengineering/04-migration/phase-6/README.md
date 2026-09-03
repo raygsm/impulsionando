@@ -5,7 +5,8 @@ Status: **IN PROGRESS (6A–6E scaffolding)** — **not CLOSED**
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Detailed plan: [`../PHASE-6-AI.md`](../PHASE-6-AI.md) · [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 6  
-Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)
+Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)  
+Speed canvas (task lanes): [`../UPDATE-CANVAS.md`](../UPDATE-CANVAS.md)
 
 ## Goal
 
@@ -41,7 +42,7 @@ Do **not** mark Phase 6 CLOSED. Worker effect handler remains noop (no writes). 
 Additive MVP on the shared gateway (not full RAG / multi-agent product):
 
 - Contracts: `AiTenantAgentConfigSchema` + env **names** (`AI_TENANT_AGENT_*`) in `packages/contracts/src/ai.ts`
-- Nest: `apps/api/src/ai/ai-agent.service.ts` · `GET /api/v1/ai/agents/:tenantId` (auth + membership recheck)
+- Nest: `apps/api/src/ai/ai-agent.service.ts` · **service ready**; HTTP `GET /api/v1/ai/agents/:tenantId` still **MISSING** on `ai.controller.ts` (Wave 1 Lane B)
 - Seed: one staging tenant from env names / static READ allowlist — no secrets
 - Chat: optional peek of agent config when `tenantId` present in body; **pilot does not yet consume** agent prompt/model (merge note vs in-flight `…-phase6cf` — avoid fighting `ai-pilot.service.ts`)
 - Contracts: `npm run test:phase6d:contracts` (folded into `test:phase6:contracts`)

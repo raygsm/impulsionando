@@ -37,7 +37,7 @@ Em caso de conflito:
 | Plataforma     | [Dokploy](03-platform/DOKPLOY.md) e [CI/CD](03-platform/CI-CD.md)                                                                               | Como ambientes, builds e releases funcionarão?                                                   |
 | Migração       | [Plano por fases](04-migration/README.md)                                                                                                       | Em que ordem migraremos sem interromper produção?                                                |
 | Governança     | [Decisões](05-governance/DECISIONS.md), [riscos](05-governance/RISKS.md), [Definition of Done](05-governance/DEFINITION-OF-DONE.md), [Implementation rules (agents)](05-governance/IMPLEMENTATION-RULES.md) | Como decisões, riscos, close-out de agentes e conclusão serão controlados? |
-| Acompanhamento | [Status](STATUS.md)                                                                                                                             | Onde estamos e qual é o próximo gate?                                                            |
+| Acompanhamento | [Status](STATUS.md) · [Update canvas](04-migration/UPDATE-CANVAS.md) · [Acceleration board](04-migration/ACCELERATION-BOARD.md) | Onde estamos, tasks abertas e lanes paralelas? |
 
 ## Sequência obrigatória
 

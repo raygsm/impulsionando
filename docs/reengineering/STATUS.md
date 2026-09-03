@@ -1,6 +1,8 @@
 # Status do Programa
 
-Atualizado em: 2026-09-03T11:45Z (Phase 6 **IN PROGRESS** — 6A–6E code in repo · contracts 44/44 · combined `…-phase6cdef` promote **UNKNOWN**/aborted; Phase 5 staging exit remains **CLOSED**)
+Atualizado em: 2026-09-03T23:20Z (Phase 6 **IN PROGRESS** — speed canvas published · 6A–6E code in repo · contracts 44/44 · combined `…-phase6cdef` promote **UNKNOWN**/aborted; Phase 5 staging exit remains **CLOSED**)
+
+Operational canvas (tasks + parallel lanes): [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)
 
 ## Estado geral
 
@@ -24,7 +26,15 @@ Atualizado em: 2026-09-03T11:45Z (Phase 6 **IN PROGRESS** — 6A–6E code in re
 
 ## Próximo gate
 
-Phase 6 governed AI is **IN PROGRESS** (6A–6E in repo; 6A/6B staging-live on `…-phase6a`). Do **not** mark Phase 6 CLOSED. Next: promote `…-phase6cdef` (or successor) with `AI_CHAT_ENABLED`, live smoke, then exit residuals (pilot applies agent config, durable approvals, effects worker). Phase 7 remains blocked.
+Phase 6 governed AI is **IN PROGRESS** (6A–6E in repo; 6A/6B staging-live on `…-phase6a`). Do **not** mark Phase 6 CLOSED.
+
+**Critical-path next (see UPDATE-CANVAS):**
+
+1. Wave 1 parallel repo lanes — policy budgets/allowlist · wire `GET /ai/agents/:tenantId` · pilot consumes agent config · effects membership + worker sink · smoke extensions  
+2. Wave 2 sequential promote `…-phase6cdef` (or successor) with `AI_CHAT_ENABLED` + live allow/deny smokes  
+3. Only then mark Phase 6 CLOSED · Phase 7 remains blocked
+
+Known gap vs prior docs: agents **service** exists; HTTP `GET /ai/agents/:tenantId` route still **missing** in `ai.controller.ts`.
 
 Phase 5 staging exit evidence (8/8 PASS @ 2026-09-03T03:40Z) is unchanged and remains authoritative for worker/ops close-out.
 
