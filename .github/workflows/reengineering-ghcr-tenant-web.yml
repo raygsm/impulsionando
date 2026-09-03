@@ -1,0 +1,74 @@
+# Reengineering GHCR tenant-web (Phase 4B).
+#
+# Manual only — workflow_dispatch. Full commit SHA tags only.
+# This file lives on `main` so GitHub registers the workflow.
+# Default build ref is `reengineering/program` (tenant-web + Dockerfile.tenant-web).
+
+name: Reengineering GHCR tenant-web
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or SHA to build
+        required: true
+        default: reengineering/program
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: reengineering-ghcr-tenant-web-${{ inputs.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/impulsionando-tenant-web
+
+jobs:
+  build-tenant-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push SHA-tagged tenant-web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/compose/Dockerfile.tenant-web
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.title=impulsionando-tenant-web
+
+      - name: Job summary
+        run: |
+          {
+            echo "## Reengineering GHCR tenant-web (Phase 4B)"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Image | \`${IMAGE_NAME}:${GITHUB_SHA}\` |"
+            echo "| Runtime | tenant-web strangler stub |"
+          } >> "$GITHUB_STEP_SUMMARY"
