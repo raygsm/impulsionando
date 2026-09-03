@@ -2,13 +2,16 @@
 /**
  * Phase 6A–6F smoke — AI gateway capabilities / policy / tools / metrics / agents / effects + pilot chat.
  *
- * Operator (staging only, after API deploy with AiModule + AI_CHAT_ENABLED for 6C):
- * 1. Deploy API image that includes apps/api/src/ai/.
- * 2. Export a staging Bearer as PHASE6_AI_BEARER (or PHASE5G_OPS_BEARER fallback).
- * 3. Optional: PHASE6_AI_TENANT_ID for agents + effects create smokes.
- * 4. Export DRY_RUN=0 and run against api.stg only.
+ * Modes (PHASE6_SMOKE_MODE):
+ *   full (default) — gateway matrix + optional allow tenant agents/effects
+ *   deny-only      — only GET /ai/agents/:denyTenantId expecting 403
  *
- * Default: DRY_RUN=1 — prints the intended request shape without sending.
+ * Env:
+ *   PHASE6_AI_BEARER | PHASE5G_OPS_BEARER
+ *   PHASE6_AI_TENANT_ID
+ *   PHASE6_AI_DENY_TENANT_ID
+ *   DRY_RUN=0 for live
+ *
  * Never prints Bearer token or other secrets.
  */
 const STAGING_API_DEFAULT = "https://api.stg.impulsionando.com.br";
@@ -16,6 +19,8 @@ const STAGING_API_DEFAULT = "https://api.stg.impulsionando.com.br";
 const dryRun = process.env.DRY_RUN !== "0";
 const base = (process.env.PHASE3_API_BASE || STAGING_API_DEFAULT).replace(/\/$/, "");
 const tenantId = process.env.PHASE6_AI_TENANT_ID?.trim() || "";
+const denyTenantId = process.env.PHASE6_AI_DENY_TENANT_ID?.trim() || "";
+const mode = (process.env.PHASE6_SMOKE_MODE || "full").trim();
 
 function assertStagingLikeUrl(url) {
   if (!url.includes("stg.impulsionando") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
@@ -30,8 +35,37 @@ function hasSecretLeak(bodyText) {
   );
 }
 
-async function main() {
-  assertStagingLikeUrl(base);
+function buildEndpoints() {
+  if (mode === "deny-only") {
+    if (!denyTenantId) {
+      throw new Error("PHASE6_AI_DENY_TENANT_ID required for deny-only mode");
+    }
+    return [
+      {
+        id: "agents-deny",
+        method: "GET",
+        url: `${base}/api/v1/ai/agents/${denyTenantId}`,
+        expectedStatusAuthed: [403],
+        expectedStatusUnauthed: 401,
+      },
+      {
+        id: "chat-deny-tenant",
+        method: "POST",
+        url: `${base}/api/v1/ai/chat`,
+        body: {
+          message: "list my support tickets",
+          tenantId: denyTenantId,
+        },
+        /**
+         * 403 if chat disabled; else 200 with refused AI_UNAUTHORIZED (Wave 1 membership).
+         */
+        expectedStatusAuthed: [200, 201, 403],
+        expectedStatusUnauthed: 401,
+        chatPilot: true,
+        expectRefuseCode: "AI_UNAUTHORIZED",
+      },
+    ];
+  }
 
   const endpoints = [
     {
@@ -67,7 +101,6 @@ async function main() {
       method: "POST",
       url: `${base}/api/v1/ai/chat`,
       body: { message: "hello what can you do?" },
-      /** 200 preferred (@HttpCode OK); 201 tolerated on older images; 403 if AI_CHAT_ENABLED off */
       expectedStatusAuthed: [200, 201, 403],
       expectedStatusUnauthed: 401,
       chatPilot: true,
@@ -89,7 +122,6 @@ async function main() {
       id: "agents-get",
       method: "GET",
       url: `${base}/api/v1/ai/agents/${tenantId}`,
-      /** 200 seeded · 404 no seed · 403 membership deny */
       expectedStatusAuthed: [200, 403, 404],
       expectedStatusUnauthed: 401,
     });
@@ -103,24 +135,31 @@ async function main() {
         idempotencyKey: `phase6-smoke-${Date.now()}`,
         reason: "phase6 smoke create (no side effect)",
       },
-      /** 201/200 pending · 403 membership/validation */
       expectedStatusAuthed: [200, 201, 403],
       expectedStatusUnauthed: 401,
     });
   }
 
+  return endpoints;
+}
+
+async function main() {
+  assertStagingLikeUrl(base);
+  const endpoints = buildEndpoints();
+
   const plan = {
     ok: true,
     dryRun,
+    mode,
     tenantIdConfigured: Boolean(tenantId),
+    denyTenantIdConfigured: Boolean(denyTenantId),
     endpoints,
     authHeader: "Authorization: Bearer <PHASE6_AI_BEARER>",
     notes: [
       "Auth required on all endpoints",
       "Responses must not contain secret/password/token field values",
       "With AI_CHAT_ENABLED: chat returns 200 grounded or refused; without: 403",
-      "GET /ai/metrics retention=in-memory-ring; canaryStatus=UNKNOWN",
-      "Set PHASE6_AI_TENANT_ID to exercise GET /ai/agents/:tenantId and effects create",
+      "deny-only mode expects agents 403 + chat refuse AI_UNAUTHORIZED when enabled",
       "Do not deploy to prod",
     ],
   };
@@ -142,7 +181,7 @@ async function main() {
   }
 
   const results = [];
-  for (const ep of plan.endpoints) {
+  for (const ep of endpoints) {
     const unauth = await fetch(ep.url, {
       method: ep.method,
       headers: ep.method === "POST" ? { "content-type": "application/json" } : undefined,
@@ -187,6 +226,10 @@ async function main() {
         if (ep.expectGroundedWhenEnabled && data.refused === false) {
           chatShapeOk = chatShapeOk && typeof data.answer === "string" && data.answer.length > 0;
         }
+        if (ep.expectRefuseCode) {
+          chatShapeOk =
+            chatShapeOk && data.refused === true && data.code === ep.expectRefuseCode;
+        }
       } catch {
         chatShapeOk = false;
       }
@@ -211,6 +254,7 @@ async function main() {
       {
         ok,
         dryRun: false,
+        mode,
         results,
       },
       null,

@@ -6,7 +6,8 @@ Status: **IN PROGRESS (Wave 1 repo landed 2026-09-03T23:40Z)** — **not CLOSED*
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Detailed plan: [`../PHASE-6-AI.md`](../PHASE-6-AI.md) · [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 6  
 Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)  
-Speed canvas (task lanes): [`../UPDATE-CANVAS.md`](../UPDATE-CANVAS.md)
+Speed canvas (task lanes): [`../UPDATE-CANVAS.md`](../UPDATE-CANVAS.md)  
+Wave 2 close plan: [`WAVE-2-CLOSE.md`](./WAVE-2-CLOSE.md)
 
 ## Goal
 

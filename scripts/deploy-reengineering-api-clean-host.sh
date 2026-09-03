@@ -34,6 +34,8 @@ TRAEFIK_HOST="api.stg.impulsionando.com.br"
 CONTAINER_PORT="3100"
 SKIP_PULL="${SKIP_PULL:-0}"
 STAGING_ACCESS_GATE="${STAGING_ACCESS_GATE:-0}"
+# Phase 6 Wave 2 — when 1, docker service update --env-add AI_CHAT_ENABLED=true (name only).
+PHASE6_CHAT="${PHASE6_CHAT:-0}"
 
 die() { echo "error: $*" >&2; exit 1; }
 
@@ -98,6 +100,7 @@ CONTAINER_PORT=$(printf %q "${CONTAINER_PORT}") \
 REMOTE_ENV=$(printf %q "${REMOTE_ENV}") \
 SKIP_PULL=$(printf %q "${SKIP_PULL}") \
 STAGING_ACCESS_GATE=$(printf %q "${STAGING_ACCESS_GATE}") \
+PHASE6_CHAT=$(printf %q "${PHASE6_CHAT}") \
 bash -s" <<'REMOTE'
 set -euo pipefail
 
@@ -190,6 +193,13 @@ if docker service inspect "$SERVICE_NAME" >/dev/null 2>&1; then
     --update-order start-first \
     --rollback-order start-first \
     "$SERVICE_NAME"
+  if [[ "${PHASE6_CHAT}" == "1" ]]; then
+    echo "==> PHASE6_CHAT=1 — env-add AI_CHAT_ENABLED=true (no secret values)"
+    docker service update \
+      --env-add AI_CHAT_ENABLED=true \
+      --update-order start-first \
+      "$SERVICE_NAME"
+  fi
   if [[ -n "${REMOTE_ENV}" ]]; then
     echo "==> Note: existing service — ENV_FILE not re-applied automatically."
     echo "    Set/refresh secrets via Dokploy UI or docker service update --env-add (do not log values)."
@@ -200,6 +210,10 @@ else
   if [[ -n "${REMOTE_ENV}" ]]; then
     ENV_ARGS=(--env-file "${REMOTE_ENV}")
   fi
+  CREATE_ENV_EXTRA=()
+  if [[ "${PHASE6_CHAT}" == "1" ]]; then
+    CREATE_ENV_EXTRA+=(--env AI_CHAT_ENABLED=true)
+  fi
   # shellcheck disable=SC2046
   docker service create \
     --name "$SERVICE_NAME" \
@@ -207,6 +221,7 @@ else
     --network "$NETWORK_NAME" \
     $(apply_labels_create) \
     "${ENV_ARGS[@]}" \
+    "${CREATE_ENV_EXTRA[@]}" \
     --update-order start-first \
     --rollback-order start-first \
     "$IMAGE_REF"

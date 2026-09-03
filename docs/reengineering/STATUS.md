@@ -1,8 +1,9 @@
 # Status do Programa
 
-Atualizado em: 2026-09-03T23:40Z (Phase 6 **IN PROGRESS** — Wave 1 repo lanes A–D landed · contracts **47/47** · staging still on `…-phase6a` · Wave 2 promote **UNKNOWN**; Phase 5 staging exit remains **CLOSED**)
+Atualizado em: 2026-09-03T23:50Z (Phase 6 **IN PROGRESS** — Wave 1 repo done · Wave 2 close tooling landed · promote/live still **UNKNOWN** — no SSH/Docker in this agent; Phase 5 remains **CLOSED**)
 
-Operational canvas (tasks + parallel lanes): [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)
+Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
+Wave 2 plan: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)
 
 ## Estado geral
 
@@ -28,16 +29,13 @@ Operational canvas (tasks + parallel lanes): [`04-migration/UPDATE-CANVAS.md`](0
 
 Phase 6 governed AI is **IN PROGRESS**. Wave 1 (repo) landed 2026-09-03T23:40Z — do **not** mark Phase 6 CLOSED until Wave 2 staging proof.
 
-**Next (Wave 2 — sequential ops):**
+**Next (Wave 2 — parallel where possible, then sequential promote):**
 
-1. Build/promote API + worker (`…-phase6cdef` or successor SHA) with `AI_CHAT_ENABLED` + optional `AI_TENANT_AGENT_*` seed
-2. Live smoke: capabilities/policy/tools/metrics/chat grounded · agents allow/deny · effects create
-3. Cross-tenant deny evidence
-4. Then mark Phase 6 CLOSED in STATUS + phase-6 README + clean-host log
+See [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md).
 
-Phase 5 staging exit evidence (8/8 PASS @ 2026-09-03T03:40Z) is unchanged.
+Repo tooling ready: `npm run phase6:staging:verify` · `npm run phase6:wave2:close` (needs SSH key + IMAGE_TAG).
 
-Human residual: optional GHCR push of local-load SHA tags; Wave 2 promote = **UNKNOWN** until operator run.
+This cloud agent **cannot** finish promote (no Docker / no `id_ed25519_impulsionando` / no operator bearer). Operator must run Wave 2 on a machine with those, then agent can close STATUS.
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 
