@@ -1,7 +1,7 @@
 # Reengineering update canvas — speed plan
 
-Created: **2026-09-03T23:20Z**  
-Branch: `reengineering/program` (planning on `cursor/phase6-update-canvas-4675`)  
+Created: **2026-09-03T23:20Z** · Wave 1 landed: **2026-09-03T23:40Z**  
+Branch: `cursor/phase6-update-canvas-4675`  
 Program SoT: [`../STATUS.md`](../STATUS.md)  
 Authority: accepted ADRs → target architecture → STATUS → evidence → product-intake  
 
@@ -16,13 +16,9 @@ Authority: accepted ADRs → target architecture → STATUS → evidence → pro
 | --- | --- |
 | Overall | Phases **0–5 CLOSED (staging)** · Phase **6 IN PROGRESS** · Phase **7 NOT STARTED** |
 | Live API | `https://api.stg.impulsionando.com.br` · image `…-phase6a` · SHA `67e10951…` |
-| Live tenant-web | `https://tenant.stg.impulsionando.com.br` |
-| Worker | Swarm internal · outbox/comm/journey **ON** · AI effect handler **noop** |
-| Staging Supabase | `aamorcqznimmleafavai` |
-| Clean host | `2.25.123.224` · Dokploy v0.30.3 |
-| Legacy prod | `187.77.232.52` — **deny** mutate from this track |
-| Phase 6 contracts | 44/44 in repo |
-| Combined promote `…-phase6cdef` | **UNKNOWN** / aborted |
+| Wave 1 (repo) | **LANDED** — allowlist/budgets/agents route/pilot consume/effects membership/worker sink |
+| Wave 2 (staging) | **PENDING** — promote + live allow/deny |
+| Contracts | **47/47** PASS (`test:phase6:contracts`) |
 | Phase 6 CLOSED? | **No** |
 
 ### Critical honesty

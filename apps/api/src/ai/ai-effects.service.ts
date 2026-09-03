@@ -28,6 +28,7 @@ import {
 import type { AuthUser } from "../auth/auth.types";
 import { JobsService } from "../jobs/jobs.service";
 import { SupportService } from "../support/support.service";
+import { TenantsService, TenantAccessDeniedError } from "../tenants/tenants.service";
 
 const STORE_MAX = 500;
 
@@ -36,7 +37,7 @@ const STORE_MAX = 500;
  * In-memory audit store (staging scaffold). No autonomous writes:
  * approve only enqueues `ai.effect.execute` (or records QUEUE_STUB).
  *
- * Decide path uses Support staff check (`is_impulsionando_staff`).
+ * Create requires tenant membership. Decide uses Support staff check.
  * Staging note: without staff membership, decide returns 403.
  */
 @Injectable()
@@ -47,13 +48,14 @@ export class AiEffectsService {
   constructor(
     @Inject(JobsService) private readonly jobs: JobsService,
     @Inject(SupportService) private readonly support: SupportService,
+    @Inject(TenantsService) private readonly tenants: TenantsService,
   ) {}
 
-  createRequest(opts: {
+  async createRequest(opts: {
     body: AiEffectApprovalCreateBody;
     actor: AuthUser;
     correlationId: string;
-  }): AiEffectApprovalRequest {
+  }): Promise<AiEffectApprovalRequest> {
     const parsed = AiEffectApprovalCreateBodySchema.safeParse(opts.body);
     if (!parsed.success) {
       throw new ForbiddenException({
@@ -63,6 +65,24 @@ export class AiEffectsService {
           correlationId: opts.correlationId,
         },
       });
+    }
+
+    try {
+      await this.tenants.assertMembership(opts.actor.id, parsed.data.tenantId);
+    } catch (err) {
+      if (err instanceof TenantAccessDeniedError) {
+        throw new ForbiddenException({
+          error: {
+            code: err.code,
+            message:
+              err.code === "NO_MEMBERSHIP"
+                ? "User has no tenant memberships"
+                : "User is not a member of this tenant",
+            correlationId: opts.correlationId,
+          },
+        });
+      }
+      throw err;
     }
 
     const scope = aiEffectIdempotencyScopeKey({

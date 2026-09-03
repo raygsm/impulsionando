@@ -1,5 +1,6 @@
 import {
   COMMUNICATION_DISPATCH_JOB_TYPE,
+  AI_EFFECT_EXECUTE_JOB_TYPE,
   DEFAULT_MAX_JOB_ATTEMPTS,
   DEFAULT_VISIBILITY_TIMEOUT_SECONDS,
   computeBackoffMs,
@@ -31,6 +32,7 @@ export type ConsumerStats = {
   failed: number;
   dlq: number;
   communication?: CommunicationDispatchStats;
+  aiEffects?: number;
 };
 
 const SMOKE_JOB_TYPE = "reengineering.smoke.echo";
@@ -43,6 +45,7 @@ export class JobConsumer {
     failed: 0,
     dlq: 0,
     communication: { delivered: 0, skipped: 0, failed: 0 },
+    aiEffects: 0,
   };
 
   constructor(
@@ -205,6 +208,37 @@ export class JobConsumer {
       };
       await handleCommunicationDispatchJob(this.client, envelope, commStats);
       this.stats.communication = commStats;
+      return;
+    }
+
+    // Phase 6E — sink handler: acknowledge + ledger effect; no domain writes.
+    if (envelope.type === AI_EFFECT_EXECUTE_JOB_TYPE) {
+      const payload =
+        envelope.payload && typeof envelope.payload === "object"
+          ? (envelope.payload as Record<string, unknown>)
+          : {};
+      const inserted = await recordJobEffect(this.client, {
+        scopeKey,
+        tenantId: envelope.tenantId,
+        effectType: AI_EFFECT_EXECUTE_JOB_TYPE,
+        jobId: envelope.jobId,
+      });
+      this.stats.aiEffects = (this.stats.aiEffects ?? 0) + 1;
+      console.log(
+        JSON.stringify({
+          ok: true,
+          service: "impulsionando-worker",
+          event: "ai_effect_execute_sink",
+          jobId: envelope.jobId,
+          tenantId: envelope.tenantId,
+          correlationId: envelope.correlationId,
+          approvalRequestId: payload.approvalRequestId ?? null,
+          toolId: payload.toolId ?? null,
+          singleEffect: inserted,
+          sideEffect: "none",
+          at: new Date().toISOString(),
+        }),
+      );
       return;
     }
 

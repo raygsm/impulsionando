@@ -10,8 +10,12 @@ import {
   assertNoSecretFields,
   buildDefaultCapabilities,
   defaultAiToolAllowPolicy,
+  estimatePromptTokens,
+  evaluateChatBudget,
+  isCapabilityAllowed,
   isToolAllowed,
   isTruthyEnv,
+  parseCapabilityAllowlist,
   parsePositiveIntEnv,
 } from "@impulsionando/contracts";
 
@@ -136,5 +140,52 @@ describe("Phase 6A — AI gateway / policy contract", () => {
     });
     const chat = envelope.capabilities.find((c) => c.id === "ai.chat");
     expect(chat?.enabled).toBe(false);
+  });
+
+  it("AI-12: capability allowlist disables unlisted capabilities", () => {
+    expect(parseCapabilityAllowlist(undefined)).toBeNull();
+    expect(parseCapabilityAllowlist("ai.capabilities, ai.policy")).toEqual([
+      "ai.capabilities",
+      "ai.policy",
+    ]);
+    const filtered = buildDefaultCapabilities({
+      killSwitchEnabled: false,
+      chatEnabled: true,
+      capabilityAllowlist: ["ai.capabilities", "ai.policy"],
+    });
+    expect(filtered.capabilities.find((c) => c.id === "ai.chat")?.enabled).toBe(false);
+    expect(filtered.capabilities.find((c) => c.id === "ai.policy")?.enabled).toBe(true);
+    expect(isCapabilityAllowed("ai.chat", null)).toBe(true);
+    expect(isCapabilityAllowed("ai.chat", ["ai.policy"])).toBe(false);
+  });
+
+  it("AI-13: evaluateChatBudget enforces token and rate limits", () => {
+    const budgets = {
+      maxTokensPerRequest: 2,
+      maxCostCentsPerRequest: null,
+      ratePerMinute: 1,
+    };
+    expect(
+      evaluateChatBudget({
+        budgets,
+        message: "abcdefghij", // ~3 tokens
+        rateCountInWindow: 0,
+      }).ok,
+    ).toBe(false);
+    expect(
+      evaluateChatBudget({
+        budgets: { ...budgets, maxTokensPerRequest: 100 },
+        message: "hi",
+        rateCountInWindow: 1,
+      }).ok,
+    ).toBe(false);
+    expect(
+      evaluateChatBudget({
+        budgets: { ...budgets, maxTokensPerRequest: 100 },
+        message: "hi",
+        rateCountInWindow: 0,
+      }).ok,
+    ).toBe(true);
+    expect(estimatePromptTokens("abcd")).toBe(1);
   });
 });

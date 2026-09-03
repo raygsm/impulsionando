@@ -1,12 +1,12 @@
 # Status do Programa
 
-Atualizado em: 2026-09-03T23:20Z (Phase 6 **IN PROGRESS** — speed canvas published · 6A–6E code in repo · contracts 44/44 · combined `…-phase6cdef` promote **UNKNOWN**/aborted; Phase 5 staging exit remains **CLOSED**)
+Atualizado em: 2026-09-03T23:40Z (Phase 6 **IN PROGRESS** — Wave 1 repo lanes A–D landed · contracts **47/47** · staging still on `…-phase6a` · Wave 2 promote **UNKNOWN**; Phase 5 staging exit remains **CLOSED**)
 
 Operational canvas (tasks + parallel lanes): [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)
 
 ## Estado geral
 
-**FASES 0–5 CONCLUÍDAS (staging). FASE 6 IN PROGRESS (6A–6E). FASE 7 NÃO INICIADA.**
+**FASES 0–5 CONCLUÍDAS (staging). FASE 6 IN PROGRESS (6A–6E Wave 1 repo). FASE 7 NÃO INICIADA.**
 
 | Fase | Estado | Evidência |
 | --- | --- | --- |
@@ -18,27 +18,26 @@ Operational canvas (tasks + parallel lanes): [`04-migration/UPDATE-CANVAS.md`](0
 | 5F | **CLOSED (staging)** | CRM invite → click → first-login live **PASS** (`…-journeyfix`) |
 | 5G | **CLOSED (staging)** | ops metrics **PASS** · outage drill **PASS** · owners **assigned** (Cauã) |
 | **5 (gate)** | **CLOSED (staging exit)** | `npm run phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
-| **6A/6B** | **IN PROGRESS** | staging API `…-phase6a` promote **PASS** · live smoke **PASS** |
-| **6C/6F** | **IN PROGRESS** (repo) | deterministic pilot + telemetry/evals · contracts included in 44/44 · combined staging promote **UNKNOWN** |
-| **6D** | **IN PROGRESS** (scaffolding) | tenant agent + `GET /ai/agents/:tenantId` |
-| **6E** | **IN PROGRESS** (scaffolding) | gated effects + `/api/v1/ai/effects` · worker handler still noop |
+| **6A/6B** | **IN PROGRESS** | staging API `…-phase6a` · Wave 1: allowlist + budgets + host-resolve membership |
+| **6C/6F** | **IN PROGRESS** (repo) | pilot + telemetry · Wave 2 live promote **UNKNOWN** |
+| **6D** | **IN PROGRESS** (repo) | `GET /ai/agents/:tenantId` wired · pilot **consumes** agent config |
+| **6E** | **IN PROGRESS** (repo) | effects membership on create · worker `ai.effect.execute` **sink** (no domain writes) |
 | 7 | Não iniciada | Cutover not authorized |
 
 ## Próximo gate
 
-Phase 6 governed AI is **IN PROGRESS** (6A–6E in repo; 6A/6B staging-live on `…-phase6a`). Do **not** mark Phase 6 CLOSED.
+Phase 6 governed AI is **IN PROGRESS**. Wave 1 (repo) landed 2026-09-03T23:40Z — do **not** mark Phase 6 CLOSED until Wave 2 staging proof.
 
-**Critical-path next (see UPDATE-CANVAS):**
+**Next (Wave 2 — sequential ops):**
 
-1. Wave 1 parallel repo lanes — policy budgets/allowlist · wire `GET /ai/agents/:tenantId` · pilot consumes agent config · effects membership + worker sink · smoke extensions  
-2. Wave 2 sequential promote `…-phase6cdef` (or successor) with `AI_CHAT_ENABLED` + live allow/deny smokes  
-3. Only then mark Phase 6 CLOSED · Phase 7 remains blocked
+1. Build/promote API + worker (`…-phase6cdef` or successor SHA) with `AI_CHAT_ENABLED` + optional `AI_TENANT_AGENT_*` seed
+2. Live smoke: capabilities/policy/tools/metrics/chat grounded · agents allow/deny · effects create
+3. Cross-tenant deny evidence
+4. Then mark Phase 6 CLOSED in STATUS + phase-6 README + clean-host log
 
-Known gap vs prior docs: agents **service** exists; HTTP `GET /ai/agents/:tenantId` route still **missing** in `ai.controller.ts`.
+Phase 5 staging exit evidence (8/8 PASS @ 2026-09-03T03:40Z) is unchanged.
 
-Phase 5 staging exit evidence (8/8 PASS @ 2026-09-03T03:40Z) is unchanged and remains authoritative for worker/ops close-out.
-
-Human residual: optional GHCR push of local-load SHA tags; combined 6C–6E staging promote = **UNKNOWN** (aborted mid-run).
+Human residual: optional GHCR push of local-load SHA tags; Wave 2 promote = **UNKNOWN** until operator run.
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 
@@ -81,4 +80,5 @@ Human residual: optional GHCR push of local-load SHA tags; combined 6C–6E stag
 | Runtime gitSha (API) | `67e109511962f86dbbdea2356bc8486b87a4abc1` |
 | Clean host | `2.25.123.224` |
 | GHCR workflow (prior) | [33575721274](https://github.com/raygsm/impulsionando/actions/runs/33575721274) — this SHA **not** GHCR-pushed |
+| Wave 1 contracts | `npm run test:phase6:contracts` **47/47 PASS** @ 2026-09-03T23:37Z |
 | Integration owners | Cauã — [`04-migration/phase-5/INTEGRATION-REGISTRY.md`](04-migration/phase-5/INTEGRATION-REGISTRY.md) |

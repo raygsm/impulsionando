@@ -4,12 +4,16 @@ import {
   AI_DETERMINISTIC_MODEL_ID,
   AI_ENV_NAMES,
   AI_SCHEMA_VERSION,
+  AiChatContextAssemblySchema,
   AiPilotReplySchema,
   assertNoSecretFields,
+  isToolIdOnAllowlist,
   routePilotIntent,
   synthesizePilotAnswer,
+  type AiChatContextAssembly,
   type AiChatRequestBody,
   type AiPilotReply,
+  type AiTenantAgentConfig,
   type AiToolId,
 } from "@impulsionando/contracts";
 import type { AuthUser } from "../auth/auth.types";
@@ -45,15 +49,23 @@ export class AiPilotService {
 
   /**
    * Phase 6C — deterministic tool-grounded pilot.
-   * Refuses unknowns; never invents facts beyond tool JSON.
+   * Phase 6A — budgets + capability allowlist + server context assembly.
+   * Phase 6D — optional agentConfig applies prompt/model/tool allowlist.
    */
   async runPilotChat(opts: {
     actor: AuthUser;
     body: AiChatRequestBody;
     correlationId: string;
+    /** Membership-checked seed config when body.tenantId matches; null = none. */
+    agentConfig?: AiTenantAgentConfig | null;
   }): Promise<AiPilotReply> {
     const started = Date.now();
-    const promptVersion = this.promptVersion();
+    const agent = opts.agentConfig ?? null;
+    const promptVersion = agent?.enabled
+      ? agent.promptVersion
+      : this.promptVersion();
+    const modelId = agent?.enabled ? agent.modelId : AI_DETERMINISTIC_MODEL_ID;
+    const tenantId = opts.body.tenantId ?? null;
 
     if (this.policy.isKillSwitchEnabled()) {
       return this.finishRefuse({
@@ -61,8 +73,9 @@ export class AiPilotService {
         message: "AI kill switch is enabled",
         correlationId: opts.correlationId,
         promptVersion,
+        modelId,
         started,
-        tenantId: opts.body.tenantId ?? null,
+        tenantId,
         toolIds: [],
       });
     }
@@ -73,11 +86,65 @@ export class AiPilotService {
         message: "Chat is not enabled (set AI_CHAT_ENABLED)",
         correlationId: opts.correlationId,
         promptVersion,
+        modelId,
         started,
-        tenantId: opts.body.tenantId ?? null,
+        tenantId,
         toolIds: [],
       });
     }
+
+    if (!this.policy.isCapabilityEnabled("ai.chat")) {
+      return this.finishRefuse({
+        code: "AI_CAPABILITY_DENIED",
+        message: "Capability ai.chat is not on AI_CAPABILITY_ALLOWLIST",
+        correlationId: opts.correlationId,
+        promptVersion,
+        modelId,
+        started,
+        tenantId,
+        toolIds: [],
+      });
+    }
+
+    if (agent && !agent.enabled) {
+      return this.finishRefuse({
+        code: "AI_POLICY_REFUSED",
+        message: "Tenant agent is configured but disabled",
+        correlationId: opts.correlationId,
+        promptVersion,
+        modelId,
+        started,
+        tenantId,
+        toolIds: [],
+      });
+    }
+
+    const budget = this.policy.checkAndConsumeChatBudget({
+      actorUserId: opts.actor.id,
+      message: opts.body.message,
+    });
+    if (!budget.ok) {
+      return this.finishRefuse({
+        code: budget.code,
+        message: budget.message,
+        correlationId: opts.correlationId,
+        promptVersion,
+        modelId,
+        started,
+        tenantId,
+        toolIds: [],
+      });
+    }
+
+    // Server-side context only — never trust client-assembled fields.
+    const context = this.assembleContext({
+      actor: opts.actor,
+      tenantId,
+      correlationId: opts.correlationId,
+      promptVersion,
+      modelId,
+    });
+    void context;
 
     const plan = routePilotIntent(opts.body.message);
     if (plan.intent === "refuse.ambiguous" || !plan.toolId) {
@@ -86,13 +153,41 @@ export class AiPilotService {
         message: plan.refuseMessage ?? "Ambiguous request",
         correlationId: opts.correlationId,
         promptVersion,
+        modelId,
         started,
-        tenantId: opts.body.tenantId ?? null,
+        tenantId,
         toolIds: [],
       });
     }
 
     const toolId = plan.toolId as AiToolId;
+
+    if (agent?.enabled && !isToolIdOnAllowlist(toolId, agent.capabilityAllowlist)) {
+      return this.finishRefuse({
+        code: "AI_TOOL_FORBIDDEN",
+        message: `Tool ${toolId} is outside tenant agent allowlist`,
+        correlationId: opts.correlationId,
+        promptVersion,
+        modelId,
+        started,
+        tenantId,
+        toolIds: [toolId],
+      });
+    }
+
+    if (!this.policy.isCapabilityEnabled("ai.tools.read")) {
+      return this.finishRefuse({
+        code: "AI_CAPABILITY_DENIED",
+        message: "Capability ai.tools.read is not on AI_CAPABILITY_ALLOWLIST",
+        correlationId: opts.correlationId,
+        promptVersion,
+        modelId,
+        started,
+        tenantId,
+        toolIds: [toolId],
+      });
+    }
+
     const fetchedAt = new Date().toISOString();
     const exec = await executeAiTool({
       toolId,
@@ -101,6 +196,7 @@ export class AiPilotService {
       correlationId: opts.correlationId,
       killSwitchEnabled: false,
       services: this.toolServices(),
+      requireMembershipOnHostResolve: Boolean(tenantId),
     });
 
     if (!exec.ok) {
@@ -109,14 +205,17 @@ export class AiPilotService {
           ? "AI_UNAUTHORIZED"
           : exec.code === "AI_KILL_SWITCH"
             ? "AI_KILL_SWITCH"
-            : "AI_FACT_UNAVAILABLE";
+            : exec.code === "AI_TOOL_UNAUTHORIZED"
+              ? "AI_UNAUTHORIZED"
+              : "AI_FACT_UNAVAILABLE";
       return this.finishRefuse({
         code,
         message: exec.message,
         correlationId: opts.correlationId,
         promptVersion,
+        modelId,
         started,
-        tenantId: opts.body.tenantId ?? null,
+        tenantId,
         toolIds: [toolId],
         sources: [
           {
@@ -136,8 +235,9 @@ export class AiPilotService {
         message: answer,
         correlationId: opts.correlationId,
         promptVersion,
+        modelId,
         started,
-        tenantId: opts.body.tenantId ?? null,
+        tenantId,
         toolIds: [toolId],
         sources: [{ toolId, fetchedAt, degraded: true, reason: "no_synthesizer" }],
       });
@@ -150,7 +250,7 @@ export class AiPilotService {
       answer,
       sources: [{ toolId, fetchedAt, degraded: false, reason: null }],
       promptVersion,
-      modelId: AI_DETERMINISTIC_MODEL_ID,
+      modelId,
       correlationId: opts.correlationId,
       tokensUsed: null,
       latencyMs,
@@ -165,15 +265,48 @@ export class AiPilotService {
       recordedAt: new Date().toISOString(),
       correlationId: opts.correlationId,
       capability: "ai.chat",
-      tenantId: opts.body.tenantId ?? null,
+      tenantId,
       latencyMs,
       outcome: "ok",
       tokensUsed: null,
       costCentsEstimate: null,
       toolIds: [toolId],
       promptVersion,
-      modelId: AI_DETERMINISTIC_MODEL_ID,
+      modelId,
     });
+    return parsed.data;
+  }
+
+  private assembleContext(opts: {
+    actor: AuthUser;
+    tenantId: string | null;
+    correlationId: string;
+    promptVersion: string;
+    modelId: string;
+  }): AiChatContextAssembly {
+    const capabilityIds = (
+      ["ai.capabilities", "ai.policy", "ai.tools.list", "ai.tools.read", "ai.chat"] as const
+    ).filter((id) => this.policy.isCapabilityEnabled(id));
+
+    const assembled: AiChatContextAssembly = {
+      schemaVersion: AI_SCHEMA_VERSION,
+      actorUserId: opts.actor.id,
+      tenantId: opts.tenantId,
+      correlationId: opts.correlationId,
+      capabilityIds,
+      modelId: opts.modelId,
+      promptVersion: opts.promptVersion,
+      sourceFreshness: {
+        assembledAt: new Date().toISOString(),
+        degraded: false,
+        reason: null,
+      },
+    };
+    const parsed = AiChatContextAssemblySchema.safeParse(assembled);
+    if (!parsed.success) {
+      throw new Error("AI_CONTEXT_ASSEMBLY_INVALID");
+    }
+    assertNoSecretFields(parsed.data);
     return parsed.data;
   }
 
@@ -182,6 +315,7 @@ export class AiPilotService {
     message: string;
     correlationId: string;
     promptVersion: string;
+    modelId: string;
     started: number;
     tenantId: string | null;
     toolIds: string[];
@@ -196,7 +330,7 @@ export class AiPilotService {
       answer: null,
       sources: opts.sources ?? [],
       promptVersion: opts.promptVersion,
-      modelId: AI_DETERMINISTIC_MODEL_ID,
+      modelId: opts.modelId,
       correlationId: opts.correlationId,
       tokensUsed: null,
       latencyMs,
@@ -218,7 +352,7 @@ export class AiPilotService {
       costCentsEstimate: null,
       toolIds: opts.toolIds,
       promptVersion: opts.promptVersion,
-      modelId: AI_DETERMINISTIC_MODEL_ID,
+      modelId: opts.modelId,
       refuseCode: opts.code,
     });
     return parsed.data;

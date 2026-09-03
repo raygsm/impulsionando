@@ -24,15 +24,22 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 | **V1–V7 verticals** | post-6 | Not started | CRM → Marocas → Colors… — [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) |
 | **P7 cutover** | 7 | Blocked | Needs Phase 6 CLOSED + explicit auth |
 
+## Wave 1 status (2026-09-03T23:40Z)
+
+| Lane | Focus | Repo state |
+| --- | --- | --- |
+| **A** | Policy: allowlist + budgets + context assembly | **DONE** |
+| **B** | Agent route + pilot consumes config | **DONE** |
+| **C** | Effects membership + worker `ai.effect.execute` sink | **DONE** (in-memory approvals remain) |
+| **D** | Smoke/contracts extensions | **DONE** — `test:phase6:contracts` **47/47** |
+| **P** | Promote + live prove | **PENDING** (Wave 2) |
+
 ## Phase 6 parallel lanes (active)
 
 | Lane | Focus | Parallel? |
 | --- | --- | --- |
-| **A** | Policy: allowlist + budgets + context assembly | yes |
-| **B** | Agent route + pilot consumes config | yes (coord pilot file) |
-| **C** | Effects membership + worker `ai.effect.execute` sink | yes |
-| **D** | Smoke/contracts extensions | yes |
-| **P** | Promote + live prove | **sequential** after A–D merge |
+| **A–D** | Wave 1 repo close gaps | **landed** |
+| **P** | Promote + live prove | **sequential** next |
 
 ## Proibido (todos os tracks)
 

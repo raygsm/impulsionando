@@ -38,7 +38,7 @@ export class AiEffectsController {
   ) {}
 
   @Post("requests")
-  createRequest(
+  async createRequest(
     @Body() body: unknown,
     @Headers("x-correlation-id") correlationId: string | undefined,
     @Req() req: AuthedRequest,
@@ -60,7 +60,7 @@ export class AiEffectsController {
         },
       });
     }
-    const data = this.effects.createRequest({
+    const data = await this.effects.createRequest({
       body: parsed.data,
       actor: req.user,
       correlationId: corr,

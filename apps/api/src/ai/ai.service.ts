@@ -1,6 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  AI_SCHEMA_VERSION,
   AiCapabilitiesEnvelopeSchema,
+  AiPilotReplySchema,
   AiToolsEnvelopeSchema,
   assertNoSecretFields,
   buildDefaultCapabilities,
@@ -22,7 +24,7 @@ import {
 } from "./ai-provider.adapter";
 import { executeAiTool, listRegisteredTools, type AiToolServices } from "./tools/registry";
 import { SupportService } from "../support/support.service";
-import { TenantsService } from "../tenants/tenants.service";
+import { TenantsService, TenantAccessDeniedError } from "../tenants/tenants.service";
 import { JourneysService } from "../journeys/journeys.service";
 import type { AuthUser } from "../auth/auth.types";
 
@@ -56,6 +58,7 @@ export class AiService {
     const envelope = buildDefaultCapabilities({
       killSwitchEnabled: this.policy.isKillSwitchEnabled(),
       chatEnabled: this.policy.isChatEnabled(),
+      capabilityAllowlist: this.policy.getCapabilityAllowlist(),
     });
     const parsed = AiCapabilitiesEnvelopeSchema.safeParse(envelope);
     if (!parsed.success) {
@@ -95,21 +98,50 @@ export class AiService {
   }
 
   /**
-   * Phase 6C — tool-grounded pilot chat (deterministic synthesizer).
-   * Phase 6D additive: when body.tenantId is present, optionally resolve agent config.
-   * Pilot does not yet consume agentConfig (merge note for …-phase6cf) — resolve is
-   * side-effect free and must not break chat when seed is absent.
+   * Phase 6C — tool-grounded pilot chat.
+   * Phase 6D — when body.tenantId is present, membership is rechecked and
+   * seeded agent config (if any) is applied by the pilot.
    */
   async runChat(opts: {
     actor: AuthUser;
     body: AiChatRequestBody;
     correlationId: string;
   }): Promise<AiPilotReply> {
+    let agentConfig: AiTenantAgentConfig | null = null;
     if (opts.body.tenantId) {
-      // Optional resolve — peek only (membership recheck lives on GET /agents/:tenantId).
-      void this.agents.peekConfigForTenant(opts.body.tenantId);
+      try {
+        agentConfig = await this.agents.resolveForTenant({
+          actorUserId: opts.actor.id,
+          tenantId: opts.body.tenantId,
+        });
+      } catch (err) {
+        if (err instanceof TenantAccessDeniedError) {
+          const started = Date.now();
+          const refuse: AiPilotReply = {
+            schemaVersion: AI_SCHEMA_VERSION,
+            refused: true,
+            code: "AI_UNAUTHORIZED",
+            message: "Actor is not a member of the requested tenant",
+            answer: null,
+            sources: [],
+            promptVersion: "pilot-v1",
+            modelId: "deterministic-pilot-v1",
+            correlationId: opts.correlationId,
+            tokensUsed: null,
+            latencyMs: Date.now() - started,
+          };
+          const parsed = AiPilotReplySchema.safeParse(refuse);
+          if (!parsed.success) throw new Error("AI_CHAT_AUTH_REFUSE_INVALID");
+          assertNoSecretFields(parsed.data);
+          return parsed.data;
+        }
+        throw err;
+      }
     }
-    return this.pilot.runPilotChat(opts);
+    return this.pilot.runPilotChat({
+      ...opts,
+      agentConfig,
+    });
   }
 
   getProvider(): AiProviderAdapter {

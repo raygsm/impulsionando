@@ -1,7 +1,7 @@
 # Phase 6 — Governed AI platform
 
 Opened: **2026-09-03T04:04Z**  
-Status: **IN PROGRESS (6A–6E scaffolding)** — **not CLOSED**
+Status: **IN PROGRESS (Wave 1 repo landed 2026-09-03T23:40Z)** — **not CLOSED** (Wave 2 promote pending)
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Detailed plan: [`../PHASE-6-AI.md`](../PHASE-6-AI.md) · [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 6  
@@ -16,12 +16,23 @@ Add shared **governed AI** capabilities (gateway, policy, tool registry) without
 
 | Wave | Focus | State |
 | --- | --- | --- |
-| **6A** | Gateway + policy (kill switch, budgets, capabilities, chat stub refuse) | **IN PROGRESS** |
-| **6B** | Tool registry (READ / RECOMMEND / AUTO_SAFE / APPROVAL_REQUIRED / FORBIDDEN) | **IN PROGRESS** |
-| 6C | Real-data read pilot (Impulsionito reads canonical APIs) | Code largely landed (promote in flight) |
-| **6D** | First tenant agent instance (Impulsionito READ seed) | **IN PROGRESS** (scaffolding) |
-| **6E** | Gated effects / approval | **IN PROGRESS** (scaffolding) |
-| 6F | Eval + ops telemetry | Code largely landed (promote in flight) |
+| **6A** | Gateway + policy (kill switch, budgets, capabilities, allowlist) | **IN PROGRESS** — Wave 1 enforced budgets/allowlist/context |
+| **6B** | Tool registry + host-resolve membership when tenantId set | **IN PROGRESS** |
+| **6C** | Real-data read pilot | Repo ready · staging promote **UNKNOWN** |
+| **6D** | First tenant agent | **IN PROGRESS** — `GET /ai/agents/:tenantId` + pilot consumes config |
+| **6E** | Gated effects / approval | **IN PROGRESS** — membership on create · worker sink |
+| **6F** | Eval + ops telemetry | Repo ready · metrics in smoke · promote **UNKNOWN** |
+
+## Wave 1 note (2026-09-03T23:40Z) — repo lanes A–D
+
+Landed without staging promote (Wave 2 still required):
+
+- **Lane A:** `AI_CAPABILITY_ALLOWLIST` filter · token/rate budget gate (`AI_BUDGET_EXCEEDED`) · server `AiChatContextAssembly`
+- **Lane B:** `GET /api/v1/ai/agents/:tenantId` · chat resolves membership + applies agent prompt/model/allowlist
+- **Lane C:** effects `assertMembership` on create · worker `ai.effect.execute` sink (ledger + log, **no domain writes**)
+- **Lane D:** smoke extends agents/effects when `PHASE6_AI_TENANT_ID` set · contracts **47/47**
+
+Do **not** mark Phase 6 CLOSED. Approvals remain in-memory (durable store deferred).
 
 ## 6E note (2026-09-03) — scaffolding IN PROGRESS
 
@@ -42,10 +53,8 @@ Do **not** mark Phase 6 CLOSED. Worker effect handler remains noop (no writes). 
 Additive MVP on the shared gateway (not full RAG / multi-agent product):
 
 - Contracts: `AiTenantAgentConfigSchema` + env **names** (`AI_TENANT_AGENT_*`) in `packages/contracts/src/ai.ts`
-- Nest: `apps/api/src/ai/ai-agent.service.ts` · **service ready**; HTTP `GET /api/v1/ai/agents/:tenantId` still **MISSING** on `ai.controller.ts` (Wave 1 Lane B)
-- Seed: one staging tenant from env names / static READ allowlist — no secrets
-- Chat: optional peek of agent config when `tenantId` present in body; **pilot does not yet consume** agent prompt/model (merge note vs in-flight `…-phase6cf` — avoid fighting `ai-pilot.service.ts`)
-- Contracts: `npm run test:phase6d:contracts` (folded into `test:phase6:contracts`)
+- Nest: `apps/api/src/ai/ai-agent.service.ts` · **`GET /api/v1/ai/agents/:tenantId`** on `ai.controller.ts` (auth + membership)
+- Chat: pilot **consumes** agent prompt/model/allowlist when seeded+enabled for `body.tenantId`
 
 Do **not** mark Phase 6 CLOSED. Phase 7 / tenant UI agent pages not started.
 

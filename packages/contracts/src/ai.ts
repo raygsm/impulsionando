@@ -717,11 +717,113 @@ export function defaultAiToolAllowPolicy(
   };
 }
 
+/**
+ * Parse AI_CAPABILITY_ALLOWLIST CSV.
+ * Empty/unset → null (no extra filter; defaults from buildDefaultCapabilities apply).
+ * Set → non-empty list of capability/tool ids (case-sensitive trim).
+ */
+export function parseCapabilityAllowlist(raw: string | undefined): string[] | null {
+  if (raw === undefined || raw.trim() === "") return null;
+  const parts = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  return parts.length > 0 ? parts : null;
+}
+
+/** True when allowlist is unset (null) or explicitly includes the id. */
+export function isCapabilityAllowed(
+  capabilityId: string,
+  allowlist: string[] | null,
+): boolean {
+  if (allowlist === null) return true;
+  return allowlist.includes(capabilityId);
+}
+
+/**
+ * Apply optional env allowlist: capabilities not listed become enabled=false.
+ * Unknown ids in the allowlist are ignored (no invent).
+ */
+export function applyCapabilityAllowlist(
+  envelope: AiCapabilitiesEnvelope,
+  allowlist: string[] | null,
+): AiCapabilitiesEnvelope {
+  if (allowlist === null) return envelope;
+  return {
+    ...envelope,
+    capabilities: envelope.capabilities.map((row) => ({
+      ...row,
+      enabled: row.enabled && allowlist.includes(row.id),
+    })),
+  };
+}
+
+/** Rough token estimate for budget gates (deterministic pilot — no provider usage). */
+export function estimatePromptTokens(message: string): number {
+  const trimmed = message.trim();
+  if (!trimmed) return 0;
+  return Math.max(1, Math.ceil(trimmed.length / 4));
+}
+
+/**
+ * Pure budget gate for one chat request.
+ * rateCountInWindow = requests already counted for this actor in the last minute (excluding this one).
+ */
+export function evaluateChatBudget(opts: {
+  budgets: AiBudgetEnvelope;
+  message: string;
+  rateCountInWindow: number;
+}): { ok: true } | { ok: false; code: "AI_BUDGET_EXCEEDED"; message: string } {
+  const tokens = estimatePromptTokens(opts.message);
+  if (
+    opts.budgets.maxTokensPerRequest !== null &&
+    tokens > opts.budgets.maxTokensPerRequest
+  ) {
+    return {
+      ok: false,
+      code: "AI_BUDGET_EXCEEDED",
+      message: `Token estimate ${tokens} exceeds maxTokensPerRequest ${opts.budgets.maxTokensPerRequest}`,
+    };
+  }
+  if (
+    opts.budgets.ratePerMinute !== null &&
+    opts.rateCountInWindow >= opts.budgets.ratePerMinute
+  ) {
+    return {
+      ok: false,
+      code: "AI_BUDGET_EXCEEDED",
+      message: `Rate limit ${opts.budgets.ratePerMinute}/min exceeded`,
+    };
+  }
+  // Deterministic pilot cost is 0 — maxCostCents only blocks when estimate would be positive.
+  return { ok: true };
+}
+
+/** Whether a tool id is permitted by a tenant-agent allowlist (explicit ids). */
+export function isToolIdOnAllowlist(toolId: string, allowlist: readonly string[]): boolean {
+  if (allowlist.includes(toolId)) return true;
+  // Blanket READ tools capability covers registered READ tool ids when listed.
+  if (allowlist.includes("ai.tools.read") && !toolId.startsWith("forbidden.")) {
+    return (
+      toolId.startsWith("support.") ||
+      toolId.startsWith("tenants.") ||
+      toolId.startsWith("journeys.")
+    );
+  }
+  return false;
+}
+
 export function buildDefaultCapabilities(
-  opts: { killSwitchEnabled: boolean; chatEnabled: boolean; scrapedAt?: string },
+  opts: {
+    killSwitchEnabled: boolean;
+    chatEnabled: boolean;
+    scrapedAt?: string;
+    /** When set, capabilities not listed are enabled=false. */
+    capabilityAllowlist?: string[] | null;
+  },
 ): AiCapabilitiesEnvelope {
   const scrapedAt = opts.scrapedAt ?? new Date().toISOString();
-  return {
+  const base: AiCapabilitiesEnvelope = {
     schemaVersion: AI_SCHEMA_VERSION,
     scrapedAt,
     killSwitchEnabled: opts.killSwitchEnabled,
@@ -764,6 +866,7 @@ export function buildDefaultCapabilities(
       },
     ],
   };
+  return applyCapabilityAllowlist(base, opts.capabilityAllowlist ?? null);
 }
 
 export function parsePositiveIntEnv(raw: string | undefined): number | null {

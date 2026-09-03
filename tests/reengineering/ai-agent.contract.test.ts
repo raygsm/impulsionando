@@ -9,6 +9,7 @@ import {
   AiTenantAgentConfigSchema,
   assertNoSecretFields,
   buildSeededTenantAgentConfig,
+  isToolIdOnAllowlist,
   parseTenantAgentAllowlist,
 } from "@impulsionando/contracts";
 
@@ -90,5 +91,16 @@ describe("Phase 6D — AI tenant agent contract", () => {
     expect(config.agentId).toBe("impulsionito-stg");
     expect(config.enabled).toBe(false);
     expect(config.capabilityAllowlist).toHaveLength(2);
+  });
+
+  it("AGENT-07: isToolIdOnAllowlist honors explicit + ai.tools.read blanket", () => {
+    expect(isToolIdOnAllowlist("support.tickets.list", ["support.tickets.list"])).toBe(
+      true,
+    );
+    expect(isToolIdOnAllowlist("support.tickets.list", ["ai.tools.read"])).toBe(true);
+    expect(isToolIdOnAllowlist("forbidden.arbitrary_sql", ["ai.tools.read"])).toBe(
+      false,
+    );
+    expect(isToolIdOnAllowlist("support.tickets.list", ["ai.chat"])).toBe(false);
   });
 });

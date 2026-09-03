@@ -34,7 +34,8 @@ export type AiToolExecResult =
         | "AI_TOOL_UNKNOWN"
         | "AI_TOOL_VALIDATION"
         | "AI_KILL_SWITCH"
-        | "AI_TOOL_EXEC_FAILED";
+        | "AI_TOOL_EXEC_FAILED"
+        | "AI_TOOL_UNAUTHORIZED";
       message: string;
     };
 
@@ -119,6 +120,11 @@ export async function executeAiTool(opts: {
   correlationId: string;
   killSwitchEnabled: boolean;
   services: AiToolServices;
+  /**
+   * When true (chat path with tenantId), resolve_by_host also requires
+   * actor membership on the resolved tenant — closes host-only gap.
+   */
+  requireMembershipOnHostResolve?: boolean;
 }): Promise<AiToolExecResult> {
   const idParsed = AiToolIdSchema.safeParse(opts.toolId);
   if (!idParsed.success) {
@@ -171,6 +177,17 @@ export async function executeAiTool(opts: {
           return { ok: false, code: "AI_TOOL_VALIDATION", message: "Invalid host input" };
         }
         const tenant = await opts.services.tenants.resolveByHost(parsed.data.host);
+        if (tenant && opts.requireMembershipOnHostResolve) {
+          try {
+            await opts.services.tenants.assertMembership(opts.actor.id, tenant.id);
+          } catch {
+            return {
+              ok: false,
+              code: "AI_TOOL_UNAUTHORIZED",
+              message: "Actor is not a member of the resolved tenant",
+            };
+          }
+        }
         return { ok: true, data: { tenant } };
       }
       case "tenants.resolve_active_context": {
