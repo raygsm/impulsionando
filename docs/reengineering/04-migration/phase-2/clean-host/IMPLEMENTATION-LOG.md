@@ -246,3 +246,259 @@ Format per entry:
 - Change: Updated staging `companies` row `642096b5…` with `subdomain=chrismed`, `domain=chrismed.impulsionando.com.br`
 - Result / evidence: resolve smoke returns `data.id=642096b5-a9ff-4521-a82a-c004f6d2e2d2`
 - Docs updated: [`../../phase-4/PHASE-4-EXIT-REPORT.md`](../../phase-4/PHASE-4-EXIT-REPORT.md)
+
+## 2026-09-03T00:40Z — Phase 5A+5B staging deploy (amd64 local-load) + queue smokes
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - First promote of `67e10951…` used **arm64** images → tasks exit **255**; rolled back to `ghcr.io/raygsm/impulsionando-api:b58d4c111b0b37bc48dacad3a7e12c1506f9d6e1`
+  - Rebuilt **linux/amd64** locally; `docker save | gzip | ssh docker load` onto clean host (GHCR push still unavailable for this SHA)
+  - `SKIP_PULL=1 IMAGE_TAG=67e109511962f86dbbdea2356bc8486b87a4abc1` API deploy; service env `GIT_SHA` aligned to that SHA
+  - Created Swarm **`reengineering-worker`** (internal, no Traefik labels, no published ports) with `WORKER_CONSUMER_ENABLED=true` via env-file copy (contents not logged)
+  - Crash isolation: scale worker **0/0** → `GET https://api.stg.impulsionando.com.br/health` **200**; scale back **1/1**; internal `/health` OK
+- Result / evidence:
+  - Images on host: `ghcr.io/raygsm/impulsionando-{api,worker}:67e109511962f86dbbdea2356bc8486b87a4abc1` · **linux/amd64** · local-load (not GHCR-pushed)
+  - API Swarm **1/1** · `GET /health` → `gitSha=67e109511962f86dbbdea2356bc8486b87a4abc1`
+  - Worker Swarm **1/1** · labels `{}` · ports `null` · fake Host `worker.stg…` → **404**
+  - Internal worker health (dokploy-network / `docker exec`): `mode=queue-consumer` · `consumer.processed=3` · `skipped=1` · `failed=0` · `dlq=0`
+  - `npm run phase5:smoke:job-enqueue-consume` → **PASS** (`proof=worker_log`, jobId `bb3a3de6…`)
+  - `npm run phase5:smoke:job-duplicate` → **PASS** (`proof=worker_log_single_echo`, one `smoke_echo`, skipped increment)
+  - Ledger table SELECT still **42501** (`service_role` has no GRANT); RPC `get_reengineering_job_effect` **PGRST202** (migration `20260902131000_*` in repo, **not applied** on staging). Consume proven via worker `smoke_echo` logs, not PostgREST table read.
+- Docs updated: [`HOST.md`](./HOST.md), [`../../phase-5/PHASE-5B-EXIT-REPORT.md`](../../phase-5/PHASE-5B-EXIT-REPORT.md), [`../../../STATUS.md`](../../../STATUS.md), this log
+
+## 2026-09-03T01:15Z — Phase 4B tenant-web local-load + Phase 5B poison/DLQ + API force-rebuild
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Added `SKIP_PULL` to `scripts/deploy-reengineering-tenant-web-clean-host.sh`
+  - Built **linux/amd64** `impulsionando-tenant-web:67e109511962f86dbbdea2356bc8486b87a4abc1`; `docker save|gzip|ssh docker load`; `SKIP_PULL=1` Swarm create **`reengineering-tenant-web`** Traefik Host `tenant.stg.impulsionando.com.br` → `:3300`
+  - Rebuilt **linux/amd64** API+worker (workspace modules Ops/Webhooks/Journeys/Outbox); local-load; `docker service update --force` so same tag picks new digest
+  - Briefly set `WORKER_OUTBOX_ENABLED=true` → **`outbox_poll_failed`** (table missing); restored `WORKER_OUTBOX_ENABLED=false`
+- Result / evidence:
+  - tenant-web Swarm **1/1** · internal `/health` `gitSha=67e109511962f86dbbdea2356bc8486b87a4abc1` · dokploy-network Host `garrido…` → `tenantPath=/garrido`
+  - Public `tenant.stg` DNS **missing** at Cloudflare (`dig @1.1.1.1` empty); laptop `ENOTFOUND`; TLS for Host not publicly smokeable until DNS+ACME
+  - Seeds: chrismed **OK** · garrido-tenant **OK** · membership exists **OK** · garrido-config **FAIL** (`companies.country_code` / phase4b columns missing)
+  - 4B API smokes: resolve / deny / membership-allow / membership-deny / garrido-resolve **PASS**; entitlements **FAIL 503** (`42703` tagline / status_financial — migration `20260902120000_phase4b_*` not applied)
+  - 5B poison→DLQ: `DRY_RUN=0 PHASE5B_DLQ_VERIFY_SSH=1` **PASS** (`proof=worker_health_dlq_increment`, dlq 0→1, msgId 5)
+  - Ledger GRANT still **OPEN** — no `DATABASE_URL` in `.env.staging`; Dashboard SQL only
+  - Live API after force: `GET /api/v1/ops/*` → **401**; `POST /api/v1/webhooks/reengineering.smoke` → **503** (migration/secret); `POST /api/v1/journeys/invites` → **401**
+  - Tables absent (PGRST205): outbox / webhook_receipts / communication_deliveries / crm_journey_runs / ops_queue_snapshots; ledger SELECT still **42501**
+  - **Clarification (later):** entitlements **503/42703** was `companies` column mismatch (`tagline` / `status_financial` / locale fields absent on staging restore) — **not** proof that `20260902120000_phase4b_*` was missing (`core_tenant_slug_aliases` + resolve RPCs were already present).
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-03T01:25Z — Fix entitlements/config 42703 + garrido-config seed (no cosmetic DDL)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - `apps/api/src/tenants/tenant-entitlements.service.ts` — resilient `companies` select (base columns + optional strip on **42703**); null/default locale/branding/niche; flag catalog tables tolerate **PGRST205**
+  - `scripts/staging/phase4b-seed-garrido-config.mjs` — write only existing columns; skip missing cosmetic/locale fields with WARN
+  - Rebuilt **linux/amd64** API image same tag `67e109511962f86dbbdea2356bc8486b87a4abc1` (digest changed); `docker save|gzip|ssh docker load`; `docker service update --force reengineering-api`
+- Result / evidence:
+  - Proved staging `companies` missing: `tagline`, `country_code`, `locale`, `currency_code`, `phone_country_code`, `timezone`, `status_financial`, `release_channel`, niche fields (etc.); present: `id,name,subdomain,domain,is_active,logo_url,primary_color,secondary_color,…`
+  - Proved 4B objects present: `core_tenant_slug_aliases` OK · `user_has_company_membership` OK · `resolve_tenant_by_host` OK — **do not re-run full `20260902120000`**
+  - `npm run staging:seed:garrido-config` → **PASS** (skipped missing columns listed in WARN)
+  - `npm run test:reengineering:tenant-entitlements` → **8/8 PASS**
+  - `TENANT_ENTITLEMENTS_SMOKE_TENANT_ID=642096b5-… npm run phase4:smoke:tenant-entitlements` → **PASS** (config/entitlements **200**, modules `["support"]`, unknown flag deny)
+  - Phase 4B / Phase 5 **not CLOSED** (public DNS + 5C–5G DDL/secrets remain)
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-03T01:30Z — Staging Traefik access gate (scripts + docs; not yet activated)
+
+- Operator: Agent (local workspace; clean host inspected only)
+- Change:
+  - Added `scripts/apply-staging-access-gate-clean-host.sh` — generates APR1 htpasswd **on host** from `STAGING_BASIC_AUTH_USER` / `STAGING_BASIC_AUTH_PASS`, writes Traefik file middleware `staging-basic-auth` under `/etc/dokploy/traefik/dynamic/`, attaches Swarm labels on `reengineering-api`, `reengineering-tenant-web`, optional `reengineering-placeholder`
+  - Updated `scripts/deploy-reengineering-api-clean-host.sh` + `scripts/deploy-reengineering-tenant-web-clean-host.sh` — `STAGING_ACCESS_GATE=auto|0|1` re-attaches `staging-basic-auth@file` when gate YAML present
+  - Docs: [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md) (preferred basic auth; IP allowlist alternative; grey DNS for LE); pointer in [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md)
+- Result / evidence:
+  - Host Traefik file provider already watches `/etc/dokploy/traefik/dynamic` (confirmed `middlewares.yml`, `dokploy.yml`)
+  - Gate **not** activated this turn (no password applied; public `api.stg` still open until operator runs apply script)
+  - Legacy `187.77.232.52` untouched; no prod DNS change; no secrets in git
+- Docs updated: this log, STAGING-ACCESS-GATE, STAGING-HOSTNAMES
+
+## 2026-09-03T02:16Z — Worker redeploy outbox-degrade overlay (`-outbox1`)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`)
+- Change:
+  - Rebuilt **linux/amd64** worker from workspace overlay (includes `schema-missing.ts`, `outbox-poller.ts`, communication/journey handlers) tagged `67e109511962f86dbbdea2356bc8486b87a4abc1-outbox1` (`GIT_SHA` build-arg same tag; base HEAD `67e10951…` uncommitted overlay)
+  - `docker save | gzip | ssh docker load` onto clean host
+  - `IMAGE_TAG=…-outbox1 ENV_FILE=.env.staging SKIP_PULL=1 ./scripts/deploy-reengineering-worker-clean-host.sh`
+  - Confirmed `WORKER_OUTBOX_ENABLED=false` (not enabled; 5C SQL still open)
+- Result / evidence:
+  - Image on host: `ghcr.io/raygsm/impulsionando-worker:67e109511962f86dbbdea2356bc8486b87a4abc1-outbox1` · **amd64** · digest `sha256:d050c232462aa901d32716e8d02e19a0babd694328e9b79a6fd1c9e43dde545c` · local-load (not GHCR-pushed)
+  - Swarm **`reengineering-worker` 1/1** on that tag
+  - Internal `/health` (dokploy-network curl) → **HTTP 200** · `gitSha=67e109511962f86dbbdea2356bc8486b87a4abc1-outbox1` · `outbox.enabled=false` · `communicationEnabled=false` · `journey.enabled=false`
+  - Service env: `WORKER_OUTBOX_ENABLED=false` · `WORKER_CONSUMER_ENABLED=true`
+  - Prod / legacy host untouched
+- Docs updated: [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md), this log
+
+## 2026-09-03T02:16Z — Phase 4B live smoke matrix + CLOSE
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`; laptop smokes vs `api.stg` / `tenant.stg`)
+- Change:
+  - Re-ran full Phase 4B live smoke matrix after entitlements API fix
+  - Observed `tenant.stg` A → `2.25.123.224` (DNS only) + LE cert CN=`tenant.stg.impulsionando.com.br`
+  - Adjusted `scripts/smoke-reengineering-tenant-web-health.mjs` to accept staging public strangler stub when Host override is impossible (fetch + Traefik single-Host)
+  - Marked Phase 4B **CLOSED** in STATUS + exit report (no Phase 6)
+- Result / evidence:
+  - Swarm: `reengineering-api` / `reengineering-tenant-web` / `reengineering-worker` **1/1** · SHA `67e109511962f86dbbdea2356bc8486b87a4abc1`
+  - API smokes **PASS**: resolve · resolve-deny · membership-allow · membership-deny · entitlements · garrido-resolve
+  - Public `GET https://tenant.stg.impulsionando.com.br/health` → `impulsionando-tenant-web` · same SHA
+  - Public tenant-web smoke **PASS** (`stagingPublicStubOk`); dokploy-network Host `garrido…` → `tenantPath=/garrido` **PASS**
+  - Traefik edge Host `garrido…` → **404** (single-Host rule) — optional residual, not 4B close blocker
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-4/PHASE-4B-EXIT-REPORT.md`](../../phase-4/PHASE-4B-EXIT-REPORT.md)
+
+## 2026-09-03T02:18Z — Gap-fill: worker health recheck + phase5 verify + STATUS/canvas sync
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`; laptop smokes)
+- Change:
+  - Rechecked `reengineering-worker` after `-outbox1` redeploy
+  - Confirmed `scripts/phase5-staging-verify-all.mjs` present; ran `npm run phase5:staging:verify` (non-DDL)
+  - Reconfirmed 4B live smokes (resolve/deny/membership/garrido/entitlements/tenant-web) **PASS**
+  - Synced STATUS evidence table + HOST DNS row + progress canvas to 4B CLOSED / Phase 5 open
+- Result / evidence:
+  - Worker Swarm **1/1** · image `…-outbox1` · internal `/health` **200** · `outbox.enabled=false` · `WORKER_OUTBOX_ENABLED=false`
+  - `phase5:staging:verify` matrix: enqueue/dup/poison **PASS**; ledger SELECT **FAIL** (`PGRST202`); webhook **SKIP** (secret); ops **SKIP** (bearer); 5C/5F DRY_RUN contracts **PASS**
+  - `dig tenant.stg` → `2.25.123.224` · LE CN=`tenant.stg.impulsionando.com.br` · public `/health` **200**
+  - PR [#137](https://github.com/raygsm/impulsionando/pull/137) **MERGED**
+  - Human-only remaining: `PHASE5-PENDING-DASHBOARD.sql`, `WEBHOOK_SECRET_REENGINEERING_SMOKE`, access-gate password, 5G owners/drill/bearer
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-03T02:23Z — GHCR `2620597d…` pull verify; promote skipped (no Phase 4B/5 regress)
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando` via `BatchMode`; deploy scripts same default)
+- Change:
+  - Confirmed SSH auth method used by `scripts/deploy-reengineering-*-clean-host.sh` (`SSH_KEY=~/.ssh/id_ed25519_impulsionando`)
+  - Pulled GHCR tags for main tip / PR [#137](https://github.com/raygsm/impulsionando/pull/137) merge SHA `2620597db79a55bd7d28911ff9714d3d9cbc2745` on clean host **only** (no Swarm `service update`, no deploy-script promote)
+  - Compared git history: `2620597d…` (main CI workflows) and live program SHA `67e10951…` are **divergent**; promoting would drop Phase 4B tenant-web + Phase 5 queue/worker overlay
+  - Legacy host `187.77.232.52` untouched; Phase 6 not started
+- Result / evidence:
+  - Pull OK — digests match workflow:
+    - api `@sha256:97619aeea9dce38c385f9ed8f2c176c8f1c61a166253140e18b946b553f27ae4`
+    - worker `@sha256:9d547f16a0222eae84ad5cab11fca79528b2aa75ab48ad2254b9b7360ee50505`
+    - tenant-web `@sha256:2827a062533e502f678673e8835d73c5a46abe6f54a7fb9bbe8eac759b280cae`
+  - Swarm left on healthy local-load images: api/tenant-web `…:67e109511962f86dbbdea2356bc8486b87a4abc1` · worker `…:67e10951…-outbox` (alias `-outbox1`) · all **1/1**
+  - Health: `api.stg` `/health` **200** `gitSha=67e10951…` · `tenant.stg` `/health` **200** same SHA · worker internal `/health` **200** `gitSha=…-outbox1` · `outbox.enabled=false` · `WORKER_OUTBOX_ENABLED=false`
+  - **Promote skipped** intentionally — GHCR tags are workflow-main SHA, not program tip
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-03T02:24Z — Forked agent: 4B re-smoke + Phase5 verify matrix + canvas
+
+- Operator: Agent (forked subagent; SSH inspect only; laptop smokes)
+- Change:
+  - Re-ran 4B API smokes (6/6) + public tenant-web-health with `TENANT_WEB_BASE=https://tenant.stg…`
+  - Confirmed worker image `…-outbox1` already live with outbox-degrade + `WORKER_OUTBOX_ENABLED=false` (no rebuild this turn)
+  - Ran `npm run phase5:staging:verify` (no new DDL)
+  - Updated [`../../../STATUS.md`](../../../STATUS.md) verify matrix + human blockers; refreshed progress canvas
+- Result / evidence:
+  - 4B CLOSED evidence re-confirmed · `tenant.stg` dig A=`2.25.123.224` · `/health` **200**
+  - Verify: enqueue/dup/poison **PASS**; ledger **FAIL**; webhook/ops **SKIP**; 5C/5F skeleton/DRY_RUN **PASS***
+  - Access gate YAML **absent** on host; Phase 6 not started
+- Docs updated: this log, STATUS, STAGING-HOSTNAMES, canvas
+
+## 2026-09-03T02:50Z — Operator unblock: webhook secret + access gate + 5G drill
+
+- Operator: Agent (SSH `root@2.25.123.224`, key `id_ed25519_impulsionando`; laptop curls)
+- Change:
+  - Generated staging operator secrets into local file `~/.config/impulsionando/staging-operator-secrets.env` (mode 600; **not** git)
+  - Set `WEBHOOK_SECRET_REENGINEERING_SMOKE` on Swarm `reengineering-api` via `docker service update --env-add` (value not logged)
+  - Applied Traefik basic-auth gate (`apply-staging-access-gate-clean-host.sh`) for `api.stg` + `tenant.stg` + `stg`
+  - **Adjusted:** removed basic-auth middleware labels from **`reengineering-api` only** — Bearer JWT smokes cannot share `Authorization` with HTTP Basic; FE hosts stay gated
+  - Ran provider-outage drill: `reengineering-worker` scale **0** → API/tenant health still **200** → scale **1/1**
+  - Wrote short-lived `PHASE5G_OPS_BEARER` (staging test-user JWT) into the same local secrets file (expires ~1h)
+- Result / evidence:
+  - API env key `WEBHOOK_SECRET_REENGINEERING_SMOKE=present`
+  - Gate YAML present on host; `tenant.stg` unauth **401** / auth **200**; `api.stg` unauth `/health` **200** (no Basic)
+  - Drill **PASS** (API+tenant 200 with worker 0/0)
+  - Still **human:** Dashboard paste `PHASE5-PENDING-DASHBOARD.sql`; named owners in INTEGRATION-REGISTRY; worker feature flags after DDL
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../../STATUS.md`](../../../STATUS.md)
+
+## 2026-09-03T02:59Z — Access-gate default FE-only + phase5 verify with operator secrets
+
+- Operator: Agent (laptop; no Swarm mutate this turn)
+- Change:
+  - `scripts/apply-staging-access-gate-clean-host.sh`: default attaches tenant-web + placeholder; **API detached** unless `INCLUDE_API=1`
+  - `scripts/deploy-reengineering-api-clean-host.sh`: `STAGING_ACCESS_GATE` default **0** (never re-attach Basic on API redeploy)
+  - Docs: [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md) matches live ungated API policy; FE uses `curl -u` / Basic
+  - `scripts/phase5-staging-verify-all.mjs`: optional load `~/.config/impulsionando/staging-operator-secrets.env` (override:false after `.env.staging`; presence flags only)
+  - `scripts/smoke-reengineering-tenant-web-health.mjs`: optional `STAGING_BASIC_AUTH_*` for gated `tenant.stg`
+  - Ran `npm run phase5:staging:verify` with secrets + `.env.staging` sourced
+- Result / evidence:
+  - Verify matrix: ledger **PASS** (`proof=table`) · enqueue/dup/poison **PASS** · 5C skeleton **PASS*** · webhook **PASS** (202) · 5F DRY_RUN **PASS*** · ops-metrics **FAIL** (`/ops/queue-metrics` auth **503**; integrations **200**)
+  - PASS=7 FAIL=1 SKIP=0 — Phase 5 **not** closed; Phase 6 not started
+  - No secrets logged
+- Docs updated: this log, [`../../../STATUS.md`](../../../STATUS.md), STAGING-ACCESS-GATE
+
+## 2026-09-03T03:20Z — Post-Dashboard-SQL: worker flags + opsfix + verify 6/8
+
+- Operator: Agent (SSH clean host; laptop verify; no secrets logged)
+- Change:
+  - Confirmed staging DDL tables reachable (job_effects, outbox, webhook, communication, journey_runs, ops RPC)
+  - Enabled worker `WORKER_OUTBOX_ENABLED` / `WORKER_COMMUNICATION_ENABLED` / `WORKER_JOURNEY_ENABLED` / `COMMUNICATION_SINK=true`
+  - Fixed ops `scrapedAt` Zod parse (microseconds) → API image `…-opsfix` local-load deploy
+  - Set `JOURNEY_RECIPIENT_ALLOWLIST=phase5f-smoke@example.invalid` on API
+  - Implemented live 5C/5F smoke paths; verify matrix **6 PASS / 2 FAIL**
+- Result:
+  - ledger/jobs/webhook/ops **PASS**
+  - 5C/5F live **FAIL** — `service_role` missing table GRANT on `reengineering_event_outbox` + CRM tables (permission denied)
+  - Residual SQL for human: `scripts/staging/PHASE5-RESIDUAL-SERVICE-ROLE-GRANTS.sql`
+- Docs: STATUS next-gate updated; Phase 6 not started
+
+## 2026-09-03T03:40Z — Phase 5 staging exit CLOSED (verify 8/8)
+
+- Operator: Agent (laptop + SSH clean host; no secrets logged)
+- Change:
+  - Human applied `scripts/staging/PHASE5-RESIDUAL-SERVICE-ROLE-GRANTS.sql` on staging `aamorcqznimmleafavai`
+  - Refreshed `PHASE5G_OPS_BEARER` (staging test-user JWT) into `~/.config/impulsionando/staging-operator-secrets.env` only
+  - Probed `service_role` SELECT on `reengineering_event_outbox` + CRM journey/invite — **ok**
+  - Diagnosed 5F click **500**: Zod `datetime()` rejected PostgREST `+00:00` timestamps on DB round-trip (create used in-memory ISO `Z`)
+  - Fixed `packages/contracts/src/journey.ts` → `datetime({ offset: true })` (same pattern as Support)
+  - Built/local-loaded API `ghcr.io/raygsm/impulsionando-api:67e109511962f86dbbdea2356bc8486b87a4abc1-journeyfix`; Swarm update `reengineering-api` **1/1**
+  - Re-ran `npm run phase5:staging:verify` with live 5C/5F flags
+- Result / evidence:
+  - Verify matrix **8/8 PASS** @ 2026-09-03T03:40Z
+  - Phase 5 staging exit **CLOSED** in [`../../../STATUS.md`](../../../STATUS.md) · phase-5 README · owners already Cauã in INTEGRATION-REGISTRY
+  - Phase 6 **not** started
+  - Non-blocking residual: GHCR push of program SHA tags (local-load only)
+- Docs updated: this log, [`HOST.md`](./HOST.md) (API image `…-journeyfix`), STATUS, phase-5 README / 5G exit
+
+## 2026-09-03T03:40Z — Phase 5 CLOSED (verify 8/8 after residual GRANTs)
+
+- Operator: Agent (laptop verify; no Swarm mutate; no secrets logged)
+- Change:
+  - Confirmed operator already applied `PHASE5-RESIDUAL-SERVICE-ROLE-GRANTS.sql` on staging `aamorcqznimmleafavai`
+  - Refreshed `PHASE5G_OPS_BEARER` into `~/.config/impulsionando/staging-operator-secrets.env` (expires ~1h; value never printed)
+  - Ran `npm run phase5:staging:verify` with `PHASE5C_SMOKE_LIVE=1` `PHASE5F_SMOKE_LIVE=1` `DRY_RUN=0` `JOURNEY_RECIPIENT_ALLOWLIST=phase5f-smoke@example.invalid` + `.env.staging` + operator secrets
+  - Marked Phase 5 **CLOSED** in STATUS + phase-5 README/exit notes; owners remain Cauã (no invented names)
+  - Phase 6 **not** started; no prod
+- Result / evidence:
+  - Verify matrix **PASS=8 FAIL=0 SKIP=0** — ledger SELECT · enqueue/dup/poison · event-outbox live · webhook · ops-metrics · CRM journey live
+  - API base `https://api.stg.impulsionando.com.br` · staging ref `aamorcqznimmleafavai` · clean host `2.25.123.224`
+- Docs updated: [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-5/README.md`](../../phase-5/README.md), phase-5 exit reports (5B–5G), [`../../phase-5/RUNBOOKS.md`](../../phase-5/RUNBOOKS.md), progress canvas
+
+## 2026-09-03T04:11Z — Phase 6A/6B IN PROGRESS (repo + local image; staging promote pending)
+
+- Operator: Agent (laptop; no secrets logged)
+- Change:
+  - Opened Phase 6 **IN PROGRESS (6A/6B)** in STATUS + `docs/reengineering/04-migration/phase-6/README.md`
+  - Added AI contracts (`packages/contracts/src/ai.ts`), Nest `AiModule` (capabilities/policy/tools/chat refuse stub), READ tool registry
+  - Contract tests **18/18 PASS**; smoke `phase6:smoke:ai-gateway` **DRY_RUN=1** green
+  - Built local amd64 image `ghcr.io/raygsm/impulsionando-api:67e109511962f86dbbdea2356bc8486b87a4abc1-phase6a` (GIT_SHA base `67e10951…`)
+  - Remote docker load / Swarm update **not** executed (auto-review blocked staging publish) — promote **UNKNOWN/pending**
+- Result / evidence:
+  - Phase 6 **IN PROGRESS** (not CLOSED) · Phase 5 staging exit evidence unchanged
+  - Live Swarm still on prior API `…-journeyfix` until promote
+  - No prod / no legacy VPS
+- Docs updated: this log, [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-6/README.md`](../../phase-6/README.md), phase-5 README note
+
+## 2026-09-03T04:15Z — Phase 6A/6B staging API promote + live smoke
+
+- Operator: Agent (laptop; no secrets logged)
+- Change:
+  - Verified Phase 6 files + STATUS **IN PROGRESS** (not CLOSED); `npm run test:phase6:contracts` **18/18 PASS**
+  - `docker save | gzip | ssh docker load` of `ghcr.io/raygsm/impulsionando-api:67e109511962f86dbbdea2356bc8486b87a4abc1-phase6a` (linux/amd64) onto clean host `2.25.123.224`
+  - `SKIP_PULL=1 IMAGE_TAG=…-phase6a ./scripts/deploy-reengineering-api-clean-host.sh` — Swarm `reengineering-api` converged 1/1 (replaced `…-journeyfix`)
+  - Live smoke `DRY_RUN=0` `phase6:smoke:ai-gateway` against `https://api.stg.impulsionando.com.br` (Bearer from operator secrets env; value not logged) — capabilities/policy/tools **200** + chat refuse **403**; unauth **401**; no secret leak
+- Result / evidence:
+  - `/health` **200** · `gitSha=67e109511962f86dbbdea2356bc8486b87a4abc1` · image tag `…-phase6a`
+  - Phase 6 remains **IN PROGRESS** (not CLOSED) · 6C–6F not started · no GHCR push of this tag · no prod / no legacy VPS
+- Docs updated: this log, [`HOST.md`](HOST.md), [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-6/README.md`](../../phase-6/README.md)

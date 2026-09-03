@@ -14,6 +14,12 @@
 #
 # Optional ENV_FILE: local path (scp'd) or remote path for create --env-file.
 # Env updates on an existing service: set vars via Dokploy UI / --env-add (not printed here).
+#
+# Staging access gate (Traefik basic auth): API stays UNGATED by default.
+# Bearer JWT smokes need a free Authorization header; FE hosts are gated via
+# apply-staging-access-gate-clean-host.sh (INCLUDE_API=0 default).
+# Override: STAGING_ACCESS_GATE=0 (default, never) | 1 (force attach) | auto
+#   (attach only if staging-access-gate.yml exists — avoid unless intentional).
 
 set -euo pipefail
 
@@ -26,6 +32,8 @@ NETWORK_NAME="dokploy-network"
 IMAGE_REPO="ghcr.io/raygsm/impulsionando-api"
 TRAEFIK_HOST="api.stg.impulsionando.com.br"
 CONTAINER_PORT="3100"
+SKIP_PULL="${SKIP_PULL:-0}"
+STAGING_ACCESS_GATE="${STAGING_ACCESS_GATE:-0}"
 
 die() { echo "error: $*" >&2; exit 1; }
 
@@ -88,14 +96,38 @@ NETWORK_NAME=$(printf %q "${NETWORK_NAME}") \
 TRAEFIK_HOST=$(printf %q "${TRAEFIK_HOST}") \
 CONTAINER_PORT=$(printf %q "${CONTAINER_PORT}") \
 REMOTE_ENV=$(printf %q "${REMOTE_ENV}") \
+SKIP_PULL=$(printf %q "${SKIP_PULL}") \
+STAGING_ACCESS_GATE=$(printf %q "${STAGING_ACCESS_GATE}") \
 bash -s" <<'REMOTE'
 set -euo pipefail
 
 docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 \
   || { echo "error: docker network $NETWORK_NAME missing" >&2; exit 1; }
 
-echo "==> Pulling image"
-docker pull "$IMAGE_REF"
+GATE_YML="/etc/dokploy/traefik/dynamic/staging-access-gate.yml"
+MW_REF="staging-basic-auth@file"
+USE_GATE=0
+case "${STAGING_ACCESS_GATE}" in
+  1|true|yes) USE_GATE=1 ;;
+  0|false|no) USE_GATE=0 ;;
+  auto)
+    if [[ -f "${GATE_YML}" ]]; then USE_GATE=1; else USE_GATE=0; fi
+    ;;
+  *) echo "error: STAGING_ACCESS_GATE must be auto|0|1" >&2; exit 1 ;;
+esac
+if [[ "${USE_GATE}" == "1" ]]; then
+  echo "==> Staging access gate ON → middleware ${MW_REF}"
+else
+  echo "==> Staging access gate OFF (no middleware labels)"
+fi
+
+if [[ "${SKIP_PULL}" != "1" ]]; then
+  echo "==> Pulling image"
+  docker pull "$IMAGE_REF"
+else
+  echo "==> SKIP_PULL=1 — using local image"
+  docker image inspect "$IMAGE_REF" >/dev/null
+fi
 
 apply_labels_create() {
   # Used only on service create
@@ -111,6 +143,11 @@ apply_labels_create() {
     --label "traefik.http.routers.reeng-api-secure.tls.certresolver=letsencrypt" \
     --label "traefik.http.routers.reeng-api-secure.service=reeng-api" \
     --label "traefik.http.services.reeng-api.loadbalancer.server.port=${CONTAINER_PORT}"
+  if [[ "${USE_GATE}" == "1" ]]; then
+    echo \
+      --label "traefik.http.routers.reeng-api.middlewares=${MW_REF}" \
+      --label "traefik.http.routers.reeng-api-secure.middlewares=${MW_REF}"
+  fi
 }
 
 apply_labels_update() {
@@ -126,14 +163,30 @@ apply_labels_update() {
     --label-add "traefik.http.routers.reeng-api-secure.tls.certresolver=letsencrypt" \
     --label-add "traefik.http.routers.reeng-api-secure.service=reeng-api" \
     --label-add "traefik.http.services.reeng-api.loadbalancer.server.port=${CONTAINER_PORT}"
+  if [[ "${USE_GATE}" == "1" ]]; then
+    echo \
+      --label-add "traefik.http.routers.reeng-api.middlewares=${MW_REF}" \
+      --label-add "traefik.http.routers.reeng-api-secure.middlewares=${MW_REF}"
+  fi
 }
 
 if docker service inspect "$SERVICE_NAME" >/dev/null 2>&1; then
   echo "==> Updating existing service $SERVICE_NAME"
   # shellcheck disable=SC2046
+  UPDATE_EXTRA=()
+  if [[ "${USE_GATE}" != "1" ]] && [[ "${STAGING_ACCESS_GATE}" == "0" || "${STAGING_ACCESS_GATE}" == "false" || "${STAGING_ACCESS_GATE}" == "no" ]]; then
+    labels_json="$(docker service inspect "$SERVICE_NAME" --format '{{json .Spec.Labels}}')"
+    if printf '%s' "$labels_json" | grep -q 'traefik.http.routers.reeng-api.middlewares'; then
+      UPDATE_EXTRA+=(--label-rm "traefik.http.routers.reeng-api.middlewares")
+    fi
+    if printf '%s' "$labels_json" | grep -q 'traefik.http.routers.reeng-api-secure.middlewares'; then
+      UPDATE_EXTRA+=(--label-rm "traefik.http.routers.reeng-api-secure.middlewares")
+    fi
+  fi
   docker service update \
     --image "$IMAGE_REF" \
     $(apply_labels_update) \
+    "${UPDATE_EXTRA[@]}" \
     --update-order start-first \
     --rollback-order start-first \
     "$SERVICE_NAME"
@@ -173,5 +226,6 @@ fi
 
 echo "==> Done. External check (operator):"
 echo "    curl -fsS https://${TRAEFIK_HOST}/health"
+echo "    If staging access gate is on: curl -fsS -u USER:PASS https://${TRAEFIK_HOST}/health"
 echo "Note: if reengineering-placeholder still owns ${TRAEFIK_HOST}, remove that Host from its Traefik labels before expecting Nest responses."
 echo "Append evidence to docs/reengineering/04-migration/phase-2/clean-host/IMPLEMENTATION-LOG.md"

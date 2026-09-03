@@ -2,17 +2,21 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
-import type {
-  SupportTicketCreateBody,
-  SupportTicketListQuery,
-  SupportTicketStatus,
-  SupportTicketSummary,
-  SupportTicketUpdateStatusBody,
+import {
+  EventType,
+  domainMutationToOutboxRow,
+  type SupportTicketCreateBody,
+  type SupportTicketListQuery,
+  type SupportTicketStatus,
+  type SupportTicketSummary,
+  type SupportTicketUpdateStatusBody,
 } from "@impulsionando/contracts";
 import { randomUUID } from "node:crypto";
 import { SupabaseService } from "../supabase/supabase.service";
+import { OutboxService } from "../outbox/outbox.service";
 import type { AuthUser } from "../auth/auth.types";
 import {
   categoryToType,
@@ -38,7 +42,12 @@ type TicketRow = {
 
 @Injectable()
 export class SupportService {
-  constructor(@Inject(SupabaseService) private readonly supabase: SupabaseService) {}
+  private readonly logger = new Logger(SupportService.name);
+
+  constructor(
+    @Inject(SupabaseService) private readonly supabase: SupabaseService,
+    @Inject(OutboxService) private readonly outbox: OutboxService,
+  ) {}
 
   private admin() {
     return this.supabase.admin();
@@ -162,6 +171,55 @@ export class SupportService {
       metadata,
     };
 
+    const eventId = randomUUID();
+    const outboxRow = domainMutationToOutboxRow({
+      eventId,
+      type: EventType.SupportTicketCreated,
+      tenantId: companyId,
+      correlationId: opts.correlationId,
+      payload: {
+        ticketId: null,
+        protocol: ticketCode,
+        subject: body.subject,
+        source: body.source ?? "api.v1.support",
+      },
+      actor: opts.actor?.id
+        ? { actorType: "user", actorId: opts.actor.id }
+        : { actorType: "anonymous" },
+      idempotencyKey: opts.idempotencyKey,
+      source: "support",
+    });
+
+    // Prefer true transactional RPC (ticket + outbox + audit event).
+    const { data: txData, error: txError } = await sb.rpc(
+      "create_support_ticket_with_outbox",
+      {
+        p_ticket: insert,
+        p_outbox_envelope: outboxRow.envelope,
+      },
+    );
+
+    if (!txError && txData) {
+      const row = txData as {
+        id: string;
+        ticket_code: string;
+        status?: string;
+        eventId?: string;
+      };
+      return {
+        id: row.id,
+        protocol: row.ticket_code,
+        status: "new" as const,
+        replay: false,
+      };
+    }
+
+    // Fallback when Phase 5C migration not applied: sequential ticket write + best-effort outbox.
+    // Atomicity of ticket+outbox is UNKNOWN in this path.
+    this.logger.warn(
+      `SUPPORT_OUTBOX_TX_UNAVAILABLE:${txError?.code || "unknown"} — sequential create (atomicity UNKNOWN)`,
+    );
+
     const { data, error } = await sb
       .from("support_tickets")
       .insert(insert)
@@ -182,12 +240,27 @@ export class SupportService {
       to_value: "new",
       metadata: {
         schemaVersion: 1,
-        eventId: randomUUID(),
+        eventId,
         correlationId: opts.correlationId,
         action: "support.ticket.created",
         source: body.source ?? "api.v1.support",
       },
     });
+
+    try {
+      await this.outbox.writeEnvelope({
+        ...outboxRow.envelope,
+        payload: {
+          ...outboxRow.envelope.payload,
+          ticketId: data.id as string,
+          protocol: data.ticket_code as string,
+        },
+      });
+    } catch (outboxErr) {
+      this.logger.warn(
+        `SUPPORT_OUTBOX_WRITE_FAILED:${outboxErr instanceof Error ? outboxErr.message : String(outboxErr)}`,
+      );
+    }
 
     return {
       id: data.id as string,
@@ -263,6 +336,78 @@ export class SupportService {
       nextCursor,
       limit,
     };
+  }
+
+  /**
+   * Phase 6B READ tool — get single ticket with the same auth boundary as listTickets.
+   */
+  async getTicketById(
+    ticketId: string,
+    actor: AuthUser,
+    opts?: { correlationId?: string },
+  ): Promise<SupportTicketSummary> {
+    const sb = this.admin();
+    const staff = await this.isStaff(actor.id);
+    const corr = opts?.correlationId ?? randomUUID();
+
+    const { data, error } = await sb
+      .from("support_tickets")
+      .select(
+        "id, ticket_code, company_id, subject, category, priority, status, created_at, updated_at, resolution_due_at, requester_user_id",
+      )
+      .eq("id", ticketId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(
+        `SUPPORT_GET_FAILED:${error.code || "unknown"}:${error.message || ""}`,
+      );
+    }
+    if (!data) {
+      throw new NotFoundException({
+        error: {
+          code: "NOT_FOUND",
+          message: "Ticket not found",
+          correlationId: corr,
+        },
+      });
+    }
+
+    const row = data as TicketRow & { requester_user_id?: string | null };
+
+    if (!staff) {
+      let companyId: string | null = null;
+      const { data: prof } = await sb
+        .from("user_profiles")
+        .select("company_id")
+        .eq("user_id", actor.id)
+        .maybeSingle();
+      companyId = (prof as { company_id?: string | null } | null)?.company_id ?? null;
+      if (!companyId) {
+        const { data: roleRow } = await sb
+          .from("user_roles")
+          .select("company_id")
+          .eq("user_id", actor.id)
+          .limit(1)
+          .maybeSingle();
+        companyId = (roleRow as { company_id?: string | null } | null)?.company_id ?? null;
+      }
+
+      const allowed =
+        row.requester_user_id === actor.id ||
+        (companyId !== null && row.company_id === companyId);
+      if (!allowed) {
+        throw new ForbiddenException({
+          error: {
+            code: "FORBIDDEN",
+            message: "Ticket not visible to actor",
+            correlationId: corr,
+          },
+        });
+      }
+    }
+
+    return this.mapSummary(row);
   }
 
   async updateStatus(

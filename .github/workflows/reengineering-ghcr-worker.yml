@@ -1,6 +1,8 @@
 # Reengineering GHCR Worker (Phase 5A).
 #
 # Manual only — workflow_dispatch. Full commit SHA tags only.
+# This file lives on `main` so GitHub registers the workflow.
+# Default build ref is `reengineering/program` (worker + Dockerfile.worker).
 
 name: Reengineering GHCR Worker
 

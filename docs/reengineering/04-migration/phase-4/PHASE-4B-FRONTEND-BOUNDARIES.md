@@ -1,7 +1,7 @@
 # Phase 4B — Frontend runtime boundaries
 
 Created: **2026-09-02**  
-Status: **IN PROGRESS** — strangler stubs shipped in repo; staging Swarm deploy pending
+Status: **REPO-COMPLETE** — strangler stubs + Dockerfiles in git; staging Swarm **LIVE** (`tenant.stg` health PASS)
 
 ## Target topology
 

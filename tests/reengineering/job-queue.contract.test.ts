@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_MAX_JOB_ATTEMPTS,
+  INVALID_ENVELOPE_DLQ_REASON,
   JobEnvelopeSchema,
   JobMessageSchema,
   REENGINEERING_JOBS_DLQ,
   REENGINEERING_JOBS_QUEUE,
   computeBackoffMs,
+  dispositionForQueueMessage,
   idempotencyScopeKey,
   shouldMoveToDlq,
   shouldSkipDuplicate,
@@ -66,9 +68,11 @@ describe("Phase 5B — job queue contract", () => {
     expect(shouldSkipDuplicate(null)).toBe(false);
   });
 
-  it("JQ-05: shouldMoveToDlq at max attempts", () => {
+  it("JQ-05: shouldMoveToDlq at max attempts (local)", () => {
+    expect(shouldMoveToDlq(1, DEFAULT_MAX_JOB_ATTEMPTS)).toBe(false);
     expect(shouldMoveToDlq(DEFAULT_MAX_JOB_ATTEMPTS - 1)).toBe(false);
     expect(shouldMoveToDlq(DEFAULT_MAX_JOB_ATTEMPTS)).toBe(true);
+    expect(shouldMoveToDlq(DEFAULT_MAX_JOB_ATTEMPTS + 1)).toBe(true);
   });
 
   it("JQ-06: computeBackoffMs grows with attempt", () => {
@@ -80,5 +84,39 @@ describe("Phase 5B — job queue contract", () => {
   it("JQ-07: queue constants", () => {
     expect(REENGINEERING_JOBS_QUEUE).toBe("reengineering_jobs");
     expect(REENGINEERING_JOBS_DLQ).toBe("reengineering_jobs_dlq");
+  });
+
+  it("JQ-08: invalid envelope → immediate DLQ disposition (no retry)", () => {
+    const poison = {
+      notAJob: true,
+      type: "reengineering.smoke.echo",
+    };
+    expect(JobEnvelopeSchema.safeParse(poison).success).toBe(false);
+
+    const disposition = dispositionForQueueMessage(poison);
+    expect(disposition).toEqual({
+      kind: "dlq_invalid_envelope",
+      reason: INVALID_ENVELOPE_DLQ_REASON,
+    });
+    expect(INVALID_ENVELOPE_DLQ_REASON).toBe("INVALID_ENVELOPE");
+    // Invalid envelope does not consult attempt budget — DLQ is immediate.
+    expect(shouldMoveToDlq(1)).toBe(false);
+  });
+
+  it("JQ-09: valid envelope disposition is process", () => {
+    const envelope = {
+      jobId: "11111111-1111-4111-8111-111111111111",
+      type: "reengineering.smoke.echo",
+      schemaVersion: 1,
+      tenantId: TENANT_ID,
+      correlationId: "corr-1",
+      idempotencyKey: "idem-1",
+      enqueuedAt: new Date().toISOString(),
+    };
+    const disposition = dispositionForQueueMessage(envelope);
+    expect(disposition.kind).toBe("process");
+    if (disposition.kind === "process") {
+      expect(disposition.envelope.jobId).toBe(envelope.jobId);
+    }
   });
 });

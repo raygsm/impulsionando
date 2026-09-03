@@ -6,10 +6,12 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.34.4 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/contracts/package.json packages/contracts/
 COPY apps/worker/package.json apps/worker/
 
 RUN pnpm install --filter @impulsionando/worker... --frozen-lockfile
 
+COPY packages/contracts packages/contracts
 COPY apps/worker apps/worker
 
 ARG GIT_SHA=unknown

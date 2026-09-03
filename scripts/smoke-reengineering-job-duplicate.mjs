@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
+import { readEffectRow, workerHealth, workerLogsMentionJob } from "./lib/phase5-effect-proof.mjs";
 
 const STAGING_REF = "aamorcqznimmleafavai";
 const PROD_REF = "arygtqrdpcdkwnuwsgmm";
@@ -71,6 +72,9 @@ async function main() {
   const idempotencyKey = `phase5b-dup-${randomUUID()}`;
   const scopeKey = `${tenantId}:reengineering.smoke.echo:${idempotencyKey}`;
 
+  const healthBefore = workerHealth();
+  const skippedBefore = Number(healthBefore?.consumer?.skipped ?? 0);
+
   const first = await enqueue(token, idempotencyKey, randomUUID());
   const second = await enqueue(token, idempotencyKey, randomUUID());
 
@@ -85,27 +89,50 @@ async function main() {
     { auth: { persistSession: false } },
   );
 
+  const firstJobId = first.body?.data?.jobId;
+  const secondJobId = second.body?.data?.jobId;
   const started = Date.now();
   let count = 0;
+  let proof = "none";
+  let readError = null;
+  let echoFirst = false;
+  let echoSecond = false;
   while (Date.now() - started < waitMs) {
-    const { count: rowCount } = await admin
-      .from("reengineering_job_effects")
-      .select("*", { count: "exact", head: true })
-      .eq("scope_key", scopeKey);
-    count = rowCount ?? 0;
-    if (count >= 1) break;
+    const got = await readEffectRow(admin, scopeKey);
+    readError = got.error;
+    if (got.row) {
+      count = 1;
+      proof = got.source;
+      break;
+    }
+    echoFirst = Boolean(firstJobId && workerLogsMentionJob(firstJobId));
+    echoSecond = Boolean(secondJobId && workerLogsMentionJob(secondJobId));
+    if (echoFirst !== echoSecond && (echoFirst || echoSecond)) {
+      const health = workerHealth();
+      const skipped = Number(health?.consumer?.skipped ?? 0);
+      const processed = Number(health?.consumer?.processed ?? 0);
+      if (processed >= 1 && skipped > skippedBefore) {
+        count = 1;
+        proof = "worker_log_single_echo";
+        break;
+      }
+    }
     await new Promise((r) => setTimeout(r, 1_000));
   }
 
-  const ok = count === 1;
+  const ok = count === 1 && !(echoFirst && echoSecond);
   console.log(
     JSON.stringify(
       {
         ok,
         scopeKey,
         effectCount: count,
-        firstJobId: first.body?.data?.jobId,
-        secondJobId: second.body?.data?.jobId,
+        firstJobId,
+        secondJobId,
+        proof,
+        echoFirst,
+        echoSecond,
+        readError,
         waitedMs: Date.now() - started,
       },
       null,

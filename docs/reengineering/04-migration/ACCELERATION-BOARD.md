@@ -16,7 +16,7 @@ Acelerar implementação via **verticais strangler em paralelo**, não via atalh
 | **P3 Support** | 3 | **CLOSED** | Nest Support LIVE · GHCR promote — [`phase-3/PHASE-3-EXIT-REPORT.md`](./phase-3/PHASE-3-EXIT-REPORT.md) |
 | **P4A tenant resolve** | 4A | **CLOSED** | resolve + seed + deny — [`phase-4/PHASE-4-EXIT-REPORT.md`](./phase-4/PHASE-4-EXIT-REPORT.md) |
 | **P4B tenant/config** | 4B | **REPO-COMPLETE** | 8/8 packages — [`phase-4/PHASE-4B-EXIT-REPORT.md`](./phase-4/PHASE-4B-EXIT-REPORT.md) · staging close pending |
-| **P5 async/integrations** | 5 | **5A+5B repo-complete** | queue semantics in git — staging smokes pending — [`phase-5/PHASE-5B-EXIT-REPORT.md`](./phase-5/PHASE-5B-EXIT-REPORT.md) |
+| **P5 async/integrations** | 5 | **CLOSED (staging)** | verify **8/8 PASS** 2026-09-03T03:40Z — [`phase-5/README.md`](./phase-5/README.md) · [`../STATUS.md`](../STATUS.md) |
 | **P2 observability follow-up** | 2+ | Deferred | External alerts — [`phase-2/OBSERVABILITY-MINIMUM.md`](./phase-2/OBSERVABILITY-MINIMUM.md) |
 
 Product-intake mapping and vertical-wave order: [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md).

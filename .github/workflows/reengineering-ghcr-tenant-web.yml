@@ -1,6 +1,8 @@
 # Reengineering GHCR tenant-web (Phase 4B).
 #
 # Manual only — workflow_dispatch. Full commit SHA tags only.
+# This file lives on `main` so GitHub registers the workflow.
+# Default build ref is `reengineering/program` (tenant-web + Dockerfile.tenant-web).
 
 name: Reengineering GHCR tenant-web
 

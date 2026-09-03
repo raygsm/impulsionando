@@ -1,7 +1,7 @@
 # Phase 4A — Tenant resolve (hostname → tenant)
 
 Opened: **2026-09-01**  
-Status: **PHASE 4A CLOSED · PHASE 4B OPEN** — see [`PHASE-4-EXIT-REPORT.md`](./PHASE-4-EXIT-REPORT.md) and [`../PHASE-4-TENANTS.md`](../PHASE-4-TENANTS.md)
+Status: **PHASE 4A CLOSED · PHASE 4B CLOSED** — see [`PHASE-4-EXIT-REPORT.md`](./PHASE-4-EXIT-REPORT.md) · [`PHASE-4B-EXIT-REPORT.md`](./PHASE-4B-EXIT-REPORT.md) · [`../PHASE-4-TENANTS.md`](../PHASE-4-TENANTS.md)
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)  
@@ -60,4 +60,5 @@ Execution plan: [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PL
 | 4B-6 | Frontend runtime boundaries | [`PHASE-4B-FRONTEND-BOUNDARIES.md`](./PHASE-4B-FRONTEND-BOUNDARIES.md) · `apps/{tenant,platform,app}-web` |
 | 4B-7 | Garrido pilot seed | [`PHASE-4B-TENANT-PILOT.md`](./PHASE-4B-TENANT-PILOT.md) · `staging:seed:garrido-*` |
 
-Exit report: [`PHASE-4B-EXIT-REPORT.md`](./PHASE-4B-EXIT-REPORT.md) — **repo-complete; staging close pending operator**
+Exit report: [`PHASE-4B-EXIT-REPORT.md`](./PHASE-4B-EXIT-REPORT.md) — **CLOSED 2026-09-03**  
+Operator runbook: [`PHASE-4B-OPERATOR-RUNBOOK.md`](./PHASE-4B-OPERATOR-RUNBOOK.md)

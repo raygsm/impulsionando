@@ -28,6 +28,12 @@ export type JobMessage = z.infer<typeof JobMessageSchema>;
 
 export const DEFAULT_MAX_JOB_ATTEMPTS = 3;
 export const DEFAULT_VISIBILITY_TIMEOUT_SECONDS = 30;
+/** Worker DLQ reason when pgmq payload fails JobEnvelopeSchema. */
+export const INVALID_ENVELOPE_DLQ_REASON = "INVALID_ENVELOPE" as const;
+
+export type QueueMessageDisposition =
+  | { kind: "process"; envelope: JobEnvelope }
+  | { kind: "dlq_invalid_envelope"; reason: typeof INVALID_ENVELOPE_DLQ_REASON };
 
 export function computeBackoffMs(attempt: number, baseMs = 1_000, capMs = 60_000): number {
   const exp = Math.min(capMs, baseMs * 2 ** Math.max(0, attempt - 1));
@@ -37,6 +43,15 @@ export function computeBackoffMs(attempt: number, baseMs = 1_000, capMs = 60_000
 
 export function shouldMoveToDlq(attempt: number, maxAttempts = DEFAULT_MAX_JOB_ATTEMPTS): boolean {
   return attempt >= maxAttempts;
+}
+
+/** Invalid envelopes go to reengineering_jobs_dlq immediately (no retry budget). */
+export function dispositionForQueueMessage(payload: unknown): QueueMessageDisposition {
+  const parsed = JobEnvelopeSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { kind: "dlq_invalid_envelope", reason: INVALID_ENVELOPE_DLQ_REASON };
+  }
+  return { kind: "process", envelope: parsed.data };
 }
 
 export function idempotencyScopeKey(input: {

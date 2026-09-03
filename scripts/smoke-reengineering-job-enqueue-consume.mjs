@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
+import { readEffectRow, workerLogsMentionJob } from "./lib/phase5-effect-proof.mjs";
 
 const STAGING_REF = "aamorcqznimmleafavai";
 const PROD_REF = "arygtqrdpcdkwnuwsgmm";
@@ -89,14 +90,19 @@ async function main() {
 
   const started = Date.now();
   let effect = null;
+  let proof = "none";
+  let readError = null;
   while (Date.now() - started < waitMs) {
-    const { data } = await admin
-      .from("reengineering_job_effects")
-      .select("scope_key, job_id, effect_type")
-      .eq("scope_key", scopeKey)
-      .maybeSingle();
-    if (data) {
-      effect = data;
+    const got = await readEffectRow(admin, scopeKey);
+    readError = got.error;
+    if (got.row) {
+      effect = got.row;
+      proof = got.source;
+      break;
+    }
+    if (jobId && workerLogsMentionJob(jobId)) {
+      effect = { job_id: jobId, scope_key: scopeKey, effect_type: "reengineering.smoke.echo" };
+      proof = "worker_log";
       break;
     }
     await new Promise((r) => setTimeout(r, 1_000));
@@ -112,6 +118,8 @@ async function main() {
         jobId,
         scopeKey,
         effect,
+        proof,
+        readError,
         waitedMs: Date.now() - started,
       },
       null,

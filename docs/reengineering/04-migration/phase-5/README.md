@@ -1,12 +1,14 @@
 # Phase 5 — Worker skeleton (independent process)
 
 Opened: **2026-09-01**  
-Status: **5A repo-complete · 5B repo-complete** — staging queue smokes pending operator
+Closed: **2026-09-03T03:40Z**  
+Status: **CLOSED (staging)** — `phase5:staging:verify` **8/8 PASS** · residual service_role GRANTs applied · owners **Cauã** · Phase 6 now **IN PROGRESS (6A/6B)** — see [`../phase-6/README.md`](../phase-6/README.md)
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Acceleration board: [`../ACCELERATION-BOARD.md`](../ACCELERATION-BOARD.md)  
 ADR: [`../../05-governance/adrs/ADR-005-supabase-queues-initially.md`](../../05-governance/adrs/ADR-005-supabase-queues-initially.md)
 Detailed plan: [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 5
+5C exit: [`PHASE-5C-EXIT-REPORT.md`](./PHASE-5C-EXIT-REPORT.md)
 
 ## Goal
 
@@ -44,23 +46,23 @@ Minimum skeleton:
 | GHCR workflow design (dispatch-only) | Workers as child process of web container |
 | Health endpoint on worker port | Re-enable contained legacy workflows without decision |
 
-## Exit criteria (future — not met by seed)
+## Exit criteria (staging — met 2026-09-03T03:40Z)
 
-- Worker image on GHCR with full SHA tag
+- Worker image on clean host (local-load SHA tag; GHCR push optional / not required for close)
 - Swarm service on clean host (separate from `reengineering-api`)
-- Staging queue publish/consume smoke (pgmq) with idempotency test
-- Transactional outbox/event contract and secure webhook proof
-- Communication adapter with consent/deduplication/delivery-state proof
-- One synthetic/allowlisted end-to-end async journey
-- Queue/integration observability and recovery runbook
-- Evidence in `STATUS.md` and clean-host log
+- Staging queue publish/consume smoke (pgmq) with idempotency test — **PASS**
+- Transactional outbox/event contract and secure webhook proof — **PASS**
+- Communication adapter with consent/deduplication/delivery-state (sink) — staging flags **ON**
+- One synthetic/allowlisted end-to-end async journey — **PASS**
+- Queue/integration observability and recovery runbook — ops metrics + drill **PASS**
+- Evidence in `STATUS.md` and clean-host log — recorded
 
-## Evidence checklist (seed)
+## Evidence checklist
 
 | # | Check | State |
 | --- | --- | --- |
-| 1 | Phase 5 README + STATUS row | ✅ seed |
+| 1 | Phase 5 README + STATUS row | ✅ CLOSED |
 | 2 | `apps/worker` bootstrap | ✅ health + heartbeat |
 | 3 | Health probe | ✅ `GET /health` / `ready` on port 3200 |
 | 4 | Dockerfile + deploy doc | ✅ `Dockerfile.worker` · `reengineering-ghcr-worker.yml` |
-| 5 | Staging queue smoke | ⏳ 5B migration + smokes pending |
+| 5 | Staging verify 8/8 | ✅ `npm run phase5:staging:verify` 2026-09-03T03:40Z |

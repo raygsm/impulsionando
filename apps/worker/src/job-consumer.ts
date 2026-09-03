@@ -1,13 +1,19 @@
 import {
+  COMMUNICATION_DISPATCH_JOB_TYPE,
   DEFAULT_MAX_JOB_ATTEMPTS,
   DEFAULT_VISIBILITY_TIMEOUT_SECONDS,
-  JobEnvelopeSchema,
   computeBackoffMs,
+  dispositionForQueueMessage,
   idempotencyScopeKey,
   shouldMoveToDlq,
   type JobEnvelope,
 } from "@impulsionando/contracts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  handleCommunicationDispatchJob,
+  isCommunicationWorkerEnabled,
+  type CommunicationDispatchStats,
+} from "./communication/dispatch";
 import {
   claimIdempotency,
   completeIdempotency,
@@ -24,13 +30,20 @@ export type ConsumerStats = {
   skipped: number;
   failed: number;
   dlq: number;
+  communication?: CommunicationDispatchStats;
 };
 
 const SMOKE_JOB_TYPE = "reengineering.smoke.echo";
 
 export class JobConsumer {
   private running = false;
-  private stats: ConsumerStats = { processed: 0, skipped: 0, failed: 0, dlq: 0 };
+  private stats: ConsumerStats = {
+    processed: 0,
+    skipped: 0,
+    failed: 0,
+    dlq: 0,
+    communication: { delivered: 0, skipped: 0, failed: 0 },
+  };
 
   constructor(
     private readonly client: SupabaseClient,
@@ -88,17 +101,17 @@ export class JobConsumer {
   }
 
   private async handleMessage(msg: QueueMessage): Promise<void> {
-    const parsed = JobEnvelopeSchema.safeParse(msg.message);
-    if (!parsed.success) {
+    const disposition = dispositionForQueueMessage(msg.message);
+    if (disposition.kind === "dlq_invalid_envelope") {
       await moveJobToDlq(this.client, msg.msgId, {
         ...msg.message,
-        dlqReason: "INVALID_ENVELOPE",
+        dlqReason: disposition.reason,
       });
       this.stats.dlq += 1;
       return;
     }
 
-    const envelope = parsed.data;
+    const envelope = disposition.envelope;
     const scopeKey = idempotencyScopeKey({
       tenantId: envelope.tenantId,
       jobType: envelope.type,
@@ -180,6 +193,18 @@ export class JobConsumer {
           at: new Date().toISOString(),
         }),
       );
+      return;
+    }
+
+    // Phase 5E — default off (WORKER_COMMUNICATION_ENABLED); does not change 5B smoke path.
+    if (envelope.type === COMMUNICATION_DISPATCH_JOB_TYPE && isCommunicationWorkerEnabled()) {
+      const commStats = this.stats.communication ?? {
+        delivered: 0,
+        skipped: 0,
+        failed: 0,
+      };
+      await handleCommunicationDispatchJob(this.client, envelope, commStats);
+      this.stats.communication = commStats;
       return;
     }
 

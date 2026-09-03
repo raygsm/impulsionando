@@ -19,6 +19,7 @@
 | --- | --- |
 | [`HOST.md`](./HOST.md) | Current observed identity (IP, OS, SSH, ports) |
 | [`IMPLEMENTATION-LOG.md`](./IMPLEMENTATION-LOG.md) | Chronological mutations |
+| [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md) | Hide staging (Traefik basic auth / IP allowlist) |
 | [`../CLEAN-INFRA-TOPOLOGY.md`](../CLEAN-INFRA-TOPOLOGY.md) | Topology plan + inventory summary |
 | [`../README.md`](../README.md) | Phase 2 board |
 
