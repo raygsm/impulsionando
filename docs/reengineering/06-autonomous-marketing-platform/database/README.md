@@ -1,8 +1,9 @@
 # Canonical database reengineering
 
 Created: **2026-09-04**
-State: **PROPOSED — logical models only; no migration or database mutation authorized**
-Product architecture: [`../README.md`](../README.md) · Phase 8 data authority: [`../../04-migration/phase-8/DATA-AND-IDENTITY-PLAN.md`](../../04-migration/phase-8/DATA-AND-IDENTITY-PLAN.md)
+Updated: **2026-09-04**
+State: **PROPOSED — logical models + draft expand SQL in-repo; no staging/prod apply authorized**
+Product architecture: [`../README.md`](../README.md) · Phase 8 data authority: [`../../04-migration/phase-8/DATA-AND-IDENTITY-PLAN.md`](../../04-migration/phase-8/DATA-AND-IDENTITY-PLAN.md) · SQL drafts: [`../../../../packages/database/canonical/`](../../../../packages/database/canonical/)
 
 ## Purpose
 
@@ -118,10 +119,22 @@ Party/contact, contact points, consent, customer account, lead, pipeline/stage, 
 
 ERP/vertical tables are not prerequisites for the first CRM slice.
 
+## SQL migration files
+
+**Yes — when authorized, the redesign ships as controlled expand/contract SQL**, not ORM sync and not a big-bang replace of the 577-table legacy database.
+
+| Artifact | Location | Apply status |
+| --- | --- | --- |
+| Logical models | this folder | paper authority |
+| Draft expand SQL | [`packages/database/canonical/migrations/`](../../../../packages/database/canonical/migrations/) | **draft only** — separate from `supabase/migrations/` |
+| Apply policy | [`packages/database/canonical/APPLY-POLICY.md`](../../../../packages/database/canonical/APPLY-POLICY.md) | DB0→DB4 before any shared DB |
+
+Draft physical choice in SQL: **Option A** (private schemas). T-DB-01 remains open; Option B/C would require adapting the corpus before apply.
+
 ## Hard safety
 
 - No production writes, `db push`, reset or destructive cleanup.
-- No database object is created from these logical documents.
+- Draft SQL in git ≠ applied schema. Do not treat file presence as live proof.
 - No table is considered safe because its name appears in generated types.
 - No vertical namespace is copied into the canonical core.
 - No n8n/provider/model receives direct domain-table write authority.

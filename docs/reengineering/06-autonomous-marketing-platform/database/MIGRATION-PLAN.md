@@ -1,7 +1,7 @@
 # Canonical database migration plan
 
 Created: **2026-09-04**
-State: **PROPOSED — no migration authorized**
+State: **PROPOSED — draft expand SQL in packages/database/canonical/; apply not authorized**
 Authority: [`../../04-migration/phase-1/CONTRACT-MIGRATIONS.md`](../../04-migration/phase-1/CONTRACT-MIGRATIONS.md) · Program status: [`../../STATUS.md`](../../STATUS.md)
 
 ## Goal
@@ -18,7 +18,17 @@ canonical database
 
 “Keep” never means “let legacy shape dictate Nest.” “Retire” never means drop before dependency evidence and rollback close.
 
+## 0. Draft SQL corpus (2026-09-04)
+
+Expand-only draft files live under [`packages/database/canonical/migrations/`](../../../../packages/database/canonical/migrations/).
+
+- Physical draft in SQL: Option A (private schemas) — T-DB-01 still open
+- Not registered in `supabase/migrations/`
+- Apply policy: [`packages/database/canonical/APPLY-POLICY.md`](../../../../packages/database/canonical/APPLY-POLICY.md)
+- **Do not apply** until DB1+DB3+DB4
+
 ## 1. Migration unit
+
 
 The unit is a **capability aggregate**, not a table:
 

@@ -1,7 +1,7 @@
 # Database decisions and gates
 
 Created: **2026-09-04**
-State: **OPEN — no canonical schema implementation authorized**
+State: **OPEN — draft expand SQL exists; apply/implementation on shared DBs not authorized**
 Index: [`README.md`](./README.md) · Migration: [`MIGRATION-PLAN.md`](./MIGRATION-PLAN.md)
 
 ## Decision authority
@@ -159,7 +159,12 @@ Choose query/view/materialized projection/event-built tables per metric based on
 
 Define controlled migration generation/apply path, schema tests, local/isolated environment and evidence. Production remains forbidden until its own gate.
 
+## Draft SQL note
+
+A full expand DDL corpus was added under `packages/database/canonical/migrations/` for review. That does **not** satisfy DB1–DB4 and does not authorize staging/production apply.
+
 ## Gate model
+
 
 ```text
 DB0 requirements accepted
