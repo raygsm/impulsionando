@@ -13,8 +13,8 @@ Any failed observation window (7A staging or 7B prod pilot): restore previous ed
 | --- | --- |
 | API image | `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
 | Worker image | `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
-| CSI core SSR image | `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx` |
-| Runtime gitSha (CSI `/healthz`) | `f03ea76efda53c02e3957290780040b79a7caf1a` |
+| CSI core SSR image | `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` |
+| Runtime gitSha (CSI `/healthz`) | `5a9fd4c50cb04afcdccef6804480062aadeb17a8` |
 | Clean host | `2.25.123.224` |
 | Staging API | `https://api.stg.impulsionando.com.br` |
 | Staging CSI Host | `csi.stg.impulsionando.com.br` (Traefik; public DNS pending) |

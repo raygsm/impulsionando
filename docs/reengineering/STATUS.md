@@ -50,7 +50,7 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | --- | --- |
 | 7A | **PASS** @ 2026-09-04T00:30Z — [`phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
 | **7B pilot** | **`csi.impulsionando.com.br`** — [`phase-7/CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
-| 7B staging SSR | **PASS** @ 2026-09-04T11:16Z — Swarm `reengineering-csi-core` · Host `csi.stg.impulsionando.com.br` · `/csi` HTML **200** · `/healthz` gitSha `f03ea76e…` · image `…-csi7b-prodjsx` local-load |
+| 7B staging SSR | **PASS** @ 2026-09-04T11:16Z — Swarm `reengineering-csi-core` · Host `csi.stg.impulsionando.com.br` · `/csi` HTML **200** · `/healthz` gitSha `5a9fd4c5…` · image `…-csi7b-prodjsx` local-load |
 | 7B prod DNS flip | **BLOCKED** — no prod Vite/Supabase env locally; no Cloudflare API token; must not point prod CSI at staging DB |
 | Staging CSI seed | `npm run staging:seed:csi-tenant` → company `CSI Invest` / subdomain `csi` (staging) |
 | Impulsionando development | **UNLOCKED on staging / new stack** — do not wait for CSI DNS |

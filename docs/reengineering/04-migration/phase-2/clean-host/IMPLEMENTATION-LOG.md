@@ -526,9 +526,9 @@ Format per entry:
   - Built Nitro/TanStack monorepo CSI routes into `infra/compose/Dockerfile.csi-core` (linux/amd64 local-load)
   - Forced `NODE_ENV=production` at build (sourcing full `.env.staging` had poisoned JSX → `jsxDEV is not a function`)
   - Swarm create/update `reengineering-csi-core` on `dokploy-network` · Traefik Host `csi.stg.impulsionando.com.br` · staging access gate ON · workers OFF
-  - Image tag `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx`
+  - Image tag `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b`
 - Result / evidence:
-  - `GET Host:csi.stg… /healthz` → **200** `service=impulsionando-csi-core` `gitSha=f03ea76efda53c02e3957290780040b79a7caf1a`
+  - `GET Host:csi.stg… /healthz` → **200** `service=impulsionando-csi-core` `gitSha=5a9fd4c50cb04afcdccef6804480062aadeb17a8`
   - `GET Host:csi.stg… /csi` → **200** `text/html` · title CSI Invest / Private Intelligence (~33KB)
   - Public Cloudflare A `csi.stg` **not** created (no CF API token) — Traefik Host ready; human DNS step documented in CSI-PILOT-7B
   - Prod DNS `csi.impulsionando.com.br` **not** flipped (no prod env; staging DB behind prod Host forbidden)

@@ -31,11 +31,11 @@ So: **CSI is the chosen door.** Staging rehearsal proves the stack; prod cutover
 | Item | Value |
 | --- | --- |
 | Service | `reengineering-csi-core` 1/1 on clean `2.25.123.224` |
-| Image | `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx` (linux/amd64 local-load) |
+| Image | `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (linux/amd64 local-load) |
 | Traefik Host | `csi.stg.impulsionando.com.br` (TLS labels set; **public DNS A record NOT created yet** — smoke via `Host:` header) |
 | Supabase | Staging project baked at Vite build (`aamorcqznimmleafavai`) — **not** prod |
 | Workers | OFF (`COLORS_AUTOMATION_ENABLED=false`, no Pulsonitor) |
-| `/healthz` | **200** · `service=impulsionando-csi-core` · `gitSha=f03ea76efda53c02e3957290780040b79a7caf1a` |
+| `/healthz` | **200** · `service=impulsionando-csi-core` · `gitSha=5a9fd4c50cb04afcdccef6804480062aadeb17a8` |
 | `/csi` | **200** · `text/html` · title contains CSI Invest / Private Intelligence |
 | Access gate | Staging basic auth ON (same as other `*.stg` apps) |
 | Build scripts | `scripts/build-csi-core-staging.sh` · `scripts/deploy-reengineering-csi-core-clean-host.sh` · `infra/compose/Dockerfile.csi-core` |
