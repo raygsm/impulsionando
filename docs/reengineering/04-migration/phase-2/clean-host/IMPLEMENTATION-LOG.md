@@ -534,3 +534,21 @@ Format per entry:
   - Prod DNS `csi.impulsionando.com.br` **not** flipped (no prod env; staging DB behind prod Host forbidden)
 - Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../../STATUS.md`](../../../STATUS.md)
 - Forbidden: no legacy VPS `187.77.232.52`; no secrets in git
+
+## 2026-09-04T11:28Z — Phase 7B prod-shaped CSI Host-header bake (no DNS flip)
+
+- Operator: Agent (laptop Docker+SSH; prod Vite public keys from `.env.local`; no secrets logged)
+- Change:
+  - Built linux/amd64 CSI image `ghcr.io/raygsm/impulsionando-csi-core:a5c730f2d0e3e803966eda03cc5c91f05f923524-csi7bprod` via `scripts/build-csi-core-prod.sh` (refuses staging Supabase bake)
+  - `docker save | gzip | ssh docker load` onto clean host `2.25.123.224` (GHCR push not required)
+  - Created **separate** Swarm service `reengineering-csi-core-prod` (did **not** replace staging `reengineering-csi-core`) · Traefik Host `csi.impulsionando.com.br` · access gate OFF · workers OFF · router `reeng-csi-core-prod`
+  - Deploy: `ALLOW_PROD_CSI_HOST=1 SERVICE_NAME=reengineering-csi-core-prod TRAEFIK_HOST=csi.impulsionando.com.br STAGING_ACCESS_GATE=0 SKIP_PULL=1 IMAGE_TAG=…-csi7bprod ./scripts/deploy-reengineering-csi-core-clean-host.sh`
+- Result / evidence:
+  - Host-header `GET http://2.25.123.224/healthz` Host `csi.impulsionando.com.br` → **200** · `gitSha=a5c730f2d0e3e803966eda03cc5c91f05f923524`
+  - Host-header `GET …/csi` → **200** `text/html` · title CSI Invest / Private Intelligence (~33KB)
+  - Container bake check: prod Supabase project ref `arygtqrd…` **PRESENT** in image `.output`; staging ref `aamorcq…` **ABSENT**
+  - Staging `reengineering-csi-core` still **1/1** · in-container `/healthz` **200** `gitSha=5a9fd4c5…` (Traefik basic auth still returns 401 without vault creds — expected)
+  - Public `https://csi.impulsionando.com.br` still via Cloudflare A (not clean IP) · distinct asset hashes vs Host-header clean bake → **users unchanged / no DNS flip**
+  - Phase 7 **not** CLOSED · Cloudflare prod CSI flip **still pending** · **7F PARKED**
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../phase-7/README.md`](../../phase-7/README.md), [`../../../STATUS.md`](../../../STATUS.md)
+- Forbidden: no legacy VPS `187.77.232.52`; no Cloudflare DNS mutate; no secrets in git

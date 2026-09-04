@@ -1,6 +1,6 @@
 # Phase 7 — board
 
-Status: **IN PROGRESS** — **7A PASS** · **7B = CSI** · staging CSI HTML **PASS** · prod DNS **BLOCKED**  
+Status: **IN PROGRESS** — **7A PASS** · **7B = CSI** · staging HTML **PASS** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED**  
 Wave 0: **LANDED** · 7F: **PARKED**  
 Impulsionando staging development: **UNLOCKED**  
 Program SoT: [`../../STATUS.md`](../../STATUS.md)
@@ -34,7 +34,7 @@ Move production traffic from legacy (`187.77.232.52`) onto the target stack **gr
 | --- | --- | --- |
 | **Wave 0** | Paper + tooling | **LANDED** |
 | **7A** | Staging rehearsal | **PASS** |
-| **7B** | CSI pilot | **SELECTED** — staging SSR **PASS** · prod DNS **BLOCKED** |
+| **7B** | CSI pilot | **SELECTED** — staging SSR **PASS** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED** |
 | **7C–7E** | Recon / expand / freeze | NOT STARTED |
 | **7F** | Retirement | **PARKED** |
 
@@ -47,4 +47,9 @@ DRY_RUN=0 npm run phase7:staging:rehearse
 DRY_RUN=0 npm run phase7:pilot:verify
 ./scripts/build-csi-core-staging.sh
 IMAGE_TAG=<sha>-csi7b SKIP_PULL=1 ./scripts/deploy-reengineering-csi-core-clean-host.sh
+# prod-shaped Host-header only (no CF flip):
+./scripts/build-csi-core-prod.sh
+ALLOW_PROD_CSI_HOST=1 SERVICE_NAME=reengineering-csi-core-prod \
+  TRAEFIK_HOST=csi.impulsionando.com.br STAGING_ACCESS_GATE=0 SKIP_PULL=1 \
+  IMAGE_TAG=<sha>-csi7bprod ./scripts/deploy-reengineering-csi-core-clean-host.sh
 ```

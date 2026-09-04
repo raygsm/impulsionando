@@ -4,7 +4,7 @@ Selected: **2026-09-04**
 Hostname (prod): **`csi.impulsionando.com.br`**  
 Staging rehearsal Host: **`csi.stg.impulsionando.com.br`**  
 Internal path: **`/csi`**  
-Status: **SELECTED — staging CSI HTML PASS on clean host; prod DNS flip still BLOCKED**  
+Status: **SELECTED — staging CSI HTML PASS; prod-shaped Host-header PASS on clean host; prod DNS flip still BLOCKED**  
 7F: **PARKED**
 
 ## Why CSI
@@ -19,12 +19,12 @@ Status: **SELECTED — staging CSI HTML PASS on clean host; prod DNS flip still 
 | Claim | Reality today |
 | --- | --- |
 | “Flip CSI DNS to clean host now” | **NO** — would break CSI users (no prod env / no CF token in operator vault) |
-| What serves CSI HTML on **prod** hostname | **Legacy only** — `impulsionando-core` on `187.77.232.52` |
-| What clean host serves for CSI | **Staging SSR** — Swarm `reengineering-csi-core` · Traefik Host `csi.stg.impulsionando.com.br` · Nitro/TanStack from monorepo `/csi` |
+| What serves CSI HTML on **public** prod hostname | **Still legacy** via Cloudflare (A ≠ clean IP) — users unchanged |
+| What clean host serves for CSI | **Two Swarm services:** staging `reengineering-csi-core` (`csi.stg…`) + prod-shaped `reengineering-csi-core-prod` (`csi.impulsionando.com.br` Host-header only) |
 | Staging DB for real CSI users | **FORBIDDEN** |
 | Prod Nest public hostname | **Does not exist yet** |
 
-So: **CSI is the chosen door.** Staging rehearsal proves the stack; prod cutover waits for prod env + DNS.
+So: **CSI is the chosen door.** Staging + prod-shaped Host-header rehearse the stack; **public** prod cutover still waits for Cloudflare flip (+ remaining Nest/ops blockers).
 
 ## Staging CSI SSR — PASS @ 2026-09-04T11:16Z
 
@@ -60,6 +60,28 @@ Cloudflare zone `impulsionando.com.br` (no API token in operator vault this sess
 2. Proxy: **DNS only** (grey) so Let’s Encrypt HTTP-01 works
 3. Wait for Traefik cert · then `https://csi.stg.impulsionando.com.br/csi`
 
+## Prod-shaped Host-header bake — PASS @ 2026-09-04T11:28Z (NO Cloudflare flip)
+
+| Item | Value |
+| --- | --- |
+| Service | `reengineering-csi-core-prod` 1/1 on clean `2.25.123.224` (**separate** from staging) |
+| Image | `ghcr.io/raygsm/impulsionando-csi-core:a5c730f2d0e3e803966eda03cc5c91f05f923524-csi7bprod` (linux/amd64 local-load) |
+| Traefik Host | `csi.impulsionando.com.br` · router `reeng-csi-core-prod` · access gate OFF |
+| Supabase | **Prod** project ref `arygtqrdpcdkwnuwsgmm` baked at Vite build (staging ref absent in image) |
+| Workers | OFF (`COLORS_AUTOMATION_ENABLED=false`, `PULSONITOR_ENABLED=false`) |
+| `/healthz` (Host header → clean IP) | **200** · `gitSha=a5c730f2d0e3e803966eda03cc5c91f05f923524` |
+| `/csi` (Host header → clean IP) | **200** · `text/html` · CSI Invest / Private Intelligence |
+| Public DNS | **Unchanged** — `csi.impulsionando.com.br` still Cloudflare-proxied (not clean IP); asset hashes differ from Host-header bake |
+| Scripts | `scripts/build-csi-core-prod.sh` · deploy with `ALLOW_PROD_CSI_HOST=1` |
+
+### Smoke (Host header only — not public DNS proof)
+
+```bash
+curl -sS -H 'Host: csi.impulsionando.com.br' http://2.25.123.224/healthz
+curl -sS -D- -o /tmp/csi-prod-host.html -H 'Host: csi.impulsionando.com.br' \
+  -H 'Accept: text/html' http://2.25.123.224/csi | head
+```
+
 ## What we implement NOW (unlock Impulsionando development)
 
 1. Record CSI as official 7B pilot (this file + STATUS + PILOT-SELECTION).  
@@ -74,8 +96,8 @@ You can **develop Impulsionando on the new stack / staging now**. CSI cutover is
 
 - [ ] Prod-env Nest API (public host TBD) → **prod** Supabase  
 - [ ] Prod-env worker if journeys/AI matter for pilot scope  
-- [x] **CSI-capable web** on clean stack (staging Host proven; prod-env image still TODO)  
-- [ ] Traefik `Host(csi.impulsionando.com.br)` + TLS with **prod** image/env  
+- [x] **CSI-capable web** on clean stack (staging Host proven)  
+- [x] Traefik `Host(csi.impulsionando.com.br)` + **prod-shaped** image on clean host (**Host-header PASS**; public CF flip still TODO)  
 - [ ] Staging CSI seed + allow/deny smokes green  
 - [ ] Inventory: webhooks/n8n for CSI refreshed  
 - [ ] Written go for observation window (≥24h) + rollback owner online  
