@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assistente interno — dados ilustrativos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="system.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar"><div class="brand"><div class="logo-tile">AL</div><div><strong>Alvorada</strong><span>via Impulsionando</span></div></div>
+      <nav class="areas"><a href="dashboard.html" aria-current="page">Início</a><a href="growth.html">Crescimento</a></nav></aside>
+    <div class="inset">
+      <header class="app"><p style="flex:1;font-weight:600">Alvorada</p><span class="chip">Lina · Alvorada</span></header>
+      <div style="display:flex;flex:1;min-height:0">
+        <main style="flex:1">
+          <p class="synth">Dados ilustrativos</p>
+          <h1>Início</h1>
+          <p class="muted">O painel permanece; o assistente abre ao lado.</p>
+        </main>
+        <aside class="panel" aria-label="Assistente Lina">
+          <div style="padding:16px;border-bottom:1px solid var(--imp-border)">
+            <span class="chip">Lina · Alvorada</span>
+            <p class="caption" style="margin-top:8px">Leitura · atualizado às 14:02</p>
+          </div>
+          <div style="flex:1;padding:16px;overflow:auto">
+            <div class="msg user">Quem está atrasado no follow-up?</div>
+            <div class="msg agent">
+              Três conversas. Fontes: fila de follow-up de hoje.
+              <div class="caption">Fontes consultadas · pode estar desatualizado se alguém ligou agora</div>
+            </div>
+            <article class="card dashed" style="margin-top:12px">
+              <span class="badge prep">Preparada — não executada</span>
+              <h3 style="margin-top:8px">Mensagem para Maria Souza</h3>
+              <p class="muted">Rascunho de WhatsApp. Nada foi enviado.</p>
+              <p class="caption" style="margin:8px 0">Esta ação afeta dinheiro ou clientes. Confira antes de aprovar.</p>
+              <button class="btn btn-primary" type="button">Aprovar</button>
+              <button class="btn btn-ghost" type="button">Descartar</button>
+            </article>
+          </div>
+          <form style="padding:12px;border-top:1px solid var(--imp-border);display:flex;gap:8px" onsubmit="return false">
+            <input aria-label="Pergunta" placeholder="Pergunte sobre hoje…" style="flex:1;border:1px solid var(--imp-border);border-radius:12px;padding:10px 12px" />
+            <button class="btn btn-secondary" type="submit">Enviar</button>
+          </form>
+          <p style="padding:0 12px 12px"><button class="btn btn-ghost" type="button">Falar com pessoa</button></p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -7,7 +7,7 @@ Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Program SoT: [`
 
 Product direction proposal: [`../../06-autonomous-marketing-platform/README.md`](../../06-autonomous-marketing-platform/README.md) — **PROPOSED, awaiting acceptance; no gate moved**
 
-**Implementation direction:** NestJS is product/domain authority; the accepted frontend is presentation/thin BFF only. ADR-002 currently keeps TanStack Start. Draft [PR #151](https://github.com/raygsm/impulsionando/pull/151) proposes ADR-009 + Next.js; as of 2026-09-04T21:53Z it is open, draft, unmerged, and its listed checks are failing. It is not authority until formally accepted and landed.
+**Implementation direction:** NestJS is product/domain authority; the accepted frontend is presentation/thin BFF only. ADR-002 currently keeps TanStack Start. ADR-009 + Next.js shell from [PR #151](https://github.com/raygsm/impulsionando/pull/151) is **landed on `reengineering/program` as Proposed code** — still **not** an accepted frontend gate until ADR-009 is Aceita.
 
 ## Goal
 
@@ -31,6 +31,7 @@ Phase 8 has one authoritative sequence: accepted frontend dependency → Nest co
 | [`RISKS.md`](./RISKS.md) | Risk register + anti-patterns that would sink this phase |
 | [`EVIDENCE-TEMPLATE.md`](./EVIDENCE-TEMPLATE.md) | Skeleton for `EVIDENCE-<slice>.md` |
 | [`first-product-slice/README.md`](./first-product-slice/README.md) | Concrete Nest-authority → read proof → first CRM/Growth plan; BLOCKED on frontend/product/DB/Phase 8 gates |
+| [`first-product-slice/`](./first-product-slice/) | Additional Nest FPS work-order paper (ALLOW-DENY, CONTRACTS, NEST-WORK-ORDER, STAKEHOLDER-DELTA, …) — **no code**; G0 pending |
 
 ## Subphase board
 
@@ -40,7 +41,7 @@ Phase 8 has one authoritative sequence: accepted frontend dependency → Nest co
 | **8A** | Accepted frontend dependency + Nest common foundation/compatibility | F | NOT STARTED — G0/frontend decision pending |
 | **8B** | Identity/session and tenant/capability authority | S | NOT STARTED |
 | **8C** | Modules, quotas/plans, blueprint dry-run/onboarding and readiness | S | NOT STARTED |
-| **8D** | Dashboard manifest + Home/actions/Support/comms/Growth read proof | P | NOT STARTED |
+| **8D** | Dashboard manifest + Home/actions/Support/comms/Growth read proof | P | NOT STARTED — Nest FPS paper in [`first-product-slice/`](./first-product-slice/) |
 | **8E** | Canonical DB program: DB0–DB8, capability-sized | D | NOT STARTED |
 | **8F** | Contact→Lead→Task→Opportunity→Conversion→Growth→agent READ | P | NOT STARTED — blocked on G3/P-DB-06/DB gates |
 | **8G** | Later modules in dependency order, including staff/vertical work last | P/A/V | NOT STARTED |

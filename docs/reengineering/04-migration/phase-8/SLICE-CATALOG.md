@@ -165,10 +165,10 @@ Consolidation applies here too: 6 dashboards + 3 insights + cockpits + radar tar
 
 | Field | Value |
 | --- | --- |
-| Legacy source | `_authenticated/support.cockpit`, `abrir-ticket`, `src/lib/support*.functions.ts` |
+| Legacy source | `abrir-ticket`, `src/routes/api/public/support/create-ticket.ts`, `src/lib/support-tickets.functions.ts`. **Not** `_authenticated/support.cockpit` (`support_sessions`). **Not** a tenant customer-service desk (PRD-DB-05) |
 | Target API | `apps/api/src/support/` — **already exists** (Phase 3 pilot, 3 endpoints) |
-| Work | UI in `app-web` + list filters + staff status update; extend contracts only where the UI needs it |
-| Exit specifics | The Phase 3 smokes still pass; the legacy `_authenticated/support.cockpit` route is retired in the same series. Support is deliberately first because its API is already proven — it validates the UI path, not the backend. |
+| Work | UI in `app-web` + list filters + staff status update. **Nest half:** [`first-product-slice/`](./first-product-slice/) (F8 + S1-min + `caseKind: platform_support` + GET-by-id). |
+| Exit specifics | Phase 3 smokes still pass. Help is the **platform support case** (tenant → Impulsionando). Do not retire `support.cockpit` as if it were tickets; do not invent tenant CS. |
 
 ### P3 — Notifications and communications inbox
 

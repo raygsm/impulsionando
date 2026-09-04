@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Financeiro — dados ilustrativos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="system.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar"><div class="brand"><div class="logo-tile">AL</div><div><strong>Alvorada</strong><span>via Impulsionando</span></div></div>
+      <nav class="areas">
+        <a href="dashboard.html">Início</a><a href="growth.html">Crescimento</a>
+        <a href="pipeline.html">Clientes</a><a href="operations.html">Operações</a>
+        <a href="finance.html" aria-current="page">Gestão</a><a href="help.html">Ajuda</a><a href="settings.html">Configurações</a>
+      </nav></aside>
+    <div class="inset">
+      <header class="app"><p style="flex:1;font-weight:600">Alvorada</p><span class="chip">Lina · Alvorada</span></header>
+      <main>
+        <p class="synth">Dados ilustrativos · valores tabulares</p>
+        <h1>Financeiro</h1>
+        <div class="grid" style="margin-top:20px">
+          <article class="card span-6"><span class="caption">A pagar hoje</span><div class="kpi">R$ 3.450,00</div></article>
+          <article class="card span-6"><span class="caption">A receber hoje</span><div class="kpi">Sem dados</div><p class="caption">API de recebíveis ainda não disponível</p></article>
+          <article class="card span-12">
+            <h2 style="margin-top:0">Contas a pagar</h2>
+            <table class="data">
+              <thead><tr><th>Fornecedor</th><th>Vencimento</th><th>Estado</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>Distribuidora Norte</td><td>04/09/2026</td><td><span class="badge warn">Vence hoje</span></td><td class="num">R$ 1.200,00</td></tr>
+                <tr><td>Energia</td><td>12/09/2026</td><td><span class="badge info">Em aberto</span></td><td class="num">R$ 2.250,00</td></tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

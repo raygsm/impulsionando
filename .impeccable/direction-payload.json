@@ -1,0 +1,78 @@
+{
+  "title": "Impulsionando visual world",
+  "question": "The dashboard must feel like one operations product for every physical business. Keep the assigned world, take a fused challenger, play the category straight, or re-roll.",
+  "reroll": true,
+  "canon": true,
+  "steer": true,
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Painel de Ordens",
+      "kicker": "THE ROLL",
+      "lineage": "Brazilian oficina / back-office work-order wall: clipboards, rubber stamps, pegboard, fluorescent light",
+      "thesis": "Everything that needs a human is a clipped work order with a stampable status — never a decorative KPI gallery.",
+      "palette": ["#E6EAEF", "#F7F8FA", "#1C2430", "#1E4F8C", "#B42318", "#9AA3AD"],
+      "materials": ["bond paper", "zinc clip", "rubber stamp", "pegboard grid", "label-maker type"],
+      "viewport": "Tool-hook sidebar; today's briefing as the master ticket; attention queue as clipped orders; agent as the apprentice who fills orders but cannot stamp them.",
+      "risk": "If the materials stay greasy or striped, clinics and real-estate offices will reject it. The grammar is tickets and stamps, refined — not a mechanic shop skin.",
+      "sketch": ".impeccable/sketches/assigned.webp"
+    },
+    {
+      "id": "digital-design-canon-warm-consumer-app-surface",
+      "label": "App de balcão",
+      "kicker": "CHALLENGER",
+      "lineage": "Warm consumer app: soft cards, thumb bar, one saturated color only where something can be done",
+      "thesis": "The only bright color on screen is something you can press — prepared AI stays ink until you stamp it.",
+      "palette": ["#F3EEE6", "#FFFFFF", "#0B0B0B", "#E23D2A", "#D9D0C4"],
+      "materials": ["tinted ground", "soft white cards", "large radius", "plain-language labels"],
+      "viewport": "Single column of cards; persistent bottom bar on small screens; one action color on the next-best order only.",
+      "case": "Wins Brazilian phone familiarity; loses as a whole world because it is the SaaS default the standing exit already offers.",
+      "risk": "Becomes the GitHub starter with warmer padding. Identity disappears.",
+      "sketch": ".impeccable/sketches/challenger-consumer.webp",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/digital-design-canon-warm-consumer-app-surface.webp"
+    },
+    {
+      "id": "broadcast-programming-teletext-service",
+      "label": "Revista Teletexto",
+      "kicker": "CHALLENGER",
+      "lineage": "Broadcast teletext: 40×24 grid, cyan live figures, REVEAL for hidden answers",
+      "thesis": "Keyed pages and a REVEAL control make AI-prepared work visible as a hidden answer, never as magic.",
+      "palette": ["#000000", "#FFFFFF", "#FFFF00", "#00FFFF", "#FF0000"],
+      "materials": ["CRT black", "block mosaic", "double-height headers", "three-digit pages"],
+      "viewport": "Header with page 100; cyan live figures; red REVEAL over a prepared action; body in a rigid cell grid.",
+      "case": "Wins honesty of live figures and REVEAL-for-AI; loses because tenant logos, listings, and clinical records cannot live in a mosaic grid.",
+      "risk": "Reads as retro gimmick; fails WCAG and tenant branding if taken literally.",
+      "sketch": ".impeccable/sketches/challenger-teletext.webp",
+      "hero": "https://impeccable.style/worlds/cards/broadcast-programming-teletext-service-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/broadcast-programming-teletext-service.webp"
+    },
+    {
+      "id": "pop-culture-shelf-viewfinder-bracket-hud",
+      "label": "Visor de atenção",
+      "kicker": "CHALLENGER",
+      "lineage": "Camcorder viewfinder: corner brackets, zebra on blown highlights, W–T zoom",
+      "thesis": "The overdue thing is the only subject in focus; everything else sits in the letterbox.",
+      "palette": ["#0A0A0A", "#F5F5F0", "#E8A317", "#FFFFFF"],
+      "materials": ["OSD white", "amber zoom bar", "zebra stripes", "letterbox bars"],
+      "viewport": "Full-bleed Home; brackets snap around the top attention order; zebra on overdue; W overview / T detail in the header.",
+      "case": "Wins focus-on-overdue; fuses poorly because an empty-center HUD cannot carry pipelines, tables, or finance.",
+      "risk": "Looks like a camera toy; operators need to scan many tickets, not one face.",
+      "sketch": ".impeccable/sketches/challenger-viewfinder.webp",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-viewfinder-bracket-hud-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/pop-culture-shelf-viewfinder-bracket-hud.webp"
+    }
+  ],
+  "canonCard": {
+    "id": "canon",
+    "label": "Play it straight",
+    "kicker": "CATEGORY STANDARD",
+    "lineage": "Shadcn / Next.js admin: slate sidebar, four KPI cards, sparkline, Inter, soft radius",
+    "thesis": "A competent operations dashboard that sits beside Linear, Stripe Dashboard, and every shadcn admin on GitHub.",
+    "palette": ["#F8FAFC", "#0F172A", "#2563EB", "#FFFFFF", "#E2E8F0"],
+    "materials": ["hairline borders", "soft cards", "KPI grid", "system sans"],
+    "viewport": "Dark sidebar, light canvas, four metric cards on top, chart, table. Agent is a chatbot icon in the corner.",
+    "risk": "Indistinguishable from the GitHub starter we must restyle. Safe, and therefore invisible.",
+    "sketch": ".impeccable/sketches/canon.webp"
+  }
+}

@@ -41,7 +41,7 @@ Read this table as: *this capability exists today here, it will exist tomorrow t
 | Capability | Legacy implementation | Target API | Target app | Bucket | Slice |
 | --- | --- | --- | --- | --- | --- |
 | Dashboard, cockpits, insights | `_authenticated/dashboard*`, `dashboards.*` (6), `insights.*` (3), `cockpits.*`, `radar` | `reports` (new) read-only projections | `app-web` | product | **P1** |
-| Support tickets | `_authenticated/support.cockpit`, public `abrir-ticket`, `support_tickets` | `support` (**exists** — Phase 3 pilot) | `app-web` | product | **P2** |
+| Support tickets | public `abrir-ticket` + `support-tickets.functions.ts` + `support_tickets` (Phase 3). Cockpit/`support_sessions` ≠ this capability. Tenant CS desk does not exist (PRD-DB-05) | `support` (**exists**) | `app-web` | product | **P2** — [`first-product-slice/`](./first-product-slice/) |
 | Notifications & comms inbox | `_authenticated/notifications`, `ops.mensageria`, `message_outbox`, `notifications` | `communications` (new) over Phase 5C/5E outbox | `app-web` | product | **P3** |
 | CRM: leads, pipelines, opportunities, activities | `_authenticated/crm.*` (7), `customers`, `marketing.leads`, `src/lib/crm*.functions.ts`, `crm_leads`/`crm_pipelines`/`crm_stages`/`crm_opportunities` | `crm` (new) — reuses Phase 5F `journeys` | `app-web` | product | **P4** |
 | Agenda: professionals, appointments, slots, waitlist | `_authenticated/agenda.*` (10), `src/lib/agenda-core.functions.ts` (766 lines), `agenda_*` (21 tables), RPC `agenda_claim_open_slot` | `agenda` (new) | `app-web` | product | **P5** |

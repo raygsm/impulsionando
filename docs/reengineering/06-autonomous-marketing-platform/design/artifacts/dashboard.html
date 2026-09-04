@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impulsionando — Início (dados ilustrativos)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="system.css" />
+</head>
+<body>
+  <a class="skip" href="#conteudo">Ir para o conteúdo</a>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Áreas principais">
+      <div class="brand">
+        <div class="logo-tile" id="tile">AL</div>
+        <div>
+          <strong id="tenantName">Alvorada</strong>
+          <span>via Impulsionando</span>
+        </div>
+      </div>
+      <nav class="areas">
+        <a href="dashboard.html" aria-current="page"><span class="ico" aria-hidden="true">⌂</span> Início</a>
+        <a href="growth.html"><span class="ico" aria-hidden="true">↗</span> Crescimento</a>
+        <a href="pipeline.html"><span class="ico" aria-hidden="true">☺</span> Clientes</a>
+        <a href="operations.html"><span class="ico" aria-hidden="true">▣</span> Operações</a>
+        <a href="finance.html"><span class="ico" aria-hidden="true">⚙</span> Gestão</a>
+        <a href="help.html"><span class="ico" aria-hidden="true">?</span> Ajuda</a>
+        <a href="settings.html"><span class="ico" aria-hidden="true">●</span> Configurações</a>
+      </nav>
+    </aside>
+    <div class="inset">
+      <header class="app">
+        <p style="flex:1;margin:0;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="headerName">Alvorada</p>
+        <span class="chip" id="scope">Lina · Alvorada</span>
+        <a class="btn btn-ghost" href="agent.html">Assistente</a>
+        <span class="caption">MC</span>
+      </header>
+      <main id="conteudo">
+        <p class="synth">Dados ilustrativos — não são métricas reais</p>
+        <h1>Início</h1>
+        <p class="muted" id="dateLine">Sexta-feira, 4 de setembro</p>
+        <div id="banner"></div>
+        <div class="grid" style="margin-top:20px">
+          <article class="card span-8">
+            <h2 style="margin-top:0">Hoje na empresa</h2>
+            <p id="briefing">Três conversas pararam no follow-up. Dois compromissos à tarde. Nenhuma campanha precisa de aprovação agora.</p>
+            <ul class="muted" id="bullets" style="margin:12px 0 0;padding-left:18px;line-height:1.6">
+              <li>Fila: 3 follow-ups atrasados</li>
+              <li>Agenda: 2 horários hoje</li>
+              <li>Financeiro: sem vencimentos hoje</li>
+            </ul>
+          </article>
+          <article class="card span-4">
+            <h2 style="margin-top:0">Assistente</h2>
+            <p class="caption" id="agentMeta">Lina · pronta · dados de hoje</p>
+            <p class="muted" style="margin:8px 0 12px">Pergunte sobre a fila, campanhas ou o que está atrasado. Ela prepara; você aprova.</p>
+            <a class="btn btn-secondary" href="agent.html">Perguntar sobre hoje</a>
+          </article>
+          <article class="card span-6">
+            <h2 style="margin-top:0">Precisa de você</h2>
+            <div id="queue"></div>
+          </article>
+          <article class="card span-6">
+            <h2 style="margin-top:0">Próximas ações</h2>
+            <div class="row"><span>Ligar para Mesa 12 — retorno de orçamento</span><a class="btn btn-primary" href="agent.html">Preparar</a></div>
+            <div class="row"><span>Confirmar consulta das 15h</span><a class="btn btn-secondary" href="operations.html">Abrir</a></div>
+          </article>
+          <article class="card ticket span-3" style="grid-column:span 3">
+            <span class="caption">Aquisição</span>
+            <div class="kpi" id="k1">18</div>
+            <span class="muted">leads esta semana</span>
+          </article>
+          <article class="card ticket span-3" style="grid-column:span 3">
+            <span class="caption">Follow-up</span>
+            <div class="kpi" id="k2">5</div>
+            <span class="muted">atrasados</span>
+          </article>
+          <article class="card ticket span-3" style="grid-column:span 3">
+            <span class="caption">Conversão</span>
+            <div class="kpi" id="k3">Sem dados</div>
+            <span class="muted">atribuição indisponível</span>
+          </article>
+          <article class="card ticket span-3" style="grid-column:span 3">
+            <span class="caption">Retenção</span>
+            <div class="kpi" id="k4">2</div>
+            <span class="muted">para reativar</span>
+          </article>
+          <div class="span-12" id="ops"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav class="bottom-nav" aria-label="Principal">
+    <a href="dashboard.html" aria-current="page">Início</a>
+    <a href="growth.html">Crescimento</a>
+    <a href="pipeline.html">Clientes</a>
+    <a href="operations.html">Operações</a>
+    <a href="index.html">Mais</a>
+  </nav>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const bp = params.get("blueprint") || "universal";
+    const data = {
+      universal: {
+        name: "Alvorada", initials: "AL", action: "#C81E3A",
+        agent: "Lina · Alvorada",
+        briefing: "Três conversas pararam no follow-up. Nenhum módulo extra está ativo neste exemplo universal.",
+        queue: [["Follow-up atrasado", "warn", "Maria Souza · 2 dias"],["Lead sem dono", "info", "Inbound site"]],
+        ops: ""
+      },
+      restaurant: {
+        name: "Cantina do Porto", initials: "CP", action: "#9B2C2C",
+        agent: "Bia · Cantina do Porto",
+        briefing: "Dois pedidos atrasados na cozinha. Estoque de vinho tinto abaixo do mínimo. Três reservas às 20h.",
+        queue: [["Pedido atrasado", "warn", "Mesa 7 · 18 min"],["Estoque baixo", "danger", "Vinho tinto · Sem dados de custo"]],
+        ops: '<div class="grid"><article class="card span-6"><h3>Pedidos de agora</h3><p class="kpi">4</p><p class="caption">abertos · dados ilustrativos</p></article><article class="card span-6"><h3>Estoque</h3><p class="kpi">2</p><p class="caption">alertas</p></article></div>'
+      },
+      clinic: {
+        name: "Clínica Horizonte", initials: "CH", action: "#185FA5",
+        agent: "Helena · Clínica Horizonte",
+        briefing: "Uma falta esta manhã. Duas consultas à tarde. Nenhum chamado de paciente em aberto.",
+        queue: [["Falta hoje", "warn", "14:00 · Ana Lima"],["Confirmar consulta", "info", "15:00 · retorno"]],
+        ops: '<div class="grid"><article class="card span-6"><h3>Agenda de hoje</h3><p class="kpi">6</p><p class="caption">consultas</p></article><article class="card span-6"><h3>Chamados</h3><p class="kpi">0</p><p class="caption">abertos — valor conhecido</p></article></div>'
+      },
+      realestate: {
+        name: "Garrido Imóveis", initials: "GI", action: "#7A5C00",
+        agent: "Rafa · Garrido Imóveis",
+        briefing: "Quatro interessados sem visita marcada. Dois contratos com documento a vencer nesta semana.",
+        queue: [["Follow-up visita", "warn", "Apt. 302 · 3 dias"],["Documento a vencer", "info", "Contrato Silva"]],
+        ops: '<div class="grid"><article class="card span-6"><h3>Pipeline</h3><p class="kpi">11</p><p class="caption">negócios abertos</p></article><article class="card span-6"><h3>Documentos</h3><p class="kpi">2</p><p class="caption">vencendo</p></article></div>'
+      }
+    };
+    const d = data[bp] || data.universal;
+    document.documentElement.style.setProperty("--imp-action", d.action);
+    document.getElementById("tenantName").textContent = d.name;
+    document.getElementById("headerName").textContent = d.name;
+    document.getElementById("tile").textContent = d.initials;
+    document.getElementById("scope").textContent = d.agent;
+    document.getElementById("briefing").textContent = d.briefing;
+    document.getElementById("agentMeta").textContent = d.agent.split("·")[0].trim() + " · pronta · dados de hoje";
+    document.getElementById("queue").innerHTML = d.queue.map(([t,b,m]) =>
+      `<div class="row"><span class="badge ${b}">!</span><div><strong>${t}</strong><div class="caption">${m}</div></div></div>`
+    ).join("");
+    document.getElementById("ops").innerHTML = d.ops;
+    if (bp === "restaurant") {
+      document.getElementById("k1").textContent = "12";
+      document.querySelector("#k1 + .muted").textContent = "reservas / pedidos (ilustrativo)";
+    }
+  </script>
+</body>
+</html>

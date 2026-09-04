@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Impulsionando design tokens",
+  "version": "1.0.0",
+  "description": "Design reference for app-web. Not production CSS. World: App de balcão. Seed 06654ec7.",
+  "meta": {
+    "created": "2026-09-04",
+    "wcag": "2.2 AA",
+    "defaultColorScheme": "light"
+  },
+  "color": {
+    "light": {
+      "ground": { "hex": "#F3EFE8", "rgb": "243 239 232", "oklch": "oklch(0.953 0.010 81.8)", "hsl": "hsl(38 31% 93%)", "css": "--imp-ground" },
+      "surface": { "hex": "#FFFFFF", "rgb": "255 255 255", "oklch": "oklch(1 0 0)", "css": "--imp-surface" },
+      "surfaceSunken": { "hex": "#EBE6DD", "css": "--imp-surface-sunken" },
+      "ink": { "hex": "#1C1916", "rgb": "28 25 22", "oklch": "oklch(0.216 0.007 67.4)", "css": "--imp-ink" },
+      "inkMuted": { "hex": "#5C564E", "rgb": "92 86 78", "oklch": "oklch(0.456 0.015 75.2)", "css": "--imp-ink-muted", "contrastOnWhite": 7.25, "contrastOnGround": 6.33 },
+      "border": { "hex": "#E4DFD6", "css": "--imp-border" },
+      "action": { "hex": "#C81E3A", "rgb": "200 30 58", "oklch": "oklch(0.538 0.200 19.9)", "hsl": "hsl(350 74% 45%)", "css": "--imp-action", "contrastOnWhite": 5.67, "contrastOnGround": 4.95 },
+      "actionHover": { "hex": "#A81830", "css": "--imp-action-hover" },
+      "actionForeground": { "hex": "#FFFFFF", "css": "--imp-action-foreground", "contrastOnAction": 5.67 },
+      "success": { "hex": "#0F7A4B", "css": "--imp-success", "contrastOnWhite": 5.38 },
+      "warning": { "hex": "#8A5A00", "css": "--imp-warning", "contrastOnWhite": 5.93 },
+      "danger": { "hex": "#B42318", "css": "--imp-danger", "contrastOnWhite": 6.57 },
+      "info": { "hex": "#185FA5", "css": "--imp-info", "contrastOnWhite": 6.52 },
+      "configuring": { "hex": "#185FA5", "css": "--imp-configuring" },
+      "degraded": { "hex": "#8A5A00", "css": "--imp-degraded" },
+      "suspended": { "hex": "#5C564E", "css": "--imp-suspended" },
+      "unknown": { "hex": "#5C564E", "css": "--imp-unknown" },
+      "aiRecommend": { "hex": "#185FA5", "css": "--imp-ai-recommend" },
+      "aiPrepared": { "hex": "#6B2D5B", "css": "--imp-ai-prepared", "contrastOnWhite": 9.76 },
+      "aiExecuted": { "hex": "#0F7A4B", "css": "--imp-ai-executed" },
+      "aiApproval": { "hex": "#C81E3A", "css": "--imp-ai-approval" }
+    },
+    "dark": {
+      "ground": { "hex": "#1A1714", "css": "--imp-ground" },
+      "surface": { "hex": "#241F1B", "css": "--imp-surface" },
+      "ink": { "hex": "#F6F1EA", "css": "--imp-ink" },
+      "inkMuted": { "hex": "#B7AFA6", "css": "--imp-ink-muted" },
+      "border": { "hex": "#3A332C", "css": "--imp-border" },
+      "action": { "hex": "#F97187", "css": "--imp-action" },
+      "actionForeground": { "hex": "#1C1916", "css": "--imp-action-foreground" }
+    },
+    "tenant": {
+      "overridable": ["action", "actionHover", "actionForeground", "tenantAccent"],
+      "locked": ["ground", "surface", "ink", "inkMuted", "border", "success", "warning", "danger", "info", "configuring", "degraded", "suspended", "unknown", "aiRecommend", "aiPrepared", "aiExecuted"],
+      "minContrastNormal": 4.5,
+      "fallbackAction": "#C81E3A"
+    }
+  },
+  "typography": {
+    "fontSans": "Source Sans 3, Source Sans 3 Variable, Segoe UI, Helvetica Neue, Arial, sans-serif",
+    "fontMono": "Source Code Pro, ui-monospace, SFMono-Regular, Menlo, monospace",
+    "license": "SIL OFL 1.1",
+    "featuresNumeric": "\"tnum\"",
+    "scale": {
+      "display": { "fontSize": "clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem)", "lineHeight": 1.15, "fontWeight": 700, "letterSpacing": "-0.02em" },
+      "h1": { "fontSize": "1.5rem", "lineHeight": 1.25, "fontWeight": 700, "letterSpacing": "-0.02em" },
+      "h2": { "fontSize": "1.25rem", "lineHeight": 1.3, "fontWeight": 600, "letterSpacing": "-0.015em" },
+      "h3": { "fontSize": "1.125rem", "lineHeight": 1.35, "fontWeight": 600, "letterSpacing": "-0.01em" },
+      "body": { "fontSize": "1rem", "lineHeight": 1.5, "fontWeight": 400 },
+      "bodySm": { "fontSize": "0.875rem", "lineHeight": 1.45, "fontWeight": 400 },
+      "label": { "fontSize": "0.875rem", "lineHeight": 1.3, "fontWeight": 600 },
+      "caption": { "fontSize": "0.75rem", "lineHeight": 1.4, "fontWeight": 400, "letterSpacing": "0.01em" },
+      "kpi": { "fontSize": "1.75rem", "lineHeight": 1.1, "fontWeight": 700, "letterSpacing": "-0.02em", "fontVariantNumeric": "tabular-nums" }
+    }
+  },
+  "spacing": { "base": 4, "scalePx": [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64] },
+  "grid": { "columns": 12, "gutterPx": { "mobile": 16, "desktop": 24 } },
+  "breakpointPx": { "mobileMin": 320, "tablet": 768, "desktop": 1024, "largeDesktop": 1440 },
+  "radiusPx": { "sm": 8, "md": 12, "lg": 16, "xl": 20, "pill": 999 },
+  "border": { "widthPx": 1, "style": "solid" },
+  "shadow": {
+    "sm": "0 1px 2px rgba(28,25,22,0.06)",
+    "md": "0 4px 12px rgba(28,25,22,0.08)",
+    "lg": "0 12px 32px rgba(28,25,22,0.12)"
+  },
+  "opacity": { "disabled": 0.48, "overlay": 0.48 },
+  "iconPx": { "sm": 16, "md": 20, "lg": 24 },
+  "controlHeightPx": { "sm": 36, "md": 40, "lg": 44 },
+  "motion": {
+    "easeOut": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "durationPressMs": 140,
+    "durationFadeMs": 180,
+    "durationPanelMs": 220
+  },
+  "zIndex": { "base": 0, "sticky": 20, "sidebar": 30, "overlay": 40, "agent": 45, "modal": 50, "toast": 60, "skip": 70 },
+  "focus": { "widthPx": 3, "offsetPx": 2 },
+  "containerPx": { "prose": 720, "form": 560, "page": 1280, "wide": 1440 },
+  "shell": {
+    "sidebarWidthPx": 256,
+    "sidebarIconWidthPx": 56,
+    "headerHeightPx": 48,
+    "headerHeightMobilePx": 56,
+    "bottomNavHeightPx": 64,
+    "agentPanelWidthPx": 416
+  },
+  "widget": {
+    "sizes": {
+      "S": { "columns": 4, "minHeightPx": 160 },
+      "M": { "columns": 6, "minHeightPx": 200 },
+      "L": { "columns": 8, "minHeightPx": 240 },
+      "XL": { "columns": 12, "minHeightPx": 280 }
+    }
+  }
+}

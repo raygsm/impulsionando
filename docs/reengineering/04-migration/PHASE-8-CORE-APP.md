@@ -118,3 +118,4 @@ Phase 8 does **not** close on scaffolding, on green health checks, on a screen t
 | [`phase-8/GATES.md`](./phase-8/GATES.md) | Human gates |
 | [`phase-8/RISKS.md`](./phase-8/RISKS.md) | Risk register and anti-patterns |
 | [`phase-8/EVIDENCE-TEMPLATE.md`](./phase-8/EVIDENCE-TEMPLATE.md) | Per-slice evidence skeleton |
+| [`phase-8/first-product-slice/`](./phase-8/first-product-slice/) | Nest FPS: F8 + identity-min + platform Support (paper until G0) |
