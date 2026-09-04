@@ -3,6 +3,8 @@
 Created: **2026-09-04** · State: **PROPOSED — no implementation authorization**
 Index: [`README.md`](./README.md) · Phase 8: [`../04-migration/phase-8/README.md`](../04-migration/phase-8/README.md)
 
+Concrete first cross-stack delivery plan: [`../04-migration/phase-8/first-product-slice/README.md`](../04-migration/phase-8/first-product-slice/README.md) — Nest authority/composition first, then one CRM/Growth lifecycle across Nest and Next.
+
 ## 1. Delivery principle
 
 Build one coherent dashboard path before broad module migration:
@@ -20,9 +22,9 @@ This proves the product thesis. Migrating dozens of disconnected legacy pages do
 
 ## 2. Relationship to Phase 8
 
-The Phase 8 technical foundations remain valid:
+The Phase 8 technical foundations remain valid, independent of the final frontend framework:
 
-- real TanStack Start `apps/app-web`;
+- real `apps/app-web` runtime (Next.js if ADR-009 is accepted; otherwise ADR-002's TanStack Start remains authoritative);
 - typed API client, auth, config, UI and observability packages;
 - Nest common authorization/audit layer;
 - server-computed entitlements;
@@ -64,7 +66,7 @@ Output: accepted product decision/ADR and updated Phase 8 scope.
 
 Reuse Phase 8 F1–F9:
 
-- make `app-web` real;
+- make `app-web` real using the accepted frontend ADR; draft PR #151 is not authority until ADR-009 is accepted and the PR lands;
 - extract `api-client`, `auth`, `config`, `ui`, `observability`;
 - add Nest validation, standard errors, correlation, capability/tenant guards and audit;
 - deploy a full-SHA app image to staging;
@@ -72,7 +74,7 @@ Reuse Phase 8 F1–F9:
 
 Additional output: module registry contract and dashboard contribution contract.
 
-**Exit:** no product screen required; end-to-end session and authorization proven.
+**D1 exit:** no product screen required; end-to-end session and authorization proven. The concrete first-product **Unit A** continues through D2 and D3 read-only proof before Phase 8 G3 may open writes.
 
 ### D2 — Tenant configuration
 
@@ -214,7 +216,7 @@ Ordered, not estimated:
 | # | Deliverable | Why first |
 | --- | --- | --- |
 | 1 | Product decision record and Phase 8 rebaseline | Prevent two competing product plans |
-| 2 | `app-web` real TanStack bootstrap | No dashboard exists in the new app |
+| 2 | Land the accepted `app-web` runtime (proposed Next.js dashboard in draft PR #151) | No dashboard exists on `reengineering/program`; do not assume a draft dependency |
 | 3 | Nest common guard/error/correlation/audit layer | Every later module depends on safe enforcement |
 | 4 | Capability/module registry contracts | Defines composition before screens |
 | 5 | Session + effective entitlements API | Server authority |
@@ -267,6 +269,16 @@ Required outcomes:
 No stage moves production traffic. Production remains Phase 7 authority.
 
 Gate names describe what they **authorize next**, not what they certify as already complete. Dashboard V1 as a product closes only after the relevant D3 and D4 outcomes satisfy §8.
+
+### Crosswalk to authoritative Phase 8 gates
+
+| Product stage/gate | Required Phase 8 authority |
+| --- | --- |
+| P0 accepted | Required before Phase 8 rebaseline |
+| D1 foundation | G0 + G1/RBAC accepted; S2 enforcement remains log-only |
+| P2 / D3 read proof | G2 explicitly authorizes capability enforcement |
+| P3 / D4 first CRM writes | 8D/P1–P3 read proof accepted and G3 explicitly passed |
+| P4+ effects/providers | Later dedicated gates plus existing Phase 5/6 safety controls |
 
 ## 8. Definition of Dashboard V1 done
 

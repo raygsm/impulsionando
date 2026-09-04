@@ -6,6 +6,8 @@ Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Program SoT: [`
 
 Product direction proposal: [`../../06-autonomous-marketing-platform/README.md`](../../06-autonomous-marketing-platform/README.md) — **PROPOSED, awaiting acceptance; no gate moved**
 
+Frontend decision: ADR-002 currently keeps TanStack Start. Draft [PR #151](https://github.com/raygsm/impulsionando/pull/151) proposes ADR-009 + a Next.js `app-web`; it is not Phase 8 authority until accepted and merged. The first feature slice remains blocked on that decision.
+
 ## Goal
 
 Rebuild the authenticated Impulsionando product and its staff console on `apps/app-web` + `apps/api`, capability by capability, retiring each legacy owner as it goes. **Not** a mechanical route move (ADR-001). **Not** a production cutover (Phase 7).
@@ -27,13 +29,14 @@ If the autonomous-marketing product proposal is accepted, Phase 8 keeps its tech
 | [`GATES.md`](./GATES.md) | Human gates G0–G5 |
 | [`RISKS.md`](./RISKS.md) | Risk register + anti-patterns that would sink this phase |
 | [`EVIDENCE-TEMPLATE.md`](./EVIDENCE-TEMPLATE.md) | Skeleton for `EVIDENCE-<slice>.md` |
+| [`first-product-slice/README.md`](./first-product-slice/README.md) | Concrete Nest-foundation → first CRM/Growth Next+Nest plan; currently BLOCKED on frontend/product/Phase 8 gates |
 
 ## Subphase board
 
 | ID | Focus | Lane | State |
 | --- | --- | --- | --- |
 | **Wave 0** | Planning docs (this landing) | paper | **LANDED** |
-| **8A** | Foundation — app-web real, packages, CI, parity harness | F | NOT STARTED |
+| **8A** | Foundation — accepted `app-web` runtime, packages, CI, parity harness | F | NOT STARTED — frontend ADR pending |
 | **8B** | Identity spine — session, membership, capabilities | S | NOT STARTED |
 | **8C** | Entitlements and access gates | S | NOT STARTED |
 | **8D** | Read-only product spine — shell, nav, dashboard, support | P | NOT STARTED |
