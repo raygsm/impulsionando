@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canonicalTenantHostRedirect,
+  getTenantSubdomain,
   isImpulsionandoPlatformHost,
   tenantLandingTargetForHost,
   tenantSubdomainTarget,
@@ -105,6 +106,35 @@ describe("tenant landing resolution", () => {
   it("routes CSI staging rehearsal host to /csi", () => expect(tenantLandingTargetForHost("stg.csi.impulsionando.com.br")).toBe("/csi"));
   it("uses the storefront for a tenant without a dedicated landing", () => expect(tenantSubdomainTarget("cliente-novo")).toBe("/vitrine/cliente-novo"));
   it("does not treat the apex domain as a tenant", () => expect(tenantLandingTargetForHost("impulsionando.com.br")).toBeNull());
+  it("does not treat bare platform staging apex as a tenant landing", () => {
+    expect(tenantLandingTargetForHost("stg.impulsionando.com.br")).toBeNull();
+  });
+});
+
+describe("stg.<tenant> host recognition", () => {
+  it("maps stg.csi… to slug csi (not stg)", () => {
+    expect(getTenantSubdomain("stg.csi.impulsionando.com.br")).toEqual({
+      slug: "csi",
+      host: "stg.csi.impulsionando.com.br",
+      rootDomain: "impulsionando.com.br",
+    });
+  });
+  it("maps other stg.<tenant> rehearsal hosts to the tenant slug", () => {
+    expect(getTenantSubdomain("stg.wmp.impulsionando.com.br")?.slug).toBe("wmp");
+    expect(getTenantSubdomain("stg.chrismed.impulsionando.com.br")?.slug).toBe("chrismed");
+    expect(tenantLandingTargetForHost("stg.wmp.impulsionando.com.br")).toBe("/wmp");
+  });
+  it("does not treat bare stg.impulsionando.com.br as a tenant", () => {
+    expect(getTenantSubdomain("stg.impulsionando.com.br")).toBeNull();
+  });
+  it("does not invent a tenant from stg.<reserved>", () => {
+    expect(getTenantSubdomain("stg.api.impulsionando.com.br")).toBeNull();
+    expect(getTenantSubdomain("stg.www.impulsionando.com.br")).toBeNull();
+  });
+  it("keeps prod single-label tenant hosts unchanged", () => {
+    expect(getTenantSubdomain("csi.impulsionando.com.br")?.slug).toBe("csi");
+    expect(getTenantSubdomain("wmp.impulsionando.com.br")?.slug).toBe("wmp");
+  });
 });
 
 describe("platform core hosts", () => {
@@ -113,10 +143,12 @@ describe("platform core hosts", () => {
     expect(isImpulsionandoPlatformHost("www.impulsionando.com.br")).toBe(true);
     expect(isImpulsionandoPlatformHost("app.impulsionando.com.br")).toBe(true);
     expect(isImpulsionandoPlatformHost("admin.impulsionando.com.br")).toBe(true);
+    expect(isImpulsionandoPlatformHost("stg.impulsionando.com.br")).toBe(true);
   });
   it("does not treat customer tenant hosts as core", () => {
     expect(isImpulsionandoPlatformHost("chrismed.impulsionando.com.br")).toBe(false);
     expect(isImpulsionandoPlatformHost("riomed.impulsionando.com.br")).toBe(false);
     expect(isImpulsionandoPlatformHost("wmp.impulsionando.com.br")).toBe(false);
+    expect(isImpulsionandoPlatformHost("stg.csi.impulsionando.com.br")).toBe(false);
   });
 });

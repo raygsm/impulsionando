@@ -78,6 +78,8 @@ export function canonicalTenantHostRedirect(loc: {
 const RESERVED_SUBDOMAINS = new Set([
   "www","app","admin","api","cdn","static","assets","mail","smtp","docs","status",
   "id-preview","preview","dev","staging","project",
+  // bare stg.impulsionando.com.br = platform staging apex — not a tenant slug
+  "stg",
 ]);
 
 const PLATFORM_CORE_HOSTS = new Set([
@@ -88,14 +90,49 @@ const PLATFORM_CORE_HOSTS = new Set([
   "www.impulsionando.com.br",
 ]);
 
+function isReservedLabel(label: string): boolean {
+  return RESERVED_SUBDOMAINS.has(label) || label.startsWith("id-preview");
+}
+
+/**
+ * Phase 7 staging rehearsal: stg.<tenant>.impulsionando.com.br → tenant slug.
+ * Bare stg.impulsionando.com.br stays platform (reserved). Exact CUSTOM_HOST_LANDING
+ * entries remain the belt for landing redirects.
+ */
+function tenantSlugFromPrefix(prefix: string): string | null {
+  const parts = prefix.split(".").filter(Boolean);
+  if (parts.length === 0) return null;
+
+  // stg.<tenant>… (exactly two labels under the root)
+  if (parts.length === 2 && parts[0] === "stg") {
+    const tenantSlug = parts[1];
+    if (!tenantSlug || isReservedLabel(tenantSlug)) return null;
+    return tenantSlug;
+  }
+
+  const firstSeg = parts[0];
+  if (!firstSeg || isReservedLabel(firstSeg)) return null;
+  // Multi-label hosts that are not stg.<tenant> keep first-label behavior
+  // (e.g. colorssaude.impulsionando.com.br).
+  if (parts.length > 1) return firstSeg;
+  return firstSeg;
+}
+
 /** Apex, www, app, and other reserved platform hosts — not customer tenants. */
 export function isImpulsionandoPlatformHost(host: string | null | undefined): boolean {
   if (!host) return true;
   const clean = host.toLowerCase().split(":")[0];
   if (PLATFORM_CORE_HOSTS.has(clean)) return true;
   if (!clean.endsWith(".impulsionando.com.br")) return false;
-  const firstSeg = clean.slice(0, -".impulsionando.com.br".length).split(".")[0];
-  return Boolean(firstSeg) && (RESERVED_SUBDOMAINS.has(firstSeg) || firstSeg.startsWith("id-preview"));
+  const prefix = clean.slice(0, -".impulsionando.com.br".length);
+  const parts = prefix.split(".").filter(Boolean);
+  // stg.<tenant>… is a tenant staging host, not platform core
+  if (parts.length === 2 && parts[0] === "stg") {
+    const tenantSlug = parts[1];
+    return !tenantSlug || isReservedLabel(tenantSlug);
+  }
+  const firstSeg = parts[0];
+  return Boolean(firstSeg) && isReservedLabel(firstSeg);
 }
 
 export type TenantSubdomainMatch = { slug: string; host: string; rootDomain: string };
@@ -107,9 +144,9 @@ export function getTenantSubdomain(host: string | null | undefined): TenantSubdo
     if (cleanHost === root) return null;
     if (!cleanHost.endsWith("." + root)) continue;
     const prefix = cleanHost.slice(0, -("." + root).length);
-    const firstSeg = prefix.split(".")[0];
-    if (!firstSeg || RESERVED_SUBDOMAINS.has(firstSeg) || firstSeg.startsWith("id-preview")) return null;
-    return { slug: firstSeg, host: cleanHost, rootDomain: root };
+    const slug = tenantSlugFromPrefix(prefix);
+    if (!slug) return null;
+    return { slug, host: cleanHost, rootDomain: root };
   }
   return null;
 }
