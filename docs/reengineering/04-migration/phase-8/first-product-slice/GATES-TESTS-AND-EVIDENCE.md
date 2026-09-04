@@ -27,10 +27,10 @@ Required:
 
 | # | Condition | Current observation |
 | --- | --- | --- |
-| F0.1 | ADR-009 accepted, not merely Proposed | Proposed in draft PR #151 |
-| F0.2 | Next `app-web` merged into `reengineering/program` | Not merged |
-| F0.3 | PR #151 CI characterized/acceptable | Current listed checks failing |
-| F0.4 | Autonomous-marketing product model accepted (P0) | Proposed |
+| F0.1 | Frontend ADR resolved | ADR-002 accepted; ADR-009 remains Proposed in draft PR #151 |
+| F0.2 | Runtime selected by accepted ADR landed on implementation base | Not met for planned product app |
+| F0.3 | Selected frontend checks characterized | PR #151 listed checks fail; no Next readiness claim |
+| F0.4 | Product decisions used by Unit A accepted | Product model remains Proposed |
 | F0.5 | Phase 8 G0 accepted | Pending |
 | F0.6 | RBAC/capability ADR accepted | Pending |
 | F0.7 | G0 closes the canonical password-reset host required by ADR-008/strangler session continuity | Pending |
@@ -74,13 +74,13 @@ Required evidence:
 | Capability | Role allow/deny; undecorated new route fails policy test |
 | Modules | Three niche fixtures × plan/override/readiness |
 | Manifest | Two tenants and two roles produce correct differences |
-| Next | Production composition comes from Nest, not fixture/local authority |
+| `app-web` | Production composition comes from Nest, not fixture/local authority |
 | Read-only product proof | Home/actions, Support tickets, communications inbox and baseline Growth/Contacts summary satisfy 8D/P1–P3 |
 | Legacy parity | `npm run phase8:parity` records explained results for each Unit A read projection |
 | Existing write safety proof | Support status update demonstrates idempotency behavior and an audit record without introducing a CRM write |
-| Observability | Same correlation ID visible through Next→Nest response/log |
-| Security | No service-role or privileged Supabase client in Next |
-| Session coexistence | Legacy→Next navigation and sign-out parity proven |
+| Observability | Same correlation ID visible through `app-web`→Nest response/log |
+| Security | No service-role, privileged Supabase client or canonical table access in `app-web` |
+| Session coexistence | Legacy→`app-web` navigation and sign-out parity proven |
 | Route ownership | `npm run phase8:routes:check` PASS and ownership rollback rehearsed |
 | Rollback | Frontend can return to transitional/legacy route owner |
 | Data | No CRM write or schema migration in Unit A |
@@ -97,7 +97,7 @@ Required before Unit B:
 - migration classification;
 - transaction/outbox/audit strategy;
 - rollback;
-- Phase 8 technical approvers Cauã + Raygs accept the characterization/model packet and confirm the slice does not implement CRM Universal;
+- Cauã + Raygs accept the characterization/model packet, physical/access decision and applicable DB0–DB6 evidence; the slice is not CRM Universal;
 - the accepted packet is linked from `EVIDENCE-B-FIRST-CRM-GROWTH-SLICE.md`.
 
 Any object still `UNKNOWN` that affects tenant ownership blocks its repository.
@@ -111,7 +111,7 @@ C1 cannot start until the authoritative Phase 8 G3 is explicitly passed. Its evi
 | G2 enforcing and green | G2 decision/evidence |
 | 8D/P1–P3 read-only proof | F2 Home/actions/Support/comms/Growth results |
 | Legacy read parity | `phase8:parity` outputs linked from Unit A evidence |
-| One correlation ID through Next→Nest→audit | Unit A trace |
+| One correlation ID through `app-web`→Nest→audit | Unit A trace |
 | Route-owner rollback | Unit A ownership rehearsal |
 | Idempotency + audit on support status update | Unit A support write safety result |
 | CRM characterization/model accepted | C0 packet, Cauã + Raygs |
@@ -136,7 +136,7 @@ Required:
 | Area | Required proof |
 | --- | --- |
 | Lifecycle | Capture → follow-up → stage → conversion → Growth summary |
-| UI | Next routes complete with loading/empty/error/forbidden/degraded/unknown states |
+| UI | `app-web` routes complete with loading/empty/error/forbidden/degraded/unknown states |
 | Auth | Capability allow and role deny per command/query |
 | Isolation | Tenant A cannot list/get/mutate tenant B resources |
 | Resource enumeration | Cross-tenant IDs return non-disclosing 404/403 policy result |
@@ -197,7 +197,7 @@ Against an isolated/local or explicitly authorized staging fixture:
 
 No production write is a test.
 
-### Next tests
+### `app-web` tests
 
 - API client envelope/error mapping;
 - SSR/BFF bearer propagation;

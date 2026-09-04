@@ -28,6 +28,9 @@ No secrets. Environment variable **names** only.
 | Runtime `gitSha` (api `/health`) | |
 | Tenant(s) under test | slug + role of each test identity |
 | Route prefixes claimed | e.g. `/crm` |
+| Accepted frontend ADR/runtime | ADR + landed commit, never draft assumption |
+| Phase 8 authorization | G0/G1/G2/G3/later |
+| Applicable database gates | DB0–DB9 pointers |
 
 ## 1. Contracts and domain
 
@@ -100,6 +103,12 @@ A slice without 6.4 and 6.5 is **IN PROGRESS**, not PASS.
 | 7.2 | RLS state of each table (enabled / policies / none) | |
 | 7.3 | Migrations applied (staging only, expand/contract) | |
 | 7.4 | SECURITY DEFINER functions wrapped, and their review outcome | |
+| 7.5 | Accepted physical target/access decision | |
+| 7.6 | Source classifications and every browser/n8n/webhook/cron writer | |
+| 7.7 | Backfill/reconciliation/shadow-read evidence | |
+| 7.8 | Write/read authority before and after | |
+
+For the first CRM/Growth vertical, record accepted P-DB-06 conversion semantics. Without it, conversion metric/write acceptance is **BLOCKED**.
 
 ## 8. Gate outcome
 

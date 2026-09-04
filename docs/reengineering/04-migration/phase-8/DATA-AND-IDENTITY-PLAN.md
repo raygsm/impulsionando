@@ -20,9 +20,9 @@ Consequences, non-negotiable for Phase 8:
 - Live Supabase remains the observational source of truth ([`../../01-current-state/phase-0/SCHEMA-SOURCE-OF-TRUTH.md`](../../01-current-state/phase-0/SCHEMA-SOURCE-OF-TRUTH.md)). No `db push`, no reset, no corrective migration against production.
 - Tables referenced in code but absent from types — `core_company_access_policy`, `billing_plan_modules`, `communication_tenant_members`, `core_tenant_slug_aliases` — must be verified against staging before the slices that use them (S4, S3, P3, done in Phase 4B respectively).
 
-**Track F-DATA (part of 8A):** regenerate types from staging, commit them as `packages/contracts`-adjacent generated types for the new stack, and record the delta. Do not regenerate the legacy `src/integrations/supabase/types.ts` as part of this — that is a separate, riskier change.
+**Track F-DATA (read-only characterization):** regenerate new-stack types from staging; record generated/migration/observed drift; inventory exact objects, keys, RLS, functions, triggers, volumes and all writers for the capability. Do not regenerate legacy `types.ts`. UNKNOWN tenant ownership or hidden writers block authority.
 
-## 2. Tenant key: `company_id` is canonical, `tenant_id` is an alias
+## 2. Tenant key: API canonical, physical mapping explicit
 
 | Signal | Value |
 | --- | --- |
@@ -32,7 +32,7 @@ Consequences, non-negotiable for Phase 8:
 | Live tables with `tenant_id` | **131** |
 | Tables with both | 0 (typed) |
 
-The live database carries a second key that the typed snapshot barely shows. `communication_tenant_members.tenant_id` holds the WMP company UUID — the same concept under a different column name.
+Public contracts use `tenantId`. Legacy `company_id`/`tenant_id` remain behind reviewed adapters. T-DB-01/02/03 and DB1 must select the new physical target/access pattern before SQL.
 
 ### Rules
 
@@ -111,6 +111,8 @@ The API uses the service role and therefore **bypasses RLS entirely**. RLS is de
 | 4 | Rollback must not depend on reverting a destructive migration | [`../../03-platform/CI-CD.md`](../../03-platform/CI-CD.md) |
 | 5 | A migration that changes an RLS policy ships with the allow **and** deny test that proves it | SECURITY-MULTITENANCY |
 | 6 | The 21 RLS-less tables get RLS before they get data, not after | Phase 0 risk register |
+
+Complete sequence: DB0 requirements → DB1 physical/access ADR → DB2 F-DATA → DB3 model review → DB4 staging expand/RLS → DB5 backfill/reconcile → DB6 shadow read → DB7 write authority → DB8 read/route authority → DB9 later retirement. See [`../../06-autonomous-marketing-platform/database/DECISIONS-AND-GATES.md`](../../06-autonomous-marketing-platform/database/DECISIONS-AND-GATES.md).
 
 ## 7. Open questions that must be closed before the slices that need them
 

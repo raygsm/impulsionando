@@ -3,16 +3,16 @@
 Created: **2026-09-04** · Subphase **8A** · State: **NOT STARTED**
 Board: [`README.md`](./README.md) · Shape: [`TARGET-APP-SHAPE.md`](./TARGET-APP-SHAPE.md)
 
-Nothing here is product-visible. All of it blocks the product. Eight of the twelve `packages/*` directories are README-only placeholders and `apps/app-web` is a health stub, so the first slice cannot start until this lane produces a working platform.
+Nothing here is product-visible. Nest is the authority-bearing foundation; `app-web` is dependent presentation. No track starts until G0 and the frontend dependency is settled: ADR-002 unless a formally accepted and landed ADR-009 supersedes it.
 
 F1–F7 and F9 can run **in parallel**. F8 is a hard precondition for slice S2.
 
-## F1 — `apps/app-web` becomes a real TanStack Start app
+## F1 — accepted `apps/app-web` runtime becomes presentation
 
 | Item | Detail |
 | --- | --- |
 | Replaces | `apps/app-web/src/server.ts` raw `node:http` stub |
-| Stack | `@tanstack/react-start` ^1.167, React 19, Vite 7, Nitro 3 node-server preset, Tailwind 4 — matching the root monolith so extracted components port cleanly |
+| Stack | Frontend ADR accepted at implementation time: ADR-002 today; ADR-009/Next.js only if accepted and landed |
 | Delivers | Router, `__root.tsx` shell, `_app` and `_staff` layouts, `/healthz` with `gitSha`, `/ready`, one placeholder screen |
 | Does **not** deliver | Any product screen, any Supabase call |
 | Done when | `pnpm --filter @impulsionando/app-web dev` serves SSR HTML locally and `npm run phase8:smoke:app-web-health` passes against staging |
@@ -81,7 +81,7 @@ Extraction is mechanical for primitives (button, dialog, table…) and a rewrite
 | Done when | Each new slice's contract file exists with tests before its API module opens |
 | Depends on | — (but each file is gated by its slice) |
 
-## F8 — `apps/api/src/common/` cross-cutting layer
+## F8 — `apps/api/src/common/` cross-cutting authority layer
 
 **Hard precondition for S2 and every write slice.**
 
@@ -92,13 +92,16 @@ Extraction is mechanical for primitives (button, dialog, table…) and a rewrite
 | `CorrelationInterceptor` | Correlation ID read or minted, logged, echoed |
 | `CapabilityGuard` + `@RequireCapability()` | **Deny by default.** No handler without an explicit capability or an explicit `@Public()` |
 | `TenantScopeGuard` | Membership verified for every `:tenantId` route in one place |
-| `AuditInterceptor` | Sensitive actions write an audit row automatically |
+| Audit port/interceptor | Sensitive actions record actor/tenant/capability/resource/correlation; domain writes commit audit atomically |
+| Idempotency service/port | Standard key claim, request-hash conflict and replay result |
+| Tenant-column registry | Explicit tenant key per observed legacy table; unregistered tables fail closed |
 | `ConfigModule` | Typed env via F4 |
 
 | Done when | Detail |
 | --- | --- |
 | Deny-by-default proven | A handler without a capability decorator fails a test, not a code review |
 | Existing modules migrated | The 27 existing endpoints run through the new pipeline with their smokes still passing |
+| In-process Nest suite | Boots the application and proves guards/decorators, Zod, envelope/correlation and compatibility |
 | Depends on | F4, F7 |
 
 ## F9 — Delivery and verification plumbing
@@ -134,7 +137,7 @@ F6 observability ───────────┘
 | 1 | `app-web` serves SSR HTML on the clean host from a full-SHA GHCR image, `/healthz` reports that SHA |
 | 2 | A request traced end to end shows one correlation ID across `app-web` and `api` logs |
 | 3 | An SSR loader reads a Supabase session from a cookie and calls `api` with the bearer token |
-| 4 | `apps/api` runs on the `common/` pipeline with deny-by-default authorization and the existing Phase 3–6 smokes still passing |
+| 4 | `apps/api` runs on typed config, Zod, envelope/correlation, deny-by-default guards, audit/idempotency seams and tenant registry; in-process tests plus Phase 3–6 smokes pass |
 | 5 | `npm run phase8:routes:check` runs green with `app-web` owning zero product prefixes so far |
 | 6 | Rollback of `app-web` to the previous SHA rehearsed and logged in [`../phase-2/clean-host/IMPLEMENTATION-LOG.md`](../phase-2/clean-host/IMPLEMENTATION-LOG.md) |
 

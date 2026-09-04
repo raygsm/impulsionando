@@ -3,7 +3,7 @@
 Created: **2026-09-04**
 Authority: [`../../02-target-architecture/TARGET-STACK.md`](../../02-target-architecture/TARGET-STACK.md) · [`../../02-target-architecture/TECHNOLOGY-BOUNDARIES.md`](../../02-target-architecture/TECHNOLOGY-BOUNDARIES.md) · ADR-002, ADR-003, ADR-008
 
-How the Impulsionando core app is actually constructed on the new stack. This is the shape every slice in [`SLICE-CATALOG.md`](./SLICE-CATALOG.md) builds into, so that ten slices do not invent ten architectures.
+How the core app is constructed. **NestJS owns product/domain authority.** The accepted frontend owns rendering, routing and thin BFF only, whether ADR-002 remains or ADR-009 is later accepted.
 
 ## 1. Runtime topology
 
@@ -11,7 +11,7 @@ How the Impulsionando core app is actually constructed on the new stack. This is
 Cloudflare
    │
 Traefik (clean host 2.25.123.224)
-   ├── app.stg.impulsionando.com.br ──► app-web   (TanStack Start SSR, port 3320)
+   ├── app.stg.impulsionando.com.br ──► app-web   (accepted SSR runtime)
    │        └── path prefixes still owned by legacy are 308'd back (see STRANGLER-ROUTING.md)
    ├── api.stg.impulsionando.com.br ──► api       (Nest/Fastify, port 3100)
    ├── tenant.stg…                  ──► tenant-web
@@ -24,9 +24,9 @@ Traefik (clean host 2.25.123.224)
 
 `app-web` never holds a service-role key, never opens a privileged Supabase connection, and never talks to n8n, payment providers or WhatsApp. It holds one credential class: the end user's session. Everything else goes through `api`.
 
-## 2. `apps/app-web` — from stub to real app
+## 2. `apps/app-web` — presentation boundary
 
-Today `apps/app-web/src/server.ts` is a raw `node:http` health stub. Target (ADR-002 keeps TanStack Start):
+On the current base `apps/app-web/src/server.ts` is a health stub. ADR-002 selects TanStack Start; draft ADR-009/PR #151 may replace it only after formal acceptance and landing. Preserve this framework-neutral boundary:
 
 ```text
 apps/app-web/
@@ -52,7 +52,7 @@ apps/app-web/
 
 | Rule | Why |
 | --- | --- |
-| No `createServerFn` that contains business rules | TECHNOLOGY-BOUNDARIES: Start is UI/SSR/thin BFF. Server functions may only shape a response from `api`. |
+| No frontend server function/action/route handler containing business rules | The frontend may only authenticate, forward or shape an `api` response. |
 | No direct Supabase data reads or writes from React | Closes the ~32% direct-Supabase authorization hole documented in [`CORE-APP-SCOPE.md`](./CORE-APP-SCOPE.md) §6 |
 | No `service_role` key in the app's environment | Would defeat RLS and the Nest authorization layer |
 | Every route's data comes from `@impulsionando/api-client` | One contract surface, one error envelope, one place to add correlation IDs |
@@ -123,10 +123,12 @@ The API today has no global pipe, interceptor or exception filter, and reads `pr
 | `CorrelationInterceptor` | Read or mint `X-Correlation-Id`, put it on logs and responses | nothing |
 | `CapabilityGuard` + `@RequireCapability()` | Server-enforced authorization, deny by default | scattered `assertMembership` calls |
 | `TenantScopeGuard` + `@TenantParam()` | Membership check on every `:tenantId` route | `assertMembership` per handler |
-| `AuditInterceptor` | Sensitive actions produce an audit row | nothing |
+| Audit port/interceptor | Sensitive actions record actor/tenant/capability/resource/correlation in the authoritative mutation boundary | nothing |
+| Idempotency seam | Standard command claim/replay/conflict behavior | ad-hoc command handling |
+| Tenant-column registry | Explicit physical tenant key per observed legacy table | hand-written tenant-column assumptions |
 | `ConfigModule` over `@impulsionando/config` | Typed, validated env at boot | `process.env` reads |
 
-This is track **F8** and it is a hard precondition for slice S2.
+An in-process Nest suite proves these pieces and existing endpoint compatibility. This is a hard precondition for enforcement and every new write.
 
 ## 6. Package boundaries
 
@@ -155,7 +157,7 @@ Using P4 (CRM) as the worked example — every slice follows this seven-step sha
 4. **Allow/deny matrix.** Tests proving a member of tenant A cannot read, write or enumerate tenant B — both directions recorded, per [`../../02-target-architecture/SECURITY-MULTITENANCY.md`](../../02-target-architecture/SECURITY-MULTITENANCY.md).
 5. **Client.** `packages/api-client/src/crm.ts` typed methods.
 6. **UI.** `apps/app-web/src/routes/_app/crm/*` — loaders call the client, capability comes from `SessionContext`, empty/error/forbidden states are explicit.
-7. **Retirement.** Route-ownership manifest flips `/crm` to `app-web`; legacy `_authenticated/crm.*` and its `*.functions.ts` are deleted in the same PR series; evidence file records parity, allow/deny, idempotency and the rollback rehearsal.
+7. **Authority and retirement.** After applicable DB gates, route ownership flips; legacy/browser/n8n/cron writers are routed or disabled before write authority moves. Retirement follows observation and rollback evidence.
 
 A slice that stops at step 6 is not done. See [`../../05-governance/DEFINITION-OF-DONE.md`](../../05-governance/DEFINITION-OF-DONE.md).
 

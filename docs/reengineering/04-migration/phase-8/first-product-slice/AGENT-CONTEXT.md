@@ -5,7 +5,7 @@ Plan: [`FOUNDATION-AND-CRM-PLAN.md`](./FOUNDATION-AND-CRM-PLAN.md) · Gates: [`G
 
 ## 1. Your place in the program
 
-You are the **first cross-stack product features agent**.
+You are the **first Nest-authority product agent**. You also integrate the accepted frontend, but it is presentation/thin BFF only.
 
 Agents before you:
 
@@ -14,12 +14,12 @@ Agents before you:
 - built and proved the Nest API, worker, queues, outbox, webhook ingress and governed AI spine;
 - planned Phase 8;
 - proposed an autonomous-marketing product architecture;
-- proposed/imported a Next.js dashboard shell in draft PR #151.
+- proposed a Next.js shell in draft PR #151; it is not accepted or landed authority.
 
 Your job is not to redesign those layers or build every product module. Your job is to connect the first safe product path through them:
 
 ```text
-Next dashboard
+accepted `app-web` runtime
   → typed API client
   → Nest session/capabilities/modules/manifest
   → Nest CRM application services
@@ -28,7 +28,7 @@ Next dashboard
   → dashboard Growth projection
 ```
 
-You are responsible for both Next and Nest **only inside this slice**. You do not own public tenant sites, infrastructure, provider selection, database-wide cleanup or other vertical modules.
+You own Nest authority and its `app-web` consumption inside this slice. You do not own public tenant sites, infrastructure, provider selection, database-wide cleanup or other vertical modules.
 
 ## 2. Authority order
 
@@ -120,11 +120,11 @@ The API lacks a global validation pipe, standard exception filter, correlation i
 - outbox polling;
 - communication and AI-effect sinks.
 
-Never execute a worker inside Next or Nest request lifecycle.
+Never execute a worker inside frontend or Nest request lifecycle.
 
-### Proposed Next frontend
+### Frontend dependency
 
-Draft PR #151 proposes:
+ADR-002 currently accepts TanStack Start. Draft PR #151 proposes ADR-009 and:
 
 - Next.js App Router under `apps/app-web`;
 - invariant routes for Dashboard, Growth, Customers, Operations, Management, Help and Settings;
@@ -209,8 +209,8 @@ Required:
 - audit for sensitive writes;
 - outbox in the same transaction/RPC where possible;
 - no authorization from user-editable metadata;
-- no service-role key in Next;
-- no direct domain-table reads from Next.
+- no service-role key in `app-web`;
+- no direct canonical domain-table reads from `app-web`.
 
 RLS remains defense in depth. New exposed tables need RLS and policies, but an RLS policy does not replace Nest guards.
 
@@ -254,7 +254,7 @@ Mark these UNKNOWN until observed:
 - whether `customers` should be retained or adapted into Contacts;
 - which CRM screens real users depend on;
 - whether a metric means zero or missing data;
-- whether the Next draft PR has been merged unchanged;
+- whether the draft frontend proposal has been accepted and landed unchanged;
 - whether ADR-009 or the product model has been accepted;
 - whether staging has required migration objects.
 
@@ -279,7 +279,7 @@ Report separately for Unit A and Unit B:
 
 1. contracts added;
 2. Nest modules/endpoints;
-3. Next routes/components;
+3. `app-web` routes/components;
 4. tables and tenant-column adapters touched;
 5. allow/deny evidence;
 6. idempotency/audit/outbox evidence;

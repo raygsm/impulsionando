@@ -11,7 +11,7 @@ Gates are **human decisions**, not engineering milestones. Nothing below is exec
 
 **State: NOT STARTED** — no evidence file yet.
 
-Opens Wave 1. Requires four decisions recorded, not merely acknowledged:
+Opens Wave 1. Requires decisions recorded, not merely acknowledged:
 
 | # | Decision | Why it cannot be inferred |
 | --- | --- | --- |
@@ -19,6 +19,8 @@ Opens Wave 1. Requires four decisions recorded, not merely acknowledged:
 | 2 | **Consolidation budget accepted**: ~295 staff routes → ≈35–45 screens; the 57 `admin.*-health` pages collapse into one parameterized surface | Deleting screens someone may rely on needs an owner |
 | 3 | **Canonical authenticated staging host**: `app.stg.impulsionando.com.br` (Cloudflare A → `2.25.123.224`, grey/DNS-only) | Requires a human with Cloudflare access |
 | 4 | **Password-reset canonical host closed** — still OPEN in ADR-008, currently pointing at the apex | Cross-app concern; blocks S1 |
+| 5 | **Frontend authority resolved on the implementation base**: ADR-002 remains binding unless ADR-009 is formally accepted and landed | Draft PR #151 is not authority |
+| 6 | **Nest-first boundary accepted as plan direction**: Nest owns product/domain authority; frontend is presentation/thin BFF | Prevents a second domain authority |
 
 Useful but **not blocking**: a production usage export answering *which authenticated screens anyone opens*. Absent it, the consolidation budget is a judgement call and must be recorded as one.
 
@@ -28,7 +30,7 @@ Useful but **not blocking**: a production usage export answering *which authenti
 
 **Blocked on:** G0.
 
-The capability model proposed in [`DATA-AND-IDENTITY-PLAN.md`](./DATA-AND-IDENTITY-PLAN.md) §3 must be written as an ADR using [`../../templates/ADR-TEMPLATE.md`](../../templates/ADR-TEMPLATE.md), indexed in [`../../05-governance/DECISIONS.md`](../../05-governance/DECISIONS.md), and accepted before slice S2 writes a guard.
+The capability model proposed in [`DATA-AND-IDENTITY-PLAN.md`](./DATA-AND-IDENTITY-PLAN.md) §3 must be an accepted ADR before enforcement. G1 may open the Nest common layer in log-only compatibility mode; it does not authorize G2 enforcement or product writes.
 
 | Must answer |
 | --- |
@@ -56,7 +58,7 @@ This is the moment authorization becomes real for the first time in the product'
 
 ---
 
-## G3 — Authorize the first write slice (P4)
+## G3 — Authorize the first CRM/Growth write vertical
 
 **Blocked on:** G2, and 8D closed (P1–P3 read-only proven).
 
@@ -66,6 +68,24 @@ This is the moment authorization becomes real for the first time in the product'
 | One correlation ID traced across `app-web` → `api` → audit row |
 | Rollback rehearsed: a migrated prefix flipped back to `legacy` and back again |
 | Idempotency and audit proven on a non-domain write (e.g. support status update) |
+| Product decisions needed by the slice are accepted; **P-DB-06 selects the primary conversion event** |
+| DB0 requirements and DB1 physical/access architecture are accepted |
+| F-DATA/source/writer characterization and DB3 model review are accepted; tenant ownership is not UNKNOWN |
+| Applicable DB4–DB6 expand/backfill/reconcile/shadow-read evidence passes before DB7 |
+
+G3 authorizes only Contact → Lead → Follow-up Task → Pipeline/Opportunity → Conversion → Growth and governed tenant-agent **READ** tools. DB7 additionally requires all legacy/browser/n8n/webhook/cron writers routed or disabled. It does not authorize provider execution, AI effects, later ERP modules, production or DB9 cleanup.
+
+### Canonical database gate crosswalk
+
+| Database stage | Phase 8 ceiling |
+| --- | --- |
+| DB0–DB3 | Decisions/characterization/model review only |
+| DB4–DB6 | Staging expand/backfill/shadow-read; no write authority |
+| DB7 | Requires G3 or a later named write gate |
+| DB8 | Requires parity, deny, freshness and rollback |
+| DB9 | Separate later authorization and restore evidence |
+
+Detailed definitions: [`../../06-autonomous-marketing-platform/database/DECISIONS-AND-GATES.md`](../../06-autonomous-marketing-platform/database/DECISIONS-AND-GATES.md).
 
 ---
 

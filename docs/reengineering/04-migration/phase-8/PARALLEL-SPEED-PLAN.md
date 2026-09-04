@@ -7,15 +7,32 @@ Program SoT: [`../../STATUS.md`](../../STATUS.md) · Board: [`README.md`](./READ
 > Quality bar unchanged: allow **and** deny, parity on reads, idempotency and audit on writes, legacy owner retired per slice.
 > **Staging only. No production cutover in any wave.**
 
+## Authoritative sequence
+
+```text
+G0/frontend decision
+  → accepted app-web dependency
+  → Nest common authority + in-process compatibility tests
+  → identity/session → capabilities → modules/plans/quotas
+  → blueprint/onboarding dry-run → readiness
+  → G2 → dashboard manifest/Home/actions/Support/comms/Growth reads
+  → DB0–DB6 → G3 + P-DB-06 + DB7
+  → Contact → Lead → Task → Opportunity → Conversion → Growth → agent READ
+  → later modules in dependency order
+  → DB8/DB9 retirement per capability
+```
+
+Only contracts, read-only characterization, UI primitives and independent read projections inside an opened gate may fan out. New product writes do not fan out before the first CRM/Growth authority move proves the path. The original wave tables below remain a legacy work-inventory crosswalk; they do not override this sequence.
+
 ## Parallel vs serialize
 
 | May run in parallel | Must stay serial |
 | --- | --- |
-| F1–F7, F9 foundation tracks | F8 `common/` before any capability-guarded slice |
-| P-lane and A-lane after S3 | S1 → S2 → S3 (each is the next one's input) |
+| F1–F7/F9 internals after G0 | Frontend dependency before frontend work; Nest common before capability enforcement |
+| Read projections after G2 | Identity → capabilities → modules/quotas/blueprints/readiness → manifest |
 | Contract authoring for future slices | S2 enforcement flip (log-only → enforcing) |
-| Parity harness projections per slice | P7 → P9 (finance before self-service billing) |
-| Staff console consolidation design | A4 billing-hub write paths after S4 |
+| Parity harness projections per slice | DB0→DB7 and G3/P-DB-06 before first product writes |
+| Staff console consolidation design | Later modules in the authoritative dependency order |
 | V-lane discovery notes | Any legacy route deletion after its observation window |
 
 The spine is serial because each slice consumes the previous one's output: session feeds capabilities, capabilities feed entitlements, entitlements feed the shell. Everything downstream of the shell can fan out.
@@ -26,14 +43,14 @@ The spine is serial because each slice consumes the previous one's output: sessi
 Wave 0 (paper, LANDED): scope | capability map | app shape | slices | data | routing | gates | risks
         │
         ▼
-Wave 1 (parallel):  8A foundation — F1 F2 F3 F4 F5 F6 F7 F9 ║ then F8
+Legacy inventory Wave 1: F1 F2 F3 F4 F5 F6 F7 F9 ║ then F8
         │
         ▼
-Wave 2 (serial):    8B/8C spine — S1 → S2(log-only → enforce) → S3 → S4 → S5
+Legacy inventory Wave 2: S1 → S2(log-only → enforce) → S3 → S4 → S5
         │
         ├───────────────────────────────┐
         ▼                               ▼
-Wave 3a (parallel P-lane)        Wave 3b (parallel A-lane)
+Legacy P-lane IDs                Legacy A-lane IDs
   8D  P1 P2 P3   (read-only)       8G  A1 → A2 A3 A5 A6
   8E  P4 P5 P6 → P7, P8                    A4 (after S4)
   8F  P9 (after P7) , P10
@@ -84,9 +101,9 @@ Strictly serial. S2 additionally splits in two:
 
 Skipping 2a means discovering the gap by locking users out. The gap is real: the legacy audit found permissions are primarily UI-gated with inconsistent server checks.
 
-## Wave 3 — product and staff, in parallel
+## Legacy Wave 3 inventory — superseded ordering
 
-Both lanes depend only on the spine, touch mostly disjoint data, and have different audiences.
+The following P/A list is retained to map prior IDs, not to authorize parallel implementation. Use the authoritative sequence above.
 
 | P-lane order | Reason |
 | --- | --- |

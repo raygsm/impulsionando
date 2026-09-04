@@ -3,11 +3,26 @@
 Created: **2026-09-04** · State: **NOT STARTED** — no slice authorized
 Board: [`README.md`](./README.md) · Shape: [`TARGET-APP-SHAPE.md`](./TARGET-APP-SHAPE.md) · Waves: [`PARALLEL-SPEED-PLAN.md`](./PARALLEL-SPEED-PLAN.md)
 
-The separated implementation plan. Each slice is an independently shippable vertical: contracts → domain → API module → allow/deny matrix → client → UI → **legacy retirement**. A slice that does not retire its legacy owner is not done ([`TARGET-APP-SHAPE.md`](./TARGET-APP-SHAPE.md) §7).
+The implementation inventory. The authoritative execution path below supersedes the original broad P1–P10 ordering retained later for legacy-source traceability.
 
 Every slice inherits the program's Definition of Done ([`../../05-governance/DEFINITION-OF-DONE.md`](../../05-governance/DEFINITION-OF-DONE.md)). The per-slice tables below record only what is **specific** to that slice.
 
-## Index
+## Authoritative execution catalog
+
+| Order | Slice | Gate/dependency | Required outcome |
+| --- | --- | --- | --- |
+| 0 | Frontend dependency | G0 | Runtime selected by accepted ADR lands; presentation/thin BFF only |
+| 1 | Nest common foundation | G0/G1 | Typed config, Zod, envelope/correlation, guards, audit/idempotency, tenant registry, in-process tests, Phase 3–6 compatibility |
+| 2 | Identity/composition | G1/G2 | Session/tenant/capabilities, modules, quota/plan, blueprint dry-run/onboarding, readiness |
+| 3 | Read proof | G2 | Manifest/home/actions, Support, communications inbox and Growth consumed by `app-web` |
+| 4 | Canonical DB preparation | DB0–DB6 | Physical/access ADR, F-DATA, classification, expand/backfill/reconcile/shadow-read |
+| 5 | First CRM/Growth write | **G3 + P-DB-06 + DB7** | Contact → Lead → Task → Pipeline/Opportunity → Conversion → Growth; agent READ only |
+| 6 | Later modules | Per-module gates | Team/Tasks depth → Agenda → Catalog/Sales → Inventory → Finance/Accounting → Documents → Billing → Payments → communications execution → AI durability/effects → staff → verticals |
+| 7 | Retirement | DB8/DB9 | One authority, route flip, rollback and writer/adapter retirement |
+
+Endpoint names are governed by [`first-product-slice/CONTRACTS-AND-DATA.md`](./first-product-slice/CONTRACTS-AND-DATA.md). Older S/P/A identifiers below are subordinate and do not create parallel authorization.
+
+## Legacy inventory crosswalk
 
 | ID | Slice | Subphase | Lane | Depends on | Blast radius |
 | --- | --- | --- | --- | --- | --- |

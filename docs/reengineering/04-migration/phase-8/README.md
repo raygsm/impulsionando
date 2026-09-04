@@ -6,13 +6,13 @@ Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Program SoT: [`
 
 Product direction proposal: [`../../06-autonomous-marketing-platform/README.md`](../../06-autonomous-marketing-platform/README.md) — **PROPOSED, awaiting acceptance; no gate moved**
 
-Frontend decision: ADR-002 currently keeps TanStack Start. Draft [PR #151](https://github.com/raygsm/impulsionando/pull/151) proposes ADR-009 + a Next.js `app-web`; it is not Phase 8 authority until accepted and merged. The first feature slice remains blocked on that decision.
+**Implementation direction:** NestJS is product/domain authority; the accepted frontend is presentation/thin BFF only. ADR-002 currently keeps TanStack Start. Draft [PR #151](https://github.com/raygsm/impulsionando/pull/151) proposes ADR-009 + Next.js; as of 2026-09-04T21:53Z it is open, draft, unmerged, and its listed checks are failing. It is not authority until formally accepted and landed.
 
 ## Goal
 
 Rebuild the authenticated Impulsionando product and its staff console on `apps/app-web` + `apps/api`, capability by capability, retiring each legacy owner as it goes. **Not** a mechanical route move (ADR-001). **Not** a production cutover (Phase 7).
 
-If the autonomous-marketing product proposal is accepted, Phase 8 keeps its technical foundation, strangler and safety gates but reorders the first product proof around **Dashboard + Growth + Contacts/CRM + Tasks + mandatory tenant business agent**. Detailed impact: [`../../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md`](../../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md) §2.
+Phase 8 has one authoritative sequence: accepted frontend dependency → Nest common foundation → identity/session → modules/quotas/blueprints/readiness → dashboard read proof → canonical database gates → first CRM/Growth write vertical → later modules. Product/database documents supply detailed **PROPOSED** models; this sequence does not pre-accept them.
 
 ## Docs
 
@@ -29,21 +29,21 @@ If the autonomous-marketing product proposal is accepted, Phase 8 keeps its tech
 | [`GATES.md`](./GATES.md) | Human gates G0–G5 |
 | [`RISKS.md`](./RISKS.md) | Risk register + anti-patterns that would sink this phase |
 | [`EVIDENCE-TEMPLATE.md`](./EVIDENCE-TEMPLATE.md) | Skeleton for `EVIDENCE-<slice>.md` |
-| [`first-product-slice/README.md`](./first-product-slice/README.md) | Concrete Nest-foundation → first CRM/Growth Next+Nest plan; currently BLOCKED on frontend/product/Phase 8 gates |
+| [`first-product-slice/README.md`](./first-product-slice/README.md) | Concrete Nest-authority → read proof → first CRM/Growth plan; BLOCKED on frontend/product/DB/Phase 8 gates |
 
 ## Subphase board
 
 | ID | Focus | Lane | State |
 | --- | --- | --- | --- |
 | **Wave 0** | Planning docs (this landing) | paper | **LANDED** |
-| **8A** | Foundation — accepted `app-web` runtime, packages, CI, parity harness | F | NOT STARTED — frontend ADR pending |
-| **8B** | Identity spine — session, membership, capabilities | S | NOT STARTED |
-| **8C** | Entitlements and access gates | S | NOT STARTED |
-| **8D** | Read-only product spine — shell, nav, dashboard, support | P | NOT STARTED |
-| **8E** | Tenant product write slices — CRM, agenda, sales, finance, settings | P | NOT STARTED |
-| **8F** | Self-service commercial — subscription, invoices, dunning | P | NOT STARTED |
-| **8G** | Platform staff console — Cliente 360, factory, catalog, billing hub, obs, audit | A | NOT STARTED |
-| **8H** | Legacy route retirement | R | NOT STARTED (runs per slice, not at the end) |
+| **8A** | Accepted frontend dependency + Nest common foundation/compatibility | F | NOT STARTED — G0/frontend decision pending |
+| **8B** | Identity/session and tenant/capability authority | S | NOT STARTED |
+| **8C** | Modules, quotas/plans, blueprint dry-run/onboarding and readiness | S | NOT STARTED |
+| **8D** | Dashboard manifest + Home/actions/Support/comms/Growth read proof | P | NOT STARTED |
+| **8E** | Canonical DB program: DB0–DB8, capability-sized | D | NOT STARTED |
+| **8F** | Contact→Lead→Task→Opportunity→Conversion→Growth→agent READ | P | NOT STARTED — blocked on G3/P-DB-06/DB gates |
+| **8G** | Later modules in dependency order, including staff/vertical work last | P/A/V | NOT STARTED |
+| **8H** | Legacy authority retirement | R | NOT STARTED (per capability, not big bang) |
 | **V-lane** | Vertical packs + one-tenant bespoke ops | V | **DEFERRED** — bound to each tenant's Phase 7 cutover |
 
 ## Measured baseline (2026-09-04, static)
@@ -72,6 +72,15 @@ Evidence level: **STATIC**. Live usage per screen is **UNKNOWN** — see [`RISKS
 | 3 | Human authorization of Phase 8 scope and consolidation budget | **PENDING** — [`GATES.md`](./GATES.md) G0 |
 | 4 | Canonical authenticated staging hostname decided | **PENDING** — [`STRANGLER-ROUTING.md`](./STRANGLER-ROUTING.md) §2 |
 | 5 | ADR for capability-model RBAC unification | **PENDING** — [`DATA-AND-IDENTITY-PLAN.md`](./DATA-AND-IDENTITY-PLAN.md) §3 |
+| 6 | Accepted frontend runtime present on the implementation base | **PENDING** — ADR-002 remains authority unless ADR-009 is accepted and landed |
+
+## Detailed subordinate plans
+
+- [`first-product-slice/`](./first-product-slice/README.md) defines Unit A and the first CRM/Growth vertical.
+- [`../../06-autonomous-marketing-platform/`](../../06-autonomous-marketing-platform/README.md) defines the proposed product/module/AI formulation.
+- [`../../06-autonomous-marketing-platform/database/`](../../06-autonomous-marketing-platform/database/README.md) defines proposed canonical models and DB0–DB9 gates.
+
+Where older S/P/A labels conflict with this board or [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md), this board wins. Local F0/C0/C1 labels are evidence checkpoints subordinate to G0–G3 and DB0–DB9.
 
 ## Tooling (to be built in 8A — none of these exist yet)
 

@@ -5,9 +5,11 @@ Program SoT: [`../STATUS.md`](../STATUS.md)
 
 **Program state:** Phase 8 **PLANNING — NOT STARTED**. Staging development of Impulsionando on the new stack is already authorized by [`../STATUS.md`](../STATUS.md) ("Próximo gate" #1); Phase 8 turns that authorization into a scoped, gated, evidence-bearing program. **No production cutover of the authenticated product happens in Phase 8** — that stays under Phase 7 authority.
 
-**Product direction proposal (2026-09-04):** [`../06-autonomous-marketing-platform/README.md`](../06-autonomous-marketing-platform/README.md) reframes the product as one autonomous marketing operations dashboard with optional capability modules, niche blueprints, a mandatory internal business agent per tenant, optional client-facing agents, and Impulsionito as governed platform parent. It is **PROPOSED**: if accepted, the Phase 8 technical foundation remains, while the product slices are rebaselined through [`../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md`](../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md). No gate moved by adding the proposal.
+**Phase 8 implementation direction (rebaselined 2026-09-04):** NestJS is the product/domain authority. The accepted `app-web` runtime is presentation and, where necessary, a thin BFF; it never decides tenant, capability, module, quota, readiness or domain truth and never reads canonical domain tables directly. This follows accepted ADR-003 and does not accept any still-PROPOSED product/database choice.
 
-Until that product gate is accepted, the 8D–8G subphases below remain the current Phase 8 plan. They are intentionally **not** half-rewritten to match an unaccepted proposal.
+Frontend dependency remains conditional: ADR-002 currently accepts TanStack Start. Draft [ADR-009 / PR #151](https://github.com/raygsm/impulsionando/pull/151) proposes Next.js, but is open, draft, unmerged and has failing listed checks as of 2026-09-04T21:53Z. If ADR-009 is formally accepted and lands, Phase 8 consumes Next.js; otherwise it implements ADR-002. There is one backend/product sequence either way.
+
+The autonomous-marketing formulation and canonical database models under [`../06-autonomous-marketing-platform/`](../06-autonomous-marketing-platform/README.md) remain **PROPOSED detailed inputs**. Phase 8 links their latest model and sequences the gates needed to decide it; planning landed does not authorize implementation and no gate moved.
 
 ## Objetivo
 
@@ -47,46 +49,46 @@ Phase 8 closes that gap. It is the largest remaining body of work in the program
 
 ## Subphases
 
-### 8A — Foundation
+### 8A — Accepted frontend dependency + Nest common foundation
 
-Turn the empty scaffolding into a working platform: `apps/app-web` as a real TanStack Start app (ADR-002), `packages/api-client`, `packages/auth`, `packages/config`, `packages/ui`, `packages/observability`, contracts extension, GHCR image + staging deploy + smoke. No product screens yet.
+First close the frontend decision/landing dependency. Then build typed config, correlation, the standard error envelope, Zod validation, deny-by-default `CapabilityGuard` and `TenantScopeGuard`, audit/idempotency seams, a reviewed per-table tenant-column registry, and in-process Nest tests. Preserve and rerun existing Phase 3–6 auth, tenants, Support, jobs, outbox, webhooks, CRM invite journeys, ops and AI contracts/smokes.
 
-### 8B — Identity spine
+### 8B — Identity/session authority
 
-Server-authoritative session, membership, active tenant context, and a **single** capability model replacing the legacy dual RBAC (`user_roles` vs `profile_permissions`). Allow **and** deny proven on staging before any write slice opens.
+`GET /api/v1/identity/session` composes authenticated identity, memberships, server-validated active tenant, staff/observer/delegation mode and effective capabilities. Browser-selected tenant IDs are requests, never grants.
 
-### 8C — Entitlements and access gates
+### 8C — Product composition authority
 
-One server-computed `EntitlementSet` per tenant from `company_modules`, plan/contract modules, feature flags and access policy. UI gating becomes a projection of the server answer, never the authority.
+Nest owns the effective module registry, plan/quota rules, niche blueprint/onboarding compilation (pure/dry-run first), dependencies and readiness. Product decisions remain gated; the frontend only renders the response.
 
-### 8D — Read-only product spine
+### 8D — Dashboard manifest and read-only proof
 
-Shell, capability-driven navigation, dashboard, support (extends the Phase 3 Nest pilot), notifications. Proves the whole path — SSR session → Nest → contracts → UI — with **zero domain writes**.
+Nest serves `/api/v1/dashboard/manifest`, `/api/v1/dashboard/home`, `/api/v1/dashboard/actions`, the existing Support contract, `/api/v1/communications/inbox`, and `/api/v1/growth/overview`. `app-web` consumes those contracts. Home/actions/Support/comms/Growth prove the path with no new domain write.
 
-### 8E — Tenant product write slices
+### 8E — Canonical database program
 
-CRM, Agenda, Sales/Inventory, Finance, Settings/Users. Ascending blast radius; each slice carries a parity harness against legacy plus allow/deny tests.
+Before product writes: accept the physical target/access ADR; run F-DATA staging characterization; classify legacy objects KEEP/ADAPT/MIGRATE/MERGE/RETIRE/UNKNOWN; and move each capability through expand → backfill → reconcile → shadow-read → write authority → read authority → retire. Detailed source: [`../06-autonomous-marketing-platform/database/`](../06-autonomous-marketing-platform/database/README.md). No big bang or automatic mapping of 577 legacy tables.
 
-### 8F — Self-service commercial
+### 8F — First write vertical
 
-Subscription, plan, invoices, payment method, dunning surfaces. Highest financial blast radius, therefore last in the tenant lane and shadow-read before authority moves.
+Only after authoritative G3 and applicable DB0–DB7 gates: Contact → Lead → Follow-up Task → Pipeline/Opportunity → Conversion → Growth summary → governed tenant-agent **READ** tools. P-DB-06 must be accepted before conversion metric or write acceptance. No new AI effect or provider dispatch belongs here.
 
-### 8G — Platform staff console
+### 8G — Later capability modules
 
-Tenant registry and Cliente 360, provisioning/factory, module catalog and flags, billing hub, platform observability and release identity, audit and security. Replaces ~60 near-duplicate `admin.*-health` pages with parameterized views.
+After the first vertical: Team/Tasks depth → Agenda → Catalog/Sales → Inventory → Finance/Accounting → Documents → Billing → Payments → Communications execution → AI durability/effects → staff console → vertical extensions. Each module has its own product/DB/safety gate and retires its legacy owner capability by capability.
 
-### 8H — Legacy route retirement
+### 8H — Legacy authority retirement
 
-Per capability: flip the route-ownership manifest, redirect legacy paths, remove the legacy route files and their server functions, record evidence. A slice is not done until its legacy owner is gone.
+Retirement runs inside every capability migration after parity, writer shutdown, authority transfer and rollback evidence. n8n and provider adapters remain auxiliary; neither becomes domain authority.
 
 ## Critério de saída
 
 Phase 8 closes when, **on staging**:
 
-1. A real tenant operates the core spine (8B–8F capabilities) entirely on `app-web` + Nest, with no legacy authenticated route serving those paths.
+1. A real tenant operates the accepted Phase 8 scope through `app-web` + Nest on staging, with Nest as domain authority and no legacy authenticated route serving the migrated paths.
 2. Every migrated capability has server-enforced authorization with recorded **allow and deny** results — UI-only permission checks are gone from the migrated surface.
 3. Every migrated read endpoint has a recorded parity result against the legacy implementation, and every migrated write has an idempotency and audit result.
-4. The staff console covers the platform operations actually used (tenant lifecycle, entitlements, billing, observability, audit) without the legacy `admin.*`/`core.*` sprawl.
+4. Every canonical aggregate that moved has passed its applicable DB0–DB8 evidence; DB9 retirement remains separately authorized where physical cleanup is deferred.
 5. The route-ownership manifest shows `app-web` as sole owner of the migrated prefixes, and rollback to `legacy` has been rehearsed.
 6. `app-web` ships as a full-SHA GHCR image with health exposing `gitSha`, deployed by the same promote path as `api`/`worker`.
 
@@ -97,7 +99,7 @@ Phase 8 does **not** close on scaffolding, on green health checks, on a screen t
 - Declaring Phase 8 done while any migrated capability still has two owners;
 - shipping a write path whose authorization is enforced only in React;
 - porting the 283 staff routes one-for-one;
-- building the intake product vision (Payments, revenue share, CRM Universal, regulated verticals) under a migration gate;
+- treating the PROPOSED product/database catalogue as accepted or building later modules under the first CRM gate;
 - prod DNS, prod schema writes, or legacy runtime retirement.
 
 ## Documentos

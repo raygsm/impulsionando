@@ -3,7 +3,7 @@
 Created: **2026-09-04** · State: **PROPOSED — no implementation authorization**
 Index: [`README.md`](./README.md) · Phase 8: [`../04-migration/phase-8/README.md`](../04-migration/phase-8/README.md)
 
-Concrete first cross-stack delivery plan: [`../04-migration/phase-8/first-product-slice/README.md`](../04-migration/phase-8/first-product-slice/README.md) — Nest authority/composition first, then one CRM/Growth lifecycle across Nest and Next.
+Concrete authoritative Phase 8 sequence: [`../04-migration/PHASE-8-CORE-APP.md`](../04-migration/PHASE-8-CORE-APP.md). Detailed first slice: [`../04-migration/phase-8/first-product-slice/README.md`](../04-migration/phase-8/first-product-slice/README.md) — Nest authority/composition first, then one CRM/Growth lifecycle consumed by the accepted frontend.
 
 ## 1. Delivery principle
 
@@ -31,7 +31,7 @@ The Phase 8 technical foundations remain valid, independent of the final fronten
 - route-ownership strangler;
 - full-SHA images and staging evidence.
 
-The product sequence changes:
+Phase 8 has been rebaselined to consume this work as **PROPOSED detail behind explicit gates**:
 
 | Current Phase 8 emphasis | Revised emphasis if this proposal is accepted |
 | --- | --- |
@@ -41,7 +41,7 @@ The product sequence changes:
 | Niche/verticals deferred | Vertical packs remain deferred, but **niche blueprints** are core configuration implemented early |
 | CRM, agenda, sales, finance migrate in route order | Growth loop determines priority; operational modules join as optional signal/action providers |
 
-The existing Phase 8 docs should be **rebaselined after product-model acceptance**, not silently edited while this proposal is under review.
+The Phase 8 plan direction now reflects this sequence so there is no competing implementation path. That documentation change does **not** accept P0, any P-DB/T-DB decision, ADR-009, or any implementation gate.
 
 ## 3. Stage plan
 
@@ -215,8 +215,8 @@ Ordered, not estimated:
 
 | # | Deliverable | Why first |
 | --- | --- | --- |
-| 1 | Product decision record and Phase 8 rebaseline | Prevent two competing product plans |
-| 2 | Land the accepted `app-web` runtime (proposed Next.js dashboard in draft PR #151) | No dashboard exists on `reengineering/program`; do not assume a draft dependency |
+| 1 | Product decision record | Phase 8 is rebaselined; product acceptance is still pending |
+| 2 | Land the runtime selected by the accepted frontend ADR | ADR-002 governs unless ADR-009 is formally accepted and landed; do not assume draft PR #151 |
 | 3 | Nest common guard/error/correlation/audit layer | Every later module depends on safe enforcement |
 | 4 | Capability/module registry contracts | Defines composition before screens |
 | 5 | Session + effective entitlements API | Server authority |

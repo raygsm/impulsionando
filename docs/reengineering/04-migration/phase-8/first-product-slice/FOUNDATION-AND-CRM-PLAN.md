@@ -12,23 +12,23 @@ One agent may own the sequence for continuity, but delivery is split:
 Unit A — authority and composition
   contracts → common Nest enforcement → identity session
   → capability/module registry → dashboard manifest
-  → Next consumes it → Home/actions/Support/comms/Growth read proof
+  → accepted app-web consumes it → Home/actions/Support/comms/Growth read proof
 
 Unit B — first product loop
   Contact → Lead → Follow-up Task → Opportunity/Stage → Conversion
-  → Growth projection → Next pages/widgets → governed AI READ tools
+  → Growth projection → app-web pages/widgets → governed AI READ tools
 ```
 
 Unit A is reviewed and merged before Unit B introduces CRM writes.
 
 # Unit A — Nest foundation and dashboard composition
 
-## A0 — Reconcile the frontend after it lands
+## A0 — Reconcile the accepted frontend after it lands
 
-After PR #151 lands:
+After the runtime selected by the accepted frontend ADR lands:
 
 1. inspect actual `apps/app-web`, `packages/api-client`, `packages/auth`, `packages/config` and `packages/contracts/src/dashboard.ts`;
-2. compare them with accepted ADR-009 and the product architecture;
+2. compare them with the accepted frontend ADR and product decisions;
 3. list transitional components clearly:
    - local module catalog;
    - local fixture manifest;
@@ -55,9 +55,9 @@ Add or consolidate runtime Zod contracts:
 Rules:
 
 - extend existing contracts rather than define conflicting types;
-- maintain compatibility with PR #151's dashboard contract;
+- maintain compatibility with the accepted/landed dashboard contract; draft PR #151 is input only;
 - use a `version` where persisted/configurable shape will evolve;
-- one source of truth consumed by API and Next;
+- one source of truth consumed by API and `app-web`;
 - contract tests land in the same commit.
 
 ## A1b — Read-only staging schema baseline (F-DATA)
@@ -145,7 +145,7 @@ authenticated actor
 
 No `localStorage` tenant selection authorizes the API. Staff delegation and observer mode are explicit and audited.
 
-During legacy/Next coexistence, implement the session continuity plan from [`../STRANGLER-ROUTING.md`](../STRANGLER-ROUTING.md): shared cookie compatibility, one refresh owner, sign-out clears both session representations, and a staging user can cross route owners without re-authentication. Password-reset canonical host must already be closed at G0.
+During legacy/`app-web` coexistence, implement the session continuity plan from [`../STRANGLER-ROUTING.md`](../STRANGLER-ROUTING.md): shared cookie compatibility, one refresh owner, sign-out clears both session representations, and a staging user can cross route owners without re-authentication. Password-reset canonical host must already be closed at G0.
 
 ## A4 — Effective module registry
 
@@ -226,9 +226,9 @@ The endpoint applies both:
 - tenant/module/readiness rules;
 - requesting-user capabilities.
 
-Forbidden modules/widgets are absent from the payload, not only hidden by Next.
+Forbidden modules/widgets are absent from the payload, not only hidden by `app-web`.
 
-## A7 — Next integration
+## A7 — `app-web` integration
 
 Replace transitional local authority in `apps/app-web`:
 
@@ -242,13 +242,13 @@ Replace transitional local authority in `apps/app-web`:
 
 Preserve:
 
-- imported Next shell and visual components;
+- the accepted shell and visual components;
 - invariant IA;
 - loading/empty/configuring/degraded/error states;
 - tenant branding tokens;
 - thin BFF only where cookie/bearer bridging requires it.
 
-Next route handlers/server actions contain no domain rules.
+Frontend route handlers/server actions contain no domain rules and no canonical domain-table access.
 
 ## A8 — Read-only product proof (8D / P1–P3)
 
@@ -300,13 +300,13 @@ Unit A is complete when:
 1. three niche fixtures produce different manifests from one API implementation;
 2. two roles in one tenant produce appropriately different manifests;
 3. cross-tenant and unauthorized access return 403;
-4. Next renders the manifest with no production reliance on local fixture composition;
+4. `app-web` renders the manifest with no production reliance on local fixture composition;
 5. existing Phase 3–6 API tests/smokes remain compatible;
 6. G2 has explicitly authorized and proven capability enforcement;
 7. Home/actions, Support, communications and baseline Growth reads satisfy 8D/P1–P3 evidence;
 8. the Support status transition supplies G3's idempotency/audit/correlation write proof;
 9. `npm run phase8:routes:check` passes before and after the ownership rehearsal;
-10. session continuity and sign-out work across legacy/Next route owners;
+10. session continuity and sign-out work across legacy/`app-web` route owners;
 11. no CRM write or database migration was added;
 12. route ownership and rollback are documented.
 
@@ -316,12 +316,13 @@ Unit A is complete when:
 
 After Unit A/F2, the same agent may perform this read-only characterization **before G3**. This is preparation, not Unit B implementation and creates no CRM writes. Before defining canonical entities:
 
-1. consume/refresh the Unit A F-DATA baseline and inspect CRM-specific staging shapes, constraints, RLS and functions read-only;
-2. identify current sources for leads, contacts/customers, opportunities, stages and activities;
-3. trace legacy routes/functions for capture, follow-up, stage move and conversion;
-4. identify current user-facing behavior, including empty/error states;
-5. identify any external writers, webhooks, cron or n8n dependencies;
-6. classify every source object:
+1. confirm DB0 product requirements and an accepted DB1 physical-target/access decision;
+2. consume/refresh the Unit A F-DATA baseline and inspect CRM-specific staging shapes, constraints, RLS, functions, volumes and all writers read-only;
+3. identify current sources for leads, contacts/customers, opportunities, stages and activities;
+4. trace legacy routes/functions for capture, follow-up, stage move and conversion;
+5. identify current user-facing behavior, including empty/error states;
+6. identify every external writer, browser path, webhook, cron and n8n dependency;
+7. classify every source object:
    - KEEP;
    - ADAPT;
    - MIGRATE;
@@ -329,7 +330,7 @@ After Unit A/F2, the same agent may perform this read-only characterization **be
    - RETIRE;
    - UNKNOWN.
 
-No canonical model is chosen by table name alone.
+No canonical model is chosen by table name alone. DB3 reviews the contract; any DB4–DB6 expand/backfill/reconciliation/shadow-read occurs only through the canonical migration program. G3 and DB7 are both required before write authority moves.
 
 # Unit B — first CRM and Growth vertical
 
@@ -364,7 +365,7 @@ Required behavior:
 - outbox event in the same mutation boundary;
 - no provider calls.
 
-## B3 — Next CRM/Growth experience
+## B3 — `app-web` CRM/Growth experience
 
 Deliver:
 
@@ -439,7 +440,7 @@ Requirements:
 - source/freshness surfaced;
 - cross-tenant deny and prompt-injection tests.
 
-Do not enable write/effect tools.
+Do not enable write/effect tools. P-DB-09 still governs product cardinality; Unit B reuses the one governed runtime and does not persist an assumed agent cardinality. Impulsionito receives no standing raw all-tenant context.
 
 ## B6 — Route ownership and legacy retirement
 
@@ -478,7 +479,7 @@ And:
 - stage concurrency conflict is visible;
 - audit and outbox rows exist;
 - Growth values reconcile with the underlying records;
-- Next contains no direct CRM table access;
+- `app-web` contains no direct CRM table access;
 - agent tools remain READ-only;
 - rollback is rehearsed;
 - legacy write ownership is closed or explicitly blocks PASS.

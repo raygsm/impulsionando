@@ -3,7 +3,13 @@
 Created: **2026-09-04**
 Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Scope: [`CORE-APP-SCOPE.md`](./CORE-APP-SCOPE.md) · Slices: [`SLICE-CATALOG.md`](./SLICE-CATALOG.md)
 
-The backbone of the plan. Phase 8 is organized by **capability**, never by file, because ADR-001 forbids a mechanical route move and because the legacy route tree does not match the product.
+Phase 8 is organized by **capability**, never by file. This is an ownership/source inventory; older S/P/A labels do not define order. Authority: [`README.md`](./README.md) and [`PARALLEL-SPEED-PLAN.md`](./PARALLEL-SPEED-PLAN.md).
+
+## Authoritative path
+
+Accepted frontend dependency → Nest common foundation → identity/session → modules/quotas/blueprints/readiness → dashboard read proof → DB0–DB7 → Contact/Lead/Task/Opportunity/Conversion/Growth + agent READ → later modules → DB8/DB9 retirement.
+
+Nest owns product/domain decisions. `app-web` renders contracts and never reads canonical tables directly.
 
 Read this table as: *this capability exists today here, it will exist tomorrow there, and slice `X` is what moves it.*
 

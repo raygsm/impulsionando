@@ -8,7 +8,7 @@ Canonical database models: [`../../../06-autonomous-marketing-platform/database/
 ## 1. Contract principles
 
 - Zod runtime schema is the shared truth.
-- Next imports contracts/API client, never Nest implementation.
+- `app-web` imports contracts/API client, never Nest implementation, regardless of frontend framework.
 - Public API vocabulary uses `tenantId`; physical `company_id`/`tenant_id` stays inside repositories.
 - IDs are UUIDs unless an observed legacy object proves otherwise.
 - Timestamps are ISO UTC; reporting requests carry an explicit business timezone.
@@ -96,7 +96,7 @@ type EffectiveModuleV1 = {
 
 ### Dashboard manifest
 
-Use/extend `packages/contracts/src/dashboard.ts` from the final merged Next frontend. This file is **not present on `reengineering/program` at this plan's timestamp** and is an explicit PR #151 landing dependency. Required semantics:
+Use/extend one accepted `packages/contracts/src/dashboard.ts`. Draft PR #151's version is not authority unless ADR-009 is accepted and lands; under ADR-002 create the same framework-neutral contract. Required semantics:
 
 - stable primary regions;
 - contributions filtered server-side;
@@ -297,7 +297,7 @@ Stage commands include `expectedVersion`; stale changes return 409.
 GET /api/v1/growth/overview?from=<date>&to=<date>&timezone=<iana>
 ```
 
-No mutation endpoint belongs to the Growth projection.
+No mutation endpoint belongs to the Growth projection. P-DB-06 must be accepted before Unit B conversion write or metric acceptance.
 
 ## 5. Initial capability keys
 
