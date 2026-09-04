@@ -570,3 +570,19 @@ Format per entry:
   - Image SITE_URL bake still old URL until next staging rebuild — Traefik Host fix does not require rebuild for Host routing
 - Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../../STATUS.md`](../../../STATUS.md)
 - Forbidden: no legacy VPS `187.77.232.52`; no prod DNS flip; no secrets in git
+
+## 2026-09-04T12:10Z — Unstick hung CSI image transfer + staging promote `…-csi7b`
+
+- Operator: Agent (laptop Docker+SSH; no secrets logged; no full rebuild)
+- Change:
+  - Killed hung local `docker save | gzip | ssh 'gunzip | docker load'` (PIDs ~84449/84471–84473) and remote idle `gunzip|docker load` (~614682/614684) for tag `64411dbebe72218f6aded32b5442513e12e8730f-csi7b`
+  - Retried transfer via `docker save | gzip` → local `.tar.gz` → `scp` → `docker load` on clean host `2.25.123.224` (nested gunzip pipe was the hang)
+  - `TRAEFIK_HOST=stg.csi.impulsionando.com.br SKIP_PULL=1 IMAGE_TAG=64411dbebe72218f6aded32b5442513e12e8730f-csi7b ./scripts/deploy-reengineering-csi-core-clean-host.sh` — Swarm `reengineering-csi-core` converged 1/1
+- Result / evidence:
+  - Remote `docker image inspect` OK · image id `sha256:ae974b9f…` · tag `…64411dbebe…-csi7b`
+  - Traefik Host `stg.csi…` without vault auth → **401** (gate ON — expected)
+  - In-container with Host `stg.csi…`: `GET /` and `GET /csi` → **200** HTML title **CSI Invest** (not Impulsionando marketing home); without Host, `/` falls back to marketing title
+  - Replaced prior live staging tag `…5a9fd4c5…-csi7b`
+  - No rebuild · no GHCR push · no prod DNS · no legacy VPS
+- Docs updated: this log, [`HOST.md`](./HOST.md)
+- Forbidden: no secrets; no `187.77.232.52`; no Cloudflare mutate
