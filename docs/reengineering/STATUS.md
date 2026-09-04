@@ -1,10 +1,11 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T12:45Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**)
+Atualizado em: 2026-09-04T14:20Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Wave 0 landed, gate **G0 pending**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
-Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md) · plan [`04-migration/phase-7/PARALLEL-SPEED-PLAN.md`](04-migration/phase-7/PARALLEL-SPEED-PLAN.md) · gates [`04-migration/phase-7/GATES.md`](04-migration/phase-7/GATES.md)
+Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md) · plan [`04-migration/phase-7/PARALLEL-SPEED-PLAN.md`](04-migration/phase-7/PARALLEL-SPEED-PLAN.md) · gates [`04-migration/phase-7/GATES.md`](04-migration/phase-7/GATES.md)  
+Phase 8 board: [`04-migration/phase-8/README.md`](04-migration/phase-8/README.md) · slices [`04-migration/phase-8/SLICE-CATALOG.md`](04-migration/phase-8/SLICE-CATALOG.md) · gates [`04-migration/phase-8/GATES.md`](04-migration/phase-8/GATES.md)
 
 ## Estado geral
 
@@ -23,6 +24,7 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
 | 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
 | **7** | **IN PROGRESS** | **7A PASS** · **7B = CSI** · staging SSR **PASS** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED** · **7F PARKED** |
+| **8** | **PLANNING — NOT STARTED** | Wave 0 planning **LANDED** 2026-09-04 (paper only) · gate **G0 pending** — see below |
 
 ## Phase 6 staging close (2026-09-04T00:03Z)
 
@@ -60,9 +62,25 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | Legacy VPS | **FORBIDDEN** |
 | 7F | **PARKED** |
 
+## Phase 8 — PLANNING (Impulsionando core app on the new stack)
+
+Wave 0 = **paper only**. No code, no infra mutation, no production anything. Phase 8 is **staging-only** by definition and is orthogonal to Phase 7 (Phase 7 moves hostnames; Phase 8 moves authenticated route prefixes).
+
+| Item | Value |
+| --- | --- |
+| Authority | [`04-migration/PHASE-8-CORE-APP.md`](04-migration/PHASE-8-CORE-APP.md) · board [`phase-8/README.md`](04-migration/phase-8/README.md) |
+| Wave 0 planning | **LANDED** 2026-09-04 — scope, capability map, app shape, foundation tracks, slice catalog, data/identity, routing, waves, gates, risks, evidence template |
+| Measured scope (STATIC) | 576 `_authenticated` route files = 206 tenant product + 283 platform staff + 87 one-tenant bespoke; 12 `_command`; 1,476 `createServerFn` call sites |
+| Target | `apps/app-web` (TanStack Start, today a health stub) + new Nest modules `identity` / `billing` / `crm` / `agenda` / `sales` / `inventory` / `finance` / `communications` / `reports` / `audit` / `admin` / `automations` |
+| Consolidation budget | ~295 staff routes → ≈35–45 screens; the **57** `admin.*-health` pages collapse into one parameterized surface — [`phase-8/CORE-APP-SCOPE.md`](04-migration/phase-8/CORE-APP-SCOPE.md) §4 |
+| Deferred (**V-lane**) | Vertical packs (imobiliária, contabilidade, EHR, fiscal, affiliates, cervejaria/restaurante, eventos, educação, marketplace) + one-tenant ops (ChrisMed, WMP, Marocas, RioMed, Revela) — bound to each tenant's Phase 7 cutover |
+| Next gate | **G0** — human: accept scope + consolidation budget, choose `app.stg.impulsionando.com.br`, close the ADR-008 password-reset host — [`phase-8/GATES.md`](04-migration/phase-8/GATES.md) |
+| Blocking decision | **RBAC ADR** (capability model) before slice S2 — [`phase-8/DATA-AND-IDENTITY-PLAN.md`](04-migration/phase-8/DATA-AND-IDENTITY-PLAN.md) §3 |
+| Prod | **FORBIDDEN** in Phase 8 — production cutover stays Phase 7 authority |
+
 ## Próximo gate
 
-1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized.  
+1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized. Scoped plan: **Phase 8** ([`04-migration/PHASE-8-CORE-APP.md`](04-migration/PHASE-8-CORE-APP.md)); opens at gate **G0**.  
 2. Rebuild/redeploy CSI staging image with `stg.<tenant>` host recognition, then confirm browser no longer shows “Domínio não reconhecido” on `stg.csi…`.  
 3. Add Cloudflare **A** `stg.csi` → `2.25.123.224` (grey / DNS-only) for public staging URL (human — no CF token this session). Do **not** create `csi.stg`.  
 4. When remaining blockers green: Cloudflare flip **only** `csi` → clean (prod-shaped service already Host-proven).  
