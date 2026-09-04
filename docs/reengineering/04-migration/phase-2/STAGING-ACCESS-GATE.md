@@ -40,12 +40,14 @@ Also gate API (rarely wanted): `INCLUDE_API=1 … ./scripts/apply-staging-access
 
 ### What the script does on the host
 
-1. Writes APR1 htpasswd to `/etc/dokploy/traefik/dynamic/staging-basic-auth.htpasswd` (mode `600`).
-2. Writes middleware file `/etc/dokploy/traefik/dynamic/staging-access-gate.yml` referencing that `usersFile` (Traefik file provider already watches this directory).
+1. Writes APR1 hash into middleware file `/etc/dokploy/traefik/dynamic/staging-access-gate.yml` as inline `users:` (hash only). Also writes `/etc/dokploy/traefik/dynamic/staging-basic-auth.htpasswd` as backup.
+   - **Note (2026-09-04):** Traefik on this host returned **401** for valid `usersFile` htpasswd even when the file was mounted and readable; inline `users:` works. Apply script uses inline.
+2. Traefik file provider already watches the dynamic directory.
 3. Attaches Swarm labels on **tenant-web** (+ placeholder when `INCLUDE_STG=1`):
    - `traefik.http.routers.<name>.middlewares=staging-basic-auth@file`
    - same for `*-secure` routers
 4. By default **detaches** middleware from `reengineering-api` (`INCLUDE_API=0`). Set `INCLUDE_API=1` to attach API.
+   CSI (`reengineering-csi-core`) gets the same middleware when deploy uses `STAGING_ACCESS_GATE=auto|1`.
 
 No plaintext password is stored. Do not copy host htpasswd / YAML into git.
 
