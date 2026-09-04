@@ -63,6 +63,19 @@ Live per-screen usage remains **UNKNOWN**; no 30/90-day usage export exists.
 
 These should be retained and adapted rather than rewritten.
 
+### Concrete reusable UI and onboarding assets
+
+| Asset | Current behavior | Intended reuse |
+| --- | --- | --- |
+| `src/components/app/AppShell.tsx` | Auth, billing/trial restrictions, module URL gate, agent dock | Behavioral reference only; rebuild server-authoritative in `app-web` |
+| `navigation-areas.ts` | Five hubs for empresa/white-label audiences | Starting information architecture for the invariant dashboard |
+| `operations.cockpit.tsx` | Cross-module snapshot of appointments, stock, orders and restaurant tables | Starting source map for daily operations |
+| `crm.board.tsx` | Real CRM Kanban over `crm_*` tables | CRM behavior/parity input |
+| `email-templates/registry.ts` | React email templates with channel guards | Template migration input |
+| `niche-onboarding.functions.ts` | `apply_niche_template` for five niches | Blueprint compiler precursor, not the final compiler |
+| `factory.functions.ts` | Staff-side company/modules/billing/admin provisioning | Onboarding apply requirements and migration adapter |
+| `core_ai_brains` + `ai-brain.functions.ts` | Per-company prompt/tone/knowledge CRUD | Agent-registry migration input; not the runtime authority |
+
 ## 4. Current structural problems
 
 ### Product fragmentation
@@ -76,6 +89,8 @@ The legacy product is organized by accumulated route prefixes and named tenants.
 
 This obscures the universal lifecycle and encourages bespoke work.
 
+The dashboard split is concrete: `/dashboard`, `/dashboards/empresa`, `/dashboards/core`, `/dashboards/white-label`, `/dashboards/consumidor`, `/dashboards/operacao` and `/inicio` do not form one composable surface. `/dashboard` also contains WMP/ChrisMed host-specific behavior. These are migration inputs, not the target shell.
+
 ### Client-side authority
 
 - authenticated routes are `ssr: false`;
@@ -85,6 +100,8 @@ This obscures the universal lifecycle and encourages bespoke work.
 - server enforcement is inconsistent.
 
 The new dashboard must receive session, capabilities, entitlements and manifest from Nest.
+
+Nest already computes merged tenant entitlements, but `fetchTenantEntitlements` / the reengineering tenant client currently have **no dashboard or navigation consumers**. `AppShell` still gates from direct Supabase reads. Wiring the existing API onto the UI hot path is a reformulation requirement, not a new entitlement backend.
 
 ### Entitlement fragmentation
 
@@ -111,7 +128,11 @@ The new product cannot infer schema truth from generated types. Existing adapter
 
 ### AI MVP limitations
 
+- two AI runtimes compete today: the legacy `api/impulsionito/chat` path performs real OpenAI-compatible streaming and writes the omnichannel ledger but bypasses the governed Nest tool/policy runtime; the Nest Phase 6 path is governed but intentionally narrow/deterministic;
 - tenant agent is seeded rather than a durable per-tenant product record;
+- the Phase 6 seed uses agent id `impulsionito`, which conflates a tenant pilot with the proposed platform-parent identity;
+- `core_ai_brains` has real per-company configuration CRUD but is not what drives the authenticated agent dock;
+- client-facing agents (Investito, Iris, Medicito, Anita and others) exist as bespoke tenant API routes rather than one policy/configuration-driven client-agent runtime;
 - provider is a deterministic stub by default;
 - approval and telemetry state are in memory;
 - effect worker is a sink;
@@ -130,15 +151,23 @@ The safety shape is good; product persistence and scopes are missing.
 
 Dashboard V1 therefore includes connection states/templates/prepared actions, not a false “connected” claim.
 
+### Additional product gaps found in the UI
+
+- tenant branding data exists (`primary_color`, `logo_url`, `TenantConfigV1.branding`) but the authenticated `AppShell` does not consistently apply it as shell design tokens;
+- the staff support cockpit uses `support_sessions`, while the proven Nest API owns `support_tickets`; Dashboard V1 needs one Help/Tickets product contract, not a cosmetic port of the cockpit;
+- current “daily follow-up” is spread across `operations.cockpit`, CRM activities and dashboards; no single deterministic daily action queue exists;
+- documents are mostly niche-specific rather than a cross-tenant document capability;
+- retention logic exists in hooks/cron/health surfaces but not as a tenant-facing Growth module.
+
 ## 5. Retain, reformulate, retire
 
 | Decision | Assets |
 | --- | --- |
 | **Retain** | Nest/Fastify, Supabase Auth/Postgres, tenant resolution, Support API, jobs/worker, outbox, webhook ingress, operations metrics, AI policy/tools/effects |
-| **Reformulate** | Tenants→module/blueprint/onboarding composition; Journeys→lifecycle automation; AI→three durable agent kinds; entitlements→one effective set; dashboard routes→one manifest |
+| **Reformulate** | Tenants→module/blueprint/onboarding composition; Journeys→lifecycle automation; dual AI runtimes→one governed runtime with three durable agent kinds; entitlements→one effective set consumed by UI; dashboard routes→one manifest |
 | **Extract** | CRM, Agenda, Sales, Inventory, Finance, Billing, Communications and Audit business rules from `*.functions.ts` into Nest/domain modules |
 | **Consolidate** | Dashboards/insights/cockpits; admin/core/command; health pages; duplicate customer representations |
-| **Retire per slice** | Direct browser Supabase access, UI-only authority, named tenant route trees after their replacement is proven |
+| **Retire per slice** | Direct browser Supabase access, UI-only authority, legacy ungoverned Impulsionito chat after governed parity, bespoke client-agent routes after configuration-driven replacements, named tenant route trees after proof |
 | **Defer** | Advanced automation, permanent WhatsApp provider, regulated effects, full vertical migrations |
 
 ## 6. Gaps that block Dashboard V1

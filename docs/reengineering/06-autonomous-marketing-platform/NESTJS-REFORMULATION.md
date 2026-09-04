@@ -25,6 +25,11 @@ Phases 3–6 built useful infrastructure and proved it on staging. Replacing it 
 | `OpsModule` | **Extend** | Queue/integration metrics feed platform health and Impulsionito |
 | `AiModule` | **Extend materially** | Gateway/policy/tools/effects are correct foundation |
 
+Two “already built” facts must not be misread:
+
+- `TenantEntitlementsService` already merges plan/modules/flags, but the authenticated UI does not consume it; Dashboard V1 must put it on the navigation/widget hot path.
+- `AiAgentService` currently returns an environment-seeded tenant pilot whose default id is `impulsionito`; that is not the proposed platform parent and must be migrated with an explicit `AgentKind`.
+
 ## 2. Cross-cutting reformulation first
 
 The current API has no global validation pipe, exception filter, correlation interceptor or capability guard. Product modules must not repeat manual checks.
@@ -231,6 +236,8 @@ At no stage is the current Nest application discarded or replaced.
 | `/ai/*` | AI Runtime | Keep compatibility; add agent-kind routes around it |
 
 New modules consume these application services; they do not duplicate the endpoints under new paths and leave two authorities.
+
+The legacy `support.cockpit` is not API parity proof: it reads `support_sessions`, while the Nest pilot owns `support_tickets`. The new Help/Tickets UI must be built against the Nest contract and any session/impersonation capability modeled separately.
 
 ## 9. Testing requirements
 

@@ -214,6 +214,26 @@ Email templates are versioned content with declared variables. The agent may dra
 
 ## 10. Reformulation of the existing AI module
 
+### Current split that must be closed
+
+| Runtime | What is real | Problem |
+| --- | --- | --- |
+| Legacy `src/routes/api/impulsionito/chat.ts` + `ImpulsionitoDock` | OpenAI-compatible streaming and omnichannel ledger | Richer UX but not governed by the Nest policy/tool registry |
+| Nest `apps/api/src/ai/*` | Capabilities, budgets, policy, tool authorization, cross-tenant refusal and gated effects | Governed but narrow/deterministic pilot |
+| `core_ai_brains` | Per-company prompt, tone and knowledge configuration CRUD | Not wired to the authenticated runtime |
+| Bespoke public chat routes | Investito, Iris, Medicito, Anita and other tenant agents | Real but forked by tenant instead of agent kind/configuration |
+
+The target is **one governed Nest AI runtime** serving three agent kinds. Migration order:
+
+1. model the three kinds and durable minimal agent definitions;
+2. adapt `core_ai_brains` into the registry without treating legacy prompts as trusted policy;
+3. route the authenticated dock through Nest while retaining the legacy path as the route-owner rollback;
+4. prove response/source/tool parity and all deny cases;
+5. retire the legacy Impulsionito route;
+6. migrate client-facing routes one tenant at a time into the `tenant_client` registry/runtime.
+
+The Phase 6 environment seed currently using agent id `impulsionito` is renamed or migrated as a **tenant pilot**. It must not become the platform parent by accident.
+
 | Existing asset | Keep | Change |
 | --- | --- | --- |
 | Capabilities/policy/tools endpoints | Yes | Scope by `AgentKind` and durable policy version |

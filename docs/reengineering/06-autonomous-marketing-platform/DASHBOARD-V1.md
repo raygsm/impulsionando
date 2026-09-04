@@ -232,6 +232,8 @@ Responsive mode may reorder widgets for usability but cannot change authorizatio
 | 8 | No dashboard component imports a privileged Supabase client or provider SDK |
 | 9 | Every write is authorized, validated, audited and idempotent where replay is possible |
 | 10 | Full-SHA `app-web` image is deployed and rollback to the prior route owner is rehearsed |
+| 11 | Tenant logo/color tokens are applied to the invariant shell from `TenantConfigV1.branding`; branding never changes layout or authorization |
+| 12 | The Help/Tickets surface reads `support_tickets` through the proven Nest contract; legacy `support_sessions` remains a separate impersonation/support-operations concern |
 
 ## Explicitly deferred
 
