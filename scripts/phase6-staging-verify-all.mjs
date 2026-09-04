@@ -6,7 +6,7 @@
  *   DRY_RUN=0 npm run phase6:staging:verify
  *
  * Loads `.env.staging` then `~/.config/impulsionando/staging-operator-secrets.env`
- * (override:false). Never prints secret values. Does not SSH / promote.
+ * (operator secrets override:true). Never prints secret values. Does not SSH / promote.
  *
  * Env (names):
  *   PHASE6_AI_BEARER | PHASE5G_OPS_BEARER
@@ -34,7 +34,7 @@ const scriptsDir = dirname(fileURLToPath(import.meta.url));
 const stagingEnv = resolve(root, ".env.staging");
 if (existsSync(stagingEnv)) config({ path: stagingEnv, override: true });
 if (existsSync(OPERATOR_SECRETS_PATH)) {
-  config({ path: OPERATOR_SECRETS_PATH, override: false });
+  config({ path: OPERATOR_SECRETS_PATH, override: true });
 }
 if (!process.env.PHASE3_API_BASE) {
   process.env.PHASE3_API_BASE = STAGING_API_DEFAULT;

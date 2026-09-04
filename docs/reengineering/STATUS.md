@@ -1,13 +1,14 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T00:03Z (Phase 6 **CLOSED (staging)** — Wave 2 promote + `phase6:staging:verify` **2/2 PASS**; Phase 5 remains **CLOSED**; Phase 7 **not started**)
+Atualizado em: 2026-09-04T00:30Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **no prod DNS**; **7F PARKED**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
-Wave 2 plan: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)
+Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
+Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md) · plan [`04-migration/phase-7/PARALLEL-SPEED-PLAN.md`](04-migration/phase-7/PARALLEL-SPEED-PLAN.md) · gates [`04-migration/phase-7/GATES.md`](04-migration/phase-7/GATES.md)
 
 ## Estado geral
 
-**FASES 0–6 CONCLUÍDAS (staging). FASE 7 NÃO INICIADA.**
+**FASES 0–6 CONCLUÍDAS (staging). FASE 7 IN PROGRESS (7A staging rehearsal). Sem cutover de DNS prod. 7F PARKED.**
 
 | Fase | Estado | Evidência |
 | --- | --- | --- |
@@ -21,7 +22,7 @@ Wave 2 plan: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-
 | **5 (gate)** | **CLOSED (staging exit)** | `phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
 | **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
 | 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
-| 7 | Não iniciada | Cutover not authorized |
+| **7** | **IN PROGRESS** | **7A PASS** @ 2026-09-04T00:30Z · 7B needs hostname · **7F PARKED** |
 
 ## Phase 6 staging close (2026-09-04T00:03Z)
 
@@ -43,9 +44,33 @@ Wave 2 plan: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-
 | 6A–6F gateway matrix (capabilities/policy/tools/metrics/chat/agents allow/effects create) | **PASS** |
 | 6D agents deny + chat cross-tenant refuse | **PASS** |
 
+## Phase 7 — IN PROGRESS · 7A PASS (2026-09-04T00:30Z)
+
+| Item | Value |
+| --- | --- |
+| Scope completed | **7A staging rehearsal matrix** |
+| Verify | `DRY_RUN=0 npm run phase7:staging:rehearse` · **PASS=4 FAIL=0 SKIP=1** |
+| Runtime `/health` | **200** · `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
+| Nested | phase5 + phase6 staging verify **PASS** |
+| Traefik swap / rollback practice | **SKIP** — no Swarm Host mutation this session |
+| Evidence | [`04-migration/phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
+| Prod DNS / 7B | **FORBIDDEN** until human names one pilot hostname |
+| Legacy VPS | **FORBIDDEN** |
+| 7F Retirement | **PARKED** |
+
+### 7A evidence rows
+
+| Check | Result |
+| --- | --- |
+| API `/health` + gitSha | **PASS** |
+| tenant-web reachable | **PASS** |
+| Nested `phase5:staging:verify` | **PASS** |
+| Nested `phase6:staging:verify` | **PASS** |
+| `phase7:pilot:verify` | **SKIP** (opt-in; 7B) |
+
 ## Próximo gate
 
-Phase 6 staging exit is **CLOSED**. **Phase 7 cutover is not started** and remains blocked until an explicit program gate. Do not treat this close as prod DNS / legacy VPS authority.
+**7B:** human names **one** low-risk hostname ([`04-migration/phase-7/PILOT-SELECTION.md`](04-migration/phase-7/PILOT-SELECTION.md)) + written auth → single DNS/traffic flip → observation window. Then 7C–7E. **7F remains PARKED.**
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 

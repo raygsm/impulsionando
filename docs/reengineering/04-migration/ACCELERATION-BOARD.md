@@ -1,9 +1,10 @@
 # Acceleration board — parallel strangler tracks
 
-Atualizado em: **2026-09-04T00:03Z**
+Atualizado em: **2026-09-04** (Phase 7 Wave 0 prep)
 
 Program SoT: [`../STATUS.md`](../STATUS.md)  
-Speed canvas: [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md)
+Speed canvas: [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md)  
+Phase 7: [`phase-7/PARALLEL-SPEED-PLAN.md`](./phase-7/PARALLEL-SPEED-PLAN.md)
 
 ## Princípio
 
@@ -22,7 +23,7 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 | **P6 governed AI** | 6 | **CLOSED (staging)** | Wave 2 verify **2/2 PASS** · `…-phase6exit` · [`phase-6/README.md`](./phase-6/README.md) · [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) |
 | **P2 observability follow-up** | 2+ | Deferred | External alerts — [`phase-2/OBSERVABILITY-MINIMUM.md`](./phase-2/OBSERVABILITY-MINIMUM.md) |
 | **V1–V7 verticals** | post-6 | Not started | CRM → Marocas → Colors… — [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) |
-| **P7 cutover** | 7 | **NOT STARTED** | Blocked until explicit auth (Phase 6 close ≠ cutover) |
+| **P7 cutover** | 7 | **IN PROGRESS** | **7A PASS** · 7B needs hostname · **7F PARKED** — [`phase-7/README.md`](./phase-7/README.md) |
 
 ## Wave 1 + Wave 2 (complete)
 
@@ -41,6 +42,19 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 | Optional GHCR push of `…-phase6exit` | pending |
 | Durable approvals migration | optional |
 | Effect worker domain writes | out of Phase 6 (sink only) |
+
+## Phase 7 Wave 0 lanes
+
+| Lane | Focus | State |
+| --- | --- | --- |
+| **Inv** | Legacy dependency inventory | **LANDED** |
+| **Play** | Cutover playbook | **LANDED** |
+| **Recon** | `phase7:staging:rehearse` | **LANDED** |
+| **Id** | Release identity dual-observe | **LANDED** |
+| **Rb** | Rollback kit | **LANDED** |
+| **Pilot** | Selection criteria (human picks later) | **LANDED** |
+| **7A–7E** | Live rehearsal / pilot / freeze | **BLOCKED** on human — [`phase-7/GATES.md`](./phase-7/GATES.md) |
+| **7F** | Legacy retirement | **PARKED** |
 
 ## Proibido (todos os tracks)
 

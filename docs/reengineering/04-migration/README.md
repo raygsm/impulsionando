@@ -11,11 +11,11 @@ A migração segue o padrão strangler: o sistema novo assume fluxos completos g
 | 4 | [Frontends e tenants](PHASE-4-TENANTS.md) | 4A resolve fechado; 4B configuração/frontends/tenant piloto aberta |
 | 5 | [Workers e integrações](PHASE-5-INTEGRATIONS.md) | workers e integrações desacoplados |
 | 6 | [Plataforma de IA](PHASE-6-AI.md) | IA governada e mensurável |
-| 7 | [Cutover e retirada do legado](PHASE-7-CUTOVER.md) | produção consolidada e legado retirado |
+| 7 | [Cutover e retirada do legado](PHASE-7-CUTOVER.md) · [board](phase-7/README.md) · [parallel plan](phase-7/PARALLEL-SPEED-PLAN.md) | 7A–7E cutover; **7F PARKED** |
 
 ## Operational canvas (current)
 
-Live task board + parallel speed lanes (Phase 6 critical path): [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) · [`ACCELERATION-BOARD.md`](./ACCELERATION-BOARD.md)
+Live task board: [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) · [`ACCELERATION-BOARD.md`](./ACCELERATION-BOARD.md) · Phase 7 Wave 0: [`phase-7/PARALLEL-SPEED-PLAN.md`](./phase-7/PARALLEL-SPEED-PLAN.md)
 
 ## Product-intake integration plan
 

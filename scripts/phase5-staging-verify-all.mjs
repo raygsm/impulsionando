@@ -5,10 +5,10 @@
  * Usage:
  *   npm run phase5:staging:verify
  *
- * Loads `.env.staging` first (override), then optionally
- * `~/.config/impulsionando/staging-operator-secrets.env` with override:false
- * so operator secrets fill gaps (WEBHOOK_SECRET_REENGINEERING_SMOKE,
- * PHASE5G_OPS_BEARER, STAGING_BASIC_AUTH_*). Never prints secret values.
+ * Loads `.env.staging` first (override), then
+ * `~/.config/impulsionando/staging-operator-secrets.env` with override:true
+ * so refreshed operator JWTs win over stale `.env.staging` bearers
+ * (WEBHOOK_SECRET_REENGINEERING_SMOKE, PHASE5G_OPS_BEARER, …). Never prints secrets.
  * Defaults PHASE3_API_BASE to api.stg. Does not SSH.
  *
  * Staging only (project aamorcqznimmleafavai). Never targets prod.
@@ -38,8 +38,8 @@ const stagingEnv = resolve(root, ".env.staging");
 if (existsSync(stagingEnv)) config({ path: stagingEnv, override: true });
 const operatorSecretsLoaded = existsSync(OPERATOR_SECRETS_PATH);
 if (operatorSecretsLoaded) {
-  // Fill missing keys only — do not clobber .env.staging or pre-exported shell env.
-  config({ path: OPERATOR_SECRETS_PATH, override: false });
+  // Operator secrets win so Phase 7 / 5G smokes use refreshed JWTs.
+  config({ path: OPERATOR_SECRETS_PATH, override: true });
 }
 
 if (!process.env.PHASE3_API_BASE) {

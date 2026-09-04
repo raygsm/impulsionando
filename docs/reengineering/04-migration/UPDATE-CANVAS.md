@@ -43,9 +43,9 @@ Authority: accepted ADRs → target architecture → STATUS → evidence → pro
 | 4A Resolve | CLOSED | ✅ | — |
 | 4B Config/FE | CLOSED (staging) | ✅ | Web apps = stubs; richer entitlements seed optional |
 | 5A–5G Workers | CLOSED (staging) | ✅ | Optional GHCR push of local-load tags; sink ≠ real providers |
-| **6A–6F AI** | **CLOSED (staging)** | ✅ | See §3 — Wave 2 evidence |
+| **6A–6F AI** | **CLOSED (staging)** | ✅ | See phase-6 README |
+| **7 Cutover** | **NOT STARTED** | ⬜ | Wave 0 LANDED · [`phase-7/PARALLEL-SPEED-PLAN.md`](./phase-7/PARALLEL-SPEED-PLAN.md) · **7F PARKED** |
 | V1–V7 verticals | Not started as waves | ⬜ | After Phase 6 platform spine |
-| **7 Cutover** | Blocked | ⬜ | Requires explicit authorization (Phase 6 CLOSED alone ≠ cutover) |
 
 ---
 
@@ -125,10 +125,13 @@ Intake priority after AI close (from product-intake, not execution license):
 
 | # | Action | Owner type | Blocks |
 | --- | --- | --- | --- |
-| 1 | Optional GHCR push of `…-phase6exit` | human | non-blocking |
-| 2 | Optional durable approvals migration | agents | non-blocking |
-| 3 | Open V1 CRM contracts track | agents | after explicit intake gate |
-| 4 | Phase 7 | humans only | explicit auth — **not started** |
+| 1 | Phase 7 Wave 0 (docs + `phase7:staging:rehearse`) | agents | **LANDED** |
+| 2 | Human: open Wave 1 / 7A staging rehearsal | humans | [`phase-7/GATES.md`](./phase-7/GATES.md) |
+| 3 | Optional GHCR push of `…-phase6exit` | human | non-blocking |
+| 4 | Optional durable approvals migration | agents | non-blocking |
+| 5 | Open V1 CRM contracts track | agents | after explicit intake gate |
+| 6 | 7B–7E after 7A PASS | humans + agents | serialize DNS |
+| 7 | 7F retirement | humans only | **PARKED** |
 
 ---
 
@@ -148,9 +151,10 @@ Intake priority after AI close (from product-intake, not execution license):
 
 | Doc | Action |
 | --- | --- |
-| `STATUS.md` | Phase 6 **CLOSED (staging)** — done |
-| `ACCELERATION-BOARD.md` | P6 CLOSED; Wave 2 PASS |
+| `STATUS.md` | Phase 6 CLOSED · Phase 7 NOT STARTED + Wave 0 pointer |
+| `ACCELERATION-BOARD.md` | P6 CLOSED · P7 Wave 0 lanes |
 | `phase-6/README.md` | CLOSED + Wave 2 evidence — done |
+| `phase-7/*` | Wave 0 parallel plan — landed |
 | `clean-host/HOST.md` + `IMPLEMENTATION-LOG.md` | …-phase6exit — done |
 
 ---

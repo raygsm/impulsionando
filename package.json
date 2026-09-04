@@ -83,6 +83,8 @@
     "phase6:smoke:ai-gateway": "node scripts/smoke-reengineering-ai-gateway.mjs",
     "phase6:staging:verify": "node scripts/phase6-staging-verify-all.mjs",
     "phase6:wave2:close": "bash scripts/phase6-wave2-close.sh",
+    "phase7:staging:rehearse": "node scripts/phase7-staging-rehearse-all.mjs",
+    "phase7:pilot:verify": "node scripts/phase7-pilot-verify.mjs",
     "test:reengineering:tenant-host": "vitest run tests/reengineering/tenant-host.contract.test.ts",
     "worker:dev": "pnpm --filter @impulsionando/worker start:dev",
     "test:e2e:visual": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts",

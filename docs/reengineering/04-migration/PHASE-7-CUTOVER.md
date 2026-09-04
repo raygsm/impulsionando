@@ -1,6 +1,9 @@
 # Fase 7 — Cutover e retirada do legado
 
-Detailed execution plan: [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 7.
+Detailed execution plan: [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 7.  
+Parallel speed plan (7F deferred): [`phase-7/PARALLEL-SPEED-PLAN.md`](./phase-7/PARALLEL-SPEED-PLAN.md) · board [`phase-7/README.md`](./phase-7/README.md).
+
+**Program state:** Phase 7 **NOT STARTED** (Wave 0 prep may exist). Prod DNS requires Wave 1 (7A) PASS + written auth. **7F PARKED.**
 
 ## Objetivo
 
@@ -36,12 +39,14 @@ Phase 7 is a **migration and retirement phase**, not the phase where missing CRM
 - freeze legacy writes when applicable;
 - confirm no hidden publisher, worker, webhook or n8n dependency.
 
-### 7F — Retirement
+### 7F — Retirement (**PARKED** — later gate)
 
 - retire Nginx and concurrent runtimes after approval;
 - archive required evidence/configuration;
 - remove releases/images/volumes only after backup/restore evidence;
 - revoke old credentials and access.
+
+Do **not** execute 7F in the parallel speed plan’s “usable done.” Separate approval after 7A–7E.
 
 ## Critério de saída
 
