@@ -10,7 +10,7 @@ Created: **2026-09-04** · Updated: **2026-09-04T11:16Z**
 
 **Selected:** `csi.impulsionando.com.br` — [`CSI-PILOT-7B.md`](./CSI-PILOT-7B.md) · [`PILOT-SELECTION.md`](./PILOT-SELECTION.md).
 
-**Staging CSI SSR: PASS** @ 2026-09-04T11:16Z — Swarm `reengineering-csi-core` · Host `csi.stg` · `/csi` HTML 200.
+**Staging CSI SSR: PASS** @ 2026-09-04T11:16Z (Host corrected 2026-09-04 to `stg.csi`) — Swarm `reengineering-csi-core` · Host `stg.csi.impulsionando.com.br` · `/csi` HTML 200.
 
 **Prod DNS flip BLOCKED** until prod-env CSI image + Cloudflare flip for **only** `csi` (staging Supabase behind prod Host forbidden).
 

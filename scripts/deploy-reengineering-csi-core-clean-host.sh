@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Deploy CSI-capable core SSR to clean host Swarm.
-# Default: staging Host csi.stg.impulsionando.com.br
+# Default: staging Host stg.csi.impulsionando.com.br (stg first — operator rule)
 # Prod Host-header rehearsal (NO DNS flip):
 #   ALLOW_PROD_CSI_HOST=1 SERVICE_NAME=reengineering-csi-core-prod \
 #   TRAEFIK_HOST=csi.impulsionando.com.br STAGING_ACCESS_GATE=0 SKIP_PULL=1 \
@@ -17,7 +17,7 @@ SSH_USER="${SSH_USER:-root}"
 SERVICE_NAME="${SERVICE_NAME:-reengineering-csi-core}"
 NETWORK_NAME="dokploy-network"
 IMAGE_REPO="ghcr.io/raygsm/impulsionando-csi-core"
-TRAEFIK_HOST="${TRAEFIK_HOST:-csi.stg.impulsionando.com.br}"
+TRAEFIK_HOST="${TRAEFIK_HOST:-stg.csi.impulsionando.com.br}"
 CONTAINER_PORT="3000"
 SKIP_PULL="${SKIP_PULL:-0}"
 STAGING_ACCESS_GATE="${STAGING_ACCESS_GATE:-auto}"

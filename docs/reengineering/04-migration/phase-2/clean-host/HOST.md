@@ -1,6 +1,6 @@
 # Clean host — current identity
 
-Recorded: **2026-09-04T11:28Z** (CSI staging + prod-shaped Host-header services LIVE; Phase 6 exit images retained; no prod DNS flip). Update when facts change. **No secrets.**
+Recorded: **2026-09-04T11:45Z** (CSI staging Host corrected to `stg.csi…`; prod-shaped Host-header unchanged; Phase 6 exit images retained; no prod DNS flip). Update when facts change. **No secrets.**
 
 | Field | Value |
 | --- | --- |
@@ -20,11 +20,11 @@ Recorded: **2026-09-04T11:28Z** (CSI staging + prod-shaped Host-header services 
 | Nest API (Phase 3/5/6) | Swarm **`reengineering-api`** · image `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (linux/amd64 **local-load**, 2026-09-04 Phase 6 Wave 2) · Host **`api.stg.impulsionando.com.br`** · port **3100** · `/health` `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` · `AI_CHAT_ENABLED=true` |
 | Worker (Phase 5/6) | Swarm **`reengineering-worker`** · image `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (linux/amd64 **local-load**) · **internal only** · `:3200` on `dokploy-network` · outbox/comm/journey **ON** · `ai.effect.execute` sink |
 | tenant-web (Phase 4B) | Swarm **`reengineering-tenant-web`** · image `ghcr.io/raygsm/impulsionando-tenant-web:67e109511962f86dbbdea2356bc8486b87a4abc1` (linux/amd64 **local-load**) · Host **`tenant.stg.impulsionando.com.br`** → `:3300` · public `/health` OK · ACME LE issued |
-| CSI core SSR (Phase 7B staging) | Swarm **`reengineering-csi-core`** · image `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (linux/amd64 **local-load**) · Traefik Host **`csi.stg.impulsionando.com.br`** → `:3000` · `/healthz` gitSha `5a9fd4c5…` · `/csi` HTML **200** (Host-header / in-container; Traefik gate → 401 without vault auth; public DNS A for `csi.stg` **pending**) · workers OFF · staging Supabase baked at build |
+| CSI core SSR (Phase 7B staging) | Swarm **`reengineering-csi-core`** · image `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (linux/amd64 **local-load**) · Traefik Host **`stg.csi.impulsionando.com.br`** (`stg` first) → `:3000` · `/healthz` gitSha `5a9fd4c5…` · `/csi` HTML **200** (Host-header; Traefik gate → 401 without vault auth; public DNS A for `stg.csi` **pending**) · workers OFF · staging Supabase baked at build |
 | CSI core SSR (Phase 7B prod-shaped Host-header) | Swarm **`reengineering-csi-core-prod`** · image `ghcr.io/raygsm/impulsionando-csi-core:a5c730f2d0e3e803966eda03cc5c91f05f923524-csi7bprod` (linux/amd64 **local-load**) · Traefik Host **`csi.impulsionando.com.br`** → `:3000` · router `reeng-csi-core-prod` · `/healthz` gitSha `a5c730f2…` · `/csi` HTML **200** via Host header only · workers OFF · **prod** Supabase project ref baked · **public Cloudflare DNS NOT flipped** (users still on legacy via CF) |
 | GHCR cache (not live) | Tags `2620597db79a55bd7d28911ff9714d3d9cbc2745` for api/worker/tenant-web **pulled** 2026-09-03 (digests match workflow); **not** Swarm-promoted — would regress Phase 4B/5 program SHA `67e10951…` |
-| Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` / **`tenant.stg`** → `2.25.123.224` (DNS only); `dokploy.stg` proxied; **`csi.stg` A record NOT yet created** (Traefik Host ready) |
-| Staging access gate | Traefik basic auth **ACTIVE** on `tenant.stg` + `stg` + **`csi.stg`** (2026-09-04). **`api.stg` ungated** (Bearer JWT smokes). Creds in `~/.config/impulsionando/staging-operator-secrets.env` only (not git). See [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md). |
+| Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` / **`tenant.stg`** → `2.25.123.224` (DNS only); `dokploy.stg` proxied; **`stg.csi` A record NOT yet created** (Traefik Host ready; do not create wrong `csi.stg`) |
+| Staging access gate | Traefik basic auth **ACTIVE** on `tenant.stg` + `stg` + **`stg.csi`** (2026-09-04). **`api.stg` ungated** (Bearer JWT smokes). Creds in `~/.config/impulsionando/staging-operator-secrets.env` only (not git). See [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md). |
 | App Supabase | Managed external — staging ref **`aamorcqznimmleafavai`** |
 | Legacy prod (deny) | `187.77.232.52` — do not mutate from Phase 2 clean-host work |
 

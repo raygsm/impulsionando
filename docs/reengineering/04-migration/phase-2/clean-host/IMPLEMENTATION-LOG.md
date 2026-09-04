@@ -552,3 +552,21 @@ Format per entry:
   - Phase 7 **not** CLOSED · Cloudflare prod CSI flip **still pending** · **7F PARKED**
 - Docs updated: this log, [`HOST.md`](./HOST.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../phase-7/README.md`](../../phase-7/README.md), [`../../../STATUS.md`](../../../STATUS.md)
 - Forbidden: no legacy VPS `187.77.232.52`; no Cloudflare DNS mutate; no secrets in git
+
+## 2026-09-04T11:44Z — Phase 7B staging CSI hostname correction (`stg` first)
+
+- Operator: Agent (laptop SSH; no Cloudflare mutate; no secrets logged)
+- Change:
+  - Operator rule: correct staging CSI hostname is **`stg.csi.impulsionando.com.br`** (`stg` first). Wrong name `csi.stg.impulsionando.com.br` never existed in Cloudflare DNS (Host-header only).
+  - Updated defaults: deploy `TRAEFIK_HOST`, build `VITE_PUBLIC_SITE_URL`, `CSI_STAGING_HOST` + `CUSTOM_HOST_LANDING` + test, Phase 7 / Phase 2 hostname docs, `STATUS.md`, `HOST.md`
+  - Redeployed Swarm `reengineering-csi-core` same image `…:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (`SKIP_PULL=1`) · Traefik Host → `stg.csi.impulsionando.com.br` · staging access gate ON · workers OFF
+  - Left prod-shaped `reengineering-csi-core-prod` / Host `csi.impulsionando.com.br` untouched
+- Result / evidence:
+  - Traefik labels: `Host(\`stg.csi.impulsionando.com.br\`)` on routers `reeng-csi-core` + `-secure`
+  - Host-header without vault auth → **401** (gate ON — expected); wrong Host `csi.stg…` → **404**
+  - In-container `GET /healthz` → **200** `gitSha=5a9fd4c50cb04afcdccef6804480062aadeb17a8`; `GET /csi` → HTML
+  - Prod Host-header still **200** (unchanged)
+  - Public Cloudflare **A** `stg.csi` → `2.25.123.224` DNS-only **NOT** created (human step; no CF API token)
+  - Image SITE_URL bake still old URL until next staging rebuild — Traefik Host fix does not require rebuild for Host routing
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../../STATUS.md`](../../../STATUS.md)
+- Forbidden: no legacy VPS `187.77.232.52`; no prod DNS flip; no secrets in git

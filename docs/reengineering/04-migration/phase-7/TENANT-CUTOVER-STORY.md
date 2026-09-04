@@ -124,7 +124,7 @@ Choose hostname (CSI = `csi.impulsionando.com.br`). Small blast radius first; ap
 
 ### Step 2 — Put the app on the new house (staging)
 - Build from **this repo** whatever serves `/csi` (migrate to tenant-web **or** run legacy SSR image on new VPS as a bridge).
-- Wire Traefik to a **staging** name (`csi.stg.…` or similar).
+- Wire Traefik to a **staging** name (`stg.csi.impulsionando.com.br` — `stg` first).
 - Staging Supabase only.
 - Prove: HTML loads, login/resolve/membership allow+deny.
 

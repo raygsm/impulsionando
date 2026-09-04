@@ -1,6 +1,6 @@
 # Phase 7 — board
 
-Status: **IN PROGRESS** — **7A PASS** · **7B = CSI** · staging HTML **PASS** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED**  
+Status: **IN PROGRESS** — **7A PASS** · **7B = CSI** · staging Host **`stg.csi.impulsionando.com.br`** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED**  
 Wave 0: **LANDED** · 7F: **PARKED**  
 Impulsionando staging development: **UNLOCKED**  
 Program SoT: [`../../STATUS.md`](../../STATUS.md)

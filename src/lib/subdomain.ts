@@ -8,8 +8,8 @@
 const ROOT_DOMAINS = ["impulsionando.com.br"];
 export const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
-/** Phase 7B staging rehearsal host (clean VPS Traefik) — not prod CSI. */
-export const CSI_STAGING_HOST = "csi.stg.impulsionando.com.br";
+/** Phase 7B staging rehearsal host (clean VPS Traefik) — not prod CSI. stg comes first. */
+export const CSI_STAGING_HOST = "stg.csi.impulsionando.com.br";
 export const CSI_CANONICAL_HOST = "csi.impulsionando.com.br";
 
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
@@ -45,6 +45,8 @@ export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
   [COLORS_CANONICAL_HOST]: "/colors",
+  // stg.csi… first segment is "stg", not "csi" — exact host required
+  [CSI_STAGING_HOST]: "/csi",
 };
 
 export function canonicalTenantHostRedirect(loc: {

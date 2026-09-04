@@ -102,7 +102,7 @@ describe("tenant landing resolution", () => {
   it("routes Colors Saúde from its canonical subdomain", () => expect(tenantLandingTargetForHost(COLORS)).toBe("/colors"));
   it("routes WMP to its dedicated landing", () => expect(tenantLandingTargetForHost(WMP)).toBe("/wmp"));
   it("routes CSI to its dedicated landing", () => expect(tenantLandingTargetForHost("csi.impulsionando.com.br")).toBe("/csi"));
-  it("routes CSI staging rehearsal host to /csi", () => expect(tenantLandingTargetForHost("csi.stg.impulsionando.com.br")).toBe("/csi"));
+  it("routes CSI staging rehearsal host to /csi", () => expect(tenantLandingTargetForHost("stg.csi.impulsionando.com.br")).toBe("/csi"));
   it("uses the storefront for a tenant without a dedicated landing", () => expect(tenantSubdomainTarget("cliente-novo")).toBe("/vitrine/cliente-novo"));
   it("does not treat the apex domain as a tenant", () => expect(tenantLandingTargetForHost("impulsionando.com.br")).toBeNull());
 });

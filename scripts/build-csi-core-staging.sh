@@ -31,7 +31,7 @@ done < "${STAGING_ENV}"
 
 export NODE_ENV=production
 export NITRO_PRESET=node-server
-export VITE_PUBLIC_SITE_URL="${VITE_PUBLIC_SITE_URL:-https://csi.stg.impulsionando.com.br}"
+export VITE_PUBLIC_SITE_URL="${VITE_PUBLIC_SITE_URL:-https://stg.csi.impulsionando.com.br}"
 export VITE_GIT_COMMIT="${VITE_GIT_COMMIT:-${GIT_SHA}}"
 export VITE_GIT_BRANCH="${VITE_GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
 

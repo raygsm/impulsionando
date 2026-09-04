@@ -2,7 +2,7 @@
 
 Selected: **2026-09-04**  
 Hostname (prod): **`csi.impulsionando.com.br`**  
-Staging rehearsal Host: **`csi.stg.impulsionando.com.br`**  
+Staging rehearsal Host: **`stg.csi.impulsionando.com.br`** (`stg` first — operator rule; never `csi.stg…`)  
 Internal path: **`/csi`**  
 Status: **SELECTED — staging CSI HTML PASS; prod-shaped Host-header PASS on clean host; prod DNS flip still BLOCKED**  
 7F: **PARKED**
@@ -20,7 +20,7 @@ Status: **SELECTED — staging CSI HTML PASS; prod-shaped Host-header PASS on cl
 | --- | --- |
 | “Flip CSI DNS to clean host now” | **NO** — would break CSI users (no prod env / no CF token in operator vault) |
 | What serves CSI HTML on **public** prod hostname | **Still legacy** via Cloudflare (A ≠ clean IP) — users unchanged |
-| What clean host serves for CSI | **Two Swarm services:** staging `reengineering-csi-core` (`csi.stg…`) + prod-shaped `reengineering-csi-core-prod` (`csi.impulsionando.com.br` Host-header only) |
+| What clean host serves for CSI | **Two Swarm services:** staging `reengineering-csi-core` (`stg.csi…`) + prod-shaped `reengineering-csi-core-prod` (`csi.impulsionando.com.br` Host-header only) |
 | Staging DB for real CSI users | **FORBIDDEN** |
 | Prod Nest public hostname | **Does not exist yet** |
 
@@ -32,7 +32,7 @@ So: **CSI is the chosen door.** Staging + prod-shaped Host-header rehearse the s
 | --- | --- |
 | Service | `reengineering-csi-core` 1/1 on clean `2.25.123.224` |
 | Image | `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (linux/amd64 local-load) |
-| Traefik Host | `csi.stg.impulsionando.com.br` (TLS labels set; **public DNS A record NOT created yet** — smoke via `Host:` header) |
+| Traefik Host | `stg.csi.impulsionando.com.br` (TLS labels set; **public DNS A record NOT created yet** — smoke via `Host:` header) |
 | Supabase | Staging project baked at Vite build (`aamorcqznimmleafavai`) — **not** prod |
 | Workers | OFF (`COLORS_AUTOMATION_ENABLED=false`, no Pulsonitor) |
 | `/healthz` | **200** · `service=impulsionando-csi-core` · `gitSha=5a9fd4c50cb04afcdccef6804480062aadeb17a8` |
@@ -46,9 +46,9 @@ So: **CSI is the chosen door.** Staging + prod-shaped Host-header rehearse the s
 ```bash
 # with staging basic auth from operator vault
 curl -sS -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" \
-  -H 'Host: csi.stg.impulsionando.com.br' http://2.25.123.224/healthz
+  -H 'Host: stg.csi.impulsionando.com.br' http://2.25.123.224/healthz
 curl -sS -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" \
-  -H 'Host: csi.stg.impulsionando.com.br' -H 'Accept: text/html' \
+  -H 'Host: stg.csi.impulsionando.com.br' -H 'Accept: text/html' \
   http://2.25.123.224/csi -o /tmp/csi.html -w '%{http_code} %{content_type}\n'
 ```
 
@@ -56,9 +56,10 @@ curl -sS -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" \
 
 Cloudflare zone `impulsionando.com.br` (no API token in operator vault this session):
 
-1. Create **A** `csi.stg` → `2.25.123.224`
-2. Proxy: **DNS only** (grey) so Let’s Encrypt HTTP-01 works
-3. Wait for Traefik cert · then `https://csi.stg.impulsionando.com.br/csi`
+1. Create **A** name `stg.csi` → content `2.25.123.224` (full name `stg.csi.impulsionando.com.br`)
+2. Proxy: **DNS only** (grey cloud — not proxied) so Let’s Encrypt HTTP-01 works
+3. Wait for Traefik cert · then `https://stg.csi.impulsionando.com.br/csi`
+4. Do **not** create `csi.stg` (wrong order; never existed)
 
 ## Prod-shaped Host-header bake — PASS @ 2026-09-04T11:28Z (NO Cloudflare flip)
 
@@ -87,7 +88,7 @@ curl -sS -D- -o /tmp/csi-prod-host.html -H 'Host: csi.impulsionando.com.br' \
 1. Record CSI as official 7B pilot (this file + STATUS + PILOT-SELECTION).  
 2. Staging seed `staging:seed:csi-tenant` so Nest/resolve/membership can be rehearsed for a CSI-shaped tenant on **staging**.  
 3. tenant-web stub recognizes CSI pilot slug (JSON only — not full UI).  
-4. **CSI-capable SSR on clean host** under `csi.stg` (done — see PASS table).  
+4. **CSI-capable SSR on clean host** under `stg.csi` (done — see PASS table).  
 5. Runbook for the **later** DNS flip when blockers clear.
 
 You can **develop Impulsionando on the new stack / staging now**. CSI cutover is the **first prod door** when ready — not a requirement to start coding Impulsionando features on staging.

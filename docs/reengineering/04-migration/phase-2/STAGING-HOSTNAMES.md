@@ -1,7 +1,7 @@
 # Staging hostname plan (Phase 2)
 
 Opened: **2026-08-30**  
-Updated: **2026-09-03**  
+Updated: **2026-09-04**  
 Status: **LIVE** — DNS + Traefik wired on clean host  
 Authority: [`CLEAN-INFRA-TOPOLOGY.md`](./CLEAN-INFRA-TOPOLOGY.md), ADR-006
 
@@ -16,7 +16,7 @@ Clean host Traefik: `2.25.123.224` (ports `80`/`443`). Zone: **Cloudflare** `imp
 | Placeholder / smoke | `stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only) | Traefik → `reengineering-placeholder` |
 | Nest API | `api.stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only) | Traefik → `reengineering-api` `:3100` |
 | tenant-web | `tenant.stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only; **LIVE** 2026-09-03) | Traefik → `reengineering-tenant-web` `:3300` |
-| CSI core SSR (7B staging) | `csi.stg.impulsionando.com.br` | **A pending** (Traefik Host **LIVE** 2026-09-04; smoke via Host header) | Traefik → `reengineering-csi-core` `:3000` |
+| CSI core SSR (7B staging) | `stg.csi.impulsionando.com.br` | **A pending** (Traefik Host **LIVE**; smoke via Host header; `stg` first — not `csi.stg`) | Traefik → `reengineering-csi-core` `:3000` |
 | Dokploy UI | `dokploy.stg.impulsionando.com.br` | A → CF proxy IPs (orange cloud) | Traefik → `dokploy:3000` |
 
 ### Access gate (staging hide)
@@ -35,11 +35,12 @@ https://dokploy.stg.impulsionando.com.br/ → 200 (via Cloudflare)
 
 ## Cloudflare rules
 
-1. **Only** `*.stg` / `stg` hostnames — never prod apex / tenant cutover.
-2. Prefer **DNS only** (grey) for `stg` + `api.stg` + `tenant.stg` so Let’s Encrypt HTTP-01 works cleanly.
+1. Prefer staging-shaped names — never prod apex / tenant cutover without a gate.
+2. Prefer **DNS only** (grey) for `stg` + `api.stg` + `tenant.stg` + **`stg.csi`** so Let’s Encrypt HTTP-01 works cleanly.
 3. `dokploy.stg` is currently **Proxied** — if TLS/login flakes, switch to DNS only.
 4. ACME email on Traefik set to `stg-ops@impulsionando.com.br` (replace if you want a real inbox).
 5. Do **not** orange-cloud staging app hosts to “hide” them — use the Traefik access gate instead.
+6. CSI staging hostname is **`stg.csi.impulsionando.com.br`** (`stg` first). Do **not** create `csi.stg`.
 
 ## Decision log
 
@@ -49,4 +50,5 @@ https://dokploy.stg.impulsionando.com.br/ → 200 (via Cloudflare)
 | 2026-08-31 | Zone = Cloudflare `impulsionando.com.br`; records `stg`, `api.stg`, `dokploy.stg` | Cauã |
 | 2026-08-31 | Traefik Host rules + LE for stg/api.stg; dokploy.yml Host | Agent |
 | 2026-09-03 | Staging access gate = Traefik basic auth (`staging-basic-auth@file`); grey DNS retained; IP allowlist documented as alternative | Agent |
-| 2026-09-04 | Traefik Host `csi.stg` → CSI Nitro SSR (`reengineering-csi-core`); Cloudflare A `csi.stg` deferred (no API token) | Agent |
+| 2026-09-04 | Traefik Host `csi.stg` → CSI Nitro SSR (`reengineering-csi-core`); Cloudflare A deferred (no API token) | Agent |
+| 2026-09-04 | **Hostname correction:** staging CSI = `stg.csi.impulsionando.com.br` (`stg` first). Wrong name `csi.stg…` never existed in CF DNS. Human creates A `stg.csi` → `2.25.123.224` DNS-only. | Operator / Agent |

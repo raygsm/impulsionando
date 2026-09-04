@@ -17,7 +17,7 @@ Any failed observation window (7A staging or 7B prod pilot): restore previous ed
 | Runtime gitSha (CSI `/healthz`) | `5a9fd4c50cb04afcdccef6804480062aadeb17a8` |
 | Clean host | `2.25.123.224` |
 | Staging API | `https://api.stg.impulsionando.com.br` |
-| Staging CSI Host | `csi.stg.impulsionando.com.br` (Traefik; public DNS pending) |
+| Staging CSI Host | `stg.csi.impulsionando.com.br` (Traefik; public DNS pending; `stg` first) |
 
 Update this table when a newer SHA is promoted **before** a rehearsal or pilot.
 

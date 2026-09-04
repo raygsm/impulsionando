@@ -8,7 +8,7 @@ During cutover you must prove traffic hit the **intended** runtime. HTTP 200 alo
 
 ## Staging CSI core SSR (7B rehearsal)
 
-`GET` Traefik Host `csi.stg.impulsionando.com.br` `/healthz` returns JSON:
+`GET` Traefik Host `stg.csi.impulsionando.com.br` `/healthz` returns JSON:
 
 - `status: ok`
 - `service: impulsionando-csi-core`
@@ -16,7 +16,7 @@ During cutover you must prove traffic hit the **intended** runtime. HTTP 200 alo
 
 `GET /csi` must return **HTML 200** (not tenant-web JSON stub). HTTP 200 alone on `/healthz` is not CSI UI proof.
 
-Public DNS for `csi.stg` may lag Traefik Host — Host-header smoke against `2.25.123.224` is valid staging evidence.
+Public DNS for `stg.csi` may lag Traefik Host — Host-header smoke against `2.25.123.224` is valid staging evidence.
 
 ## Dual-observe during 7B pilot
 
