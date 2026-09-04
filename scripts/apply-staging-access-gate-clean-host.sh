@@ -111,31 +111,38 @@ fi
 
 command -v openssl >/dev/null || { echo "error: openssl missing on host" >&2; exit 1; }
 
-# APR1 htpasswd line on host — password never written to disk in plaintext.
+# APR1 hash on host — plaintext password never written to disk.
+# Prefer inline `users:` (hash). Traefik on this host rejected valid
+# `usersFile` htpasswd (401 even with correct creds / readable mount).
 HASH="$(printf '%s' "${STAGING_BASIC_AUTH_PASS}" | openssl passwd -apr1 -stdin)"
 AUTH_USER="${STAGING_BASIC_AUTH_USER}"
 unset STAGING_BASIC_AUTH_PASS STAGING_BASIC_AUTH_USER
 
-umask 077
+umask 022
 printf '%s:%s\n' "${AUTH_USER}" "${HASH}" > "${GATE_HTPASSWD}"
-chmod 600 "${GATE_HTPASSWD}"
+chmod 644 "${GATE_HTPASSWD}"
+
+# Build YAML without shell-expanding $ inside the APR1 hash.
+python3 - "${GATE_YML}" "${AUTH_USER}" "${HASH}" <<'PY'
+import sys
+from pathlib import Path
+path, user, hashed = sys.argv[1], sys.argv[2], sys.argv[3]
+Path(path).write_text(
+    "# Staging access gate — managed by scripts/apply-staging-access-gate-clean-host.sh\n"
+    "# Do not commit host copies. No plaintext passwords (APR1 hash only).\n"
+    "http:\n"
+    "  middlewares:\n"
+    "    staging-basic-auth:\n"
+    "      basicAuth:\n"
+    '        realm: "Impulsionando staging"\n'
+    "        users:\n"
+    f'          - "{user}:{hashed}"\n'
+)
+PY
+chmod 644 "${GATE_YML}"
 unset HASH AUTH_USER
 
-# usersFile keeps the hash out of YAML; .htpasswd is not loaded as Traefik config
-# (file provider only parses yml/yaml/toml). Path is inside the Traefik bind mount.
-cat > "${GATE_YML}" <<'YAML'
-# Staging access gate — managed by scripts/apply-staging-access-gate-clean-host.sh
-# Do not commit host copies. No plaintext passwords.
-http:
-  middlewares:
-    staging-basic-auth:
-      basicAuth:
-        realm: "Impulsionando staging"
-        usersFile: /etc/dokploy/traefik/dynamic/staging-basic-auth.htpasswd
-YAML
-chmod 644 "${GATE_YML}"
-
-echo "==> Wrote ${GATE_YML} + usersFile (hash only; not printed)"
+echo "==> Wrote ${GATE_YML} + htpasswd backup (hash only; not printed)"
 
 # Brief wait so Traefik file provider picks up middleware before routers reference it.
 sleep 2

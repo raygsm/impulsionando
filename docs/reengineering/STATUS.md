@@ -1,6 +1,6 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T22:00Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Nest-first plan rebaselined on paper, gate **G0 pending**; autonomous-marketing product + canonical database models **PROPOSED** (draft expand SQL in `packages/database/canonical/`, not applied); first CRM/Growth slice **PLANNED — BLOCKED**, no gate moved)
+Atualizado em: 2026-09-04T22:30Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **PASS** (image `…f889a87e…-csi7b`); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Nest-first plan rebaselined on paper, gate **G0 pending**; autonomous-marketing product + canonical database models **PROPOSED** (draft expand SQL in `packages/database/canonical/`, not applied); first CRM/Growth slice **PLANNED — BLOCKED**, no gate moved)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
@@ -52,8 +52,8 @@ Phase 8 board: [`04-migration/phase-8/README.md`](04-migration/phase-8/README.md
 | --- | --- |
 | 7A | **PASS** @ 2026-09-04T00:30Z — [`phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
 | **7B pilot** | **`csi.impulsionando.com.br`** — [`phase-7/CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
-| 7B staging SSR | **PASS** (Host corrected 2026-09-04) — Swarm `reengineering-csi-core` · Host **`stg.csi.impulsionando.com.br`** (`stg` first; never `csi.stg…`) · `/csi` HTML **200** · `/healthz` gitSha `5a9fd4c5…` · image `…-csi7b` local-load |
-| 7B `stg.<tenant>` recognition | **Code fix** — `getTenantSubdomain` maps `stg.csi…` → slug `csi` (bare `stg…` stays platform). Live browser fallback clear **UNKNOWN** until CSI image rebuild/redeploy — see [`CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
+| 7B staging SSR | **PASS** @ 2026-09-04T16:01Z — Swarm `reengineering-csi-core` · Host **`stg.csi.impulsionando.com.br`** · `/healthz` gitSha `f889a87e…` · image `…f889a87e…-csi7b` local-load |
+| 7B `stg.<tenant>` recognition | **PASS** @ 2026-09-04T16:01Z — live image includes `#146`; Host `stg.csi…` `/`+`/csi` CSI Invest; “Domínio não reconhecido” **ABSENT** — [`CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
 | 7B prod-shaped Host-header | **PASS** @ 2026-09-04T11:28Z — Swarm `reengineering-csi-core-prod` · Host `csi.impulsionando.com.br` · `/healthz`+`/csi` **200** · image `…-csi7bprod` · prod Supabase ref baked · **no CF flip** |
 | 7B prod DNS flip | **BLOCKED** — Cloudflare token / human flip pending; Nest prod host + remaining pilot blockers still open |
 | Staging CSI seed | `npm run staging:seed:csi-tenant` → company `CSI Invest` / subdomain `csi` (staging) |
@@ -85,8 +85,8 @@ Wave 0 = **paper only**. No code, no infra mutation, no production anything. Pha
 ## Próximo gate
 
 1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized. Scoped plan: **Phase 8** ([`04-migration/PHASE-8-CORE-APP.md`](04-migration/PHASE-8-CORE-APP.md)); opens at gate **G0**.  
-2. Rebuild/redeploy CSI staging image with `stg.<tenant>` host recognition, then confirm browser no longer shows “Domínio não reconhecido” on `stg.csi…`.  
-3. Add Cloudflare **A** `stg.csi` → `2.25.123.224` (grey / DNS-only) for public staging URL (human — no CF token this session). Do **not** create `csi.stg`.  
+2. Add Cloudflare **A** `stg.csi` → `2.25.123.224` (grey / DNS-only) for public staging URL (human — no CF token this session). Do **not** create `csi.stg`. (`stg.<tenant>` recognition **PASS** on clean host @ 2026-09-04T16:01Z.)  
+3. Refresh operator staging JWTs then re-run `DRY_RUN=0 npm run phase7:pilot:verify` (last matrix PASS=1 FAIL=4 on expired Bearer — unrelated to CSI HTML).  
 4. When remaining blockers green: Cloudflare flip **only** `csi` → clean (prod-shaped service already Host-proven).  
 5. Then 7C–7E. **7F PARKED.**
 

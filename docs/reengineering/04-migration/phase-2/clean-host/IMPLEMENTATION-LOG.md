@@ -586,3 +586,36 @@ Format per entry:
   - No rebuild · no GHCR push · no prod DNS · no legacy VPS
 - Docs updated: this log, [`HOST.md`](./HOST.md)
 - Forbidden: no secrets; no `187.77.232.52`; no Cloudflare mutate
+
+## 2026-09-04T12:20Z — Rotate staging Traefik basic-auth (temporary weak creds)
+
+- Operator: Agent (operator-requested temporary FE gate creds on clean host)
+- Change:
+  - Regenerated Traefik middleware `staging-basic-auth` on `2.25.123.224`
+  - Root cause: `usersFile` htpasswd was readable in Traefik mount but still returned **401** with valid APR1; switched middleware to inline `users:` with APR1 hash (no plaintext on disk in git)
+  - Ensured CSI routers `reeng-csi-core` / `-secure` keep middleware attached
+  - Updated `scripts/apply-staging-access-gate-clean-host.sh` to write inline `users:` (python-safe hash) instead of broken `usersFile` path
+- Result / evidence:
+  - Host-header `tenant.stg` / `stg.csi` without auth → **401**
+  - With temporary operator creds → **200** (CSI HTML / tenant health)
+  - Creds live only on VPS Traefik config + operator local vault — **not** committed
+- Docs updated: this log; apply script
+- Forbidden: no plaintext password in git; no legacy VPS; no prod DNS
+
+## 2026-09-04T16:01Z — Redeploy CSI staging with `stg.<tenant>` host recognition
+
+- Operator: Agent (laptop Docker+SSH; staging-only; no secrets logged)
+- Change:
+  - Tip `f889a87e` (contains `#146` / `4f89a2ef`) · `npx vitest run src/lib/subdomain.test.ts` **33/33 PASS**
+  - `./scripts/build-csi-core-staging.sh` → `ghcr.io/raygsm/impulsionando-csi-core:f889a87e2b4b878ef4b87e6b49f457ead6894fc3-csi7b`
+  - Transfer: `docker save|gzip` → scp → remote `docker load` (avoid hung nested ssh pipe)
+  - `IMAGE_TAG=f889a87e2b4b878ef4b87e6b49f457ead6894fc3-csi7b SKIP_PULL=1 ./scripts/deploy-reengineering-csi-core-clean-host.sh`
+  - Did **not** touch `reengineering-csi-core-prod`, legacy VPS, Cloudflare, or access-gate policy beyond existing middleware
+- Result / evidence:
+  - Swarm `reengineering-csi-core` Running on new image; prior `…64411dbebe…-csi7b` Shutdown (rollback tag retained on host)
+  - `/healthz` gitSha `f889a87e2b4b878ef4b87e6b49f457ead6894fc3`
+  - dokploy-network Host `stg.csi…` `GET /` + `GET /csi` → **200** title **CSI Invest — Private Intelligence & Wealth Experience**
+  - grep “Domínio não reconhecido” → **0** (acceptance)
+  - `DRY_RUN=0 npm run phase7:pilot:verify` → PASS=1 FAIL=4 (AI/membership **401 Invalid or expired access token** — JWT vault stale; not a CSI HTML regression)
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../../STATUS.md`](../../../STATUS.md)
+- Forbidden: no `187.77.232.52`; no prod DNS; no secrets in git

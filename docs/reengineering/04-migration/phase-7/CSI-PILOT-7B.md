@@ -4,7 +4,7 @@ Selected: **2026-09-04**
 Hostname (prod): **`csi.impulsionando.com.br`**  
 Staging rehearsal Host: **`stg.csi.impulsionando.com.br`** (`stg` first — operator rule; never `csi.stg…`)  
 Internal path: **`/csi`**  
-Status: **SELECTED — staging CSI HTML PASS; prod-shaped Host-header PASS on clean host; prod DNS flip still BLOCKED**  
+Status: **SELECTED — staging CSI HTML PASS + `stg.<tenant>` recognition PASS (image `…f889a87e…-csi7b`); prod-shaped Host-header PASS on clean host; prod DNS flip still BLOCKED**  
 7F: **PARKED**
 
 ## Why CSI
@@ -26,20 +26,23 @@ Status: **SELECTED — staging CSI HTML PASS; prod-shaped Host-header PASS on cl
 
 So: **CSI is the chosen door.** Staging + prod-shaped Host-header rehearse the stack; **public** prod cutover still waits for Cloudflare flip (+ remaining Nest/ops blockers).
 
-## Staging CSI SSR — PASS @ 2026-09-04T11:16Z
+## Staging CSI SSR — PASS @ 2026-09-04T16:01Z (host-recognition image)
 
 | Item | Value |
 | --- | --- |
 | Service | `reengineering-csi-core` 1/1 on clean `2.25.123.224` |
-| Image | `ghcr.io/raygsm/impulsionando-csi-core:5a9fd4c50cb04afcdccef6804480062aadeb17a8-csi7b` (linux/amd64 local-load) |
-| Traefik Host | `stg.csi.impulsionando.com.br` (TLS labels set; **public DNS A record NOT created yet** — smoke via `Host:` header) |
+| Image | `ghcr.io/raygsm/impulsionando-csi-core:f889a87e2b4b878ef4b87e6b49f457ead6894fc3-csi7b` (linux/amd64 local-load; includes `#146` `stg.<tenant>` fix) |
+| Prior / rollback | `…64411dbebe72218f6aded32b5442513e12e8730f-csi7b` (pre-fix; showed “Domínio não reconhecido”) |
+| Traefik Host | `stg.csi.impulsionando.com.br` (TLS labels set; **public DNS A record NOT created yet** — smoke via `Host:` / dokploy-network) |
 | Supabase | Staging project baked at Vite build (`aamorcqznimmleafavai`) — **not** prod |
 | Workers | OFF (`COLORS_AUTOMATION_ENABLED=false`, no Pulsonitor) |
-| `/healthz` | **200** · `service=impulsionando-csi-core` · `gitSha=5a9fd4c50cb04afcdccef6804480062aadeb17a8` |
-| `/csi` | **200** · `text/html` · title contains CSI Invest / Private Intelligence |
+| `/healthz` | **200** · `service=impulsionando-csi-core` · `gitSha=f889a87e2b4b878ef4b87e6b49f457ead6894fc3` |
+| `/` + `/csi` | **200** · `text/html` · title **CSI Invest — Private Intelligence & Wealth Experience** |
+| “Domínio não reconhecido” | **ABSENT** (grep count 0 on `/` and `/csi` with Host `stg.csi…`) |
 | Access gate | Staging basic auth ON (same as other `*.stg` apps) |
 | Build scripts | `scripts/build-csi-core-staging.sh` · `scripts/deploy-reengineering-csi-core-clean-host.sh` · `infra/compose/Dockerfile.csi-core` |
 | Build gotcha | Must force `NODE_ENV=production` — sourcing full `.env.staging` poisons JSX (`jsxDEV is not a function`) |
+| Transfer | Prefer `docker save\|gzip` → scp → remote `docker load` (nested gzip\|ssh pipe previously hung) |
 
 ### Smoke (no public DNS required)
 
@@ -124,7 +127,7 @@ IMAGE_TAG=<sha>-csi7b SKIP_PULL=1 ./scripts/deploy-reengineering-csi-core-clean-
 5. `PHASE7_ALLOW_PROD=1 PHASE7_PILOT_HOSTNAME=csi.impulsionando.com.br DRY_RUN=0 npm run phase7:pilot:verify`  
 6. Watch window → 7C. Abort → [`ROLLBACK-KIT.md`](./ROLLBACK-KIT.md).
 
-## Browser host recognition (`stg.<tenant>`) — code fix (redeploy required)
+## Browser host recognition (`stg.<tenant>`) — PASS @ 2026-09-04T16:01Z
 
 Public browsers on `stg.csi.impulsionando.com.br` previously hit Impulsionando `TenantHostFallback` (“Domínio não reconhecido”) even when Traefik + `/csi` SSR were healthy.
 
@@ -133,8 +136,8 @@ Public browsers on `stg.csi.impulsionando.com.br` previously hit Impulsionando `
 | Bug | `getTenantSubdomain` / `useTenant` used the **first** label → `stg`, not `csi` |
 | Landing-only patch | `CUSTOM_HOST_LANDING` / `CSI_STAGING_HOST` already mapped exact host → `/csi` for redirects, but did **not** satisfy `useTenant` |
 | Fix | Pattern `stg.<tenant>.impulsionando.com.br` → slug `<tenant>`; bare `stg.impulsionando.com.br` stays platform (not a tenant) |
-| Code | `src/lib/subdomain.ts` · `packages/tenant-host/src/index.ts` · tests in `src/lib/subdomain.test.ts` |
-| Live | **UNKNOWN until** CSI staging image rebuild + redeploy on clean host picks up this SHA |
+| Code | `src/lib/subdomain.ts` · `packages/tenant-host/src/index.ts` · tests in `src/lib/subdomain.test.ts` · merged `#146` @ `4f89a2ef` |
+| Live | **PASS** — Swarm image `…f889a87e…-csi7b` · `/healthz` gitSha `f889a87e…` · Host `stg.csi…` `/`+`/csi` title CSI Invest · grep “Domínio não reconhecido” **0** · `reengineering-csi-core-prod` **not** redeployed |
 
 ## Explicit exclusions
 
