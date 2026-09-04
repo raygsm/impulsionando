@@ -1,6 +1,6 @@
 # Phase 7 — human gates (Waves 1–3)
 
-Created: **2026-09-04** · Updated: **2026-09-04T00:30Z**
+Created: **2026-09-04** · Updated: **2026-09-04T11:16Z**
 
 ## Wave 1 — 7A staging rehearsal
 
@@ -10,9 +10,11 @@ Created: **2026-09-04** · Updated: **2026-09-04T00:30Z**
 
 **Selected:** `csi.impulsionando.com.br` — [`CSI-PILOT-7B.md`](./CSI-PILOT-7B.md) · [`PILOT-SELECTION.md`](./PILOT-SELECTION.md).
 
-**DNS flip BLOCKED** until CSI-capable web + prod env exist (stub tenant-web ≠ CSI UI).
+**Staging CSI SSR: PASS** @ 2026-09-04T11:16Z — Swarm `reengineering-csi-core` · Host `csi.stg` · `/csi` HTML 200.
 
-Meanwhile: `npm run staging:seed:csi-tenant` + Impulsionando staging development **UNLOCKED**.
+**Prod DNS flip BLOCKED** until prod-env CSI image + Cloudflare flip for **only** `csi` (staging Supabase behind prod Host forbidden).
+
+Meanwhile: Impulsionando staging development **UNLOCKED**.
 
 When blockers clear:
 

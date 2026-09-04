@@ -34,10 +34,29 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
     return response;
   }
 
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
+  const captured = consumeLastCapturedError();
+  console.error(captured ?? new Error(`h3 swallowed SSR error: ${body.slice(0, 500)}`));
+  let detail = "h3-swallowed-HTTPError";
+  if (captured instanceof Error) {
+    detail = `${captured.name}: ${captured.message}`.slice(0, 240);
+  } else if (captured != null) {
+    detail = String(captured).slice(0, 240);
+  } else {
+    try {
+      const parsed = JSON.parse(body) as { statusMessage?: string; message?: string; data?: { message?: string } };
+      detail = String(
+        parsed.statusMessage || parsed.data?.message || parsed.message || detail,
+      ).slice(0, 240);
+    } catch {
+      detail = body.slice(0, 240);
+    }
+  }
   return new Response(renderErrorPage(), {
     status: 500,
-    headers: { "content-type": "text/html; charset=utf-8" },
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "x-impulsionando-ssr-error": detail.replace(/[\r\n]+/g, " "),
+    },
   });
 }
 
@@ -199,10 +218,17 @@ export default {
       return applySecurityHeaders(wmpLocked);
     } catch (error) {
       console.error(error);
+      const detail =
+        error instanceof Error
+          ? `${error.name}: ${error.message}`.slice(0, 240)
+          : String(error).slice(0, 240);
       return applySecurityHeaders(
         new Response(renderErrorPage(), {
           status: 500,
-          headers: { "content-type": "text/html; charset=utf-8" },
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "x-impulsionando-ssr-error": detail.replace(/[\r\n]+/g, " "),
+          },
         }),
       );
     }

@@ -8,7 +8,7 @@ import { RevelaLanding } from "./revela";
 import { AnaMaduStorefront } from "@/components/anamadu/AnaMaduStorefront";
 import { AnitaDock } from "@/components/anamadu/AnitaDock";
 import { CpDiscoveryPopup } from "@/components/cp/CpDiscoveryPopup";
-import { tenantLandingTargetForHost } from "@/lib/subdomain";
+import { CSI_CANONICAL_HOST, CSI_STAGING_HOST, tenantLandingTargetForHost } from "@/lib/subdomain";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
@@ -31,7 +31,8 @@ function HomeWithTenantResolver() {
   const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
   const target = tenantLandingTargetForHost(host);
   const isRevela = host === "revela.impulsionando.com.br";
-  const isDedicatedRoot = isRevela || host === "wmp.impulsionando.com.br" || host === "csi.impulsionando.com.br" || host === "colorssaude.impulsionando.com.br" || host === "colorssaude.com.br" || host === "chrismed.impulsionando.com.br" || host === "anamadu.impulsionando.com.br";
+  const isCsiHost = host === CSI_CANONICAL_HOST || host === CSI_STAGING_HOST;
+  const isDedicatedRoot = isRevela || host === "wmp.impulsionando.com.br" || isCsiHost || host === "colorssaude.impulsionando.com.br" || host === "colorssaude.com.br" || host === "chrismed.impulsionando.com.br" || host === "anamadu.impulsionando.com.br";
 
   // Hooks must run in the same order on server and browser. Dedicated hosts
   // render natively at root and therefore must not be redirected.
@@ -41,7 +42,7 @@ function HomeWithTenantResolver() {
 
   if (isRevela) return <RevelaLanding />;
   if (host === "wmp.impulsionando.com.br") return routeComponent(WmpIndexRoute);
-  if (host === "csi.impulsionando.com.br") return routeComponent(CsiIndexRoute);
+  if (isCsiHost) return routeComponent(CsiIndexRoute);
   if (host === "colorssaude.impulsionando.com.br" || host === "colorssaude.com.br") return routeComponent(ColorsIndexRoute);
   if (host === "chrismed.impulsionando.com.br") return <ChrismedHomePage />;
   if (host === "anamadu.impulsionando.com.br") return <><AnaMaduStorefront /><AnitaDock /></>;

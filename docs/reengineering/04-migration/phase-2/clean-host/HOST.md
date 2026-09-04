@@ -1,6 +1,6 @@
 # Clean host — current identity
 
-Recorded: **2026-09-04T00:03Z** (live API+worker `…-phase6exit` local-load; Phase 6 Wave 2 CLOSED). Update when facts change. **No secrets.**
+Recorded: **2026-09-04T11:16Z** (CSI staging SSR LIVE on clean host; Phase 6 exit images retained). Update when facts change. **No secrets.**
 
 | Field | Value |
 | --- | --- |
@@ -20,9 +20,10 @@ Recorded: **2026-09-04T00:03Z** (live API+worker `…-phase6exit` local-load; Ph
 | Nest API (Phase 3/5/6) | Swarm **`reengineering-api`** · image `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (linux/amd64 **local-load**, 2026-09-04 Phase 6 Wave 2) · Host **`api.stg.impulsionando.com.br`** · port **3100** · `/health` `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` · `AI_CHAT_ENABLED=true` |
 | Worker (Phase 5/6) | Swarm **`reengineering-worker`** · image `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (linux/amd64 **local-load**) · **internal only** · `:3200` on `dokploy-network` · outbox/comm/journey **ON** · `ai.effect.execute` sink |
 | tenant-web (Phase 4B) | Swarm **`reengineering-tenant-web`** · image `ghcr.io/raygsm/impulsionando-tenant-web:67e109511962f86dbbdea2356bc8486b87a4abc1` (linux/amd64 **local-load**) · Host **`tenant.stg.impulsionando.com.br`** → `:3300` · public `/health` OK · ACME LE issued |
+| CSI core SSR (Phase 7B staging) | Swarm **`reengineering-csi-core`** · image `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx` (linux/amd64 **local-load**) · Traefik Host **`csi.stg.impulsionando.com.br`** → `:3000` · `/healthz` gitSha `f03ea76e…` · `/csi` HTML **200** (Host-header smoke; public DNS A for `csi.stg` **pending**) · workers OFF · staging Supabase baked at build |
 | GHCR cache (not live) | Tags `2620597db79a55bd7d28911ff9714d3d9cbc2745` for api/worker/tenant-web **pulled** 2026-09-03 (digests match workflow); **not** Swarm-promoted — would regress Phase 4B/5 program SHA `67e10951…` |
-| Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` / **`tenant.stg`** → `2.25.123.224` (DNS only); `dokploy.stg` proxied |
-| Staging access gate | Traefik basic auth **ACTIVE** on `tenant.stg` + `stg` (2026-09-03). **`api.stg` ungated** (Bearer JWT smokes). Creds in `~/.config/impulsionando/staging-operator-secrets.env` only (not git). See [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md). |
+| Staging DNS | Cloudflare zone `impulsionando.com.br` — `stg` / `api.stg` / **`tenant.stg`** → `2.25.123.224` (DNS only); `dokploy.stg` proxied; **`csi.stg` A record NOT yet created** (Traefik Host ready) |
+| Staging access gate | Traefik basic auth **ACTIVE** on `tenant.stg` + `stg` + **`csi.stg`** (2026-09-04). **`api.stg` ungated** (Bearer JWT smokes). Creds in `~/.config/impulsionando/staging-operator-secrets.env` only (not git). See [`../STAGING-ACCESS-GATE.md`](../STAGING-ACCESS-GATE.md). |
 | App Supabase | Managed external — staging ref **`aamorcqznimmleafavai`** |
 | Legacy prod (deny) | `187.77.232.52` — do not mutate from Phase 2 clean-host work |
 

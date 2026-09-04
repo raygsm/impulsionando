@@ -6,14 +6,17 @@ Created: **2026-09-04** · Status: **Wave 0**
 
 During cutover you must prove traffic hit the **intended** runtime. HTTP 200 alone is not release identity.
 
-## Staging / Nest (already live)
+## Staging CSI core SSR (7B rehearsal)
 
-`GET https://api.stg.impulsionando.com.br/health` returns JSON including:
+`GET` Traefik Host `csi.stg.impulsionando.com.br` `/healthz` returns JSON:
 
-- `ok`, `service`, `phase`, `pilot`
-- **`gitSha`** — must match promoted image / Swarm `GIT_SHA`
+- `status: ok`
+- `service: impulsionando-csi-core`
+- **`gitSha`** — must match Swarm image / `GIT_SHA` build arg
 
-Document any promote in clean-host `HOST.md` + `IMPLEMENTATION-LOG.md`.
+`GET /csi` must return **HTML 200** (not tenant-web JSON stub). HTTP 200 alone on `/healthz` is not CSI UI proof.
+
+Public DNS for `csi.stg` may lag Traefik Host — Host-header smoke against `2.25.123.224` is valid staging evidence.
 
 ## Dual-observe during 7B pilot
 

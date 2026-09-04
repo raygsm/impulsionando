@@ -1,0 +1,28 @@
+# Phase 7B — CSI-capable Nitro/TanStack SSR (legacy monorepo core) for clean-host rehearsal.
+# Prefer: build .output on the operator machine, then:
+#   docker buildx build --platform linux/amd64 -f infra/compose/Dockerfile.csi-core \
+#     --build-arg GIT_SHA=<full-sha> -t ghcr.io/raygsm/impulsionando-csi-core:<sha>-csi7b --load .
+#
+# Workers stay OFF (SSR-only). Do not point prod CSI DNS at staging Supabase.
+
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV NITRO_HOST=0.0.0.0
+ENV NITRO_PORT=3000
+ENV COLORS_AUTOMATION_ENABLED=false
+ENV PULSONITOR_ENABLED=false
+
+ARG GIT_SHA=unknown
+ENV GIT_SHA=${GIT_SHA}
+
+COPY .output ./.output
+COPY public ./public
+
+EXPOSE 3000
+
+CMD ["node", ".output/server/index.mjs"]

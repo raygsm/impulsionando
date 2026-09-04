@@ -518,3 +518,19 @@ Format per entry:
   - Residuals: optional GHCR push of `…-phase6exit`; approvals MVP in-memory; effect worker sink-only
 - Docs touched: `STATUS.md`, `phase-6/README.md`, this log, `HOST.md`
 - Forbidden: no legacy VPS `187.77.232.52`; no prod DNS; no secrets in git
+
+## 2026-09-04T11:16Z — Phase 7B staging CSI SSR on clean host
+
+- Operator: Agent (laptop Docker+SSH; staging Vite public keys from `.env.staging`; no secrets logged)
+- Change:
+  - Built Nitro/TanStack monorepo CSI routes into `infra/compose/Dockerfile.csi-core` (linux/amd64 local-load)
+  - Forced `NODE_ENV=production` at build (sourcing full `.env.staging` had poisoned JSX → `jsxDEV is not a function`)
+  - Swarm create/update `reengineering-csi-core` on `dokploy-network` · Traefik Host `csi.stg.impulsionando.com.br` · staging access gate ON · workers OFF
+  - Image tag `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx`
+- Result / evidence:
+  - `GET Host:csi.stg… /healthz` → **200** `service=impulsionando-csi-core` `gitSha=f03ea76efda53c02e3957290780040b79a7caf1a`
+  - `GET Host:csi.stg… /csi` → **200** `text/html` · title CSI Invest / Private Intelligence (~33KB)
+  - Public Cloudflare A `csi.stg` **not** created (no CF API token) — Traefik Host ready; human DNS step documented in CSI-PILOT-7B
+  - Prod DNS `csi.impulsionando.com.br` **not** flipped (no prod env; staging DB behind prod Host forbidden)
+- Docs updated: this log, [`HOST.md`](./HOST.md), [`../STAGING-HOSTNAMES.md`](../STAGING-HOSTNAMES.md), [`../../phase-7/CSI-PILOT-7B.md`](../../phase-7/CSI-PILOT-7B.md), [`../../../STATUS.md`](../../../STATUS.md)
+- Forbidden: no legacy VPS `187.77.232.52`; no secrets in git

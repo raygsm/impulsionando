@@ -1,6 +1,6 @@
 # Phase 7 — board
 
-Status: **IN PROGRESS** — **7A PASS** · **7B = CSI selected** · DNS flip **BLOCKED**  
+Status: **IN PROGRESS** — **7A PASS** · **7B = CSI** · staging CSI HTML **PASS** · prod DNS **BLOCKED**  
 Wave 0: **LANDED** · 7F: **PARKED**  
 Impulsionando staging development: **UNLOCKED**  
 Program SoT: [`../../STATUS.md`](../../STATUS.md)
@@ -14,6 +14,7 @@ Move production traffic from legacy (`187.77.232.52`) onto the target stack **gr
 
 | Doc | Use |
 | --- | --- |
+| [`TENANT-CUTOVER-STORY.md`](./TENANT-CUTOVER-STORY.md) | Stupid-simple flux: old → staging VPS → prod → no legacy |
 | [`CSI-PILOT-7B.md`](./CSI-PILOT-7B.md) | **7B = CSI** — blockers, staging unlock, later DNS |
 | [`PARALLEL-SPEED-PLAN.md`](./PARALLEL-SPEED-PLAN.md) | Parallel lanes |
 | [`CUTOVER-PLAYBOOK.md`](./CUTOVER-PLAYBOOK.md) | Owners, go/no-go |
@@ -33,7 +34,7 @@ Move production traffic from legacy (`187.77.232.52`) onto the target stack **gr
 | --- | --- | --- |
 | **Wave 0** | Paper + tooling | **LANDED** |
 | **7A** | Staging rehearsal | **PASS** |
-| **7B** | CSI pilot | **SELECTED** — DNS **BLOCKED** until CSI web + prod env |
+| **7B** | CSI pilot | **SELECTED** — staging SSR **PASS** · prod DNS **BLOCKED** |
 | **7C–7E** | Recon / expand / freeze | NOT STARTED |
 | **7F** | Retirement | **PARKED** |
 
@@ -44,4 +45,6 @@ npm run staging:seed:csi-tenant
 npm run phase7:staging:rehearse
 DRY_RUN=0 npm run phase7:staging:rehearse
 DRY_RUN=0 npm run phase7:pilot:verify
+./scripts/build-csi-core-staging.sh
+IMAGE_TAG=<sha>-csi7b SKIP_PULL=1 ./scripts/deploy-reengineering-csi-core-clean-host.sh
 ```

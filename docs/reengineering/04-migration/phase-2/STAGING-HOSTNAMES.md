@@ -16,6 +16,7 @@ Clean host Traefik: `2.25.123.224` (ports `80`/`443`). Zone: **Cloudflare** `imp
 | Placeholder / smoke | `stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only) | Traefik → `reengineering-placeholder` |
 | Nest API | `api.stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only) | Traefik → `reengineering-api` `:3100` |
 | tenant-web | `tenant.stg.impulsionando.com.br` | A → `2.25.123.224` (DNS only; **LIVE** 2026-09-03) | Traefik → `reengineering-tenant-web` `:3300` |
+| CSI core SSR (7B staging) | `csi.stg.impulsionando.com.br` | **A pending** (Traefik Host **LIVE** 2026-09-04; smoke via Host header) | Traefik → `reengineering-csi-core` `:3000` |
 | Dokploy UI | `dokploy.stg.impulsionando.com.br` | A → CF proxy IPs (orange cloud) | Traefik → `dokploy:3000` |
 
 ### Access gate (staging hide)
@@ -48,3 +49,4 @@ https://dokploy.stg.impulsionando.com.br/ → 200 (via Cloudflare)
 | 2026-08-31 | Zone = Cloudflare `impulsionando.com.br`; records `stg`, `api.stg`, `dokploy.stg` | Cauã |
 | 2026-08-31 | Traefik Host rules + LE for stg/api.stg; dokploy.yml Host | Agent |
 | 2026-09-03 | Staging access gate = Traefik basic auth (`staging-basic-auth@file`); grey DNS retained; IP allowlist documented as alternative | Agent |
+| 2026-09-04 | Traefik Host `csi.stg` → CSI Nitro SSR (`reengineering-csi-core`); Cloudflare A `csi.stg` deferred (no API token) | Agent |

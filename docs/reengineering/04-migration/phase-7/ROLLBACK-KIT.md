@@ -7,17 +7,25 @@ Owner: Cauã · No secrets.
 
 Any failed observation window (7A staging or 7B prod pilot): restore previous edge target immediately.
 
-## Known-good staging identities (as of Phase 6 close)
+## Known-good staging identities (as of Phase 7B CSI SSR)
 
 | Surface | Identity |
 | --- | --- |
 | API image | `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
 | Worker image | `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
-| Runtime gitSha | `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
+| CSI core SSR image | `ghcr.io/raygsm/impulsionando-csi-core:f03ea76efda53c02e3957290780040b79a7caf1a-csi7b-prodjsx` |
+| Runtime gitSha (CSI `/healthz`) | `f03ea76efda53c02e3957290780040b79a7caf1a` |
 | Clean host | `2.25.123.224` |
 | Staging API | `https://api.stg.impulsionando.com.br` |
+| Staging CSI Host | `csi.stg.impulsionando.com.br` (Traefik; public DNS pending) |
 
 Update this table when a newer SHA is promoted **before** a rehearsal or pilot.
+
+## Staging CSI SSR revert
+
+1. `docker service update --rollback reengineering-csi-core` **or** `docker service rm reengineering-csi-core` (removes Traefik Host).  
+2. Confirm `*.stg` Nest/tenant-web still healthy.  
+3. Log in clean-host `IMPLEMENTATION-LOG.md`.
 
 ## Staging revert (7A practice)
 

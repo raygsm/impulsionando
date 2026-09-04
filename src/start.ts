@@ -11,9 +11,16 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
       throw error;
     }
     console.error(error);
+    const detail =
+      error instanceof Error
+        ? `${error.name}: ${error.message}`.slice(0, 240)
+        : String(error).slice(0, 240);
     return new Response(renderErrorPage(), {
       status: 500,
-      headers: { "content-type": "text/html; charset=utf-8" },
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "x-impulsionando-ssr-error": detail.replace(/[\r\n]+/g, " "),
+      },
     });
   }
 });

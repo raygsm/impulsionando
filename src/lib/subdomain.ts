@@ -8,6 +8,9 @@
 const ROOT_DOMAINS = ["impulsionando.com.br"];
 export const COLORS_CANONICAL_HOST = "colorssaude.impulsionando.com.br";
 export const WMP_CANONICAL_HOST = "wmp.impulsionando.com.br";
+/** Phase 7B staging rehearsal host (clean VPS Traefik) — not prod CSI. */
+export const CSI_STAGING_HOST = "csi.stg.impulsionando.com.br";
+export const CSI_CANONICAL_HOST = "csi.impulsionando.com.br";
 
 export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   marocas: "/marocas",

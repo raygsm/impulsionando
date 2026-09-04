@@ -23,7 +23,7 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 | **P6 governed AI** | 6 | **CLOSED (staging)** | Wave 2 verify **2/2 PASS** · `…-phase6exit` · [`phase-6/README.md`](./phase-6/README.md) · [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) |
 | **P2 observability follow-up** | 2+ | Deferred | External alerts — [`phase-2/OBSERVABILITY-MINIMUM.md`](./phase-2/OBSERVABILITY-MINIMUM.md) |
 | **V1–V7 verticals** | post-6 | Not started | CRM → Marocas → Colors… — [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) |
-| **P7 cutover** | 7 | **IN PROGRESS** | **7A PASS** · **7B=CSI** selected · DNS blocked until CSI web · **7F PARKED** — [`phase-7/CSI-PILOT-7B.md`](./phase-7/CSI-PILOT-7B.md) |
+| **P7 cutover** | 7 | **IN PROGRESS** | **7A PASS** · **7B=CSI** staging SSR **PASS** · prod DNS blocked · **7F PARKED** — [`phase-7/CSI-PILOT-7B.md`](./phase-7/CSI-PILOT-7B.md) |
 
 ## Wave 1 + Wave 2 (complete)
 

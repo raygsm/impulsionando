@@ -7,7 +7,11 @@ export const Route = createFileRoute("/healthz")({
         new Response(
           JSON.stringify({
             status: "ok",
-            service: "impulsionando",
+            service: "impulsionando-csi-core",
+            gitSha:
+              process.env.GIT_SHA ||
+              process.env.VITE_GIT_COMMIT ||
+              "unknown",
             ts: new Date().toISOString(),
           }),
           {

@@ -1,6 +1,6 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T00:50Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B pilot = CSI** selected; **DNS flip BLOCKED** until CSI web+prod env; **7F PARKED**; Impulsionando **staging development UNLOCKED**)
+Atualizado em: 2026-09-04T11:16Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — **staging CSI HTML PASS** on clean host; **prod DNS flip BLOCKED**; **7F PARKED**; Impulsionando **staging development UNLOCKED**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
@@ -22,7 +22,7 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | **5 (gate)** | **CLOSED (staging exit)** | `phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
 | **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
 | 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
-| **7** | **IN PROGRESS** | **7A PASS** · **7B = CSI** selected · DNS **BLOCKED** (no CSI UI on clean yet) · **7F PARKED** |
+| **7** | **IN PROGRESS** | **7A PASS** · **7B = CSI** · staging CSI SSR **PASS** · prod DNS **BLOCKED** · **7F PARKED** |
 
 ## Phase 6 staging close (2026-09-04T00:03Z)
 
@@ -44,24 +44,25 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | 6A–6F gateway matrix (capabilities/policy/tools/metrics/chat/agents allow/effects create) | **PASS** |
 | 6D agents deny + chat cross-tenant refuse | **PASS** |
 
-## Phase 7 — IN PROGRESS · 7A PASS · 7B = CSI (selected)
+## Phase 7 — IN PROGRESS · 7A PASS · 7B = CSI (staging SSR PASS; prod DNS BLOCKED)
 
 | Item | Value |
 | --- | --- |
 | 7A | **PASS** @ 2026-09-04T00:30Z — [`phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
 | **7B pilot** | **`csi.impulsionando.com.br`** — [`phase-7/CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
-| 7B DNS flip | **BLOCKED** — CSI HTML still legacy-only; clean host has Nest+stub on `*.stg` / staging DB only |
+| 7B staging SSR | **PASS** @ 2026-09-04T11:16Z — Swarm `reengineering-csi-core` · Host `csi.stg.impulsionando.com.br` · `/csi` HTML **200** · `/healthz` gitSha `f03ea76e…` · image `…-csi7b-prodjsx` local-load |
+| 7B prod DNS flip | **BLOCKED** — no prod Vite/Supabase env locally; no Cloudflare API token; must not point prod CSI at staging DB |
 | Staging CSI seed | `npm run staging:seed:csi-tenant` → company `CSI Invest` / subdomain `csi` (staging) |
 | Impulsionando development | **UNLOCKED on staging / new stack** — do not wait for CSI DNS |
-| Prod DNS / apex | **FORBIDDEN** until CSI web+prod env blockers clear |
+| Prod DNS / apex | **FORBIDDEN** until CSI prod-env + CF flip authorized |
 | Legacy VPS | **FORBIDDEN** |
 | 7F | **PARKED** |
 
 ## Próximo gate
 
 1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized.  
-2. Build or migrate **CSI UI** (or prod SSR) onto clean stack with **prod** env.  
-3. Then flip **only** `csi.impulsionando.com.br` → clean (7B DNS).  
+2. Add Cloudflare **A** `csi.stg` → `2.25.123.224` (grey) for public staging URL (human — no CF token this session).  
+3. Build **prod-env** CSI SSR + Traefik Host `csi.impulsionando.com.br`, then flip **only** that DNS.  
 4. Then 7C–7E. **7F PARKED.**
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
