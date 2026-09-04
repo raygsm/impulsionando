@@ -37,6 +37,7 @@ Em caso de conflito:
 | Plataforma     | [Dokploy](03-platform/DOKPLOY.md) e [CI/CD](03-platform/CI-CD.md)                                                                               | Como ambientes, builds e releases funcionarão?                                                   |
 | Migração       | [Plano por fases](04-migration/README.md)                                                                                                       | Em que ordem migraremos sem interromper produção?                                                |
 | Governança     | [Decisões](05-governance/DECISIONS.md), [riscos](05-governance/RISKS.md), [Definition of Done](05-governance/DEFINITION-OF-DONE.md), [Implementation rules (agents)](05-governance/IMPLEMENTATION-RULES.md) | Como decisões, riscos, close-out de agentes e conclusão serão controlados? |
+| Produto proposto | [Autonomous Marketing Platform](06-autonomous-marketing-platform/README.md)                                                                      | Qual produto único, dashboard, módulos, blueprints e agentes a nova estrutura deve entregar?     |
 | Acompanhamento | [Status](STATUS.md) · [Update canvas](04-migration/UPDATE-CANVAS.md) · [Acceleration board](04-migration/ACCELERATION-BOARD.md) | Onde estamos, tasks abertas e lanes paralelas? |
 
 ## Sequência obrigatória
@@ -51,4 +52,4 @@ Em caso de conflito:
 
 ## Estado deste documento
 
-A Fase 0 foi **concluída em 2026-08-30** ([STATUS](STATUS.md), [exit report](01-current-state/phase-0/PHASE-0-EXIT-REPORT.md)). A Fase 1 (contratos e fundação) está autorizada. Nest/Dokploy/monorepo **não** estão autorizados até ADRs Aceitas e gates da Fase 1/2.
+A Fase 0 foi **concluída em 2026-08-30** ([exit report](01-current-state/phase-0/PHASE-0-EXIT-REPORT.md)); as Fases 1–6 foram posteriormente fechadas em staging. A Fase 7 está **IN PROGRESS** e a Fase 8 está em **PLANNING — NOT STARTED**. A formulação de produto em [`06-autonomous-marketing-platform/`](06-autonomous-marketing-platform/README.md) é **PROPOSED** e não altera gates por si só. Estado corrente e ações proibidas: [`STATUS.md`](STATUS.md).

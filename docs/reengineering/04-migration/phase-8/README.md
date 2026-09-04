@@ -4,9 +4,13 @@ Opened: **2026-09-04**
 Status: **PLANNING — NOT STARTED** · no slice authorized yet · staging-only when it opens
 Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Program SoT: [`../../STATUS.md`](../../STATUS.md)
 
+Product direction proposal: [`../../06-autonomous-marketing-platform/README.md`](../../06-autonomous-marketing-platform/README.md) — **PROPOSED, awaiting acceptance; no gate moved**
+
 ## Goal
 
 Rebuild the authenticated Impulsionando product and its staff console on `apps/app-web` + `apps/api`, capability by capability, retiring each legacy owner as it goes. **Not** a mechanical route move (ADR-001). **Not** a production cutover (Phase 7).
+
+If the autonomous-marketing product proposal is accepted, Phase 8 keeps its technical foundation, strangler and safety gates but reorders the first product proof around **Dashboard + Growth + Contacts/CRM + Tasks + mandatory tenant business agent**. Detailed impact: [`../../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md`](../../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md) §2.
 
 ## Docs
 

@@ -5,6 +5,10 @@ Program SoT: [`../STATUS.md`](../STATUS.md)
 
 **Program state:** Phase 8 **PLANNING — NOT STARTED**. Staging development of Impulsionando on the new stack is already authorized by [`../STATUS.md`](../STATUS.md) ("Próximo gate" #1); Phase 8 turns that authorization into a scoped, gated, evidence-bearing program. **No production cutover of the authenticated product happens in Phase 8** — that stays under Phase 7 authority.
 
+**Product direction proposal (2026-09-04):** [`../06-autonomous-marketing-platform/README.md`](../06-autonomous-marketing-platform/README.md) reframes the product as one autonomous marketing operations dashboard with optional capability modules, niche blueprints, a mandatory internal business agent per tenant, optional client-facing agents, and Impulsionito as governed platform parent. It is **PROPOSED**: if accepted, the Phase 8 technical foundation remains, while the product slices are rebaselined through [`../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md`](../06-autonomous-marketing-platform/IMPLEMENTATION-PLAN.md). No gate moved by adding the proposal.
+
+Until that product gate is accepted, the 8D–8G subphases below remain the current Phase 8 plan. They are intentionally **not** half-rewritten to match an unaccepted proposal.
+
 ## Objetivo
 
 Rebuild the **Impulsionando core product** — the authenticated SaaS that the platform sells, plus the platform-staff console that operates it — on the target stack (`apps/app-web` + `apps/api` + `apps/worker` + `packages/*`), capability by capability, with the legacy monolith remaining the live system until each capability is proven and its legacy routes are retired.

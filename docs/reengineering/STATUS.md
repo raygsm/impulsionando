@@ -1,6 +1,6 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T14:20Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Wave 0 landed, gate **G0 pending**)
+Atualizado em: 2026-09-04T19:55Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Wave 0 landed, gate **G0 pending**; autonomous-marketing product model **PROPOSED**, no gate moved)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
@@ -70,8 +70,10 @@ Wave 0 = **paper only**. No code, no infra mutation, no production anything. Pha
 | --- | --- |
 | Authority | [`04-migration/PHASE-8-CORE-APP.md`](04-migration/PHASE-8-CORE-APP.md) · board [`phase-8/README.md`](04-migration/phase-8/README.md) |
 | Wave 0 planning | **LANDED** 2026-09-04 — scope, capability map, app shape, foundation tracks, slice catalog, data/identity, routing, waves, gates, risks, evidence template |
+| Product model proposal | **PROPOSED** 2026-09-04 — one invariant dashboard, capability modules, niche blueprints/onboarding compiler, mandatory tenant business agent, optional client agent, governed Impulsionito — [`06-autonomous-marketing-platform/README.md`](06-autonomous-marketing-platform/README.md) |
 | Measured scope (STATIC) | 576 `_authenticated` route files = 206 tenant product + 283 platform staff + 87 one-tenant bespoke; 12 `_command`; 1,476 `createServerFn` call sites |
-| Target | `apps/app-web` (TanStack Start, today a health stub) + new Nest modules `identity` / `billing` / `crm` / `agenda` / `sales` / `inventory` / `finance` / `communications` / `reports` / `audit` / `admin` / `automations` |
+| Phase 8 technical target | `apps/app-web` (TanStack Start, today a health stub) + modular Nest API; accepted pre-proposal module list remains in [`phase-8/CAPABILITY-MAP.md`](04-migration/phase-8/CAPABILITY-MAP.md) until product gate P0 |
+| Proposed product modules | Adds/reframes `contacts`, `growth`, `campaigns`, `tasks`, `dashboard`, `modules`, `blueprints`, `onboarding` and three agent kinds; **not authoritative until accepted** — [`06-autonomous-marketing-platform/NESTJS-REFORMULATION.md`](06-autonomous-marketing-platform/NESTJS-REFORMULATION.md) |
 | Consolidation budget | ~295 staff routes → ≈35–45 screens; the **57** `admin.*-health` pages collapse into one parameterized surface — [`phase-8/CORE-APP-SCOPE.md`](04-migration/phase-8/CORE-APP-SCOPE.md) §4 |
 | Deferred (**V-lane**) | Vertical packs (imobiliária, contabilidade, EHR, fiscal, affiliates, cervejaria/restaurante, eventos, educação, marketplace) + one-tenant ops (ChrisMed, WMP, Marocas, RioMed, Revela) — bound to each tenant's Phase 7 cutover |
 | Next gate | **G0** — human: accept scope + consolidation budget, choose `app.stg.impulsionando.com.br`, close the ADR-008 password-reset host — [`phase-8/GATES.md`](04-migration/phase-8/GATES.md) |
