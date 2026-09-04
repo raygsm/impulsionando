@@ -12,6 +12,11 @@ A migração segue o padrão strangler: o sistema novo assume fluxos completos g
 | 5 | [Workers e integrações](PHASE-5-INTEGRATIONS.md) | workers e integrações desacoplados |
 | 6 | [Plataforma de IA](PHASE-6-AI.md) | IA governada e mensurável |
 | 7 | [Cutover e retirada do legado](PHASE-7-CUTOVER.md) · [board](phase-7/README.md) · [parallel plan](phase-7/PARALLEL-SPEED-PLAN.md) | 7A–7E cutover; **7F PARKED** |
+| 8 | [Impulsionando Core no stack novo](PHASE-8-CORE-APP.md) · [board](phase-8/README.md) · [slices](phase-8/SLICE-CATALOG.md) | produto autenticado e console de staff reconstruídos em `app-web` + Nest; **PLANNING — NOT STARTED** |
+
+### Fase 7 e Fase 8 são ortogonais
+
+A Fase 7 move **hostnames públicos** para o stack novo (produção, gated). A Fase 8 reconstrói o **produto autenticado** em `app-web` + Nest (**apenas staging**), fatia por fatia. Unidades de movimento diferentes — hostname vs. prefixo de rota — e rollbacks diferentes. Podem correr em paralelo; a Fase 8 não autoriza nada em produção. Detalhe: [`phase-8/STRANGLER-ROUTING.md`](phase-8/STRANGLER-ROUTING.md) §7.
 
 ## Operational canvas (current)
 
