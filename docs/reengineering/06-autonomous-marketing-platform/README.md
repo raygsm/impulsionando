@@ -1,7 +1,7 @@
 # Autonomous Marketing Platform — product architecture
 
-Created: **2026-09-04**  
-State: **PROPOSED — product direction awaiting explicit acceptance**  
+Created: **2026-09-04**
+State: **PROPOSED — product direction awaiting explicit acceptance**
 Program SoT: [`../STATUS.md`](../STATUS.md) · Technical authority: [`../02-target-architecture/`](../02-target-architecture/) · Delivery plan: [`../04-migration/phase-8/`](../04-migration/phase-8/)
 
 ## Purpose
