@@ -26,7 +26,17 @@ Traefik (clean host 2.25.123.224)
 
 ## 2. `apps/app-web` — from stub to real app
 
-Today `apps/app-web/src/server.ts` is a raw `node:http` health stub. Target (ADR-002 keeps TanStack Start):
+Today `apps/app-web` may be a Next.js App Router scaffold on a feature branch (**ADR-009 Proposed**). Until that ADR is Aceita, the Phase 8 paper still allows the TanStack Start shape below as the ADR-002 path.
+
+Target `apps/app-web/` (Next.js path, ADR-009):
+
+```text
+apps/app-web/
+  src/app/(auth) (dashboard) healthz ready
+  src/components/{dashboard,navigation,modules,agents,states,ui}
+  src/lib/{api,auth,config,modules}
+  middleware.ts
+```
 
 ```text
 apps/app-web/

@@ -1,6 +1,6 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T14:20Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B = CSI** — staging SSR Host **`stg.csi…`**; `stg.<tenant>` host-recognition **code fix** (redeploy pending); prod-shaped Host-header **PASS**; **prod DNS flip BLOCKED**; **7F PARKED**. Phase 8 **PLANNING** — Wave 0 landed, gate **G0 pending**)
+Atualizado em: 2026-09-04T20:30Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS**; Phase 8 **PLANNING** — G0 pending; **ADR-009 Proposed** — Next.js `app-web` on feature branch only, **not Aceita**, **not deployed**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
@@ -24,7 +24,7 @@ Phase 8 board: [`04-migration/phase-8/README.md`](04-migration/phase-8/README.md
 | **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
 | 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
 | **7** | **IN PROGRESS** | **7A PASS** · **7B = CSI** · staging SSR **PASS** · prod-shaped Host-header **PASS** · prod DNS **BLOCKED** · **7F PARKED** |
-| **8** | **PLANNING — NOT STARTED** | Wave 0 planning **LANDED** 2026-09-04 (paper only) · gate **G0 pending** — see below |
+| **8** | **PLANNING — NOT STARTED** | Wave 0 planning **LANDED** 2026-09-04 (paper only) · gate **G0 pending** — see below. **ADR-009 Proposta** (Next.js `app-web`); does not open G0 or replace ADR-002 until accepted. |
 
 ## Phase 6 staging close (2026-09-04T00:03Z)
 
@@ -64,14 +64,14 @@ Phase 8 board: [`04-migration/phase-8/README.md`](04-migration/phase-8/README.md
 
 ## Phase 8 — PLANNING (Impulsionando core app on the new stack)
 
-Wave 0 = **paper only**. No code, no infra mutation, no production anything. Phase 8 is **staging-only** by definition and is orthogonal to Phase 7 (Phase 7 moves hostnames; Phase 8 moves authenticated route prefixes).
+Wave 0 = **paper only**. Feature-branch Next.js `app-web` scaffold may exist under **ADR-009 Proposed**; it is **not** G0, **not** Aceita, **not** a Traefik/DNS change, **not** a dual live dashboard. Phase 8 is **staging-only** by definition and is orthogonal to Phase 7 (Phase 7 moves hostnames; Phase 8 moves authenticated route prefixes).
 
 | Item | Value |
 | --- | --- |
 | Authority | [`04-migration/PHASE-8-CORE-APP.md`](04-migration/PHASE-8-CORE-APP.md) · board [`phase-8/README.md`](04-migration/phase-8/README.md) |
 | Wave 0 planning | **LANDED** 2026-09-04 — scope, capability map, app shape, foundation tracks, slice catalog, data/identity, routing, waves, gates, risks, evidence template |
 | Measured scope (STATIC) | 576 `_authenticated` route files = 206 tenant product + 283 platform staff + 87 one-tenant bespoke; 12 `_command`; 1,476 `createServerFn` call sites |
-| Target | `apps/app-web` (TanStack Start, today a health stub) + new Nest modules `identity` / `billing` / `crm` / `agenda` / `sales` / `inventory` / `finance` / `communications` / `reports` / `audit` / `admin` / `automations` |
+| Target | `apps/app-web` (**ADR-009 Proposed:** Next.js App Router; ADR-002 still Aceita for TanStack until 009 is accepted) + new Nest modules `identity` / `billing` / `crm` / `agenda` / `sales` / `inventory` / `finance` / `communications` / `reports` / `audit` / `admin` / `automations` |
 | Consolidation budget | ~295 staff routes → ≈35–45 screens; the **57** `admin.*-health` pages collapse into one parameterized surface — [`phase-8/CORE-APP-SCOPE.md`](04-migration/phase-8/CORE-APP-SCOPE.md) §4 |
 | Deferred (**V-lane**) | Vertical packs (imobiliária, contabilidade, EHR, fiscal, affiliates, cervejaria/restaurante, eventos, educação, marketplace) + one-tenant ops (ChrisMed, WMP, Marocas, RioMed, Revela) — bound to each tenant's Phase 7 cutover |
 | Next gate | **G0** — human: accept scope + consolidation budget, choose `app.stg.impulsionando.com.br`, close the ADR-008 password-reset host — [`phase-8/GATES.md`](04-migration/phase-8/GATES.md) |

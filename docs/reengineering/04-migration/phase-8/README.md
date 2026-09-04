@@ -1,7 +1,8 @@
 # Phase 8 — board
 
 Opened: **2026-09-04**
-Status: **PLANNING — NOT STARTED** · no slice authorized yet · staging-only when it opens
+Status: **PLANNING — NOT STARTED** · no slice authorized yet · staging-only when it opens  
+**ADR-009** is **Proposed** ([`../../05-governance/adrs/ADR-009-nextjs-authenticated-app-web.md`](../../05-governance/adrs/ADR-009-nextjs-authenticated-app-web.md)): Next.js for authenticated `app-web`. Does not replace ADR-002 until accepted. Product IA: [`../../06-autonomous-marketing-platform/DASHBOARD-V1.md`](../../06-autonomous-marketing-platform/DASHBOARD-V1.md).
 Authority: [`../PHASE-8-CORE-APP.md`](../PHASE-8-CORE-APP.md) · Program SoT: [`../../STATUS.md`](../../STATUS.md)
 
 ## Goal

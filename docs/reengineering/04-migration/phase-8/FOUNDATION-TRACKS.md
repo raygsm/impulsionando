@@ -7,16 +7,17 @@ Nothing here is product-visible. All of it blocks the product. Eight of the twel
 
 F1–F7 and F9 can run **in parallel**. F8 is a hard precondition for slice S2.
 
-## F1 — `apps/app-web` becomes a real TanStack Start app
+## F1 — `apps/app-web` becomes a real authenticated app
 
 | Item | Detail |
 | --- | --- |
-| Replaces | `apps/app-web/src/server.ts` raw `node:http` stub |
-| Stack | `@tanstack/react-start` ^1.167, React 19, Vite 7, Nitro 3 node-server preset, Tailwind 4 — matching the root monolith so extracted components port cleanly |
-| Delivers | Router, `__root.tsx` shell, `_app` and `_staff` layouts, `/healthz` with `gitSha`, `/ready`, one placeholder screen |
-| Does **not** deliver | Any product screen, any Supabase call |
-| Done when | `pnpm --filter @impulsionando/app-web dev` serves SSR HTML locally and `npm run phase8:smoke:app-web-health` passes against staging |
-| Depends on | — |
+| Replaces | `apps/app-web` raw `node:http` stub |
+| Stack (ADR-002 Aceita) | TanStack Start — original Phase 8 paper |
+| Stack (ADR-009 **Proposed**) | Next.js App Router + shadcn preset — see [`../../06-autonomous-marketing-platform/NEXTJS-PRESET-AUDIT.md`](../../06-autonomous-marketing-platform/NEXTJS-PRESET-AUDIT.md). **Do not Traefik-promote until ADR-009 Aceita + G0.** |
+| Delivers | Router, authenticated layout, invariant IA (Home/Growth/Customers/Operations/Management/Help/Settings), `/healthz` with `gitSha`, `/ready` |
+| Does **not** deliver | Domain APIs, fake CRM/ERP numbers, production DNS |
+| Done when | `pnpm --filter @impulsionando/app-web dev` serves SSR HTML locally and health exposes full Git SHA |
+| Depends on | ADR-009 Aceita for the Next.js path; otherwise implement TanStack as originally specified |
 
 Keep `apps/app-web` out of the root Vite build. The root monolith and `app-web` are two independent builds that happen to share a repository.
 

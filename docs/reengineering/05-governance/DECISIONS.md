@@ -28,4 +28,10 @@ Toda decisão relevante deve ter um ADR em [`05-governance/adrs/`](adrs/README.m
 | P0-SCHEMA-SOT | Live Supabase structure is the observational baseline; no `db push`/`reset`; reconciliation deferred | Registrado em `01-current-state/phase-0/SCHEMA-SOURCE-OF-TRUTH.md` |
 | P0-AUTHORITY | Temporary production approvers = Cauã + Raygs | DECLARED |
 
+## Decisões propostas (não autorizam implementação de cutover)
+
+| ID | Decisão | Estado | ADR |
+|---|---|---|---|
+| ADR-009 | Next.js App Router para `app-web` autenticado; Nest permanece autoridade de domínio; TanStack permanece em platform-web, tenant-web e legado | **Proposta** | [ADR-009](adrs/ADR-009-nextjs-authenticated-app-web.md) |
+
 Aceita das ADRs **não** autoriza sozinha: scaffolding Nest, move mecânico de monorepo, Dokploy no VPS legado, DNS cutover, ou migrations corretivas em prod.

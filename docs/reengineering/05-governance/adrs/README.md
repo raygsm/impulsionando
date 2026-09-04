@@ -18,3 +18,4 @@ Use o [template de ADR](../../templates/ADR-TEMPLATE.md) e mantenha o índice em
 | ADR-006 | [ADR-006-dokploy-clean-infra.md](ADR-006-dokploy-clean-infra.md) | Usar Dokploy como control plane em infraestrutura limpa | Aceita-com-condições |
 | ADR-007 | [ADR-007-ghcr-immutable-sha-images.md](ADR-007-ghcr-immutable-sha-images.md) | Usar GHCR e imagens imutáveis por SHA | Aceita |
 | ADR-008 | [ADR-008-split-platform-tenant-app-web.md](ADR-008-split-platform-tenant-app-web.md) | Separar platform-web, tenant-web e app-web | Aceita-com-condições |
+| ADR-009 | [ADR-009-nextjs-authenticated-app-web.md](ADR-009-nextjs-authenticated-app-web.md) | Next.js para `app-web` autenticado | **Proposta** |
