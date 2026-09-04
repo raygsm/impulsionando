@@ -1,6 +1,6 @@
 # Acceleration board — parallel strangler tracks
 
-Atualizado em: **2026-09-03T23:20Z**
+Atualizado em: **2026-09-04T00:03Z**
 
 Program SoT: [`../STATUS.md`](../STATUS.md)  
 Speed canvas: [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md)
@@ -19,27 +19,28 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 | **P4A tenant resolve** | 4A | **CLOSED** | resolve + seed + deny — [`phase-4/PHASE-4-EXIT-REPORT.md`](./phase-4/PHASE-4-EXIT-REPORT.md) |
 | **P4B tenant/config** | 4B | **CLOSED (staging)** | tenant.stg LIVE · stubs OK for exit — [`phase-4/PHASE-4B-EXIT-REPORT.md`](./phase-4/PHASE-4B-EXIT-REPORT.md) |
 | **P5 async/integrations** | 5 | **CLOSED (staging)** | verify **8/8 PASS** 2026-09-03T03:40Z — [`phase-5/README.md`](./phase-5/README.md) |
-| **P6 governed AI** | 6 | **IN PROGRESS** | 6A/6B staging-live · 6C–6F gaps — [`phase-6/README.md`](./phase-6/README.md) · [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) |
+| **P6 governed AI** | 6 | **CLOSED (staging)** | Wave 2 verify **2/2 PASS** · `…-phase6exit` · [`phase-6/README.md`](./phase-6/README.md) · [`UPDATE-CANVAS.md`](./UPDATE-CANVAS.md) |
 | **P2 observability follow-up** | 2+ | Deferred | External alerts — [`phase-2/OBSERVABILITY-MINIMUM.md`](./phase-2/OBSERVABILITY-MINIMUM.md) |
 | **V1–V7 verticals** | post-6 | Not started | CRM → Marocas → Colors… — [`PRODUCT-INTAKE-ACTION-PLAN.md`](./PRODUCT-INTAKE-ACTION-PLAN.md) |
-| **P7 cutover** | 7 | Blocked | Needs Phase 6 CLOSED + explicit auth |
+| **P7 cutover** | 7 | **NOT STARTED** | Blocked until explicit auth (Phase 6 close ≠ cutover) |
 
-## Wave 1 status (2026-09-03T23:40Z)
+## Wave 1 + Wave 2 (complete)
 
-| Lane | Focus | Repo state |
+| Lane | Focus | State |
 | --- | --- | --- |
 | **A** | Policy: allowlist + budgets + context assembly | **DONE** |
 | **B** | Agent route + pilot consumes config | **DONE** |
-| **C** | Effects membership + worker `ai.effect.execute` sink | **DONE** (in-memory approvals remain) |
+| **C** | Effects membership + worker `ai.effect.execute` sink | **DONE** (in-memory approvals OK) |
 | **D** | Smoke/contracts extensions | **DONE** — `test:phase6:contracts` **47/47** |
-| **P** | Promote + live prove | **PENDING** (Wave 2) |
+| **P** | Promote + live prove | **DONE** — `phase6:staging:verify` **2/2 PASS** @ 2026-09-04T00:03Z |
 
-## Phase 6 parallel lanes (active)
+## Phase 6 residuals (non-blocking)
 
-| Lane | Focus | Parallel? |
-| --- | --- | --- |
-| **A–D** | Wave 1 repo close gaps | **landed** |
-| **P** | Promote + live prove | **sequential** next |
+| Item | State |
+| --- | --- |
+| Optional GHCR push of `…-phase6exit` | pending |
+| Durable approvals migration | optional |
+| Effect worker domain writes | out of Phase 6 (sink only) |
 
 ## Proibido (todos os tracks)
 
@@ -49,4 +50,4 @@ Quality: contracts green → promote → live allow/deny → evidence → only t
 - `db push` / reset em prod
 - Tratar `latest` como identidade de release
 - Executar fintech, clínica, investimento ou campanhas reais diretamente de Product Intake
-- Marcar Phase 6 CLOSED sem smoke live allow/deny
+- Tratar Phase 6 CLOSED como autorização de Phase 7

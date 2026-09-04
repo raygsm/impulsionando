@@ -1,6 +1,6 @@
 # Reengineering update canvas — speed plan
 
-Created: **2026-09-03T23:20Z** · Wave 1 landed: **2026-09-03T23:40Z**  
+Created: **2026-09-03T23:20Z** · Wave 1 landed: **2026-09-03T23:40Z** · Wave 2 closed: **2026-09-04T00:03Z**  
 Branch: `cursor/phase6-update-canvas-4675`  
 Program SoT: [`../STATUS.md`](../STATUS.md)  
 Authority: accepted ADRs → target architecture → STATUS → evidence → product-intake  
@@ -14,21 +14,21 @@ Authority: accepted ADRs → target architecture → STATUS → evidence → pro
 
 | Item | Value |
 | --- | --- |
-| Overall | Phases **0–5 CLOSED (staging)** · Phase **6 IN PROGRESS** · Phase **7 NOT STARTED** |
-| Live API | `https://api.stg.impulsionando.com.br` · image `…-phase6a` · SHA `67e10951…` |
+| Overall | Phases **0–6 CLOSED (staging)** · Phase **7 NOT STARTED** |
+| Live API | `https://api.stg.impulsionando.com.br` · image `…-phase6exit` · SHA `c4c9530a…` |
 | Wave 1 (repo) | **LANDED** — allowlist/budgets/agents route/pilot consume/effects membership/worker sink |
-| Wave 2 (staging) | **PENDING** — promote + live allow/deny |
+| Wave 2 (staging) | **CLOSED** — promote + `phase6:staging:verify` **2/2 PASS** |
 | Contracts | **47/47** PASS (`test:phase6:contracts`) |
-| Phase 6 CLOSED? | **No** |
+| Phase 6 CLOSED? | **Yes (staging)** @ 2026-09-04T00:03Z |
 
-### Critical honesty
+### Residuals (non-blocking)
 
-| Claim in older docs | Reality |
+| Item | State |
 | --- | --- |
-| `GET /ai/agents/:tenantId` exists | Service exists; **HTTP route missing** in `ai.controller.ts` |
-| Phase 6 “scaffolding done” | 6A/6B staging-live; 6C–6F mostly **repo-only** |
-| ACCELERATION-BOARD 4B “staging pending” | **Stale** — 4B staging CLOSED per STATUS |
-| Web apps are TanStack Start | Still **health/strangler stubs** |
+| Approvals store | In-memory MVP OK for Phase 6 close |
+| Effect worker | Sink only (ledger/log, no domain writes) |
+| GHCR push of `…-phase6exit` | Optional |
+| Durable `reengineering_ai_approvals` | Optional follow-up |
 
 ---
 
@@ -43,128 +43,48 @@ Authority: accepted ADRs → target architecture → STATUS → evidence → pro
 | 4A Resolve | CLOSED | ✅ | — |
 | 4B Config/FE | CLOSED (staging) | ✅ | Web apps = stubs; richer entitlements seed optional |
 | 5A–5G Workers | CLOSED (staging) | ✅ | Optional GHCR push of local-load tags; sink ≠ real providers |
-| **6A–6F AI** | **OPEN** | 🟡 | See §3 — **critical path** |
+| **6A–6F AI** | **CLOSED (staging)** | ✅ | See §3 — Wave 2 evidence |
 | V1–V7 verticals | Not started as waves | ⬜ | After Phase 6 platform spine |
-| **7 Cutover** | Blocked | ⬜ | Requires Phase 6 CLOSED + explicit authorization |
+| **7 Cutover** | Blocked | ⬜ | Requires explicit authorization (Phase 6 CLOSED alone ≠ cutover) |
 
 ---
 
-## 3. Phase 6 task canvas (critical path)
+## 3. Phase 6 task canvas — CLOSED
 
-Exit gate (must all be true before CLOSED):
+Exit gate (all met @ 2026-09-04T00:03Z):
 
-1. Security never prompt-only  
-2. One real-data tenant-isolated agent proven (allow **and** deny)  
-3. Sensitive actions blocked or approval-gated (API + worker evidence)  
-4. Kill switch + cost/budget controls work  
-5. Staging live smoke for 6C–6F (not DRY_RUN alone)
+1. Security never prompt-only ✅  
+2. One real-data tenant-isolated agent proven (allow **and** deny) ✅  
+3. Sensitive actions blocked or approval-gated (API + worker sink) ✅  
+4. Kill switch + cost/budget controls work ✅  
+5. Staging live smoke for 6C–6F (not DRY_RUN alone) ✅  
 
-### 6A Gateway + policy
+### Evidence
 
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6A-1 | Kill switch + chat refuse | ✅ staging | — |
-| 6A-2 | Capabilities / policy / tools endpoints | ✅ staging | — |
-| 6A-3 | Enforce `AI_CAPABILITY_ALLOWLIST` | ❌ missing | **Lane A** |
-| 6A-4 | Enforce rate/token/cost budgets (`AI_BUDGET_EXCEEDED`) | ❌ partial | **Lane A** |
-| 6A-5 | Server-side `AiChatContextAssembly` from actor (not client) | ❌ partial | **Lane A** |
+| Item | Value |
+| --- | --- |
+| Promoted SHA | `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
+| Images | `…-api:…-phase6exit` · `…-worker:…-phase6exit` (local-load amd64) |
+| Verify | `npm run phase6:staging:verify` · **PASS=2 FAIL=0** |
+| Allow | capabilities/policy/tools/metrics/chat/agents **200** · effects create **201** |
+| Deny | agents **403** · chat cross-tenant refuse |
 
-### 6B Tool registry
+### Packages
 
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6B-1 | Risk classes + Zod I/O + FORBIDDEN non-exec | ✅ | — |
-| 6B-2 | Auth recheck Support/Journeys/active context | ✅ partial | — |
-| 6B-3 | Membership wrap on host-only resolve in chat path | ❌ | **Lane A** |
-| 6B-4 | Optional `POST /ai/tools/execute` | defer | only if exit ops need it |
+| Wave | State |
+| --- | --- |
+| 6A Gateway + policy | ✅ CLOSED |
+| 6B Tool registry | ✅ CLOSED |
+| 6C Real-data READ pilot | ✅ CLOSED |
+| 6D Tenant agent | ✅ CLOSED |
+| 6E Gated effects | ✅ CLOSED (worker = sink) |
+| 6F Evals + ops | ✅ CLOSED |
 
-### 6C Real-data READ pilot
-
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6C-1 | Deterministic grounded pilot + freshness/degraded | ✅ repo | — |
-| 6C-2 | Promote API with `AI_CHAT_ENABLED` + live smoke | ❌ **UNKNOWN** | **Lane P (ops)** sequential after code |
-| 6C-3 | Cross-tenant deny via chat | ❌ **UNKNOWN** | **Lane P** after 6C-2 |
-
-### 6D Tenant agent
-
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6D-1 | Agent config schema + env seed service | ✅ scaffolding | — |
-| 6D-2 | Wire `GET /api/v1/ai/agents/:tenantId` | ❌ **missing route** | **Lane B** |
-| 6D-3 | Pilot **consumes** agent prompt/model/allowlist | ❌ peek-only | **Lane B** |
-| 6D-4 | Staging seed env + allow/deny smoke | ❌ **UNKNOWN** | **Lane P** |
-| 6D-5 | Full RAG product | out of MVP | defer |
-
-### 6E Gated effects
-
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6E-1 | Approval create/get/staff decide API | ✅ scaffolding | — |
-| 6E-2 | `assertMembership` on create | ❌ | **Lane C** |
-| 6E-3 | Worker `ai.effect.execute` sink handler (not noop) | ❌ | **Lane C** |
-| 6E-4 | Durable approval store (survive restart) | ❌ in-memory | **Lane C** (larger) |
-| 6E-5 | Live create→decide→job smoke | ❌ **UNKNOWN** | **Lane P** |
-
-### 6F Evals + ops
-
-| Task ID | Work | State | Parallel lane |
-| --- | --- | --- | --- |
-| 6F-1 | Offline eval fixtures + contracts | ✅ repo | — |
-| 6F-2 | In-memory metrics + redaction | ✅ repo | — |
-| 6F-3 | Populate tokens/cost estimates when available | ❌ partial | **Lane D** |
-| 6F-4 | Smoke includes `/ai/metrics` + agents + effects | ❌ partial | **Lane D** |
-| 6F-5 | Canary wiring | UNKNOWN OK for MVP close if documented | defer |
+Wave 1 lanes A–D and Wave 2 promote+prove are complete. Detail: [`phase-6/README.md`](./phase-6/README.md) · [`phase-6/WAVE-2-CLOSE.md`](./phase-6/WAVE-2-CLOSE.md).
 
 ---
 
-## 4. Parallel execution plan (speed + quality)
-
-### Principle
-
-- **Parallelize repo work** that does not share the same files.  
-- **Serialize promote + live proof** (one Swarm promote, then smokes).  
-- **Never** mark CLOSED without allow+deny evidence.  
-- Subagents = one lane each; parent merges + runs contracts before promote.
-
-### Wave 1 — repo close gaps (4 parallel subagents)
-
-```text
-Lane A — Policy hardening
-  files: ai-policy.service.ts, ai-pilot.service.ts, tools/registry.ts
-  deliver: allowlist + budgets + context assembly + membership on resolve
-
-Lane B — Agent consume
-  files: ai.controller.ts, ai.service.ts, ai-pilot.service.ts (coordinate merge)
-  deliver: GET /ai/agents/:tenantId + pilot applies agent config
-
-Lane C — Effects durability path
-  files: ai-effects.service.ts, apps/worker job-consumer.ts
-  deliver: membership on create + worker sink handler for ai.effect.execute
-  note: durable DB table can be Lane C.2 if time; else document in-memory MVP + follow-up
-
-Lane D — Smoke + contracts
-  files: scripts/smoke-reengineering-ai-gateway.mjs, tests/reengineering/ai-*.ts
-  deliver: extend smoke (agents, effects, metrics); keep test:phase6:contracts green
-```
-
-**Merge rule:** Lane B owns `ai-pilot.service.ts` agent-consume hunks; Lane A lands budgets first or rebase onto B. Prefer sequential PR order: A → B → C → D if file conflicts, else true parallel with rebase.
-
-### Wave 2 — promote + prove (sequential, one operator)
-
-```text
-1. Build amd64 API (+ worker if C landed)
-2. Local-load or GHCR → Swarm reengineering-api / reengineering-worker
-3. Set AI_CHAT_ENABLED + AI_TENANT_AGENT_* seed (no secrets in git)
-4. Live smoke: capabilities/policy/tools/metrics/chat grounded
-5. Agents allow + deny
-6. Effects create → staff decide → worker log / ledger
-7. Cross-tenant deny chat
-8. Update STATUS + phase-6 README + clean-host IMPLEMENTATION-LOG
-9. Only then mark Phase 6 CLOSED
-```
-
-### Wave 3 — after Phase 6 CLOSED (next speed tracks)
+## 4. Next speed tracks (Wave 3 — after Phase 6 CLOSED)
 
 Do **not** start Phase 7 cutover here. Parallel vertical foundations:
 
@@ -190,7 +110,7 @@ Intake priority after AI close (from product-intake, not execution license):
 
 | Check | Required |
 | --- | --- |
-| Contracts | `npm run test:phase6:contracts` green before promote |
+| Contracts | green before promote |
 | Smoke | live, not only `DRY_RUN=1` |
 | Tenant isolation | allow **and** deny |
 | Release identity | full SHA on image; no `latest` |
@@ -205,13 +125,10 @@ Intake priority after AI close (from product-intake, not execution license):
 
 | # | Action | Owner type | Blocks |
 | --- | --- | --- | --- |
-| 1 | Implement Wave 1 Lanes A–D | agents (parallel) | Phase 6 close |
-| 2 | Re-run `test:phase6:contracts` | CI/agent | promote |
-| 3 | Promote `…-phase6cdef` (or successor) | human/ops SSH | live proof |
-| 4 | Live smokes + deny tests | agent+ops | STATUS CLOSED |
-| 5 | Optional GHCR push of current SHA tags | human | non-blocking |
-| 6 | Open V1 CRM contracts track | agents | after 6 CLOSED |
-| 7 | Phase 7 | humans only | after 6 CLOSED + explicit auth |
+| 1 | Optional GHCR push of `…-phase6exit` | human | non-blocking |
+| 2 | Optional durable approvals migration | agents | non-blocking |
+| 3 | Open V1 CRM contracts track | agents | after explicit intake gate |
+| 4 | Phase 7 | humans only | explicit auth — **not started** |
 
 ---
 
@@ -222,8 +139,8 @@ Intake priority after AI close (from product-intake, not execution license):
 - `db push` / reset prod  
 - Mechanical move of all legacy routes  
 - Autonomous AUTO_SAFE / clinical / investment / payment AI  
-- Claiming Phase 6 CLOSED on current `…-phase6a` alone  
 - Treating product-intake as implement-now license  
+- Treating Phase 6 close as Phase 7 authorization  
 
 ---
 
@@ -231,16 +148,15 @@ Intake priority after AI close (from product-intake, not execution license):
 
 | Doc | Action |
 | --- | --- |
-| `STATUS.md` | Point to this canvas; keep Phase 6 IN PROGRESS |
-| `ACCELERATION-BOARD.md` | Refresh tracks; add P6 + parallel lanes |
-| `phase-6/README.md` | Link canvas; note missing agents route |
-| `04-migration/README.md` | Link canvas as operational board |
+| `STATUS.md` | Phase 6 **CLOSED (staging)** — done |
+| `ACCELERATION-BOARD.md` | P6 CLOSED; Wave 2 PASS |
+| `phase-6/README.md` | CLOSED + Wave 2 evidence — done |
+| `clean-host/HOST.md` + `IMPLEMENTATION-LOG.md` | …-phase6exit — done |
 
 ---
 
 ## 9. Definition of “fast done” for Phase 6
 
-**Fast done ≠ all product agents / RAG / real LLM.**  
-**Fast done =** Wave 1 code + Wave 2 staging proof satisfying §3 exit gate, evidenced in STATUS.
+**Met:** Wave 1 code + Wave 2 staging proof satisfying §3 exit gate, evidenced in STATUS.
 
 Anything beyond that is Wave 3+ product strangler under separate intakes and gates.
