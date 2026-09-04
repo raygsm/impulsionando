@@ -1,7 +1,8 @@
 # Phase 6 — Governed AI platform
 
 Opened: **2026-09-03T04:04Z**  
-Status: **IN PROGRESS (Wave 1 repo landed 2026-09-03T23:40Z)** — **not CLOSED** (Wave 2 promote pending)
+Closed: **2026-09-04T00:03Z**  
+Status: **CLOSED (staging)** — Wave 2 promote + `phase6:staging:verify` **2/2 PASS** · Phase 7 **not started**
 
 Program SoT: [`../../STATUS.md`](../../STATUS.md)  
 Detailed plan: [`../PHASE-6-AI.md`](../PHASE-6-AI.md) · [`../PRODUCT-INTAKE-ACTION-PLAN.md`](../PRODUCT-INTAKE-ACTION-PLAN.md) § Phase 6  
@@ -17,23 +18,30 @@ Add shared **governed AI** capabilities (gateway, policy, tool registry) without
 
 | Wave | Focus | State |
 | --- | --- | --- |
-| **6A** | Gateway + policy (kill switch, budgets, capabilities, allowlist) | **IN PROGRESS** — Wave 1 enforced budgets/allowlist/context |
-| **6B** | Tool registry + host-resolve membership when tenantId set | **IN PROGRESS** |
-| **6C** | Real-data read pilot | Repo ready · staging promote **UNKNOWN** |
-| **6D** | First tenant agent | **IN PROGRESS** — `GET /ai/agents/:tenantId` + pilot consumes config |
-| **6E** | Gated effects / approval | **IN PROGRESS** — membership on create · worker sink |
-| **6F** | Eval + ops telemetry | Repo ready · metrics in smoke · promote **UNKNOWN** |
+| **6A** | Gateway + policy | **CLOSED** (staging-live) |
+| **6B** | Tool registry + membership | **CLOSED** (staging-live) |
+| **6C** | Real-data READ pilot | **CLOSED** (chat grounded/refuse live) |
+| **6D** | First tenant agent | **CLOSED** (allow 200 + deny 403 live) |
+| **6E** | Gated effects | **CLOSED** (create membership-gated; worker sink) |
+| **6F** | Eval + telemetry | **CLOSED** (metrics 200 + contracts) |
+
+## Wave 2 close evidence (2026-09-04T00:03Z)
+
+- SHA `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b`
+- Images `…-phase6exit` (API + worker), local-load to `2.25.123.224`
+- `/health` `gitSha` matches promote
+- `AI_CHAT_ENABLED=true` · agent seed enabled
+- `npm run phase6:staging:verify` **PASS=2 FAIL=0**
+- Residuals: in-memory approvals OK for MVP · effect = sink · optional GHCR push
 
 ## Wave 1 note (2026-09-03T23:40Z) — repo lanes A–D
 
-Landed without staging promote (Wave 2 still required):
+Landed before Wave 2 promote:
 
-- **Lane A:** `AI_CAPABILITY_ALLOWLIST` filter · token/rate budget gate (`AI_BUDGET_EXCEEDED`) · server `AiChatContextAssembly`
-- **Lane B:** `GET /api/v1/ai/agents/:tenantId` · chat resolves membership + applies agent prompt/model/allowlist
-- **Lane C:** effects `assertMembership` on create · worker `ai.effect.execute` sink (ledger + log, **no domain writes**)
-- **Lane D:** smoke extends agents/effects when `PHASE6_AI_TENANT_ID` set · contracts **47/47**
-
-Do **not** mark Phase 6 CLOSED. Approvals remain in-memory (durable store deferred).
+- **Lane A:** `AI_CAPABILITY_ALLOWLIST` · budgets · server context assembly
+- **Lane B:** `GET /api/v1/ai/agents/:tenantId` · pilot consumes agent config
+- **Lane C:** effects membership · worker `ai.effect.execute` sink
+- **Lane D:** smoke/verify tooling · contracts **47/47**
 
 ## 6E note (2026-09-03) — scaffolding IN PROGRESS
 

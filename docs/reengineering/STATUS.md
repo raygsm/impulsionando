@@ -1,69 +1,55 @@
 # Status do Programa
 
-Atualizado em: 2026-09-03T23:50Z (Phase 6 **IN PROGRESS** — Wave 1 repo done · Wave 2 close tooling landed · promote/live still **UNKNOWN** — no SSH/Docker in this agent; Phase 5 remains **CLOSED**)
+Atualizado em: 2026-09-04T00:03Z (Phase 6 **CLOSED (staging)** — Wave 2 promote + `phase6:staging:verify` **2/2 PASS**; Phase 5 remains **CLOSED**; Phase 7 **not started**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Wave 2 plan: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)
 
 ## Estado geral
 
-**FASES 0–5 CONCLUÍDAS (staging). FASE 6 IN PROGRESS (6A–6E Wave 1 repo). FASE 7 NÃO INICIADA.**
+**FASES 0–6 CONCLUÍDAS (staging). FASE 7 NÃO INICIADA.**
 
 | Fase | Estado | Evidência |
 | --- | --- | --- |
 | 4B | **Concluída (staging)** | tenant.stg LIVE · smokes PASS |
 | 5A+5B | **CLOSED (staging)** | ledger SELECT **PASS** · enqueue/dup/poison **PASS** |
-| 5C | **CLOSED (staging)** | event-outbox live smoke **PASS** (residual table GRANTs applied) |
-| 5D | **CLOSED (staging)** | webhook ingress **PASS** (secret set) |
-| 5E | **CLOSED (staging)** | `WORKER_COMMUNICATION_ENABLED=true` · `COMMUNICATION_SINK=true` |
-| 5F | **CLOSED (staging)** | CRM invite → click → first-login live **PASS** (`…-journeyfix`) |
-| 5G | **CLOSED (staging)** | ops metrics **PASS** · outage drill **PASS** · owners **assigned** (Cauã) |
-| **5 (gate)** | **CLOSED (staging exit)** | `npm run phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
-| **6A/6B** | **IN PROGRESS** | staging API `…-phase6a` · Wave 1: allowlist + budgets + host-resolve membership |
-| **6C/6F** | **IN PROGRESS** (repo) | pilot + telemetry · Wave 2 live promote **UNKNOWN** |
-| **6D** | **IN PROGRESS** (repo) | `GET /ai/agents/:tenantId` wired · pilot **consumes** agent config |
-| **6E** | **IN PROGRESS** (repo) | effects membership on create · worker `ai.effect.execute` **sink** (no domain writes) |
+| 5C | **CLOSED (staging)** | event-outbox live smoke **PASS** |
+| 5D | **CLOSED (staging)** | webhook ingress **PASS** |
+| 5E | **CLOSED (staging)** | communication sink **ON** |
+| 5F | **CLOSED (staging)** | CRM invite journey **PASS** |
+| 5G | **CLOSED (staging)** | ops metrics + drill **PASS** · owners Cauã |
+| **5 (gate)** | **CLOSED (staging exit)** | `phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
+| **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
+| 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
 | 7 | Não iniciada | Cutover not authorized |
+
+## Phase 6 staging close (2026-09-04T00:03Z)
+
+| Item | Value |
+| --- | --- |
+| Promoted SHA | `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
+| API image | `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (local-load amd64) |
+| Worker image | `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` (local-load amd64) |
+| Runtime `/health` | **200** · `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
+| Verify | `npm run phase6:staging:verify` · **PASS=2 FAIL=0** |
+| Flags | `AI_CHAT_ENABLED=true` · tenant agent seed enabled |
+| Method | `docker save\|gzip\|ssh docker load` + `SKIP_PULL=1` · `PHASE6_CHAT=1` |
+| Residuals (non-blocking) | Approvals MVP in-memory OK per Wave 2 plan · effect worker = sink (no domain writes) · GHCR push of `…-phase6exit` optional · durable `reengineering_ai_approvals` migration may be applied separately |
+
+### Verify matrix
+
+| Check | Result |
+| --- | --- |
+| 6A–6F gateway matrix (capabilities/policy/tools/metrics/chat/agents allow/effects create) | **PASS** |
+| 6D agents deny + chat cross-tenant refuse | **PASS** |
 
 ## Próximo gate
 
-Phase 6 governed AI is **IN PROGRESS**. Wave 1 (repo) landed 2026-09-03T23:40Z — do **not** mark Phase 6 CLOSED until Wave 2 staging proof.
-
-**Next (Wave 2 — parallel where possible, then sequential promote):**
-
-See [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md).
-
-Repo tooling ready: `npm run phase6:staging:verify` · `npm run phase6:wave2:close` (needs SSH key + IMAGE_TAG).
-
-This cloud agent **cannot** finish promote (no Docker / no `id_ed25519_impulsionando` / no operator bearer). Operator must run Wave 2 on a machine with those, then agent can close STATUS.
+Phase 6 staging exit is **CLOSED**. **Phase 7 cutover is not started** and remains blocked until an explicit program gate. Do not treat this close as prod DNS / legacy VPS authority.
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 
-`npm run phase5:staging:verify` against `https://api.stg.impulsionando.com.br` after residual GRANTs + `…-journeyfix` API:
-
-| Check | Result | Note |
-| --- | --- | --- |
-| 5B ledger SELECT | **PASS** | proof=table |
-| 5B job-enqueue-consume | **PASS** | proof=worker_log |
-| 5B job-duplicate | **PASS** | proof=rpc |
-| 5B job-poison-dlq | **PASS** | proof=enqueued_no_ssh_verify |
-| 5C event-outbox live | **PASS** | ticket+outbox row |
-| 5D webhook-ingress | **PASS** | 202 accepted |
-| 5G ops-metrics | **PASS** | queue-metrics + integrations 200 |
-| 5F crm-journey live | **PASS** | invite_created → link_clicked → first_login |
-
-## Phase 5 staging verify matrix (2026-09-03T03:20Z)
-
-| Check | Result | Note |
-| --- | --- | --- |
-| 5B ledger SELECT | **PASS** | proof=table |
-| 5B job-enqueue-consume | **PASS** | |
-| 5B job-duplicate | **PASS** | |
-| 5B job-poison-dlq | **PASS** | |
-| 5C event-outbox live | **FAIL** | need residual GRANT |
-| 5D webhook-ingress | **PASS** | |
-| 5G ops-metrics | **PASS** | |
-| 5F crm-journey live | **FAIL** | need residual GRANT |
+`npm run phase5:staging:verify` against `https://api.stg.impulsionando.com.br` — retained as Phase 5 authority.
 
 ## Evidência corrente
 
@@ -71,12 +57,9 @@ This cloud agent **cannot** finish promote (no Docker / no `id_ed25519_impulsion
 | --- | --- |
 | Staging ref | `aamorcqznimmleafavai` |
 | Live API | `https://api.stg.impulsionando.com.br` |
-| Live tenant-web | `https://tenant.stg.impulsionando.com.br` · `/health` **200** · ACME OK |
-| API image (local-load) | `ghcr.io/raygsm/impulsionando-api:67e109511962f86dbbdea2356bc8486b87a4abc1-phase6a` |
-| Worker image (local-load) | `ghcr.io/raygsm/impulsionando-worker:67e109511962f86dbbdea2356bc8486b87a4abc1-outbox` (alias `-outbox1`) · outbox/comm/journey **ON** |
-| tenant-web image (local-load) | `ghcr.io/raygsm/impulsionando-tenant-web:67e109511962f86dbbdea2356bc8486b87a4abc1` |
-| Runtime gitSha (API) | `67e109511962f86dbbdea2356bc8486b87a4abc1` |
+| Live tenant-web | `https://tenant.stg.impulsionando.com.br` |
+| API image (local-load) | `ghcr.io/raygsm/impulsionando-api:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
+| Worker image (local-load) | `ghcr.io/raygsm/impulsionando-worker:c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b-phase6exit` |
+| Runtime gitSha (API) | `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
 | Clean host | `2.25.123.224` |
-| GHCR workflow (prior) | [33575721274](https://github.com/raygsm/impulsionando/actions/runs/33575721274) — this SHA **not** GHCR-pushed |
-| Wave 1 contracts | `npm run test:phase6:contracts` **47/47 PASS** @ 2026-09-03T23:37Z |
 | Integration owners | Cauã — [`04-migration/phase-5/INTEGRATION-REGISTRY.md`](04-migration/phase-5/INTEGRATION-REGISTRY.md) |

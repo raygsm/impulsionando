@@ -54,4 +54,11 @@ Program SoT: [`../../STATUS.md`](../../STATUS.md) · Canvas: [`UPDATE-CANVAS.md`
 | Repo Wave 1 code | present on branch |
 | Contracts | 47/47 |
 
-Promote/live CLOSE cannot finish inside this cloud agent until SSH + bearer + image build path exist. Repo lanes V/O/D proceed immediately.
+## Wave 2 result (2026-09-04T00:03Z) — CLOSED
+
+Operator machine with SSH + Docker completed promote:
+
+- Images `…-phase6exit` from SHA `c4c9530a…` local-loaded to `2.25.123.224`
+- `phase6:staging:verify` **PASS=2 FAIL=0**
+- Phase 6 marked **CLOSED (staging)** in `STATUS.md` · Phase 7 still not started
+

@@ -502,3 +502,19 @@ Format per entry:
   - `/health` **200** · `gitSha=67e109511962f86dbbdea2356bc8486b87a4abc1` · image tag `…-phase6a`
   - Phase 6 remains **IN PROGRESS** (not CLOSED) · 6C–6F not started · no GHCR push of this tag · no prod / no legacy VPS
 - Docs updated: this log, [`HOST.md`](HOST.md), [`../../../STATUS.md`](../../../STATUS.md), [`../../phase-6/README.md`](../../phase-6/README.md)
+
+## 2026-09-04T00:03Z — Phase 6 Wave 2 CLOSED (staging)
+
+- Operator: Agent (laptop Docker+SSH; operator secrets local only; no secrets logged)
+- Change:
+  - Built linux/amd64 API+worker from `c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` tags `…-phase6exit`
+  - Local-load to clean host `2.25.123.224` + `SKIP_PULL=1` deploy API+worker
+  - Fixed Swarm `GIT_SHA` env override (was stuck on `4d9d4ffb…`)
+  - Set `AI_CHAT_ENABLED=true` + tenant agent seed env names
+  - Ran `npm run phase6:staging:verify` → **PASS=2 FAIL=0** (allow+deny)
+- Result / evidence:
+  - `/health` `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b`
+  - STATUS Phase 6 **CLOSED (staging)** · Phase 7 not started
+  - Residuals: optional GHCR push of `…-phase6exit`; approvals MVP in-memory; effect worker sink-only
+- Docs touched: `STATUS.md`, `phase-6/README.md`, this log, `HOST.md`
+- Forbidden: no legacy VPS `187.77.232.52`; no prod DNS; no secrets in git
