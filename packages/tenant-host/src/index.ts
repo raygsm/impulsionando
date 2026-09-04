@@ -22,11 +22,15 @@ export const TENANT_LANDING_BY_SUBDOMAIN: Record<string, string> = {
   riobeer: "/riobeer",
 };
 
+export const CSI_STAGING_HOST = "stg.csi.impulsionando.com.br";
+
 export const CUSTOM_HOST_LANDING: Record<string, string> = {
   "agenda.chrismed.com.br": "/chrismed",
   "www.agenda.chrismed.com.br": "/chrismed",
   "colorssaude.impulsionando.com.br": "/colors",
   "wmp.impulsionando.com.br": "/wmp",
+  // stg.csi… first segment is "stg", not "csi" — exact host + pattern below
+  [CSI_STAGING_HOST]: "/csi",
 };
 
 const RESERVED_SUBDOMAINS = new Set([
@@ -40,7 +44,32 @@ const RESERVED_SUBDOMAINS = new Set([
   "mail",
   "staging",
   "dev",
+  // bare stg.impulsionando.com.br = platform staging apex — not a tenant slug
+  "stg",
 ]);
+
+function isReservedLabel(label: string): boolean {
+  return RESERVED_SUBDOMAINS.has(label) || label.startsWith("id-preview");
+}
+
+/**
+ * Phase 7 staging rehearsal: stg.<tenant>.impulsionando.com.br → tenant slug.
+ * Bare stg.impulsionando.com.br stays platform (reserved).
+ */
+function tenantSlugFromPrefix(prefix: string): string | null {
+  const parts = prefix.split(".").filter(Boolean);
+  if (parts.length === 0) return null;
+
+  if (parts.length === 2 && parts[0] === "stg") {
+    const tenantSlug = parts[1];
+    if (!tenantSlug || isReservedLabel(tenantSlug)) return null;
+    return tenantSlug;
+  }
+
+  const firstSeg = parts[0];
+  if (!firstSeg || isReservedLabel(firstSeg)) return null;
+  return firstSeg;
+}
 
 export type TenantSubdomainMatch = { slug: string; host: string; rootDomain: string };
 
@@ -51,9 +80,9 @@ export function getTenantSubdomain(host: string | null | undefined): TenantSubdo
     if (cleanHost === root) return null;
     if (!cleanHost.endsWith("." + root)) continue;
     const prefix = cleanHost.slice(0, -("." + root).length);
-    const firstSeg = prefix.split(".")[0];
-    if (!firstSeg || RESERVED_SUBDOMAINS.has(firstSeg)) return null;
-    return { slug: firstSeg, host: cleanHost, rootDomain: root };
+    const slug = tenantSlugFromPrefix(prefix);
+    if (!slug) return null;
+    return { slug, host: cleanHost, rootDomain: root };
   }
   return null;
 }

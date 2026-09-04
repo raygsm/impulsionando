@@ -124,9 +124,22 @@ IMAGE_TAG=<sha>-csi7b SKIP_PULL=1 ./scripts/deploy-reengineering-csi-core-clean-
 5. `PHASE7_ALLOW_PROD=1 PHASE7_PILOT_HOSTNAME=csi.impulsionando.com.br DRY_RUN=0 npm run phase7:pilot:verify`  
 6. Watch window → 7C. Abort → [`ROLLBACK-KIT.md`](./ROLLBACK-KIT.md).
 
+## Browser host recognition (`stg.<tenant>`) — code fix (redeploy required)
+
+Public browsers on `stg.csi.impulsionando.com.br` previously hit Impulsionando `TenantHostFallback` (“Domínio não reconhecido”) even when Traefik + `/csi` SSR were healthy.
+
+| Piece | Behavior |
+| --- | --- |
+| Bug | `getTenantSubdomain` / `useTenant` used the **first** label → `stg`, not `csi` |
+| Landing-only patch | `CUSTOM_HOST_LANDING` / `CSI_STAGING_HOST` already mapped exact host → `/csi` for redirects, but did **not** satisfy `useTenant` |
+| Fix | Pattern `stg.<tenant>.impulsionando.com.br` → slug `<tenant>`; bare `stg.impulsionando.com.br` stays platform (not a tenant) |
+| Code | `src/lib/subdomain.ts` · `packages/tenant-host/src/index.ts` · tests in `src/lib/subdomain.test.ts` |
+| Live | **UNKNOWN until** CSI staging image rebuild + redeploy on clean host picks up this SHA |
+
 ## Explicit exclusions
 
 - Apex / www / app as this pilot  
 - Using staging Supabase behind prod CSI hostname  
 - Dokploy / wipe on legacy `187.77.232.52`  
 - 7F retirement  
+- Treating bare `stg.impulsionando.com.br` as a customer tenant  
