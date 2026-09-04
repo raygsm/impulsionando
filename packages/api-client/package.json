@@ -1,8 +1,8 @@
 {
-  "name": "@impulsionando/auth",
+  "name": "@impulsionando/api-client",
   "version": "0.0.1",
   "private": true,
-  "description": "Supabase SSR cookie session helpers for Impulsionando web apps.",
+  "description": "Typed Nest HTTP client for Impulsionando web apps.",
   "type": "module",
   "exports": {
     ".": {
@@ -15,8 +15,11 @@
     "src"
   ],
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.106.2"
+    "@impulsionando/contracts": "workspace:*",
+    "@impulsionando/tenant-context": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^3.23.8"
   },
   "engines": {
     "node": ">=20"

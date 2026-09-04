@@ -1,3 +1,3 @@
-# @impulsionando/config
+# `@impulsionando/config`
 
-Placeholder for shared configuration and startup environment validation helpers.
+Zod-validated environment per app. Errors mention **variable names only**, never values.
