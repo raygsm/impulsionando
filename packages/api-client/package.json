@@ -1,0 +1,27 @@
+{
+  "name": "@impulsionando/api-client",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Typed Nest HTTP client for Impulsionando web apps.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@impulsionando/contracts": "workspace:*",
+    "@impulsionando/tenant-context": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

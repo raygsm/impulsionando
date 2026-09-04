@@ -347,6 +347,27 @@ export {
 } from "./ai";
 /* --- end Phase 6A–6F --- */
 
+export {
+  ActionDefinitionSchema,
+  AgentSummarySchema,
+  DashboardAreaIdSchema,
+  DashboardManifestSchema,
+  DashboardTenantBrandingSchema,
+  ModuleLifecycleStateSchema,
+  ModuleStatusSchema,
+  NavigationItemSchema,
+  WidgetDefinitionSchema,
+  type ActionDefinition,
+  type AgentSummary,
+  type DashboardAreaId,
+  type DashboardManifest,
+  type DashboardTenantBranding,
+  type ModuleLifecycleState,
+  type ModuleStatus,
+  type NavigationItem,
+  type WidgetDefinition,
+} from "./dashboard";
+
 /* --- Phase 6E gated effects / approval (minimal export block) --- */
 export {
   AI_EFFECT_ENV_NAMES,
