@@ -3,6 +3,7 @@
 Created: **2026-09-04**
 State: **PROPOSED — schemas below are planning contracts, not implemented facts**
 Plan: [`FOUNDATION-AND-CRM-PLAN.md`](./FOUNDATION-AND-CRM-PLAN.md)
+Canonical database models: [`../../../06-autonomous-marketing-platform/database/README.md`](../../../06-autonomous-marketing-platform/database/README.md)
 
 ## 1. Contract principles
 
@@ -132,6 +133,8 @@ type ContactV1 = {
 
 Do not expose sensitive vertical fields in this base contract.
 
+`ContactV1.consent` is a read projection only. It summarizes the latest applicable `compliance.consent_events` by purpose/channel/lawful basis. A consent write appends an event; it never persists these summary values as the source of truth.
+
 ### Lead
 
 ```ts
@@ -207,7 +210,7 @@ type OpportunityV1 = {
   title: string
   ownerUserId?: string
   value?: { amountMinor: number; currency: string }
-  status: 'open' | 'won' | 'lost'
+  status: 'open' | 'won' | 'lost' | 'cancelled'
   outcomeReason?: string
   expectedCloseAt?: string
   closedAt?: string
@@ -241,8 +244,11 @@ GET    /api/v1/contacts
 POST   /api/v1/contacts
 GET    /api/v1/contacts/:contactId
 PATCH  /api/v1/contacts/:contactId
+POST   /api/v1/contacts/:contactId/consent-events
 GET    /api/v1/contacts/:contactId/timeline
 ```
+
+Consent command accepts purpose, channel, decision, lawful basis/evidence reference and occurred-at. It appends a canonical consent event and returns the recomputed summary; it never persists `ContactV1.consent` booleans as authority.
 
 ### Leads
 
@@ -344,8 +350,8 @@ lead.assigned
 lead.qualified
 lead.disqualified
 lead.converted
-follow_up.created
-follow_up.completed
+task.created
+task.completed
 opportunity.created
 opportunity.stage_changed
 opportunity.won
@@ -406,6 +412,7 @@ If several legacy tables represent contacts/leads, adapt them initially and plan
 | Command | Atomic requirement |
 | --- | --- |
 | Capture lead | Idempotency claim + contact link/create + lead + audit + outbox |
+| Record consent | Append-only consent event + audit + domain event + outbox; recompute summary projection |
 | Assign lead | Lead owner/version + audit + outbox |
 | Create follow-up | Task + related entity reference + audit + outbox |
 | Move stage | Opportunity version/stage + audit + outbox |
@@ -436,6 +443,8 @@ Minimum definitions must be approved before implementation:
 | Qualified | Leads whose qualification transition occurred in period |
 | Converted | Leads converted/opportunities won in period—choose one canonical event and avoid double count |
 | Conversion value | Sum of trustworthy won opportunity values; UNKNOWN when currency/source is incomplete |
+
+Phase 8 product decision **P-DB-06 must select one primary conversion event before Unit B implements or accepts the Converted metric**. Lead conversion, opportunity win, order confirmation and payment are distinct lifecycle milestones; secondary milestones may be reported separately but cannot be double-counted as the same conversion.
 
 ## 11. Error codes
 

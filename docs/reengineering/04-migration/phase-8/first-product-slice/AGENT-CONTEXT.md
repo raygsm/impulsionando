@@ -187,7 +187,7 @@ Do not add campaign sending, WhatsApp or advanced retention to make this loop lo
 
 ### AI
 
-- every tenant will have one internal business-agent configuration;
+- the **proposed target invariant** is an internal business-agent configuration for every tenant; product P0/P-DB-09 must accept its exact cardinality before persistence;
 - the first slice only adds governed READ tools for the CRM/Growth data it owns;
 - PREPARE remains a typed non-executed recommendation;
 - no new effects;
@@ -215,6 +215,8 @@ Required:
 RLS remains defense in depth. New exposed tables need RLS and policies, but an RLS policy does not replace Nest guards.
 
 ## 6. Data rule
+
+Canonical logical models and migration gates: [`../../../06-autonomous-marketing-platform/database/README.md`](../../../06-autonomous-marketing-platform/database/README.md).
 
 TypeScript contracts use `tenantId`. Physical legacy tables may use `company_id` or `tenant_id`.
 

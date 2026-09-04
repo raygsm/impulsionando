@@ -179,7 +179,9 @@ Keep `/api/v1/ai/*` compatibility initially, then expose:
 
 ## 6. Persistence
 
-No ORM reformulation is required for Dashboard V1. Keep Supabase JS/RPCs, but **no product slice may open until its per-table adapter is registered and tested against staging**. The reviewed `company_id`/`tenant_id` mapping described in Phase 8 is a hard precondition, not later cleanup.
+Canonical database redesign: [`database/README.md`](./database/README.md).
+
+No ORM is automatically required for Dashboard V1, and the 577-table legacy shape must not become the new model. The physical access choice—private canonical schemas, prefixed public/RLS tables, or a new managed project—requires an explicit technical decision. Until a canonical aggregate migrates, keep Supabase JS/RPC adapters, but **no product slice may open until its per-table adapter is registered and tested against staging**. The reviewed `company_id`/`tenant_id` mapping described in Phase 8 is a hard precondition, not later cleanup.
 
 New product state should prefer:
 
@@ -215,10 +217,12 @@ The Phase 6 MVP intentionally allowed in-memory state. The product cannot.
 | N3 | Add Contacts/Growth/Tasks around existing CRM data via adapters | Legacy tables remain |
 | N4 | Migrate CRM, campaigns and communications slices | Phase 5 outbox/jobs reused |
 | N5 | Add optional Operations/ERP modules in dependency order | Per-module parity and deny tests |
-| N6 | Make agent registry durable and add tenant/client/parent scopes | Existing Phase 6 routes stay compatible |
+| N6 | After P-DB-09 + durable Phase 6 registry gate: make agent registry durable and add tenant/client/parent scopes | Existing Phase 6 routes stay compatible |
 | N7 | Retire legacy server functions by route-ownership slice | Rollback manifest retained |
 
 At no stage is the current Nest application discarded or replaced.
+
+Any N3–N7 stage that introduces writes is subordinate to [`database/MIGRATION-PLAN.md`](./database/MIGRATION-PLAN.md) Step 7/DB7: enumerate and disable or route every legacy browser, n8n, webhook and cron writer before authority moves. “Legacy tables remain” never authorizes parallel independent writers. The accepted `app-web` runtime—TanStack under ADR-002 unless ADR-009 is accepted—consumes the same Nest contracts.
 
 ### Existing endpoint migration map
 

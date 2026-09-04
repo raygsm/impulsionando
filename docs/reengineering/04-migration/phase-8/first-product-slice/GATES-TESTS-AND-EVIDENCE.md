@@ -93,7 +93,7 @@ Required before Unit B:
 - existing writer inventory;
 - route/server-function behavior trace;
 - canonical Contact/Lead/Task/Opportunity decisions;
-- metric definitions;
+- metric definitions, including accepted database product decision P-DB-06 selecting the primary conversion event;
 - migration classification;
 - transaction/outbox/audit strategy;
 - rollback;

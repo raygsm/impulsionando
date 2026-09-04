@@ -69,7 +69,7 @@ Names are proposals; contracts must be versioned before implementation.
 - `contact.created`, `contact.updated`, `contact.consent_changed`;
 - `lead.captured`, `lead.qualified`, `lead.assigned`;
 - `opportunity.created`, `opportunity.stage_changed`, `opportunity.won`, `opportunity.lost`;
-- `follow_up.due`, `follow_up.completed`;
+- `task.created`, `task.due`, `task.completed` (follow-up is a task purpose/link, not a separate event namespace);
 - `campaign.created`, `campaign.activated`, `campaign.completed`;
 - `retention.risk_detected`, `retention.reactivation_eligible`, `retention.reactivated`.
 
@@ -80,7 +80,7 @@ Names are proposals; contracts must be versioned before implementation.
 - `inventory.low`, `inventory.movement_recorded`;
 - `receivable.created`, `receivable.overdue`, `receivable.settled`;
 - `invoice.issued`, `billing.payment_failed`, `billing.service_state_changed`;
-- `document.added`, `task.created`, `task.completed`.
+- `document.added`.
 
 ### Communications and platform
 

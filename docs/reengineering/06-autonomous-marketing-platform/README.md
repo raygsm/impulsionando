@@ -86,6 +86,7 @@ CRM, agenda, sales, inventory, finance and billing are not unrelated mini-produc
 | [`NESTJS-REFORMULATION.md`](./NESTJS-REFORMULATION.md) | What stays, what changes and the target Nest module graph |
 | [`DATA-EVENTS-AND-AUTOMATION.md`](./DATA-EVENTS-AND-AUTOMATION.md) | Canonical data, event spine, automation extension points and integrations |
 | [`IMPLEMENTATION-PLAN.md`](./IMPLEMENTATION-PLAN.md) | Dashboard-first phases, gates, tests, evidence and Phase 8 impact |
+| [`database/README.md`](./database/README.md) | Canonical database models, legacy disposition, ERP/operations, execution/AI/analytics, verticals, migration and decisions |
 
 ## Current-code conclusion
 
