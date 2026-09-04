@@ -51,7 +51,7 @@
     "phase4:smoke:garrido-resolve": "node scripts/smoke-reengineering-garrido-resolve.mjs",
     "tenant-web:dev": "pnpm --filter @impulsionando/tenant-web start:dev",
     "platform-web:dev": "pnpm --filter @impulsionando/platform-web start:dev",
-    "app-web:dev": "pnpm --filter @impulsionando/app-web start:dev",
+    "app-web:dev": "pnpm --filter @impulsionando/app-web dev",
     "phase4:smoke:tenant-web-health": "node scripts/smoke-reengineering-tenant-web-health.mjs",
     "phase5:smoke:worker-health": "node scripts/smoke-reengineering-worker-health.mjs",
     "test:reengineering:job-queue": "vitest run tests/reengineering/job-queue.contract.test.ts",
