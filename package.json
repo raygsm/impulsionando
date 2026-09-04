@@ -45,6 +45,7 @@
     "staging:seed:chrismed-tenant": "node scripts/staging/phase4-seed-chrismed-tenant.mjs",
     "staging:seed:garrido-tenant": "node scripts/staging/phase4b-seed-garrido-tenant.mjs",
     "staging:seed:garrido-config": "node scripts/staging/phase4b-seed-garrido-config.mjs",
+    "staging:seed:csi-tenant": "node scripts/staging/phase7-seed-csi-tenant.mjs",
     "staging:seed:membership": "node scripts/staging/phase4b-seed-membership.mjs",
     "test:phase4b:contracts": "node scripts/phase4b-contract-all.mjs",
     "phase4:smoke:garrido-resolve": "node scripts/smoke-reengineering-garrido-resolve.mjs",

@@ -8,13 +8,19 @@ Created: **2026-09-04** · Updated: **2026-09-04T00:30Z**
 
 ## Wave 2 — 7B one-tenant pilot
 
-**Blocked on:** human picks hostname ([`PILOT-SELECTION.md`](./PILOT-SELECTION.md)) + written auth.
+**Selected:** `csi.impulsionando.com.br` — [`CSI-PILOT-7B.md`](./CSI-PILOT-7B.md) · [`PILOT-SELECTION.md`](./PILOT-SELECTION.md).
 
-1. Fill decision record in pilot selection.  
-2. Flip **one** hostname only.  
-3. Observation window ≥ default in playbook.  
-4. `DRY_RUN=0 npm run phase7:pilot:verify` (or `PHASE7_RUN_PILOT_VERIFY=1`).  
-5. Abort → rollback kit; do not expand.
+**DNS flip BLOCKED** until CSI-capable web + prod env exist (stub tenant-web ≠ CSI UI).
+
+Meanwhile: `npm run staging:seed:csi-tenant` + Impulsionando staging development **UNLOCKED**.
+
+When blockers clear:
+
+1. Fill go/no-go in CSI runbook.  
+2. Flip **only** `csi` hostname.  
+3. Observation window ≥24h.  
+4. `phase7:pilot:verify` with prod flags only when authorized.  
+5. Abort → rollback kit.
 
 ## Wave 3 — 7C / 7D / 7E
 

@@ -34,21 +34,22 @@ const server = http.createServer((req, res) => {
   }
 
   const tenantPath = resolveTenantPathFromHost(host);
-  const pilotSlug = process.env.TENANT_PILOT_SLUG || "garrido";
+  const pilotSlug = process.env.TENANT_PILOT_SLUG || "csi";
+  const csiPilot = tenantPath === "/csi" || pilotSlug === "csi";
 
-  if (tenantPath === `/${pilotSlug}`) {
+  if (tenantPath === `/${pilotSlug}` || (csiPilot && tenantPath === "/csi")) {
     sendJson(res, 200, {
       runtime: "tenant-web",
       host,
-      tenantPath,
-      pilot: pilotSlug,
-      mode: "4b-7-pilot",
+      tenantPath: tenantPath || "/csi",
+      pilot: "csi",
+      mode: "7b-csi-pilot-stub",
       config: {
         schemaVersion: 1,
         branding: {
-          tagline: "Referência imobiliária no Rio",
-          primary_color: "#1a3a5c",
-          secondary_color: "#c9a227",
+          tagline: "CSI — staging strangler stub (not full UI)",
+          primary_color: "#0f172a",
+          secondary_color: "#38bdf8",
         },
         locale: {
           country_code: "BR",
@@ -57,7 +58,8 @@ const server = http.createServer((req, res) => {
           timezone: "America/Sao_Paulo",
         },
       },
-      message: "Garrido pilot — shared image, configuration-only differences.",
+      message:
+        "CSI Phase 7B stub — JSON only. Full /csi TanStack UI remains on legacy until vertical migrate or SSR promote.",
       gitSha,
     });
     return;

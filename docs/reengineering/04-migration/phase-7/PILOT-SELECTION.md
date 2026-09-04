@@ -38,12 +38,21 @@ No prod tenant UUIDs or secrets in this file.
 - `n8n.impulsionando.com.br`  
 - Any hostname without written authorization  
 
-## Decision record (blank until human)
+## Decision record
 
 | Field | Value |
 | --- | --- |
-| Chosen hostname | |
-| Authorized by | |
-| Date | |
-| Observation window | |
-| Link to STATUS / chat | |
+| Chosen hostname | `csi.impulsionando.com.br` |
+| Authorized by | Operator (Cauã) — chat 2026-09-04 |
+| Date | 2026-09-04 |
+| Observation window | ≥24h when DNS flip authorized |
+| Runbook | [`CSI-PILOT-7B.md`](./CSI-PILOT-7B.md) |
+| DNS flip | **BLOCKED** until CSI web surface + prod env exist |
+
+### Shortlist
+
+| Candidate hostname | Why low-risk | Owner | Decision |
+| --- | --- | --- | --- |
+| `csi.impulsionando.com.br` | Non-clinical; declared client; smaller than apex | Cauã / Raygs | **SELECTED** |
+| apex `impulsionando.com.br` | Platform priority but max blast radius | — | defer after CSI |
+| `chrismed.*` / `riomed.*` | Clinical | — | excluded first pilot |

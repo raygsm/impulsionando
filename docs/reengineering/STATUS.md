@@ -1,6 +1,6 @@
 # Status do Programa
 
-Atualizado em: 2026-09-04T00:30Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **no prod DNS**; **7F PARKED**)
+Atualizado em: 2026-09-04T00:50Z (Phase 6 **CLOSED**; Phase 7 **IN PROGRESS** — **7A PASS**; **7B pilot = CSI** selected; **DNS flip BLOCKED** until CSI web+prod env; **7F PARKED**; Impulsionando **staging development UNLOCKED**)
 
 Operational canvas: [`04-migration/UPDATE-CANVAS.md`](04-migration/UPDATE-CANVAS.md)  
 Phase 6 Wave 2: [`04-migration/phase-6/WAVE-2-CLOSE.md`](04-migration/phase-6/WAVE-2-CLOSE.md)  
@@ -22,7 +22,7 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | **5 (gate)** | **CLOSED (staging exit)** | `phase5:staging:verify` **8/8 PASS** @ 2026-09-03T03:40Z |
 | **6 (gate)** | **CLOSED (staging)** | Wave 2 live proof @ 2026-09-04T00:03Z — see below |
 | 6A–6F | **CLOSED with Phase 6** | gateway/tools/pilot/agents allow+deny/effects create/metrics |
-| **7** | **IN PROGRESS** | **7A PASS** @ 2026-09-04T00:30Z · 7B needs hostname · **7F PARKED** |
+| **7** | **IN PROGRESS** | **7A PASS** · **7B = CSI** selected · DNS **BLOCKED** (no CSI UI on clean yet) · **7F PARKED** |
 
 ## Phase 6 staging close (2026-09-04T00:03Z)
 
@@ -44,33 +44,25 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 | 6A–6F gateway matrix (capabilities/policy/tools/metrics/chat/agents allow/effects create) | **PASS** |
 | 6D agents deny + chat cross-tenant refuse | **PASS** |
 
-## Phase 7 — IN PROGRESS · 7A PASS (2026-09-04T00:30Z)
+## Phase 7 — IN PROGRESS · 7A PASS · 7B = CSI (selected)
 
 | Item | Value |
 | --- | --- |
-| Scope completed | **7A staging rehearsal matrix** |
-| Verify | `DRY_RUN=0 npm run phase7:staging:rehearse` · **PASS=4 FAIL=0 SKIP=1** |
-| Runtime `/health` | **200** · `gitSha=c4c9530ab55f1bcb9ba7db6a10ef9e76265c870b` |
-| Nested | phase5 + phase6 staging verify **PASS** |
-| Traefik swap / rollback practice | **SKIP** — no Swarm Host mutation this session |
-| Evidence | [`04-migration/phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
-| Prod DNS / 7B | **FORBIDDEN** until human names one pilot hostname |
+| 7A | **PASS** @ 2026-09-04T00:30Z — [`phase-7/EVIDENCE-7A.md`](04-migration/phase-7/EVIDENCE-7A.md) |
+| **7B pilot** | **`csi.impulsionando.com.br`** — [`phase-7/CSI-PILOT-7B.md`](04-migration/phase-7/CSI-PILOT-7B.md) |
+| 7B DNS flip | **BLOCKED** — CSI HTML still legacy-only; clean host has Nest+stub on `*.stg` / staging DB only |
+| Staging CSI seed | `npm run staging:seed:csi-tenant` → company `CSI Invest` / subdomain `csi` (staging) |
+| Impulsionando development | **UNLOCKED on staging / new stack** — do not wait for CSI DNS |
+| Prod DNS / apex | **FORBIDDEN** until CSI web+prod env blockers clear |
 | Legacy VPS | **FORBIDDEN** |
-| 7F Retirement | **PARKED** |
-
-### 7A evidence rows
-
-| Check | Result |
-| --- | --- |
-| API `/health` + gitSha | **PASS** |
-| tenant-web reachable | **PASS** |
-| Nested `phase5:staging:verify` | **PASS** |
-| Nested `phase6:staging:verify` | **PASS** |
-| `phase7:pilot:verify` | **SKIP** (opt-in; 7B) |
+| 7F | **PARKED** |
 
 ## Próximo gate
 
-**7B:** human names **one** low-risk hostname ([`04-migration/phase-7/PILOT-SELECTION.md`](04-migration/phase-7/PILOT-SELECTION.md)) + written auth → single DNS/traffic flip → observation window. Then 7C–7E. **7F remains PARKED.**
+1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized.  
+2. Build or migrate **CSI UI** (or prod SSR) onto clean stack with **prod** env.  
+3. Then flip **only** `csi.impulsionando.com.br` → clean (7B DNS).  
+4. Then 7C–7E. **7F PARKED.**
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 
