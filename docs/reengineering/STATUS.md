@@ -65,8 +65,8 @@ Phase 7 board: [`04-migration/phase-7/README.md`](04-migration/phase-7/README.md
 1. **Develop Impulsionando** on staging (Nest / tenant-web / product) — authorized.  
 2. Rebuild/redeploy CSI staging image with `stg.<tenant>` host recognition, then confirm browser no longer shows “Domínio não reconhecido” on `stg.csi…`.  
 3. Add Cloudflare **A** `stg.csi` → `2.25.123.224` (grey / DNS-only) for public staging URL (human — no CF token this session). Do **not** create `csi.stg`.  
-3. When remaining blockers green: Cloudflare flip **only** `csi` → clean (prod-shaped service already Host-proven).  
-4. Then 7C–7E. **7F PARKED.**
+4. When remaining blockers green: Cloudflare flip **only** `csi` → clean (prod-shaped service already Host-proven).  
+5. Then 7C–7E. **7F PARKED.**
 
 ## Phase 5 staging verify matrix (2026-09-03T03:40Z) — **8/8 PASS**
 
