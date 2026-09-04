@@ -1,405 +1,389 @@
 # INTAKE VIVO — CHRISMED — AGENDA, PROFISSIONAIS, PEGAAGENDA E EVENTOS
 
 **Projeto/cliente:** CHRISMED
-**Destinatários:** K1 / Cauã / equipe de desenvolvimento
-**Natureza:** Intake vivo e consolidado. Este é o documento único para esta frente; novas definições devem atualizar/substituir este mesmo documento, evitando Intakes concorrentes.
-**Execução:** não alterar código automaticamente; este documento orienta análise e implementação posterior.
+**Destinatários:** Cauã / K1 / equipe de desenvolvimento
+**Natureza:** Intake vivo, único e consolidado. Novas definições desta frente devem atualizar este mesmo documento, substituindo regras anteriores quando houver conflito e evitando documentos concorrentes.
+**Execução:** este documento orienta análise e implementação posterior; não alterar código automaticamente sem priorização expressa.
 
 ---
 
-## 1. PRINCÍPIO GERAL
+## 1. VISÃO EXECUTIVA
 
-A CHRISMED deve possuir dois módulos centrais e extremamente importantes:
+A CHRISMED deve ser entendida como uma operação integrada de saúde e relacionamento profissional sustentada por dois módulos centrais do Core Impulsionando:
 
-1. **Agenda/Agendamento**, incluindo profissionais de saúde, teleconsulta, consulta presencial, consulta domiciliar, remarcações, cancelamentos, financeiro, carteira e PegaAgenda.
-2. **Eventos**, incluindo captação, cadastro, convites, aprovação, contratantes, gestores, QR Code, check-in, no-show, relatórios e BI.
+1. **Agenda/Agendamento**, para pacientes e profissionais de saúde, incluindo teleconsulta, presencial, domiciliar, remarcação, cancelamento, carteira, financeiro e PegaAgenda.
+2. **Eventos**, para laboratórios, empresas, sociedades médicas e outros contratantes, incluindo captação, segmentação, convite, aceite, aprovação, QR Code, check-in, no-show, relatórios e BI.
 
-Ambos devem usar o mesmo cadastro profissional, mesmas taxonomias, mesmo CRM, mesma camada de comunicação, financeiro, auditoria e o agente **Oliver** como instância especializada da CHRISMED.
+Esses dois módulos compartilham a mesma identidade profissional, mesmas taxonomias, mesmo CRM, mesma camada de comunicação, mesmo ledger/financeiro, mesma auditoria e o agente **Oliver** como instância especializada da CHRISMED.
 
-Não criar sistemas paralelos. Agenda e Eventos devem ser módulos reutilizáveis do Core, configurados para a CHRISMED.
+**Não criar sistemas paralelos. Não duplicar cadastro, agenda, CRM, profissionais ou eventos.** Tudo deve usar Core único e regras por tenant.
 
 ---
 
-## 2. CADASTRO DE PROFISSIONAIS DE SAÚDE
+## 2. ATORES E PERMISSÕES
 
-A base de profissionais deve ser um ativo estratégico crescente da CHRISMED.
+### 2.1 Gestão CHRISMED
 
-O profissional pode entrar por:
+Pode:
+- aprovar/reprovar profissionais;
+- cadastrar/importar profissionais;
+- criar e administrar eventos;
+- configurar planos, preços, regras e comunicações;
+- acompanhar agenda, PegaAgenda, financeiro, carteiras, check-ins e BI;
+- cadastrar contratantes e participantes de gestão;
+- intervir operacionalmente quando necessário.
 
+### 2.2 Profissional de saúde
+
+Pode:
+- manter cadastro profissional;
+- selecionar especialidades/subespecialidades;
+- selecionar modalidades de atendimento;
+- abrir e fechar agenda;
+- definir duração e preço por serviço/modalidade;
+- cadastrar consultórios/endereço;
+- definir raio de atendimento domiciliar e raio de convites de eventos;
+- remarcar compromissos dentro das regras;
+- participar do PegaAgenda;
+- aceitar convites de eventos;
+- solicitar participação orgânica em eventos públicos;
+- acompanhar carteira, repasses, multas, bônus e histórico.
+
+### 2.3 Paciente
+
+Pode:
+- pesquisar/agendar atendimento;
+- escolher modalidade;
+- pagar pela CHRISMED;
+- remarcar diretamente na agenda;
+- cancelar dentro das regras;
+- receber links, instruções, rotas e comunicações;
+- acompanhar consultas e histórico permitido.
+
+### 2.4 Contratante de evento
+
+Ex.: laboratório, indústria, empresa ou sociedade médica.
+
+Pode acompanhar somente seus próprios eventos e relatórios autorizados.
+
+### 2.5 Participante de gestão do evento
+
+Ex.: propagandista, vendedor, consultor ou gestor do laboratório.
+
+Pode acompanhar o evento e executar check-in conforme permissão. Não tem acesso ao restante da CHRISMED.
+
+---
+
+## 3. CADASTRO ÚNICO DE PROFISSIONAIS DE SAÚDE
+
+A base de profissionais deve crescer continuamente e ser tratada como ativo estratégico da CHRISMED.
+
+Entradas possíveis:
 - cadastro orgânico pelo site;
 - convite da CHRISMED;
-- cadastro manual interno;
+- cadastro manual;
 - importação por planilha;
-- eventual origem por eventos ou outras campanhas.
+- origem por campanhas/eventos.
 
-### 2.1 Aprovação
+### 3.1 Aprovação
 
-Profissional novo que se cadastra organicamente deve passar pelo **Comitê de Gestão CHRISMED**. A entrada não é automática.
+Profissional novo que se cadastra organicamente **não entra automaticamente**. O cadastro vai ao Comitê de Gestão CHRISMED.
 
 Após aprovação:
-
 - recebe boas-vindas;
 - entra no CRM/base oficial;
-- passa a poder participar de eventos;
-- passa a acessar sua agenda;
-- pode configurar modalidades, preços, durações, endereços e disponibilidade;
-- passa a receber comunicações e convites compatíveis com seus filtros.
+- acessa agenda;
+- configura modalidades, preços, duração, endereços e disponibilidade;
+- passa a receber convites compatíveis;
+- pode participar de eventos e do PegaAgenda.
 
-### 2.2 Dados obrigatórios
+### 3.2 Dados obrigatórios
 
-Cadastro completo deve incluir, entre outros:
-
+Cadastro deve contemplar, no mínimo:
 - nome completo;
 - CPF obrigatório;
-- data de nascimento quando aplicável;
 - e-mail;
 - celular/WhatsApp;
 - endereço completo;
 - CEP;
 - profissão;
 - conselho profissional aplicável;
-- número do conselho;
-- UF do conselho quando aplicável;
+- número/UF do conselho quando aplicável;
 - especialidades;
 - subespecialidades;
 - áreas/nichos de atendimento;
 - idiomas;
-- modalidades de atendimento disponíveis;
-- raio geográfico para convites/eventos e/ou atendimento domiciliar quando aplicável;
-- demais documentos necessários à validação cadastral.
+- modalidades de atendimento;
+- raio geográfico para eventos;
+- raio/perímetro domiciliar quando aplicável.
 
-CPF deve ser validado tecnicamente e, quando houver integração oficial/licenciada apropriada, cadastralmente. Não confundir validação matemática de CPF com confirmação de identidade diretamente na Receita Federal.
+### 3.3 Taxonomias
 
-### 2.3 Taxonomias estruturadas
+Profissão, conselho, especialidade, subespecialidade, área de atuação e modalidade devem ser **listas estruturadas**, não campos livres.
 
-Nada relevante deve depender de texto livre quando puder ser taxonomia.
+O profissional pode selecionar múltiplas especialidades/subespecialidades quando fizer sentido.
 
-Devem existir listas estruturadas para:
-
-- profissões da área da saúde;
-- conselhos profissionais;
-- especialidades;
-- subespecialidades;
-- áreas de atuação;
-- modalidades de atendimento.
-
-O profissional pode selecionar múltiplas especialidades/subespecialidades/áreas quando fizer sentido.
+CPF deve ser validado tecnicamente; eventual confirmação cadastral externa deve usar fonte/serviço autorizado. Não tratar simples validação matemática como consulta oficial à Receita Federal.
 
 ---
 
-## 3. MODALIDADES DE ATENDIMENTO
+# PARTE A — AGENDA E AGENDAMENTO
 
-Todos os profissionais de saúde aprovados devem poder selecionar quais modalidades desejam oferecer:
+## 4. MODALIDADES DE ATENDIMENTO
 
+Todo profissional aprovado pode habilitar uma ou mais modalidades:
 - **Teleconsulta**;
 - **Consulta presencial**;
 - **Consulta domiciliar**.
 
-Cada profissional escolhe em quais participa. A configuração deve ser independente por modalidade.
+A seleção é do próprio profissional. Cada modalidade pode ter agenda, duração, preço e regras específicas, mas todas ocupam **uma única agenda operacional compartilhada**.
 
 ---
 
-## 4. TELECONSULTA
+## 5. TELECONSULTA
 
-Teleconsulta deve estar disponível para todos os profissionais aprovados que optarem por oferecê-la.
+Teleconsulta deve estar disponível para todo profissional aprovado que optar por oferecê-la.
 
-### 4.1 Experiência dentro da plataforma
+A experiência deve acontecer **dentro da CHRISMED**, preferencialmente com player próprio. Pode utilizar tecnologia de terceiro embutida, desde que o paciente e o profissional não precisem abandonar a plataforma.
 
-A teleconsulta não pode obrigar paciente ou profissional a sair da experiência CHRISMED.
+### 5.1 Duração
 
-Pode utilizar:
+A grade-base é de 15 minutos, mas o profissional escolhe a duração real do serviço, por exemplo 15, 30, 45 ou 60 minutos.
 
-- player próprio, preferencial;
-- ou tecnologia de terceiro embutida, por exemplo mecanismo equivalente a Google Meet/Meeting/WebRTC, desde que integrada de forma transparente dentro da plataforma.
+Pode haver duração diferente por tipo de consulta, exame, especialidade ou serviço.
 
-Objetivo UX: paciente e profissional entram na área CHRISMED e realizam a consulta sem sensação de redirecionamento para outro produto.
+### 5.2 Preço
 
-### 4.2 Agenda e duração
+O profissional escolhe o próprio preço.
 
-A agenda usa grade-base de **15 minutos**, mas o profissional escolhe a duração real de cada tipo de atendimento/serviço, por exemplo:
-
-- 15 minutos;
-- 30 minutos;
-- 45 minutos;
-- 60 minutos;
-- outra duração compatível com a grade e parametrização permitida.
-
-O profissional pode configurar durações distintas conforme serviço, exame, especialidade ou modalidade.
-
-### 4.3 Preço
-
-O profissional escolhe o preço do atendimento.
-
-Oliver deve apresentar uma **faixa/média sugerida de mercado**, apenas como referência. Não deve impor o preço final do profissional, salvo regra contratual específica futura.
+Oliver exibe **média/faixa sugerida** como referência de mercado, sem impor preço final.
 
 ---
 
-## 5. CONSULTA PRESENCIAL
+## 6. CONSULTA PRESENCIAL
 
-O profissional que habilitar atendimento presencial deve cadastrar um ou mais locais de atendimento.
-
-Para cada consultório/local, registrar:
-
+Ao habilitar presencial, o profissional deve cadastrar um ou mais locais de atendimento com:
 - nome do local;
 - endereço completo;
-- número/complemento;
 - bairro;
 - cidade/UF;
 - CEP;
-- referências quando aplicável;
-- coordenadas geográficas calculadas pelo sistema.
+- complemento;
+- coordenadas geográficas.
 
-### 5.1 Mapas e rota
+### 6.1 Rotas e conveniência
 
-Oliver, com apoio das automações do ecossistema, deve gerar automaticamente atalhos de rota.
-
-Na confirmação do atendimento, paciente deve receber links úteis para:
-
+Na confirmação, Oliver deve disponibilizar links de rota com destino pronto para:
 - Google Maps;
-- Waze;
-- rota com destino já preenchido;
-- possibilidade de usar localização atual ou informar origem/CEP.
+- Waze.
 
-Esses links devem aparecer na plataforma, e-mail e comunicação transacional via WhatsApp quando habilitada.
+Paciente pode usar localização atual ou informar origem/CEP.
+
+Esses links devem aparecer na plataforma e nas comunicações transacionais por e-mail e WhatsApp.
 
 ---
 
-## 6. CONSULTA DOMICILIAR
+## 7. CONSULTA DOMICILIAR
 
-O profissional que optar por atendimento domiciliar define:
-
+O profissional define:
 - dias/horários;
 - preço;
-- perímetro/raio de atendimento;
-- áreas/bairros/CEPs quando necessário;
+- raio/perímetro de atendimento;
+- áreas/CEPs/bairros quando necessário;
 - duração clínica estimada.
 
-### 6.1 Bloqueio operacional de deslocamento
+### 7.1 Regra logística
 
-A CHRISMED deve informar ao paciente que o atendimento domiciliar possui, como referência, **aproximadamente 1 hora de atendimento clínico**, mas a agenda deve reservar **2 horas de bloco operacional**, considerando deslocamento e margem logística.
+A comunicação ao paciente pode indicar aproximadamente **1 hora de atendimento clínico**, mas a agenda deve reservar **2 horas operacionais** para considerar deslocamento e margem logística.
 
-Objetivo: impedir que um atendimento domiciliar gere conflitos com consultas imediatamente anteriores ou posteriores.
-
-Esse bloqueio deve ser tratado pela agenda como indisponibilidade real, mesmo que apenas parte dele corresponda ao contato clínico.
+Esse período completo bloqueia a agenda para evitar conflito com outros atendimentos.
 
 ---
 
-## 7. UMA ÚNICA AGENDA COMPARTILHADA POR PROFISSIONAL
+## 8. UMA ÚNICA AGENDA COMPARTILHADA
 
-Teleconsulta, presencial e domiciliar não podem existir em calendários independentes que permitam conflito.
-
-O profissional possui **uma agenda operacional compartilhada**, com tipos de atendimento diferentes.
+Teleconsulta, presencial e domiciliar não podem gerar conflito entre si.
 
 Exemplo válido:
+- 08:00 teleconsulta;
+- 08:30 presencial;
+- 10:00 domiciliar, desde que respeitado o bloco logístico.
 
-- sexta-feira 08:00 — teleconsulta;
-- sexta-feira 08:30 — consulta presencial no consultório;
-- outro horário — domiciliar, respeitando bloco logístico de 2 horas.
+Qualquer reserva bloqueia o mesmo intervalo para todas as modalidades.
 
-Qualquer reserva bloqueia aquele período para todas as demais modalidades.
-
-O sistema precisa validar também tempo de deslocamento quando houver sequência fisicamente incompatível entre locais.
-
----
-
-## 8. PREÇOS, REPASSE E CARTEIRA DO PROFISSIONAL
-
-Regra econômica vigente para atendimentos:
-
-- **60% do valor bruto da consulta para o profissional de saúde**;
-- **40% do valor bruto para a CHRISMED**.
-
-A interface deve explicar de forma transparente que, sobre sua parcela, a CHRISMED suporta tributação na faixa informada atualmente de aproximadamente **16%**, além da operação e gestão da plataforma. Essa informação é explicativa e não altera automaticamente o split 60/40.
-
-Não hardcodar tributação como verdade eterna; manter percentual/informação parametrizável e versionada.
-
-### 8.1 Cobrança
-
-A CHRISMED é quem cobra o paciente.
-
-O profissional não recebe diretamente do paciente dentro do fluxo oficial.
-
-### 8.2 Repasse
-
-Regra consolidada mais recente deste Intake:
-
-- repasse **D37** para pagamentos via PIX;
-- repasse **D37** para pagamentos via cartão;
-- considerar a janela operacional informada de 7 dias dentro da política financeira correspondente.
-
-Essa regra substitui referências anteriores divergentes até nova instrução expressa.
-
-Profissional e financeiro CHRISMED devem possuir:
-
-- carteira eletrônica;
-- saldo futuro;
-- saldo disponível;
-- débitos/créditos;
-- calendário de repasses;
-- relógio regressivo até liberação/pagamento;
-- detalhamento por consulta/transação;
-- histórico auditável.
+O sistema deve impedir sequências fisicamente impossíveis, especialmente quando houver deslocamento entre locais.
 
 ---
 
-## 9. REMARCAÇÃO PELO PRÓPRIO USUÁRIO
+## 9. REMARCAÇÃO
 
-Paciente e profissional devem poder **remarcar diretamente pela agenda**, inclusive com experiência de arrastar/mover o horário, desde que haja slot compatível.
+**Remarcar não é cancelar.**
 
-Remarcar é diferente de cancelar.
+Paciente e profissional devem poder mover o compromisso diretamente na agenda, inclusive por interação visual de arrastar/mover horário, desde que exista slot compatível.
 
-### 9.1 Princípio
+Podem remarcar inclusive no próprio dia, conforme disponibilidade operacional.
 
-A CHRISMED quer incentivar remarcação em vez de cancelamento.
-
-Paciente e profissional podem mover o compromisso inclusive no próprio dia, conforme disponibilidade e regras do serviço, sem transformar a ação automaticamente em cancelamento.
-
-O sistema deve:
-
-- exibir claramente direitos e deveres;
-- confirmar a mudança;
-- atualizar agenda de todas as partes;
+Ao remarcar, o sistema deve:
+- explicar direitos e deveres;
+- pedir confirmação;
+- atualizar todas as agendas;
+- preservar o vínculo financeiro quando aplicável;
 - disparar e-mail/WhatsApp;
-- registrar histórico da mudança;
-- impedir sobreposição;
-- preservar pagamento e vínculo da consulta quando a regra permitir;
-- manter trilha de auditoria.
+- registrar trilha de auditoria;
+- impedir sobreposição.
 
-### 9.2 Proteção operacional
-
-Monitorar remarcações excessivas ou abusivas sem bloquear arbitrariamente o usuário. O histórico deve permitir futura política de frequência, caso a CHRISMED defina.
+A CHRISMED deve incentivar remarcação para reduzir cancelamentos e retrabalho operacional.
 
 ---
 
 ## 10. CANCELAMENTO DO PACIENTE
 
-Regra a manter distinta da remarcação:
+Fluxo distinto de remarcação.
 
-- até 24 horas antes: pode cancelar dentro da regra vigente, sem penalidade e com devolução conforme política financeira;
-- com menos de 24 horas: não há reembolso; deve-se priorizar remarcação conforme regra CHRISMED.
+Regra vigente:
+- até 24h antes: pode cancelar sem penalidade e com devolução conforme política financeira;
+- com menos de 24h: não há reembolso; o fluxo deve priorizar remarcação.
 
-A interface deve explicar a consequência antes do usuário confirmar cancelamento.
+A interface precisa mostrar a consequência antes da confirmação do cancelamento.
 
 ---
 
 ## 11. CANCELAMENTO PELO PROFISSIONAL
 
-O profissional também pode remarcar sem tratar a ação como cancelamento, desde que siga o fluxo de remarcação.
+Profissional pode remarcar dentro do fluxo de remarcação. Se decidir **cancelar**, aplica-se fluxo específico.
 
-Se optar por **cancelar** atendimento confirmado, entra em fluxo próprio.
+### 11.1 Mais de 24h antes
 
-### 11.1 Cancelamento com antecedência superior a 24 horas
+- sem multa;
+- PegaAgenda dispara automaticamente;
+- profissionais compatíveis recebem oportunidade sem bônus extra;
+- se ninguém assumir, paciente é informado e conduzido para remarcação.
 
-- sem multa financeira;
-- PegaAgenda é acionado automaticamente para tentar substituir o profissional;
-- profissionais compatíveis recebem oportunidade sem bônus adicional;
-- se não houver substituto dentro do prazo operacional, paciente é informado e convidado a remarcar.
+### 11.2 Com 24h ou menos
 
-### 11.2 Cancelamento com 24 horas ou menos
+Penalidade: **10% do valor bruto da consulta**, lançada como débito na carteira do profissional que cancelou.
 
-Aplicar penalidade equivalente a **10% do valor bruto da consulta**, lançada como débito na carteira do profissional que cancelou.
+Distribuição:
+- **5% do valor bruto**: bônus para o profissional substituto que assumir o PegaAgenda urgente;
+- **5% do valor bruto**: fundo de recuperação do paciente prejudicado.
 
-Esse débito é compensado nos próximos valores a receber.
+### 11.3 Fundo de recuperação
 
-Distribuição econômica da penalidade:
+Esse segundo 5% **não é receita da CHRISMED**.
 
-- **5% do valor bruto da consulta** = bônus para o profissional substituto que aceitar o PegaAgenda urgente;
-- **5% do valor bruto da consulta** = fundo de recuperação do paciente prejudicado.
-
-### 11.3 Fundo de recuperação do paciente
-
-Os 5% destinados à CHRISMED **não são receita da clínica**.
-
-Devem ser contabilizados separadamente e utilizados para:
-
+Deve ficar contabilizado separadamente para:
 - cupom de desconto;
 - pedido de desculpas;
 - remarketing/reconquista;
-- benefício futuro ao paciente impactado;
-- outras ações de recuperação autorizadas pela CHRISMED.
+- benefício futuro ao paciente impactado.
 
-No ledger, esse valor deve aparecer como verba/fundo de recuperação do paciente, e não como margem operacional CHRISMED.
-
-Exemplo: consulta de R$ 100 cancelada em cima da hora pelo profissional:
-
-- multa do profissional: R$ 10;
-- R$ 5 de bônus ao substituto;
-- R$ 5 destinados à recuperação do paciente.
+Exemplo em consulta de R$100:
+- multa do profissional: R$10;
+- R$5 ao substituto;
+- R$5 para recuperação do paciente.
 
 ---
 
 ## 12. PEGAAGENDA
 
-Qualquer cancelamento de profissional confirmado deve disparar automaticamente o **PegaAgenda**.
+Todo cancelamento de profissional confirmado deve disparar PegaAgenda automaticamente.
 
-Matching deve considerar, conforme o caso:
-
+Matching deve considerar:
 - profissão;
 - especialidade;
 - subespecialidade;
-- modalidade de atendimento;
+- modalidade;
 - disponibilidade;
-- endereço/consultório;
+- endereço;
 - raio/perímetro;
 - idioma;
-- requisitos do paciente;
-- demais filtros cadastrais pertinentes.
+- demais requisitos do paciente.
 
-### 12.1 Mais de 24 horas
+### 12.1 Mais de 24h
 
-Profissionais compatíveis recebem aviso de oportunidade para ajudar o paciente, sem bônus extraordinário.
+Oportunidade sem bônus extra.
 
-### 12.2 24 horas ou menos
+### 12.2 24h ou menos
 
-Profissional que assumir recebe bônus adicional de 5% do valor bruto da consulta, financiado pela penalidade do profissional que cancelou.
+Profissional que assumir recebe bônus de 5% do valor bruto da consulta.
 
 ### 12.3 Sem substituto
 
-Se não houver profissional compatível disponível, paciente deve ser avisado rapidamente e conduzido para remarcação, sem ficar sem informação.
+Paciente deve ser informado rapidamente e conduzido a remarcar. Nunca ficar sem atualização.
 
-Oliver acompanha toda a jornada.
-
----
-
-# MÓDULO EVENTOS CHRISMED
-
-## 13. OBJETIVO DO MÓDULO
-
-Eventos é vertical estratégica de receita e relacionamento da CHRISMED.
-
-Problema que resolve: laboratórios, empresas e sociedades médicas investem em encontros, jantares, simpósios e eventos com profissionais de saúde, mas enfrentam dificuldade de captação, confirmação e no-show.
-
-A CHRISMED agrega:
-
-- rede e autoridade da Dra. Christiane;
-- captação e convite;
-- segmentação;
-- confirmação;
-- gestão de vagas;
-- check-in;
-- redução de no-show;
-- BI e relatórios em tempo real.
+Oliver acompanha o fluxo inteiro.
 
 ---
 
-## 14. PLANOS DE EVENTOS
+## 13. PREÇO, SPLIT, CARTEIRA E REPASSE
+
+Regra econômica vigente:
+- **60% do valor bruto para o profissional de saúde**;
+- **40% para a CHRISMED**.
+
+A interface deve explicar que a CHRISMED suporta tributação na faixa informada atualmente de aproximadamente 16% sobre sua parcela, além dos custos de operação e gestão. Esse percentual tributário deve ser parametrizável/versionado.
+
+A CHRISMED cobra sempre o paciente.
+
+### 13.1 Carteira
+
+Profissional e financeiro CHRISMED devem visualizar:
+- saldo futuro;
+- saldo disponível;
+- créditos;
+- débitos;
+- multas;
+- bônus;
+- data prevista de repasse;
+- relógio regressivo;
+- histórico auditável por atendimento.
+
+### 13.2 Repasse
+
+Regra consolidada neste Intake:
+- PIX: D37;
+- cartão: D37;
+- considerar janela operacional de 7 dias conforme política financeira correspondente.
+
+Se houver futura alteração, deve substituir esta regra neste mesmo documento.
+
+---
+
+# PARTE B — EVENTOS CHRISMED
+
+## 14. OBJETIVO DO MÓDULO EVENTOS
+
+Eventos é vertical estratégica de receita, relacionamento e crescimento da base profissional.
+
+Resolve dificuldade de laboratórios, empresas e sociedades médicas em:
+- localizar profissionais adequados;
+- convidar;
+- confirmar;
+- reduzir no-show;
+- ocupar vagas limitadas;
+- realizar check-in;
+- acompanhar resultado em tempo real.
+
+A CHRISMED agrega a rede, a autoridade da Dra. Christiane e a capacidade de segmentação e relacionamento.
+
+---
+
+## 15. PLANOS DE EVENTOS
 
 Existem três planos previstos.
 
-Regra hoje explicitamente consolidada para o plano inicial:
-
+Regra hoje confirmada para o plano mínimo:
 - **mínimo de 20 profissionais**;
-- **R$ 49,90 por profissional**;
-- contratação mínima equivalente a **R$ 998,00**.
+- **R$49,90 por profissional**;
+- contratação mínima de **R$998,00**.
 
-Os valores/regras dos outros dois planos devem permanecer parametrizáveis e não devem ser inventados até definição expressa.
+Os dois demais planos permanecem parametrizáveis e não devem ser inventados até definição expressa.
 
 ---
 
-## 15. CRIAÇÃO DO EVENTO
+## 16. CRIAÇÃO DO EVENTO
 
-Gestão CHRISMED cria evento pelo dashboard e informa, entre outros:
-
+Gestão CHRISMED deve criar evento pelo dashboard com:
 - contratante;
 - nome/título;
 - imagem/capa;
@@ -407,99 +391,72 @@ Gestão CHRISMED cria evento pelo dashboard e informa, entre outros:
 - data;
 - horário;
 - endereço/local;
-- capacidade/vagas;
+- capacidade;
 - especialidades/subespecialidades-alvo;
 - profissão/área-alvo;
 - raio geográfico;
 - critérios de elegibilidade;
 - participantes de gestão autorizados;
 - regras do evento;
-- status de publicação.
+- status/publicação.
 
 ---
 
-## 16. CONTRATANTE E PARTICIPANTES DE GESTÃO
+## 17. CONTRATANTE E PARTICIPANTES DE GESTÃO
 
-### 16.1 Contratante
+### 17.1 Contratante
 
-Pode ser, por exemplo:
+Pode ser laboratório, indústria, empresa, sociedade médica ou outra organização autorizada.
 
-- laboratório;
-- indústria;
-- empresa;
-- sociedade médica;
-- outra organização autorizada.
+### 17.2 Participantes de gestão
 
-O contratante é a entidade que compra o serviço.
+São representantes do contratante, diferentes dos convidados.
 
-### 16.2 Participantes de gestão
-
-São representantes autorizados do contratante, diferentes dos convidados.
-
-Exemplos:
-
-- propagandistas;
-- vendedores;
-- consultores;
-- gestores do laboratório.
+Ex.: propagandistas, vendedores, consultores, gestores.
 
 Dados mínimos:
-
 - nome;
 - celular/WhatsApp;
 - e-mail.
 
-O exemplo atual prevê até três participantes de gestão, mas a quantidade deve ser parametrizável por plano/evento.
-
-Eles podem acompanhar o evento e executar check-in conforme permissões, sem acesso a dados globais da CHRISMED.
+O exemplo atual prevê três participantes de gestão, mas a quantidade deve ser parametrizável por plano/evento.
 
 ---
 
-## 17. CAPTAÇÃO DE PROFISSIONAIS PARA EVENTOS
+## 18. DOIS FLUXOS DE ENTRADA NO EVENTO
 
-Dois fluxos diferentes:
+### 18.1 Convite ativo CHRISMED
 
-### 17.1 Convite ativo pela CHRISMED
+A CHRISMED seleciona profissionais já aprovados usando filtros.
 
-A CHRISMED seleciona profissionais já aprovados com base em filtros.
+Quando o profissional recebe convite e aceita, **a participação é confirmada imediatamente**, desde que haja vaga. Não passa novamente pelo Comitê.
 
-Canais:
+### 18.2 Solicitação orgânica
 
-- e-mail nativo obrigatório;
-- WhatsApp quando habilitado.
-
-Quando um profissional elegível recebe convite da CHRISMED e aceita, **a participação é confirmada imediatamente**, desde que ainda exista vaga. Não passa novamente pelo comitê.
-
-### 17.2 Descoberta orgânica
-
-Profissional acessa a página pública de Eventos CHRISMED, vê a agenda e solicita participação.
+Profissional acessa a página pública de Eventos CHRISMED, visualiza eventos e solicita participação.
 
 Nesse caso:
-
-- qualquer profissional cadastrado pode visualizar eventos públicos;
-- mesmo que esteja fora do filtro de convite, pode manifestar interesse;
-- participação **não é automática**;
-- solicitação vai para o Comitê de Gestão CHRISMED;
+- pode visualizar eventos públicos mesmo fora do filtro de convite;
+- a participação não é automática;
+- pedido vai ao Comitê de Gestão CHRISMED;
 - Comitê aprova ou recusa.
 
-Exemplo: cardiologista pode visualizar evento de gastroenterologia no site e solicitar participação; isso não significa aprovação automática.
+Exemplo: cardiologista pode visualizar evento de gastroenterologia e pedir vaga, mas precisa de aprovação.
 
 ---
 
-## 18. FILTROS E RAIO GEOGRÁFICO
+## 19. FILTROS, ESPECIALIDADE E RAIO
 
-Profissional configura raio, em quilômetros, no qual aceita receber convites direcionados.
+Profissional configura raio, em quilômetros, no qual aceita receber convites proativos.
 
 Exemplo:
+- raio do profissional: 5 km;
+- evento: 6 km;
+- não recebe convite direcionado.
 
-- raio configurado: 5 km;
-- evento: 6 km do endereço de referência;
-- resultado: não recebe convite proativo.
+Isso não impede que visualize o evento publicamente e solicite participação.
 
-Isso não impede visualização pública do evento no site.
-
-Matching de convite deve considerar:
-
+Matching deve considerar:
 - CEP/endereço;
 - raio;
 - profissão;
@@ -507,87 +464,74 @@ Matching de convite deve considerar:
 - subespecialidade;
 - perfil do evento;
 - situação cadastral;
-- disponibilidade/limites quando aplicável.
+- capacidade/vagas.
 
 ---
 
-## 19. IMPORTAÇÃO E CRESCIMENTO DA BASE
+## 20. CRESCIMENTO DA BASE
 
 CHRISMED deve poder:
-
-- cadastrar profissional manualmente;
+- cadastrar manualmente;
 - importar planilha;
 - convidar leads ainda não cadastrados;
-- capturar cadastro orgânico pelo site.
+- receber cadastro orgânico.
 
-Importar não significa aprovar automaticamente. Novos registros seguem fluxo de validação/comitê quando aplicável.
+Importação não significa aprovação automática.
 
-Objetivo estratégico: quanto maior e melhor segmentada a base de profissionais, maior o valor do módulo Eventos.
+Objetivo estratégico: quanto maior e mais qualificada a base, maior o valor comercial do módulo Eventos.
 
 ---
 
-## 20. COMUNICAÇÃO DE EVENTOS
+## 21. COMUNICAÇÃO
 
-E-mail é canal nativo e deve funcionar automaticamente.
+E-mail é canal nativo obrigatório.
 
-Ao criar/publicar evento e disparar convites, sistema deve suportar:
+WhatsApp atua como canal adicional quando habilitado.
 
+Jornadas devem cobrir:
 - convite;
 - confirmação;
-- lembretes;
+- lembrete;
 - alteração de data/local;
-- confirmação final;
 - QR Code;
 - instruções de chegada;
 - pós-evento;
 - pesquisa/NPS;
-- comunicação de no-show quando política aplicável.
-
-WhatsApp atua como canal complementar quando habilitado.
+- comunicação de ausência/no-show quando aplicável.
 
 ---
 
-## 21. QR CODE E CHECK-IN
+## 22. QR CODE E CHECK-IN
 
-Após participação confirmada, cada profissional recebe QR Code individual por evento.
+Após confirmação, cada profissional recebe QR Code individual por evento.
 
-No local:
+Check-in pode ocorrer por:
+1. leitura do QR Code; ou
+2. busca pelo **CPF**.
 
-1. representante autorizado escaneia/fotografa o QR Code e confirma check-in; ou
-2. busca pelo **CPF** do profissional e confirma manualmente.
+Não usar telefone ou número do conselho como identificador alternativo.
 
-Não utilizar telefone nem número de conselho como identificador alternativo de check-in.
-
-QR Code deve ser:
-
-- não previsível;
+QR deve ser:
 - individual;
-- específico do evento;
-- associado ao participante correto;
+- específico daquele evento;
+- não previsível;
 - protegido contra reutilização indevida.
 
 Registrar:
-
 - data/hora;
-- operador que realizou o check-in;
-- método (QR ou CPF);
+- operador;
+- método de check-in;
 - status final.
 
 ---
 
-## 22. NO-SHOW E RESPONSABILIDADE
+## 23. NO-SHOW E RESPONSABILIDADE
 
-A jornada deve explicar ao profissional que aceitar um convite representa compromisso, especialmente em eventos com vagas limitadas.
+A experiência deve deixar claro que aceitar convite ocupa vaga limitada e cria compromisso.
 
-No-show prejudica:
-
-- contratante;
-- logística;
-- investimento;
-- outro profissional que poderia ocupar a vaga.
+No-show prejudica contratante, logística e outro profissional interessado.
 
 Registrar histórico de:
-
 - convidado;
 - aceitou;
 - recusou;
@@ -596,18 +540,17 @@ Registrar histórico de:
 - cancelou/desistiu;
 - no-show.
 
-Não criar penalidade automática adicional sem definição expressa da CHRISMED.
+Não criar punição financeira automática para no-show sem nova definição expressa.
 
 ---
 
-## 23. DASHBOARD E RELATÓRIOS DE EVENTOS
+## 24. DASHBOARD E BI DE EVENTOS
 
-CHRISMED possui visão Master.
+CHRISMED tem visão Master.
 
-Contratante e participantes de gestão veem somente eventos e dados autorizados vinculados ao contratante.
+Contratante e participantes de gestão veem somente seus eventos e dados autorizados.
 
-Indicadores em tempo real devem incluir, no mínimo:
-
+Indicadores em tempo real:
 - capacidade total;
 - vagas disponíveis;
 - convidados;
@@ -624,71 +567,111 @@ Indicadores em tempo real devem incluir, no mínimo:
 - taxa de ocupação;
 - taxa de comparecimento;
 - origem dos participantes;
-- segmentação por especialidade/subespecialidade;
-- desempenho das campanhas/convites.
+- especialidade/subespecialidade;
+- desempenho das campanhas.
 
-Relatórios devem ser exportáveis conforme padrão do ecossistema.
+Relatórios devem ser exportáveis.
 
 ---
 
-## 24. OLIVER COMO CAMADA INTELIGENTE
+## 25. OLIVER COMO CAMADA INTELIGENTE
 
-Oliver acompanha Agenda e Eventos.
+Na Agenda, Oliver deve:
+- sugerir faixa de preço;
+- explicar split 60/40;
+- explicar modalidades;
+- orientar remarcação/cancelamento;
+- gerar rotas e conveniência;
+- acompanhar PegaAgenda;
+- sinalizar conflitos e riscos.
 
-Na Agenda:
-
-- orienta profissional sobre preços médios sugeridos;
-- explica split 60/40;
-- explica modalidades;
-- explica regras de remarcação/cancelamento;
-- ajuda paciente com rota, horário e confirmação;
-- acompanha PegaAgenda;
-- identifica conflitos e riscos operacionais.
-
-Nos Eventos:
-
-- ajuda a segmentar convidados;
-- identifica profissionais compatíveis;
-- apoia comunicação;
-- alerta sobre vagas, confirmações e risco de no-show;
-- acompanha resultados e BI.
+Nos Eventos, Oliver deve:
+- ajudar a segmentar convidados;
+- sugerir profissionais compatíveis;
+- acompanhar vagas e confirmações;
+- detectar risco de no-show;
+- apoiar comunicação e BI.
 
 Oliver não deve tomar decisões clínicas ou regulatórias fora das permissões definidas.
 
 ---
 
-## 25. CRITÉRIO DE ARQUITETURA PARA K1/CAUÃ
+## 26. IMPACTO OPERACIONAL ESPERADO
 
-Antes de implementar qualquer parte desta frente, garantir:
+### Para a CHRISMED
 
-1. uma única identidade profissional para Agenda e Eventos;
-2. taxonomias estruturadas, sem depender de texto livre;
-3. agenda compartilhada entre teleconsulta, presencial e domiciliar;
-4. teleconsulta dentro da experiência CHRISMED;
-5. reserva logística de 2h para domiciliar conforme regra atual;
-6. split 60% profissional / 40% CHRISMED;
-7. carteira/ledger capaz de registrar multas, bônus e fundo de recuperação;
-8. remarcação distinta de cancelamento;
-9. PegaAgenda automático;
-10. eventos com fluxo convite imediato versus solicitação orgânica sujeita a aprovação;
-11. geofiltro configurável por raio;
-12. QR Code/CPF para check-in;
-13. dashboards e relatórios por permissão;
-14. comunicação automática por e-mail e WhatsApp;
-15. todas as regras parametrizáveis quando forem suscetíveis a mudança.
+- menos atendimento manual de remarcação;
+- melhor ocupação de agenda;
+- redução de perda por cancelamentos;
+- PegaAgenda automatizado;
+- crescimento estruturado da base profissional;
+- nova receita com eventos;
+- maior rastreabilidade financeira e operacional;
+- relacionamento mais forte com pacientes, profissionais e laboratórios.
+
+### Para o profissional de saúde
+
+- autonomia de agenda;
+- autonomia de preço e duração;
+- transparência do split;
+- possibilidade de teleconsulta, presencial e domiciliar;
+- novas oportunidades via PegaAgenda;
+- novos convites e networking via Eventos;
+- carteira e repasses claros.
+
+### Para o paciente
+
+- facilidade de agendamento/remarcação;
+- melhor comunicação;
+- teleconsulta integrada;
+- rotas prontas para presencial;
+- mais previsibilidade em domiciliar;
+- proteção em caso de cancelamento do profissional;
+- recuperação/benefício quando sofrer transtorno por cancelamento tardio.
+
+### Para contratantes de eventos
+
+- segmentação qualificada;
+- redução de no-show;
+- check-in confiável;
+- acompanhamento em tempo real;
+- relatórios mensuráveis.
 
 ---
 
-## 26. REGRA DE DOCUMENTAÇÃO
+## 27. CRITÉRIOS DE ACEITE PARA IMPLEMENTAÇÃO
 
-Este arquivo é o **Intake vivo único** da frente CHRISMED Agenda + Profissionais + PegaAgenda + Eventos.
+Cauã/K1 só deve considerar esta frente funcional quando houver evidência de que:
+
+1. existe cadastro único de profissional compartilhado por Agenda e Eventos;
+2. especialidades/subespecialidades são estruturadas;
+3. teleconsulta, presencial e domiciliar compartilham uma única agenda;
+4. teleconsulta acontece dentro da experiência CHRISMED;
+5. domiciliar bloqueia corretamente a janela operacional;
+6. remarcação é distinta de cancelamento;
+7. cancelamento profissional dispara PegaAgenda;
+8. multa, bônus e fundo do paciente são lançados corretamente;
+9. carteira/financeiro mostram saldos, datas e relógios regressivos;
+10. eventos diferenciam convite automático de candidatura orgânica;
+11. geofiltro e especialidade funcionam no convite;
+12. QR Code e CPF funcionam como check-in;
+13. contratante/gestores veem apenas o que podem ver;
+14. e-mail e WhatsApp disparam as jornadas corretas;
+15. dashboards/relatórios refletem dados reais;
+16. todas as regras sensíveis a mudança são parametrizáveis e não hardcoded;
+17. não há duplicação de cadastro, agenda, CRM ou financeiro entre módulos.
+
+---
+
+## 28. REGRA DE DOCUMENTAÇÃO VIVA
+
+Este arquivo é o **único Intake vivo vigente** para CHRISMED — Agenda + Profissionais + PegaAgenda + Eventos.
 
 Quando Raygs fornecer nova regra:
-
-- atualizar este mesmo documento;
-- substituir regra antiga quando houver conflito;
-- preservar histórico pelo Git;
-- não criar vários Intakes concorrentes;
+- atualizar este mesmo arquivo;
+- substituir a regra anterior se houver conflito;
+- preservar histórico apenas via Git;
+- evitar Intakes paralelos;
 - não executar código automaticamente sem instrução expressa.
 
-**Status:** Intake oficial CHRISMED consolidado.
+**Status:** Intake oficial CHRISMED consolidado para Cauã/K1.
