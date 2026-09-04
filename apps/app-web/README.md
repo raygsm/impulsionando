@@ -1,25 +1,37 @@
 # @impulsionando/app-web
 
-Phase **4B** authenticated app shell runtime.
+Authenticated Impulsionando dashboard. **Next.js App Router.**
 
-## Current state
+ADR-009 is **Proposed**, not Aceita. This app is a feature-branch scaffold. It is **not** a production origin and must not be Traefik-promoted until G0 + accepted ADR.
 
-Independent Node process with:
+## Provenance
 
-- `GET /health` / `GET /ready` probes
-- Strangler stub JSON (authenticated routes still on legacy monolith)
+Preset: `https://github.com/arhamkhnz/next-shadcn-admin-dashboard` @ `15e0a081bc1acad2b47adc638471b6e67fa36f10` (MIT). See `THIRD_PARTY_NOTICES.md` and `LICENSE.preset`.
 
 ## Scripts
 
 ```bash
-pnpm --filter @impulsionando/app-web start:dev
-# or from repo root:
-npm run app-web:dev
+pnpm --filter @impulsionando/app-web dev     # APP_WEB_PORT default 3320
+pnpm --filter @impulsionando/app-web test
+pnpm --filter @impulsionando/app-web build
 ```
 
-Port: `APP_WEB_PORT` (default **3320**).
+Probes: `GET /healthz` (includes `gitSha`), `GET /ready`.
 
-## Docker / GHCR
+## Env (names only)
 
-- `infra/compose/Dockerfile.app-web`
-- Build locally for now; GHCR workflow can extend from `reengineering-ghcr-tenant-web.yml` when staging needs an independent app shell service
+- `NEST_API_BASE` / `NEXT_PUBLIC_NEST_API_BASE`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `GIT_SHA`
+- `APP_WEB_PORT`
+
+No service-role key. No provider credentials.
+
+## Preview fixtures (non-production)
+
+`/preview/restaurant` and `/preview/clinic` exist only when `NODE_ENV !== production`. They are UI fixtures, not live tenants.
+
+## Rollback
+
+Revert this package to the Phase 4B Node health stub, or keep Traefik on the legacy authenticated origin. See ADR-009.

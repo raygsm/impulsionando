@@ -1,18 +1,34 @@
-# Phase 4B app-web — GHCR SHA image (staging strangler stub).
+# Phase 4B+/8A app-web — Next.js (ADR-009 Proposed). Not a production cutover.
 
-FROM node:22-alpine AS build
+FROM node:22-alpine AS deps
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.34.4 --activate
-
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/app-web/package.json apps/app-web/
-
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/api-client/package.json packages/api-client/
+COPY packages/auth/package.json packages/auth/
+COPY packages/config/package.json packages/config/
+COPY packages/tenant-context/package.json packages/tenant-context/
 RUN pnpm install --filter @impulsionando/app-web... --frozen-lockfile
 
+FROM deps AS build
+COPY packages packages
 COPY apps/app-web apps/app-web
+ARG GIT_SHA=unknown
+ENV GIT_SHA=${GIT_SHA}
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN pnpm --filter @impulsionando/app-web build
 
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 ARG GIT_SHA=unknown
 ENV GIT_SHA=${GIT_SHA}
 ENV APP_WEB_PORT=3320
+COPY --from=build /app/apps/app-web/.next/standalone ./
+COPY --from=build /app/apps/app-web/.next/static ./apps/app-web/.next/static
+COPY --from=build /app/apps/app-web/public ./apps/app-web/public
 EXPOSE 3320
-CMD ["pnpm", "--filter", "@impulsionando/app-web", "start"]
+CMD ["node", "apps/app-web/server.js"]
