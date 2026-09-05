@@ -1,10 +1,10 @@
 # Impulsionando design system
 
 Created: **2026-09-04**  
-Status: **DESIGN AUTHORITY for `app-web` implementation** — not a live product, not a phase gate skip.  
+Status: **DESIGN AUTHORITY (documentation)** for future `app-web` work — not a live product, not a phase gate skip, **not** a license to rewrite the UI unprompted.  
 Impeccable: `PRODUCT.md` (repo root) · visual world **App de balcão** (seed `06654ec7`, chosen challenger `digital-design-canon-warm-consumer-app-surface`) · skeleton **pinned** to the imported Next.js shadcn admin shell.
 
-This folder is the handoff the frontend agent must follow. Do not invent UX, layout, visual states, or branding rules that contradict these files.
+This folder is the handoff a frontend agent must follow **when an implementation task is authorized**. Until then it is paper: brand, IA, UX specs, tokens, copy, and HTML references. Do not invent UX, layout, visual states, or branding rules that contradict these files. Do not replace the existing dashboard shell with a new layout.
 
 ## Locked direction
 

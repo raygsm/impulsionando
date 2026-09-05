@@ -16,6 +16,7 @@ import {
   Raleway,
   Roboto,
   Roboto_Slab,
+  Source_Sans_3,
 } from "next/font/google";
 
 import { GeistPixelSquare } from "geist/font/pixel";
@@ -107,10 +108,20 @@ const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
 });
 
+/** Brand face for App de balcão (login + future product chrome). Dashboard default stays Geist via preferences. */
+const sourceSans = Source_Sans_3({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-source-sans",
+});
+
 export const fontRegistry = {
   geist: {
     label: "Geist",
     font: geist,
+  },
+  sourceSans: {
+    label: "Source Sans 3",
+    font: sourceSans,
   },
   inter: {
     label: "Inter",

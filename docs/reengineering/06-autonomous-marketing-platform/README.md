@@ -78,6 +78,7 @@ CRM, agenda, sales, inventory, finance and billing are not unrelated mini-produc
 | Document | Purpose |
 | --- | --- |
 | [`PRODUCT-MODEL.md`](./PRODUCT-MODEL.md) | Product thesis, actors, operating loop, dashboard invariant and tenancy rules |
+| [`STAKEHOLDER-REQUIREMENTS.md`](./STAKEHOLDER-REQUIREMENTS.md) | Product-owner catalogue, safe technical translations, PRD-DB decisions (PROPOSED) |
 | [`CURRENT-STATE-AND-GAPS.md`](./CURRENT-STATE-AND-GAPS.md) | Code baseline: retain, reformulate, consolidate, retire and blocking gaps |
 | [`CAPABILITY-MODULES.md`](./CAPABILITY-MODULES.md) | Mandatory/optional modules, dependencies, contracts and activation |
 | [`DASHBOARD-V1.md`](./DASHBOARD-V1.md) | Dashboard-first scope, navigation, widgets, states and responsive behavior |
@@ -87,6 +88,17 @@ CRM, agenda, sales, inventory, finance and billing are not unrelated mini-produc
 | [`DATA-EVENTS-AND-AUTOMATION.md`](./DATA-EVENTS-AND-AUTOMATION.md) | Canonical data, event spine, automation extension points and integrations |
 | [`IMPLEMENTATION-PLAN.md`](./IMPLEMENTATION-PLAN.md) | Dashboard-first phases, gates, tests, evidence and Phase 8 impact |
 | [`database/README.md`](./database/README.md) | Canonical database models, legacy disposition, ERP/operations, execution/AI/analytics, verticals, migration and decisions |
+| [`design/README.md`](./design/README.md) | **Impeccable design authority** — App de balcão, IA, UX, tokens, a11y, PT-BR copy, HTML artifacts |
+| [`../../PRODUCT.md`](../../PRODUCT.md) · [`../../DESIGN.md`](../../DESIGN.md) | Impeccable product + visual-world summaries (repo root) |
+
+### Design documentation posture (current)
+
+Product and design documentation on `reengineering/program` is the **source of truth for what to build later**.
+
+- **Do** follow [`design/`](./design/) for brand, IA, Home region order, module states, and accessibility when an implementation task is authorized.
+- **Do not** treat this folder as permission to rewrite `apps/app-web` layout or invent a second dashboard.
+- The authenticated shell already on program (Next.js / shadcn under **ADR-009 Proposed**) stays; future UI work is **restyle** (color, type, components) on that skeleton — not a new IA — and only when explicitly tasked.
+- No logo file is shipped yet: binding name **Impulsionando**; commissioned mark is `OPEN` (wordmark until then).
 
 ## Current-code conclusion
 

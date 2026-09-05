@@ -9,6 +9,8 @@ Product direction proposal: [`../../06-autonomous-marketing-platform/README.md`]
 
 **Implementation direction:** NestJS is product/domain authority; the accepted frontend is presentation/thin BFF only. ADR-002 currently keeps TanStack Start. ADR-009 + Next.js shell from [PR #151](https://github.com/raygsm/impulsionando/pull/151) is **landed on `reengineering/program` as Proposed code** — still **not** an accepted frontend gate until ADR-009 is Aceita.
 
+**Design docs (current):** Impeccable product/design corpus is **LANDED as documentation** — [`../../06-autonomous-marketing-platform/design/README.md`](../../06-autonomous-marketing-platform/design/README.md). Do **not** rewrite `apps/app-web` IA/shell from Phase 8 paper; authorized UI work later is restyle (tokens/components) on the existing skeleton.
+
 ## Goal
 
 Rebuild the authenticated Impulsionando product and its staff console on `apps/app-web` + `apps/api`, capability by capability, retiring each legacy owner as it goes. **Not** a mechanical route move (ADR-001). **Not** a production cutover (Phase 7).

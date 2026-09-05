@@ -57,7 +57,8 @@ Open / inferred (labelled, not invented as closed product):
 
 - Exact production entitlement slug strings: UNKNOWN
 - Whether dark mode is a v1 product requirement or a system capability: OPEN (design for both; ship light as the default operating scene)
-- New logomark geometry: OPEN — only the name **Impulsionando** is binding; current mark is discarded
+- New logomark geometry: CLOSED (2026-09-04) — forward-impulse mark at `apps/app-web/public/brand/impulsionando/mark.svg` (+ `mark.png`); name **Impulsionando** remains binding
+
 - Staff chrome: keep the same dashboard skeleton; restyle everything required for staff vs tenant distinction without forking IA
 
 ## Brand Commitments
@@ -74,7 +75,9 @@ Binding:
 - Product model: `docs/reengineering/06-autonomous-marketing-platform/`
 - Phase 8 IA: `docs/reengineering/04-migration/PHASE-8-CORE-APP.md` and `phase-8/`
 - Incumbent tokens (anti-reference): `src/styles.css`, `src/styles/tokens-core.css`, `src/styles/tokens-tenants.css`
-- Incumbent mark (discarded): `public/brand/impulsionando/logo.png`
+- Incumbent mark (discarded): legacy rocket/pixel assets if present
+- Current mark: `apps/app-web/public/brand/impulsionando/mark.svg` (sidebar) and `mark.png` (raster reference)
+
 - Tenant marks (tenant-owned, not Impulsionando identity): `public/brand/{riomed,wmp,colors,chrismed}/`
 - Shadcn New York primitives exist in `src/components/ui/` and `apps/app-web/src/components/ui/`
 - Next.js preset audit: `docs/reengineering/06-autonomous-marketing-platform/NEXTJS-PRESET-AUDIT.md`

@@ -52,79 +52,113 @@
   --font-sans: var(--font-sans);
 }
 
-/* Default theme styles (used when no data-theme-preset is set or when 'default' is selected).
-These serve as the fallback; there is no separate default.css file. */
+/* Default theme — Impulsionando App de balcão palette.
+   Layout/components stay as-is; only color roles are remapped. */
 :root {
   --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
 
-  /* fonts */
+  /* Brand primitives (design authority) */
+  --imp-ground: #f3efe8;
+  --imp-surface: #ffffff;
+  --imp-surface-sunken: #ebe6dd;
+  --imp-ink: #1c1916;
+  --imp-ink-muted: #5c564e;
+  --imp-border: #e4dfd6;
+  --imp-action: #c81e3a;
+  --imp-action-hover: #a81830;
+  --imp-action-foreground: #ffffff;
+  --imp-success: #0f7a4b;
+  --imp-warning: #8a5a00;
+  --imp-danger: #b42318;
+  --imp-info: #185fa5;
+  --imp-ai-prepared: #6b2d5b;
+
+  /* shadcn semantic map */
+  --background: var(--imp-ground);
+  --foreground: var(--imp-ink);
+  --card: var(--imp-surface);
+  --card-foreground: var(--imp-ink);
+  --popover: var(--imp-surface);
+  --popover-foreground: var(--imp-ink);
+  --primary: var(--imp-action);
+  --primary-foreground: var(--imp-action-foreground);
+  --secondary: var(--imp-surface-sunken);
+  --secondary-foreground: var(--imp-ink);
+  --muted: var(--imp-surface-sunken);
+  --muted-foreground: var(--imp-ink-muted);
+  --accent: var(--imp-surface-sunken);
+  --accent-foreground: var(--imp-ink);
+  --destructive: var(--imp-danger);
+  --border: var(--imp-border);
+  --input: var(--imp-border);
+  --ring: var(--imp-action);
+  --chart-1: var(--imp-action);
+  --chart-2: var(--imp-info);
+  --chart-3: var(--imp-success);
+  --chart-4: var(--imp-warning);
+  --chart-5: var(--imp-ink-muted);
+  --sidebar: var(--imp-ground);
+  --sidebar-foreground: var(--imp-ink);
+  --sidebar-primary: var(--imp-action);
+  --sidebar-primary-foreground: var(--imp-action-foreground);
+  --sidebar-accent: var(--imp-surface-sunken);
+  --sidebar-accent-foreground: var(--imp-ink);
+  --sidebar-border: var(--imp-border);
+  --sidebar-ring: var(--imp-action);
+
+  /* fonts (unchanged structure — preferences still control face) */
   --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
 }
 
+/* After-hours shop — same roles, measured dark values from COLOR-SYSTEM */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --imp-ground: #1a1714;
+  --imp-surface: #241f1b;
+  --imp-surface-sunken: #2e2823;
+  --imp-ink: #f6f1ea;
+  --imp-ink-muted: #b7afa6;
+  --imp-border: #3a332c;
+  --imp-action: #f97187;
+  --imp-action-hover: #fb8b9d;
+  --imp-action-foreground: #1c1916;
+  --imp-success: #4ec38a;
+  --imp-warning: #e0a343;
+  --imp-danger: #f38375;
+  --imp-info: #79b4f0;
+  --imp-ai-prepared: #d79ac6;
+
+  --background: var(--imp-ground);
+  --foreground: var(--imp-ink);
+  --card: var(--imp-surface);
+  --card-foreground: var(--imp-ink);
+  --popover: var(--imp-surface);
+  --popover-foreground: var(--imp-ink);
+  --primary: var(--imp-action);
+  --primary-foreground: var(--imp-action-foreground);
+  --secondary: var(--imp-surface-sunken);
+  --secondary-foreground: var(--imp-ink);
+  --muted: var(--imp-surface-sunken);
+  --muted-foreground: var(--imp-ink-muted);
+  --accent: var(--imp-surface-sunken);
+  --accent-foreground: var(--imp-ink);
+  --destructive: var(--imp-danger);
+  --border: var(--imp-border);
+  --input: var(--imp-border);
+  --ring: var(--imp-action);
+  --chart-1: var(--imp-action);
+  --chart-2: var(--imp-info);
+  --chart-3: var(--imp-success);
+  --chart-4: var(--imp-warning);
+  --chart-5: var(--imp-ink-muted);
+  --sidebar: var(--imp-ground);
+  --sidebar-foreground: var(--imp-ink);
+  --sidebar-primary: var(--imp-action);
+  --sidebar-primary-foreground: var(--imp-action-foreground);
+  --sidebar-accent: var(--imp-surface-sunken);
+  --sidebar-accent-foreground: var(--imp-ink);
+  --sidebar-border: var(--imp-border);
+  --sidebar-ring: var(--imp-action);
 }
 
 @layer base {
@@ -191,6 +225,9 @@ These serve as the fallback; there is no separate default.css file. */
   }
   html[data-font="geist"] body {
     --font-sans: var(--font-geist);
+  }
+  html[data-font="sourceSans"] body {
+    --font-sans: var(--font-source-sans);
   }
   html[data-font="raleway"] body {
     --font-sans: var(--font-raleway);

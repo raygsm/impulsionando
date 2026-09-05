@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Impulsionando">
+  <!-- Forward impulse — App de balcão mark -->
+  <g transform="translate(32 34) rotate(-32) translate(-32 -34)">
+    <rect x="20.5" y="8" width="11" height="46" rx="5.5" fill="#C81E3A"/>
+    <rect x="33.5" y="22" width="11" height="32" rx="5.5" fill="#C81E3A"/>
+    <path d="M31.5 29.5 L35.5 33.5 L31.5 37.5 Z" fill="#1C1916"/>
+  </g>
+</svg>

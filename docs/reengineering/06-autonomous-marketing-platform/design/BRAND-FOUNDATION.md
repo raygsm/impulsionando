@@ -58,13 +58,15 @@ Help physical businesses grow through operations they can see and control: acqui
 
 ## Wordmark
 
-Until a commissioned mark exists (`OPEN`):
+Canonical mark (2026-09-04) — geometry CLOSED:
 
-- Letters: **Impulsionando** (sentence case, never `IMPULSIONANDO TECNOLOGIA` lockup in product UI).
-- Face: Source Sans 3 ExtraBold, tracking `-0.02em`, color ink (or white on action).
-- Clear space: 0.5× cap-height on all sides.
-- Minimum digital size: 18px cap-height; below that, use the “I” fallback tile (rounded square, action fill, white “I”).
-- Do not place the discarded PNG rocket/pixel mark in `app-web`.
+- Mark SVG: `apps/app-web/public/brand/impulsionando/mark.svg`
+- Raster reference: `apps/app-web/public/brand/impulsionando/mark.png`
+- Geometry: two forward-leaning Impulso strokes with a small ink joint (impulse, not a rocket)
+- Letters: **Impulsionando** (sentence case, never `IMPULSIONANDO TECNOLOGIA` lockup in product UI)
+- Face: Source Sans 3 ExtraBold when typeset; dashboard chrome currently uses the template sans with the SVG mark in the sidebar
+- Clear space: 0.5× cap-height on all sides
+- Do not place the discarded PNG rocket/pixel mark in `app-web`
 
 Descriptor line **Tecnologia** is institutional-only, not in the dashboard chrome.
 

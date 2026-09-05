@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import { cn } from "cn";
 import { BadgeCheck, Bell, Check, CreditCard, LogOut } from "lucide-react";
@@ -85,9 +86,11 @@ export function AccountSwitcher({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut />
-          Log out
+        <DropdownMenuItem asChild>
+          <Link prefetch={false} href="/auth/v1/login">
+            <LogOut />
+            Sair
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
